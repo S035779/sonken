@@ -11,8 +11,8 @@ dotenv.config();
 const env = process.env.NODE_ENV || 'development';
 const host = process.env.TOP_URL || '';
 const assets = process.env.ASSET_PATH || '';
-const roboto_font
-  = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+const font
+  = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
 let path_to_js; 
 let path_to_img;
 if (env === 'development') {
@@ -36,14 +36,15 @@ class Html extends React.Component {
       <meta charSet="utf-8" />
       <title>WatchNote</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
-      <link rel="stylesheet"    href={ roboto_font }/>
+      <link rel="stylesheet"    href={ font }/>
       </head>
       <body style={styles}>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>
       <style id="jss-server-side">{initialStyles}</style>
       <script id="initial-data" type="text/plain"
         data-init={initialData}></script>
-      <script src={ path_to_js + "vendor.bundle.js" }></script>
+      <script src={ path_to_js + "icon.bundle.js" }></script>
+      <script src={ path_to_js + "view.bundle.js" }></script>
       <script src={ path_to_js + "app.bundle.js" }></script>
       </body>
       </html>;
@@ -51,9 +52,6 @@ class Html extends React.Component {
 };
 
 const styles = {
-  margin: 0,
-  padding: 0,
-  lineHeight: 1.4,
-  fontFamily: 'Roboto, sans-serif'
+  fontFamily: 'Noto Sans JP, sans-serif'
 };
 export default Html;

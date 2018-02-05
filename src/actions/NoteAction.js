@@ -15,7 +15,6 @@ export default {
   },
   fetchStarred() {
     return NoteApiClient.fetchStarredNotes().then(notes => {
-      console.log(notes);
       dispatch({ type: 'note/fetch/starred', notes });
     });
   },

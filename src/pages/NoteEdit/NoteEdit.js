@@ -83,7 +83,7 @@ const styles = theme => ({
               , height: '62px', minHeight: '62px', boxSizing: 'border-box'
               , padding: '5px', borderBottom: '1px solid #CCC' },
   inputText:  { flex: '2 1 auto'},
-  buttons:    { flex: '1 1 auto'},
+  buttons:    { flex: '1 1 auto' },
   editBody:   { borderBottom: '1px solid #CCC' },
   inputArea:  { display: 'block', resize: 'none' 
               , height: '260px',  maxHeight: 'calc(100vh - 112px - 62px)'

@@ -4,7 +4,7 @@ import { renderRoutes } from 'react-router-config';
 import { Container } from 'flux/utils';
 import NoteAction from 'Actions/NoteAction';
 import { getStores, getState } from 'Stores';
-import getRoutes from '../../routes';
+import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
@@ -33,7 +33,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    console.log('>>> render!!', 'State:', this.state);
+    //console.log('>>> render!!', 'State:', this.state);
     console.log('>>> render!!', 'Props:', this.props);
     const {classes, match, route} = this.props;
     const {notes} = this.state;
@@ -46,11 +46,9 @@ class Dashboard extends React.Component {
             onClick={this.handleClickNew.bind(this)}>
           New Note</Button>
         </div>
-        <div className={classes.listBody}>
-          <NoteList notes={notes} selectedNoteId={match.params.id}/>
-        </div>
+        <NoteList notes={notes} selectedNoteId={match.params.id}/>
       </div>
-      <div className={classes.main}>
+      <div className={classes.noteEdit}>
         {route.routes ? renderRoutes(route.routes, {note: note}) : null}
       </div>
     </div>;
@@ -63,9 +61,8 @@ const styles = theme => ({
             , borderRight: '1px solid #CCC' },
   listHead: { height: '62px', boxSizing: 'border-box', padding: '5px'
             , borderBottom: '1px solid #CCC' },
-  listBody: {},
   button:   { margin: theme.spacing.unit },
-  main:     { flex: 1 }
+  noteEdit: { flex: 1 }
 });
 
 Dashboard.propTypes = {

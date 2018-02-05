@@ -9,13 +9,17 @@ const common = require('./webpack.common.js');
 var web = {
   target: "web",
   entry: {
-    vendor: [
+    view: [
       'react',
       'react-dom',
       'react-router',
       'react-router-dom',
       'react-router-config',
+      'flux',
       'material-ui'
+    ],
+    icon: [
+      'material-ui-icons'
     ],
     app: [
       'react-hot-loader/patch',
@@ -28,7 +32,7 @@ var web = {
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
+      names: ["view", "icon"],
       minChunks: Infinity,
     }),
     new CleanWebpackPlugin([
