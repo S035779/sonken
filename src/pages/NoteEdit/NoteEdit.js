@@ -75,21 +75,34 @@ class NoteEdit extends React.Component {
   }
 };
 
+const barHeightSmUp = 112;
+const barHeightSmDown = 104;
+const titleHeight = 62;
 const styles = theme => ({
   edit:       { display: 'flex', flexDirection: 'column'
-              , height: 'calc(100vh - 112px)' },
+              , height: `calc(100vh - ${barHeightSmDown}px)`
+              , [theme.breakpoints.up('sm')]: {
+                  height: `calc(100vh - ${barHeightSmUp}px)`
+              }},
   editHead:   { display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
-              , height: '62px', minHeight: '62px', boxSizing: 'border-box'
+              , height: titleHeight, minHeight: titleHeight
+              , boxSizing: 'border-box'
               , padding: '5px', borderBottom: '1px solid #CCC' },
   inputText:  { flex: '2 1 auto'},
   buttons:    { flex: '1 1 auto' },
   editBody:   { borderBottom: '1px solid #CCC' },
   inputArea:  { display: 'block', resize: 'none' 
-              , height: '260px',  maxHeight: 'calc(100vh - 112px - 62px)'
+              , height: '260px'
               , width: '100%',    boxSizing: 'border-box'
               , border: 'none',   padding: '10px'
-              , fontSize: '16px', outline: 'none', resize: 'vertical' },
+              , fontSize: '16px', outline: 'none', resize: 'vertical'
+              , maxHeight:
+                `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px)`
+              , [theme.breakpoints.up('sm')]: {
+                maxHeight:
+                  `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px)`
+              }},
   editView:   { flex: '1 1 auto', overflow: 'auto'
               , position: 'relative'
               , padding: '20px 10px 10px 10px'

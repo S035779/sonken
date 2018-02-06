@@ -1,5 +1,5 @@
-import NoteAction from './NoteAction';
-import StarAction from './StarAction';
+import NoteAction from 'Actions/NoteAction';
+import StarAction from 'Actions/StarAction';
 
 export function rehydrateState(state) {
   NoteAction.rehydrate(state);

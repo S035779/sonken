@@ -8,15 +8,15 @@ import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
-import CheckboxList from 'Components/CheckboxList/CheckboxList';
+import NoteList from 'Components/NoteList/NoteList';
 
-class Dashboard extends React.Component {
+class Trash extends React.Component {
   static getStores() {
-    return getStores(['dashboardStore']);
+    return getStores(['trashStore']);
   }
 
   static calculateState() {
-    return getState('dashboardStore');
+    return getState('trashStore');
   }
 
   static prefetch(props) {
@@ -25,7 +25,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    Dashboard.prefetch(this.props);
+    Trash.prefetch(this.props);
   }
 
   handleClickNew() {
@@ -46,7 +46,7 @@ class Dashboard extends React.Component {
             onClick={this.handleClickNew.bind(this)}>
           New Note</Button>
         </div>
-        <CheckboxList notes={notes} selectedNoteId={match.params.id}/>
+        <NoteList notes={notes} selectedNoteId={match.params.id}/>
       </div>
       <div className={classes.noteEdit}>
         {route.routes ? renderRoutes(route.routes, {note: note}) : null}
@@ -55,26 +55,17 @@ class Dashboard extends React.Component {
   }
 };
 
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
-const listWidth = 360;
-const titleHeight = 62;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'row' },
-  list:     { width: listWidth, minWidth: listWidth
-            , height: `calc(100vh - ${barHeightSmDown}px)`
-            , [theme.breakpoints.up('sm')]: {
-              height: `calc(100vh - ${barHeightSmUp}px)`
-            }
+  list:     { width: '260px', height: 'calc(100vh - 112px)'
             , borderRight: '1px solid #CCC' },
-  listHead: { height: titleHeight
-            , boxSizing: 'border-box', padding: '5px'
+  listHead: { height: '62px', boxSizing: 'border-box', padding: '5px'
             , borderBottom: '1px solid #CCC' },
   button:   { margin: theme.spacing.unit },
   noteEdit: { flex: 1 }
 });
 
-Dashboard.propTypes = {
+Trash.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Container.create(Dashboard));
+export default withStyles(styles)(Container.create(Trash));

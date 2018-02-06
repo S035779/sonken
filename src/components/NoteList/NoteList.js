@@ -3,20 +3,22 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { withStyles } from 'material-ui/styles';
-import { List, Divider } from 'material-ui';
+import { List, Divider, Avatar } from 'material-ui';
 import { ListItem, ListItemText } from 'material-ui/List';
+import deepPurple from 'material-ui/colors/deepPurple';
 
 class NoteList extends React.Component {
   renderItem(note) {
     const {classes} = this.props;
     return <div key={note.id}>
-      <ListItem button className={classes.listItem}>
-        <Link to={`/notes/${note.id}/edit`} className={classes.link}>
+      <ListItem button
+        component={Link} to={`/notes/${note.id}/edit`}
+        className={classes.listItem}>
+        <Avatar  className={classes.avatar}>M</Avatar>
         <ListItemText
           classes={
             { primary: classes.primary, secondary: classes.secondary } }
           primary={note.title} secondary={note.updated}/>
-        </Link>
       </ListItem>
       <Divider light />
       </div>;
@@ -33,15 +35,15 @@ class NoteList extends React.Component {
 };
 
 const styles = theme => ({
-  noteList: { width: '100%', minWidth: 260 },
-  link:     { textDecoration: 'none' },
-  primary:  {},
+  noteList:   { width: '100%' },
+  primary:    {},
   secondary:  {},
-  listItem: { '&:hover': {
+  listItem:   { '&:hover': {
                 backgroundColor: theme.palette.primary.main
-                , '& $primary, &secondary': {
-                  color: theme.palette.common.white
-  }}}
+                , '& $primary, $secondary': {
+                  color: theme.palette.common.white }}},
+  avatar:     { color: '#fff'
+              , backgroundColor: deepPurple[500] }
 });
 
 NoteList.propTypes = {

@@ -22,8 +22,9 @@ class App extends React.Component {
 
   renderDrawerMdUp(classes) {
     const modalProps = { keepMounted: true };
+    const paperClass = { paper: classes.drawerPaper };
     return <Drawer type="temporary"
-      classes={{ paper: classes.drawerPaper }}
+      classes={paperClass}
       open={this.state.mobileOpen}
       onClose={this.handleDrawerToggle.bind(this)}
       ModalProps={modalProps}>
@@ -32,8 +33,9 @@ class App extends React.Component {
   }
   
   renderDrawerSmDown(classes) {
+    const paperClass = { paper: classes.drawerPaper };
     return <Drawer type="permanent" open
-      classes={{ paper: classes.drawerPaper}}>
+      classes={paperClass}>
       <DrawerList />
     </Drawer>;
   }
@@ -45,14 +47,9 @@ class App extends React.Component {
     return <div className={classes.root}>
       <Reboot />
       <div className={classes.appFrame}>
-        <GlobalHeader
-          onClickNav={this.handleDrawerToggle.bind(this)}/>
-        <Hidden mdUp>
-          {renderDrawerMdUp}
-        </Hidden>
-        <Hidden smDown implementation="css">
-          {renderDrawerSmDown}
-        </Hidden>
+        <GlobalHeader onClickNav={this.handleDrawerToggle.bind(this)}/>
+        <Hidden mdUp>{renderDrawerMdUp}</Hidden>
+        <Hidden smDown implementation="css">{renderDrawerSmDown}</Hidden>
         <div className={classes.content}>
         {renderRoutes(this.props.route.routes)}
         </div>
@@ -82,10 +79,10 @@ const styles = theme => ({
                   width: `calc(100% - ${drawerWidthMdUp}px)`
                 , marginLeft: drawerWidthMdUp
               }
-              , height: `calc(100% - ${barHeightSmDown}px)`
+              , height: `calc(100vh - ${barHeightSmDown}px)`
               , marginTop: barHeightSmDown
               , [theme.breakpoints.up('sm')]: {
-                  height: `calc(100% - ${barHeightSmUp}px)`
+                  height: `calc(100vh - ${barHeightSmUp}px)`
                 , marginTop: barHeightSmUp
               }}
 });

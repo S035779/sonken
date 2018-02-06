@@ -11,7 +11,9 @@ dotenv.config();
 const env = process.env.NODE_ENV || 'development';
 const host = process.env.TOP_URL || '';
 const assets = process.env.ASSET_PATH || '';
-const font
+const roboto_font
+  = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+const noto_font
   = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
 let path_to_js; 
 let path_to_img;
@@ -36,7 +38,8 @@ class Html extends React.Component {
       <meta charSet="utf-8" />
       <title>WatchNote</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
-      <link rel="stylesheet"    href={ font }/>
+      <link rel="stylesheet"    href={ roboto_font }/>
+      <link rel="stylesheet"    href={ noto_font }/>
       </head>
       <body style={styles}>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>

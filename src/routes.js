@@ -3,6 +3,8 @@ import Dashboard from 'Pages/Dashboard/Dashboard';
 import NoteEdit from 'Pages/NoteEdit/NoteEdit';
 import Note from 'Pages/Note/Note'
 import Starred from 'Pages/Starred/Starred';
+import Drafts from 'Pages/Drafts/Drafts';
+import Trash from 'Pages/Trash/Trash';
 
 export default function getRoutes() {
   return [
@@ -29,6 +31,14 @@ export default function getRoutes() {
         {
           path: '/starred',
           component: Starred
+        },
+        {
+          path: '/drafts',
+          component: Drafts
+        },
+        {
+          path: '/trash',
+          component: Trash
         }
       ]
     }
