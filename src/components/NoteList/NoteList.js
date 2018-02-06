@@ -3,17 +3,20 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { withStyles } from 'material-ui/styles';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Divider from 'material-ui/Divider';
+import { List, Divider } from 'material-ui';
+import { ListItem, ListItemText } from 'material-ui/List';
 
 class NoteList extends React.Component {
   renderItem(note) {
     const {classes} = this.props;
     return <div key={note.id}>
-      <ListItem button>
-      <Link to={`/notes/${note.id}/edit`} className={classes.link}>
-        <ListItemText primary={note.title} secondary={note.updated}/>
-      </Link>
+      <ListItem button className={classes.listItem}>
+        <Link to={`/notes/${note.id}/edit`} className={classes.link}>
+        <ListItemText
+          classes={
+            { primary: classes.primary, secondary: classes.secondary } }
+          primary={note.title} secondary={note.updated}/>
+        </Link>
       </ListItem>
       <Divider light />
       </div>;
@@ -21,8 +24,8 @@ class NoteList extends React.Component {
   render() {
     const {classes} = this.props;
     const items = this.props.notes.map(note => this.renderItem(note));
-    return <div className={classes.root}>
-      <List dense className={classes.list}>
+    return <div className={classes.noteList}>
+      <List dense>
       {items}
       </List>
       </div>;
@@ -30,9 +33,15 @@ class NoteList extends React.Component {
 };
 
 const styles = theme => ({
-  root:     { width: '100%', minWidth: 260 },
-  list:     { backgroundColor: theme.palette.background.paper },
-  link: { textDecoration: 'none' }
+  noteList: { width: '100%', minWidth: 260 },
+  link:     { textDecoration: 'none' },
+  primary:  {},
+  secondary:  {},
+  listItem: { '&:hover': {
+                backgroundColor: theme.palette.primary.main
+                , '& $primary, &secondary': {
+                  color: theme.palette.common.white
+  }}}
 });
 
 NoteList.propTypes = {

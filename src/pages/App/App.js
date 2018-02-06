@@ -1,17 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import getRoutes from 'Main/routes';
-import GlobalHeader from 'Components/GlobalHeader/GlobalHeader';
 
 import { withStyles } from 'material-ui/styles';
-import Reboot from 'material-ui/Reboot';
-import Divider from 'material-ui/Divider';
-import Hidden from 'material-ui/Hidden';
-import List from 'material-ui/List';
-import Drawer from 'material-ui/Drawer';
+import { Reboot, Hidden, Drawer } from 'material-ui';
 import DrawerList from 'Components/DrawerList/DrawerList';
+import GlobalHeader from 'Components/GlobalHeader/GlobalHeader';
 
 class App extends React.Component {
   constructor(props) {
@@ -26,7 +21,6 @@ class App extends React.Component {
   }
 
   renderDrawerMdUp(classes) {
-    const renderNav = this.renderNav(classes);
     const modalProps = { keepMounted: true };
     return <Drawer type="temporary"
       classes={{ paper: classes.drawerPaper }}
@@ -38,7 +32,6 @@ class App extends React.Component {
   }
   
   renderDrawerSmDown(classes) {
-    const renderNav = this.renderNav(classes);
     return <Drawer type="permanent" open
       classes={{ paper: classes.drawerPaper}}>
       <DrawerList />

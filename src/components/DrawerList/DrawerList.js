@@ -1,30 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { withStyles } from 'material-ui/styles';
+import { Divider, List } from 'material-ui';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import InboxIcon from 'material-ui-icons/MoveToInbox';
-import DraftsIcon from 'material-ui-icons/Drafts';
-import StarIcon from 'material-ui-icons/Star';
-import DeleteIcon from 'material-ui-icons/Delete';
+import { MoveToInbox as InboxIcon  
+       , Drafts      as DraftsIcon 
+       , Star        as StarIcon   
+       , Delete      as DeleteIcon } from 'material-ui-icons';
 
 class DrawerList extends React.Component {
+  handleClickButton(name, event) {
+    switch(name) {
+      case 'inbox':
+        this.props.history.push('/');
+        break;
+      case 'starred':
+        this.props.history.push('/starred');
+        break;
+      case 'drafts':
+        this.props.history.push('/drafts');
+        break;
+      case 'trash':
+        this.props.history.push('/trash');
+        break;
+      default:
+        break;
+    }
+  }
+
   renderListItems() {
     return <div>
-      <ListItem button>
+      <ListItem button
+        onClick={this.handleClickButton.bind(this, 'inbox')}>
         <ListItemIcon>
           <InboxIcon />
         </ListItemIcon>
         <ListItemText primary="Inbox" />
       </ListItem>
-      <ListItem button>
+      <ListItem button 
+        onClick={this.handleClickButton.bind(this, 'starred')}>
         <ListItemIcon>
           <StarIcon />
         </ListItemIcon>
         <ListItemText primary="Starred" />
       </ListItem>
-      <ListItem button>
+      <ListItem button 
+        onClick={this.handleClickButton.bind(this, 'drafts')}>
         <ListItemIcon>
           <DraftsIcon />
         </ListItemIcon>
@@ -35,7 +58,8 @@ class DrawerList extends React.Component {
     
   renderOtherListItems() {
     return <div>
-      <ListItem button>
+      <ListItem button 
+        onClick={this.handleClickButton.bind(this, 'trash')}>
         <ListItemIcon>
           <DeleteIcon />
         </ListItemIcon>
@@ -70,4 +94,4 @@ const styles = theme => ({
 DrawerList.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(DrawerList);
+export default withStyles(styles)(withRouter(DrawerList));

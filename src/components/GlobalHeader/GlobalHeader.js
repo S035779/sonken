@@ -3,16 +3,12 @@ import PropTypes from 'prop-types'
 import { withRouter } from 'react-router';
 
 import { withStyles } from 'material-ui/styles';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
-import Typography from 'material-ui/Typography';
-import IconButton from 'material-ui/IconButton';
-import MenuIcon from 'material-ui-icons/Menu';
-import AccountCircle from 'material-ui-icons/AccountCircle';
-import Switch from 'material-ui/Switch';
+import { AppBar, Toolbar, Typography
+       , IconButton, Switch, Menu, Button } from 'material-ui';
 import { FormControlLabel, FormGroup } from 'material-ui/Form';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Button from 'material-ui/Button';
+import { MenuItem } from 'material-ui/Menu';
+import { Menu as MenuIcon
+       , AccountCircle as AccountCircle } from 'material-ui-icons';
 
 class GlobalHeader extends React.Component {
   constructor(props) {
