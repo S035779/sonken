@@ -5,6 +5,8 @@ import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import { Reboot, Hidden, Drawer } from 'material-ui';
+import DrawerNavTemporary from 'Components/DrawerNav/DrawerNavTemporary';
+import DrawerNavPermanent from 'Components/DrawerNav/DrawerNavPermanent';
 import DrawerList from 'Components/DrawerList/DrawerList';
 import GlobalHeader from 'Components/GlobalHeader/GlobalHeader';
 
