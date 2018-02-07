@@ -85,10 +85,9 @@ class DrawerList extends React.Component {
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const styles = theme => ({
-  drawerHeader:{height: barHeightSmDown
-              , [theme.breakpoints.up('sm')]: {
-                  height: barHeightSmUp
-              }}
+  drawerHeader: { height: barHeightSmDown
+                , [theme.breakpoints.up('sm')]: {
+                  height: barHeightSmUp }}
 });
 
 DrawerList.propTypes = {

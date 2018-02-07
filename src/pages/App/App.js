@@ -7,7 +7,6 @@ import { withStyles } from 'material-ui/styles';
 import { Reboot, Hidden, Drawer } from 'material-ui';
 import DrawerNavTemporary from 'Components/DrawerNav/DrawerNavTemporary';
 import DrawerNavPermanent from 'Components/DrawerNav/DrawerNavPermanent';
-import DrawerList from 'Components/DrawerList/DrawerList';
 import GlobalHeader from 'Components/GlobalHeader/GlobalHeader';
 
 class App extends React.Component {
@@ -22,38 +21,17 @@ class App extends React.Component {
     this.setState({ mobileOpen: !this.state.mobileOpen });
   }
 
-  renderDrawerMdUp(classes) {
-    const modalProps = { keepMounted: true };
-    const paperClass = { paper: classes.drawerPaper };
-    return <Drawer type="temporary"
-      classes={paperClass}
-      open={this.state.mobileOpen}
-      onClose={this.handleDrawerToggle.bind(this)}
-      ModalProps={modalProps}>
-      <DrawerList />
-    </Drawer>;
-  }
-  
-  renderDrawerSmDown(classes) {
-    const paperClass = { paper: classes.drawerPaper };
-    return <Drawer type="permanent" open
-      classes={paperClass}>
-      <DrawerList />
-    </Drawer>;
-  }
-
   render() {
     const {classes} = this.props;
-    const renderDrawerMdUp = this.renderDrawerMdUp(classes);
-    const renderDrawerSmDown = this.renderDrawerSmDown(classes);
     return <div className={classes.root}>
       <Reboot />
       <div className={classes.appFrame}>
         <GlobalHeader onClickNav={this.handleDrawerToggle.bind(this)}/>
-        <Hidden mdUp>{renderDrawerMdUp}</Hidden>
-        <Hidden smDown implementation="css">{renderDrawerSmDown}</Hidden>
+        <DrawerNavTemporary open={this.state.mobileOpen}
+          onClose={this.handleDrawerToggle.bind(this)}/>
+        <DrawerNavPermanent />
         <div className={classes.content}>
-        {renderRoutes(this.props.route.routes)}
+          {renderRoutes(this.props.route.routes)}
         </div>
       </div>
     </div>;
@@ -61,32 +39,23 @@ class App extends React.Component {
 };
 
 const drawerWidthMdUp = 240;
-const drawerWidthMdDown = 250;
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const styles = theme => ({
-  root:       { width: '100%', zIndex: 1 },
-  appFrame:   { position: 'relative'
-              , display: 'flex', flexDirection: 'column'
-              , width: '100%'},
-  drawerPaper:{ width: drawerWidthMdDown
-              , [theme.breakpoints.up('md')]: {
-                  position: 'relative'
-                , width: drawerWidthMdUp
-                , height: '100%'
-              }},
-  content:    { position: 'absolute'
-              , width: '100%'
-              , [theme.breakpoints.up('md')]: {
-                  width: `calc(100% - ${drawerWidthMdUp}px)`
-                , marginLeft: drawerWidthMdUp
-              }
-              , height: `calc(100vh - ${barHeightSmDown}px)`
-              , marginTop: barHeightSmDown
-              , [theme.breakpoints.up('sm')]: {
-                  height: `calc(100vh - ${barHeightSmUp}px)`
-                , marginTop: barHeightSmUp
-              }}
+  root:     { width: '100%', zIndex: 1 },
+  appFrame: { position: 'relative'
+            , display: 'flex', flexDirection: 'column'
+            , width: '100%'},
+  content:  { position: 'absolute'
+            , width: '100%'
+            , [theme.breakpoints.up('md')]: {
+              width: `calc(100% - ${drawerWidthMdUp}px)`
+            , marginLeft: drawerWidthMdUp }
+            , height: `calc(100vh - ${barHeightSmDown}px)`
+            , marginTop: barHeightSmDown
+            , [theme.breakpoints.up('sm')]: {
+              height: `calc(100vh - ${barHeightSmUp}px)`
+            , marginTop: barHeightSmUp }}
 });
 
 App.propTypes = {

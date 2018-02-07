@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import { withStyles } from 'material-ui/styles';
 import { Hidden, Drawer } from 'material-ui';
-import DrawerList from 'Components/DrawerList/DrawerList';
+import DrawerList from 'Components/DrawerNav/DrawerList';
 
 class DrawerNavPermanent extends React.Component {
   render() {
