@@ -41,10 +41,14 @@ class NoteButtons extends React.Component {
     </div>;
   }
 };
-
+const titleHeight = 62;
 const styles = theme => ({
-  buttons:    { display: 'flex', flexDirection: 'row' },
-  button:     { flex: 1
+  buttons:    { display:    'flex',      flexDirection: 'row'
+              , alignItems: 'stretch'
+              , height:     titleHeight, minHeight: titleHeight
+              , boxSizing:  'border-box'
+              , padding:    '5px',       borderBottom: '1px solid #CCC' },
+  button:     { flex: '0 0 auto'
               , margin:     theme.spacing.unit }
 });
 

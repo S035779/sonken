@@ -41,9 +41,9 @@ class Buttons extends React.Component {
 };
 
 const styles = theme => ({
-  buttons:       { display: 'flex', flexDirection: 'row' },
+  buttons:    { display: 'flex', flexDirection: 'row' },
   button:     { flex: 1
-                , margin:     theme.spacing.unit },
+              , margin:     theme.spacing.unit },
   rightIcon:  { marginLeft:   theme.spacing.unit },
   leftIcon:   { marginRight:  theme.spacing.unit }
 });
