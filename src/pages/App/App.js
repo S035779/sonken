@@ -12,9 +12,7 @@ import GlobalHeader from 'Components/GlobalHeader/GlobalHeader';
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state ={
-      mobileOpen: false
-    };
+    this.state = { mobileOpen: false };
   }
 
   handleDrawerToggle() {

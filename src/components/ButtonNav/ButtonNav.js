@@ -5,8 +5,13 @@ import { withRouter } from 'react-router';
 import { withStyles } from 'material-ui/styles';
 import { BottomNavigation } from 'material-ui';
 import { BottomNavigationAction } from 'material-ui/BottomNavigation';
-import { RssFeed as RssIcon, List as ListIcon
-       , CheckCircle as CheckIcon } from 'material-ui-icons';
+import {
+  RssFeed       as RssIcon
+  , List        as ListIcon
+  , CheckCircle as CheckIcon
+  , LiveHelp    as FaqIcon
+  , Feedback    as InquiryIcon
+} from 'material-ui-icons';
 
 class ButtonNav extends React.Component {
   constructor(props) {
@@ -14,7 +19,7 @@ class ButtonNav extends React.Component {
     this.state = { value: 'marchant' };
   }
 
-  handleChange(event, value) {
+  handleChangeNav(event, value) {
     switch(value) {
       case 'marchant':
         this.props.history.push('/');
@@ -28,6 +33,12 @@ class ButtonNav extends React.Component {
       case 'trade':
         this.props.history.push('/trade');
         break;
+      case 'faq':
+        this.props.history.push('/faq');
+        break;
+      case 'inquiry':
+        this.props.history.push('/inquiry');
+        break;
     }
     this.setState({ value });
   }
@@ -35,25 +46,28 @@ class ButtonNav extends React.Component {
   render() {
     const { classes } = this.props;
     const { value } = this.state;
-    return <BottomNavigation showLabels
-      color="inherit"
+    return <BottomNavigation showLabels value={value}
       className={classes.root}
-      value={value}
-      onChange={this.handleChange.bind(this)}
-    >
-      <BottomNavigationAction
-        label="Marchant"    value="marchant" icon={<RssIcon />} />
-      <BottomNavigationAction
-        label="Sellers"     value="sellers"  icon={<RssIcon />} />
-      <BottomNavigationAction
-        label="Bids"        value="bids"     icon={<ListIcon />} />
-      <BottomNavigationAction
-        label="Trade"       value="trade"    icon={<CheckIcon />} />
+      onChange={this.handleChangeNav.bind(this)}>
+      <BottomNavigationAction className={classes.buttons}
+        label="Marchant"    value="marchant" icon={<RssIcon />}     />
+      <BottomNavigationAction className={classes.buttons}
+        label="Sellers"     value="sellers"  icon={<RssIcon />}     />
+      <BottomNavigationAction className={classes.buttons}
+        label="Bids"        value="bids"     icon={<ListIcon />}    />
+      <BottomNavigationAction className={classes.buttons}
+        label="Trade"       value="trade"    icon={<CheckIcon />}   />
+      <BottomNavigationAction className={classes.buttons}
+        label="FAQ"         value="faq"      icon={<FaqIcon />}     />
+      <BottomNavigationAction className={classes.buttons}
+        label="Inquiry"     value="inquiry"  icon={<InquiryIcon />} />
     </BottomNavigation>;
   }
 };
 const styles = theme => ({
-  root: { flex: '1 1 auto' }
+  root: { flex: '2 1 auto'
+        , backgroundColor:theme.palette.primary.main },
+  buttons: { color: '#fff' }
 });
 ButtonNav.propTypes = {
   classes: PropTypes.object.isRequired

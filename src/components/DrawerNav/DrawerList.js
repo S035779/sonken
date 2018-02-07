@@ -5,25 +5,31 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'material-ui/styles';
 import { Divider, List } from 'material-ui';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import { MoveToInbox as InboxIcon  
-       , Drafts      as DraftsIcon 
-       , Star        as StarIcon   
-       , Delete      as DeleteIcon } from 'material-ui-icons';
+import {
+  AccountBox        as UsersIcon  
+  , VerifiedUser    as ApprovalIcon 
+  , LiveHelp        as FaqIcon
+  , Feedback        as InquiryIcon   
+  , MonetizationOn  as InventoryIcon
+} from 'material-ui-icons';
 
 class DrawerList extends React.Component {
   handleClickButton(name, event) {
     switch(name) {
-      case 'inbox':
-        this.props.history.push('/');
+      case 'users':
+        this.props.history.push('/users');
         break;
-      case 'starred':
-        this.props.history.push('/starred');
+      case 'approval':
+        this.props.history.push('/approval');
         break;
-      case 'drafts':
-        this.props.history.push('/drafts');
+      case 'inquiry':
+        this.props.history.push('/inquiry');
         break;
-      case 'trash':
-        this.props.history.push('/trash');
+      case 'faq':
+        this.props.history.push('/faq');
+        break;
+      case 'inventry':
+        this.props.history.push('/inventry');
         break;
       default:
         break;
@@ -33,25 +39,32 @@ class DrawerList extends React.Component {
   renderListItems() {
     return <div>
       <ListItem button
-        onClick={this.handleClickButton.bind(this, 'inbox')}>
+        onClick={this.handleClickButton.bind(this, 'users')}>
         <ListItemIcon>
-          <InboxIcon />
+          <UsersIcon />
         </ListItemIcon>
-        <ListItemText primary="Inbox" />
+        <ListItemText primary="Users" />
       </ListItem>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'starred')}>
+        onClick={this.handleClickButton.bind(this, 'approval')}>
         <ListItemIcon>
-          <StarIcon />
+          <ApprovalIcon />
         </ListItemIcon>
-        <ListItemText primary="Starred" />
+        <ListItemText primary="Approval" />
       </ListItem>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'drafts')}>
+        onClick={this.handleClickButton.bind(this, 'faq')}>
         <ListItemIcon>
-          <DraftsIcon />
+          <FaqIcon />
         </ListItemIcon>
-        <ListItemText primary="Drafts" />
+        <ListItemText primary="FAQ" />
+      </ListItem>
+      <ListItem button 
+        onClick={this.handleClickButton.bind(this, 'inquiry')}>
+        <ListItemIcon>
+          <InquiryIcon />
+        </ListItemIcon>
+        <ListItemText primary="Inquiry" />
       </ListItem>
     </div>;
   }
@@ -59,11 +72,11 @@ class DrawerList extends React.Component {
   renderOtherListItems() {
     return <div>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'trash')}>
+        onClick={this.handleClickButton.bind(this, 'inventory')}>
         <ListItemIcon>
-          <DeleteIcon />
+          <InventoryIcon />
         </ListItemIcon>
-        <ListItemText primary="Trash" />
+        <ListItemText primary="Inventory" />
       </ListItem>
     </div>;
   }

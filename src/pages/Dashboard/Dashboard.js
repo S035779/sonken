@@ -8,7 +8,8 @@ import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
-import CheckboxList from 'Components/CheckboxList/CheckboxList';
+import NoteList from 'Components/NoteList/NoteList';
+import NoteButtons from 'Components/NoteList/NoteButtons';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -28,9 +29,9 @@ class Dashboard extends React.Component {
     Dashboard.prefetch(this.props);
   }
 
-  handleClickNew() {
-    return NoteAction.create();
-  }
+//  handleClickNew() {
+//    return NoteAction.create();
+//}
 
   render() {
     //console.log('>>> render!!', 'State:', this.state);
@@ -41,12 +42,15 @@ class Dashboard extends React.Component {
     return <div className={classes.root}>
       <div className={classes.list}>
         <div className={classes.listHead}>
+        <NoteButtons />
+        </div>
+      {/*
           <Button raised size="medium" color="primary"
             className={classes.button}
             onClick={this.handleClickNew.bind(this)}>
           New Note</Button>
-        </div>
-        <CheckboxList notes={notes} selectedNoteId={match.params.id}/>
+      */}
+        <NoteList notes={notes} selectedNoteId={match.params.id}/>
       </div>
       <div className={classes.noteEdit}>
         {route.routes ? renderRoutes(route.routes, {note: note}) : null}
@@ -67,10 +71,12 @@ const styles = theme => ({
               height: `calc(100vh - ${barHeightSmUp}px)`
             }
             , borderRight: '1px solid #CCC' },
-  listHead: { height: titleHeight
-            , boxSizing: 'border-box', padding: '5px'
-            , borderBottom: '1px solid #CCC' },
-  button:   { margin: theme.spacing.unit },
+  listHead: { display: 'flex', flexDirection: 'row'
+            , alignItems: 'stretch'
+            , height: titleHeight, minHeight: titleHeight
+            , boxSizing: 'border-box'
+            , padding: '5px', borderBottom: '1px solid #CCC' },
+//  button:   { margin: theme.spacing.unit },
   noteEdit: { flex: 1 }
 });
 

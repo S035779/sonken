@@ -22,7 +22,7 @@ class Buttons extends React.Component {
 
   render() {
     const {classes} = this.props;
-    return <div className={classes.root}>
+    return <div className={classes.buttons}>
       <Button raised size="medium" color="primary"
         className={classes.button}
         onClick={this.handleSave.bind(this)}>
@@ -41,7 +41,7 @@ class Buttons extends React.Component {
 };
 
 const styles = theme => ({
-  root:       { display: 'flex', flexDirection: 'row' },
+  buttons:       { display: 'flex', flexDirection: 'row' },
   button:     { flex: 1
                 , margin:     theme.spacing.unit },
   rightIcon:  { marginLeft:   theme.spacing.unit },
