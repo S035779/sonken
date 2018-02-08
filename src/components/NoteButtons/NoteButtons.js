@@ -25,11 +25,12 @@ class NoteButtons extends React.Component {
 
   render() {
     const {classes} = this.props;
-    return <div className={classes.buttons}>
+    return <div className={classes.noteButtons}>
       <Checkbox checked={this.state.checked}
         className={classes.button}
         onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
+      <div className={classes.noteButton}>
       <Button raised size="medium" color="primary"
         className={classes.button}
         onClick={this.handleRead.bind(this)}>
@@ -38,18 +39,21 @@ class NoteButtons extends React.Component {
         className={classes.button}
         onClick={this.handleDelete.bind(this)}>
         Delete</Button>
+      </div>
     </div>;
   }
 };
 const titleHeight = 62;
 const styles = theme => ({
-  buttons:    { display:    'flex',      flexDirection: 'row'
+  noteButtons:{ display:    'flex',      flexDirection: 'row'
               , alignItems: 'stretch'
               , height:     titleHeight, minHeight: titleHeight
               , boxSizing:  'border-box'
-              , padding:    '5px',       borderBottom: '1px solid #CCC' },
-  button:     { flex: '0 0 auto'
-              , margin:     theme.spacing.unit }
+              , padding:    '5px',       borderBottom: '1px solid #CCC' }
+, checkbox:   { flex: '1 1 auto' }
+, noteButton: { flex: '1 1 auto' }
+, buttons:    { display: 'flex', flexDirection: 'row' }
+, button:     { flex: 1, margin: theme.spacing.unit }
 });
 
 NoteButtons.propTypes = {

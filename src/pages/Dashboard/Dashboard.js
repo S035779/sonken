@@ -10,6 +10,7 @@ import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import NoteList from 'Components/NoteList/NoteList';
 import NoteButtons from 'Components/NoteButtons/NoteButtons';
+import NoteSearch from 'Components/NoteSearch/NoteSearch';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -36,12 +37,17 @@ class Dashboard extends React.Component {
     const {notes} = this.state;
     const note = notes.find(note => note.id === Number(match.params.id));
     return <div className={classes.root}>
-      <div className={classes.list}>
-        <NoteButtons />
-        <NoteList notes={notes} selectedNoteId={match.params.id}/>
+      <div className={classes.head}>
+        <NoteSearch />
       </div>
-      <div className={classes.noteEdit}>
-        {route.routes ? renderRoutes(route.routes, {note: note}) : null}
+      <div className={classes.body}>
+        <div className={classes.noteList}>
+          <NoteButtons />
+          <NoteList notes={notes} selectedNoteId={match.params.id}/>
+        </div>
+        <div className={classes.noteEdit}>
+          {route.routes ? renderRoutes(route.routes, {note: note}) : null}
+        </div>
       </div>
     </div>;
   }
@@ -50,15 +56,20 @@ class Dashboard extends React.Component {
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const listWidth = 360;
+const searchHeight = 62;
 const styles = theme => ({
-  root:     { display: 'flex', flexDirection: 'row' },
-  list:     { width: listWidth, minWidth: listWidth
-            , height: `calc(100vh - ${barHeightSmDown}px)`
+  root:     { display: 'flex', flexDirection: 'column' }
+, head:     {}
+, body:     { display: 'flex', flexDirection: 'row' }
+, noteList: { width: listWidth, minWidth: listWidth
+            , height:
+                `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`
             , [theme.breakpoints.up('sm')]: {
-              height: `calc(100vh - ${barHeightSmUp}px)`
+              height:
+                `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`
             }
-            , borderRight: '1px solid #CCC' },
-  noteEdit: { flex: 1 }
+            , borderRight: '1px solid #CCC' }
+, noteEdit: { flex: 1 }
 });
 
 Dashboard.propTypes = {

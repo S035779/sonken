@@ -3,11 +3,8 @@ import PropTypes from 'prop-types';
 import NoteAction from 'Actions/NoteAction';
 
 import { withStyles } from 'material-ui/styles';
-import Input, { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import Button from 'material-ui/Button';
 import NoteBody from 'Components/NoteBody/NoteBody';
-import Buttons from 'Components/Buttons/Buttons';
+import EditButtons from 'Components/EditButtons/EditButtons';
 
 class NoteEdit extends React.Component {
   constructor(props) {
@@ -34,9 +31,9 @@ class NoteEdit extends React.Component {
     this.props.history.push(`/notes/${this.state.note.id}`);
   }
 
-  handleChangeTitle(e) {
+  handleChangeTitle(nextTitle) {
     this.setState({ note: Object.assign({}, this.state.note, 
-      { title: e.target.value }) });
+      { title: nextTitle }) });
   }
 
   handleChangeBody(e) {
@@ -50,19 +47,11 @@ class NoteEdit extends React.Component {
     if(!note || !note.id) return null;
     const isChanged = note.title !== nextTitle || note.body !== nextBody;
     return <div className={classes.edit}>
-      <div className={classes.editHead}>
-        <FormControl className={classes.inputText}>
-          <InputLabel htmlFor="name-simple">Title</InputLabel>
-          <Input id="name-simple" value={nextTitle}
-            onChange={this.handleChangeTitle.bind(this)}
-        />
-        </FormControl>
-        <Buttons className={classes.buttons}
-          changed={isChanged}
-          onSave={this.handleSave.bind(this)}
-          onDelete={this.handleDelete.bind(this)}
-          onShow={this.handleShow.bind(this)} />
-      </div>
+      <EditButtons changed={isChanged} value={nextTitle}
+        onChange={this.handleChangeTitle.bind(this)}
+        onSave={this.handleSave.bind(this)}
+        onDelete={this.handleDelete.bind(this)}
+        onShow={this.handleShow.bind(this)} />
       <div className={classes.editBody}>
         <textarea className={classes.inputArea}
           id="note-body" value={nextBody}
@@ -78,32 +67,24 @@ class NoteEdit extends React.Component {
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const titleHeight = 62;
+const searchHeight = 62;
 const styles = theme => ({
   edit:       { display: 'flex', flexDirection: 'column'
-              , height: `calc(100vh - ${barHeightSmDown}px)`
+              , height: `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`
               , [theme.breakpoints.up('sm')]: {
-                  height: `calc(100vh - ${barHeightSmUp}px)`
-              }},
-  editHead:   { display: 'flex', flexDirection: 'row'
-              , alignItems: 'stretch'
-              , height: titleHeight, minHeight: titleHeight
-              , boxSizing: 'border-box'
-              , padding: '5px', borderBottom: '1px solid #CCC' },
-  inputText:  { flex: '2 1 auto'},
-  buttons:    { flex: '1 1 auto' },
-  editBody:   { borderBottom: '1px solid #CCC' },
-  inputArea:  { display: 'block', resize: 'none' 
+                  height: `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)` }}
+, editBody:   { borderBottom: '1px solid #CCC' }
+, inputArea:  { display: 'block', resize: 'none' 
               , height: '260px'
               , width: '100%',    boxSizing: 'border-box'
               , border: 'none',   padding: '10px'
               , fontSize: '16px', outline: 'none', resize: 'vertical'
               , maxHeight:
-                `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px)`
+                `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px - ${searchHeight}px)`
               , [theme.breakpoints.up('sm')]: {
                 maxHeight:
-                  `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px)`
-              }},
-  editView:   { flex: '1 1 auto', overflow: 'auto'
+                  `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)` }}
+, editView:   { flex: '1 1 auto', overflow: 'auto'
               , position: 'relative'
               , padding: '20px 10px 10px 10px'
               , '&:before': {

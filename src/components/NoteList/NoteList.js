@@ -4,9 +4,13 @@ import { Link } from 'react-router-dom';
 
 import { withStyles } from 'material-ui/styles';
 import { List, Divider, Checkbox, IconButton } from 'material-ui';
-import { ListItem, ListItemText
-  , ListItemSecondaryAction } from 'material-ui/List';
-import { Comment as CommentIcon } from 'material-ui-icons';
+import {
+  ListItem, ListItemText, ListItemSecondaryAction
+} from 'material-ui/List';
+import {
+  Edit as EditIcon
+  , NewReleases as NewIcon
+} from 'material-ui-icons';
 
 class NoteList extends React.Component {
   constructor(props) {
@@ -33,17 +37,17 @@ class NoteList extends React.Component {
     const textClass ={
       primary: classes.primary, secondary: classes.secondary };
     return <div key={note.id}>
-      <ListItem button dense
-        onClick={this.handleToggle.bind(this, note.id)}
-        className={classes.listItem}>
+      <ListItem button dense className={classes.noteItem}
+        onClick={this.handleToggle.bind(this, note.id)}>
         <Checkbox checked={this.state.checked.indexOf(note.id) !== -1}
           tabIndex={-1} disableRipple />
         <ListItemText classes={textClass}
           primary={note.title} secondary={note.updated}/>
         <ListItemSecondaryAction>
-          <IconButton aria-label="Comments"
+          <IconButton aria-label="Edit"
             component={Link} to={`/notes/${note.id}/edit`}>
-            <CommentIcon />
+            <EditIcon />
+            <NewIcon />
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>
@@ -54,17 +58,24 @@ class NoteList extends React.Component {
   render() {
     const {classes, notes} = this.props;
     const items = notes.map(note => this.renderItem(note));
-    return <div className={classes.noteList}>
-      <List>{items}</List>
-    </div>;
+    return <List className={classes.noteList}>{items}</List>;
   }
 };
 
+const barHeightSmUp = 112;
+const barHeightSmDown = 104;
+const titleHeight = 62;
+const searchHeight = 62;
 const styles = theme => ({
-  noteList:   { width: '100%' },
+  noteList:   { width: '100%', overflow: 'scroll'
+              , height:
+                `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px  - ${searchHeight}px)`
+              , [theme.breakpoints.up('sm')]: {
+                height:
+                  `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)` }},
   primary:    {},
   secondary:  {},
-  listItem:   { '&:hover': {
+  noteItem:   { '&:hover': {
                 backgroundColor: theme.palette.primary.main
                 , '& $primary, $secondary': {
                   color: theme.palette.common.white }}}

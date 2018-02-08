@@ -40,7 +40,8 @@ const drawerWidthMdUp = 240;
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const styles = theme => ({
-  root:     { width: '100%', zIndex: 1 },
+  root:     { width: '100%', zIndex: 1
+            , overflow: 'hidden', height: '100vh' },
   appFrame: { position: 'relative'
             , display: 'flex', flexDirection: 'column'
             , width: '100%'},
