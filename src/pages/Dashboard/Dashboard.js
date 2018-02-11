@@ -10,7 +10,7 @@ import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import NoteList from 'Components/NoteList/NoteList';
 import NoteButtons from 'Components/NoteButtons/NoteButtons';
-import NoteSearch from 'Components/NoteSearch/NoteSearch';
+import RssSearch from 'Components/RssSearch/RssSearch';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -38,7 +38,7 @@ class Dashboard extends React.Component {
     const note = notes.find(note => note.id === Number(match.params.id));
     return <div className={classes.root}>
       <div className={classes.head}>
-        <NoteSearch />
+        <RssSearch />
       </div>
       <div className={classes.body}>
         <div className={classes.noteList}>
