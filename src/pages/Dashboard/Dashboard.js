@@ -7,9 +7,8 @@ import { getStores, getState } from 'Stores';
 import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import NoteList from 'Components/NoteList/NoteList';
-import NoteButtons from 'Components/NoteButtons/NoteButtons';
+import RssList from 'Components/RssList/RssList';
+import RssButtons from 'Components/RssButtons/RssButtons';
 import RssSearch from 'Components/RssSearch/RssSearch';
 
 class Dashboard extends React.Component {
@@ -37,13 +36,13 @@ class Dashboard extends React.Component {
     const {notes} = this.state;
     const note = notes.find(note => note.id === Number(match.params.id));
     return <div className={classes.root}>
-      <div className={classes.head}>
+      <div>
         <RssSearch />
       </div>
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <NoteButtons />
-          <NoteList notes={notes} selectedNoteId={match.params.id}/>
+          <RssButtons />
+          <RssList notes={notes} selectedNoteId={match.params.id}/>
         </div>
         <div className={classes.noteEdit}>
           {route.routes ? renderRoutes(route.routes, {note: note}) : null}
@@ -55,11 +54,10 @@ class Dashboard extends React.Component {
 
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
-const listWidth = 360;
+const listWidth = 400;
 const searchHeight = 62;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
-, head:     {}
 , body:     { display: 'flex', flexDirection: 'row' }
 , noteList: { width: listWidth, minWidth: listWidth
             , height:

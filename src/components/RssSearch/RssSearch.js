@@ -54,7 +54,7 @@ class RssSearch extends React.Component {
           onChange={this.handleChangeText.bind(this)}/>
       </FormControl>
       <div className={classes.buttons}>
-        <Button raised color="primary"
+        <Button raised
           className={classes.button}
           onClick={this.handleSubmit.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
@@ -86,10 +86,10 @@ const styles = theme => ({
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:     { flex: 1, margin: theme.spacing.unit /2
               , wordBreak: 'keep-all', padding: 4 }
-, results:    { flex: 1
-              , position: 'relative', minWidth }
-, title:      { position: 'absolute', bottom: '10%'
-              , wordBreak: 'keep-all'}
+, results:    { flex: 1, minWidth
+              , display: 'flex'
+              , justifyContent: 'center', alignItems: 'flex-end' }
+, title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
 
