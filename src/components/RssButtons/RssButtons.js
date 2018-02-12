@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import { Button, Checkbox } from 'material-ui';
 
-
 class RssButtons extends React.Component {
   constructor(props) {
     super(props);
@@ -41,18 +40,18 @@ class RssButtons extends React.Component {
     </div>;
   }
 };
-const titleHeight = 62;
+const titleHeight   = 62;
+const checkboxWidth = 38;
 const styles = theme => ({
-  noteButtons:{ display:    'flex', flexDirection: 'row'
-              , alignItems: 'stretch', justifyContent: 'flex-start' 
-              , height:     titleHeight, minHeight: titleHeight
-              , boxSizing:  'border-box'
-              , padding:    '5px' }
-, checkbox:   { flex: 0, minWidth: 48
-              , marginLeft: theme.spacing.unit * 2 - 5 }
-, buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, margin: theme.spacing.unit
-              , wordBreak: 'keep-all' }
+  noteButtons:  { display: 'flex', flexDirection: 'row'
+                , alignItems: 'stretch', justifyContent: 'flex-start' 
+                , height: titleHeight, minHeight: titleHeight
+                , boxSizing: 'border-box'
+                , padding: '5px' }
+, checkbox:     { flex: 0, minWidth: checkboxWidth }
+, buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
+, button:       { flex: 1, margin: theme.spacing.unit
+                , wordBreak: 'keep-all' }
 });
 
 RssButtons.propTypes = {

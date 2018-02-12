@@ -1,10 +1,10 @@
 import App from 'Pages/App/App';
 import Dashboard from 'Pages/Dashboard/Dashboard';
-import NoteEdit from 'Pages/NoteEdit/NoteEdit';
-import Note from 'Pages/Note/Note'
-import Starred from 'Pages/Starred/Starred';
-import Drafts from 'Pages/Drafts/Drafts';
-import Trash from 'Pages/Trash/Trash';
+import MarchantEdit from 'Pages/MarchantEdit/MarchantEdit';
+import SellersEdit from 'Pages/NoteEdit/NoteEdit';
+import Marchant from 'Pages/Note/Note'
+import Bids from 'Pages/Starred/Starred';
+import Trade from 'Pages/Starred/Starred';
 
 export default function getRoutes() {
   return [
@@ -16,29 +16,34 @@ export default function getRoutes() {
           component: Dashboard
         },
         {
-          path: '/notes/:id/edit',
+          path: '/marchant/:id/edit',
           component: Dashboard,
           routes: [
             {
-              component: NoteEdit
+              component: MarchantEdit
             }
           ]
         },
         {
-          path: '/notes/:id',
-          component: Note
+          path: '/sellers/:id/edit',
+          component: Dashboard,
+          routes: [
+            {
+              component: SellersEdit
+            }
+          ]
         },
         {
-          path: '/starred',
-          component: Starred
+          path: '/marchant/:id',
+          component: Marchant
         },
         {
-          path: '/drafts',
-          component: Drafts
+          path: '/bids',
+          component: Bids
         },
         {
-          path: '/trash',
-          component: Trash
+          path: '/trade',
+          component: Trade
         }
       ]
     }

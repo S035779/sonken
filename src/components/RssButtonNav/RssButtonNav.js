@@ -47,6 +47,7 @@ const thm1 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
     background: blue[300], width: 138, color: 'white'
     , margin: '0 8px'
     , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
+    , '&:hover':  { color: 'black' }
   }
 }}});
 const thm2 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
@@ -54,6 +55,7 @@ const thm2 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
     background: orange[500], width: 138,  color: 'white'
     , margin: '0 8px'
     , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
+    , '&:hover':  { color: 'black' }
   }
 }}});
 const thm3 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
@@ -61,6 +63,7 @@ const thm3 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
     background: green[500], width: 138,  color: 'white'
     , margin: '0 8px'
     , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
+    , '&:hover':  { color: 'black' }
   }
 }}});
 const thm4 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
@@ -68,6 +71,7 @@ const thm4 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
     background: yellow[600], width: 138,  color: 'white'
     , margin: '0 8px'
     , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
+    , '&:hover':  { color: 'black' }
   }
 }}});
 
