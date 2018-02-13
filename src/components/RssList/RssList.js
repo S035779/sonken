@@ -73,7 +73,7 @@ class RssList extends React.Component {
             <ListItemSecondaryAction>
               <Button className={classes.button}
                 onClick={this.handleChangeDialog.bind(this, note.id)}
-                variant="raised" color="primary">編集</Button>
+                color="primary">編集</Button>
               <RssFormDialog title="タイトルを編集する"
                 content={note}
                 open={this.state.opened.indexOf(note.id) !== -1}

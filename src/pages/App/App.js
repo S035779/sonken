@@ -8,6 +8,7 @@ import { Reboot } from 'material-ui';
 //import DrawerNavTemporary from 'Components/DrawerNav/DrawerNavTemporary';
 //import DrawerNavPermanent from 'Components/DrawerNav/DrawerNavPermanent';
 import RssHeader from 'Components/RssHeader/RssHeader';
+import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
 
 class App extends React.Component {
   constructor(props) {
@@ -22,6 +23,7 @@ class App extends React.Component {
   render() {
     const {classes} = this.props;
     return <div className={classes.root}>
+      <ErrorBoundary>
       <Reboot />
       <div className={classes.appFrame}>
         <RssHeader onClickMenu={this.handleDrawerToggle.bind(this)}/>
@@ -34,6 +36,7 @@ class App extends React.Component {
           {renderRoutes(this.props.route.routes)}
         </div>
       </div>
+      </ErrorBoundary>
     </div>;
   }
 };

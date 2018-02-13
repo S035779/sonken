@@ -30,16 +30,17 @@ class RssButtons extends React.Component {
         onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button raised
+        <Button variant="raised"
           className={classes.button}
           onClick={this.handleRead.bind(this)}>既読にする</Button>
-        <Button raised
+        <Button variant="raised"
           className={classes.button}
           onClick={this.handleDelete.bind(this)}>削除</Button>
       </div>
     </div>;
   }
 };
+
 const titleHeight   = 62;
 const checkboxWidth = 38;
 const styles = theme => ({
@@ -53,7 +54,8 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 });
-
+RssButtons.displayName = 'RssButtons';
+RssButtons.defaultProps = {};
 RssButtons.propTypes = {
   classes: PropTypes.object.isRequired
 };

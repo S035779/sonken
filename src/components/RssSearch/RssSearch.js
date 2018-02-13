@@ -54,16 +54,16 @@ class RssSearch extends React.Component {
           onChange={this.handleChangeText.bind(this)}/>
       </FormControl>
       <div className={classes.buttons}>
-        <Button raised
+        <Button variant="raised"
           className={classes.button}
           onClick={this.handleSubmit.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
         <div className={classes.space} />
-        <Button raised
+        <Button variant="raised"
           className={classes.button}
           onClick={this.handleUpload.bind(this)}>
           CSV アップロード</Button>
-        <Button raised
+        <Button variant="raised"
           className={classes.button}
           onClick={this.handleDownload.bind(this)}>
           CSV ダウンロード</Button>
