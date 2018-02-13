@@ -13,11 +13,11 @@ class MarchantEdit extends React.Component {
     return <div className={classes.noteEdit}>
       <div className={classes.forms}>
         <RssForms note={note}>
-          <div className={classes.view}>
       {/*
+          <div className={classes.view}>
             <RssBody body={nextBody} />
-      */}
           </div>
+      */}
         </RssForms>
       </div>
       <div className={classes.list}>

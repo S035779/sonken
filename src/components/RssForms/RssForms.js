@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import NoteAction from 'Actions/NoteAction';
 
 import { withStyles } from 'material-ui/styles';
-import { Input, Button, Typography } from 'material-ui';
+import { Input, Button, Typography, TextField } from 'material-ui';
 import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 
@@ -26,8 +26,8 @@ class RssForms extends React.Component {
   }
 
   handleSave() {
-    const {id, asin, price, bids, body} = this.state.note;
-    NoteAction.update(id, {asin, price, bids, body});
+    const {id, asin, price, bidsprice, body} = this.state.note;
+    NoteAction.update(id, {asin, price, bidsprice, body});
   }
 
   handleChangeInput(name, event) {
@@ -39,7 +39,7 @@ class RssForms extends React.Component {
         break;
       case 'price': newItem = { price:  value };
         break;
-      case 'bids':  newItem = { bids:   value };
+      case 'bidsprice':  newItem = { bidsprice:   value };
         break;
       case 'body':  newItem = { body:   value };
         break;
@@ -55,9 +55,9 @@ class RssForms extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes, note } = this.props;
-    const { asin, price, bids, body } = this.state.note;
+    const { asin, price, bidsprice, body } = this.state.note;
     const isChanged = note.asin !== asin || note.price !== price
-                   || note.bids !== bids || note.body  !== body;
+                   || note.bidsprice !== bidsprice || note.body  !== body;
     const link_mon = mon + asin;
     const link_fba = fba;
     const link_amz = amz + asin;
@@ -65,14 +65,12 @@ class RssForms extends React.Component {
     const link_kpa = kpa + asin;
     return <div className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title"
+        <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading"
-          className={classes.title}>ASIN</Typography>
-        <FormControl className={classes.inputText}>
-          <InputLabel htmlFor="asin">ASINを入力</InputLabel>
+        <FormControl className={classes.text}>
+          <InputLabel htmlFor="asin">ASIN</InputLabel>
           <Input id="asin" value={asin}
             onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
@@ -80,8 +78,7 @@ class RssForms extends React.Component {
           <Button variant="raised" size="medium"
             className={classes.button}
             onClick={this.handleSave.bind(this)}>
-          {isChanged ? '*' : ''}登録
-          </Button>
+          {isChanged ? '*' : ''}登録</Button>
         </div>
         <div className={classes.buttons}>
           <Button color="primary" size="large" className={classes.link}
@@ -93,31 +90,52 @@ class RssForms extends React.Component {
         </div>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading"
+        <Typography variant="subheading" noWrap
           className={classes.title}>Amazon商品名</Typography>
         <div className={classes.buttons}>
           <Button color="primary" size="large" className={classes.link}
             href={link_amz}>
             {note.name}</Button>
         </div>
-        {this.props.children}
-        <div className={classes.memo}>
+      </div>
+      {this.props.children}
+      <div className={classes.memo}>
+        <div className={classes.texts}>
+          <div className={classes.edit}>
+            <FormControl className={classes.text}>
+              <InputLabel htmlFor="price">想定売値</InputLabel>
+              <Input id="price" value={price}
+                onChange={this.handleChangeInput.bind(this, 'price')}/>
+            </FormControl>
+          </div>
+          <div className={classes.edit}>
+            <FormControl className={classes.text}>
+              <InputLabel htmlFor="bidsprice">最高入札額</InputLabel>
+              <Input id="bidsprice" value={bidsprice}
+                onChange={this.handleChangeInput.bind(this,'bidsprice')}/>
+            </FormControl>
+          </div>
+        </div>
+        <div className={classes.texts}>
+          <TextField id="body" label="自由入力欄" multiline rows="4"
+            className={classes.textarea} margin="normal" value={body}
+            onChange={this.handleChangeInput.bind(this, 'body')}/>
         </div>
       </div>
     </div>;
   }
 };
 
-const titleHeight = 62;
+const columnHeight = 62;
 const styles = theme => ({
   forms:      { display: 'flex', flexDirection: 'column' }
-, header:     { height: titleHeight, minHeight: titleHeight
+, header:     { height: columnHeight, minHeight: columnHeight
               , boxSizing: 'border-box'
               , padding: '5px', borderBottom: '1px solid #CCC' }
 , title:      { margin: theme.spacing.unit * 1.75 }
 , edit:       { display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
-              , height: titleHeight, minHeight: titleHeight
+              , height: columnHeight, minHeight: columnHeight
               , boxSizing: 'border-box'
               , padding: '5px', borderBottom: '1px solid #CCC' }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
@@ -125,7 +143,14 @@ const styles = theme => ({
               , wordBreak: 'keep-all' }
 , link:       { flex: 1, margin: theme.spacing.unit /2
               , wordBreak: 'keep-all' }
-, memo:       { flex: '1 1 auto' }
+, text:       { marginLeft: theme.spacing.unit * 1.75 }
+, memo:       { display: 'flex', flexDirection: 'row'
+              , alignItems: 'stretch'
+              , height: columnHeight * 2, minHeight: columnHeight * 2
+              , boxSizing: 'border-box'
+              , borderBottom: '1px solid #CCC' }
+, texts:      { display: 'flex', flexDirection: 'column' }
+, textarea:   { width: 360, marginLeft: theme.spacing.unit }
 });
 RssForms.displayName = 'RssForms';
 RssForms.defaultProps = { note: null };
