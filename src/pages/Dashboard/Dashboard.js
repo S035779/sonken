@@ -21,7 +21,7 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(props) {
-    console.log('>>> prefetch start!!', 'Props:', props);
+    console.info('>>> prefetch:', props);
     return NoteAction.fetchMyNotes();
   }
 
@@ -30,8 +30,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    //console.log('>>> render!!', 'State:', this.state);
-    console.log('>>> render!!', 'Props:', this.props);
+    console.info('>>> render:', this.state);
     const {classes, match, route} = this.props;
     const {notes} = this.state;
     const note = notes.find(note => note.id === Number(match.params.id));

@@ -59,6 +59,7 @@ class RssList extends React.Component {
     const {classes} = this.props;
     const textClass ={
       primary: classes.primary, secondary: classes.secondary };
+    const linkTo = `/${note.category}/${note.id}/edit`;
     return <div key={note.id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, note.id)}
@@ -66,7 +67,7 @@ class RssList extends React.Component {
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
-          component={Link} to={`/${note.category}/${note.id}/edit`}>
+          component={Link} to={linkTo}>
             <ListItemText classes={textClass}
               primary={note.title} secondary={note.updated}/>
             <ListItemSecondaryAction>
@@ -77,7 +78,7 @@ class RssList extends React.Component {
                 content={note}
                 open={this.state.opened.indexOf(note.id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note.id)}
-                onSubmit={this.handleChangeText.bind(this, note.id)}>
+                onSubmit={this.handleChangeTitle.bind(this, note.id)}>
                 {note.title}</RssFormDialog>
             </ListItemSecondaryAction>
         </ListItem>

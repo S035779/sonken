@@ -20,7 +20,13 @@ class MarchantEdit extends React.Component {
   }
 
   componentWillReceiveProps(props) {
+    console.info('>>> receive:', props);
     this.setState({ note: props.note });
+  }
+
+  componentDidCatch(error, info) {
+    if(error) console.error('>>> error:', error);
+    else console.info('>>> info:', info);
   }
 
   handleSave() {
@@ -47,6 +53,7 @@ class MarchantEdit extends React.Component {
   }
 
   render() {
+    console.info('>>> render:', this.state);
     if(!note || !note.id) return null;
     const { classes, note } = this.props
     const { title, asin, name, price, bids, body } = this.state.note;
@@ -54,15 +61,19 @@ class MarchantEdit extends React.Component {
                    || note.bids !== bids || note.body  !== body;
     return <div className={classes.noteEdit}>
       <div className={classes.forms}>
+      {/*
         <RssForms changed={isChanged} value={title}
           onSave={this.handleSave.bind(this)}>
           <div className={classes.view}>
             <RssBody body={nextBody} />
           </div>
         </RssForms>
+      */}
       </div>
       <div className={classes.list}>
+      {/*
         <RssItemList />
+      */}
       </div>
     </div>;
   }
@@ -81,7 +92,7 @@ const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, forms:    { borderBottom: '1px solid #CCC' }
+, forms:    { backgroundColor: 'yellow' }
 , view:     { flex: '1 1 auto', overflow: 'auto'
             , position: 'relative'
             , padding: '20px 10px 10px 10px'
