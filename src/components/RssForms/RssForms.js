@@ -81,22 +81,23 @@ class RssForms extends React.Component {
           {isChanged ? '*' : ''}登録</Button>
         </div>
         <div className={classes.buttons}>
-          <Button color="primary" size="large" className={classes.link}
+          <Button color="primary" size="large"
+            className={classes.link}
             href={link_mon}>
             モノレート</Button>
-          <Button color="primary" size="large" className={classes.link}
+          <Button color="primary" size="large" 
+            className={classes.link}
             href={link_fba}>
             FBA料金シュミレーター</Button>
         </div>
       </div>
       <div className={classes.edit}>
         <Typography variant="subheading" noWrap
-          className={classes.title}>Amazon商品名</Typography>
-        <div className={classes.buttons}>
-          <Button color="primary" size="large" className={classes.link}
-            href={link_amz}>
-            {note.name}</Button>
-        </div>
+          className={classes.title}>Amazon商品名：</Typography>
+        <Button color="primary" size="large" fullWidth
+          className={classes.name}
+          href={link_amz}>
+          {note.name}</Button>
       </div>
       {this.props.children}
       <div className={classes.memo}>
@@ -116,41 +117,46 @@ class RssForms extends React.Component {
             </FormControl>
           </div>
         </div>
-        <div className={classes.texts}>
-          <TextField id="body" label="自由入力欄" multiline rows="4"
-            className={classes.textarea} margin="normal" value={body}
-            onChange={this.handleChangeInput.bind(this, 'body')}/>
+        <div className={classes.textarea}>
+        <TextField id="body" label="自由入力欄" multiline
+          className={classes.field} rows="4"
+          fullWidth margin="none" value={body}
+          onChange={this.handleChangeInput.bind(this, 'body')}/>
         </div>
       </div>
     </div>;
   }
 };
 
+const listWidth = 400;
 const columnHeight = 62;
+const editWidth = `calc(100% - ${listWidth}px)`;
 const styles = theme => ({
   forms:      { display: 'flex', flexDirection: 'column' }
 , header:     { height: columnHeight, minHeight: columnHeight
               , boxSizing: 'border-box'
-              , padding: '5px', borderBottom: '1px solid #CCC' }
+              , padding: '5px' }
 , title:      { margin: theme.spacing.unit * 1.75 }
 , edit:       { display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
               , height: columnHeight, minHeight: columnHeight
               , boxSizing: 'border-box'
-              , padding: '5px', borderBottom: '1px solid #CCC' }
-, buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
+              , padding: '5px' }
+, buttons:    { display: 0, display: 'flex', flexDirection: 'row' }
 , button:     { flex: 1, margin: theme.spacing.unit
               , wordBreak: 'keep-all' }
 , link:       { flex: 1, margin: theme.spacing.unit /2
+              , wordBreak: 'keep-all' }
+, name:       { flex: 1, margin: theme.spacing.unit /2
+              , border: '1px solid #CCC'
               , wordBreak: 'keep-all' }
 , text:       { marginLeft: theme.spacing.unit * 1.75 }
 , memo:       { display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
               , height: columnHeight * 2, minHeight: columnHeight * 2
-              , boxSizing: 'border-box'
-              , borderBottom: '1px solid #CCC' }
-, texts:      { display: 'flex', flexDirection: 'column' }
-, textarea:   { width: 360, marginLeft: theme.spacing.unit }
+              , boxSizing: 'border-box' }
+, field:      { paddingTop: 5 }
+, textarea:   { width: '100%', padding: 5 }
 });
 RssForms.displayName = 'RssForms';
 RssForms.defaultProps = { note: null };

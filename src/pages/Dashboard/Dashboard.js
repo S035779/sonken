@@ -7,9 +7,9 @@ import { getStores, getState } from 'Stores';
 import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
-import RssList from 'Components/RssList/RssList';
-import RssButtons from 'Components/RssButtons/RssButtons';
 import RssSearch from 'Components/RssSearch/RssSearch';
+import RssButtons from 'Components/RssButtons/RssButtons';
+import RssList from 'Components/RssList/RssList';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -66,9 +66,7 @@ const styles = theme => ({
                 `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`
             , [theme.breakpoints.up('sm')]: {
               height:
-                `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`
-            }
-            , borderRight: '1px solid #CCC' }
+                `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)` }}
 , noteEdit: { flex: 1 }
 });
 Dashboard.displayName = 'Dashboard';

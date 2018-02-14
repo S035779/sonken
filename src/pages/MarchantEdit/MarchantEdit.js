@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { withStyles } from 'material-ui/styles';
 import RssForms from 'Components/RssForms/RssForms';
-//import RssItemView from 'Components/RssItemView/RssItemView';
+import RssView from 'Components/RssView/RssView';
 //import RssItemList from 'Components/RssItemList/RssItemList';
 
 class MarchantEdit extends React.Component {
@@ -13,11 +13,9 @@ class MarchantEdit extends React.Component {
     return <div className={classes.noteEdit}>
       <div className={classes.forms}>
         <RssForms note={note}>
-      {/*
           <div className={classes.view}>
-            <RssBody body={nextBody} />
+            <RssView note={note} />
           </div>
-      */}
         </RssForms>
       </div>
       <div className={classes.list}>
@@ -31,19 +29,18 @@ class MarchantEdit extends React.Component {
 
 const barHeightSmDown   = 104;
 const barHeightSmUp     = 112;
-const searchHeight      = 62;
-const titleHeight       = 62;
-const formsHeight       = 62;
+const rowHeight         = 62
 const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`;
+  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
 const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${searchHeight}px)`;
+  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, forms:    { backgroundColor: 'yellow' }
-, view:     { flex: '1 1 auto', overflow: 'auto'
+, forms:    { overflow: 'scroll' }
+, view:     { border: '1px solid #CCC', height: rowHeight * 4
+            , flex: '1 1 auto', overflow: 'auto'
             , position: 'relative'
             , padding: '20px 10px 10px 10px'
             , '&:before': {
