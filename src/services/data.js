@@ -2,7 +2,7 @@ module.exports = [
   {
     "id": 1,
     "category": "marchant",
-    "asin": "ABC123001",
+    "asin": "B01N0PYZSM",
     "price": "1220",
     "bidsprice": "4000",
     "name": "ペンタックス645D",
@@ -14,7 +14,7 @@ module.exports = [
   {
     "id": 10,
     "category": "marchant",
-    "asin": "ABC123010",
+    "asin": "B01N0PYZSM",
     "name": "ニコンD800",
     "price": "1400",
     "bidsprice": "40000",
@@ -26,7 +26,7 @@ module.exports = [
   {
     "id": 2,
     "category": "marchant",
-    "asin": "ABC123002",
+    "asin": "B01N0PYZSM",
     "name": "ソニーα900",
     "price": "1240",
     "bidsprice": "8000",
@@ -38,7 +38,7 @@ module.exports = [
   {
     "id": 3,
     "category": "marchant",
-    "asin": "ABC123003",
+    "asin": "B01N0PYZSM",
     "name": "ニコンD3X",
     "price": "1260",
     "bidsprice": "12000",
@@ -50,7 +50,7 @@ module.exports = [
   {
     "id": 4,
     "category": "marchant",
-    "asin": "ABC123004",
+    "asin": "B01N0PYZSM",
     "name": "キヤノンEOS-1Ds Mark II/III",
     "price": "1280",
     "bidsprice": "16000",
@@ -62,7 +62,7 @@ module.exports = [
   {
     "id": 5,
     "category": "marchant",
-    "asin": "ABC123005",
+    "asin": "B01N0PYZSM",
     "name": "キヤノンEOS-1D Markシリーズ",
     "price": "1300",
     "bidsprice": "20000",
@@ -74,7 +74,7 @@ module.exports = [
   {
     "id": 6,
     "category": "marchant",
-    "asin": "ABC123006",
+    "asin": "B01N0PYZSM",
     "name": "ニコンD3S",
     "price": "1320",
     "bidsprice": "24000",
@@ -86,7 +86,7 @@ module.exports = [
   {
     "id": 7,
     "category": "marchant",
-    "asin": "ABC123007",
+    "asin": "B01N0PYZSM",
     "name": "ニコンD300/D300S",
     "price": "1340",
     "bidsprice": "28000",
@@ -98,7 +98,7 @@ module.exports = [
   {
     "id": 8,
     "category": "marchant",
-    "asin": "ABC123008",
+    "asin": "B01N0PYZSM",
     "name": "シグマSD14",
     "price": "1360",
     "bidsprice": "32000",
@@ -110,7 +110,7 @@ module.exports = [
   {
     "id": 9,
     "category": "marchant",
-    "asin": "ABC123009",
+    "asin": "B01N0PYZSM",
     "name": "ペンタックスK-5",
     "price": "1380",
     "bidsprice": "36000",

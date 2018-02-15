@@ -7,12 +7,9 @@ import { Input, Button, Typography, TextField } from 'material-ui';
 import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 
-const mon = 'http://mnrate/item/aid/';
-const amz = 'http://www.amazon.co.jp/exec/obidos/ASIN/';
-const kpa = 'https://keepa.com/#!product/5-';
-const img = 'http://images-jp.amazon.com/images/P/';
-const imgfile = '.09.LZZZZZZZ.jpg';
-const fba = 'https://sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?lang=ja_JP';
+const mon = '//www.mnrate.com/item/aid/';
+const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
+const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?lang=ja_JP';
 
 class RssForms extends React.Component {
   constructor(props) {
@@ -61,8 +58,6 @@ class RssForms extends React.Component {
     const link_mon = mon + asin;
     const link_fba = fba;
     const link_amz = amz + asin;
-    const link_img = img + asin + imgfile;
-    const link_kpa = kpa + asin;
     return <div className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap

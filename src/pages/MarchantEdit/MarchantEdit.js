@@ -14,7 +14,7 @@ class MarchantEdit extends React.Component {
       <div className={classes.forms}>
         <RssForms note={note}>
           <div className={classes.view}>
-            <RssView note={note} />
+            <RssView note={note}/>
           </div>
         </RssForms>
       </div>
@@ -39,17 +39,15 @@ const styles = theme => ({
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , forms:    { overflow: 'scroll' }
-, view:     { border: '1px solid #CCC', height: rowHeight * 4
-            , flex: '1 1 auto', overflow: 'auto'
-            , position: 'relative'
-            , padding: '20px 10px 10px 10px'
-            , '&:before': {
-              content: '"Preview"', display: 'inline-block'
-              , position: 'absolute', top: 0, left: 0
-              , backgroundColor: '#F5F5F5'
-              , padding: '5px 10px', fontSize: '12px'
+, view:     { position: 'relative', height: rowHeight * 4, overflow: 'auto'
+            , border: '1px solid #CCC', padding: '20px 10px 10px 10px'
+            , '&:before': { position: 'absolute', top: 0, left: 0
+              , display: 'inline-block'
               , borderRight: '1px solid #CCC'
-              , borderBottom: '1px solid #CCC' }}
+              , borderBottom: '1px solid #CCC'
+              , padding: '5px 10px'
+              , content: '"Preview"', fontSize: '12px'
+              , backgroundColor: '#F5F5F5' }}
 , list:     {}
 });
 MarchantEdit.displayName= 'MarchantEdit';

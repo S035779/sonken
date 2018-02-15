@@ -11,8 +11,8 @@ var production = {
     ],
     performance: {
       hints: "warning",
-      maxAssetSize: 1280000,
-      maxEntrypointSize: 1280000,
+      maxAssetSize: 2560000,
+      maxEntrypointSize: 3840000,
       assetFilter: function(assetFilename) {
         return assetFilename.endsWith('.css')
           || assetFilename.endsWith('.js');
