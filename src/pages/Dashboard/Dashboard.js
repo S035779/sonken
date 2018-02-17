@@ -35,8 +35,13 @@ class Dashboard extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const {classes, match, route} = this.props;
-    const {notes} = this.state;
-    const note = notes.find(note => note.id === Number(match.params.id));
+    const { notes } = this.state;
+    const itemId = Number(match.params.id);
+    const noteCategory =
+      match.params.category ? match.params.category : 'marchant';
+    const items =
+      notes ? notes.filter(note => note.category === noteCategory) : [];
+    const item = notes.find(note => note.id === itemId);
     return <div className={classes.root}>
       <div>
         <RssSearch />
@@ -44,29 +49,30 @@ class Dashboard extends React.Component {
       <div className={classes.body}>
         <div className={classes.noteList}>
           <RssButtons />
-          <RssList notes={notes} selectedNoteId={match.params.id}/>
+          <RssList notes={items} selectedNoteId={itemId}/>
         </div>
         <div className={classes.noteEdit}>
-          {route.routes ? renderRoutes(route.routes, {note: note}) : null}
+          {route.routes ? renderRoutes(route.routes, {note: item}) : null}
         </div>
       </div>
     </div>;
   }
 };
 
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
-const listWidth = 400;
-const searchHeight = 62;
+const barHeightSmUp     = 112;
+const barHeightSmDown   = 104;
+const listWidth         = 400;
+const searchHeight      = 62;
+const noteHeightSmUp    = 
+  `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`;
+const noteHeightSmDown  =
+  `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
 , body:     { display: 'flex', flexDirection: 'row' }
 , noteList: { width: listWidth, minWidth: listWidth
-            , height:
-                `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`
-            , [theme.breakpoints.up('sm')]: {
-              height:
-                `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)` }}
+            , height: noteHeightSmDown
+            , [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
 , noteEdit: { flex: 1 }
 });
 Dashboard.displayName = 'Dashboard';

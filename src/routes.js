@@ -1,8 +1,8 @@
 import App from 'Pages/App/App';
 import Dashboard from 'Pages/Dashboard/Dashboard';
 import MarchantEdit from 'Pages/MarchantEdit/MarchantEdit';
-import SellersEdit from 'Pages/NoteEdit/NoteEdit';
-import Marchant from 'Pages/Note/Note'
+import SellersEdit from 'Pages/SellersEdit/SellersEdit';
+import Note from 'Pages/Note/Note'
 import Bids from 'Pages/Starred/Starred';
 import Trade from 'Pages/Starred/Starred';
 
@@ -16,26 +16,8 @@ export default function getRoutes() {
           component: Dashboard
         },
         {
-          path: '/marchant/:id/edit',
-          component: Dashboard,
-          routes: [
-            {
-              component: MarchantEdit
-            }
-          ]
-        },
-        {
-          path: '/sellers/:id/edit',
-          component: Dashboard,
-          routes: [
-            {
-              component: SellersEdit
-            }
-          ]
-        },
-        {
-          path: '/marchant/:id',
-          component: Marchant
+          path: '/note/:id',
+          component: Note
         },
         {
           path: '/bids',
@@ -44,6 +26,24 @@ export default function getRoutes() {
         {
           path: '/trade',
           component: Trade
+        },
+        {
+          path: '/:category/:id',
+          component: Dashboard,
+          routes: [
+            {
+              path: '/marchant/:id/edit',
+              component: MarchantEdit
+            },
+            {
+              path: '/sellers/:id/edit',
+              component: SellersEdit
+            }
+          ]
+        },
+        {
+          path: '/:category',
+          component: Dashboard
         }
       ]
     }

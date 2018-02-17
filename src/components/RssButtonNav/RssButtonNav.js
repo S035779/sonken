@@ -17,7 +17,7 @@ class RssButtonNav extends React.Component {
   render() {
     return <MuiThemeProvider theme={thm}>
       <MuiThemeProvider theme={thm1}>
-        <Button component={Link} to="/">商品RSS</Button>
+        <Button component={Link} to="/marchant">商品RSS</Button>
       </MuiThemeProvider>
       <MuiThemeProvider theme={thm2}>
         <Button component={Link} to="/sellers">出品者RSS</Button>

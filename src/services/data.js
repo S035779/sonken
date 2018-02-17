@@ -1,7 +1,7 @@
 module.exports = [
   {
     "id": 1,
-    "category": "marchant",
+    "category": "sellers",
     "asin": "B01N0PYZSM",
     "price": "1220",
     "bidsprice": "4000",
@@ -13,7 +13,7 @@ module.exports = [
   },
   {
     "id": 10,
-    "category": "marchant",
+    "category": "sellers",
     "asin": "B01N0PYZSM",
     "name": "ニコンD800",
     "price": "1400",
