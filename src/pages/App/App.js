@@ -21,7 +21,7 @@ class App extends React.Component {
   }
 
   render() {
-    const {classes} = this.props;
+    const { classes, route } = this.props;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
@@ -33,7 +33,7 @@ class App extends React.Component {
         <DrawerNavPermanent />
       */}
         <div className={classes.content}>
-          {renderRoutes(this.props.route.routes)}
+          {renderRoutes(route.routes)}
         </div>
       </div>
       </ErrorBoundary>

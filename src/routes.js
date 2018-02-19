@@ -2,9 +2,8 @@ import App from 'Pages/App/App';
 import Dashboard from 'Pages/Dashboard/Dashboard';
 import MarchantEdit from 'Pages/MarchantEdit/MarchantEdit';
 import SellersEdit from 'Pages/SellersEdit/SellersEdit';
-import Note from 'Pages/Note/Note'
-import Bids from 'Pages/Starred/Starred';
-import Trade from 'Pages/Starred/Starred';
+import Bids from 'Pages/Bids/Bids';
+import Trade from 'Pages/Trade/Trade';
 
 export default function getRoutes() {
   return [
@@ -14,10 +13,6 @@ export default function getRoutes() {
           path: '/',
           exact: true,
           component: Dashboard
-        },
-        {
-          path: '/note/:id',
-          component: Note
         },
         {
           path: '/bids',

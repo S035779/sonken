@@ -4,7 +4,6 @@ import { renderRoutes } from 'react-router-config';
 import { Container } from 'flux/utils';
 import NoteAction from 'Actions/NoteAction';
 import { getStores, getState } from 'Stores';
-import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import RssSearch from 'Components/RssSearch/RssSearch';
@@ -43,9 +42,7 @@ class Dashboard extends React.Component {
       notes ? notes.filter(note => note.category === noteCategory) : [];
     const item = notes.find(note => note.id === itemId);
     return <div className={classes.root}>
-      <div>
         <RssSearch />
-      </div>
       <div className={classes.body}>
         <div className={classes.noteList}>
           <RssButtons />
