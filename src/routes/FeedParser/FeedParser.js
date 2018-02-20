@@ -1,5 +1,5 @@
 import fs from 'fs';
-import xml2js from 'xml2js';
+import { parseString } from 'xml2js';
 import R from 'ramda';
 import Rx from 'rx';
 import std from 'Utilities/stdutils';
@@ -29,49 +29,58 @@ class FeedParser {
     return new FeedParser();
   }
 
-  request(req, opt) {
-    switch(req) {
-      case 'rss':
+  request(request, options) {
+    switch(request) {
+      case 'fetch/rss':
         return new Promise((resolve, reject) => {
-          net.get2(opt.url, {}, (err, head, body) => {
+          net.get2(options.url
+          , null, (err, head, body) => {
             if(err) reject(err);
             resolve(body);
           });
         });
         break;
-      case 'file':
+      case 'fetch/file':
         return new Promise((resolve, reject) => {
-          fs.readFile(path + opt.file, { encoding: 'utf-8' }
-            , (err, data) => {
-              if(err) reject(err);
-              resolve(data);
-            });
+          fs.readFile(path + options.file
+          , { encoding: 'utf-8' }
+          , (err, data) => {
+            if(err) reject(err);
+            resolve(data);
+          });
         });
         break;
-      case 'xml':
+      case 'parse/xml':
         return new Promise((resolve, reject) => {
-          const parser = new xml2js().Paeser();
-          parser.parseString(opt.xml, (err, data) => {
+          parseString(options.xml, {}
+          , (err, data) => {
             if(err) reject(err);
             resolve(data);
           }); 
         });
         break;
       default:
+        return new Promise((resolve, reject) => {
+          reject(options);
+        });
         break;
     }
   }
 
   getRss(url) {
-    return this.request('rss', { url });
+    return this.request('fetch/rss', { url });
   }
 
   getFile(file) {
-    return this.request('file', { file });
+    return this.request('fetch/file', { file });
   }
 
   getXml(xml) {
-    return this.request('xml', { xml });
+    return this.request('parse/xml', { xml });
+  }
+
+  fetchRss(url) {
+    return Rx.Observable.fromPromise(this.getRss(url));
   }
 
   forFile(files) {
@@ -84,19 +93,21 @@ class FeedParser {
     return Rx.Observable.forkJoin(promises);
   }
 
-  parseXml() {
+  parseXml(xml) {
+    return Rx.Observable.fromPromise(this.getXml(xml));
+  }
+
+  parseRss({ url, category }) {
+    return this.fetchRss(url)
+      .flatMap(obj => this.parseXml(obj))
+      .map(R.tap(this.logTrace.bind(this)));
+  }
+
+  parseFile() {
     return this.forFile(files)
       .flatMap(file => this.forXml(file))
       .map(this.setXmls.bind(this))
       .map(R.tap(this.logTrace.bind(this)));
-  }
-
-  fetchRss({ url, category }) {
-    return Rx.Observable.fromPromise(this.getRss(url))
-      .map(R.tap(this.logTrace.bind(this)));
-  }
-
-  parseRss({ url, category }) {
   }
 
   logTrace(message) {

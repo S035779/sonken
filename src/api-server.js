@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 const feed = (req, res, next) => {
   const { user, url, category } = req.body;
   const feed = FeedParser.of();
-  feed.fetchRss({ url, category }).subscribe(
+  feed.parseRss({ url, category }).subscribe(
     data => { res.json(data); }
     , err => {
       res.status(500).send({ name: err.name, message: err.message });
@@ -42,7 +42,7 @@ const notImplemented = (req, res, next) => {
   next(new Error('not implemented'));
 };
 
-router.route('/create/note')
+router.route('/note')
 .get(notImplemented)
 .put(notImplemented)
 .post(feed)

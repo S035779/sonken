@@ -11,60 +11,54 @@ const pspid = 'NoteApiClient';
 
 export default {
   request(request, options) {
-    const uri = api + request;
+    this.logInfo(request, options);
     switch(request) {
-      case '/create/note':
-        this.logInfo('create/note', request, options);
+      case 'create/note':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(uri, options
-          , obj => { resolve(obj); }, err => { reject(err); }
+          xhr.postJSON(
+            api + '/note'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
           );
         });
         break;
-      case '/update/note':
-        this.logInfo('update/note', request, options);
+      case 'update/note':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/delete/note':
-        this.logInfo('delete/note', request, options);
+      case 'delete/note':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/create/starred':
-        this.logInfo('create/starred', request, options);
+      case 'create/starred':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/delete/starred':
-        this.logInfo('delete/starred', request, options);
+      case 'delete/starred':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/fetch/notes':
-        this.logInfo('fetch/notes', request, options);
+      case 'fetch/notes':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/fetch/note':
-        this.logInfo('fetch/note', request, options);
+      case 'fetch/note':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
-      case '/fetch/starred':
-        this.logInfo('fetch/starred', request, options);
+      case 'fetch/starred':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
       default:
-        this.logWarn('unknown request', request, options);
         return new Promise((resolve, reject) => {
           reject(options);
         });
@@ -72,20 +66,21 @@ export default {
     }
   },
   fetchMyNotes() {
-    return this.request('/fetch/notes', this.myNotes());
+    return this.request('fetch/notes', this.myNotes());
   },
   fetchStarredNotes() {
-    return this.request('/fetch/starred', notes.filter(note => starred.includes(note.id)));
+    return this.request('fetch/starred', notes.filter(note => starred.includes(note.id)));
   },
   fetchNote(id) {
     const note = notes.find(note => note.id === id);
-    return this.request('/fetch/note',
+    return this.request('fetch/note',
       Object.assign({ starred: starred.includes(note.id) }, note)
     );
   },
   createNote({ url, category }) {
     if(!url)
-      return this.request('/not/url', { message: 'Not Url Registory.' });
+      return this.request('not/url'
+        , { name: 'Warning', message: 'Not Url Registory.' });
     //const id = notes.length + 1;
     //const note = {
     //  id
@@ -97,7 +92,7 @@ export default {
     //, updated: this.getUpdated()
     //};
     //notes.unshift(note);
-    return this.request('/create/note', { url, category });
+    return this.request('create/note', { url, category });
   },
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
@@ -111,19 +106,19 @@ export default {
         , { title, body, updated: this.getUpdated() })
       : note
     );
-    return this.request('/update/note', null);
+    return this.request('update/note', null);
   },
   deleteNote(id) {
     notes = notes.filter(note => note.id !== id);
-    return this.request('/delete/note', null);
+    return this.request('delete/note', null);
   },
   createStar(id) {
     starred.push(id);
-    return this.request('/create/starred', null);
+    return this.request('create/starred', null);
   },
   deleteStar(id) {
     starred = starred.filter(noteId => noteId !== id);
-    return this.request('/delete/starred', null);
+    return this.request('delete/starred', null);
   },
   myNotes() {
     return notes.filter(note => note.user === 'MyUserName');

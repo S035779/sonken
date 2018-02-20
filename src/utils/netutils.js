@@ -5,15 +5,20 @@ import { logs as log }  from './logutils';
  * Simple HTTP GET request
  *
  * @param {string} url - 
- * @param {object} query -
+ * @param {object} options -
  * @param {function} callback -
  */
-const get = function(url, query, callback) {  
+const get = function(url, options, callback) {  
   url = require('url').parse(url);
   let hostname  = url.hostname
     , port      = url.port || 80
-    , path      = url.pathname;
-  if (query) path += '?' + require('querystring').stringify(query);
+    , path      = url.pathname
+    , query     = url.query;
+  if (query) {
+    path += '?' + query;
+  } else if(options) {
+    path += '?' + require('querystring').stringify(options);
+  }
   const client = require('http');
   const req = client.get({
     host: hostname
@@ -67,15 +72,20 @@ module.exports.get = get;
  * Simple HTTP GET request
  *
  * @param {string} url - 
- * @param {object} query -
+ * @param {object} options -
  * @param {function} callback -
  */
-const getJSON = function(url, query, callback) {  
+const getJSON = function(url, options, callback) {  
   url = require('url').parse(url);
   let hostname  = url.hostname
     , port      = url.port || 80
-    , path      = url.pathname;
-  if (query) path += '?' + require('querystring').stringify(query);
+    , path      = url.pathname
+    , query     = url.query;
+  if (query) {
+    path += '?' + query;
+  } else if(options) {
+    path += '?' + require('querystring').stringify(options);
+  }
   const client = require('http');
   const req = client.get({
     host: hostname
@@ -129,15 +139,20 @@ module.exports.getJSON = getJSON;
  * HTTPS GET request
  *
  * @param {string} url - 
- * @param {object} query -
+ * @param {object} options -
  * @param {function} callback -
  */
-const get2 = function(url, query, callback) {  
+const get2 = function(url, options, callback) {  
   url = require('url').parse(url);
   let hostname  = url.hostname
     , port      = url.port || 443
-    , path      = url.pathname;
-  if (query) path += '?' + require('querystring').stringify(query);
+    , path      = url.pathname
+    , query     = url.query;
+  if (query) {
+    path += '?' + query;
+  } else if(options) {
+    path += '?' + require('querystring').stringify(options);
+  }
   const client = require('https');
   const req = client.get({
     host: hostname
@@ -191,15 +206,20 @@ module.exports.get2 = get2;
  * HTTPS GET request
  *
  * @param {string} url - 
- * @param {object} query -
+ * @param {object} options -
  * @param {function} callback -
  */
-const getJSON2 = function(url, query, callback) {  
+const getJSON2 = function(url, options, callback) {  
   url = require('url').parse(url);
   let hostname  = url.hostname
     , port      = url.port || 443
-    , path      = url.pathname;
-  if (query) path += '?' + require('querystring').stringify(query);
+    , path      = url.pathname
+    , query     = url.query;
+  if (query) {
+    path += '?' + query;
+  } else if(options) {
+    path += '?' + require('querystring').stringify(options);
+  }
   const client = require('https');
   const req = client.get({
     host: hostname
