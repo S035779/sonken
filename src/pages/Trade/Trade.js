@@ -5,7 +5,9 @@ import NoteAction from 'Actions/NoteAction';
 import { getStores, getState } from 'Stores';
 
 import { withStyles } from 'material-ui/styles';
-//import RssItemList from 'Components/TradeNoteList/TradeNoteList';
+import TradeSearch from 'Components/TradeSearch/TradeSearch';
+import TradeFilter from 'Components/TradeFilter/TradeFilter';
+import TradeItemList from 'Components/TradeItemList/TradeItemList';
 
 class Trade extends React.Component {
   static getStores() {
@@ -27,20 +29,20 @@ class Trade extends React.Component {
   }
 
   render() {
-    console.log(this.state.notes);
     const { classes } = this.props;
+    const { notes } = this.state;
     return <div className={classes.root}>
-      <h1 className={classes.title}>Trade Items</h1>
-      {/*
-      <RssItemList notes={this.state.notes} />
-      */}
+      <TradeSearch notes={notes} />
+      <TradeFilter notes={notes} />
+      <TradeItemList notes={notes} />
       </div>;
   }
 };
 const styles = {
-  root:   { padding: '10px' },
-  title:  { fontSize: '32px', fontWeight: 'bold', margin: '20px 10px' }
+  root:   { display: 'flex', flexDirection: 'column' }
 };
+Trade.displayName = 'Trade';
+Trade.defaultProps = { notes: null };
 Trade.propTypes = {
   classes: PropTypes.object.isRequired
 };

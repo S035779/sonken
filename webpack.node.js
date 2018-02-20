@@ -15,6 +15,9 @@ var node = {
     ssr: [
       './ssr-server.js',
     ],
+    api: [
+      './api-server.js',
+    ]
   },
   plugins: [
     new ManifestPlugin({ fileName: 'manifest.node.json' }),

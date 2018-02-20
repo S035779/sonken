@@ -8,7 +8,7 @@ import { Input, Button, Checkbox, Typography, TextField }
 import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 
-class BidsFilter extends React.Component {
+class TradeFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -172,9 +172,9 @@ const styles = theme => ({
 , text:         { marginLeft: theme.spacing.unit
                 , marginRight: theme.spacing.unit }
 });
-BidsFilter.displayName = 'BidsFilter';
-BidsFilter.defaultProps = { note: null };
-BidsFilter.propTypes = {
+TradeFilter.displayName = 'TradeFilter';
+TradeFilter.defaultProps = { note: null };
+TradeFilter.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(BidsFilter);
+export default withStyles(styles)(TradeFilter);

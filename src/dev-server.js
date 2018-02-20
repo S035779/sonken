@@ -26,8 +26,8 @@ app.use(webpackDevMiddleware(compiler, {
   publicPath: config.output.publicPath
 }));
 app.use(webpackHotMiddleware(compiler));
-app.use('/', proxy(url.parse('http://localhost:8081')));
-
+app.use('/api', proxy(url.parse('http://localhost:8082/api')));
+app.use('*', proxy(url.parse('http://localhost:8081')));
 https.createServer(ssl_keyset, app).listen(https_port, https_host, () => {
   log.info(`Secure HTTP Server listening on ${https_host}:${https_port}`);
 });

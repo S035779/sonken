@@ -7,7 +7,7 @@ import { getStores, getState } from 'Stores';
 import { withStyles } from 'material-ui/styles';
 import BidsSearch from 'Components/BidsSearch/BidsSearch';
 import BidsFilter from 'Components/BidsFilter/BidsFilter';
-import BidsItemList from 'Components/StarredNoteList/StarredNoteList';
+import BidsItemList from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
@@ -32,9 +32,9 @@ class Bids extends React.Component {
     const { classes } = this.props;
     const { notes } = this.state;
     return <div className={classes.root}>
-      <BidsSearch />
+      <BidsSearch notes={notes}/>
       <BidsFilter notes={notes}/>
-      <BidsItemList notes={notes} />
+      <BidsItemList notes={notes}/>
     </div>;
   }
 };

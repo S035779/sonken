@@ -27,14 +27,30 @@ class Dashboard extends React.Component {
     Dashboard.prefetch(this.props);
   }
 
+  handleSubmit(url, category) {
+    NoteAction.create({ url, category });
+  }
+
+  handlePages(pages, page) {
+    NoteAction.page({ pages, page })
+  }
+
+  handleUpload(filename) {
+    NoteAction.upload({ filename });
+  }
+
+  handleDownload(file) {
+    NoteAction.download({ filename });
+  }
+
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
   }
 
   render() {
     this.logInfo('render', this.state);
-    const {classes, match, route} = this.props;
-    const { notes } = this.state;
+    const { classes, match, route } = this.props;
+    const { notes, pages, page } = this.state;
     const itemId = Number(match.params.id);
     const noteCategory =
       match.params.category ? match.params.category : 'marchant';
@@ -42,7 +58,13 @@ class Dashboard extends React.Component {
       notes ? notes.filter(note => note.category === noteCategory) : [];
     const item = notes.find(note => note.id === itemId);
     return <div className={classes.root}>
-        <RssSearch />
+        <RssSearch
+          category={noteCategory}
+          pages={pages} page={page} 
+          onSubmit={this.handleSubmit.bind(this)}
+          onPages={this.handlePages.bind(this)}
+          onUpload={this.handleUpload.bind(this)}
+          onDownload={this.handleDownload.bind(this)} />
       <div className={classes.body}>
         <div className={classes.noteList}>
           <RssButtons />

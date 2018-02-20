@@ -8,50 +8,85 @@ import { FormControl } from 'material-ui/Form';
 import { MenuItem } from 'material-ui/Menu';
 
 class RssSearch extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      url: ''
+    , filename:  ''
+    , pages: props.pages
+    , page: props.page
+    };
+  }
+
   handleSubmit() {
-    this.props.onSubmit();
+    const { url } = this.state;
+    const { category } = this.props;
+    this.logInfo('handleSubmit', url);
+    this.props.onSubmit(url, category);
   }
 
   handleUpload() {
-    this.props.onUpload();
+    const { filename } = this.state;
+    this.logInfo('handleUpload', filename);
+    this.props.onUpload(filename);
   }
 
   handleDownload() {
-    this.props.onDownload();
+    const { filename } = this.state;
+    this.logInfo('handleDownload', filename);
+    this.props.onDownload(filename);
   }
 
-  handleChangeText(event) {
-    this.props.onChangeText(event.target.value);
+  handleChangeText(name, event) {
+    this.logInfo('handleChangeText', name);
+    switch(name) {
+      case 'url':
+        this.setState({ url: event.target.value });
+        break;
+      default:
+        break;
+    }
   }
 
-  handleChangeSelect(event) {
-    this.props.onChangeSelect(event.target.value);
+  handleChangeSelect(name, event) {
+    this.logInfo('handleChangeSelect', name);
+    switch(name) {
+      case 'page':
+        this.setState({ page: event.target.value });
+        break;
+      default:
+        break;
+    }
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
   render() {
-    const {classes, textValue, selectValue} = this.props;
+    const {classes } = this.props;
+    const { url, pages, page, filename } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{213}件中{20}件表示
+          全{pages}件中{page < pages ? page : pages}件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select value={20}
-          onChange={this.handleChangeSelect}
-          inputProps={{name: 'results', id: 'results'}}>
-          <MenuItem value=""><em>None</em></MenuItem>
+        <Select
+          value={page}
+          onChange={this.handleChangeSelect.bind(this, 'page')}>
+          <MenuItem value={pages}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>
-          <MenuItem value={1000}>ALL</MenuItem>
         </Select>
       </FormControl>
       <FormControl className={classes.inputText}>
         <InputLabel htmlFor="url">URL</InputLabel>
-        <Input id="url" value={textValue}
-          onChange={this.handleChangeText.bind(this)}/>
+        <Input id="url" value={url}
+          onChange={this.handleChangeText.bind(this, 'url')}/>
       </FormControl>
       <div className={classes.buttons}>
         <Button variant="raised"
@@ -61,12 +96,12 @@ class RssSearch extends React.Component {
         <div className={classes.space} />
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleUpload.bind(this)}>
-          CSV アップロード</Button>
-        <Button variant="raised"
-          className={classes.button}
           onClick={this.handleDownload.bind(this)}>
           CSV ダウンロード</Button>
+        <Button variant="raised"
+          className={classes.button}
+          onClick={this.handleUpload.bind(this)}>
+          CSV アップロード</Button>
       </div>
     </div>;
   }

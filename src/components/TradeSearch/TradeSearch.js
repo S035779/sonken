@@ -7,7 +7,7 @@ import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 import { MenuItem } from 'material-ui/Menu';
 
-class BidsSearch extends React.Component {
+class TradeSearch extends React.Component {
   handleDownload() {
     this.props.onDownload();
   }
@@ -71,9 +71,9 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-BidsSearch.displayName = 'BidsSearch';
-BidsSearch.defaultProps = { notes: null };
-BidsSearch.propTypes = {
+TradeSearch.displayName = 'TradeSearch';
+TradeSearch.defaultProps = { notes: null };
+TradeSearch.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(BidsSearch);
+export default withStyles(styles)(TradeSearch);

@@ -2,8 +2,9 @@ import fs from 'fs';
 import xml2js from 'xml2js';
 import R from 'ramda';
 import Rx from 'rx';
-import std from './stdutils';
-import { logs as log } from './logutils';
+import std from 'Utilities/stdutils';
+import net from 'Utilities/netutils';
+import { logs as log } from 'Utilities/logutils';
 
 const pspid = 'FeedParser';
 
@@ -30,6 +31,14 @@ class FeedParser {
 
   request(req, opt) {
     switch(req) {
+      case 'rss':
+        return new Promise((resolve, reject) => {
+          net.get2(opt.url, {}, (err, head, body) => {
+            if(err) reject(err);
+            resolve(body);
+          });
+        });
+        break;
       case 'file':
         return new Promise((resolve, reject) => {
           fs.readFile(path + opt.file, { encoding: 'utf-8' }
@@ -51,6 +60,10 @@ class FeedParser {
       default:
         break;
     }
+  }
+
+  getRss(url) {
+    return this.request('rss', { url });
   }
 
   getFile(file) {
@@ -76,6 +89,14 @@ class FeedParser {
       .flatMap(file => this.forXml(file))
       .map(this.setXmls.bind(this))
       .map(R.tap(this.logTrace.bind(this)));
+  }
+
+  fetchRss({ url, category }) {
+    return Rx.Observable.fromPromise(this.getRss(url))
+      .map(R.tap(this.logTrace.bind(this)));
+  }
+
+  parseRss({ url, category }) {
   }
 
   logTrace(message) {

@@ -6,6 +6,8 @@ export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
       notes: []
+    , pages: 0
+    , page: 0
     };
   }
   

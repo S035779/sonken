@@ -24,8 +24,10 @@ export default {
       dispatch({ type: 'note/fetch', note });
     });
   },
-  create() {
-    return NoteApiClient.createNote().then(note => {
+  create({ url, category }) {
+    return NoteApiClient
+    .createNote({ url, category })
+    .then(note => {
       dispatch({ type: 'note/create', note });
     });
   },
