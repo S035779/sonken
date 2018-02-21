@@ -38,6 +38,10 @@ class RssList extends React.Component {
     else newChecked.splice(currentIndex, 1);
     this.setState({ checked: newChecked });
   }
+  
+  componentDidUpdate(prevProps, prevState) {
+    NoteAction.selected(this.state.cheched);
+  }
 
   handleChangeTitle(id, title) {
     console.log('>>> handleChangeTitle:', title);

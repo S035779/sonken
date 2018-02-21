@@ -14,7 +14,14 @@ const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?l
 class RssForms extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { note: props.note };
+    const note = props.note;
+    this.state = {
+      note: props.note
+    , asin: note.asin
+    , price: note.price
+    , bidsprice: note.bidsprice
+    , body: note.body
+    };
   }
 
   componentWillReceiveProps(props) {
@@ -23,26 +30,37 @@ class RssForms extends React.Component {
   }
 
   handleSave() {
-    const {id, asin, price, bidsprice, body} = this.state.note;
-    NoteAction.update(id, {asin, price, bidsprice, body});
+    const { id, asin, price, bidsprice, body } = this.state.note;
+    NoteAction.update(id, { asin, price, bidsprice, body });
   }
 
   handleChangeInput(name, event) {
     const { note } = this.state;
-    const value = event.target.value;
-    let newItem = {};
+    let newState = {};
+    let newNote = {};
     switch (name) {
-      case 'asin':  newItem = { asin:   value };
+      case 'asin':
+        const asin = event.target.value
+        newNote = Object.assign({}, note, { asin });
+        newState = { note: newNote, asin };
         break;
-      case 'price': newItem = { price:  value };
+      case 'price':
+        const price = event.target.value
+        newNote = Object.assign({}, note, { price });
+        newState = { note: newNote, price };
         break;
-      case 'bidsprice':  newItem = { bidsprice:   value };
+      case 'bidsprice':
+        const bidsprice = event.target.value
+        newNote = Object.assign({}, note, { bidsprice });
+        newState = { note: newNote, bidsprice };
         break;
-      case 'body':  newItem = { body:   value };
+      case 'body':
+        const body = event.target.value
+        newNote = Object.assign({}, note, { body });
+        newState = { note: newNote, body };
         break;
     }
-    const newNote = Object.assign({}, note, newItem);
-    this.setState({ note: newNote });
+    this.setState(newState);
   }
 
   logInfo(name, info) {
@@ -66,7 +84,8 @@ class RssForms extends React.Component {
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="asin">ASIN</InputLabel>
-          <Input id="asin" value={asin}
+          <Input id="asin"
+            value={this.state.asin}
             onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
         <div className={classes.buttons}>
@@ -100,14 +119,16 @@ class RssForms extends React.Component {
           <div className={classes.edit}>
             <FormControl className={classes.text}>
               <InputLabel htmlFor="price">想定売値</InputLabel>
-              <Input id="price" value={price}
+              <Input id="price"
+                value={this.state.price}
                 onChange={this.handleChangeInput.bind(this, 'price')}/>
             </FormControl>
           </div>
           <div className={classes.edit}>
             <FormControl className={classes.text}>
               <InputLabel htmlFor="bidsprice">最高入札額</InputLabel>
-              <Input id="bidsprice" value={bidsprice}
+              <Input id="bidsprice"
+                value={this.state.bidsprice}
                 onChange={this.handleChangeInput.bind(this,'bidsprice')}/>
             </FormControl>
           </div>
@@ -115,7 +136,8 @@ class RssForms extends React.Component {
         <div className={classes.textarea}>
         <TextField id="body" label="自由入力欄" multiline
           className={classes.field} rows="4"
-          fullWidth margin="none" value={body}
+          fullWidth margin="none"
+          value={this.state.body}
           onChange={this.handleChangeInput.bind(this, 'body')}/>
         </div>
       </div>

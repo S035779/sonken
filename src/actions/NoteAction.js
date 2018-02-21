@@ -8,6 +8,11 @@ export default {
     dispatch({ type: 'note/rehydrate', state: state.noteStore });
     dispatch({ type: 'note/rehydrate/my', state: state.dashboardStore });
   },
+  fetchNotes() {
+    return NoteApiClient.fetchNotes().then(notes => {
+      dispatch({ type: 'note/fetch/my', notes });
+    });
+  },
   fetchMyNotes() {
     return NoteApiClient.fetchMyNotes().then(notes => {
       dispatch({ type: 'note/fetch/my', notes });
@@ -31,16 +36,42 @@ export default {
       dispatch({ type: 'note/create', note });
     });
   },
-  update(id, { title, body }) {
-    return NoteApiClient.updateNote(id, { title, body })
+  update(id, { title, asin, price, bidsprice, body }) {
+    return NoteApiClient.updateNote(id
+      , { title, asin, price, bidsprice, body })
     .then(() => {
-      dispatch({ type: 'note/update', id, note: { title, body } });
+      dispatch({ type: 'note/update', id
+        , note: { title, asin, price, bidsprice, body } });
     });
   },
-  delete(id) {
-    return NoteApiClient.deleteNote(id)
-    .then(() => {
-      dispatch({ type: 'note/delete', id });
+  delete(ids) {
+    return NoteApiClient.deleteNotes(ids).then(() => {
+      dispatch({ type: 'note/delete', ids });
+    });
+  },
+  read(ids) {
+    return NoteApiClient.readNotes(ids).then(() => {
+      dispatch({ type: 'note/select', ids });
+    });
+  },
+  select(ids) {
+    return NoteApiClient.selectNotes(ids).then(() => {
+      dispatch({ type: 'note/select', ids });
+    });
+  },
+  upload(filename) {
+    return NoteApiClient.uploadNotes(filename).then(notes => {
+      dispatch({ type: 'note/upload', notes });
+    });
+  },
+  download(filename) {
+    return NoteApiClient.downloadNotes(filename).then(notes => {
+      dispatch({ type: 'note/download', notes });
+    });
+  },
+  page(pages, page) {
+    return NoteApiClient.pagenation(pages, page).then(notes => {
+      dispatch({ type: 'note/pagenation', notes, pages, page });
     });
   }
 };

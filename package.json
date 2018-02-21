@@ -9,6 +9,7 @@
     "watch": "webpack --config webpack.development.js",
     "start:ssr": "node dist/ssr.node.js",
     "start:api": "node dist/api.node.js",
+    "start:node": "npm-run-all --parallel start:api start:ssr",
     "build:node": "webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js --watch --progress",
     "start:all": "npm-run-all --parallel start:api start:ssr start",

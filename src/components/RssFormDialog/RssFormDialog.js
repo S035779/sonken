@@ -18,7 +18,8 @@ class RssFormDialog extends React.Component {
   }
 
   handleSubmit() {
-    this.props.onSubmit(this.state);
+    const { title } = this.state;
+    this.props.onSubmit(title);
     this.props.onClose();
   }
 

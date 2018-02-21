@@ -20,11 +20,12 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(props) {
-    return NoteAction.fetchMyNotes();
+    return NoteAction.fetchNotes();
   }
 
   componentDidMount() {
-    Dashboard.prefetch(this.props);
+    NoteAction.fetchMyNotes();
+    //Dashboard.prefetch(this.props);
   }
 
   handleSubmit(url, category) {
@@ -41,6 +42,18 @@ class Dashboard extends React.Component {
 
   handleDownload(file) {
     NoteAction.download({ filename });
+  }
+
+  handleSelectAll() {
+    NoteAction.select();
+  }
+
+  handleSelectRead() {
+    NoteAction.read();
+  }
+
+  handleSelectDelete() {
+    NoteAction.delete(id);
   }
 
   logInfo(name, info) {
@@ -67,11 +80,18 @@ class Dashboard extends React.Component {
           onDownload={this.handleDownload.bind(this)} />
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <RssButtons />
+          <RssButtons
+            onRead={this.handleSelectRead.bind(this)}
+            onDelete={this.handleSelectDelete.bind(this)}
+            onSelect={this.handleSelectAll.bind(this)} />
           <RssList notes={items} selectedNoteId={itemId}/>
         </div>
         <div className={classes.noteEdit}>
-          {route.routes ? renderRoutes(route.routes, {note: item}) : null}
+          {
+            route.routes
+            ? renderRoutes(route.routes, { note: item })
+            : null
+          }
         </div>
       </div>
     </div>;
