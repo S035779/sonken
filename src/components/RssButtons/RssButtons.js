@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import NoteAction from 'Actions/NoteAction';
 
 import { withStyles } from 'material-ui/styles';
 import { Button, Checkbox } from 'material-ui';
@@ -11,22 +12,38 @@ class RssButtons extends React.Component {
   }
 
   handleChangeCheckbox(event) {
-    this.setState({ checked: event.target.checked });
-    this.props.onSelect();
+    const checked = event.target.checked;
+    this.setState({ checked });
+
+    const { notes } = this.props;
+    const ids = checked ? notes.map(note => note.id) : [];
+    this.logInfo('handleChangeCheckbox', ids);
+    NoteAction.select(ids);
   }
 
   handleRead() {
-    this.props.onRead();
+    const { selectedNoteId } = this.props;
+    this.logInfo('handleRead', selectedNoteId);
+    NoteAction.read(selectedNoteId);
   }
 
   handleDelete() {
-    this.props.onDelete();
+    const { selectedNoteId } = this.props;
+    this.logInfo('handleDelete', selectedNoteId);
+    if(window.confirm('Are you sure?')) {
+      NoteAction.delete(selectedNoteId);
+    }
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
   render() {
-    const {classes} = this.props;
+    const { classes } = this.props;
+    const { checked } = this.state;
     return <div className={classes.noteButtons}>
-      <Checkbox checked={this.state.checked}
+      <Checkbox checked={checked}
         className={classes.checkbox}
         onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />

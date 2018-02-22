@@ -54,6 +54,26 @@ export default {
           );
         });
         break;
+      case 'pagenation/notes':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/notes'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'select/notes/all':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
+      case 'select/notes':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -124,13 +144,7 @@ export default {
     //notes.unshift(note);
     return this.request('create/note', { user, url, category });
   },
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  },
-  logWarn(name, info) {
-    console.warn('<<< Warn:', name, info);
-  },
-  updateNote(id, { title, asin, name, price, bidsprice, body }) {
+  updateNote({ id, title, asin, name, price, bidsprice, body }) {
     //notes = notes.map(note => note.id === id
     //  ? Object.assign({}, note
     //    , { title, body, updated: this.getUpdated() })
@@ -140,6 +154,17 @@ export default {
     const data = { title, asin, name, price, bidsprice, body, updated };
     return this.request('update/note', { user, id, data });
   },
+  pagenation({ maxNumber, number, perPage }) {
+    return this.request('pagenation/notes', {
+      user, maxNumber, number, perPage
+    });
+  },
+  //selectAll(selected) {
+  //  return this.request('select/notes/all', { user });
+  //},
+  selectNotes(ids) {
+    return this.request('select/notes', { user, ids });
+  },
   deleteNotes(ids) {
     //notes = notes.filter(note => note.id !== id);
     return this.request('delete/note', { user, ids });
@@ -147,17 +172,11 @@ export default {
   readNotes(ids) {
     return this.request('read/note', { user, ids });
   },
-  selectNotes(ids) {
-    return this.request('select/note', { user, ids });
-  },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });
   },
   downloadNotes(fileName) {
     return this.request('download/note', { user, filename });
-  },
-  pagenation(pages, page) {
-    return this.request('pagenation/note', { user, pages, page });
   },
   createStar(id) {
     starred.push(id);
@@ -166,6 +185,12 @@ export default {
   deleteStar(id) {
     starred = starred.filter(noteId => noteId !== id);
     return this.request('delete/starred', null);
+  },
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
+  },
+  logWarn(name, info) {
+    console.warn('<<< Warn:', name, info);
   }
   //myNotes() {
   //  return notes.filter(note => note.user === 'MyUserName');

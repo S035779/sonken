@@ -31,7 +31,7 @@ class RssForms extends React.Component {
 
   handleSave() {
     const { id, asin, price, bidsprice, body } = this.state.note;
-    NoteAction.update(id, { asin, price, bidsprice, body });
+    NoteAction.update({ id, asin, price, bidsprice, body });
   }
 
   handleChangeInput(name, event) {

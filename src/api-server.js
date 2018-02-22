@@ -28,9 +28,9 @@ app.use(bodyParser.json());
 const feed = FeedParser.of();
 
 const deleteNote = (req, res, next) => {
-  const { user, id } = req.body;
-  feed.deleteNote({ user, id }).subscribe(
-    obj => { res.status(200).send(obj); }
+  const { user, ids } = req.body;
+  feed.deleteNote({ user, ids }).subscribe(
+    obj => { res.json(obj); }
   , err => {
     res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);

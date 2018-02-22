@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import NoteAction from 'Actions/NoteAction';
 
 import { withStyles } from 'material-ui/styles';
 import { Select, Input, Button, Typography } from 'material-ui';
@@ -11,30 +12,45 @@ class RssSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: ''
-    , filename:  ''
-    , pages: props.pages
-    , page: props.page
+      url:      ''
+    , filename: ''
+    , maxNumber:  props.notePage.maxNumber
+    , number:     props.notePage.number
+    , perPage:    props.notePage.perPage
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { noteNumber, notePage } = nextProps;
+    const maxNumber = Math.ceil(noteNumber / notePage.perPage);
+    const newState = {
+      maxNumber:  maxNumber
+    , number:     1
+    , perPage:    notePage.perPage
+    };
+    this.setState(Object.assign({}, this.state, newState));
+  }
+
+  componentDidUpdate() {
   }
 
   handleSubmit() {
     const { url } = this.state;
     const { category } = this.props;
     this.logInfo('handleSubmit', url);
-    this.props.onSubmit(url, category);
+    NoteAction.create({ url, category });
   }
 
   handleUpload() {
     const { filename } = this.state;
     this.logInfo('handleUpload', filename);
-    this.props.onUpload(filename);
+    NoteAction.upload(filename);
   }
 
   handleDownload() {
     const { filename } = this.state;
     this.logInfo('handleDownload', filename);
-    this.props.onDownload(filename);
+    NoteAction.download(filename);
   }
 
   handleChangeText(name, event) {
@@ -49,14 +65,17 @@ class RssSearch extends React.Component {
   }
 
   handleChangeSelect(name, event) {
-    this.logInfo('handleChangeSelect', name);
+    const { maxNumber, number } = this.state;
+    this.logInfo('handleChangeSelect', event.target.value);
+    let newState = {};
     switch(name) {
       case 'page':
-        this.setState({ page: event.target.value });
-        break;
-      default:
+        const perPage = event.target.value;
+        NoteAction.pagenation({ maxNumber, number, perPage })
+        newState = { perPage };
         break;
     }
+    this.setState(newState);
   }
 
   logInfo(name, info) {
@@ -64,20 +83,21 @@ class RssSearch extends React.Component {
   }
 
   render() {
-    const {classes } = this.props;
-    const { url, pages, page, filename } = this.state;
+    const { classes, noteNumber } = this.props;
+    const { url, maxNumber, number, perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{pages}件中{page < pages ? page : pages}件表示
+          全{noteNumber}件中{
+            noteNumber < perPage ? noteNumber : perPage
+          }件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select
-          value={page}
+        <Select value={perPage}
           onChange={this.handleChangeSelect.bind(this, 'page')}>
-          <MenuItem value={pages}><em>All</em></MenuItem>
+          <MenuItem value={noteNumber}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>

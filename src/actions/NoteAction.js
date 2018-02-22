@@ -30,32 +30,35 @@ export default {
     });
   },
   create({ url, category }) {
-    return NoteApiClient
-    .createNote({ url, category })
-    .then(note => {
+    return NoteApiClient.createNote(
+    { url, category }).then(note => {
       dispatch({ type: 'note/create', note });
     });
   },
-  update(id, { title, asin, price, bidsprice, body }) {
-    return NoteApiClient.updateNote(id
-      , { title, asin, price, bidsprice, body })
-    .then(() => {
+  update({ id, title, asin, price, bidsprice, body }) {
+    return NoteApiClient.updateNote(
+    { id, title, asin, price, bidsprice, body }).then(() => {
       dispatch({ type: 'note/update', id
         , note: { title, asin, price, bidsprice, body } });
     });
   },
-  delete(ids) {
-    return NoteApiClient.deleteNotes(ids).then(() => {
-      dispatch({ type: 'note/delete', ids });
-    });
-  },
-  read(ids) {
-    return NoteApiClient.readNotes(ids).then(() => {
-      dispatch({ type: 'note/select', ids });
+  pagenation(page) {
+    return NoteApiClient.pagenation(page).then(notes => {
+      dispatch({ type: 'note/pagenation', notes, page });
     });
   },
   select(ids) {
     return NoteApiClient.selectNotes(ids).then(() => {
+      dispatch({ type: 'note/select', ids });
+    });
+  },
+  delete(ids) {
+    return NoteApiClient.deleteNotes(ids).then(notes => {
+      dispatch({ type: 'note/delete', ids: [], notes });
+    });
+  },
+  read(ids) {
+    return NoteApiClient.readNotes(ids).then(() => {
       dispatch({ type: 'note/select', ids });
     });
   },
@@ -67,11 +70,6 @@ export default {
   download(filename) {
     return NoteApiClient.downloadNotes(filename).then(notes => {
       dispatch({ type: 'note/download', notes });
-    });
-  },
-  page(pages, page) {
-    return NoteApiClient.pagenation(pages, page).then(notes => {
-      dispatch({ type: 'note/pagenation', notes, pages, page });
     });
   }
 };

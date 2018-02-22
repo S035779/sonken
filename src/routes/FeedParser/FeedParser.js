@@ -19,9 +19,6 @@ const files = [
  * FeedPaser class.
  *
  * @constructor
- * @param {string} length - Length of shippment.
- * @param {string} height - Weight of shippment.
- * @param {string} from - Shipping source.
  */
 class FeedParser {
   constructor() {
@@ -68,10 +65,23 @@ class FeedParser {
         break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          const isNotEven = obj =>
-            obj.user === options.user && obj.id !== options.id; 
-          notes = R.filter(isNotEven, notes);
-          resolve('OK');
+          const isNotId = (obj, opt) =>
+            obj.id !== opt.id && obj.user === opt.user;
+          const cryIsNotId = R.curry(isNotId);
+          //const isNotIds = obj => {
+          //  return R.find(cryIsNotId(obj), options.ids) ? true : false;
+          //};
+          let objs=[];
+          for(let i=0; i<options.ids.length; i++) {
+              R.filter(obj =>
+                obj.id !== options.ids[i] && obj.user === options.user
+              , notes);
+          }
+          notes = R.filter(isNotIds, notes);
+
+          //const isEven = obj => obj.user === options.user;
+          //const objs = R.filter(isEven, notes);
+          //resolve(objs);
         });
         break;
       case 'fetch/rss':
@@ -111,8 +121,8 @@ class FeedParser {
     }
   }
 
-  removeNote(user, id) {
-    return this.request('delete/note', { user, id });
+  removeNote(user, ids) {
+    return this.request('delete/note', { user, ids });
   }
 
   replaceNote(user, id, data) {
@@ -185,8 +195,8 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
   }
 
-  deleteNote({ user, id }) {
-    return Rx.Observable.fromPromise(this.removeNote(user, id));
+  deleteNote({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeNote(user, ids));
   }
 
   parseFile({ user, file, category }) {

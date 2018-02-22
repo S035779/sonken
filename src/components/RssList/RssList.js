@@ -12,15 +12,21 @@ import RssFormDialog from 'Components/RssFormDialog/RssFormDialog';
 class RssList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { checked: [], opened: [], notes: props.notes };
+    this.state = {
+      checked:  props.selectedNoteId
+    , opened:   []
+    , notes:    props.notes
+    };
   }
 
   componentWillReceiveProps(props) {
-    this.setState({ notes: props.notes });
+    const checked = props.selectedNoteId;
+    const notes = props.notes;
+    this.setState({ checked, notes });
   }
 
   handleChangeDialog(id, event) {
-    console.log('>>> handleChangeDialog:', id);
+    this.logInfo('handleChangeDialog', id);
     const { opened } = this.state;
     const currentIndex = opened.indexOf(id);
     const newOpened = [...opened];
@@ -30,39 +36,36 @@ class RssList extends React.Component {
   }
 
   handleChangeCheckbox(id, event) {
-    console.log('>>> handleChangeCheckbox:', id);
+    this.logInfo('handleChangeCheckbox', id);
     const { checked } = this.state;
     const currentIndex = checked.indexOf(id);
     const newChecked = [...checked];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
     this.setState({ checked: newChecked });
+    NoteAction.select(newChecked);
   }
   
-  componentDidUpdate(prevProps, prevState) {
-    NoteAction.selected(this.state.cheched);
-  }
-
   handleChangeTitle(id, title) {
-    console.log('>>> handleChangeTitle:', title);
+    this.logInfo('handleChangeTitle', title);
     const { notes } = this.state;
     const currentNote = notes.filter(note => note.id === id);
     const newNote = Object.assign({}, currentNote, { title });
     const newNotes = notes.map(note => note.id === id ? newNote : note);
     this.setState({ note: newNotes});
-    NoteAction.update(id, { title });
+    NoteAction.update({ id, title });
   }
 
-  handleDelete(id) {
-    if(window.confirm('Are you sure?')) {
-      NoteAction.delete(this.state.note.id);
-    }
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
   renderItem(note) {
-    const {classes} = this.props;
-    const textClass ={
-      primary: classes.primary, secondary: classes.secondary };
+    const { classes } = this.props;
+    const textClass = {
+      primary:    classes.primary
+    , secondary:  classes.secondary
+    };
     const linkTo = `/${note.category}/${note.id}/edit`;
     return <div key={note.id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
@@ -96,9 +99,9 @@ class RssList extends React.Component {
   render() {
     const { classes } = this.props;
     const { notes } = this.state;
-    const items = notes.map(note => this.renderItem(note));
+    const renderItems = notes.map(note => this.renderItem(note));
     return <List className={classes.noteList}>
-      {items}
+      {renderItems}
     </List>;
   }
 };

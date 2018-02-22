@@ -25,35 +25,6 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     NoteAction.fetchMyNotes();
-    //Dashboard.prefetch(this.props);
-  }
-
-  handleSubmit(url, category) {
-    NoteAction.create({ url, category });
-  }
-
-  handlePages(pages, page) {
-    NoteAction.page({ pages, page })
-  }
-
-  handleUpload(filename) {
-    NoteAction.upload({ filename });
-  }
-
-  handleDownload(file) {
-    NoteAction.download({ filename });
-  }
-
-  handleSelectAll() {
-    NoteAction.select();
-  }
-
-  handleSelectRead() {
-    NoteAction.read();
-  }
-
-  handleSelectDelete() {
-    NoteAction.delete(id);
   }
 
   logInfo(name, info) {
@@ -63,33 +34,25 @@ class Dashboard extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes, match, route } = this.props;
-    const { notes, pages, page } = this.state;
-    const itemId = Number(match.params.id);
-    const noteCategory =
-      match.params.category ? match.params.category : 'marchant';
-    const items =
-      notes ? notes.filter(note => note.category === noteCategory) : [];
-    const item = notes.find(note => note.id === itemId);
+    const { notes, page, ids } = this.state;
+    const _id = Number(match.params.id);
+    const category = match.params.category
+      ? match.params.category : 'marchant';
+    const _notes = notes
+      ? notes.filter(note => note.category === category) : [];
+    const _note = notes.find(note => note.id === _id);
     return <div className={classes.root}>
-        <RssSearch
-          category={noteCategory}
-          pages={pages} page={page} 
-          onSubmit={this.handleSubmit.bind(this)}
-          onPages={this.handlePages.bind(this)}
-          onUpload={this.handleUpload.bind(this)}
-          onDownload={this.handleDownload.bind(this)} />
+        <RssSearch category={category}
+          noteNumber={_notes.length} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <RssButtons
-            onRead={this.handleSelectRead.bind(this)}
-            onDelete={this.handleSelectDelete.bind(this)}
-            onSelect={this.handleSelectAll.bind(this)} />
-          <RssList notes={items} selectedNoteId={itemId}/>
+          <RssButtons notes={_notes} selectedNoteId={ids} />
+          <RssList notes={_notes} selectedNoteId={ids}/>
         </div>
         <div className={classes.noteEdit}>
           {
             route.routes
-            ? renderRoutes(route.routes, { note: item })
+            ? renderRoutes(route.routes, { note: _note })
             : null
           }
         </div>
