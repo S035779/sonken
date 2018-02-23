@@ -27,10 +27,34 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
-const deleteNote = (req, res, next) => {
+const deleteRead = (req, res, next) => {
   const { user, ids } = req.body;
-  feed.deleteNote({ user, ids }).subscribe(
+  feed.deleteRead({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete Read.'); }  
+  );
+};
+
+const createRead = (req, res, next) => {
+  const { user, ids } = req.body;
+  feed.createRead({ user, ids }).subscribe(
     obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to create Read.'); }  
+  );
+};
+
+const deleteNote = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteNote({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
   , err => {
     res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
@@ -63,6 +87,18 @@ const fetchNote = (req, res, next) => {
   );
 };
 
+const fetchReadedNotes = (req, res, next) => {
+  const { user } = req.query;
+  feed.fetchReadedNotes({ user }).subscribe(
+    obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to fetch Readed.'); }  
+  );
+};
+
 const fetchNotes = (req, res, next) => {
   const { user } = req.query;
   feed.fetchNotes({ user }).subscribe(
@@ -91,6 +127,12 @@ const notImplemented = (req, res, next) => {
   next(new Error('not implemented'));
 };
 
+router.route('/readed')
+.get(fetchReadedNotes)
+.put(notImplemented)
+.post(createRead)
+.delete(deleteRead);
+
 router.route('/notes')
 .get(fetchNotes)
 .put(notImplemented)
@@ -99,21 +141,9 @@ router.route('/notes')
 
 router.route('/note')
 .get(fetchNote)
-.put(notImplemented)
+.put(updateNote)
 .post(createNote)
-.delete(notImplemented);
-
-router.route('/note/update')
-.get(notImplemented)
-.put(notImplemented)
-.post(updateNote)
-.delete(notImplemented);
-
-router.route('/note/delete')
-.get(notImplemented)
-.put(notImplemented)
-.post(deleteNote)
-.delete(notImplemented);
+.delete(deleteNote);
 
 app.use('/api', router);
 http.createServer(app).listen(http_port, http_host, () => {

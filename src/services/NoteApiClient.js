@@ -1,7 +1,5 @@
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
-//let notes = require('Services/data');
-//let starred = [1, 2, 3];
 let user = 'MyUserName';
 
 const env = process.env.NODE_ENV || 'development';
@@ -34,6 +32,16 @@ export default {
           );
         });
         break;
+      case 'fetch/readed':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/readed'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -46,8 +54,8 @@ export default {
         break;
       case 'update/note':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/note/update'
+          xhr.putJSON(
+            api + '/note'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -76,27 +84,32 @@ export default {
         break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/note/delete'
+          xhr.deleteJSON(
+            api + '/note'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
         break;
-      case 'create/starred':
+      case 'create/readed':
         return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
+          xhr.postJSON(
+            api + '/readed/create'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
         });
         break;
-      case 'delete/starred':
+      case 'delete/readed':
         return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
-        });
-        break;
-      case 'fetch/starred':
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
+          xhr.postJSON(
+            api + '/readed/delete'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
         });
         break;
       case 'prefetch/notes':
@@ -112,44 +125,25 @@ export default {
     }
   },
   fetchNotes() {
-    return this.request('prefetch/notes', []);
+    const notes = [];
+    return this.request('prefetch/notes', notes);
   },
   fetchMyNotes() {
     return this.request('fetch/notes', { user });
   },
-  fetchStarredNotes() {
-    return this.request('fetch/starred', notes.filter(note => starred.includes(note.id)));
+  fetchReadedNotes() {
+    return this.request('fetch/readed', { user });
   },
   fetchNote(id) {
-    //const note = notes.find(note => note.id === id);
-    //return this.request('fetch/note',
-    //  Object.assign({ starred: starred.includes(note.id) }, note)
-    //);
     return this.request('fetch/note', { user, id });
   },
   createNote({ url, category }) {
     if(!url)
       return this.request('not/url'
         , { name: 'Warning', message: 'Not Url Registory.' });
-    //const id = notes.length + 1;
-    //const note = {
-    //  id
-    //, url
-    //, category
-    //, title: 'Untitled'
-    //, body: ''
-    //, user
-    //, updated: this.getUpdated()
-    //};
-    //notes.unshift(note);
     return this.request('create/note', { user, url, category });
   },
   updateNote({ id, title, asin, name, price, bidsprice, body }) {
-    //notes = notes.map(note => note.id === id
-    //  ? Object.assign({}, note
-    //    , { title, body, updated: this.getUpdated() })
-    //  : note
-    //);
     const updated = std.getLocalTimeStamp(Date.now());
     const data = { title, asin, name, price, bidsprice, body, updated };
     return this.request('update/note', { user, id, data });
@@ -159,18 +153,19 @@ export default {
       user, maxNumber, number, perPage
     });
   },
-  //selectAll(selected) {
-  //  return this.request('select/notes/all', { user });
-  //},
   selectNotes(ids) {
     return this.request('select/notes', { user, ids });
   },
   deleteNotes(ids) {
-    //notes = notes.filter(note => note.id !== id);
     return this.request('delete/note', { user, ids });
   },
-  readNotes(ids) {
-    return this.request('read/note', { user, ids });
+  createRead(ids) {
+    //starred.push(id);
+    return this.request('create/readed', { user, ids });
+  },
+  deleteRead(ids) {
+    //starred = starred.filter(noteId => noteId !== id);
+    return this.request('delete/readed', { user, ids });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });
@@ -178,25 +173,10 @@ export default {
   downloadNotes(fileName) {
     return this.request('download/note', { user, filename });
   },
-  createStar(id) {
-    starred.push(id);
-    return this.request('create/starred', null);
-  },
-  deleteStar(id) {
-    starred = starred.filter(noteId => noteId !== id);
-    return this.request('delete/starred', null);
-  },
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
   },
   logWarn(name, info) {
     console.warn('<<< Warn:', name, info);
   }
-  //myNotes() {
-  //  return notes.filter(note => note.user === 'MyUserName');
-  //},
-  //getUpdated() {
-  //  const day = new Date();
-  //  return `${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()} ${day.toTimeString().split(' ')[0]}`;
-  //}
 };

@@ -7,14 +7,14 @@ export default {
   rehydrate(state) {
     dispatch({ type: 'star/rehydrate', state: state.starredNotesStore });
   },
-  create(id) {
-    return NoteApiClient.createStar(id).then(() => {
-      dispatch({ type: 'star/create', noteId: id });
+  createRead(ids) {
+    return NoteApiClient.createRead(ids).then(() => {
+      dispatch({ type: 'star/create/read', readIds: ids });
     });
   },
-  delete(id) {
-    return NoteApiClient.deleteStar(id).then(id => {
-      dispatch({ type: 'star/delete', noteId: id });
+  deleteRead(ids) {
+    return NoteApiClient.deleteStar(ids).then(ids => {
+      dispatch({ type: 'star/delete/read', readIds: ids });
     });
   }
 };

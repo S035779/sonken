@@ -16,6 +16,18 @@ export default class DashboardStore extends ReduceStore {
     };
   }
   
+  updateNote(state, action) {
+    return state.notes.map(note =>
+      action.note.id === note.id
+        ? Object.assign({}, note, action.note)
+        : note);
+  }
+
+  deleteNote(state, action) {
+    return state.notes.filter(note =>
+      !action.ids.some(id => id === note.id));
+  }
+
   reduce(state, action) {
     switch (action.type) { 
       case 'note/rehydrate/my':
@@ -30,8 +42,7 @@ export default class DashboardStore extends ReduceStore {
         });
       case 'note/update': 
         return Object.assign({}, state, {
-          notes:  state.notes.map(note => action.id === note.id
-              ? Object.assign({}, note, action.note) : note )
+          notes:  this.updateNote(state, action)
         });
       case 'note/pagenation':
         return Object.assign({}, state, {
@@ -44,8 +55,8 @@ export default class DashboardStore extends ReduceStore {
         });
       case 'note/delete':
         return Object.assign({}, state, {
-          notes:  action.notes
-        , ids:    action.ids
+          notes:  this.deleteNote(state, action)
+        , ids:    []
         });
       default: 
         return state; 

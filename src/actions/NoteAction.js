@@ -35,11 +35,9 @@ export default {
       dispatch({ type: 'note/create', note });
     });
   },
-  update({ id, title, asin, price, bidsprice, body }) {
-    return NoteApiClient.updateNote(
-    { id, title, asin, price, bidsprice, body }).then(() => {
-      dispatch({ type: 'note/update', id
-        , note: { title, asin, price, bidsprice, body } });
+  update(note) {
+    return NoteApiClient.updateNote(note).then(() => {
+      dispatch({ type: 'note/update', note });
     });
   },
   pagenation(page) {
@@ -53,13 +51,8 @@ export default {
     });
   },
   delete(ids) {
-    return NoteApiClient.deleteNotes(ids).then(notes => {
-      dispatch({ type: 'note/delete', ids: [], notes });
-    });
-  },
-  read(ids) {
-    return NoteApiClient.readNotes(ids).then(() => {
-      dispatch({ type: 'note/select', ids });
+    return NoteApiClient.deleteNotes(ids).then(note => {
+      dispatch({ type: 'note/delete', note, ids });
     });
   },
   upload(filename) {

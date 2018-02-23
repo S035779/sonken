@@ -13,13 +13,14 @@ class RssList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checked:  props.selectedNoteId
-    , opened:   []
+      opened:   []
+    , checked:  props.selectedNoteId
     , notes:    props.notes
     };
   }
 
   componentWillReceiveProps(props) {
+    this.logInfo('comopnentWillReceiveProps', props);
     const checked = props.selectedNoteId;
     const notes = props.notes;
     this.setState({ checked, notes });
@@ -42,18 +43,16 @@ class RssList extends React.Component {
     const newChecked = [...checked];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    this.setState({ checked: newChecked });
     NoteAction.select(newChecked);
   }
   
-  handleChangeTitle(id, title) {
-    this.logInfo('handleChangeTitle', title);
+  handleChangeTitle({ id, title }) {
+    this.logInfo('handleChangeTitle', id);
     const { notes } = this.state;
-    const currentNote = notes.filter(note => note.id === id);
-    const newNote = Object.assign({}, currentNote, { title });
-    const newNotes = notes.map(note => note.id === id ? newNote : note);
-    this.setState({ note: newNotes});
-    NoteAction.update({ id, title });
+    const curNote = notes.find(obj => obj.id === id);
+    const newNote = Object.assign({}, curNote, { title });
+    const newNotes = notes.map(obj => obj.id === id ? newNote : obj);
+    NoteAction.update(newNote);
   }
 
   logInfo(name, info) {
@@ -82,10 +81,10 @@ class RssList extends React.Component {
                 onClick={this.handleChangeDialog.bind(this, note.id)}
                 color="primary">編集</Button>
               <RssFormDialog title="タイトルを編集する"
-                content={note}
+                note={note}
                 open={this.state.opened.indexOf(note.id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note.id)}
-                onSubmit={this.handleChangeTitle.bind(this, note.id)}>
+                onSubmit={this.handleChangeTitle.bind(this)}>
                 {note.title}</RssFormDialog>
             </ListItemSecondaryAction>
         </ListItem>

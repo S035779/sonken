@@ -6,7 +6,7 @@ import std from 'Utilities/stdutils';
 import net from 'Utilities/netutils';
 import { logs as log } from 'Utilities/logutils';
 let notes = require('Services/data');
-let starred = [ 1,2,3 ];
+let readed = [ 1,2,3 ];
 
 const pspid = 'FeedParser';
 
@@ -29,59 +29,62 @@ class FeedParser {
   }
 
   request(request, options) {
+    const isUsr = obj =>
+      obj.user === options.user;
+    const isId =  obj =>
+      obj.user === options.user && obj.id === options.id;
+    const isRead = obj => 
+      obj.user === options.user && R.contains(obj.id, readed);
+    const setRead = obj =>
+      Object.assign({ readed: R.contains(obj.id, readed) }, obj) 
+    const updNote = obj =>
+      isId(obj) ? Object.assign({}, obj, options.data) : obj;
+    const _isIds = (obj, id) =>
+      obj.id === id && obj.user === options.user;
+    const isIds = R.curry(_isIds);
+    const _ids = obj => R.split(',', obj);
+    const delNote = obj => R.none(isIds(obj), _ids(options.ids));
+    if(options.ids) console.log(_ids(options.ids));
+
     switch(request) {
+      case 'fetch/readed':
+        return new Promise((resolve, reject) => {
+          const _objs = R.filter(isRead, notes);
+          const objs = R.map(setRead, _objs);
+          resolve(objs);
+        });
+        break;
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          const isEven = obj => obj.user === options.user;
-          const objs = R.filter(isEven, notes);
+          const _objs = R.filter(isUsr, notes);
+          const objs = R.map(setRead, _objs);
           resolve(objs);
         });
         break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
-          const isEven = obj =>
-            obj.user === options.user && obj.id === options.id;
-          const obj = R.filter(isEven, notes);
-          resolve(Object.assign({
-            starred: starred.includes(obj.id)
-          }, obj));
+          const _obj = R.filter(isId, notes);
+          const obj = setRead(_obj);
+          resolve(obj);
         });
         break;
       case 'create/note':
         return new Promise((resolve, reject) => {
           notes = R.prepend(options.note, notes);
-          resolve(options.note);
+          const obj = R.filter(isId, notes);
+          resolve(obj);
         });
         break;
       case 'update/note':
         return new Promise((resolve, reject) => {
-          const isEven = obj =>
-            obj.user === options.user && obj.id === options.id; 
-          const setNote = obj =>
-            isEven(obj) ? Object.assign({}, obj, options.data) : obj;
-          notes = R.map(setNote, notes);
+          notes = R.map(updNote, notes);
           resolve('OK');
         });
         break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          const isNotId = (obj, opt) =>
-            obj.id !== opt.id && obj.user === opt.user;
-          const cryIsNotId = R.curry(isNotId);
-          //const isNotIds = obj => {
-          //  return R.find(cryIsNotId(obj), options.ids) ? true : false;
-          //};
-          let objs=[];
-          for(let i=0; i<options.ids.length; i++) {
-              R.filter(obj =>
-                obj.id !== options.ids[i] && obj.user === options.user
-              , notes);
-          }
-          notes = R.filter(isNotIds, notes);
-
-          //const isEven = obj => obj.user === options.user;
-          //const objs = R.filter(isEven, notes);
-          //resolve(objs);
+          notes = R.filter(delNote, notes);
+          resolve('OK');
         });
         break;
       case 'fetch/rss':
@@ -137,6 +140,10 @@ class FeedParser {
     return this.request('fetch/notes', { user });
   }
 
+  getReadedNotes(user) {
+    return this.request('fetch/readed', { user });
+  }
+
   getNote(user, id) {
     return this.request('fetch/note', { user, id });
   }
@@ -185,6 +192,10 @@ class FeedParser {
 
   fetchNote({ user, id }) {
     return Rx.Observable.fromPromise(this.getNote(user, id));
+  }
+
+  fetchReadedNotes({ user }) {
+    return Rx.Observable.fromPromise(this.getReadedNotes(user));
   }
 
   fetchNotes({ user }) {

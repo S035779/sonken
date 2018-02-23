@@ -1,16 +1,18 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Button, Dialog, TextField } from 'material-ui';
+import React      from 'react';
+import PropTypes  from 'prop-types';
+import { Button, Dialog, TextField }
+                  from 'material-ui';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle
-  ,withMobileDialog } from 'material-ui/Dialog';
-import { Slide } from 'material-ui/transitions';
+, withMobileDialog }
+                  from 'material-ui/Dialog';
+import { Slide }  from 'material-ui/transitions';
 
 const Transition =  props => <Slide direction="up" {...props} />;
 
 class RssFormDialog extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { title: props.content.title }
+    this.state = { title: props.note.title }
   }
 
   handleClose() {
@@ -19,19 +21,28 @@ class RssFormDialog extends React.Component {
 
   handleSubmit() {
     const { title } = this.state;
-    this.props.onSubmit(title);
+    this.logInfo('handleSubmit', title);
+    const newNote = Object.assign({}, this.props.note, { title })
+    this.props.onSubmit(newNote);
     this.props.onClose();
   }
 
-  handleChangeText(id, event) {
-    console.log('>>> handleChangedText:', id);
-    this.setState({ title: event.target.value });
+  handleChangeText(name, event) {
+    switch(name) {
+      case 'title':
+        this.setState({ title: event.target.value });
+        break;
+    }
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info', name, info);
   }
 
   render() {
-    const { open, fullScreen, title, children } = this.props;
-    return <Dialog fullScreen={fullScreen} transition={Transition}
-      open={open}
+    const { open, fullScreen, children, title } = this.props;
+    return <Dialog fullScreen={fullScreen}
+      transition={Transition} open={open}
       onClose={this.handleClose.bind(this)}
       aria-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">{title}</DialogTitle>
@@ -53,9 +64,11 @@ class RssFormDialog extends React.Component {
     </Dialog>;
   }
 }
-
+RssFormDialog.displayName = 'RssFormDialog';
+RssFormDialog.defaultProps = {
+  note: null
+};
 RssFormDialog.propTypes = {
   fullScreen: PropTypes.bool.isRequired
 };
-
 export default withMobileDialog()(RssFormDialog);

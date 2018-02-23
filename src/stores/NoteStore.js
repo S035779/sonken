@@ -9,6 +9,18 @@ export default class NoteStore extends ReduceStore {
     };
   }
   
+  createRead(state, action) {
+    return state.id === action.readIds
+      ? { note: Object.assign({}, state.note, {starred: true}) }
+      : state;
+  }
+
+  deleteRead(state, action) {
+    return state.id === action.readIds
+      ? { note: Object.assign({}, state.note, {starred: false}) }
+      : state;
+  }
+
   reduce(state, action) {
     switch (action.type) { 
       case 'note/rehydrate':
@@ -17,18 +29,10 @@ export default class NoteStore extends ReduceStore {
         return { note: null };
       case 'note/fetch':
         return { note: action.note };
-      case 'star/create':
-        if(state.id === action.noteId) {
-          return { note: Object.assign({}, state.note, {starred: true}) };
-        } else {
-          return state;
-        }
-      case 'star/delete':
-        if(state.id === action.noteId) {
-          return { note: Object.assign({}, state.note, {starred: false}) };
-        } else {
-          return state;
-        }
+      case 'star/create/read':
+        return this.createRead(state, action);
+      case 'star/delete/read':
+        return this.deleteRead(state, action);
       default: 
         return state; 
     } 

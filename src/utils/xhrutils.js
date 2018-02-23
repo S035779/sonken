@@ -87,6 +87,40 @@ const getJSON = function(url, data, success, error) {
 module.exports.getJSON = getJSON;
 
 /**
+ * deleteJSON
+ *
+ * @param {string} url
+ * @param {object} data 
+ * @param {function} success 
+ * @param {function} error 
+ */
+const deleteJSON = function(url, data, success, error) {
+  const request = new XMLHttpRequest();
+  request.open("DELETE", url + "?" + encodeFormData(data));
+  request.onreadystatechange = function() {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        const type = request.getResponseHeader("Content-Type");
+        if (type.indexOf("xml") !== -1 && request.responseXML) {
+          success(request.responseXML);
+        } else if (type === "application/json; charset=utf-8") {
+          success(JSON.parse(request.responseText));
+        } else {
+          success(request.responseText);
+        }
+      } else {
+        error(JSON.parse(request.responseText));
+      }
+    }
+  };
+  request.onerror = function(e) {
+    error(JSON.parse(request.statusText));
+  };
+  request.send(null);
+};
+module.exports.deleteJSON = deleteJSON;
+
+/**
  * post
  *
  * @param {string} url 
@@ -268,7 +302,7 @@ module.exports.postJSON = postJSON;
 /**
  * putJSON
  *
- * @param {string} url
+ * @param {string} url 
  * @param {object} data 
  * @param {function} success 
  * @param {function} error 
@@ -279,9 +313,16 @@ const putJSON = function(url, data, success, error) {
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
-        success(request);
+        const type = request.getResponseHeader("Content-Type");
+        if (type === "text/xml; charset=utf-8") {
+          success(request.responseXML);
+        } else if (type === "application/json; charset=utf-8") {
+          success(JSON.parse(request.responseText));
+        } else {
+          success(request.responseText);
+        }
       } else {
-        error(request.responseText);
+        error(JSON.parse(request.responseText));
       }
     }
   };
@@ -292,3 +333,4 @@ const putJSON = function(url, data, success, error) {
   request.send(JSON.stringify(data));
 };
 module.exports.putJSON = putJSON;
+
