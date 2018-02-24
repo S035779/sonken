@@ -41,8 +41,8 @@ export default {
     });
   },
   pagenation(page) {
-    return NoteApiClient.pagenation(page).then(notes => {
-      dispatch({ type: 'note/pagenation', notes, page });
+    return NoteApiClient.pagenation(page).then(() => {
+      dispatch({ type: 'note/pagenation', page });
     });
   },
   select(ids) {
@@ -64,8 +64,12 @@ export default {
     return NoteApiClient.deleteStar(ids).then(() => {
       dispatch({ type: 'star/delete/read', ids });
     });
-  }
-,
+  },
+  deleteItems(ids) {
+    return NoteApiClient.deleteItems(ids).then(() => {
+      dispatch({ type: 'item/delete', ids });
+    });
+  },
   upload(filename) {
     return NoteApiClient.uploadNotes(filename).then(notes => {
       dispatch({ type: 'note/upload', notes });

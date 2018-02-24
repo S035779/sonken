@@ -64,16 +64,6 @@ export default {
         break;
       case 'pagenation/notes':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/notes'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'select/notes/all':
-        return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
         break;
@@ -106,6 +96,16 @@ export default {
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
             api + '/readed'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/item':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/item'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -164,6 +164,9 @@ export default {
   },
   deleteRead(ids) {
     return this.request('delete/readed', { user, ids });
+  },
+  deleteItems(ids) {
+    return this.request('delete/item', { user, ids });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });

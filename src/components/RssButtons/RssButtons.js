@@ -11,6 +11,10 @@ class RssButtons extends React.Component {
     this.state = { checked: false };
   }
 
+  componentDidMount() {
+    NoteAction.select([]);
+  }
+
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });

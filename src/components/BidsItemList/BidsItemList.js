@@ -14,15 +14,13 @@ class BidsItemList extends React.Component {
     this.state = {
       traded: []
     , checked: props.selectedItemId
-    , notes: props.notes
     };
   }
 
   componentWillReceiveProps(props) {
     this.logInfo('componentWillReciveProps', props);
     const checked = props.selectedItemId;
-    const notes = props.notes;
-    this.setState({ checked, notes });
+    this.setState({ checked });
   }
 
   handleChangeTraded(id, event) {
@@ -49,7 +47,7 @@ class BidsItemList extends React.Component {
     console.info('>>> Info:', name, info);
   }
 
-  renderItem(note, item) {
+  renderItem(item) {
     const { classes } = this.props;
     const { traded } = this.state;
     const textClass = {
@@ -87,12 +85,10 @@ class BidsItemList extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { notes } = this.props;
-    const items = notes.map(note => note.items
-      ? note.items.map(item => this.renderItem(note, item)) : '' );
+    const { classes, items } = this.props;
+    const renderItems = items.map(item => this.renderItem(item));
     return <List className={classes.noteList}>
-      {items}
+      {renderItems}
     </List>;
   }
 };
@@ -134,7 +130,7 @@ const styles = theme => ({
                 , fontSize: 12 }
 });
 BidsItemList.displayName = 'BidsItemList';
-BidsItemList.defaultProps = { notes: null }
+BidsItemList.defaultProps = { items: null }
 BidsItemList.propTypes = {
   classes: PropTypes.object.isRequired
 };

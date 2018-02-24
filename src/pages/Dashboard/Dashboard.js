@@ -41,13 +41,18 @@ class Dashboard extends React.Component {
     const _notes = notes
       ? notes.filter(note => note.category === category) : [];
     const _note = notes.find(note => note.id === _id);
+    const noteNumber = _notes.length;
+    _notes.length =
+      _notes.length < page.perPage ? _notes.length : page.perPage;;
     return <div className={classes.root}>
         <RssSearch category={category}
-          noteNumber={_notes.length} notePage={page} />
+          noteNumber={noteNumber} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
           <RssButtons notes={_notes} selectedNoteId={ids} />
-          <RssList notes={_notes} selectedNoteId={ids}/>
+          <RssList notes={_notes}
+            selectedNoteId={ids}
+            notePage={page}/>
         </div>
         <div className={classes.noteEdit}>
           {

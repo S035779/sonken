@@ -13,7 +13,8 @@ class BidsFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checked:        false
+      selectedItemId: props.selectedItemId
+    , checked:        false
     , endBidding:     false
     , allBidding:     false
     , inBidding:      false
@@ -22,9 +23,13 @@ class BidsFilter extends React.Component {
     };
   }
 
-  componentWillReceiveProps(props) {
-    this.logInfo('componentWillReciveProps', props);
-    this.setState({ note: props.notes });
+  componentDidMount() {
+    NoteAction.select([]);
+  }
+
+  componentWillReciveProps(nextProps) {
+    const { selectedItemId } = nextProps;
+    this.setState({ selectedItemId });
   }
 
   handleChangeCheckbox(name, event) {
@@ -41,15 +46,9 @@ class BidsFilter extends React.Component {
         break;
       case 'checked':
         this.setState({ checked: checked });
-        const { notes } = this.props;
+        const { items } = this.props;
         let ids = [];
-        if(checked) {
-          notes.forEach(note => {
-            if(note.items)
-              note.items.forEach(item => ids.push(item.guid._));
-          ? notes.map(note => note.items
-            ? note.items.map(item => item.guid._ ) : [] )
-          : [];
+        if(checked) items.forEach(item => ids.push(item.guid._));
         this.logInfo('handleChangeCheckbox', ids);
         NoteAction.select(ids);
         break;
@@ -57,16 +56,16 @@ class BidsFilter extends React.Component {
   }
 
   handleTraded() {
-    const { selectedItemId } = this.props;
+    const { selectedItemId } = this.state;
     this.logInfo('handleTraded', selectedItemId);
     NoteAction.createTrade(selectedItemId);
   }
 
   handleDelete() {
-    const { selectedItemId } = this.props;
+    const { selectedItemId } = this.state;
     this.logInfo('handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
-      NoteAction.delete(selectedItemId);
+      NoteAction.deleteItem(selectedItemId);
     }
   }
 
@@ -182,7 +181,7 @@ const styles = theme => ({
                 , marginRight: theme.spacing.unit }
 });
 BidsFilter.displayName = 'BidsFilter';
-BidsFilter.defaultProps = { note: null };
+BidsFilter.defaultProps = { items: null };
 BidsFilter.propTypes = {
   classes: PropTypes.object.isRequired
 };

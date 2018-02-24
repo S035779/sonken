@@ -14,24 +14,14 @@ class RssSearch extends React.Component {
     this.state = {
       url:      ''
     , filename: ''
-    , maxNumber:  props.notePage.maxNumber
-    , number:     props.notePage.number
-    , perPage:    props.notePage.perPage
+    , perPage:    props.noteNumber
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { noteNumber, notePage } = nextProps;
-    const maxNumber = Math.ceil(noteNumber / notePage.perPage);
-    const newState = {
-      maxNumber:  maxNumber
-    , number:     1
-    , perPage:    notePage.perPage
-    };
-    this.setState(Object.assign({}, this.state, newState));
-  }
-
-  componentDidUpdate() {
+    this.logInfo('componentWillReceiveProps', nextProps);
+    const { notePage } = nextProps;
+    this.setState({ perPage: notePage.perPage });
   }
 
   handleSubmit() {
@@ -54,28 +44,28 @@ class RssSearch extends React.Component {
   }
 
   handleChangeText(name, event) {
-    this.logInfo('handleChangeText', name);
+    const value = event.target.value;
+    this.logInfo('handleChangeText', value);
     switch(name) {
       case 'url':
-        this.setState({ url: event.target.value });
-        break;
-      default:
+        this.setState({ url: value });
         break;
     }
   }
 
   handleChangeSelect(name, event) {
-    const { maxNumber, number } = this.state;
-    this.logInfo('handleChangeSelect', event.target.value);
-    let newState = {};
+    const { noteNumber } = this.props;
+    const value = event.target.value;
+    this.logInfo('handleChangeSelect', value);
     switch(name) {
       case 'page':
-        const perPage = event.target.value;
-        NoteAction.pagenation({ maxNumber, number, perPage })
-        newState = { perPage };
+        NoteAction.pagenation({
+          maxNumber: Math.ceil(noteNumber / value)
+          , number: 1, perPage: value
+        });
+        this.setState({ perPage: value });
         break;
     }
-    this.setState(newState);
   }
 
   logInfo(name, info) {
@@ -84,12 +74,12 @@ class RssSearch extends React.Component {
 
   render() {
     const { classes, noteNumber } = this.props;
-    const { url, maxNumber, number, perPage, filename } = this.state;
+    const { url, perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
           全{noteNumber}件中{
-            noteNumber < perPage ? noteNumber : perPage
+            perPage > noteNumber ? noteNumber : perPage
           }件表示
         </Typography>
       </div>
@@ -97,7 +87,7 @@ class RssSearch extends React.Component {
         <InputLabel htmlFor="results">表示件数</InputLabel>
         <Select value={perPage}
           onChange={this.handleChangeSelect.bind(this, 'page')}>
-          <MenuItem value={noteNumber}><em>All</em></MenuItem>
+          <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>
@@ -147,7 +137,8 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-
+RssSearch.displayName = 'RssSearch';
+RssSearch.defaultProps = {};
 RssSearch.propTypes = {
   classes: PropTypes.object.isRequired
 };
