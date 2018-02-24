@@ -1,19 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
 
-import { withStyles } from 'material-ui/styles';
-import { Input, Button, Checkbox, Typography, TextField }
-  from 'material-ui';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
+import { withStyles }   from 'material-ui/styles';
+import {
+  Input, Button, Checkbox, Typography, TextField
+}                       from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormControl }  from 'material-ui/Form';
 
 class BidsFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      notes:          props.notes
-    , checked:        false
+      checked:        false
     , endBidding:     false
     , allBidding:     false
     , inBidding:      false
@@ -23,11 +23,54 @@ class BidsFilter extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    this.logInfo('props', props);
+    this.logInfo('componentWillReciveProps', props);
     this.setState({ note: props.notes });
   }
 
-  handleChangeTrade(traded) {
+  handleChangeCheckbox(name, event) {
+    const checked = event.target.checked;
+    switch(name) {
+      case 'inBidding':
+        this.setState({ inBidding: checked });
+        break;
+      case 'allBidding':
+        this.setState({ allBidding: checked });
+        break;
+      case 'endBidding':
+        this.setState({ endBidding: checked });
+        break;
+      case 'checked':
+        this.setState({ checked: checked });
+        const { notes } = this.props;
+        let ids = [];
+        if(checked) {
+          notes.forEach(note => {
+            if(note.items)
+              note.items.forEach(item => ids.push(item.guid._));
+          ? notes.map(note => note.items
+            ? note.items.map(item => item.guid._ ) : [] )
+          : [];
+        this.logInfo('handleChangeCheckbox', ids);
+        NoteAction.select(ids);
+        break;
+    }
+  }
+
+  handleTraded() {
+    const { selectedItemId } = this.props;
+    this.logInfo('handleTraded', selectedItemId);
+    NoteAction.createTrade(selectedItemId);
+  }
+
+  handleDelete() {
+    const { selectedItemId } = this.props;
+    this.logInfo('handleDelete', selectedItemId);
+    if(window.confirm('Are you sure?')) {
+      NoteAction.delete(selectedItemId);
+    }
+  }
+
+  handleFilter() {
   }
 
   handleChangeText(name, event) {
@@ -38,40 +81,6 @@ class BidsFilter extends React.Component {
       case 'bidStopTime':
         this.setState({ bidStopTime: event.target.value });
         break;
-      default:
-        break;
-    }
-  }
-
-  handleChangeCheckbox(name, event) {
-    switch(name) {
-      case 'inBidding':
-        this.setState({ inBidding: event.target.checked });
-        break;
-      case 'allBidding':
-        this.setState({ allBidding: event.target.checked });
-        break;
-      case 'endBidding':
-        this.setState({ endBidding: event.target.checked });
-        break;
-      case 'checked':
-        this.setState({ checked: event.target.checked });
-        break;
-      default:
-        break;
-    }
-  }
-
-  handleButton(name, event) {
-    switch(name) {
-      case 'delete':
-        this.props.onDelete();
-        break;
-      case 'filter':
-        this.props.onFilter();
-        break;
-      default:
-        break;
     }
   }
 
@@ -81,7 +90,7 @@ class BidsFilter extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes, notes } = this.props;
+    const { classes } = this.props;
     const { bidStartTime, bidStopTime, endBidding, allBidding, inBidding }
       = this.state;
     return <div className={classes.forms}>
@@ -110,7 +119,7 @@ class BidsFilter extends React.Component {
           <div className={classes.buttons}>
             <Button variant="raised"
               className={classes.button}
-              onClick={this.handleButton.bind(this, 'filter')}>
+              onClick={this.handleFilter.bind(this)}>
               絞り込み</Button>
           </div>
         </div>
@@ -143,7 +152,7 @@ class BidsFilter extends React.Component {
           <div className={classes.buttons}>
             <Button variant="raised"
               className={classes.button}
-              onClick={this.handleButton.bind(this, 'delete')}>
+              onClick={this.handleDelete.bind(this)}>
               削除</Button>
           </div>
         </div>

@@ -11,30 +11,33 @@ import BidsItemList from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
-    return getStores(['starredNotesStore']);
+    return getStores(['dashboardStore']);
   }
 
   static calculateState() {
-    return getState('starredNotesStore');
+    return getState('dashboardStore');
   }
 
   static prefetch(props) {
-    console.log('Bids prefetch!!', 'Props:', props)
-    return NoteAction.fetchStarred();
+    return NoteAction.fetchNotes();
   }
 
   componentDidMount() {
-    console.log('Bids did mount!!');
-    Bids.prefetch(this.props);
+    NoteAction.fetchMyNotes();
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
   render() {
+    this.logInfo('render', this.state);
     const { classes } = this.props;
-    const { notes } = this.state;
+    const { notes, page, ids } = this.state;
     return <div className={classes.root}>
       <BidsSearch notes={notes}/>
-      <BidsFilter notes={notes}/>
-      <BidsItemList notes={notes}/>
+      <BidsFilter notes={notes} selectedItemId={ids}/>
+      <BidsItemList notes={notes} selectedItemId={ids}/>
     </div>;
   }
 };

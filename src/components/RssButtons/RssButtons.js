@@ -21,10 +21,10 @@ class RssButtons extends React.Component {
     NoteAction.select(ids);
   }
 
-  handleRead() {
+  handleReaded() {
     const { selectedNoteId } = this.props;
-    this.logInfo('handleRead', selectedNoteId);
-    NoteAction.read(selectedNoteId);
+    this.logInfo('handleReaded', selectedNoteId);
+    NoteAction.createRead(selectedNoteId);
   }
 
   handleDelete() {
@@ -50,7 +50,7 @@ class RssButtons extends React.Component {
       <div className={classes.buttons}>
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleRead.bind(this)}>既読にする</Button>
+          onClick={this.handleReaded.bind(this)}>既読にする</Button>
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleDelete.bind(this)}>削除</Button>

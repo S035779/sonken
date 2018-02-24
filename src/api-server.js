@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 const feed = FeedParser.of();
 
 const deleteRead = (req, res, next) => {
-  const { user, ids } = req.body;
+  const { user, ids } = req.query;
   feed.deleteRead({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
@@ -42,7 +42,7 @@ const deleteRead = (req, res, next) => {
 const createRead = (req, res, next) => {
   const { user, ids } = req.body;
   feed.createRead({ user, ids }).subscribe(
-    obj => { res.json(obj); }
+    obj => { res.status(200).send(obj); }
   , err => {
     res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
@@ -129,8 +129,8 @@ const notImplemented = (req, res, next) => {
 
 router.route('/readed')
 .get(fetchReadedNotes)
-.put(notImplemented)
-.post(createRead)
+.put(createRead)
+.post(notImplemented)
 .delete(deleteRead);
 
 router.route('/notes')
@@ -141,8 +141,8 @@ router.route('/notes')
 
 router.route('/note')
 .get(fetchNote)
-.put(updateNote)
-.post(createNote)
+.put(createNote)
+.post(updateNote)
 .delete(deleteNote);
 
 app.use('/api', router);

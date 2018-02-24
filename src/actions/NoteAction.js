@@ -51,10 +51,21 @@ export default {
     });
   },
   delete(ids) {
-    return NoteApiClient.deleteNotes(ids).then(note => {
-      dispatch({ type: 'note/delete', note, ids });
+    return NoteApiClient.deleteNotes(ids).then(() => {
+      dispatch({ type: 'note/delete', ids });
     });
   },
+  createRead(ids) {
+    return NoteApiClient.createRead(ids).then(() => {
+      dispatch({ type: 'star/create/read', ids });
+    });
+  },
+  deleteRead(ids) {
+    return NoteApiClient.deleteStar(ids).then(() => {
+      dispatch({ type: 'star/delete/read', ids });
+    });
+  }
+,
   upload(filename) {
     return NoteApiClient.uploadNotes(filename).then(notes => {
       dispatch({ type: 'note/upload', notes });

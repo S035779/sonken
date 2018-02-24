@@ -6,7 +6,7 @@ import std from 'Utilities/stdutils';
 import net from 'Utilities/netutils';
 import { logs as log } from 'Utilities/logutils';
 let notes = require('Services/data');
-let readed = [ 1,2,3 ];
+let readed = [];
 
 const pspid = 'FeedParser';
 
@@ -29,63 +29,98 @@ class FeedParser {
   }
 
   request(request, options) {
-    const isUsr = obj =>
-      obj.user === options.user;
-    const isId =  obj =>
-      obj.user === options.user && obj.id === options.id;
-    const isRead = obj => 
-      obj.user === options.user && R.contains(obj.id, readed);
-    const setRead = obj =>
-      Object.assign({ readed: R.contains(obj.id, readed) }, obj) 
-    const updNote = obj =>
-      isId(obj) ? Object.assign({}, obj, options.data) : obj;
-    const _isIds = (obj, id) =>
-      obj.id === id && obj.user === options.user;
-    const isIds = R.curry(_isIds);
-    const _ids = obj => R.split(',', obj);
-    const delNote = obj => R.none(isIds(obj), _ids(options.ids));
-    if(options.ids) console.log(_ids(options.ids));
+    const isUsr = obj => obj.user === options.user;
+    const isId =  obj => obj.id === options.id;
+    const isIds = (obj, ids) => R.any(id => obj.id === id, ids);
+    const isRead = obj => R.contains(obj.id, readed);
+    const setRead = obj => Object.assign({ readed: isRead(obj) }, obj) 
+    const _updNote = obj => Object.assign({}, obj, options.data);
+    const updNote = obj => isId(obj) ? _updNote(obj) : obj;
+    const setNotes = objs => { return notes = objs };
+    const setReaded = objs => { return readed = objs };
+    const _ids = R.compose(R.map(Number), R.split(','));
+    const delNote = obj => !isIds(obj, _ids(options.ids));
+
+    console.log(options, readed);
 
     switch(request) {
-      case 'fetch/readed':
-        return new Promise((resolve, reject) => {
-          const _objs = R.filter(isRead, notes);
-          const objs = R.map(setRead, _objs);
-          resolve(objs);
-        });
-        break;
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          const _objs = R.filter(isUsr, notes);
-          const objs = R.map(setRead, _objs);
-          resolve(objs);
+          const response = R.compose(
+            R.map(setRead)
+          , R.filter(isUsr)
+          );
+          resolve(response(notes));
+        });
+        break;
+      case 'fetch/readed':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            R.map(setRead)
+          , R.filter(isRead)
+          , R.filter(isUser)
+          );
+          resolve(response(notes));
         });
         break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
-          const _obj = R.filter(isId, notes);
-          const obj = setRead(_obj);
-          resolve(obj);
+          const response = R.compose(
+            setRead
+          , R.filter(isId)
+          , R.filter(isUsr)
+          );
+          resolve(response(notes));
         });
         break;
       case 'create/note':
         return new Promise((resolve, reject) => {
-          notes = R.prepend(options.note, notes);
-          const obj = R.filter(isId, notes);
-          resolve(obj);
+          const response = R.compose(
+            () => options.note
+          , setNotes
+          , R.prepend(options.note)
+          );
+          resolve(response(notes));
         });
         break;
       case 'update/note':
         return new Promise((resolve, reject) => {
-          notes = R.map(updNote, notes);
-          resolve('OK');
+          const response = R.compose(
+            () => 'OK'
+          , setNotes
+          , R.map(updNote)
+          );
+          resolve(response(notes));
         });
         break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          notes = R.filter(delNote, notes);
-          resolve('OK');
+          const response = R.compose(
+            () => 'OK'
+          , setNotes
+          , R.filter(delNote)
+          );
+          resolve(response(notes));
         });
+        break;
+      case 'create/readed':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setReaded
+          , R.concat(readed)
+          , R.difference(options.ids)
+          );
+          resolve(response(readed));
+        });
+        break;
+      case 'delete/readed':
+          const response = R.compose(
+            () => 'OK'
+          , setReaded
+          , R.difference(options.ids)
+          );
+          resolve(response(readed));
         break;
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
@@ -122,6 +157,14 @@ class FeedParser {
         });
         break;
     }
+  }
+
+  removeRead(user, ids) {
+    return this.request('delete/readed', { user, ids });
+  }
+
+  addRead(user, ids) {
+    return this.request('create/readed', { user, ids });
   }
 
   removeNote(user, ids) {
@@ -208,6 +251,14 @@ class FeedParser {
 
   deleteNote({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeNote(user, ids));
+  }
+
+  deleteRead({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeRead(user, ids));
+  }
+
+  createRead({ user, ids }) {
+    return Rx.Observable.fromPromise(this.addRead(user, ids));
   }
 
   parseFile({ user, file, category }) {

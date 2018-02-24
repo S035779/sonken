@@ -14,7 +14,7 @@ export default {
     switch(request) {
       case 'create/note':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
+          xhr.putJSON(
             api + '/note'
           , options
           , obj => { resolve(obj); }
@@ -54,7 +54,7 @@ export default {
         break;
       case 'update/note':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
+          xhr.postJSON(
             api + '/note'
           , options
           , obj => { resolve(obj); }
@@ -94,8 +94,8 @@ export default {
         break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/readed/create'
+          xhr.putJSON(
+            api + '/readed'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -104,8 +104,8 @@ export default {
         break;
       case 'delete/readed':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/readed/delete'
+          xhr.deleteJSON(
+            api + '/readed'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -160,11 +160,9 @@ export default {
     return this.request('delete/note', { user, ids });
   },
   createRead(ids) {
-    //starred.push(id);
     return this.request('create/readed', { user, ids });
   },
   deleteRead(ids) {
-    //starred = starred.filter(noteId => noteId !== id);
     return this.request('delete/readed', { user, ids });
   },
   uploadNotes(filename) {

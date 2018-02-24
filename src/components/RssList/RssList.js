@@ -66,6 +66,7 @@ class RssList extends React.Component {
     , secondary:  classes.secondary
     };
     const linkTo = `/${note.category}/${note.id}/edit`;
+    const notice = !note.readed ? '99件 NEW' : '';
     return <div key={note.id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, note.id)}
@@ -90,7 +91,7 @@ class RssList extends React.Component {
         </ListItem>
       </Paper>
       <div className={classes.notice}>
-        <Typography noWrap>{'99件 NEW'}</Typography>
+        <Typography noWrap>{notice}</Typography>
       </div>
     </div>;
   }

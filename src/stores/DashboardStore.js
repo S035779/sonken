@@ -28,6 +28,20 @@ export default class DashboardStore extends ReduceStore {
       !action.ids.some(id => id === note.id));
   }
 
+  createRead(state, action) {
+    return state.notes.map(note =>
+      action.ids.some(id => id === note.id)
+        ? Object.assign({}, note, { readed: true })
+        : note);
+  }
+
+  deleteRead(state, action) {
+    return state.notes.map(note =>
+      action.ids.some(id => id === note.id)
+        ? Object.assign({}, note, { readed: false })
+        : note);
+  }
+
   reduce(state, action) {
     switch (action.type) { 
       case 'note/rehydrate/my':
@@ -56,6 +70,16 @@ export default class DashboardStore extends ReduceStore {
       case 'note/delete':
         return Object.assign({}, state, {
           notes:  this.deleteNote(state, action)
+        , ids:    []
+        });
+      case 'star/create/read':
+        return Object.assign({}, state, {
+          notes: this.createRead(state, action)
+        , ids:    []
+        });
+      case 'star/delete/read':
+        return Object.assign({}, state, {
+          notes: this.deleteRead(state, action)
         , ids:    []
         });
       default: 
