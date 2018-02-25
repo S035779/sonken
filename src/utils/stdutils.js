@@ -314,6 +314,21 @@ export default {
   },
 
   /**
+   * getUTCTimeStamp
+   * 2014-01-01T15:30
+   * @param {string} s
+   * @returns {string}
+   */
+  getUTCTimeStamp(s) {
+    const dt = new Date(s);
+    const _yr = dt.getFullYear();
+    const _mo = dt.getMonth() + 1;
+    const _dy = dt.getDate();
+    const _tm = dt.toTimeString().split(' ')[0];
+    return `${_yr}-${_mo}-${_dy}T${_tm}`;
+  },
+
+  /**
    * getLocalTimeStamp
    *
    * @param {string} s

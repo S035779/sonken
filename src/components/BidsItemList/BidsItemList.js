@@ -1,26 +1,32 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import NoteAction from 'Actions/NoteAction';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import { Link }       from 'react-router-dom';
+import NoteAction     from 'Actions/NoteAction';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography } from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction
-  } from 'material-ui/List';
+import {
+  List, Paper, Checkbox, Button, Typography
+}                     from 'material-ui';
+import {
+  ListItem, ListItemText, ListItemSecondaryAction
+}                     from 'material-ui/List';
 
 class BidsItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      traded: []
-    , checked: props.selectedItemId
+      traded:   []
+    , checked:  props.selectedItemId
+    , filter:   props.itemFilter
     };
   }
 
   componentWillReceiveProps(props) {
     this.logInfo('componentWillReciveProps', props);
     const checked = props.selectedItemId;
-    this.setState({ checked });
+    const filter = props.itemFiler;
+    this.setState({ checked, filter });
   }
 
   handleChangeTraded(id, event) {
@@ -56,6 +62,14 @@ class BidsItemList extends React.Component {
     };
     const buttonText = traded.indexOf(item.guid._) !== -1
       ? '取引チェック 登録済み' : '取引チェック 登録';
+    const title = `出品件名：${item.title}`;
+    const description = 
+        `配信時間：${std.getLocalTimeStamp(item.pubDate)}、`
+      + `現在価格：${item.price}円、`
+      + `入札数：${item.bids}、`
+      + `入札終了時間：${item.bidStopTime}、`
+      + `AuctionID：${item.guid._}`
+    ;
     const notice = '';
     return <div key={item.guid._} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
@@ -65,11 +79,21 @@ class BidsItemList extends React.Component {
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters
           className={classes.listItem}>
-            <div className={classes.description}
-              dangerouslySetInnerHTML={{__html: item.description}} />
+            <div className={classes.description}>
+              <a href={item.description.DIV.A.$.HREF}>
+              <img
+                src={     item.description.DIV.A.IMG.$.SRC      }
+                border={  item.description.DIV.A.IMG.$.BORDER   }
+                width={   item.description.DIV.A.IMG.$.WIDTH    }
+                height={  item.description.DIV.A.IMG.$.HEIGHT   }
+                alt={     item.description.DIV.A.IMG.$.ALT      }
+              />
+              </a>
+            </div>
             <ListItemText classes={textClass}
               className={classes.listItemText}
-              primary={item.title} secondary={item.pubDate}/>
+              primary={title}
+              secondary={description}/>
             <ListItemSecondaryAction>
               <Button variant="raised" color="primary"
                 className={classes.button}

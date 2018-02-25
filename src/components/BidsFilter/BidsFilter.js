@@ -1,6 +1,7 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
 import {
@@ -14,12 +15,15 @@ class BidsFilter extends React.Component {
     super(props);
     this.state = {
       selectedItemId: props.selectedItemId
+    , filter:         props.itemFilter
     , checked:        false
     , endBidding:     false
     , allBidding:     false
     , inBidding:      false
-    , bidStartTime:   '2017-05-24'
-    , bidStopTime:    '2017-05-24'
+    , bidStartTime:
+      std.dateFormat.format(Date.now(), 'yyyy-mm-ddThh:mm:ss')
+    , bidStopTime:
+      std.dateFormat.format(Date.now(), 'yyyy-mm-ddThh:mm:ss')
     };
   }
 
@@ -29,8 +33,8 @@ class BidsFilter extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.logInfo('componentWillReceiveProps', nextProps);
-    const { selectedItemId } = nextProps;
-    this.setState({ selectedItemId });
+    const { selectedItemId, filter } = nextProps;
+    this.setState({ selectedItemId, filter });
   }
 
   handleChangeCheckbox(name, event) {
@@ -130,12 +134,12 @@ class BidsFilter extends React.Component {
         <Typography variant="subheading" noWrap
           className={classes.title}>入札終了時期</Typography>
         <form className={classes.inputText} noValidate>
-          <TextField id="date" label="開始" type="date"
+          <TextField id="date" label="開始" type="datetime-local"
             className={classes.text}
             InputLabelProps={{shrink: true}}
             value={bidStartTime}
             onChange={this.handleChangeText.bind(this, 'bidStartTime')}/>
-          <TextField id="date" label="終了" type="date"
+          <TextField id="date" label="終了" type="datetime-local"
             className={classes.text}
             InputLabelProps={{shrink: true}}
             value={bidStopTime}

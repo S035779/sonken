@@ -29,6 +29,7 @@ class FeedParser {
   }
 
   request(request, options) {
+    //this.logTrace(request, options);
     const isUsr = obj => obj.user === options.user;
     const isId =  obj => obj.id === options.id;
     const isRead = obj => R.contains(obj.id, readed);
@@ -46,8 +47,36 @@ class FeedParser {
     const delItem = obj => obj.items
       ? Object.assign({}, obj, { items: R.filter(_delItem, obj.items )})
       : obj;
-
-    this.logTrace(request, options);
+    const price = R.compose(
+      R.join(':')
+    , R.map(R.last)
+    , R.map(R.split(':'))
+    , R.match(/現在価格:[0-9,]+/g)
+    );
+    const bids  = R.compose(
+      R.join(':')
+    , R.map(R.last)
+    , R.map(R.split(':'))
+    , R.match(/入札数:[0-9-]+/g)
+    );
+    const bidStopTime = R.compose(
+      R.join(':')
+    , R.map(R.tail)
+    , R.map(R.split(':'))
+    , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g)
+    );
+    const _setItem = (obj, str) => Object.assign({}, options.xml, {
+      description:    obj
+    , price:        price(str)
+    , bids:         bids(str)
+    , bidStopTime:  bidStopTime(str)
+    });
+    const setItem = R.curry(_setItem);
+    const newItem = obj => R.compose(
+      setItem(obj)
+    , R.last
+    , R.split('>')
+    );
 
     switch(request) {
       case 'fetch/notes':
@@ -159,7 +188,7 @@ class FeedParser {
         break;
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
-          parseString(options.note
+          parseString(options.xml
           , { trim: true, explicitArray: false }
           , (err, data) => {
             if(err) reject(err);
@@ -169,33 +198,12 @@ class FeedParser {
         break;
       case 'parse/xml/item':
         return new Promise((resolve, reject) => {
-          parseString(options.item.description
-          , { trim: true, explicitArray: false, strict: false }
-          , (err, data) => {
-            if(err) reject(err);
-            const _data = options.item.description;
-            const setItem = objs => Object.assign({}, options.item, {
-              description:  data
-            , price:        objs[objs.length - 3]
-            , bids:         objs[objs.length - 2]
-            , bidEndTime:   objs[objs.length - 1]
-            });
-            const bidEndTime =
-              R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g
-              , '現在価格:10,000 円,入札数:1,終了日時:2018/02/25 22:46');
-            const price =
-              R.match(/現在価格:[0-9,]+/g
-            , '現在価格:10,000 円,入札数:1,終了日時:2018/02/25 22:46');
-            const bids =
-              R.match(/入札数:[0-9]+/g
-            , '現在価格:10,000 円,入札数:1,終了日時:2018/02/25 22:46');
-            const response = R.compose(
-              setItem
-            , R.last
-            , R.split('>')
-            );
-            resolve(response(_data));
-          }); 
+          parseString(options.xml.description
+            , { trim: true, explicitArray: false, strict: false }
+            , (err, data) => {
+              if(err) reject(err);
+              resolve(newItem(data)(options.xml.description));
+            }); 
         });
         break;
       default:
@@ -250,12 +258,16 @@ class FeedParser {
     return this.request('fetch/file', { file });
   }
 
-  getXmlNote(note) {
-    return this.request('parse/xml/note', { note });
+  getXmlNote(xml) {
+    return this.request('parse/xml/note', { xml });
   }
 
-  getXmlItem(item) {
-    return this.request('parse/xml/item', { item });
+  getXmlItem(xml) {
+    return this.request('parse/xml/item', { xml });
+  }
+
+  parseNote(xml) {
+    return Rx.Observable.fromPromise(this.getXmlNote(xml));
   }
 
   forRss(urls) {
@@ -268,32 +280,37 @@ class FeedParser {
     return Rx.Observable.forkJoin(promises);
   }
 
-  forXmlNote(objs) {
-    const promises = R.map(this.getXmlNote.bind(this), objs);
+  forXmlNote(xmls) {
+    const promises = R.map(this.getXmlNote.bind(this), xmls);
     return Rx.Observable.forkJoin(promises);
   }
 
-  forXmlItem(obj) {
-    const _promises = objs => R.map(this.getXmlItem.bind(this), objs);
-    const promises = obj.items ? _promises(obj.items) : [];
-    this.logTrace('forXmlItem', promises);
-    return Rx.Observable.forkJoin(promises);
-  }
-
-  parseXml(obj) {
-    return Rx.Observable.fromPromise(this.getXmlNote(obj));
+  forXmlItem(xmls) {
+    const _promises = R.map(this.getXmlItem.bind(this));
+    const promises = R.map(xml => _promises(xml.rss.channel.item), xmls);
+    return Rx.Observable.forkJoin(R.flatten(promises));
   }
 
   createNote({ user, url, category }) {
     const setNotes = R.curry(this.setNotes);
-    const addNote = obj =>
-      Rx.Observable.fromPromise(this.addNote(user, obj));
+    const addNote = 
+      obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+    let _notes = [];
     return this.forRss([ url ])
       .flatMap(objs => this.forXmlNote(objs))
+      .flatMap(objs => {
+        _notes = objs;
+        return this.forXmlItem(_notes);
+      })
+      .map(item => {
+        return R.map(_note => {
+          this.logTrace('createNote', item);
+          return Object.assign({}, _note.rss.channel, { item });
+        }, _notes)
+      })
       .map(setNotes({ user, url, category }))
+      .map(R.tap(this.logTrace.bind(this)))
       .flatMap(objs => addNote(objs[0]))
-      .flatMap(obj => this.forXmlItem(obj))
-      .map(R.tap(this.logTrace.bind(this)));
   }
 
   fetchNote({ user, id }) {
@@ -341,15 +358,14 @@ class FeedParser {
   }
 
   setNotes({ user, url, category }, objs) {
-    const channel = obj => obj.rss.channel;
     const setNote = obj => ({
       id: std.makeRandInt(9)
     , url: url
     , category: category
     , user: user
-    , updated: std.getLocalTimeStamp(channel(obj).lastBuildDate)
-    , items: channel(obj).item
-    , title: channel(obj).title
+    , updated: std.getLocalTimeStamp(obj.lastBuildDate)
+    , items: obj.item
+    , title: obj.title
     , asin: ''
     , name: ''
     , price: 0

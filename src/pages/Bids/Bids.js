@@ -33,7 +33,7 @@ class Bids extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes } = this.props;
-    const { notes, page, ids } = this.state;
+    const { notes, page, ids, filter } = this.state;
     let _items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => _items.push(item))
@@ -42,9 +42,14 @@ class Bids extends React.Component {
     _items.length = 
       _items.length < page.perPage ? _items.length : page.perPage;;
     return <div className={classes.root}>
-      <BidsSearch itemNumber={itemNumber} itemPage={page}/>
-      <BidsFilter items={_items} selectedItemId={ids}/>
+      <BidsSearch
+        itemNumber={itemNumber}
+        itemPage={page}/>
+      <BidsFilter   items={_items}
+        itemFilter={filter}
+        selectedItemId={ids}/>
       <BidsItemList items={_items}
+        itemFilter={filter}
         selectedItemId={ids}
         itemPage={page}/>
     </div>;
