@@ -27,6 +27,18 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
+const deleteItem = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteItem({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete Item.'); }  
+  );
+};
+
 const deleteRead = (req, res, next) => {
   const { user, ids } = req.query;
   feed.deleteRead({ user, ids }).subscribe(
@@ -126,6 +138,12 @@ const createNote = (req, res, next) => {
 const notImplemented = (req, res, next) => {
   next(new Error('not implemented'));
 };
+
+router.route('/item')
+.get(notImplemented)
+.put(notImplemented)
+.post(notImplemented)
+.delete(deleteItem);
 
 router.route('/readed')
 .get(fetchReadedNotes)

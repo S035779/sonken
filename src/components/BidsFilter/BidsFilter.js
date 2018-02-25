@@ -27,7 +27,8 @@ class BidsFilter extends React.Component {
     NoteAction.select([]);
   }
 
-  componentWillReciveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
+    this.logInfo('componentWillReceiveProps', nextProps);
     const { selectedItemId } = nextProps;
     this.setState({ selectedItemId });
   }
@@ -47,8 +48,7 @@ class BidsFilter extends React.Component {
       case 'checked':
         this.setState({ checked: checked });
         const { items } = this.props;
-        let ids = [];
-        if(checked) items.forEach(item => ids.push(item.guid._));
+        const ids = checked ? items.map(item => item.guid._) : [];
         this.logInfo('handleChangeCheckbox', ids);
         NoteAction.select(ids);
         break;

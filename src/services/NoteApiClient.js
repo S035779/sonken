@@ -165,7 +165,7 @@ export default {
   deleteRead(ids) {
     return this.request('delete/readed', { user, ids });
   },
-  deleteItems(ids) {
+  deleteItem(ids) {
     return this.request('delete/item', { user, ids });
   },
   uploadNotes(filename) {

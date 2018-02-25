@@ -65,8 +65,8 @@ export default {
       dispatch({ type: 'star/delete/read', ids });
     });
   },
-  deleteItems(ids) {
-    return NoteApiClient.deleteItems(ids).then(() => {
+  deleteItem(ids) {
+    return NoteApiClient.deleteItem(ids).then(() => {
       dispatch({ type: 'item/delete', ids });
     });
   },

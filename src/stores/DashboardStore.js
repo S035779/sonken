@@ -24,8 +24,8 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteNote(state, action) {
-    return state.notes.filter(note =>
-      !action.ids.some(id => id === note.id));
+    const isNote = obj => action.ids.some(id => id === obj.id)
+    return state.notes.filter(note => !isNote(note));
   }
 
   createRead(state, action) {
@@ -43,12 +43,11 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteItem(state, action) {
-    return state.notes.map(note => {
-      if(note.items) note.items.map(item => 
-        action.ids.some(id => id === item.id)
-          ? Object.assign({}, item, { deleted: true })
-          : item);
-    }
+    const isItem = obj => action.ids.some(id => id === obj.guid._)
+    return state.notes.map(note => note.items
+      ? Object.assign({}, note
+        , { items: note.items.filter(item => !isItem(item)) })
+      : note );
   }
 
   reduce(state, action) {
