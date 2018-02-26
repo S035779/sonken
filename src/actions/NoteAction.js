@@ -61,7 +61,7 @@ export default {
     });
   },
   deleteRead(ids) {
-    return NoteApiClient.deleteStar(ids).then(() => {
+    return NoteApiClient.deleteRead(ids).then(() => {
       dispatch({ type: 'star/delete/read', ids });
     });
   },
@@ -73,6 +73,26 @@ export default {
   filterItem(filter) {
     return NoteApiClient.filterItem(filter).then(() => {
       dispatch({ type: 'item/filter', filter });
+    });
+  },
+  createTrade(ids) {
+    return NoteApiClient.createTrade(ids).then(() => {
+      dispatch({ type: 'star/create/trade', ids });
+    });
+  },
+  deleteTrade(ids) {
+    return NoteApiClient.deleteTrade(ids).then(() => {
+      dispatch({ type: 'star/delete/trade', ids });
+    });
+  },
+  createBids(ids) {
+    return NoteApiClient.createBids(ids).then(() => {
+      dispatch({ type: 'star/create/bids', ids });
+    });
+  },
+  deleteBids(ids) {
+    return NoteApiClient.deleteBids(ids).then(() => {
+      dispatch({ type: 'star/delete/bids', ids });
     });
   },
   upload(filename) {

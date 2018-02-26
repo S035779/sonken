@@ -5,21 +5,21 @@ const pspid = 'DashboardStore';
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
-      notes: []
+      notes:    []
       , page: {
         maxNumer: 0
-      , number: 0
-      , perPage: 20
+      , number:   0
+      , perPage:  20
       }
       , filter: {
-        endBidding: false
-      , allBidding: false
-      , inBidding: false
+        endBidding:   true
+      , allBidding:   true
+      , inBidding:    false
       , bidStartTime: 0
-      , bidStopTime: 0
+      , bidStopTime:  0
       }
     , selected: false
-    , ids: []
+    , ids:      []
     };
   }
   
@@ -36,25 +36,58 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createRead(state, action) {
-    return state.notes.map(note =>
-      action.ids.some(id => id === note.id)
-        ? Object.assign({}, note, { readed: true })
-        : note);
+    const isNote = obj => action.ids.some(id => id === obj.id)
+    return state.notes.map(note => isNote(note)
+      ? Object.assign({}, note, { readed: true }) : note);
   }
 
   deleteRead(state, action) {
-    return state.notes.map(note =>
-      action.ids.some(id => id === note.id)
-        ? Object.assign({}, note, { readed: false })
-        : note);
+    const isNote = obj => action.ids.some(id => id === obj.id)
+    return state.notes.map(note => isNote(note)
+      ? Object.assign({}, note, { readed: false }) : note);
   }
 
   deleteItem(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._)
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const delItems = objs => objs.filter(item => !isItem(item));
     return state.notes.map(note => note.items
-      ? Object.assign({}, note
-        , { items: note.items.filter(item => !isItem(item)) })
-      : note );
+      ? Object.assign({}, note, { items: delItems(note.items) }) : note );
+  }
+
+  createTrade(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { traded: true }) : item;
+    const setItems = objs => objs.map(item =>setItem(item))
+    return state.notes.map(note => note.items
+      ? Object.assign({}, note, { items: setItems(note.items) }) : note );
+  }
+
+  deleteTrade(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { traded: false }) : item;
+    const setItems = objs => objs.map(item =>setItem(item))
+    return state.notes.map(note => note.items
+      ? Object.assign({}, note, { items: setItems(note.items) }) : note );
+  }
+
+  createBids(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { bided: true }) : item;
+    const setItems = objs => objs.map(item =>setItem(item))
+    return state.notes.map(note => note.items
+      ? Object.assign({}, note, { items: setItems(note.items) }) : note );
+  }
+
+  deleteBids(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { bided: false }) : item;
+    const setItems = objs => objs.map(item =>setItem(item))
+    return state.notes.map(note => note.items
+      ? Object.assign({}, note, { items: setItems(note.items) }) : note );
   }
 
   reduce(state, action) {
@@ -104,6 +137,26 @@ export default class DashboardStore extends ReduceStore {
       case 'item/filter':
         return Object.assign({}, state, {
           filter: action.filter
+        });
+      case 'star/create/trade':
+        return Object.assign({}, state, {
+          notes: this.createTrade(state, action)
+        , ids:    []
+        });
+      case 'star/delete/trade':
+        return Object.assign({}, state, {
+          notes: this.deleteTrade(state, action)
+        , ids:    []
+        });
+      case 'star/create/bids':
+        return Object.assign({}, state, {
+          notes: this.createBids(state, action)
+        , ids:    []
+        });
+      case 'star/delete/bids':
+        return Object.assign({}, state, {
+          notes: this.deleteBids(state, action)
+        , ids:    []
         });
       default: 
         return state; 

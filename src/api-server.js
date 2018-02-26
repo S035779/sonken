@@ -27,6 +27,54 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
+const deleteBids = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteBids({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete Bids.'); }  
+  );
+};
+
+const createBids = (req, res, next) => {
+  const { user, ids } = req.body;
+  feed.createBids({ user, ids }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to create Bids.'); }  
+  );
+};
+
+const deleteTrade = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteTrade({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete Trade.'); }  
+  );
+};
+
+const createTrade = (req, res, next) => {
+  const { user, ids } = req.body;
+  feed.createTrade({ user, ids }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to create Trade.'); }  
+  );
+};
+
 const deleteItem = (req, res, next) => {
   const { user, ids } = req.query;
   feed.deleteItem({ user, ids }).subscribe(
@@ -87,15 +135,27 @@ const updateNote = (req, res, next) => {
   );
 };
 
-const fetchNote = (req, res, next) => {
+const fetchTradedNotes = (req, res, next) => {
   const { user } = req.query;
-  feed.fetchNote({ user }).subscribe(
+  feed.fetchTradedNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
     res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
-  , () => { log.info('Complete to fetch Note.'); }  
+  , () => { log.info('Complete to fetch Traded.'); }  
+  );
+};
+
+const fetchBidedNotes = (req, res, next) => {
+  const { user } = req.query;
+  feed.fetchBidedNotes({ user }).subscribe(
+    obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to fetch Bided.'); }  
   );
 };
 
@@ -108,6 +168,18 @@ const fetchReadedNotes = (req, res, next) => {
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Readed.'); }  
+  );
+};
+
+const fetchNote = (req, res, next) => {
+  const { user } = req.query;
+  feed.fetchNote({ user }).subscribe(
+    obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to fetch Note.'); }  
   );
 };
 
@@ -138,6 +210,18 @@ const createNote = (req, res, next) => {
 const notImplemented = (req, res, next) => {
   next(new Error('not implemented'));
 };
+
+router.route('/traded')
+.get(fetchTradedNotes)
+.put(createTrade)
+.post(notImplemented)
+.delete(deleteTrade);
+
+router.route('/bided')
+.get(fetchBidedNotes)
+.put(createBids)
+.post(notImplemented)
+.delete(deleteBids);
 
 router.route('/item')
 .get(notImplemented)

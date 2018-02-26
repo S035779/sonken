@@ -47,6 +47,26 @@ export default {
           );
         });
         break;
+      case 'fetch/traded':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/traded'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'fetch/bided':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/bided'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -122,6 +142,46 @@ export default {
           setTimeout(() => resolve(options), 200);
         });
         break;
+      case 'create/traded':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/traded'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/traded':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/traded'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/bided':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/bided'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/bided':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/bided'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       default:
         return new Promise((resolve, reject) => {
           reject(options);
@@ -180,6 +240,18 @@ export default {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     };
     return this.request('filter/item', { user, filter });
+  },
+  createTrade(ids) {
+    return this.request('create/traded', { user, ids });
+  },
+  deleteTrade(ids) {
+    return this.request('delete/traded', { user, ids });
+  },
+  createBids(ids) {
+    return this.request('create/bided', { user, ids });
+  },
+  deleteBids(ids) {
+    return this.request('delete/bided', { user, ids });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });

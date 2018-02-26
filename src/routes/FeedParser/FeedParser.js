@@ -6,7 +6,9 @@ import std from 'Utilities/stdutils';
 import net from 'Utilities/netutils';
 import { logs as log } from 'Utilities/logutils';
 let notes = require('Services/data');
-let readed = [];
+let readed = [{ user: 'MyUserName', ids: [] }];
+let traded = [{ user: 'MyUserName', ids: [] }];
+let bided = [{ user: 'MyUserName', ids: [] }];
 
 const pspid = 'FeedParser';
 
@@ -30,10 +32,17 @@ class FeedParser {
 
   request(request, options) {
     //this.logTrace(request, options);
-    const isUsr = obj => obj.user === options.user;
-    const isId =  obj => obj.id === options.id;
-    const isRead = obj => R.contains(obj.id, readed);
+    const isUsr   = obj => obj.user === options.user;
+    const isId    = obj => obj.id === options.id;
+    const isData  = objs => R.filter(isUsr, objs);
+    const isIds   = objs => { const data = isData(objs) };
+    const isRead  = obj => R.contains(obj.id, isUsrs(readed));
+    const isTrade = obj => R.contains(obj.id, isUsrs(traded));
+    const isBids  = obj => R.contains(obj.id, isUsrs(bided));
     const setRead = obj => Object.assign({}, obj, {readed: isRead(obj)}); 
+    const setTrade = obj =>
+      Object.assign({}, obj, {traded: isTrade(obj)}); 
+    const setBids = obj => Object.assign({}, obj, {bided: isBids(obj)}); 
     const _updNote = obj => Object.assign({}, obj, options.data);
     const updNote = obj => isId(obj) ? _updNote(obj) : obj;
     const setNotes = objs => { return notes = objs };
@@ -48,19 +57,20 @@ class FeedParser {
       ? Object.assign({}, obj, { items: R.filter(_delItem, obj.items )})
       : obj;
     const price = R.compose(
-      R.join(':')
+      R.join('')
     , R.map(R.last)
     , R.map(R.split(':'))
     , R.match(/現在価格:[0-9,]+/g)
     );
     const bids  = R.compose(
-      R.join(':')
+      R.join('')
     , R.map(R.last)
     , R.map(R.split(':'))
     , R.match(/入札数:[0-9-]+/g)
     );
     const bidStopTime = R.compose(
-      R.join(':')
+      R.join('')
+    , R.map(R.join(':'))
     , R.map(R.tail)
     , R.map(R.split(':'))
     , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g)
@@ -93,6 +103,26 @@ class FeedParser {
           const response = R.compose(
             R.map(setRead)
           , R.filter(isRead)
+          , R.filter(isUser)
+          );
+          resolve(response(notes));
+        });
+        break;
+      case 'fetch/traded':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            R.map(setTrade)
+          , R.filter(isTrade)
+          , R.filter(isUser)
+          );
+          resolve(response(notes));
+        });
+        break;
+      case 'fetch/bided':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            R.map(setBids)
+          , R.filter(isBids)
           , R.filter(isUser)
           );
           resolve(response(notes));
@@ -145,6 +175,7 @@ class FeedParser {
           , setReaded
           , R.concat(readed)
           , R.difference(options.ids)
+          , R.map(isUsrs)
           );
           resolve(response(readed));
         });
@@ -321,6 +352,14 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.getReadedNotes(user));
   }
 
+  fetchTradedNotes({ user }) {
+    return Rx.Observable.fromPromise(this.getTradedNotes(user));
+  }
+
+  fetchBidedNotes({ user }) {
+    return Rx.Observable.fromPromise(this.getBidedNotes(user));
+  }
+
   fetchNotes({ user }) {
     return Rx.Observable.fromPromise(this.getNotes(user));
   }
@@ -363,7 +402,8 @@ class FeedParser {
     , url: url
     , category: category
     , user: user
-    , updated: std.getLocalTimeStamp(obj.lastBuildDate)
+    , updated:
+      std.formatDate(new Date(obj.lastBuildDate), 'YYYY/MM/DD hh:mm:ss')
     , items: obj.item
     , title: obj.title
     , asin: ''

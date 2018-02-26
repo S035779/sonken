@@ -1,13 +1,17 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import NoteAction from 'Actions/NoteAction';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import { Link }       from 'react-router-dom';
+import NoteAction     from 'Actions/NoteAction';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography } from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction
-  } from 'material-ui/List';
-import RssFormDialog from 'Components/RssFormDialog/RssFormDialog';
+import {
+  List, Paper, Checkbox, Button, Typography
+}                     from 'material-ui';
+import {
+  ListItem, ListItemText, ListItemSecondaryAction
+}                     from 'material-ui/List';
+import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
 
 class RssList extends React.Component {
   constructor(props) {
@@ -67,6 +71,9 @@ class RssList extends React.Component {
     };
     const linkTo = `/${note.category}/${note.id}/edit`;
     const notice = !note.readed ? '99件 NEW' : '';
+    const title = note.title;
+    const updated =
+      std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
     return <div key={note.id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, note.id)}
@@ -76,7 +83,7 @@ class RssList extends React.Component {
         <ListItem dense button disableGutters className={classes.listItem}
           component={Link} to={linkTo}>
             <ListItemText classes={textClass}
-              primary={note.title} secondary={note.updated}/>
+              primary={title} secondary={updated}/>
             <ListItemSecondaryAction>
               <Button className={classes.button}
                 onClick={this.handleChangeDialog.bind(this, note.id)}
@@ -86,7 +93,7 @@ class RssList extends React.Component {
                 open={this.state.opened.indexOf(note.id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note.id)}
                 onSubmit={this.handleChangeTitle.bind(this)}>
-                {note.title}</RssFormDialog>
+                {title}</RssFormDialog>
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>

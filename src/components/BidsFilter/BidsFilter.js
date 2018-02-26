@@ -17,8 +17,8 @@ class BidsFilter extends React.Component {
       selectedItemId: props.selectedItemId
     , itemFilter:     props.itemFilter
     , checked:        false
-    , endBidding:     false
-    , allBidding:     false
+    , endBidding:     true
+    , allBidding:     true
     , inBidding:      false
     , bidStartTime:   std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , bidStopTime:    std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
@@ -39,13 +39,25 @@ class BidsFilter extends React.Component {
     const checked = event.target.checked;
     switch(name) {
       case 'inBidding':
-        this.setState({ inBidding: checked });
+        this.setState({
+          inBidding:  checked
+        , allBidding: !checked
+        , endBidding: !checked
+        });
         break;
       case 'allBidding':
-        this.setState({ allBidding: checked });
+        this.setState({
+          inBidding:  false
+        , allBidding: checked
+        , endBidding: true
+        });
         break;
       case 'endBidding':
-        this.setState({ endBidding: checked });
+        this.setState({
+          inBidding:  !checked
+        , allBidding: false
+        , endBidding: checked
+        });
         break;
       case 'checked':
         this.setState({ checked: checked });
@@ -140,12 +152,12 @@ class BidsFilter extends React.Component {
           <Typography variant="subheading" noWrap
             className={classes.title}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
-            <TextField id="date" label="開始" type="datetime-local"
+            <TextField id="date" label="始め" type="datetime-local"
               InputLabelProps={{shrink: true}}
               value={bidStartTime}
               onChange={this.handleChangeText.bind(this, 'bidStartTime')}
               className={classes.text}/>
-            <TextField id="date" label="終了" type="datetime-local"
+            <TextField id="date" label="終わり" type="datetime-local"
               InputLabelProps={{shrink: true}}
               value={bidStopTime}
               onChange={this.handleChangeText.bind(this, 'bidStopTime')}

@@ -51,7 +51,7 @@ class BidsItemList extends React.Component {
     console.info('>>> Info:', name, info);
   }
 
-  renderItem(item) {
+  renderItem(index, item) {
     const { classes } = this.props;
     const { traded } = this.state;
     const textClass = {
@@ -62,14 +62,15 @@ class BidsItemList extends React.Component {
       ? '取引チェック 登録済み' : '取引チェック 登録';
     const title = `出品件名：${item.title}`;
     const description = 
-        `配信時間：${std.getLocalTimeStamp(item.pubDate)}、`
+        `配信時間：${
+          std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
       + `現在価格：${item.price}円、`
       + `入札数：${item.bids}、`
       + `入札終了時間：${item.bidStopTime}、`
       + `AuctionID：${item.guid._}`
     ;
     const notice = '';
-    return <div key={item.guid._} className={classes.noteItem}>
+    return <div key={index} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
         checked={this.state.selectedItemId.indexOf(item.guid._) !== -1}
@@ -108,7 +109,8 @@ class BidsItemList extends React.Component {
 
   render() {
     const { classes, items } = this.props;
-    const renderItems = items.map(item => this.renderItem(item));
+    const renderItems =
+      items.map((item, index) => this.renderItem(index, item));
     return <List className={classes.noteList}>
       {renderItems}
     </List>;
