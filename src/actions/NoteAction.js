@@ -70,6 +70,11 @@ export default {
       dispatch({ type: 'item/delete', ids });
     });
   },
+  filterItem(filter) {
+    return NoteApiClient.filterItem(filter).then(() => {
+      dispatch({ type: 'item/filter', filter });
+    });
+  },
   upload(filename) {
     return NoteApiClient.uploadNotes(filename).then(notes => {
       dispatch({ type: 'note/upload', notes });

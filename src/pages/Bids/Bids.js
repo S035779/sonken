@@ -38,6 +38,8 @@ class Bids extends React.Component {
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => _items.push(item))
     });
+    // itemFilter
+    // itemPage
     const itemNumber = _items.length;
     _items.length = 
       _items.length < page.perPage ? _items.length : page.perPage;;
@@ -45,13 +47,13 @@ class Bids extends React.Component {
       <BidsSearch
         itemNumber={itemNumber}
         itemPage={page}/>
-      <BidsFilter   items={_items}
+      <BidsFilter
+        items={_items}
         itemFilter={filter}
         selectedItemId={ids}/>
-      <BidsItemList items={_items}
-        itemFilter={filter}
-        selectedItemId={ids}
-        itemPage={page}/>
+      <BidsItemList
+        items={_items}
+        selectedItemId={ids}/>
     </div>;
   }
 };

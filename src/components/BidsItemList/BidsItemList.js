@@ -16,17 +16,15 @@ class BidsItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      traded:   []
-    , checked:  props.selectedItemId
-    , filter:   props.itemFilter
+      traded:         []
+    , selectedItemId: props.selectedItemId
     };
   }
 
-  componentWillReceiveProps(props) {
-    this.logInfo('componentWillReciveProps', props);
-    const checked = props.selectedItemId;
-    const filter = props.itemFiler;
-    this.setState({ checked, filter });
+  componentWillReceiveProps(nextProps) {
+    this.logInfo('componentWillReciveProps', nextProps);
+    const { selectedItemId } = nextProps;
+    this.setState({ selectedItemId });
   }
 
   handleChangeTraded(id, event) {
@@ -41,9 +39,9 @@ class BidsItemList extends React.Component {
 
   handleChangeCheckbox(id, event) {
     this.logInfo('handleChangeCheckbox', id);
-    const { checked } = this.state;
-    const currentIndex = checked.indexOf(id);
-    const newChecked = [...checked];
+    const { selectedItemId } = this.state;
+    const currentIndex = selectedItemId.indexOf(id);
+    const newChecked = [...selectedItemId];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
     NoteAction.select(newChecked);
@@ -74,7 +72,7 @@ class BidsItemList extends React.Component {
     return <div key={item.guid._} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
-        checked={this.state.checked.indexOf(item.guid._) !== -1}
+        checked={this.state.selectedItemId.indexOf(item.guid._) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters

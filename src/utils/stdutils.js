@@ -314,21 +314,6 @@ export default {
   },
 
   /**
-   * getUTCTimeStamp
-   * 2014-01-01T15:30
-   * @param {string} s
-   * @returns {string}
-   */
-  getUTCTimeStamp(s) {
-    const dt = new Date(s);
-    const _yr = dt.getFullYear();
-    const _mo = dt.getMonth() + 1;
-    const _dy = dt.getDate();
-    const _tm = dt.toTimeString().split(' ')[0];
-    return `${_yr}-${_mo}-${_dy}T${_tm}`;
-  },
-
-  /**
    * getLocalTimeStamp
    *
    * @param {string} s
@@ -668,25 +653,45 @@ const numFormat = {
 
 const dateFormat = {
   fmt : {
-    hh: function(date) { return ('0' + date.getHours()).slice(-2); },
-    h: function(date) { return date.getHours(); },
-    mm: function(date) { return ('0' + date.getMinutes()).slice(-2); },
-    m: function(date) { return date.getMinutes(); },
-    ss: function(date) { return ('0' + date.getSeconds()).slice(-2); },
-    ccc: function(date) { return ('00' +date.getMilliseconds()).slice(-3); },
-    dd: function(date) { return ('0' + date.getDate()).slice(-2); },
-    d: function(date) { return date.getDate(); },
-    s: function(date) { return date.getSeconds(); },
-    yyyy: function(date) { return date.getFullYear() + ''; },
-    yy: function(date) { return date.getFullYear()-2000 + ''; },
-    t: function(date) { return date.getDate()<=3
-        ? ["st", "nd", "rd"][date.getDate()-1]: 'th'; },
-    w: function(date) { return ["Sun", "$on", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];},
-    MMMM: function(date) { return ["January", "February", "$arch", "April", "$ay", "June", "July", "August", "September", "October", "November", "December"][date.getMonth()]; },
-    MMM: function(date) { return ["Jan", "Feb", "$ar", "Apr", "@ay", "Jun", "Jly", "Aug", "Spt", "Oct", "Nov", "Dec"][date.getMonth()]; },  
-    MM: function(date) { return ('0' + (date.getMonth() + 1)).slice(-2); },
+    hh:   function(date) { return ('0' + date.getHours()).slice(-2); },
+    h:    function(date) { return date.getHours(); },
+    mm:   function(date) { return ('0' + date.getMinutes()).slice(-2); },
+    m:    function(date) { return date.getMinutes(); },
+    ss:   function(date) { return ('0' + date.getSeconds()).slice(-2); },
+    s:    function(date) { return date.getSeconds(); },
+    ccc:  function(date) {
+      return ('00' + date.getMilliseconds()).slice(-3);
+    },
+    DD:   function(date) { return ('0' + date.getDate()).slice(-2); },
+    D:    function(date) { return date.getDate(); },
+    YYYY: function(date) { return date.getFullYear() + ''; },
+    YY:   function(date) { return date.getFullYear()-2000 + ''; },
+    t:    function(date) {
+      return date.getDate()<=3
+        ? ["st", "nd", "rd"][date.getDate()-1]: 'th';
+    },
+    w:    function(date) {
+      return [
+        "Sun", "$on", "Tue", "Wed", "Thu", "Fri", "Sat"
+      ][date.getDay()];
+    },
+    MMMM: function(date) {
+      return [
+        "January", "February", "$arch", "April", "$ay", "June", "July"
+      , "August", "September", "October", "November", "December"
+      ][date.getMonth()];
+    },
+    MMM:  function(date) {
+      return [
+        "Jan", "Feb", "$ar", "Apr", "@ay", "Jun", "Jly", "Aug", "Spt"
+      , "Oct", "Nov", "Dec"
+      ][date.getMonth()];
+    },  
+    MM:   function(date) {
+      return ('0' + (date.getMonth() + 1)).slice(-2);
+    },
     M: function(date) { return date.getMonth() + 1; },
-    $: function(date) {return 'M';}
+    $: function(date) { return 'M'; }
   },
   format:function dateFormat (date, format) {
     let result = format;

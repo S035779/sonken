@@ -12,6 +12,11 @@ export default {
   request(request, options) {
     this.logInfo(request, options);
     switch(request) {
+      case 'prefetch/notes':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
       case 'create/note':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -112,7 +117,7 @@ export default {
           );
         });
         break;
-      case 'prefetch/notes':
+      case 'filter/item':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
@@ -167,6 +172,14 @@ export default {
   },
   deleteItem(ids) {
     return this.request('delete/item', { user, ids });
+  },
+  filterItem({
+    endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+  }) {
+    const filter = {
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    };
+    return this.request('filter/item', { user, filter });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });

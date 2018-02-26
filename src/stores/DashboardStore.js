@@ -6,11 +6,18 @@ export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
       notes: []
-    , page: {
+      , page: {
         maxNumer: 0
       , number: 0
       , perPage: 20
-    }
+      }
+      , filter: {
+        endBidding: false
+      , allBidding: false
+      , inBidding: false
+      , bidStartTime: 0
+      , bidStopTime: 0
+      }
     , selected: false
     , ids: []
     };
@@ -93,6 +100,10 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  this.deleteItem(state, action)
         , ids:    []
+        });
+      case 'item/filter':
+        return Object.assign({}, state, {
+          filter: action.filter
         });
       default: 
         return state; 

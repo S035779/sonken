@@ -15,15 +15,13 @@ class BidsFilter extends React.Component {
     super(props);
     this.state = {
       selectedItemId: props.selectedItemId
-    , filter:         props.itemFilter
+    , itemFilter:     props.itemFilter
     , checked:        false
     , endBidding:     false
     , allBidding:     false
     , inBidding:      false
-    , bidStartTime:
-      std.dateFormat.format(Date.now(), 'yyyy-mm-ddThh:mm:ss')
-    , bidStopTime:
-      std.dateFormat.format(Date.now(), 'yyyy-mm-ddThh:mm:ss')
+    , bidStartTime:   std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , bidStopTime:    std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     };
   }
 
@@ -33,8 +31,8 @@ class BidsFilter extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.logInfo('componentWillReceiveProps', nextProps);
-    const { selectedItemId, filter } = nextProps;
-    this.setState({ selectedItemId, filter });
+    const { selectedItemId, itemFilter } = nextProps;
+    this.setState({ selectedItemId, itemFilter });
   }
 
   handleChangeCheckbox(name, event) {
@@ -74,6 +72,14 @@ class BidsFilter extends React.Component {
   }
 
   handleFilter() {
+    const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
+      = this.state;
+    this.logInfo('handleFilter', {
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    });
+    NoteAction.filterItem({
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    });
   }
 
   handleChangeText(name, event) {
@@ -121,30 +127,31 @@ class BidsFilter extends React.Component {
         <div className={classes.buttons}>
           <div className={classes.buttons}>
             <Button variant="raised"
-              className={classes.button}
-              onClick={this.handleFilter.bind(this)}>
-              絞り込み</Button>
+              onClick={this.handleFilter.bind(this)}
+              className={classes.button}>絞り込み</Button>
           </div>
         </div>
-        <Checkbox checked={this.state.checked}
-          className={classes.checkbox}
-          checked={inBidding}
-          onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.title}>入札終了時期</Typography>
-        <form className={classes.inputText} noValidate>
-          <TextField id="date" label="開始" type="datetime-local"
-            className={classes.text}
-            InputLabelProps={{shrink: true}}
-            value={bidStartTime}
-            onChange={this.handleChangeText.bind(this, 'bidStartTime')}/>
-          <TextField id="date" label="終了" type="datetime-local"
-            className={classes.text}
-            InputLabelProps={{shrink: true}}
-            value={bidStopTime}
-            onChange={this.handleChangeText.bind(this, 'bidStopTime')}/>
-        </form>
+        <div className={classes.datetimes}>
+          <Checkbox checked={this.state.checked}
+            tabIndex={-1} disableRipple
+            checked={inBidding}
+            onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
+            className={classes.checkbox}/>
+          <Typography variant="subheading" noWrap
+            className={classes.title}>入札終了時期：</Typography>
+          <form className={classes.inputText} noValidate>
+            <TextField id="date" label="開始" type="datetime-local"
+              InputLabelProps={{shrink: true}}
+              value={bidStartTime}
+              onChange={this.handleChangeText.bind(this, 'bidStartTime')}
+              className={classes.text}/>
+            <TextField id="date" label="終了" type="datetime-local"
+              InputLabelProps={{shrink: true}}
+              value={bidStopTime}
+              onChange={this.handleChangeText.bind(this, 'bidStopTime')}
+              className={classes.text}/>
+          </form>
+        </div>
       </div>
       <div className={classes.edit}>
         <div className={classes.buttons}>
@@ -154,9 +161,8 @@ class BidsFilter extends React.Component {
             tabIndex={-1} disableRipple />
           <div className={classes.buttons}>
             <Button variant="raised"
-              className={classes.button}
-              onClick={this.handleDelete.bind(this)}>
-              削除</Button>
+              onClick={this.handleDelete.bind(this)}
+              className={classes.button}>削除</Button>
           </div>
         </div>
       </div>
@@ -166,10 +172,11 @@ class BidsFilter extends React.Component {
 
 const columnHeight = 62;
 const checkboxWidth = 38;
-const spaceWidth = 38;
-const minWidth = 125;
+const datetimeWidth = 200;
 const styles = theme => ({
-  space:        { minWidth: spaceWidth }
+  space:        { width: checkboxWidth }
+, datetimes:    { display: 'flex', flexDirection: 'row'
+                , marginLeft: theme.spacing.unit * 0.5}
 , title:        { margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
@@ -180,9 +187,8 @@ const styles = theme => ({
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
-, inputText:    { minWidth: minWidth*2 }
-, text:         { marginLeft: theme.spacing.unit
-                , marginRight: theme.spacing.unit }
+, inputText:    {  }
+, text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
 BidsFilter.displayName = 'BidsFilter';
 BidsFilter.defaultProps = { items: null };
