@@ -95,6 +95,16 @@ export default {
       dispatch({ type: 'star/delete/bids', ids });
     });
   },
+  createStar(ids) {
+    return NoteApiClient.createStar(ids).then(() => {
+      dispatch({ type: 'star/create', ids });
+    });
+  },
+  deleteStar(ids) {
+    return NoteApiClient.deleteStar(ids).then(() => {
+      dispatch({ type: 'star/delete', ids });
+    });
+  },
   upload(filename) {
     return NoteApiClient.uploadNotes(filename).then(notes => {
       dispatch({ type: 'note/upload', notes });

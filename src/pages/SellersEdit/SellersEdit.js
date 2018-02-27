@@ -2,17 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { withStyles } from 'material-ui/styles';
-//import RssItemList from 'Components/RssItemList/RssItemList';
+import RssItemList from 'Components/RssItemList/RssItemList';
 
 class SellersEdit extends React.Component {
   render() {
     const { classes, note } = this.props
     if(!note || !note.id) return null;
+    const items = note.items ? note.items : [];
     return <div className={classes.noteEdit}>
       <div className={classes.list}>
-      {/*
-        <RssItemList />
-      */}
+      <RssItemList items={items}/>
       </div>
     </div>;
   }
@@ -29,7 +28,7 @@ const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, list:     {}
+, list:     {  }
 });
 SellersEdit.displayName= 'SellersEdit';
 SellersEdit.defaultProps = { note: null };

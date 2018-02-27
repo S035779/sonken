@@ -67,6 +67,16 @@ export default {
           );
         });
         break;
+      case 'fetch/starred':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/starred'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -182,6 +192,26 @@ export default {
           );
         });
         break;
+      case 'create/starred':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/starred'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/starred':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/starred'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       default:
         return new Promise((resolve, reject) => {
           reject(options);
@@ -198,6 +228,15 @@ export default {
   },
   fetchReadedNotes() {
     return this.request('fetch/readed', { user });
+  },
+  fetchTradedNotes() {
+    return this.request('fetch/traded', { user });
+  },
+  fetchBidedNotes() {
+    return this.request('fetch/bided', { user });
+  },
+  fetchStarredNotes() {
+    return this.request('fetch/starred', { user });
   },
   fetchNote(id) {
     return this.request('fetch/note', { user, id });
@@ -252,6 +291,12 @@ export default {
   },
   deleteBids(ids) {
     return this.request('delete/bided', { user, ids });
+  },
+  createStar(ids) {
+    return this.request('create/starred', { user, ids });
+  },
+  deleteStar(ids) {
+    return this.request('delete/starred', { user, ids });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });

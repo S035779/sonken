@@ -9,26 +9,29 @@ import {
   List, Paper, Checkbox, Button, Typography
 }                     from 'material-ui';
 import {
-  ListItem, ListItemText, ListItemSecondaryAction
+  ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
 }                     from 'material-ui/List';
+import { Star, StarBorder } from 'material-ui-icons';
 
-class BidsItemList extends React.Component {
+class SellersItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      traded:         []
-    , selectedItemId: props.selectedItemId
+      traded:  []
+    , starred: []
     };
   }
 
   componentWillReceiveProps(nextProps) {
     this.logInfo('componentWillReciveProps', nextProps);
-    const { selectedItemId, items } = nextProps;
+    const { items } = nextProps;
     let traded = [];
+    let starred = [];
     items.forEach(item => {
       if(item.traded) traded.push(item.guid._);
+      if(item.starred) starred.push(item.guid._);
     });
-    this.setState({ selectedItemId, traded });
+    this.setState({ traded, starred });
   }
 
   handleChangeTraded(id, event) {
@@ -46,23 +49,38 @@ class BidsItemList extends React.Component {
     this.setState({ traded: newTraded });
   }
 
-  handleChangeCheckbox(id, event) {
-    this.logInfo('handleChangeCheckbox', id);
-    const { selectedItemId } = this.state;
-    const currentIndex = selectedItemId.indexOf(id);
-    const newChecked = [...selectedItemId];
-    if (currentIndex === -1)  newChecked.push(id);
-    else newChecked.splice(currentIndex, 1);
-    NoteAction.select(newChecked);
+  handleChangeStarred(id, event) {
+    this.logInfo('handleChangeStarred', id);
+    const { starred } = this.state;
+    const currentIndex = starred.indexOf(id);
+    const newStarred = [...starred];
+    if (currentIndex === -1) {
+      newStarred.push(id);
+      NoteAction.createStar([id]);
+    } else {
+      newStarred.splice(currentIndex, 1);
+      NoteAction.deleteStar([id]);
+    }
+    this.setState({ starred: newStarred });
   }
 
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
   }
 
+  renderStar() {
+    const { classes } = this.props;
+    return <Star className={classes.star}/>;
+  }
+
+  renderUnStar() {
+    const { classes } = this.props;
+    return <StarBorder className={classes.star}/>;
+  }
+
   renderItem(index, item) {
     const { classes } = this.props;
-    const { traded } = this.state;
+    const { traded, starred } = this.state;
     const textClass = {
       primary: classes.primary
     , secondary: classes.secondary
@@ -79,14 +97,14 @@ class BidsItemList extends React.Component {
       + `AuctionID：${item.guid._}`
     ;
     const notice = '';
+    const renderStar = starred.indexOf(item.guid._) !== -1
+      ? this.renderStar() : this.renderUnStar();
     return <div key={index} className={classes.noteItem}>
-      <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
-        checked={this.state.selectedItemId.indexOf(item.guid._) !== -1}
-        tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters
+          onClick={this.handleChangeStarred.bind(this, item.guid._)}
           className={classes.listItem}>
+          <ListItemIcon>{renderStar}</ListItemIcon>
             <div className={classes.description}>
               <a href={item.description.DIV.A.$.HREF}>
               <img
@@ -110,9 +128,6 @@ class BidsItemList extends React.Component {
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>
-      <div className={classes.notice}>
-        <Typography noWrap>{notice}</Typography>
-      </div>
     </div>;
   }
 
@@ -128,8 +143,8 @@ class BidsItemList extends React.Component {
 const barHeightSmDown   = 104;
 const barHeightSmUp     = 112;
 const searchHeight      = 62;
-const filterHeight      = 186;
-const itemHeight        = 160;
+const filterHeight      = 62 * 9;
+const itemHeight        = 142;
 const descMinWidth      = 133;
 const listHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
@@ -137,7 +152,7 @@ const listHeightSmUp    =
   `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  noteList:     { width: '100%', overflow: 'scroll'
+  noteList:     { width: '100%'
                 , height: listHeightSmDown
                 , [theme.breakpoints.up('sm')]: {
                   height: listHeightSmUp }}
@@ -146,9 +161,9 @@ const styles = theme => ({
   , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
                 , '&:hover':  {
                   backgroundColor: theme.palette.primary.main
-                  , '& $checkbox': { color: theme.palette.common.white }}}
+                  , '& $star': { color: theme.palette.common.white }}}
   , listItemText: { marginRight: descMinWidth }
-  , checkbox:   {}
+  , star:       { marginLeft: theme.spacing.unit }
   , button:     { width: 128, wordBreak: 'keep-all' }
   , paper:      { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {
@@ -157,14 +172,12 @@ const styles = theme => ({
                     color: theme.palette.common.white }}}   
   , primary:    {}
   , secondary:  {}
-  , notice:     { flex:1, padding: theme.spacing.unit /2
-                , minWidth: noticeWidth }
   , description: { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
 });
-BidsItemList.displayName = 'BidsItemList';
-BidsItemList.defaultProps = { items: null }
-BidsItemList.propTypes = {
+SellersItemList.displayName = 'SellersItemList';
+SellersItemList.defaultProps = { items: null }
+SellersItemList.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(BidsItemList);
+export default withStyles(styles)(SellersItemList);

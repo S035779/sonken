@@ -27,6 +27,30 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
+const deleteStar = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteStar({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete Star.'); }  
+  );
+};
+
+const createStar = (req, res, next) => {
+  const { user, ids } = req.body;
+  feed.createStar({ user, ids }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to create Star.'); }  
+  );
+};
+
 const deleteBids = (req, res, next) => {
   const { user, ids } = req.query;
   feed.deleteBids({ user, ids }).subscribe(
@@ -135,6 +159,18 @@ const updateNote = (req, res, next) => {
   );
 };
 
+const fetchReadedNotes = (req, res, next) => {
+  const { user } = req.query;
+  feed.fetchReadedNotes({ user }).subscribe(
+    obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to fetch Readed.'); }  
+  );
+};
+
 const fetchTradedNotes = (req, res, next) => {
   const { user } = req.query;
   feed.fetchTradedNotes({ user }).subscribe(
@@ -159,15 +195,15 @@ const fetchBidedNotes = (req, res, next) => {
   );
 };
 
-const fetchReadedNotes = (req, res, next) => {
+const fetchStarredNotes = (req, res, next) => {
   const { user } = req.query;
-  feed.fetchReadedNotes({ user }).subscribe(
+  feed.fetchStarredNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
     res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
-  , () => { log.info('Complete to fetch Readed.'); }  
+  , () => { log.info('Complete to fetch Starred.'); }  
   );
 };
 
@@ -222,6 +258,12 @@ router.route('/bided')
 .put(createBids)
 .post(notImplemented)
 .delete(deleteBids);
+
+router.route('/starred')
+.get(fetchStarredNotes)
+.put(createStar)
+.post(notImplemented)
+.delete(deleteStar);
 
 router.route('/item')
 .get(notImplemented)

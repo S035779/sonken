@@ -4,7 +4,6 @@ import PropTypes      from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import RssForms       from 'Components/RssForms/RssForms';
 import RssView        from 'Components/RssView/RssView';
-//import RssItemList    from 'Components/RssItemList/RssItemList';
 
 class MarchantEdit extends React.Component {
   render() {
@@ -17,12 +16,6 @@ class MarchantEdit extends React.Component {
             <RssView note={note}/>
           </div>
         </RssForms>
-      </div>
-      <div className={classes.list}>
-      {/*}
-        <RssItemList 
-          items={_items}/>
-          */}
       </div>
     </div>;
   }
@@ -49,7 +42,6 @@ const styles = theme => ({
               , padding: '5px 10px'
               , content: '"Preview"', fontSize: '12px'
               , backgroundColor: '#F5F5F5' }}
-, list:     {}
 });
 MarchantEdit.displayName= 'MarchantEdit';
 MarchantEdit.defaultProps = { note: null };

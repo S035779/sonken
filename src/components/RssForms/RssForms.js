@@ -6,6 +6,7 @@ import { withStyles } from 'material-ui/styles';
 import { Input, Button, Typography, TextField } from 'material-ui';
 import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
+import MarchantItemList    from 'Components/MarchantItemList/MarchantItemList';
 
 const mon = '//www.mnrate.com/item/aid/';
 const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
@@ -76,6 +77,7 @@ class RssForms extends React.Component {
     const link_mon = mon + asin;
     const link_fba = fba;
     const link_amz = amz + asin;
+    const items = note.items ? note.items : [];
     return <div className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap
@@ -141,6 +143,7 @@ class RssForms extends React.Component {
           onChange={this.handleChangeInput.bind(this, 'body')}/>
         </div>
       </div>
+      <MarchantItemList items={items}/>
     </div>;
   }
 };

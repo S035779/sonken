@@ -5,10 +5,11 @@ import Rx from 'rx';
 import std from 'Utilities/stdutils';
 import net from 'Utilities/netutils';
 import { logs as log } from 'Utilities/logutils';
-let notes = require('Services/data');
-let readed = [{ user: 'MyUserName', ids: [] }];
-let traded = [{ user: 'MyUserName', ids: [] }];
-let bided = [{ user: 'MyUserName', ids: [] }];
+let notes   = require('Services/data');
+let readed  = [{ user: 'MyUserName', ids: [] }];
+let traded  = [{ user: 'MyUserName', ids: [] }];
+let bided   = [{ user: 'MyUserName', ids: [] }];
+let starred = [{ user: 'MyUserName', ids: [] }];
 
 const pspid = 'FeedParser';
 
@@ -32,67 +33,82 @@ class FeedParser {
 
   request(request, options) {
     //this.logTrace(request, options);
+    //this.logTrace('readed:', readed);
+    //this.logTrace('traded:', traded);
+    //this.logTrace('bided:', bided);
+    const setNotes   = objs => { return notes   = objs };
+    const setReaded  = objs => { return readed  = objs };
+    const setTraded  = objs => { return traded  = objs };
+    const setBided   = objs => { return bided   = objs };
+    const setStarred = objs => { return starred = objs };
+    const noteIds = R.compose(R.map(Number), R.split(','));
+    const itemIds = R.split(',');
+    const delNoteIds  = ids =>
+      R.symmetricDifference(noteIds(options.ids), ids)
+    const delItemIds  = ids =>
+      R.symmetricDifference(itemIds(options.ids), ids);
     const isUsr   = obj => obj.user === options.user;
     const isId    = obj => obj.id === options.id;
-    const isData  = objs => R.filter(isUsr, objs);
-    const isIds   = objs => { const data = isData(objs) };
-    const isRead  = obj => R.contains(obj.id, isUsrs(readed));
-    const isTrade = obj => R.contains(obj.id, isUsrs(traded));
-    const isBids  = obj => R.contains(obj.id, isUsrs(bided));
-    const setRead = obj => Object.assign({}, obj, {readed: isRead(obj)}); 
-    const setTrade = obj =>
-      Object.assign({}, obj, {traded: isTrade(obj)}); 
-    const setBids = obj => Object.assign({}, obj, {bided: isBids(obj)}); 
-    const _updNote = obj => Object.assign({}, obj, options.data);
-    const updNote = obj => isId(obj) ? _updNote(obj) : obj;
-    const setNotes = objs => { return notes = objs };
-    const setReaded = objs => { return readed = objs };
-    const noteIds = R.compose(R.map(Number), R.split(','));
-    const itemIds = obj => R.split(',', obj);
+    const getIds  = R.compose(obj => obj.ids, R.head, R.filter(isUsr));
+    const _setIds = (ids, obj) => isUsr(obj) ? Object.assign({}, obj
+    , { ids }) : obj;
+    const setIds  = R.curry(_setIds);
+    const updIds  = ids =>
+      R.compose( R.concat(ids), R.difference(options.ids) )(ids);
+    const isRead  = obj => R.contains(obj.id,     getIds(readed));
+    const isTrade = obj => R.contains(obj.guid._, getIds(traded));
+    const isBids  = obj => R.contains(obj.guid._, getIds(bided) );
+    const isStar  = obj => R.contains(obj.guid._, getIds(starred) );
+    const setRead   = obj => Object.assign({}, obj
+    , { readed:  isRead(obj)   }); 
+    const setTrade  = obj => Object.assign({}, obj
+    , { traded:  isTrade(obj)  }); 
+    const setBids   = obj => Object.assign({}, obj
+    , { bided:   isBids(obj)   }); 
+    const setStar   = obj => Object.assign({}, obj
+    , { starred: isStar(obj)   }); 
+    const _setTradeItems  = obj => R.map(setTrade,  obj.items);
+    const _setBidsItems   = obj => R.map(setBids,   obj.items);
+    const _setStarItems   = obj => R.map(setStar,   obj.items);
+    const setTradeItems   = obj => obj.items ? Object.assign({}, obj
+    , { items: _setTradeItems(obj) }) : obj;
+    const setBidsItems    = obj => obj.items ? Object.assign({}, obj
+    , { items: _setBidsItems(obj)  }) : obj;
+    const setStarItems    = obj => obj.items ? Object.assign({}, obj
+    , { items: _setStarItems(obj)  }) : obj;
+    const updReaded   = ids => R.map(setIds(ids), readed  );
+    const updTraded   = ids => R.map(setIds(ids), traded  );
+    const updBided    = ids => R.map(setIds(ids), bided   );
+    const updStarred  = ids => R.map(setIds(ids), starred );
+    const _updNote  = obj => Object.assign({}, obj, options.data);
+    const updNote   = obj => isId(obj) ? _updNote(obj) : obj;
     const _isNoteIds = (obj, ids) => R.any(id => obj.id === id, ids);
     const _isItemIds = (obj, ids) => R.any(id => obj.guid._ === id, ids);
-    const delNote  = obj => !_isNoteIds(obj, noteIds(options.ids));
-    const _delItem = obj => !_isItemIds(obj, itemIds(options.ids));
-    const delItem = obj => obj.items
-      ? Object.assign({}, obj, { items: R.filter(_delItem, obj.items )})
-      : obj;
-    const price = R.compose(
-      R.join('')
-    , R.map(R.last)
-    , R.map(R.split(':'))
-    , R.match(/現在価格:[0-9,]+/g)
-    );
-    const bids  = R.compose(
-      R.join('')
-    , R.map(R.last)
-    , R.map(R.split(':'))
-    , R.match(/入札数:[0-9-]+/g)
-    );
-    const bidStopTime = R.compose(
-      R.join('')
-    , R.map(R.join(':'))
-    , R.map(R.tail)
-    , R.map(R.split(':'))
-    , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g)
-    );
-    const _setItem = (obj, str) => Object.assign({}, options.xml, {
-      description:    obj
-    , price:        price(str)
-    , bids:         bids(str)
-    , bidStopTime:  bidStopTime(str)
-    });
+    const delNote = obj => !_isNoteIds(obj, noteIds(options.ids));
+    const delItem = obj => !_isItemIds(obj, itemIds(options.ids));
+    const _delItems = obj => R.filter(delItem, obj.items);
+    const delItems  = obj => obj.items ? Object.assign({}, obj
+    , { items: _delItems(obj)}) : obj;
+    const price = R.compose( R.join(''), R.map(R.last), R.map(R.split(':'))
+    , R.match(/現在価格:[0-9,]+/g));
+    const bids  = R.compose( R.join(''), R.map(R.last), R.map(R.split(':'))
+    , R.match(/入札数:[0-9-]+/g));
+    const bidStopTime = R.compose(R.join(''), R.map(R.join(':'))
+    , R.map(R.tail), R.map(R.split(':'))
+    , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g));
+    const _setItem = (obj, str) => Object.assign({}, options.xml
+    , { description: obj, price: price(str), bids: bids(str)
+      , bidStopTime: bidStopTime(str) });
     const setItem = R.curry(_setItem);
-    const newItem = obj => R.compose(
-      setItem(obj)
-    , R.last
-    , R.split('>')
-    );
-
+    const newItem = obj => R.compose( setItem(obj), R.last, R.split('>') );
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           const response = R.compose(
-            R.map(setRead)
+            R.map(setStarItems)
+          , R.map(setBidsItems)
+          , R.map(setTradeItems)
+          , R.map(setRead)
           , R.filter(isUsr)
           );
           resolve(response(notes));
@@ -102,8 +118,7 @@ class FeedParser {
         return new Promise((resolve, reject) => {
           const response = R.compose(
             R.map(setRead)
-          , R.filter(isRead)
-          , R.filter(isUser)
+          , R.filter(isUsr)
           );
           resolve(response(notes));
         });
@@ -111,9 +126,8 @@ class FeedParser {
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
           const response = R.compose(
-            R.map(setTrade)
-          , R.filter(isTrade)
-          , R.filter(isUser)
+            R.map(setTradeItems)
+          , R.filter(isUsr)
           );
           resolve(response(notes));
         });
@@ -121,9 +135,17 @@ class FeedParser {
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
           const response = R.compose(
-            R.map(setBids)
-          , R.filter(isBids)
-          , R.filter(isUser)
+            R.map(setBidsItems)
+          , R.filter(isUsr)
+          );
+          resolve(response(notes));
+        });
+        break;
+      case 'fetch/starred':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            R.map(setStarItems)
+          , R.filter(isUsr)
           );
           resolve(response(notes));
         });
@@ -131,7 +153,9 @@ class FeedParser {
       case 'fetch/note':
         return new Promise((resolve, reject) => {
           const response = R.compose(
-            setRead
+            setBidsItems
+          , setTradeItems
+          , setRead
           , R.filter(isId)
           , R.filter(isUsr)
           );
@@ -173,29 +197,105 @@ class FeedParser {
           const response = R.compose(
             () => 'OK'
           , setReaded
-          , R.concat(readed)
-          , R.difference(options.ids)
-          , R.map(isUsrs)
+          , updReaded
+          , updIds
+          , getIds
           );
           resolve(response(readed));
         });
         break;
       case 'delete/readed':
+        return new Promise((resolve, reject) => {
           const response = R.compose(
             () => 'OK'
           , setReaded
-          , R.difference(options.ids)
+          , updReaded
+          , delNoteIds
+          , getIds
           );
           resolve(response(readed));
+        });
         break;
       case 'delete/item':
         return new Promise((resolve, reject) => {
           const response = R.compose(
             () => 'OK'
           , setNotes
-          , R.map(delItem)
+          , R.map(delItems)
           );
           resolve(response(notes));
+        });
+        break;
+      case 'create/traded':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setTraded
+          , updTraded
+          , updIds
+          , getIds
+          );
+          resolve(response(traded));
+        });
+        break;
+      case 'delete/traded':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setTraded
+          , updTraded
+          , delItemIds
+          , getIds
+          );
+          resolve(response(traded));
+        });
+        break;
+      case 'create/bided':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setBided
+          , updBided
+          , updIds
+          , getIds
+          );
+          resolve(response(bided));
+        });
+        break;
+      case 'delete/bided':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setBided
+          , updBided
+          , delItemIds
+          , getIds
+          );
+          resolve(response(bided));
+        });
+        break;
+      case 'create/starred':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setStarred
+          , updStarred
+          , updIds
+          , getIds
+          );
+          resolve(response(starred));
+        });
+        break;
+      case 'delete/starred':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setStarred
+          , updStarred
+          , delItemIds
+          , getIds
+          );
+          resolve(response(starred));
         });
         break;
       case 'fetch/rss':
@@ -245,16 +345,40 @@ class FeedParser {
     }
   }
 
+  addStar(user, ids) {
+    return this.request('create/starred', { user, ids });
+  }
+
+  removeStar(user, ids) {
+    return this.request('delete/starred', { user, ids });
+  }
+
+  addBids(user, ids) {
+    return this.request('create/bided', { user, ids });
+  }
+
+  removeBids(user, ids) {
+    return this.request('delete/bided', { user, ids });
+  }
+
+  addTrade(user, ids) {
+    return this.request('create/traded', { user, ids });
+  }
+
+  removeTrade(user, ids) {
+    return this.request('delete/traded', { user, ids });
+  }
+
   removeItem(user, ids) {
     return this.request('delete/item', { user, ids });
   }
 
-  removeRead(user, ids) {
-    return this.request('delete/readed', { user, ids });
-  }
-
   addRead(user, ids) {
     return this.request('create/readed', { user, ids });
+  }
+
+  removeRead(user, ids) {
+    return this.request('delete/readed', { user, ids });
   }
 
   removeNote(user, ids) {
@@ -271,6 +395,18 @@ class FeedParser {
 
   getNotes(user) {
     return this.request('fetch/notes', { user });
+  }
+
+  getStarredNotes(user) {
+    return this.request('fetch/starred', { user });
+  }
+
+  getBidedNotes(user) {
+    return this.request('fetch/bided', { user });
+  }
+
+  getTradedNotes(user) {
+    return this.request('fetch/traded', { user });
   }
 
   getReadedNotes(user) {
@@ -324,8 +460,8 @@ class FeedParser {
 
   createNote({ user, url, category }) {
     const setNotes = R.curry(this.setNotes);
-    const addNote = 
-      obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+    const addNote = obj =>
+      Rx.Observable.fromPromise(this.addNote(user, obj));
     let _notes = [];
     return this.forRss([ url ])
       .flatMap(objs => this.forXmlNote(objs))
@@ -333,15 +469,13 @@ class FeedParser {
         _notes = objs;
         return this.forXmlItem(_notes);
       })
-      .map(item => {
-        return R.map(_note => {
-          this.logTrace('createNote', item);
-          return Object.assign({}, _note.rss.channel, { item });
-        }, _notes)
-      })
+      .map(item => 
+        R.map(_note => Object.assign({}, _note.rss.channel, { item })
+      , _notes)
+      )
       .map(setNotes({ user, url, category }))
-      .map(R.tap(this.logTrace.bind(this)))
       .flatMap(objs => addNote(objs[0]))
+      //.map(R.tap(this.logTrace.bind(this)))
   }
 
   fetchNote({ user, id }) {
@@ -360,6 +494,10 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.getBidedNotes(user));
   }
 
+  fetchStarredNotes({ user }) {
+    return Rx.Observable.fromPromise(this.getStarredNotes(user));
+  }
+
   fetchNotes({ user }) {
     return Rx.Observable.fromPromise(this.getNotes(user));
   }
@@ -372,16 +510,40 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.removeNote(user, ids));
   }
 
-  deleteRead({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeRead(user, ids));
-  }
-
   createRead({ user, ids }) {
     return Rx.Observable.fromPromise(this.addRead(user, ids));
   }
 
+  deleteRead({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeRead(user, ids));
+  }
+
   deleteItem({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeItem(user, ids));
+  }
+
+  createTrade({ user, ids }) {
+    return Rx.Observable.fromPromise(this.addTrade(user, ids));
+  }
+
+  deleteTrade({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeTrade(user, ids));
+  }
+
+  createBids({ user, ids }) {
+    return Rx.Observable.fromPromise(this.addBids(user, ids));
+  }
+
+  deleteBids({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeBids(user, ids));
+  }
+
+  createStar({ user, ids }) {
+    return Rx.Observable.fromPromise(this.addStar(user, ids));
+  }
+
+  deleteStar({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeStar(user, ids));
   }
 
   parseFile({ user, file, category }) {
@@ -414,6 +576,5 @@ class FeedParser {
     });
     return R.map(setNote, objs);
   }
-
 };
 export default FeedParser;
