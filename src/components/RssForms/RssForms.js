@@ -6,7 +6,7 @@ import { withStyles } from 'material-ui/styles';
 import { Input, Button, Typography, TextField } from 'material-ui';
 import { InputLabel } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
-import MarchantItemList    from 'Components/MarchantItemList/MarchantItemList';
+import RssItemList    from 'Components/RssItemList/RssItemList';
 
 const mon = '//www.mnrate.com/item/aid/';
 const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
@@ -143,40 +143,54 @@ class RssForms extends React.Component {
           onChange={this.handleChangeInput.bind(this, 'body')}/>
         </div>
       </div>
-      <MarchantItemList items={items}/>
+      <div className={classes.noteList}>
+      <RssItemList items={items}/>
+      </div>
     </div>;
   }
 };
 
+const barHeightSmDown   = 104;
+const barHeightSmUp     = 112;
+const searchHeight      = 62;
+const filterHeight      = 62 * 9;
+const listHeightSmDown  =
+  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    =
+  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const listWidth = 400;
 const columnHeight = 62;
 const editWidth = `calc(100% - ${listWidth}px)`;
 const styles = theme => ({
-  forms:      { display: 'flex', flexDirection: 'column' }
-, header:     { height: columnHeight, minHeight: columnHeight
-              , boxSizing: 'border-box'
-              , padding: '5px' }
-, title:      { margin: theme.spacing.unit * 1.75 }
-, edit:       { display: 'flex', flexDirection: 'row'
-              , alignItems: 'stretch'
-              , height: columnHeight, minHeight: columnHeight
-              , boxSizing: 'border-box'
-              , padding: '5px' }
-, buttons:    { display: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, margin: theme.spacing.unit
-              , wordBreak: 'keep-all' }
-, link:       { flex: 1, margin: theme.spacing.unit /2
-              , wordBreak: 'keep-all' }
-, name:       { flex: 1, margin: theme.spacing.unit /2
-              , border: '1px solid #CCC'
-              , wordBreak: 'keep-all' }
-, text:       { marginLeft: theme.spacing.unit * 1.75 }
-, memo:       { display: 'flex', flexDirection: 'row'
-              , alignItems: 'stretch'
-              , height: columnHeight * 2, minHeight: columnHeight * 2
-              , boxSizing: 'border-box' }
-, field:      { paddingTop: 5 }
-, textarea:   { width: '100%', padding: 5 }
+  forms:        { display: 'flex', flexDirection: 'column' }
+, noteList:     { width: '100%'
+                , height: listHeightSmDown
+                , [theme.breakpoints.up('sm')]: {
+                  height: listHeightSmUp }}
+, header:       { height: columnHeight, minHeight: columnHeight
+                , boxSizing: 'border-box'
+                , padding: '5px' }
+, title:        { margin: theme.spacing.unit * 1.75 }
+, edit:         { display: 'flex', flexDirection: 'row'
+                , alignItems: 'stretch'
+                , height: columnHeight, minHeight: columnHeight
+                , boxSizing: 'border-box'
+                , padding: '5px' }
+, buttons:      { display: 0, display: 'flex', flexDirection: 'row' }
+, button:       { flex: 1, margin: theme.spacing.unit
+                , wordBreak: 'keep-all' }
+, link:         { flex: 1, margin: theme.spacing.unit /2
+                , wordBreak: 'keep-all' }
+, name:         { flex: 1, margin: theme.spacing.unit /2
+                , border: '1px solid #CCC'
+                , wordBreak: 'keep-all' }
+, text:         { marginLeft: theme.spacing.unit * 1.75 }
+, memo:         { display: 'flex', flexDirection: 'row'
+                , alignItems: 'stretch'
+                , height: columnHeight * 2, minHeight: columnHeight * 2
+                , boxSizing: 'border-box' }
+, field:        { paddingTop: 5 }
+, textarea:     { width: '100%', padding: 5 }
 });
 RssForms.displayName = 'RssForms';
 RssForms.defaultProps = { note: null };

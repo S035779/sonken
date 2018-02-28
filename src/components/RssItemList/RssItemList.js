@@ -13,7 +13,7 @@ import {
 }                     from 'material-ui/List';
 import { Star, StarBorder } from 'material-ui-icons';
 
-class SellersItemList extends React.Component {
+class RssItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -135,49 +135,35 @@ class SellersItemList extends React.Component {
     const { classes, items } = this.props;
     const renderItems =
       items.map((item, index) => this.renderItem(index, item));
-    return <List className={classes.noteList}>
-      {renderItems}
-    </List>;
+    return <List>{renderItems}</List>;
   }
 };
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
-const searchHeight      = 62;
-const filterHeight      = 62 * 9;
 const itemHeight        = 142;
 const descMinWidth      = 133;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  noteList:     { width: '100%'
-                , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: {
-                  height: listHeightSmUp }}
-  , noteItem:   { display: 'flex', flexDirection: 'row'
+noteItem:       { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }
-  , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
+, listItem:     { height: itemHeight, padding: theme.spacing.unit /2
                 , '&:hover':  {
                   backgroundColor: theme.palette.primary.main
                   , '& $star': { color: theme.palette.common.white }}}
-  , listItemText: { marginRight: descMinWidth }
-  , star:       { marginLeft: theme.spacing.unit }
-  , button:     { width: 128, wordBreak: 'keep-all' }
-  , paper:      { width: '100%', margin: theme.spacing.unit /8
+, listItemText: { marginRight: descMinWidth }
+, star:         { marginLeft: theme.spacing.unit }
+, button:       { width: 128, wordBreak: 'keep-all' }
+, paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {
                   backgroundColor: theme.palette.primary.main
                   , '& $primary, $secondary': {
                     color: theme.palette.common.white }}}   
-  , primary:    {}
-  , secondary:  {}
-  , description: { minWidth: descMinWidth, width: descMinWidth
+, primary:      {}
+, secondary:    {}
+, description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
 });
-SellersItemList.displayName = 'SellersItemList';
-SellersItemList.defaultProps = { items: null }
-SellersItemList.propTypes = {
+RssItemList.displayName = 'RssItemList';
+RssItemList.defaultProps = { items: null }
+RssItemList.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(SellersItemList);
+export default withStyles(styles)(RssItemList);
