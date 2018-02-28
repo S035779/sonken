@@ -24,23 +24,29 @@ class RssSearch extends React.Component {
     this.setState({ perPage: notePage.perPage });
   }
 
-  handleSubmit() {
+  handleSubmit(e) {
+    e.preventDefault();
     const { url } = this.state;
     const { category } = this.props;
     this.logInfo('handleSubmit', url);
     NoteAction.create({ url, category });
+    this.setState({ url: '' });
   }
 
-  handleUpload() {
+  handleUpload(e) {
+    e.preventDefault();
     const { filename } = this.state;
     this.logInfo('handleUpload', filename);
     NoteAction.upload(filename);
+    this.setState({ filename: '' });
   }
 
-  handleDownload() {
+  handleDownload(e) {
+    e.preventDefault();
     const { filename } = this.state;
     this.logInfo('handleDownload', filename);
     NoteAction.download(filename);
+    this.setState({ filename: '' });
   }
 
   handleChangeText(name, event) {

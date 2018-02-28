@@ -1,39 +1,74 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
 
-import { withStyles } from 'material-ui/styles';
-import { Select, Input, Button, Typography } from 'material-ui';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import { MenuItem } from 'material-ui/Menu';
+import { withStyles }   from 'material-ui/styles';
+import {
+  Select, Input, Button, Typography
+}                       from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormControl }  from 'material-ui/Form';
+import { MenuItem }     from 'material-ui/Menu';
 
 class TradeSearch extends React.Component {
-  handleDownload() {
-    this.props.onDownload();
+  constructor(props) {
+    super(props);
+    this.state = {
+      filename:  ''
+    , perPage:   props.itemNumber
+    };
   }
 
-  handleChangeSelect(event) {
-    this.props.onChangeSelect(event.target.value);
+  componentWillReceiveProps(nextProps) {
+    this.logInfo('componentWillReceiveProps', nextProps);
+    const { itemPage } = nextProps;
+    this.setState({ perPage: itemPage.perPage });
+  }
+
+  handleDownload() {
+    const { filename } = this.state;
+    this.logInfo('handleDownload', filename);
+    NoteAction.download(filename);
+  }
+
+  handleChangeSelect(name, event) {
+    const { itemNumber } = this.props;
+    const value = event.target.value;
+    this.logInfo('handleChangeSelet', value);
+    switch(name) {
+      case 'page':
+        NoteAction.pagenation({
+          maxNumber: Math.ceil(itemNumber / value)
+          , number: 1, perPage: value
+        });
+        this.setState({ perPage: value });
+        break;
+    }
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
   render() {
-    const {classes, textValue, selectValue} = this.props;
+    const { classes, itemNumber } = this.props;
+    const { perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{213}件中{20}件表示
+          全{itemNumber}件中{
+            perPage > itemNumber ? itemNumber : perPage
+          }件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select value={20}
-          onChange={this.handleChangeSelect}
-          inputProps={{name: 'results', id: 'results'}}>
-          <MenuItem value=""><em>None</em></MenuItem>
+        <Select value={perPage}
+          onChange={this.handleChangeSelect.bind(this, 'page')}>
+          <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>
-          <MenuItem value={1000}>ALL</MenuItem>
         </Select>
       </FormControl>
       <div className={classes.inputText} />
@@ -72,7 +107,7 @@ const styles = theme => ({
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
 TradeSearch.displayName = 'TradeSearch';
-TradeSearch.defaultProps = { notes: null };
+TradeSearch.defaultProps = {};
 TradeSearch.propTypes = {
   classes: PropTypes.object.isRequired
 };

@@ -1,7 +1,7 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Container }  from 'flux/utils';
-import NoteAction     from 'Actions/NoteAction';
+import NoteAction    from 'Actions/NoteAction';
 import {
   getStores, getState
 }                     from 'Stores';
@@ -13,21 +13,21 @@ import TradeItemList  from 'Components/TradeItemList/TradeItemList';
 
 class Trade extends React.Component {
   static getStores() {
-    return getStores(['dashboardStore']);
+    return getStores(['tradedNotesStore']);
   }
 
   static calculateState() {
-    return getState('dashboardStore');
+    return getState('tradedNotesStore');
   }
 
   static prefetch(props) {
     console.log('Trade prefetch!!', 'Props:', props)
-    return NoteAction.fetchNotes(props);
+    return NoteAction.prefetchTraded(props);
   }
 
   componentDidMount() {
     this.logInfo('Trade did mount!!');
-    NoteAction.fetchMyNotes();
+    NoteAction.fetchTraded();
   }
 
   logInfo(name, info) {
@@ -46,7 +46,7 @@ class Trade extends React.Component {
     const yesterday = new Date(year, month, day);
     const isDay = yesterday <= now && now < today; 
     const isAll = true;
-    const isNow = start < now && now < stop;
+    const isNow = start <= now && now <= stop;
     return filter.inBidding
       ? isNow
       : filter.endBidding && filter.allBidding
@@ -79,15 +79,29 @@ class Trade extends React.Component {
         items={_items}
         itemFilter={filter}
         selectedItemId={ids}/>
-      <TradeItemList
-        items={_items}
-        selectedItemId={ids}/>
-      </div>;
+      <div className={classes.noteList}>
+        <TradeItemList
+          items={_items}
+          selectedItemId={ids}/>
+      </div>
+    </div>;
   }
 };
-const styles = {
-  root:   { display: 'flex', flexDirection: 'column' }
-};
+
+const barHeightSmDown   = 104;
+const barHeightSmUp     = 112;
+const filterHeight      = 186;
+const searchHeight      = 62;
+const listHeightSmDown  =
+  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    =
+  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
+const styles = theme => ({
+  root:     { display: 'flex', flexDirection: 'column' }
+, noteList: { width: '100%', overflow: 'scroll'
+            , height: listHeightSmDown
+            , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
+});
 Trade.displayName = 'Trade';
 Trade.defaultProps = { notes: null };
 Trade.propTypes = {

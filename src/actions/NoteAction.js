@@ -5,22 +5,36 @@ const pspid = 'NoteAction';
 
 export default {
   rehydrate(state) {
-    dispatch({ type: 'note/rehydrate', state: state.noteStore });
     dispatch({ type: 'note/rehydrate/my', state: state.dashboardStore });
+  },
+  prefetchNotes() {
+    return NoteApiClient.prefetchNotes().then(notes => {
+      dispatch({ type: 'note/prefetch/my', notes });
+    });
+  },
+  prefetchBided() {
+    return NoteApiClient.prefetchBidedNotes().then(notes => {
+      dispatch({ type: 'note/prefetch/bided', notes });
+    });
+  },
+  prefetchTraded() {
+    return NoteApiClient.prefetchTradedNotes().then(notes => {
+      dispatch({ type: 'note/prefetch/traded', notes });
+    });
   },
   fetchNotes() {
     return NoteApiClient.fetchNotes().then(notes => {
       dispatch({ type: 'note/fetch/my', notes });
     });
   },
-  fetchMyNotes() {
-    return NoteApiClient.fetchMyNotes().then(notes => {
-      dispatch({ type: 'note/fetch/my', notes });
+  fetchBided() {
+    return NoteApiClient.fetchBidedNotes().then(notes => {
+      dispatch({ type: 'note/fetch/bided', notes });
     });
   },
-  fetchStarred() {
-    return NoteApiClient.fetchStarredNotes().then(notes => {
-      dispatch({ type: 'note/fetch/starred', notes });
+  fetchTraded() {
+    return NoteApiClient.fetchTradedNotes().then(notes => {
+      dispatch({ type: 'note/fetch/traded', notes });
     });
   },
   fetch(id) {
@@ -57,12 +71,12 @@ export default {
   },
   createRead(ids) {
     return NoteApiClient.createRead(ids).then(() => {
-      dispatch({ type: 'star/create/read', ids });
+      dispatch({ type: 'read/create', ids });
     });
   },
   deleteRead(ids) {
     return NoteApiClient.deleteRead(ids).then(() => {
-      dispatch({ type: 'star/delete/read', ids });
+      dispatch({ type: 'read/delete', ids });
     });
   },
   deleteItem(ids) {
@@ -73,26 +87,6 @@ export default {
   filterItem(filter) {
     return NoteApiClient.filterItem(filter).then(() => {
       dispatch({ type: 'item/filter', filter });
-    });
-  },
-  createTrade(ids) {
-    return NoteApiClient.createTrade(ids).then(() => {
-      dispatch({ type: 'star/create/trade', ids });
-    });
-  },
-  deleteTrade(ids) {
-    return NoteApiClient.deleteTrade(ids).then(() => {
-      dispatch({ type: 'star/delete/trade', ids });
-    });
-  },
-  createBids(ids) {
-    return NoteApiClient.createBids(ids).then(() => {
-      dispatch({ type: 'star/create/bids', ids });
-    });
-  },
-  deleteBids(ids) {
-    return NoteApiClient.deleteBids(ids).then(() => {
-      dispatch({ type: 'star/delete/bids', ids });
     });
   },
   createStar(ids) {

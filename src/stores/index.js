@@ -1,10 +1,14 @@
 import DashboardStore from 'Stores/DashboardStore';
+import BidedNotesStore from 'Stores/BidedNotesStore';
+import TradedNotesStore from 'Stores/TradedNotesStore';
 
 let stores;
 
 export function createStores(dispatcher) {
   stores = {
     dashboardStore: new DashboardStore(dispatcher)
+  , bidedNotesStore: new BidedNotesStore(dispatcher)
+  , tradedNotesStore: new TradedNotesStore(dispatcher)
   };
 };
 
@@ -23,5 +27,7 @@ export function getState(name) {
 export function dehydrateState() {
   return {
     dashboardStore: getState('dashboardStore')
+  , bidedNotesStore: getState('bidedNotesStore')
+  , tradedNotesStore: getState('tradedNotesStore')
   };
 };

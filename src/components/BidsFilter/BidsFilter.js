@@ -36,6 +36,7 @@ class BidsFilter extends React.Component {
   }
 
   handleChangeCheckbox(name, event) {
+    this.logInfo('handleChangeCheckbox', name);
     const checked = event.target.checked;
     switch(name) {
       case 'inBidding':
@@ -63,7 +64,6 @@ class BidsFilter extends React.Component {
         this.setState({ checked: checked });
         const { items } = this.props;
         const ids = checked ? items.map(item => item.guid._) : [];
-        this.logInfo('handleChangeCheckbox', ids);
         NoteAction.select(ids);
         break;
     }
@@ -112,21 +112,24 @@ class BidsFilter extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes } = this.props;
-    const { bidStartTime, bidStopTime, endBidding, allBidding, inBidding }
-      = this.state;
+    const {
+      checked
+    , bidStartTime, bidStopTime
+    , endBidding, allBidding, inBidding
+    } = this.state;
     return <div className={classes.forms}>
       <div className={classes.edit}>
         <div className={classes.space}/>
         <Typography variant="subheading" noWrap
           className={classes.title}>絞込件数：</Typography>
-        <Checkbox checked={this.state.checked}
+        <Checkbox
           className={classes.checkbox}
           checked={endBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'endBidding')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.title}>本日入札終了</Typography>
-        <Checkbox checked={this.state.checked}
+        <Checkbox
           className={classes.checkbox}
           checked={allBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'allBidding')}
@@ -144,7 +147,7 @@ class BidsFilter extends React.Component {
           </div>
         </div>
         <div className={classes.datetimes}>
-          <Checkbox checked={this.state.checked}
+          <Checkbox
             tabIndex={-1} disableRipple
             checked={inBidding}
             onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
@@ -167,10 +170,11 @@ class BidsFilter extends React.Component {
       </div>
       <div className={classes.edit}>
         <div className={classes.buttons}>
-          <Checkbox checked={this.state.checked}
-            className={classes.checkbox}
+          <Checkbox
+            checked={checked}
             onChange={this.handleChangeCheckbox.bind(this, 'checked')}
-            tabIndex={-1} disableRipple />
+            tabIndex={-1} disableRipple
+            className={classes.checkbox}/>
           <div className={classes.buttons}>
             <Button variant="raised"
               onClick={this.handleDelete.bind(this)}
@@ -188,7 +192,7 @@ const datetimeWidth = 200;
 const styles = theme => ({
   space:        { width: checkboxWidth }
 , datetimes:    { display: 'flex', flexDirection: 'row'
-                , marginLeft: theme.spacing.unit * 0.5}
+                , marginLeft: theme.spacing.unit * 0.5 }
 , title:        { margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
@@ -199,7 +203,7 @@ const styles = theme => ({
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
-, inputText:    {  }
+, inputText:    {}
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
 BidsFilter.displayName = 'BidsFilter';

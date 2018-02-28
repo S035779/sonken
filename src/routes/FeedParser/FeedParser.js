@@ -10,6 +10,7 @@ let readed  = [{ user: 'MyUserName', ids: [] }];
 let traded  = [{ user: 'MyUserName', ids: [] }];
 let bided   = [{ user: 'MyUserName', ids: [] }];
 let starred = [{ user: 'MyUserName', ids: [] }];
+let listed = [{ user: 'MyUserName', ids: [] }];
 
 const pspid = 'FeedParser';
 
@@ -41,6 +42,7 @@ class FeedParser {
     const setTraded  = objs => { return traded  = objs };
     const setBided   = objs => { return bided   = objs };
     const setStarred = objs => { return starred = objs };
+    const setListed  = objs => { return listed = objs };
     const noteIds = R.compose(R.map(Number), R.split(','));
     const itemIds = R.split(',');
     const delNoteIds  = ids =>
@@ -59,6 +61,7 @@ class FeedParser {
     const isTrade = obj => R.contains(obj.guid._, getIds(traded));
     const isBids  = obj => R.contains(obj.guid._, getIds(bided) );
     const isStar  = obj => R.contains(obj.guid._, getIds(starred) );
+    const isList  = obj => R.contains(obj.guid._, getIds(listed) );
     const setRead   = obj => Object.assign({}, obj
     , { readed:  isRead(obj)   }); 
     const setTrade  = obj => Object.assign({}, obj
@@ -67,19 +70,25 @@ class FeedParser {
     , { bided:   isBids(obj)   }); 
     const setStar   = obj => Object.assign({}, obj
     , { starred: isStar(obj)   }); 
+    const setList   = obj => Object.assign({}, obj
+    , { listed: isList(obj)   }); 
     const _setTradeItems  = obj => R.map(setTrade,  obj.items);
     const _setBidsItems   = obj => R.map(setBids,   obj.items);
     const _setStarItems   = obj => R.map(setStar,   obj.items);
+    const _setListItems   = obj => R.map(setList,   obj.items);
     const setTradeItems   = obj => obj.items ? Object.assign({}, obj
     , { items: _setTradeItems(obj) }) : obj;
     const setBidsItems    = obj => obj.items ? Object.assign({}, obj
     , { items: _setBidsItems(obj)  }) : obj;
     const setStarItems    = obj => obj.items ? Object.assign({}, obj
     , { items: _setStarItems(obj)  }) : obj;
+    const setListItems    = obj => obj.items ? Object.assign({}, obj
+    , { items: _setListItems(obj)  }) : obj;
     const updReaded   = ids => R.map(setIds(ids), readed  );
     const updTraded   = ids => R.map(setIds(ids), traded  );
     const updBided    = ids => R.map(setIds(ids), bided   );
     const updStarred  = ids => R.map(setIds(ids), starred );
+    const updListed  = ids => R.map(setIds(ids), listed );
     const _updNote  = obj => Object.assign({}, obj, options.data);
     const updNote   = obj => isId(obj) ? _updNote(obj) : obj;
     const _isNoteIds = (obj, ids) => R.any(id => obj.id === id, ids);
@@ -106,8 +115,6 @@ class FeedParser {
         return new Promise((resolve, reject) => {
           const response = R.compose(
             R.map(setStarItems)
-          , R.map(setBidsItems)
-          , R.map(setTradeItems)
           , R.map(setRead)
           , R.filter(isUsr)
           );
@@ -145,6 +152,15 @@ class FeedParser {
         return new Promise((resolve, reject) => {
           const response = R.compose(
             R.map(setStarItems)
+          , R.filter(isUsr)
+          );
+          resolve(response(notes));
+        });
+        break;
+      case 'fetch/listed':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            R.map(setListItems)
           , R.filter(isUsr)
           );
           resolve(response(notes));
@@ -298,6 +314,30 @@ class FeedParser {
           resolve(response(starred));
         });
         break;
+      case 'create/listed':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setListed
+          , updListed
+          , updIds
+          , getIds
+          );
+          resolve(response(listed));
+        });
+        break;
+      case 'delete/starred':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setListed
+          , updListed
+          , delItemIds
+          , getIds
+          );
+          resolve(response(listed));
+        });
+        break;
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
           net.get2(options.url
@@ -343,6 +383,14 @@ class FeedParser {
         });
         break;
     }
+  }
+
+  addList(user, ids) {
+    return this.request('create/listed', { user, ids });
+  }
+
+  removeList(user, ids) {
+    return this.request('delete/listed', { user, ids });
   }
 
   addStar(user, ids) {
@@ -395,6 +443,10 @@ class FeedParser {
 
   getNotes(user) {
     return this.request('fetch/notes', { user });
+  }
+
+  getListedNotes(user) {
+    return this.request('fetch/listed', { user });
   }
 
   getStarredNotes(user) {
@@ -498,6 +550,10 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.getStarredNotes(user));
   }
 
+  fetchListedNotes({ user }) {
+    return Rx.Observable.fromPromise(this.getListedNotes(user));
+  }
+
   fetchNotes({ user }) {
     return Rx.Observable.fromPromise(this.getNotes(user));
   }
@@ -544,6 +600,14 @@ class FeedParser {
 
   deleteStar({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeStar(user, ids));
+  }
+
+  createList({ user, ids }) {
+    return Rx.Observable.fromPromise(this.addList(user, ids));
+  }
+
+  deleteList({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeList(user, ids));
   }
 
   parseFile({ user, file, category }) {

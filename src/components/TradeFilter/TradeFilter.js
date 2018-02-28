@@ -1,33 +1,97 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { Input, Button, Checkbox, Typography, TextField }
-  from 'material-ui';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
+import { withStyles }   from 'material-ui/styles';
+import {
+  Input, Button, Checkbox, Typography, TextField
+}                       from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormControl }  from 'material-ui/Form';
 
 class TradeFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      notes:          props.notes
+      selectedItemId: props.selectedItemId
+    , itemFilter:     props.itemFilter
     , checked:        false
-    , endBidding:     false
-    , allBidding:     false
+    , endBidding:     true
+    , allBidding:     true
     , inBidding:      false
-    , bidStartTime:   '2017-05-24'
-    , bidStopTime:    '2017-05-24'
+    , bidStartTime:   std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , bidStopTime:    std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     };
   }
 
-  componentWillReceiveProps(props) {
-    this.logInfo('props', props);
-    this.setState({ note: props.notes });
+  componentDidMount() {
+    NoteAction.select([]);
   }
 
-  handleChangeTrade(traded) {
+  componentWillReceiveProps(nextProps) {
+    this.logInfo('componentWillReceiveProps', nextProps);
+    const { selectedItemId, itemFilter } = nextProps;
+    this.setState({ selectedItemId, itemFilter });
+  }
+
+  handleChangeCheckbox(name, event) {
+    this.logInfo('handleChangeCheckbox', name);
+    const checked = event.target.checked;
+    switch(name) {
+      case 'inBidding':
+        this.setState({
+          inBidding:  checked
+        , allBidding: !checked
+        , endBidding: !checked
+        });
+        break;
+      case 'allBidding':
+        this.setState({
+          inBidding:  false
+        , allBidding: checked
+        , endBidding: true
+        });
+        break;
+      case 'endBidding':
+        this.setState({
+          inBidding:  !checked
+        , allBidding: false
+        , endBidding: checked
+        });
+        break;
+      case 'checked':
+        this.setState({ checked: checked });
+        const { items } = this.props;
+        const ids = checked ? items.map(item => item.guid._) : [];
+        NoteAction.select(ids);
+        break;
+    }
+  }
+
+  handleBided() {
+    const { selectedItemId } = this.state;
+    this.logInfo('handleBided', selectedItemId);
+    NoteAction.createBids(selectedItemId);
+  }
+
+  handleDelete() {
+    const { selectedItemId } = this.state;
+    this.logInfo('handleDelete', selectedItemId);
+    if(window.confirm('Are you sure?')) {
+      NoteAction.deleteItem(selectedItemId);
+    }
+  }
+
+  handleFilter() {
+    const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
+      = this.state;
+    this.logInfo('handleFilter', {
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    });
+    NoteAction.filterItem({
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    });
   }
 
   handleChangeText(name, event) {
@@ -38,40 +102,6 @@ class TradeFilter extends React.Component {
       case 'bidStopTime':
         this.setState({ bidStopTime: event.target.value });
         break;
-      default:
-        break;
-    }
-  }
-
-  handleChangeCheckbox(name, event) {
-    switch(name) {
-      case 'inBidding':
-        this.setState({ inBidding: event.target.checked });
-        break;
-      case 'allBidding':
-        this.setState({ allBidding: event.target.checked });
-        break;
-      case 'endBidding':
-        this.setState({ endBidding: event.target.checked });
-        break;
-      case 'checked':
-        this.setState({ checked: event.target.checked });
-        break;
-      default:
-        break;
-    }
-  }
-
-  handleButton(name, event) {
-    switch(name) {
-      case 'delete':
-        this.props.onDelete();
-        break;
-      case 'filter':
-        this.props.onFilter();
-        break;
-      default:
-        break;
     }
   }
 
@@ -81,22 +111,25 @@ class TradeFilter extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes, notes } = this.props;
-    const { bidStartTime, bidStopTime, endBidding, allBidding, inBidding }
-      = this.state;
+    const { classes } = this.props;
+    const {
+      checked
+    , bidStartTime, bidStopTime
+    , endBidding, allBidding, inBidding
+    } = this.state;
     return <div className={classes.forms}>
       <div className={classes.edit}>
         <div className={classes.space}/>
         <Typography variant="subheading" noWrap
           className={classes.title}>絞込件数：</Typography>
-        <Checkbox checked={this.state.checked}
+        <Checkbox
           className={classes.checkbox}
           checked={endBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'endBidding')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.title}>本日入札終了</Typography>
-        <Checkbox checked={this.state.checked}
+        <Checkbox
           className={classes.checkbox}
           checked={allBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'allBidding')}
@@ -109,42 +142,43 @@ class TradeFilter extends React.Component {
         <div className={classes.buttons}>
           <div className={classes.buttons}>
             <Button variant="raised"
-              className={classes.button}
-              onClick={this.handleButton.bind(this, 'filter')}>
-              絞り込み</Button>
+              onClick={this.handleFilter.bind(this)}
+              className={classes.button}>絞り込み</Button>
           </div>
         </div>
-        <Checkbox checked={this.state.checked}
-          className={classes.checkbox}
-          checked={inBidding}
-          onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.title}>入札終了時期</Typography>
-        <form className={classes.inputText} noValidate>
-          <TextField id="date" label="開始" type="date"
-            className={classes.text}
-            InputLabelProps={{shrink: true}}
-            value={bidStartTime}
-            onChange={this.handleChangeText.bind(this, 'bidStartTime')}/>
-          <TextField id="date" label="終了" type="date"
-            className={classes.text}
-            InputLabelProps={{shrink: true}}
-            value={bidStopTime}
-            onChange={this.handleChangeText.bind(this, 'bidStopTime')}/>
-        </form>
+        <div className={classes.datetimes}>
+          <Checkbox
+            checked={inBidding}
+            onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
+            tabIndex={-1} disableRipple
+            className={classes.checkbox}/>
+          <Typography variant="subheading" noWrap
+            className={classes.title}>入札終了時期：</Typography>
+          <form className={classes.inputText} noValidate>
+            <TextField id="date" label="始め" type="datetime-local"
+              InputLabelProps={{shrink: true}}
+              value={bidStartTime}
+              onChange={this.handleChangeText.bind(this, 'bidStartTime')}
+              className={classes.text}/>
+            <TextField id="date" label="終わり" type="datetime-local"
+              InputLabelProps={{shrink: true}}
+              value={bidStopTime}
+              onChange={this.handleChangeText.bind(this, 'bidStopTime')}
+              className={classes.text}/>
+          </form>
+        </div>
       </div>
       <div className={classes.edit}>
         <div className={classes.buttons}>
-          <Checkbox checked={this.state.checked}
-            className={classes.checkbox}
+          <Checkbox
+            checked={checked}
             onChange={this.handleChangeCheckbox.bind(this, 'checked')}
-            tabIndex={-1} disableRipple />
+            tabIndex={-1} disableRipple
+            className={classes.checkbox}/>
           <div className={classes.buttons}>
             <Button variant="raised"
-              className={classes.button}
-              onClick={this.handleButton.bind(this, 'delete')}>
-              削除</Button>
+              onClick={this.handleDelete.bind(this)}
+              className={classes.button}>削除</Button>
           </div>
         </div>
       </div>
@@ -154,10 +188,11 @@ class TradeFilter extends React.Component {
 
 const columnHeight = 62;
 const checkboxWidth = 38;
-const spaceWidth = 38;
-const minWidth = 125;
+const datetimeWidth = 200;
 const styles = theme => ({
-  space:        { minWidth: spaceWidth }
+  space:        { minWidth: checkboxWidth }
+, datetimes:    { display: 'flex', flexDirection: 'row'
+                , marginLeft: theme.spacing.unit * 0.5 }
 , title:        { margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
@@ -168,9 +203,8 @@ const styles = theme => ({
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
-, inputText:    { minWidth: minWidth*2 }
-, text:         { marginLeft: theme.spacing.unit
-                , marginRight: theme.spacing.unit }
+, inputText:    {}
+, text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
 TradeFilter.displayName = 'TradeFilter';
 TradeFilter.defaultProps = { note: null };

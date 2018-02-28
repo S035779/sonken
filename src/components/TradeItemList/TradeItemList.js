@@ -2,6 +2,7 @@ import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
 import NoteAction     from 'Actions/NoteAction';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
 import {
@@ -14,116 +15,131 @@ import {
 class TradeItemList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { checked: [], traded: [], notes: props.notes };
+    this.state = { 
+      bided: []
+    , selectedItemId: props.selectedItemId
+    };
   }
 
-  componentWillReceiveProps(props) {
-    this.setState({ notes: props.notes });
+  componentWillReceiveProps(nextProps) {
+    this.logInfo('componentWillReceiveProps', nextProps);
+    const { selectedItemId, items } = nextProps;
+    let bided = [];
+    items.forEach(item => {
+      if(item.bided) bided.push(item.guid._);
+    });
+    this.setState({ selectedItemId, bided });
   }
 
-  handleChangeTraded(id, event) {
-    console.log('>>> handleChangeDialog:', id);
-    const { traded } = this.state;
-    const currentIndex = traded.indexOf(id);
-    const newOpened = [...traded];
-    if (currentIndex === -1)  newOpened.push(id);
-    else newOpened.splice(currentIndex, 1);
-    this.setState({ traded: newOpened });
+  handleChangeBided(id, event) {
+    this.logInfo('handleChangeBided', id);
+    const { bided } = this.state;
+    const currentIndex = bided.indexOf(id);
+    const newBided = [...bided];
+    if (currentIndex === -1) {
+      newBided.push(id);
+      NoteAction.createBids([id]);
+    } else {
+      newBided.splice(currentIndex, 1);
+      NoteAction.deleteBids([id]);
+    }
+    this.setState({ bided: newBided });
   }
 
   handleChangeCheckbox(id, event) {
-    console.log('>>> handleChangeCheckbox:', id);
-    const { checked } = this.state;
-    const currentIndex = checked.indexOf(id);
-    const newChecked = [...checked];
+    this.logInfo('handleChangeCheckbox', id);
+    const { selectedItemId } = this.state;
+    const currentIndex = selectedItemId.indexOf(id);
+    const newChecked = [...selectedItemId];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    this.setState({ checked: newChecked });
+    NoteAction.select(newChecked);
   }
 
-  handleDelete(id) {
-    if(window.confirm('Are you sure?')) {
-      NoteAction.delete(this.state.note.id);
-    }
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
   }
 
-  renderItem(note) {
+  renderItem(index, item) {
     const { classes } = this.props;
-    const { traded } = this.state;
+    const { bided, selectedItemId } = this.state;
     const textClass ={
-      primary: classes.primary, secondary: classes.secondary };
-    const linkTo = `/${note.category}/${note.id}/edit`;
-    const buttonText = traded.indexOf(note.id) !== -1
-      ? '取引 完了'
-      : '取引 未完了';
-    return <div key={note.id} className={classes.noteItem}>
+      primary: classes.primary
+    , secondary: classes.secondary
+    };
+    const buttonText = bided.indexOf(item.guid._) !== -1
+      ? '取引 完了' : '取引 未完了';
+    const title = `出品件名：${item.title}`;
+    const description = `配信時間：${
+      std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
+      + `現在価格：${item.price}円、`
+      + `入札数：${item.bids}、`
+      + `入札終了時間：${item.bidStopTime}、`
+      + `AuctionID：${item.guid._}`;
+    return <div key={index} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, note.id)}
-        checked={this.state.checked.indexOf(note.id) !== -1}
+        onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
+        checked={selectedItemId.indexOf(item.guid._) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters className={classes.listItem}
-          component={Link} to={linkTo}>
-            <ListItemText classes={textClass}
-              primary={note.title} secondary={note.updated}/>
-            <ListItemSecondaryAction>
-              <Button variant="raised" color="primary"
-                className={classes.button}
-                onClick={this.handleChangeTraded.bind(this, note.id)}>
-                {buttonText}</Button>
-            </ListItemSecondaryAction>
+        <ListItem dense button disableGutters
+          className={classes.listItem}>
+          <div className={classes.description}>
+            <a href={item.description.DIV.A.$.HREF}>
+            <img src={item.description.DIV.A.IMG.$.SRC}
+              border={item.description.DIV.A.IMG.$.BORDER}
+              width={ item.description.DIV.A.IMG.$.WIDTH}
+              height={item.description.DIV.A.IMG.$.HEIGHT}
+              alt={   item.description.DIV.A.IMG.$.ALT}/>
+            </a>
+          </div>
+          <ListItemText classes={textClass}
+            primary={title} secondary={description}
+            className={classes.listItemText}/>
+          <ListItemSecondaryAction>
+            <Button variant="raised" color="primary"
+              onClick={this.handleChangeBided.bind(this, item.guid._)}
+              className={classes.button}>{buttonText}</Button>
+          </ListItemSecondaryAction>
         </ListItem>
       </Paper>
-      <div className={classes.notice}>
-        <Typography noWrap>{''}</Typography>
-      </div>
+      <div className={classes.space} />
     </div>;
   }
 
   render() {
-    const { classes } = this.props;
-    const { notes } = this.props;
-    const items = notes.map(note => this.renderItem(note));
-    return <List className={classes.noteList}>
-      {items}
-    </List>;
+    const { classes, items } = this.props;
+    const _items = 
+      items.map((item, index) => this.renderItem(index, item));
+    return <List>{_items}</List>;
   }
 };
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
-const searchHeight      = 62;
-const filterHeight      = 186;
-const itemHeight        = 128;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const noticeWidth       = 72;
+
+const itemHeight        = 160;
+const descMinWidth      = 133;
 const styles = theme => ({
-  noteList:     { width: '100%', overflow: 'scroll'
-                , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: {
-                  height: listHeightSmUp }}
-  , noteItem:   { display: 'flex', flexDirection: 'row'
+  noteItem:     { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }
-  , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
+, listItem:     { height: itemHeight, padding: theme.spacing.unit /2
                 , '&:hover':  {
                   backgroundColor: theme.palette.primary.main
                   , '& $checkbox': { color: theme.palette.common.white }}}
-  , checkbox:   {}
-  , button:     { width: 80, wordBreak: 'keep-all' }
-  , paper:      { width: '100%', margin: theme.spacing.unit /8
+, listItemText: { marginRight: descMinWidth }
+, checkbox:     {}
+, button:       { width: 80, wordBreak: 'keep-all' }
+, paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {
                   backgroundColor: theme.palette.primary.main
                   , '& $primary, $secondary': {
                     color: theme.palette.common.white }}}   
-  , primary:    {}
-  , secondary:  {}
-  , notice:     { flex:1, padding: theme.spacing.unit /2
-                , minWidth: noticeWidth }
+, primary:      {}
+, secondary:    {}
+, description:  { minWidth: descMinWidth, width: descMinWidth
+                , fontSize: 12 }
+, space:        { minWidth: theme.spacing.unit * 6 }
 });
 TradeItemList.displayName = 'TradeItemList';
-TradeItemList.defaultProps = { notes: null }
+TradeItemList.defaultProps = { items: null }
 TradeItemList.propTypes = {
   classes: PropTypes.object.isRequired
 };

@@ -20,15 +20,21 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(props) {
-    return NoteAction.fetchNotes();
+    console.log('Notes prefetch!!', props);
+    return NoteAction.prefetchNotes(props);
   }
 
   componentDidMount() {
-    NoteAction.fetchMyNotes();
+    this.logInfo('Notes did mount!!');
+    NoteAction.fetchNotes();
   }
 
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
+  }
+
+  notePage(number, page) {
+    return number < page.perPage ? number : page.perPage;
   }
 
   render() {
@@ -41,12 +47,11 @@ class Dashboard extends React.Component {
     const _notes = notes
       ? notes.filter(note => note.category === category) : [];
     const _note = notes.find(note => note.id === _id);
-    const noteNumber = _notes.length;
-    _notes.length =
-      _notes.length < page.perPage ? _notes.length : page.perPage;;
+    const number = _notes.length;
+    _notes.length = this.notePage(number, page);
     return <div className={classes.root}>
         <RssSearch category={category}
-          noteNumber={noteNumber} notePage={page} />
+          noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
           <RssButtons notes={_notes} selectedNoteId={ids} />

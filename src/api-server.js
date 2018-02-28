@@ -27,6 +27,30 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
+const deleteList = (req, res, next) => {
+  const { user, ids } = req.query;
+  feed.deleteList({ user, ids }).subscribe(
+    obj => {  res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to delete List.'); }  
+  );
+};
+
+const createList = (req, res, next) => {
+  const { user, ids } = req.body;
+  feed.createList({ user, ids }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to create List.'); }  
+  );
+};
+
 const deleteStar = (req, res, next) => {
   const { user, ids } = req.query;
   feed.deleteStar({ user, ids }).subscribe(
@@ -207,6 +231,18 @@ const fetchStarredNotes = (req, res, next) => {
   );
 };
 
+const fetchListedNotes = (req, res, next) => {
+  const { user } = req.query;
+  feed.fetchListedNotes({ user }).subscribe(
+    obj => { res.json(obj); }
+  , err => {
+    res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to fetch Listed.'); }  
+  );
+};
+
 const fetchNote = (req, res, next) => {
   const { user } = req.query;
   feed.fetchNote({ user }).subscribe(
@@ -264,6 +300,12 @@ router.route('/starred')
 .put(createStar)
 .post(notImplemented)
 .delete(deleteStar);
+
+router.route('/listed')
+.get(fetchListedNotes)
+.put(createList)
+.post(notImplemented)
+.delete(deleteList);
 
 router.route('/item')
 .get(notImplemented)

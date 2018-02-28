@@ -13,21 +13,21 @@ import BidsItemList   from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
-    return getStores(['dashboardStore']);
+    return getStores(['bidedNotesStore']);
   }
 
   static calculateState() {
-    return getState('dashboardStore');
+    return getState('bidedNotesStore');
   }
 
   static prefetch(props) {
     console.log('Bids prefetch!!', props)
-    return NoteAction.fetchNotes(props);
+    return NoteAction.prefetchBided(props);
   }
 
   componentDidMount() {
     this.logInfo('Bids did mount!!');
-    NoteAction.fetchMyNotes();
+    NoteAction.fetchBided();
   }
 
   logInfo(name, info) {
@@ -46,7 +46,7 @@ class Bids extends React.Component {
     const yesterday = new Date(year, month, day);
     const isDay = yesterday <= now && now < today; 
     const isAll = true;
-    const isNow = start < now && now < stop;
+    const isNow = start <= now && now <= stop;
     return filter.inBidding
       ? isNow
       : filter.endBidding && filter.allBidding
@@ -79,14 +79,28 @@ class Bids extends React.Component {
         items={_items}
         itemFilter={filter}
         selectedItemId={ids}/>
-      <BidsItemList
-        items={_items}
-        selectedItemId={ids}/>
+      <div className={classes.noteList}>
+        <BidsItemList
+          items={_items}
+          selectedItemId={ids}/>
+      </div>
     </div>;
   }
 };
+
+const barHeightSmDown   = 104;
+const barHeightSmUp     = 112;
+const filterHeight      = 186;
+const searchHeight      = 62;
+const listHeightSmDown  =
+  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    =
+  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
+, noteList: { width: '100%', overflow: 'scroll'
+            , height: listHeightSmDown
+            , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
 });
 Bids.displayName = 'Bids';
 Bids.defaultProps = { notes: null };

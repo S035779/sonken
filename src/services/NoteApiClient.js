@@ -12,35 +12,10 @@ export default {
   request(request, options) {
     this.logInfo(request, options);
     switch(request) {
-      case 'prefetch/notes':
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
-        });
-        break;
-      case 'create/note':
-        return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/note'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
             api + '/notes'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'fetch/readed':
-        return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/readed'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -67,19 +42,19 @@ export default {
           );
         });
         break;
-      case 'fetch/starred':
+      case 'fetch/note':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
-            api + '/starred'
+            api + '/note'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
         break;
-      case 'fetch/note':
+      case 'create/note':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
+          xhr.putJSON(
             api + '/note'
           , options
           , obj => { resolve(obj); }
@@ -212,6 +187,21 @@ export default {
           );
         });
         break;
+      case 'prefetch/notes':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
+      case 'prefetch/traded':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
+      case 'prefetch/bided':
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve(options), 200);
+        });
+        break;
       default:
         return new Promise((resolve, reject) => {
           reject(options);
@@ -219,24 +209,26 @@ export default {
         break;
     }
   },
-  fetchNotes() {
+  prefetchNotes() {
     const notes = [];
     return this.request('prefetch/notes', notes);
   },
-  fetchMyNotes() {
-    return this.request('fetch/notes', { user });
+  prefetchTradedNotes() {
+    const notes = [];
+    return this.request('prefetch/traded', notes);
   },
-  fetchReadedNotes() {
-    return this.request('fetch/readed', { user });
+  prefetchBidedNotes() {
+    const notes = [];
+    return this.request('prefetch/bided', notes);
+  },
+  fetchNotes() {
+    return this.request('fetch/notes', { user });
   },
   fetchTradedNotes() {
     return this.request('fetch/traded', { user });
   },
   fetchBidedNotes() {
     return this.request('fetch/bided', { user });
-  },
-  fetchStarredNotes() {
-    return this.request('fetch/starred', { user });
   },
   fetchNote(id) {
     return this.request('fetch/note', { user, id });
