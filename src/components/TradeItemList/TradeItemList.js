@@ -1,12 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import NoteAction from 'Actions/NoteAction';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import { Link }       from 'react-router-dom';
+import NoteAction     from 'Actions/NoteAction';
 
 import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography } from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction
-  } from 'material-ui/List';
+import {
+  List, Paper, Checkbox, Button, Typography
+}                     from 'material-ui';
+import {
+  ListItem, ListItemText, ListItemSecondaryAction
+}                     from 'material-ui/List';
 
 class TradeItemList extends React.Component {
   constructor(props) {

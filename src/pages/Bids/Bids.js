@@ -1,13 +1,15 @@
-import React                    from 'react';
-import PropTypes                from 'prop-types';
-import { Container }            from 'flux/utils';
-import NoteAction               from 'Actions/NoteAction';
-import { getStores, getState }  from 'Stores';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import { Container }  from 'flux/utils';
+import NoteAction     from 'Actions/NoteAction';
+import {
+  getStores, getState
+}                     from 'Stores';
 
-import { withStyles }           from 'material-ui/styles';
-import BidsSearch               from 'Components/BidsSearch/BidsSearch';
-import BidsFilter               from 'Components/BidsFilter/BidsFilter';
-import BidsItemList             from 'Components/BidsItemList/BidsItemList';
+import { withStyles } from 'material-ui/styles';
+import BidsSearch     from 'Components/BidsSearch/BidsSearch';
+import BidsFilter     from 'Components/BidsFilter/BidsFilter';
+import BidsItemList   from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
@@ -19,10 +21,12 @@ class Bids extends React.Component {
   }
 
   static prefetch(props) {
-    return NoteAction.fetchNotes();
+    console.log('Bids prefetch!!', props)
+    return NoteAction.fetchNotes(props);
   }
 
   componentDidMount() {
+    this.logInfo('Bids did mount!!');
     NoteAction.fetchMyNotes();
   }
 
