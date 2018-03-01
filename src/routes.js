@@ -5,6 +5,13 @@ import SellersEdit from 'Pages/SellersEdit/SellersEdit';
 import Bids from 'Pages/Bids/Bids';
 import Trade from 'Pages/Trade/Trade';
 
+const getUserData = props => {
+  return new Promise((resolve, reject) => {
+    const login = { user: 'MyUserName', notes: [] };
+    resolve(login);
+  });
+};
+
 export default function getRoutes() {
   return [
     { component: App,
@@ -12,19 +19,23 @@ export default function getRoutes() {
         {
           path: '/',
           exact: true,
-          component: Dashboard
+          component: Dashboard,
+          loadData: getUserData
         },
         {
           path: '/bids',
-          component: Bids
+          component: Bids,
+          loadData: getUserData
         },
         {
           path: '/trade',
-          component: Trade
+          component: Trade,
+          loadData: getUserData
         },
         {
           path: '/:category/:id',
           component: Dashboard,
+          loadData: getUserData,
           routes: [
             {
               path: '/marchant/:id/edit',
@@ -38,7 +49,8 @@ export default function getRoutes() {
         },
         {
           path: '/:category',
-          component: Dashboard
+          component: Dashboard,
+          loadData: getUserData
         }
       ]
     }

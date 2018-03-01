@@ -4,45 +4,42 @@ import NoteApiClient from 'Services/NoteApiClient';
 const pspid = 'NoteAction';
 
 export default {
-  rehydrate(state) {
-    dispatch({ type: 'note/rehydrate/my', state: state.dashboardStore });
-  },
-  prefetchNotes() {
-    return NoteApiClient.prefetchNotes().then(notes => {
-      dispatch({ type: 'note/prefetch/my', notes });
+  //prefetchNotes(data) {
+  //  return NoteApiClient.prefetchNotes(data).then(notes => {
+  //    dispatch({ type: 'note/prefetch/my', notes });
+  //  });
+  //},
+  //prefetchBided(data) {
+  //  return NoteApiClient.prefetchBidedNotes(data).then(notes => {
+  //    dispatch({ type: 'note/prefetch/bided', notes });
+  //  });
+  //},
+  //prefetchTraded(data) {
+  //  return NoteApiClient.prefetchTradedNotes(data).then(notes => {
+  //    dispatch({ type: 'note/prefetch/traded', notes });
+  //  });
+  //},
+  fetchNotes(init) {
+    return NoteApiClient.fetchNotes(init).then(notes => {
+      dispatch({ type: 'note/fetch/my', init, notes });
     });
   },
-  prefetchBided() {
-    return NoteApiClient.prefetchBidedNotes().then(notes => {
-      dispatch({ type: 'note/prefetch/bided', notes });
+  fetchBided(init) {
+    return NoteApiClient.fetchBidedNotes(init).then(notes => {
+      dispatch({ type: 'note/fetch/bided', init, notes });
     });
   },
-  prefetchTraded() {
-    return NoteApiClient.prefetchTradedNotes().then(notes => {
-      dispatch({ type: 'note/prefetch/traded', notes });
+  fetchTraded(init) {
+    return NoteApiClient.fetchTradedNotes(init).then(notes => {
+      dispatch({ type: 'note/fetch/traded', init, notes });
     });
   },
-  fetchNotes() {
-    return NoteApiClient.fetchNotes().then(notes => {
-      dispatch({ type: 'note/fetch/my', notes });
-    });
-  },
-  fetchBided() {
-    return NoteApiClient.fetchBidedNotes().then(notes => {
-      dispatch({ type: 'note/fetch/bided', notes });
-    });
-  },
-  fetchTraded() {
-    return NoteApiClient.fetchTradedNotes().then(notes => {
-      dispatch({ type: 'note/fetch/traded', notes });
-    });
-  },
-  fetch(id) {
-    dispatch({ type: 'note/fetch/before' });
-    return NoteApiClient.fetchNote(id).then(note => {
-      dispatch({ type: 'note/fetch', note });
-    });
-  },
+  //fetch(id) {
+  //  dispatch({ type: 'note/fetch/before' });
+  //  return NoteApiClient.fetchNote(id).then(note => {
+  //    dispatch({ type: 'note/fetch', note });
+  //  });
+  //},
   create({ url, category }) {
     return NoteApiClient.createNote(
     { url, category }).then(note => {
@@ -55,18 +52,28 @@ export default {
     });
   },
   pagenation(page) {
-    return NoteApiClient.pagenation(page).then(() => {
+    return NoteApiClient.pageNote(page).then(() => {
       dispatch({ type: 'note/pagenation', page });
     });
   },
   select(ids) {
-    return NoteApiClient.selectNotes(ids).then(() => {
+    return NoteApiClient.selectNote(ids).then(() => {
       dispatch({ type: 'note/select', ids });
     });
   },
   delete(ids) {
-    return NoteApiClient.deleteNotes(ids).then(() => {
+    return NoteApiClient.deleteNote(ids).then(() => {
       dispatch({ type: 'note/delete', ids });
+    });
+  },
+  upload(filename) {
+    return NoteApiClient.uploadNotes(filename).then(notes => {
+      dispatch({ type: 'note/upload', notes });
+    });
+  },
+  download(filename) {
+    return NoteApiClient.downloadNotes(filename).then(notes => {
+      dispatch({ type: 'note/download', notes });
     });
   },
   createRead(ids) {
@@ -79,16 +86,6 @@ export default {
       dispatch({ type: 'read/delete', ids });
     });
   },
-  deleteItem(ids) {
-    return NoteApiClient.deleteItem(ids).then(() => {
-      dispatch({ type: 'item/delete', ids });
-    });
-  },
-  filterItem(filter) {
-    return NoteApiClient.filterItem(filter).then(() => {
-      dispatch({ type: 'item/filter', filter });
-    });
-  },
   createStar(ids) {
     return NoteApiClient.createStar(ids).then(() => {
       dispatch({ type: 'star/create', ids });
@@ -99,14 +96,17 @@ export default {
       dispatch({ type: 'star/delete', ids });
     });
   },
-  upload(filename) {
-    return NoteApiClient.uploadNotes(filename).then(notes => {
-      dispatch({ type: 'note/upload', notes });
+  createList(ids) {
+    return NoteApiClient.createList(ids).then(() => {
+      dispatch({ type: 'list/create', ids });
     });
   },
-  download(filename) {
-    return NoteApiClient.downloadNotes(filename).then(notes => {
-      dispatch({ type: 'note/download', notes });
+  deleteList(ids) {
+    return NoteApiClient.deleteList(ids).then(() => {
+      dispatch({ type: 'list/delete', ids });
     });
+  },
+  rehydrate(state) {
+    dispatch({ type: 'note/rehydrate/my', state: state.dashboardStore });
   }
 };

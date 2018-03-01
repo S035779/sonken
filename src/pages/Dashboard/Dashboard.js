@@ -1,14 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React            from 'react';
+import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
-import { Container } from 'flux/utils';
-import NoteAction from 'Actions/NoteAction';
-import { getStores, getState } from 'Stores';
+import { Container }    from 'flux/utils';
+import NoteAction       from 'Actions/NoteAction';
+import {
+  getStores, getState
+}                       from 'Stores';
 
-import { withStyles } from 'material-ui/styles';
-import RssSearch from 'Components/RssSearch/RssSearch';
-import RssButtons from 'Components/RssButtons/RssButtons';
-import RssList from 'Components/RssList/RssList';
+import { withStyles }   from 'material-ui/styles';
+import RssSearch        from 'Components/RssSearch/RssSearch';
+import RssButtons       from 'Components/RssButtons/RssButtons';
+import RssList          from 'Components/RssList/RssList';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -19,14 +21,14 @@ class Dashboard extends React.Component {
     return getState('dashboardStore');
   }
 
-  static prefetch(props) {
-    console.log('Notes prefetch!!', props);
-    return NoteAction.prefetchNotes(props);
+  static prefetch(init) {
+    console.log('prefetch', init);
+    return NoteAction.fetchNotes(init);
   }
 
   componentDidMount() {
-    this.logInfo('Notes did mount!!');
-    NoteAction.fetchNotes();
+    this.logInfo('componentDidMount', 'Dashboard');
+    Dashboard.prefetch();
   }
 
   logInfo(name, info) {

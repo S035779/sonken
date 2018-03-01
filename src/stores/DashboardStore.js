@@ -5,18 +5,12 @@ const pspid = 'DashboardStore';
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
-      notes:    []
+      user: ''
+      , notes:    []
       , page: {
         maxNumer: 0
       , number:   0
       , perPage:  20
-      }
-      , filter: {
-        endBidding:   true
-      , allBidding:   true
-      , inBidding:    false
-      , bidStartTime: 0
-      , bidStopTime:  0
       }
     , selected: false
     , ids:      []
@@ -43,13 +37,6 @@ export default class DashboardStore extends ReduceStore {
     const isNote = obj => action.ids.some(id => id === obj.id)
     return state.notes.map(note => isNote(note) ? Object.assign({}, note
     , { readed: false }) : note);
-  }
-
-  deleteItem(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const delItems = objs => objs.filter(item => !isItem(item));
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: delItems(note.items) }) : note );
   }
 
   createStar(state, action) {
@@ -90,11 +77,14 @@ export default class DashboardStore extends ReduceStore {
 
   reduce(state, action) {
     switch (action.type) { 
-      case 'note/rehydrate/my':
-        return    action.state;
+      //case 'note/prefetch/my':
+      //  return Object.assign({}, state, {
+      //    notes:  action.notes
+      //  });
       case 'note/fetch/my':
         return Object.assign({}, state, {
-          notes:  action.notes
+          user:   action.init.user
+        , notes:  action.notes
         });
       case 'note/create':
         return Object.assign({}, state, {
@@ -117,6 +107,14 @@ export default class DashboardStore extends ReduceStore {
           notes:  this.deleteNote(state, action)
         , ids:    []
         });
+      case 'note/upload':
+        return Object.assign({}, state, {
+          notes:  [action.note, ...state.notes]
+        });
+      case 'note/download':
+        return Object.assign({}, state, {
+          notes:  action.notes
+        });
       case 'read/create':
         return Object.assign({}, state, {
           notes: this.createRead(state, action)
@@ -126,15 +124,6 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           notes: this.deleteRead(state, action)
         , ids:    []
-        });
-      case 'item/delete':
-        return Object.assign({}, state, {
-          notes:  this.deleteItem(state, action)
-        , ids:    []
-        });
-      case 'item/filter':
-        return Object.assign({}, state, {
-          filter: action.filter
         });
       case 'star/create':
         return Object.assign({}, state, {
@@ -156,6 +145,8 @@ export default class DashboardStore extends ReduceStore {
           notes: this.deleteList(state, action)
         , ids:    []
         });
+      case 'note/rehydrate/my':
+        return    action.state;
       default: 
         return state; 
     } 

@@ -4,6 +4,7 @@ import { matchRoutes } from 'react-router-config';
 import { dehydrateState, createStores } from 'Stores';
 import { createDispatcher } from 'Main/dispatcher';
 import getRoutes from 'Main/routes';
+import { logs as log } from 'Utilities/logutils';
 
 import Html from 'Pages/Html/Html';
 
@@ -22,26 +23,42 @@ export default class ReactSSRenderer {
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
-      this.prefetch(matchs).then(() => {
-        const initialData = JSON.stringify(dehydrateState());
-        ReactDOMServer
-          .renderToStaticNodeStream(
-            <Html initialData={initialData} location={location}/>)
-          .pipe(res);
-        next();
-      }).catch(err => {
-        res.status(500)
-          .send({ error:
-            { name: err.name, message: err.message, stack: err.stack }
-          });
-      });
+      this.getUserData(matchs)
+      .then(objs => this.prefetch(matchs, objs[0]))
+      .then(() => this.setInitialData(location).pipe(res))
+      .then(() => next())
+      .catch(err => res.status(500)
+        .send({ error:
+          { name: err.name, message: err.message, stack: err.stack }
+        })
+      );
     };
   }
 
-  prefetch(matchs) {
-    const promises = matchs.map(({ route, match }) =>
-      route.component.prefetch
-        ? route.component.prefetch(match) : Promise.resolve(null));
+  setInitialData(location) {
+    const initialData = JSON.stringify(dehydrateState());
+    return ReactDOMServer.renderToStaticNodeStream(
+      <Html initialData={initialData} location={location}/>
+    );
+  }
+
+  prefetch(matchs, data) {
+    log.trace('Data:', data);
+    const promises = matchs.map(({ route, match }) => {
+      return route.component.prefetch
+        ? route.component.prefetch(data) : Promise.resolve(null);
+    });
+    return Promise.all(promises);
+  }
+
+  getUserData(matchs) {
+    let promises = [];
+    matchs.some(({ route, match }) => {
+      //log.trace('Route:', route);
+      //log.trace('Match:', match);
+      if(route.loadData) promises.push(route.loadData(match));
+      return route.loadData;
+    });
     return Promise.all(promises);
   }
 };

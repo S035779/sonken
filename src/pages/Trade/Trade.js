@@ -20,14 +20,14 @@ class Trade extends React.Component {
     return getState('tradedNotesStore');
   }
 
-  static prefetch(props) {
-    console.log('Trade prefetch!!', 'Props:', props)
-    return NoteAction.prefetchTraded(props);
+  static prefetch(init) {
+    console.log('prefetch', init)
+    return NoteAction.fetchTraded(init);
   }
 
   componentDidMount() {
-    this.logInfo('Trade did mount!!');
-    NoteAction.fetchTraded();
+    this.logInfo('componentDidMount', 'Trade');
+    Trade.prefetch();
   }
 
   logInfo(name, info) {

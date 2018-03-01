@@ -1,6 +1,7 @@
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
-let user = 'MyUserName';
+
+let user = '';
 
 const env = process.env.NODE_ENV || 'development';
 const host = process.env.TOP_URL;
@@ -14,6 +15,7 @@ export default {
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
+          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/notes'
           , options
@@ -24,6 +26,7 @@ export default {
         break;
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
+          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/traded'
           , options
@@ -34,6 +37,7 @@ export default {
         break;
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
+          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/bided'
           , options
@@ -72,20 +76,20 @@ export default {
           );
         });
         break;
-      case 'pagenation/notes':
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
-        });
-        break;
-      case 'select/notes':
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
-        });
-        break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
             api + '/note'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/item':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/item'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -110,21 +114,6 @@ export default {
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
-        });
-        break;
-      case 'delete/item':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/item'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'filter/item':
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
         });
         break;
       case 'create/traded':
@@ -187,17 +176,42 @@ export default {
           );
         });
         break;
-      case 'prefetch/notes':
+      case 'create/listed':
         return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
+          xhr.putJSON(
+            api + '/listed'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
         });
         break;
-      case 'prefetch/traded':
+      case 'delete/listed':
         return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(options), 200);
+          xhr.deleteJSON(
+            api + '/listed'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
         });
         break;
-      case 'prefetch/bided':
+      //case 'prefetch/notes':
+      //case 'prefetch/traded':
+      //case 'prefetch/bided':
+      //  return new Promise((resolve, reject) => {
+      //    const notes = options.notes;
+      //    setTimeout(() => resolve(notes), 200);
+      //  });
+      //  break;
+      case 'pagenation/note':
+      case 'pagenation/traded':
+      case 'pagenation/bided':
+      case 'select/note':
+      case 'select/traded':
+      case 'select/bided':
+      case 'filter/traded':
+      case 'filter/bided':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
@@ -209,27 +223,37 @@ export default {
         break;
     }
   },
-  prefetchNotes() {
-    const notes = [];
-    return this.request('prefetch/notes', notes);
+
+  /*
+   * Notes
+   */
+  //prefetchNotes(data) {
+  //  user = data.user;
+  //  this.logInfo('User:', user);
+  //  return this.request('prefetch/notes', { notes: data.notes });
+  //},
+  //prefetchTradedNotes(data) {
+  //  user = data.user;
+  //  return this.request('prefetch/traded', { notes: data.notes });
+  //},
+  //prefetchBidedNotes(data) {
+  //  user = data.user;
+  //  return this.request('prefetch/bided', { notes: data.notes });
+  //},
+
+  fetchNotes(init) {
+    return this.request('fetch/notes', init ? { init } : { user });
   },
-  prefetchTradedNotes() {
-    const notes = [];
-    return this.request('prefetch/traded', notes);
+  fetchTradedNotes(init) {
+    return this.request('fetch/traded', init ? { init } : { user });
   },
-  prefetchBidedNotes() {
-    const notes = [];
-    return this.request('prefetch/bided', notes);
+  fetchBidedNotes(init) {
+    return this.request('fetch/bided', init ? { init } : { user });
   },
-  fetchNotes() {
-    return this.request('fetch/notes', { user });
-  },
-  fetchTradedNotes() {
-    return this.request('fetch/traded', { user });
-  },
-  fetchBidedNotes() {
-    return this.request('fetch/bided', { user });
-  },
+
+  /*
+   * Note
+   */
   fetchNote(id) {
     return this.request('fetch/note', { user, id });
   },
@@ -244,51 +268,19 @@ export default {
     const data = { title, asin, name, price, bidsprice, body, updated };
     return this.request('update/note', { user, id, data });
   },
-  pagenation({ maxNumber, number, perPage }) {
-    return this.request('pagenation/notes', {
+  pageNote({ maxNumber, number, perPage }) {
+    return this.request('pagenation/note', {
       user, maxNumber, number, perPage
     });
   },
-  selectNotes(ids) {
-    return this.request('select/notes', { user, ids });
+  selectNote(ids) {
+    return this.request('select/note', { user, ids });
   },
-  deleteNotes(ids) {
+  deleteNote(ids) {
     return this.request('delete/note', { user, ids });
-  },
-  createRead(ids) {
-    return this.request('create/readed', { user, ids });
-  },
-  deleteRead(ids) {
-    return this.request('delete/readed', { user, ids });
   },
   deleteItem(ids) {
     return this.request('delete/item', { user, ids });
-  },
-  filterItem({
-    endBidding, allBidding, inBidding, bidStartTime, bidStopTime
-  }) {
-    const filter = {
-      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
-    };
-    return this.request('filter/item', { user, filter });
-  },
-  createTrade(ids) {
-    return this.request('create/traded', { user, ids });
-  },
-  deleteTrade(ids) {
-    return this.request('delete/traded', { user, ids });
-  },
-  createBids(ids) {
-    return this.request('create/bided', { user, ids });
-  },
-  deleteBids(ids) {
-    return this.request('delete/bided', { user, ids });
-  },
-  createStar(ids) {
-    return this.request('create/starred', { user, ids });
-  },
-  deleteStar(ids) {
-    return this.request('delete/starred', { user, ids });
   },
   uploadNotes(filename) {
     return this.request('upload/note', { user, filename });
@@ -296,6 +288,91 @@ export default {
   downloadNotes(fileName) {
     return this.request('download/note', { user, filename });
   },
+
+
+  /*
+   *  Trade
+   */
+  createTrade(ids) {
+    return this.request('create/traded', { user, ids });
+  },
+  deleteTrade(ids) {
+    return this.request('delete/traded', { user, ids });
+  },
+  pageTrade({ maxNumber, number, perPage }) {
+    return this.request('pagenation/traded', {
+      user, maxNumber, number, perPage
+    });
+  },
+  selectTrade(ids) {
+    return this.request('select/traded', { user, ids });
+  },
+  filterTrade({
+    endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
+    const filter = {
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    };
+    return this.request('filter/traded', { user, filter });
+  },
+
+  /*
+   *  Bids
+   */
+  createBids(ids) {
+    return this.request('create/bided', { user, ids });
+  },
+  deleteBids(ids) {
+    return this.request('delete/bided', { user, ids });
+  },
+  pageBids({ maxNumber, number, perPage }) {
+    return this.request('pagenation/bided', {
+      user, maxNumber, number, perPage
+    });
+  },
+  selectBids(ids) {
+    return this.request('select/bided', { user, ids });
+  },
+  filterBids({
+    endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
+    const filter = {
+      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+    };
+    return this.request('filter/bided', { user, filter });
+  },
+
+  /*
+   *  Read
+   */
+  createRead(ids) {
+    return this.request('create/readed', { user, ids });
+  },
+  deleteRead(ids) {
+    return this.request('delete/readed', { user, ids });
+  },
+
+  /*
+   *  Star
+   */
+  createStar(ids) {
+    return this.request('create/starred', { user, ids });
+  },
+  deleteStar(ids) {
+    return this.request('delete/starred', { user, ids });
+  },
+
+  /*
+   *  List
+   */
+  createList(ids) {
+    return this.request('create/listed', { user, ids });
+  },
+  deleteList(ids) {
+    return this.request('delete/listed', { user, ids });
+  },
+
+  /*
+   * Log
+   */
   logInfo(name, info) {
     console.info('>>> Info:', name, info);
   },

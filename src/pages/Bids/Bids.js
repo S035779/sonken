@@ -20,14 +20,14 @@ class Bids extends React.Component {
     return getState('bidedNotesStore');
   }
 
-  static prefetch(props) {
-    console.log('Bids prefetch!!', props)
-    return NoteAction.prefetchBided(props);
+  static prefetch(init) {
+    console.log('prefetch', init)
+    return NoteAction.fetchBided(init);
   }
 
   componentDidMount() {
-    this.logInfo('Bids did mount!!');
-    NoteAction.fetchBided();
+    this.logInfo('componentDidMount', 'Bids');
+    Bids.prefetch();
   }
 
   logInfo(name, info) {
