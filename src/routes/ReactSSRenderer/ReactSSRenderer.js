@@ -19,20 +19,17 @@ export default class ReactSSRenderer {
 
   request() {
     return (req, res, next) => {
+      const user = 'MyUserName';
       createStores(createDispatcher());
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
-      console.log(matchs, location);
-      this.getUserData(matchs)
-      .then(objs => this.prefetch(matchs, objs[0]))
+      this.getUserData(matchs, user)
+      .then(objs => this.prefetchData(matchs, objs))
       .then(() => this.setInitialData(location).pipe(res))
       .then(() => next())
-      .catch(err => res.status(500)
-        .send({ error:
-          { name: err.name, message: err.message, stack: err.stack }
-        })
-      );
+      .catch(err => res.status(500).send({ error:
+          { name: err.name, message: err.message, stack: err.stack }}));
     };
   }
 
@@ -43,22 +40,20 @@ export default class ReactSSRenderer {
     );
   }
 
-  prefetch(matchs, data) {
-    let promises = [];
-    matchs.some(({ route, match }) => {
-      if(route.component.prefetch)
-        promises.push(route.component.prefetch(data));
-      return route.component.prefetch;
-    });
+  prefetchData(matchs, objs) {
+    console.log(objs);
+    const promises = matchs.map(({ route, match }, index) =>
+      route.component.prefetch 
+        ? route.component.prefetch(objs[index], match)
+        : Promise.resolve(null));
     return Promise.all(promises);
   }
 
-  getUserData(matchs) {
-    let promises = [];
-    matchs.some(({ route, match }) => {
-      if(route.loadData) promises.push(route.loadData(match));
-      return route.loadData;
-    });
+  getUserData(matchs, user) {
+    const  promises = matchs.map(({ route, match }) => 
+      route.loadData
+        ? route.loadData(user, match)
+        : Promise.resolve(null));
     return Promise.all(promises);
   }
 };

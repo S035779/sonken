@@ -5,9 +5,8 @@ import SellersEdit from 'Pages/SellersEdit/SellersEdit';
 import Bids from 'Pages/Bids/Bids';
 import Trade from 'Pages/Trade/Trade';
 
-const getUserData = props => {
+const getUserData = (user, match) => {
   return new Promise((resolve, reject) => {
-    const user = 'MyUserName';
     resolve(user);
   });
 };

@@ -1,7 +1,7 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
-import NoteAction     from 'Actions/NoteAction';
+import BidsAction     from 'Actions/BidsAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
@@ -16,7 +16,7 @@ class BidsItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      traded:         []
+      bided:         []
     , selectedItemId: props.selectedItemId
     };
   }
@@ -24,36 +24,38 @@ class BidsItemList extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.logInfo('componentWillReciveProps', nextProps);
     const { selectedItemId, items } = nextProps;
-    let traded = [];
+    let bided = [];
     items.forEach(item => {
-      if(item.traded) traded.push(item.guid._);
+      if(item.bided) bided.push(item.guid._);
     });
-    this.setState({ selectedItemId, traded });
+    this.setState({ selectedItemId, bided });
   }
 
-  handleChangeTraded(id, event) {
-    this.logInfo('handleChangeTraded', id);
-    const { traded } = this.state;
-    const currentIndex = traded.indexOf(id);
-    const newTraded = [...traded];
+  handleChangeBided(id, event) {
+    this.logInfo('handleChangeBided', id);
+    const { bided } = this.state;
+    const { user } = this.props;
+    const currentIndex = bided.indexOf(id);
+    const newBided = [...bided];
     if (currentIndex === -1) {
-      newTraded.push(id);
-      NoteAction.createTrade([id]);
+      newBided.push(id);
+      BidsAction.create(user, [id]);
     } else {
-      newTraded.splice(currentIndex, 1);
-      NoteAction.deleteTrade([id]);
+      newBided.splice(currentIndex, 1);
+      BidsAction.delete(user, [id]);
     }
-    this.setState({ traded: newTraded });
+    this.setState({ bided: newBided });
   }
 
   handleChangeCheckbox(id, event) {
     this.logInfo('handleChangeCheckbox', id);
     const { selectedItemId } = this.state;
+    const { user } = this.props;
     const currentIndex = selectedItemId.indexOf(id);
     const newChecked = [...selectedItemId];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    NoteAction.select(newChecked);
+    BidsAction.select(user, newChecked);
   }
 
   logInfo(name, info) {
@@ -62,12 +64,12 @@ class BidsItemList extends React.Component {
 
   renderItem(index, item) {
     const { classes } = this.props;
-    const { traded, selectedItemId } = this.state;
+    const { bided, selectedItemId } = this.state;
     const textClass = {
       primary: classes.primary
     , secondary: classes.secondary
     };
-    const buttonText = traded.indexOf(item.guid._) !== -1
+    const buttonText = bided.indexOf(item.guid._) !== -1
       ? '取引チェック 登録済み' : '取引チェック 登録';
     const title = `出品件名：${item.title}`;
     const description = `配信時間：${
@@ -98,7 +100,7 @@ class BidsItemList extends React.Component {
             className={classes.listItemText}/>
           <ListItemSecondaryAction>
             <Button variant="raised" color="primary"
-              onClick={this.handleChangeTraded.bind(this, item.guid._)}
+              onClick={this.handleChangeBided.bind(this, item.guid._)}
               className={classes.button}>{buttonText}</Button>
           </ListItemSecondaryAction>
         </ListItem>

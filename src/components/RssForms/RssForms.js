@@ -15,13 +15,12 @@ const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?l
 class RssForms extends React.Component {
   constructor(props) {
     super(props);
-    const note = props.note;
     this.state = {
-      note: props.note
-    , asin: note.asin
-    , price: note.price
-    , bidsprice: note.bidsprice
-    , body: note.body
+      note:       props.note
+    , asin:       props.note.asin
+    , price:      props.note.price
+    , bidsprice:  props.note.bidsprice
+    , body:       props.note.body
     };
   }
 
@@ -31,37 +30,40 @@ class RssForms extends React.Component {
   }
 
   handleSave() {
+    const { user } = this.props;
     const { id, asin, price, bidsprice, body } = this.state.note;
-    NoteAction.update({ id, asin, price, bidsprice, body });
+    NoteAction.update(user, { id, asin, price, bidsprice, body });
   }
 
   handleChangeInput(name, event) {
     const { note } = this.state;
-    let newState = {};
-    let newNote = {};
+    const value = event.target.value
     switch (name) {
       case 'asin':
-        const asin = event.target.value
-        newNote = Object.assign({}, note, { asin });
-        newState = { note: newNote, asin };
+        this.setState({
+          note: Object.assign({}, note, { asin: value })
+        , asin: value
+        });
         break;
       case 'price':
-        const price = event.target.value
-        newNote = Object.assign({}, note, { price });
-        newState = { note: newNote, price };
+        this.setState({
+          note: Object.assign({}, note, { price: value })
+        , price: value
+        });
         break;
       case 'bidsprice':
-        const bidsprice = event.target.value
-        newNote = Object.assign({}, note, { bidsprice });
-        newState = { note: newNote, bidsprice };
+        this.setState({
+          note: Object.assign({}, note, { bidsprice: value })
+        , bidsprice: value 
+        });
         break;
       case 'body':
-        const body = event.target.value
-        newNote = Object.assign({}, note, { body });
-        newState = { note: newNote, body };
+        this.setState({
+          note: Object.assign({}, note, { body: value })
+        , body: value
+        });
         break;
     }
-    this.setState(newState);
   }
 
   logInfo(name, info) {
@@ -70,7 +72,7 @@ class RssForms extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes, note } = this.props;
+    const { classes, user, note } = this.props;
     const { asin, price, bidsprice, body } = this.state.note;
     const isChanged = note.asin !== asin || note.price !== price
                    || note.bidsprice !== bidsprice || note.body  !== body;
@@ -87,33 +89,29 @@ class RssForms extends React.Component {
         <FormControl className={classes.text}>
           <InputLabel htmlFor="asin">ASIN</InputLabel>
           <Input id="asin"
-            value={this.state.asin}
+            value={asin}
             onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
         <div className={classes.buttons}>
           <Button variant="raised" size="medium"
-            className={classes.button}
-            onClick={this.handleSave.bind(this)}>
-          {isChanged ? '*' : ''}登録</Button>
+            onClick={this.handleSave.bind(this)}
+            className={classes.button}>{isChanged ? '*' : ''}登録</Button>
         </div>
         <div className={classes.buttons}>
           <Button color="primary" size="large"
-            className={classes.link}
-            href={link_mon}>
-            モノレート</Button>
+            href={link_mon}
+            className={classes.link}>モノレート</Button>
           <Button color="primary" size="large" 
-            className={classes.link}
-            href={link_fba}>
-            FBA料金シュミレーター</Button>
+            href={link_fba}
+            className={classes.link}>FBA料金シュミレーター</Button>
         </div>
       </div>
       <div className={classes.edit}>
         <Typography variant="subheading" noWrap
           className={classes.title}>Amazon商品名：</Typography>
         <Button color="primary" size="large" fullWidth
-          className={classes.name}
-          href={link_amz}>
-          {note.name}</Button>
+          href={link_amz}
+          className={classes.name}>{note.name}</Button>
       </div>
       {this.props.children}
       <div className={classes.memo}>
@@ -122,7 +120,7 @@ class RssForms extends React.Component {
             <FormControl className={classes.text}>
               <InputLabel htmlFor="price">想定売値</InputLabel>
               <Input id="price"
-                value={this.state.price}
+                value={price}
                 onChange={this.handleChangeInput.bind(this, 'price')}/>
             </FormControl>
           </div>
@@ -130,21 +128,23 @@ class RssForms extends React.Component {
             <FormControl className={classes.text}>
               <InputLabel htmlFor="bidsprice">最高入札額</InputLabel>
               <Input id="bidsprice"
-                value={this.state.bidsprice}
+                value={bidsprice}
                 onChange={this.handleChangeInput.bind(this,'bidsprice')}/>
             </FormControl>
           </div>
         </div>
         <div className={classes.textarea}>
         <TextField id="body" label="自由入力欄" multiline
-          className={classes.field} rows="4"
-          fullWidth margin="none"
-          value={this.state.body}
-          onChange={this.handleChangeInput.bind(this, 'body')}/>
+          rows="4" fullWidth margin="none"
+          value={body}
+          onChange={this.handleChangeInput.bind(this, 'body')}
+          className={classes.field}/>
         </div>
       </div>
       <div className={classes.noteList}>
-      <RssItemList items={items}/>
+        <RssItemList
+          user={user}
+          items={items} />
       </div>
     </div>;
   }

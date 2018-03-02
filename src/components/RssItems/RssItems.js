@@ -1,5 +1,5 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React          from 'react';
+import PropTypes      from 'prop-types';
 
 import { withStyles } from 'material-ui/styles';
 import { Typography } from 'material-ui';
@@ -7,15 +7,17 @@ import RssItemList    from 'Components/RssItemList/RssItemList';
 
 class RssItems extends React.Component {
   render() {
-    const { classes, note } = this.props;
+    const { classes, user, note } = this.props;
     const items = note.items ? note.items : [];
     return <div className={classes.forms}>
       <div className={classes.header}>
-      <Typography variant="title" noWrap
-        className={classes.title}>{note.title}</Typography>
+        <Typography variant="title" noWrap
+          className={classes.title}>{note.title}</Typography>
       </div>
       <div className={classes.noteList}>
-      <RssItemList items={items}/>
+        <RssItemList
+          user={user}
+          items={items} />
       </div>
     </div>;
   }

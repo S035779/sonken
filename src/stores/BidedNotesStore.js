@@ -49,10 +49,13 @@ export default class BidedNotesStore extends ReduceStore {
 
   reduce(state, action) {
     switch (action.type) { 
-      case 'note/prefetch/bided':
+      case 'user/preset':
         return Object.assign({}, state, {
           user: action.user
-        , notes: action.notes
+        });
+      case 'note/prefetch/bided':
+        return Object.assign({}, state, {
+          notes: action.notes
         });
       case 'note/fetch/bided':
         return Object.assign({}, state, {
@@ -84,6 +87,10 @@ export default class BidedNotesStore extends ReduceStore {
       case 'bids/filter':
         return Object.assign({}, state, {
           filter: action.filter
+        });
+      case 'bids/download':
+        return Object.assign({}, state, {
+          notes:  action.notes
         });
       case 'bids/rehydrate':
         return action.state;

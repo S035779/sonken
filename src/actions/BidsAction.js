@@ -34,6 +34,11 @@ export default {
       dispatch({ type: 'bids/filter', filter });
     });
   },
+  download(user, filename) {
+    return NoteApiClient.downloadBids(user, filename).then(notes => {
+      dispatch({ type: 'bids/download', notes });
+    });
+  },
   rehydrate(state) {
     dispatch({ type: 'bids/rehydrate', state: state.bidedNotesStore });
   }

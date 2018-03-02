@@ -7,7 +7,7 @@ import url from 'url';
 import path from 'path';
 import https from 'https';
 import express from 'express';
-import proxy from 'proxy-middleware';
+import proxy from 'http-proxy-middleware';
 import serveStatic from 'serve-static';
 import { logs as log } from './utils/logutils';
 
@@ -22,22 +22,16 @@ const ssl_keyset = {
 const compiler = webpack(config);
 const app = express();
 app.use(log.connect());
+
 app.use(webpackDevMiddleware(compiler, {
-  publicPath: config.output.publicPath
-}));
+  publicPath: config.output.publicPath }));
 app.use(webpackHotMiddleware(compiler));
-const api_server = {
-  target: { host: 'localhost', port: 8082 }
-, path: '/api'
-, changeOrigin: true
-};
-const ssr_server = {
-  target: { host: 'localhost', port: 8081 }
-, path: '*'
-, changeOrigin: true
-};
-app.use('/api', proxy(api_server));
-app.use('/\*', proxy(ssr_server));
+
+app.use('/api'
+  , proxy({ target: 'http://localhost:8082', changeOrigin: true }));
+app.use('/\*'
+  , proxy({ target: 'http://localhost:8081', changeOrigin: true }));
+
 https.createServer(ssl_keyset, app).listen(https_port, https_host, () => {
   log.info(`Secure HTTP Server listening on ${https_host}:${https_port}`);
 });

@@ -23,7 +23,8 @@ class Dashboard extends React.Component {
 
   static prefetch(user) {
     console.info('prefetch', user);
-    return NoteAction.prefetchNotes(user);
+    return NoteAction.presetUser(user)
+      .then(() => NoteAction.prefetchNotes(user));
   }
 
   componentDidMount() {
@@ -52,7 +53,9 @@ class Dashboard extends React.Component {
     const number = _notes.length;
     _notes.length = this.notePage(number, page);
     return <div className={classes.root}>
-        <RssSearch category={category}
+        <RssSearch
+          user={user}
+          category={category}
           noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
@@ -69,7 +72,7 @@ class Dashboard extends React.Component {
         <div className={classes.noteEdit}>
           {
             route.routes
-            ? renderRoutes(route.routes, { note: _note })
+            ? renderRoutes(route.routes, { user, note: _note })
             : null
           }
         </div>

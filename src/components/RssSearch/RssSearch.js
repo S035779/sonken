@@ -27,25 +27,27 @@ class RssSearch extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     const { url } = this.state;
-    const { category } = this.props;
+    const { user, category } = this.props;
     this.logInfo('handleSubmit', url);
-    NoteAction.create({ url, category });
+    NoteAction.create(user, { url, category });
     this.setState({ url: '' });
   }
 
   handleUpload(e) {
     e.preventDefault();
     const { filename } = this.state;
+    const { user } = this.props;
     this.logInfo('handleUpload', filename);
-    NoteAction.upload(filename);
+    NoteAction.upload(user, filename);
     this.setState({ filename: '' });
   }
 
   handleDownload(e) {
     e.preventDefault();
     const { filename } = this.state;
+    const { user } = this.props;
     this.logInfo('handleDownload', filename);
-    NoteAction.download(filename);
+    NoteAction.download(user, filename);
     this.setState({ filename: '' });
   }
 
@@ -60,12 +62,12 @@ class RssSearch extends React.Component {
   }
 
   handleChangeSelect(name, event) {
-    const { noteNumber } = this.props;
+    const { user, noteNumber } = this.props;
     const value = event.target.value;
     this.logInfo('handleChangeSelect', value);
     switch(name) {
       case 'page':
-        NoteAction.pagenation({
+        NoteAction.pagenation(user, {
           maxNumber: Math.ceil(noteNumber / value)
           , number: 1, perPage: value
         });

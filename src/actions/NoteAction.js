@@ -4,19 +4,24 @@ import NoteApiClient from 'Services/NoteApiClient';
 const pspid = 'NoteAction';
 
 export default {
+  presetUser(user) {
+    return NoteApiClient.presetUser(user).then(() => {
+      dispatch({ type: 'user/preset', user });
+    });
+  },
   prefetchNotes(user) {
     return NoteApiClient.prefetchNotes(user).then(notes => {
-      dispatch({ type: 'note/prefetch/my', user, notes });
+      dispatch({ type: 'note/prefetch/my', notes });
     });
   },
   prefetchBided(user) {
     return NoteApiClient.prefetchBidedNotes(user).then(notes => {
-      dispatch({ type: 'note/prefetch/bided', user, notes });
+      dispatch({ type: 'note/prefetch/bided', notes });
     });
   },
   prefetchTraded(user) {
     return NoteApiClient.prefetchTradedNotes(user).then(notes => {
-      dispatch({ type: 'note/prefetch/traded', user, notes });
+      dispatch({ type: 'note/prefetch/traded', notes });
     });
   },
   fetchNotes(user) {

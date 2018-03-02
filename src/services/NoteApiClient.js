@@ -227,6 +227,7 @@ export default {
           );
         });
         break;
+      case 'preset/user':
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -248,8 +249,11 @@ export default {
   },
 
   /*
-   * Notes
+   * Preset & Prefetch
    */
+  presetUser(user) {
+    return this.request('preset/user', { user });
+  },
   prefetchNotes(user) {
     return this.request('prefetch/notes', { user });
   },
@@ -260,6 +264,9 @@ export default {
     return this.request('prefetch/bided', { user });
   },
 
+  /*
+   * Notes
+   */
   fetchNotes(user) {
     return this.request('fetch/notes', { user });
   },
@@ -303,7 +310,7 @@ export default {
   uploadNotes(user, filename) {
     return this.request('upload/note', { user, filename });
   },
-  downloadNotes(user, fileName) {
+  downloadNotes(user, filename) {
     return this.request('download/note', { user, filename });
   },
 
@@ -332,6 +339,9 @@ export default {
     };
     return this.request('filter/traded', { user, filter });
   },
+  downloadTrade(user, filename) {
+    return this.request('download/traded', { user, filename });
+  },
 
   /*
    *  Bids
@@ -356,6 +366,9 @@ export default {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     };
     return this.request('filter/bided', { user, filter });
+  },
+  downloadBids(user, filename) {
+    return this.request('download/bided', { user, filename });
   },
 
   /*

@@ -22,7 +22,8 @@ class Bids extends React.Component {
 
   static prefetch(user) {
     console.info('prefetch', user)
-    return NoteAction.prefetchBided(user);
+    return NoteAction.presetUser(user)
+      .then(() => NoteAction.prefetchBided(user));
   }
 
   componentDidMount() {
@@ -68,7 +69,8 @@ class Bids extends React.Component {
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
     });
-    let _items = items.filter(item => this.itemFilter(filter, item));
+    let _items = items
+      .filter(item => item.listed && this.itemFilter(filter, item));
     const number = _items.length;
     _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
@@ -83,6 +85,7 @@ class Bids extends React.Component {
         selectedItemId={ids}/>
       <div className={classes.noteList}>
         <BidsItemList
+          user={user}
           items={_items}
           selectedItemId={ids}/>
       </div>

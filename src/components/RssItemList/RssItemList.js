@@ -17,7 +17,7 @@ class RssItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      traded:  []
+      listed:  []
     , starred: []
     };
   }
@@ -25,41 +25,43 @@ class RssItemList extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.logInfo('componentWillReciveProps', nextProps);
     const { items } = nextProps;
-    let traded = [];
+    let listed = [];
     let starred = [];
     items.forEach(item => {
-      if(item.traded) traded.push(item.guid._);
+      if(item.listed) listed.push(item.guid._);
       if(item.starred) starred.push(item.guid._);
     });
-    this.setState({ traded, starred });
+    this.setState({ listed, starred });
   }
 
-  handleChangeTraded(id, event) {
-    this.logInfo('handleChangeTraded', id);
-    const { traded } = this.state;
-    const currentIndex = traded.indexOf(id);
-    const newTraded = [...traded];
+  handleChangeListed(id, event) {
+    this.logInfo('handleChangeListed', id);
+    const { listed } = this.state;
+    const { user } = this.props;
+    const currentIndex = listed.indexOf(id);
+    const newListed = [...listed];
     if (currentIndex === -1) {
-      newTraded.push(id);
-      NoteAction.createTrade([id]);
+      newListed.push(id);
+      NoteAction.createList(user, [id]);
     } else {
-      newTraded.splice(currentIndex, 1);
-      NoteAction.deleteTrade([id]);
+      newListed.splice(currentIndex, 1);
+      NoteAction.deleteList(user, [id]);
     }
-    this.setState({ traded: newTraded });
+    this.setState({ listed: newListed });
   }
 
   handleChangeStarred(id, event) {
     this.logInfo('handleChangeStarred', id);
     const { starred } = this.state;
+    const { user } = this.props;
     const currentIndex = starred.indexOf(id);
     const newStarred = [...starred];
     if (currentIndex === -1) {
       newStarred.push(id);
-      NoteAction.createStar([id]);
+      NoteAction.createStar(user, [id]);
     } else {
       newStarred.splice(currentIndex, 1);
-      NoteAction.deleteStar([id]);
+      NoteAction.deleteStar(user, [id]);
     }
     this.setState({ starred: newStarred });
   }
@@ -80,13 +82,13 @@ class RssItemList extends React.Component {
 
   renderItem(index, item) {
     const { classes } = this.props;
-    const { traded, starred } = this.state;
+    const { listed, starred } = this.state;
     const textClass = {
       primary: classes.primary
     , secondary: classes.secondary
     };
-    const buttonText = traded.indexOf(item.guid._) !== -1
-      ? '取引チェック 登録済み' : '取引チェック 登録';
+    const buttonText = listed.indexOf(item.guid._) !== -1
+      ? '取引リスト 登録済み' : '取引リスト 登録';
     const title = `出品件名：${item.title}`;
     const description = 
         `配信時間：${
@@ -123,7 +125,7 @@ class RssItemList extends React.Component {
             <ListItemSecondaryAction>
               <Button variant="raised" color="primary"
                 className={classes.button}
-                onClick={this.handleChangeTraded.bind(this, item.guid._)}>
+                onClick={this.handleChangeListed.bind(this, item.guid._)}>
                 {buttonText}</Button>
             </ListItemSecondaryAction>
         </ListItem>

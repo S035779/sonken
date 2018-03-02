@@ -34,6 +34,11 @@ export default {
       dispatch({ type: 'trade/filter', filter });
     });
   },
+  download(user, filename) {
+    return NoteApiClient.downloadTrade(user, filename).then(notes => {
+      dispatch({ type: 'trade/download', notes });
+    });
+  },
   rehydrate(state) {
     dispatch({ type: 'trade/rehydrate', state: state.tradedNotesStore });
   }

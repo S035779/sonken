@@ -49,10 +49,13 @@ export default class TradedNotesStore extends ReduceStore {
 
   reduce(state, action) {
     switch (action.type) { 
-      case 'note/prefetch/traded':
+      case 'user/preset':
         return Object.assign({}, state, {
           user:   action.user
-        , notes:  action.notes
+        });
+      case 'note/prefetch/traded':
+        return Object.assign({}, state, {
+          notes:  action.notes
         });
       case 'note/fetch/traded':
         return Object.assign({}, state, {
@@ -84,6 +87,10 @@ export default class TradedNotesStore extends ReduceStore {
       case 'trade/filter':
         return Object.assign({}, state, {
           filter: action.filter
+        });
+      case 'trade/download':
+        return Object.assign({}, state, {
+          notes:  action.notes
         });
       case 'trade/rehydrate':
         return action.state;

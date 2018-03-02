@@ -10,10 +10,6 @@ import blue from 'material-ui/colors/blue';
 import yellow from 'material-ui/colors/yellow';
 
 class RssButtonNav extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return <MuiThemeProvider theme={thm}>
       <MuiThemeProvider theme={thm1}>

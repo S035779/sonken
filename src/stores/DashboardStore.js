@@ -77,10 +77,13 @@ export default class DashboardStore extends ReduceStore {
 
   reduce(state, action) {
     switch (action.type) { 
-      case 'note/prefetch/my':
+      case 'user/preset':
         return Object.assign({}, state, {
           user:   action.user
-        , notes:  action.notes
+        })
+      case 'note/prefetch/my':
+        return Object.assign({}, state, {
+          notes:  action.notes
         });
       case 'note/fetch/my':
         return Object.assign({}, state, {
