@@ -1,6 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import NoteAction       from 'Actions/NoteAction';
+import TradeAction       from 'Actions/TradeAction';
 
 import { withStyles }   from 'material-ui/styles';
 import {
@@ -27,17 +27,18 @@ class TradeSearch extends React.Component {
 
   handleDownload() {
     const { filename } = this.state;
+    const { user } = this.props;
     this.logInfo('handleDownload', filename);
-    NoteAction.download(filename);
+    TradeAction.download(user, filename);
   }
 
   handleChangeSelect(name, event) {
-    const { itemNumber } = this.props;
+    const { user, itemNumber } = this.props;
     const value = event.target.value;
     this.logInfo('handleChangeSelet', value);
     switch(name) {
       case 'page':
-        NoteAction.pagenation({
+        TradeAction.pagenation(user, {
           maxNumber: Math.ceil(itemNumber / value)
           , number: 1, perPage: value
         });

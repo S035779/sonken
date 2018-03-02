@@ -20,14 +20,14 @@ class Trade extends React.Component {
     return getState('tradedNotesStore');
   }
 
-  static prefetch(init) {
-    console.log('prefetch', init)
-    return NoteAction.fetchTraded(init);
+  static prefetch(user) {
+    console.info('prefetch', user)
+    return NoteAction.prefetchTraded(user);
   }
 
   componentDidMount() {
-    this.logInfo('componentDidMount', 'Trade');
-    Trade.prefetch();
+    this.logInfo('fetch', 'Trade');
+    NoteAction.fetchTraded(this.state.user);
   }
 
   logInfo(name, info) {
@@ -63,7 +63,7 @@ class Trade extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes } = this.props;
-    const { notes, page, ids, filter } = this.state;
+    const { user, notes, page, ids, filter } = this.state;
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -73,9 +73,11 @@ class Trade extends React.Component {
     _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
       <TradeSearch
+        user={user}
         itemNumber={number}
         itemPage={page}/>
       <TradeFilter
+        user={user}
         items={_items}
         itemFilter={filter}
         selectedItemId={ids}/>

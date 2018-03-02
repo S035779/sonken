@@ -4,105 +4,104 @@ import NoteApiClient from 'Services/NoteApiClient';
 const pspid = 'NoteAction';
 
 export default {
-  //prefetchNotes(data) {
-  //  return NoteApiClient.prefetchNotes(data).then(notes => {
-  //    dispatch({ type: 'note/prefetch/my', notes });
-  //  });
-  //},
-  //prefetchBided(data) {
-  //  return NoteApiClient.prefetchBidedNotes(data).then(notes => {
-  //    dispatch({ type: 'note/prefetch/bided', notes });
-  //  });
-  //},
-  //prefetchTraded(data) {
-  //  return NoteApiClient.prefetchTradedNotes(data).then(notes => {
-  //    dispatch({ type: 'note/prefetch/traded', notes });
-  //  });
-  //},
-  fetchNotes(init) {
-    return NoteApiClient.fetchNotes(init).then(notes => {
-      dispatch({ type: 'note/fetch/my', init, notes });
+  prefetchNotes(user) {
+    return NoteApiClient.prefetchNotes(user).then(notes => {
+      dispatch({ type: 'note/prefetch/my', user, notes });
     });
   },
-  fetchBided(init) {
-    return NoteApiClient.fetchBidedNotes(init).then(notes => {
-      dispatch({ type: 'note/fetch/bided', init, notes });
+  prefetchBided(user) {
+    return NoteApiClient.prefetchBidedNotes(user).then(notes => {
+      dispatch({ type: 'note/prefetch/bided', user, notes });
     });
   },
-  fetchTraded(init) {
-    return NoteApiClient.fetchTradedNotes(init).then(notes => {
-      dispatch({ type: 'note/fetch/traded', init, notes });
+  prefetchTraded(user) {
+    return NoteApiClient.prefetchTradedNotes(user).then(notes => {
+      dispatch({ type: 'note/prefetch/traded', user, notes });
     });
   },
-  //fetch(id) {
+  fetchNotes(user) {
+    return NoteApiClient.fetchNotes(user).then(notes => {
+      dispatch({ type: 'note/fetch/my', notes });
+    });
+  },
+  fetchBided(user) {
+    return NoteApiClient.fetchBidedNotes(user).then(notes => {
+      dispatch({ type: 'note/fetch/bided', notes });
+    });
+  },
+  fetchTraded(user) {
+    return NoteApiClient.fetchTradedNotes(user).then(notes => {
+      dispatch({ type: 'note/fetch/traded', notes });
+    });
+  },
+  //fetch(user, id) {
   //  dispatch({ type: 'note/fetch/before' });
-  //  return NoteApiClient.fetchNote(id).then(note => {
+  //  return NoteApiClient.fetchNote(user, id).then(note => {
   //    dispatch({ type: 'note/fetch', note });
   //  });
   //},
-  create({ url, category }) {
-    return NoteApiClient.createNote(
-    { url, category }).then(note => {
+  create(user, { url, category }) {
+    return NoteApiClient.createNote(user, { url, category }).then(note => {
       dispatch({ type: 'note/create', note });
     });
   },
-  update(note) {
-    return NoteApiClient.updateNote(note).then(() => {
+  update(user, note) {
+    return NoteApiClient.updateNote(user, note).then(() => {
       dispatch({ type: 'note/update', note });
     });
   },
-  pagenation(page) {
-    return NoteApiClient.pageNote(page).then(() => {
+  pagenation(user, page) {
+    return NoteApiClient.pageNote(user, page).then(() => {
       dispatch({ type: 'note/pagenation', page });
     });
   },
-  select(ids) {
-    return NoteApiClient.selectNote(ids).then(() => {
+  select(user, ids) {
+    return NoteApiClient.selectNote(user, ids).then(() => {
       dispatch({ type: 'note/select', ids });
     });
   },
-  delete(ids) {
-    return NoteApiClient.deleteNote(ids).then(() => {
+  delete(user, ids) {
+    return NoteApiClient.deleteNote(user, ids).then(() => {
       dispatch({ type: 'note/delete', ids });
     });
   },
-  upload(filename) {
-    return NoteApiClient.uploadNotes(filename).then(notes => {
+  upload(user, filename) {
+    return NoteApiClient.uploadNotes(user, filename).then(notes => {
       dispatch({ type: 'note/upload', notes });
     });
   },
-  download(filename) {
-    return NoteApiClient.downloadNotes(filename).then(notes => {
+  download(user, filename) {
+    return NoteApiClient.downloadNotes(user, filename).then(notes => {
       dispatch({ type: 'note/download', notes });
     });
   },
-  createRead(ids) {
-    return NoteApiClient.createRead(ids).then(() => {
+  createRead(user, ids) {
+    return NoteApiClient.createRead(user, ids).then(() => {
       dispatch({ type: 'read/create', ids });
     });
   },
-  deleteRead(ids) {
-    return NoteApiClient.deleteRead(ids).then(() => {
+  deleteRead(user, ids) {
+    return NoteApiClient.deleteRead(user, ids).then(() => {
       dispatch({ type: 'read/delete', ids });
     });
   },
-  createStar(ids) {
-    return NoteApiClient.createStar(ids).then(() => {
+  createStar(user, ids) {
+    return NoteApiClient.createStar(user, ids).then(() => {
       dispatch({ type: 'star/create', ids });
     });
   },
-  deleteStar(ids) {
-    return NoteApiClient.deleteStar(ids).then(() => {
+  deleteStar(user, ids) {
+    return NoteApiClient.deleteStar(user, ids).then(() => {
       dispatch({ type: 'star/delete', ids });
     });
   },
-  createList(ids) {
-    return NoteApiClient.createList(ids).then(() => {
+  createList(user, ids) {
+    return NoteApiClient.createList(user, ids).then(() => {
       dispatch({ type: 'list/create', ids });
     });
   },
-  deleteList(ids) {
-    return NoteApiClient.deleteList(ids).then(() => {
+  deleteList(user, ids) {
+    return NoteApiClient.deleteList(user, ids).then(() => {
       dispatch({ type: 'list/delete', ids });
     });
   },

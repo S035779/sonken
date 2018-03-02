@@ -4,33 +4,33 @@ import NoteApiClient from 'Services/NoteApiClient';
 const pspid = 'BidsAction';
 
 export default {
-  deleteItem(ids) {
-    return NoteApiClient.deleteItem(ids).then(() => {
+  deleteItem(user, ids) {
+    return NoteApiClient.deleteItem(user, ids).then(() => {
       dispatch({ type: 'item/delete/bided', ids });
     });
   },
-  create(ids) {
-    return NoteApiClient.createBids(ids).then(() => {
+  create(user, ids) {
+    return NoteApiClient.createBids(user, ids).then(() => {
       dispatch({ type: 'bids/create', ids });
     });
   },
-  delete(ids) {
-    return NoteApiClient.deleteBids(ids).then(() => {
+  delete(user, ids) {
+    return NoteApiClient.deleteBids(user, ids).then(() => {
       dispatch({ type: 'bids/delete', ids });
     });
   },
-  pagenation(page) {
-    return NoteApiClient.pageBids(page).then(() => {
+  pagenation(user, page) {
+    return NoteApiClient.pageBids(user, page).then(() => {
       dispatch({ type: 'bids/pagenation', page });
     });
   },
-  select(ids) {
-    return NoteApiClient.selectBids(ids).then(() => {
+  select(user, ids) {
+    return NoteApiClient.selectBids(user, ids).then(() => {
       dispatch({ type: 'bids/select', ids });
     });
   },
-  filter(filter) {
-    return NoteApiClient.filterBids(filter).then(() => {
+  filter(user, filter) {
+    return NoteApiClient.filterBids(user, filter).then(() => {
       dispatch({ type: 'bids/filter', filter });
     });
   },

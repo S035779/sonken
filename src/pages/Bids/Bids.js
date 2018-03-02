@@ -20,14 +20,14 @@ class Bids extends React.Component {
     return getState('bidedNotesStore');
   }
 
-  static prefetch(init) {
-    console.log('prefetch', init)
-    return NoteAction.fetchBided(init);
+  static prefetch(user) {
+    console.info('prefetch', user)
+    return NoteAction.prefetchBided(user);
   }
 
   componentDidMount() {
-    this.logInfo('componentDidMount', 'Bids');
-    Bids.prefetch();
+    this.logInfo('fetch', 'Bids');
+    NoteAction.fetchBided(this.state.user);
   }
 
   logInfo(name, info) {
@@ -63,7 +63,7 @@ class Bids extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes } = this.props;
-    const { notes, page, ids, filter } = this.state;
+    const { user, notes, page, ids, filter } = this.state;
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -73,9 +73,11 @@ class Bids extends React.Component {
     _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
       <BidsSearch
+        user={user}
         itemNumber={number}
         itemPage={page}/>
       <BidsFilter
+        user={user}
         items={_items}
         itemFilter={filter}
         selectedItemId={ids}/>

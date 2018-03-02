@@ -1,5 +1,11 @@
-import std from './stdutils';
-import { logs as log }  from './logutils';
+import std from 'Utilities/stdutils';
+
+const log = {
+  error: function(message) { console.error(message); }
+, trace: function(message) { console.trace(message); }
+, info:  function(message) { console.info(message);  }
+, warn:  function(message) { console.warn(message);  }
+};
 
 /*
  * Simple HTTP GET request

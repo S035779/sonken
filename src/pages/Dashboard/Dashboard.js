@@ -21,14 +21,14 @@ class Dashboard extends React.Component {
     return getState('dashboardStore');
   }
 
-  static prefetch(init) {
-    console.log('prefetch', init);
-    return NoteAction.fetchNotes(init);
+  static prefetch(user) {
+    console.info('prefetch', user);
+    return NoteAction.prefetchNotes(user);
   }
 
   componentDidMount() {
-    this.logInfo('componentDidMount', 'Dashboard');
-    Dashboard.prefetch();
+    this.logInfo('fetch', 'Dashboard');
+    NoteAction.fetchNotes(this.state.user);
   }
 
   logInfo(name, info) {
@@ -42,7 +42,7 @@ class Dashboard extends React.Component {
   render() {
     this.logInfo('render', this.state);
     const { classes, match, route } = this.props;
-    const { notes, page, ids } = this.state;
+    const { user, notes, page, ids } = this.state;
     const _id = Number(match.params.id);
     const category = match.params.category
       ? match.params.category : 'marchant';
@@ -56,8 +56,13 @@ class Dashboard extends React.Component {
           noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <RssButtons notes={_notes} selectedNoteId={ids} />
-          <RssList notes={_notes}
+          <RssButtons
+            user={user}
+            notes={_notes}
+            selectedNoteId={ids} />
+          <RssList
+            user={user}
+            notes={_notes}
             selectedNoteId={ids}
             notePage={page}/>
         </div>

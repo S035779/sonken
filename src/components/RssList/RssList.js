@@ -43,20 +43,22 @@ class RssList extends React.Component {
   handleChangeCheckbox(id, event) {
     this.logInfo('handleChangeCheckbox', id);
     const { checked } = this.state;
+    const { user } = this.props;
     const currentIndex = checked.indexOf(id);
     const newChecked = [...checked];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    NoteAction.select(newChecked);
+    NoteAction.select(user, newChecked);
   }
   
   handleChangeTitle({ id, title }) {
     this.logInfo('handleChangeTitle', id);
     const { notes } = this.state;
+    const { user } = this.props;
     const curNote = notes.find(obj => obj.id === id);
     const newNote = Object.assign({}, curNote, { title });
     const newNotes = notes.map(obj => obj.id === id ? newNote : obj);
-    NoteAction.update(newNote);
+    NoteAction.update(user, newNote);
   }
 
   logInfo(name, info) {
@@ -65,6 +67,7 @@ class RssList extends React.Component {
 
   renderItem(note) {
     const { classes } = this.props;
+    const { checked } = this.state;
     const textClass = {
       primary:    classes.primary
     , secondary:  classes.secondary
@@ -77,7 +80,7 @@ class RssList extends React.Component {
     return <div key={note.id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, note.id)}
-        checked={this.state.checked.indexOf(note.id) !== -1}
+        checked={checked.indexOf(note.id) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}

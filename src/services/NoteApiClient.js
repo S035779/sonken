@@ -1,21 +1,54 @@
+import net from 'Utilities/netutils';
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
 
-let user = '';
-
 const env = process.env.NODE_ENV || 'development';
-const host = process.env.TOP_URL;
-const api_path = process.env.API_PATH;
+const host = process.env.TOP_URL || 'https://localhost:4443';
+const api_path = process.env.API_PATH || '/api';
 const api = host + api_path;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const pspid = 'NoteApiClient';
 
 export default {
   request(request, options) {
     this.logInfo(request, options);
     switch(request) {
+      case 'prefetch/notes':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/notes'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'prefetch/traded':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/traded'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'prefetch/bided':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/bided'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/notes'
           , options
@@ -26,7 +59,6 @@ export default {
         break;
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
-          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/traded'
           , options
@@ -37,7 +69,6 @@ export default {
         break;
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
-          if(!user) return resolve(options.init.notes);
           xhr.getJSON(
             api + '/bided'
           , options
@@ -46,16 +77,16 @@ export default {
           );
         });
         break;
-      case 'fetch/note':
-        return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/note'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
+      //case 'fetch/note':
+      //  return new Promise((resolve, reject) => {
+      //    xhr.getJSON(
+      //      api + '/note'
+      //    , options
+      //    , obj => { resolve(obj); }
+      //    , err => { reject(err); }
+      //    );
+      //  });
+      //  break;
       case 'create/note':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -196,14 +227,6 @@ export default {
           );
         });
         break;
-      //case 'prefetch/notes':
-      //case 'prefetch/traded':
-      //case 'prefetch/bided':
-      //  return new Promise((resolve, reject) => {
-      //    const notes = options.notes;
-      //    setTimeout(() => resolve(notes), 200);
-      //  });
-      //  break;
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -227,65 +250,60 @@ export default {
   /*
    * Notes
    */
-  //prefetchNotes(data) {
-  //  user = data.user;
-  //  this.logInfo('User:', user);
-  //  return this.request('prefetch/notes', { notes: data.notes });
-  //},
-  //prefetchTradedNotes(data) {
-  //  user = data.user;
-  //  return this.request('prefetch/traded', { notes: data.notes });
-  //},
-  //prefetchBidedNotes(data) {
-  //  user = data.user;
-  //  return this.request('prefetch/bided', { notes: data.notes });
-  //},
+  prefetchNotes(user) {
+    return this.request('prefetch/notes', { user });
+  },
+  prefetchTradedNotes(user) {
+    return this.request('prefetch/traded', { user });
+  },
+  prefetchBidedNotes(user) {
+    return this.request('prefetch/bided', { user });
+  },
 
-  fetchNotes(init) {
-    return this.request('fetch/notes', init ? { init } : { user });
+  fetchNotes(user) {
+    return this.request('fetch/notes', { user });
   },
-  fetchTradedNotes(init) {
-    return this.request('fetch/traded', init ? { init } : { user });
+  fetchTradedNotes(user) {
+    return this.request('fetch/traded', { user });
   },
-  fetchBidedNotes(init) {
-    return this.request('fetch/bided', init ? { init } : { user });
+  fetchBidedNotes(user) {
+    return this.request('fetch/bided', { user });
   },
 
   /*
    * Note
    */
-  fetchNote(id) {
-    return this.request('fetch/note', { user, id });
-  },
-  createNote({ url, category }) {
-    if(!url)
-      return this.request('not/url'
+  //fetchNote(user, id) {
+  //  return this.request('fetch/note', { user, id });
+  //},
+  createNote(user, { url, category }) {
+    if(!url) return this.request('not/url'
         , { name: 'Warning', message: 'Not Url Registory.' });
     return this.request('create/note', { user, url, category });
   },
-  updateNote({ id, title, asin, name, price, bidsprice, body }) {
+  updateNote(user, { id, title, asin, name, price, bidsprice, body }) {
     const updated = std.getLocalTimeStamp(Date.now());
     const data = { title, asin, name, price, bidsprice, body, updated };
     return this.request('update/note', { user, id, data });
   },
-  pageNote({ maxNumber, number, perPage }) {
+  pageNote(user, { maxNumber, number, perPage }) {
     return this.request('pagenation/note', {
       user, maxNumber, number, perPage
     });
   },
-  selectNote(ids) {
+  selectNote(user, ids) {
     return this.request('select/note', { user, ids });
   },
-  deleteNote(ids) {
+  deleteNote(user, ids) {
     return this.request('delete/note', { user, ids });
   },
-  deleteItem(ids) {
+  deleteItem(user, ids) {
     return this.request('delete/item', { user, ids });
   },
-  uploadNotes(filename) {
+  uploadNotes(user, filename) {
     return this.request('upload/note', { user, filename });
   },
-  downloadNotes(fileName) {
+  downloadNotes(user, fileName) {
     return this.request('download/note', { user, filename });
   },
 
@@ -293,21 +311,21 @@ export default {
   /*
    *  Trade
    */
-  createTrade(ids) {
+  createTrade(user, ids) {
     return this.request('create/traded', { user, ids });
   },
-  deleteTrade(ids) {
+  deleteTrade(user, ids) {
     return this.request('delete/traded', { user, ids });
   },
-  pageTrade({ maxNumber, number, perPage }) {
+  pageTrade(user, { maxNumber, number, perPage }) {
     return this.request('pagenation/traded', {
       user, maxNumber, number, perPage
     });
   },
-  selectTrade(ids) {
+  selectTrade(user, ids) {
     return this.request('select/traded', { user, ids });
   },
-  filterTrade({
+  filterTrade(user, {
     endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
     const filter = {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
@@ -318,21 +336,21 @@ export default {
   /*
    *  Bids
    */
-  createBids(ids) {
+  createBids(user, ids) {
     return this.request('create/bided', { user, ids });
   },
-  deleteBids(ids) {
+  deleteBids(user, ids) {
     return this.request('delete/bided', { user, ids });
   },
-  pageBids({ maxNumber, number, perPage }) {
+  pageBids(user, { maxNumber, number, perPage }) {
     return this.request('pagenation/bided', {
       user, maxNumber, number, perPage
     });
   },
-  selectBids(ids) {
+  selectBids(user, ids) {
     return this.request('select/bided', { user, ids });
   },
-  filterBids({
+  filterBids(user, {
     endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
     const filter = {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
@@ -343,30 +361,30 @@ export default {
   /*
    *  Read
    */
-  createRead(ids) {
+  createRead(user, ids) {
     return this.request('create/readed', { user, ids });
   },
-  deleteRead(ids) {
+  deleteRead(user, ids) {
     return this.request('delete/readed', { user, ids });
   },
 
   /*
    *  Star
    */
-  createStar(ids) {
+  createStar(user, ids) {
     return this.request('create/starred', { user, ids });
   },
-  deleteStar(ids) {
+  deleteStar(user, ids) {
     return this.request('delete/starred', { user, ids });
   },
 
   /*
    *  List
    */
-  createList(ids) {
+  createList(user, ids) {
     return this.request('create/listed', { user, ids });
   },
-  deleteList(ids) {
+  deleteList(user, ids) {
     return this.request('delete/listed', { user, ids });
   },
 

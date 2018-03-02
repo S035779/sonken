@@ -7,8 +7,8 @@ import Trade from 'Pages/Trade/Trade';
 
 const getUserData = props => {
   return new Promise((resolve, reject) => {
-    const login = { user: 'MyUserName', notes: [] };
-    resolve(login);
+    const user = 'MyUserName';
+    resolve(user);
   });
 };
 

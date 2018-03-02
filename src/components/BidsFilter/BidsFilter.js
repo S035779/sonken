@@ -1,6 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import NoteAction       from 'Actions/NoteAction';
+import BidsAction       from 'Actions/BidsAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
@@ -26,7 +26,7 @@ class BidsFilter extends React.Component {
   }
 
   componentDidMount() {
-    NoteAction.select([]);
+    BidsAction.select(this.props.user, []);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -62,34 +62,37 @@ class BidsFilter extends React.Component {
         break;
       case 'checked':
         this.setState({ checked: checked });
-        const { items } = this.props;
+        const { user, items } = this.props;
         const ids = checked ? items.map(item => item.guid._) : [];
-        NoteAction.select(ids);
+        BidsAction.select(user, ids);
         break;
     }
   }
 
   handleTraded() {
     const { selectedItemId } = this.state;
+    const { user } = this.props;
     this.logInfo('handleTraded', selectedItemId);
-    NoteAction.createTrade(selectedItemId);
+    BidsAction.createTrade(user, selectedItemId);
   }
 
   handleDelete() {
     const { selectedItemId } = this.state;
+    const { user } = this.props;
     this.logInfo('handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
-      NoteAction.deleteItem(selectedItemId);
+      BidsAction.deleteItem(user, selectedItemId);
     }
   }
 
   handleFilter() {
     const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
       = this.state;
+    const { user } = this.props;
     this.logInfo('handleFilter', {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     });
-    NoteAction.filterItem({
+    BidsAction.filter(user, {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     });
   }

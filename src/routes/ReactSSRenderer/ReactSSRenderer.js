@@ -23,6 +23,7 @@ export default class ReactSSRenderer {
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
+      console.log(matchs, location);
       this.getUserData(matchs)
       .then(objs => this.prefetch(matchs, objs[0]))
       .then(() => this.setInitialData(location).pipe(res))
@@ -43,10 +44,11 @@ export default class ReactSSRenderer {
   }
 
   prefetch(matchs, data) {
-    log.trace('Data:', data);
-    const promises = matchs.map(({ route, match }) => {
-      return route.component.prefetch
-        ? route.component.prefetch(data) : Promise.resolve(null);
+    let promises = [];
+    matchs.some(({ route, match }) => {
+      if(route.component.prefetch)
+        promises.push(route.component.prefetch(data));
+      return route.component.prefetch;
     });
     return Promise.all(promises);
   }
@@ -54,8 +56,6 @@ export default class ReactSSRenderer {
   getUserData(matchs) {
     let promises = [];
     matchs.some(({ route, match }) => {
-      //log.trace('Route:', route);
-      //log.trace('Match:', match);
       if(route.loadData) promises.push(route.loadData(match));
       return route.loadData;
     });

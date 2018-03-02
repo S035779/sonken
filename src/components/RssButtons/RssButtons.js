@@ -12,30 +12,30 @@ class RssButtons extends React.Component {
   }
 
   componentDidMount() {
-    NoteAction.select([]);
+    NoteAction.select(this.props.user, []);
   }
 
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });
 
-    const { notes } = this.props;
+    const { user, notes } = this.props;
     const ids = checked ? notes.map(note => note.id) : [];
     this.logInfo('handleChangeCheckbox', ids);
-    NoteAction.select(ids);
+    NoteAction.select(user, ids);
   }
 
   handleReaded() {
-    const { selectedNoteId } = this.props;
+    const { user, selectedNoteId } = this.props;
     this.logInfo('handleReaded', selectedNoteId);
-    NoteAction.createRead(selectedNoteId);
+    NoteAction.createRead(user, selectedNoteId);
   }
 
   handleDelete() {
-    const { selectedNoteId } = this.props;
+    const { user, selectedNoteId } = this.props;
     this.logInfo('handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
-      NoteAction.delete(selectedNoteId);
+      NoteAction.delete(user, selectedNoteId);
     }
   }
 

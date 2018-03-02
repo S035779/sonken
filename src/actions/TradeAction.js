@@ -4,33 +4,33 @@ import NoteApiClient from 'Services/NoteApiClient';
 const pspid = 'TradeAction';
 
 export default {
-  deleteItem(ids) {
-    return NoteApiClient.deleteItem(ids).then(() => {
+  deleteItem(user, ids) {
+    return NoteApiClient.deleteItem(user, ids).then(() => {
       dispatch({ type: 'item/delete/traded', ids });
     });
   },
-  create(ids) {
-    return NoteApiClient.createTrade(ids).then(() => {
+  create(user, ids) {
+    return NoteApiClient.createTrade(user, ids).then(() => {
       dispatch({ type: 'trade/create', ids });
     });
   },
-  delete(ids) {
-    return NoteApiClient.deleteTrade(ids).then(() => {
+  delete(user, ids) {
+    return NoteApiClient.deleteTrade(user, ids).then(() => {
       dispatch({ type: 'trade/delete', ids });
     });
   },
-  pagenation(page) {
-    return NoteApiClient.pageTrade(page).then(() => {
+  pagenation(user, page) {
+    return NoteApiClient.pageTrade(user, page).then(() => {
       dispatch({ type: 'trade/pagenation', page });
     });
   },
-  select(ids) {
-    return NoteApiClient.selectTrade(ids).then(() => {
+  select(user, ids) {
+    return NoteApiClient.selectTrade(user, ids).then(() => {
       dispatch({ type: 'trade/select', ids });
     });
   },
-  filter(filter) {
-    return NoteApiClient.filterTrade(filter).then(() => {
+  filter(user, filter) {
+    return NoteApiClient.filterTrade(user, filter).then(() => {
       dispatch({ type: 'trade/filter', filter });
     });
   },
