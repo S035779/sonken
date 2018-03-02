@@ -9,6 +9,7 @@ import {
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
+import RssBurron        from 'Components/RssButton/RssButton';
 
 class BidsSearch extends React.Component {
   constructor(props) {
@@ -52,8 +53,9 @@ class BidsSearch extends React.Component {
   }
 
   render() {
-    const { classes, itemNumber } = this.props;
+    const { classes, itemNumber, category } = this.props;
     const { perPage, filename } = this.state;
+    const color = category === 'bids' ? 'green' : 'yellow';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -76,10 +78,9 @@ class BidsSearch extends React.Component {
       <div className={classes.buttons}>
         <div className={classes.button} />
         <div className={classes.space} />
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleDownload.bind(this)}>
-          CSV ダウンロード</Button>
+        <RssButton color={color}
+          onClick={this.handleDownload.bind(this)}
+          classes={classes.button}>CSV ダウンロード</RssButton>
         <div className={classes.button} />
       </div>
     </div>;

@@ -1,12 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
 
-import { withStyles } from 'material-ui/styles';
-import { Select, Input, Button, Typography } from 'material-ui';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import { MenuItem } from 'material-ui/Menu';
+import { withStyles }   from 'material-ui/styles';
+import {
+  Select, Input, Button, Typography
+}                       from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormControl }  from 'material-ui/Form';
+import { MenuItem }     from 'material-ui/Menu';
+import RssButton        from 'Components/RssButton/RssButton';
 
 class RssSearch extends React.Component {
   constructor(props) {
@@ -81,8 +84,9 @@ class RssSearch extends React.Component {
   }
 
   render() {
-    const { classes, noteNumber } = this.props;
+    const { classes, noteNumber, category } = this.props;
     const { url, perPage, filename } = this.state;
+    const color = category === 'marchant' ? 'skyblue' : 'orange';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -112,14 +116,12 @@ class RssSearch extends React.Component {
           onClick={this.handleSubmit.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
         <div className={classes.space} />
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleDownload.bind(this)}>
-          CSV ダウンロード</Button>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleUpload.bind(this)}>
-          CSV アップロード</Button>
+        <RssButton color={color}
+          onClick={this.handleDownload.bind(this)}
+          classes={classes.button}>CSV ダウンロード</RssButton>
+        <RssButton color={color}
+          onClick={this.handleUpload.bind(this)}
+          classes={classes.button}>CSV アップロード</RssButton>
       </div>
     </div>;
   }
@@ -137,7 +139,8 @@ const styles = theme => ({
 , inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, margin: theme.spacing.unit /2
+, button:     { flex: 1
+              , margin: theme.spacing.unit /2
               , wordBreak: 'keep-all', padding: 4 }
 , results:    { flex: 1, minWidth
               , display: 'flex'

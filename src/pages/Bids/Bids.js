@@ -63,8 +63,9 @@ class Bids extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes } = this.props;
+    const { classes, match } = this.props;
     const { user, notes, page, ids, filter } = this.state;
+    const category = match.params.category;
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -76,8 +77,8 @@ class Bids extends React.Component {
     return <div className={classes.root}>
       <BidsSearch
         user={user}
-        itemNumber={number}
-        itemPage={page}/>
+        category={category}
+        itemNumber={number} itemPage={page}/>
       <BidsFilter
         user={user}
         items={_items}

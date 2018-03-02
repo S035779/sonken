@@ -63,8 +63,9 @@ class Trade extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes } = this.props;
+    const { classes, match } = this.props;
     const { user, notes, page, ids, filter } = this.state;
+    const category = match.params.category;
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -76,8 +77,8 @@ class Trade extends React.Component {
     return <div className={classes.root}>
       <TradeSearch
         user={user}
-        itemNumber={number}
-        itemPage={page}/>
+        category={category}
+        itemNumber={number} itemPage={page}/>
       <TradeFilter
         user={user}
         items={_items}
