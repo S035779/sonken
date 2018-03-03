@@ -24,6 +24,7 @@ export default class ReactSSRenderer {
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
+      console.log(matchs);
       this.getUserData(matchs, user)
       .then(objs => this.prefetchData(matchs, objs))
       .then(() => this.setInitialData(location).pipe(res))

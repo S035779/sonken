@@ -5,20 +5,17 @@ import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
 import { Reboot } from 'material-ui';
-import RssHeader from 'Components/RssHeader/RssHeader';
 import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
 
-class App extends React.Component {
+class Public extends React.Component {
   render() {
     const { classes, route } = this.props;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
       <div className={classes.appFrame}>
-        <RssHeader />
-        <div className={classes.content}>
-          {renderRoutes(route.routes)}
-        </div>
+      <div className={classes.content}>
+      </div>
       </div>
       </ErrorBoundary>
     </div>;
@@ -34,16 +31,17 @@ const styles = theme => ({
             , display: 'flex', flexDirection: 'column'
             , width: '100%'},
   content:  { position: 'absolute'
-            , width: '100%'
+            , border: '1px solid #CCC'
+            , width: '80%'
             , height: `calc(100vh - ${barHeightSmDown}px)`
             , marginTop: barHeightSmDown
             , [theme.breakpoints.up('sm')]: {
               height: `calc(100vh - ${barHeightSmUp}px)`
             , marginTop: barHeightSmUp }}
 });
-App.displayName = 'App';
-App.defaultProps = {};
-App.propTypes = {
+Public.displayName = 'Public';
+Public.defaultProps = {};
+Public.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(App);
+export default withStyles(styles)(Public);

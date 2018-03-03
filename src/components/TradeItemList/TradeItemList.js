@@ -11,6 +11,7 @@ import {
 import {
   ListItem, ListItemText, ListItemSecondaryAction
 }                     from 'material-ui/List';
+import RssButton      from 'Components/RssButton/RssButton';
 
 class TradeItemList extends React.Component {
   constructor(props) {
@@ -69,6 +70,8 @@ class TradeItemList extends React.Component {
       primary: classes.primary
     , secondary: classes.secondary
     };
+    const buttonColor = traded.indexOf(item.guid._) !== -1
+      ? 'green' : 'yellow';
     const buttonText = traded.indexOf(item.guid._) !== -1
       ? '取引 完了' : '取引 未完了';
     const title = `出品件名：${item.title}`;
@@ -99,9 +102,9 @@ class TradeItemList extends React.Component {
             primary={title} secondary={description}
             className={classes.listItemText}/>
           <ListItemSecondaryAction>
-            <Button variant="raised" color="primary"
+            <RssButton color={buttonColor}
               onClick={this.handleChangeTraded.bind(this, item.guid._)}
-              className={classes.button}>{buttonText}</Button>
+              classes={classes.button}>{buttonText}</RssButton>
           </ListItemSecondaryAction>
         </ListItem>
       </Paper>

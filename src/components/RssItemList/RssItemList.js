@@ -1,17 +1,18 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import { Link }       from 'react-router-dom';
-import NoteAction     from 'Actions/NoteAction';
-import std            from 'Utilities/stdutils';
+import React                from 'react';
+import PropTypes            from 'prop-types';
+import { Link }             from 'react-router-dom';
+import NoteAction           from 'Actions/NoteAction';
+import std                  from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles }       from 'material-ui/styles';
 import {
   List, Paper, Checkbox, Button, Typography
-}                     from 'material-ui';
+}                           from 'material-ui';
 import {
   ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
-}                     from 'material-ui/List';
+}                           from 'material-ui/List';
 import { Star, StarBorder } from 'material-ui-icons';
+import RssButton            from 'Components/RssButton/RssButton';
 
 class RssItemList extends React.Component {
   constructor(props) {
@@ -87,6 +88,8 @@ class RssItemList extends React.Component {
       primary: classes.primary
     , secondary: classes.secondary
     };
+    const buttonColor = listed.indexOf(item.guid._) !== -1
+      ? 'green' : 'yellow';
     const buttonText = listed.indexOf(item.guid._) !== -1
       ? '取引リスト 登録済み' : '取引リスト 登録';
     const title = `出品件名：${item.title}`;
@@ -123,10 +126,9 @@ class RssItemList extends React.Component {
               primary={title}
               secondary={description}/>
             <ListItemSecondaryAction>
-              <Button variant="raised" color="primary"
-                className={classes.button}
-                onClick={this.handleChangeListed.bind(this, item.guid._)}>
-                {buttonText}</Button>
+              <RssButton color={buttonColor}
+                onClick={this.handleChangeListed.bind(this, item.guid._)}
+                classes={classes.button}>{buttonText}</RssButton>
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>

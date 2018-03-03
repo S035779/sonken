@@ -82,6 +82,7 @@ class TradeFilter extends React.Component {
     this.logInfo('handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       TradeAction.deleteItem(user, selectedItemId);
+      this.setState({ checked: false });
     }
   }
 

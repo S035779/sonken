@@ -82,6 +82,7 @@ class BidsFilter extends React.Component {
     this.logInfo('handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       BidsAction.deleteItem(user, selectedItemId);
+      this.setState({ checked: false });
     }
   }
 

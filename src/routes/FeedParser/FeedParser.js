@@ -45,21 +45,29 @@ class FeedParser {
     const setBided   = objs => { return bided   = objs };
     const setStarred = objs => { return starred = objs };
     const setListed  = objs => { return listed = objs };
-    const noteIds = R.compose(R.map(Number), R.split(','));
-    const itemIds = R.split(',');
-    const delNoteIds  = ids =>
-      R.symmetricDifference(noteIds(options.ids), ids)
-    const delItemIds  = ids =>
-      R.symmetricDifference(itemIds(options.ids), ids);
+    const splitNumIds = R.compose(R.map(Number), R.split(','));
+    const splitStrIds = R.split(',');
     const isUsr   = obj => obj.user === options.user;
     const isId    = obj => obj.id === options.id;
-    const getIds  = R.compose(obj => obj.ids, R.head, R.filter(isUsr));
     const _setIds = (ids, obj) => isUsr(obj) ? Object.assign({}, obj
     , { ids }) : obj;
-    const setIds  = R.curry(_setIds);
-    const updIds  = ids =>
-      R.compose( R.concat(ids), R.difference(options.ids) )(ids);
-    const isRead  = obj => R.contains(obj.id,     getIds(readed)  );
+    const setIds = R.curry(_setIds);
+    const getIds = R.compose(obj => obj.ids, R.head, R.filter(isUsr));
+    const updIds = ids =>
+      R.compose(R.concat(ids), R.difference(options.ids))(ids);
+    const delIds = ids =>
+      R.symmetricDifference(splitStrIds(options.ids), ids);
+    const getNote = id => R.find(obj => obj.id === id, notes);
+    const getItems = obj => obj.items;
+    const getItemId = obj => obj.guid._;
+    const getItemIds = R.compose(
+      R.map(getItemId), R.flatten, R.map(getItems)
+      , R.filter(getItems), R.map(getNote));
+    const updReadIds = ids => R.compose(
+      R.concat(ids), R.difference(getItemIds(options.ids)))(ids);
+    const delReadIds = ids => R.symmetricDifference(
+      getItemIds(splitStrIds(options.ids)), ids);
+    const isRead  = obj => R.contains(obj.guid._, getIds(readed)  );
     const isTrade = obj => R.contains(obj.guid._, getIds(traded)  );
     const isBids  = obj => R.contains(obj.guid._, getIds(bided)   );
     const isStar  = obj => R.contains(obj.guid._, getIds(starred) );
@@ -74,10 +82,13 @@ class FeedParser {
     , { starred:  isStar(obj)   }); 
     const setList   = obj => Object.assign({}, obj
     , { listed:   isList(obj)   }); 
+    const _setReadItems   = obj => R.map(setRead,   obj.items);
     const _setTradeItems  = obj => R.map(setTrade,  obj.items);
     const _setBidsItems   = obj => R.map(setBids,   obj.items);
     const _setStarItems   = obj => R.map(setStar,   obj.items);
     const _setListItems   = obj => R.map(setList,   obj.items);
+    const setReadItems    = obj => obj.items ? Object.assign({}, obj
+    , { items: _setReadItems(obj)  }) : obj;
     const setTradeItems   = obj => obj.items ? Object.assign({}, obj
     , { items: _setTradeItems(obj) }) : obj;
     const setBidsItems    = obj => obj.items ? Object.assign({}, obj
@@ -95,8 +106,8 @@ class FeedParser {
     const updNote   = obj => isId(obj) ? _updNote(obj) : obj;
     const _isNoteIds = (obj, ids) => R.any(id => obj.id === id, ids);
     const _isItemIds = (obj, ids) => R.any(id => obj.guid._ === id, ids);
-    const delNote = obj => !_isNoteIds(obj, noteIds(options.ids));
-    const delItem = obj => !_isItemIds(obj, itemIds(options.ids));
+    const delNote = obj => !_isNoteIds(obj, splitNumIds(options.ids));
+    const delItem = obj => !_isItemIds(obj, splitStrIds(options.ids));
     const _delItems = obj => R.filter(delItem, obj.items);
     const delItems  = obj => obj.items ? Object.assign({}, obj
     , { items: _delItems(obj)}) : obj;
@@ -120,7 +131,7 @@ class FeedParser {
           const response = R.compose(
             R.map(setStarItems)
           , R.map(setListItems)
-          , R.map(setRead)
+          , R.map(setReadItems)
           , R.filter(isUsr)
           );
           resolve(response(notes));
@@ -129,10 +140,10 @@ class FeedParser {
       case 'fetch/readed':
         return new Promise((resolve, reject) => {
           const response = R.compose(
-            R.map(setRead)
+            R.map(setReadItems)
           , R.filter(isUsr)
           );
-          resolve(response(notes));
+         resolve(response(notes));
         });
         break;
       case 'fetch/traded':
@@ -178,7 +189,7 @@ class FeedParser {
           const response = R.compose(
             setStarItems
           , setListItems
-          , setRead
+          , setReadItems
           , R.filter(isId)
           , R.filter(isUsr)
           );
@@ -215,13 +226,23 @@ class FeedParser {
           resolve(response(notes));
         });
         break;
+      case 'delete/item':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => 'OK'
+          , setNotes
+          , R.map(delItems)
+          );
+          resolve(response(notes));
+        });
+        break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
           const response = R.compose(
             () => 'OK'
           , setReaded
           , updReaded
-          , updIds
+          , updReadIds
           , getIds
           );
           resolve(response(readed));
@@ -233,20 +254,10 @@ class FeedParser {
             () => 'OK'
           , setReaded
           , updReaded
-          , delNoteIds
+          , delReadIds
           , getIds
           );
           resolve(response(readed));
-        });
-        break;
-      case 'delete/item':
-        return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setNotes
-          , R.map(delItems)
-          );
-          resolve(response(notes));
         });
         break;
       case 'create/traded':
@@ -267,7 +278,7 @@ class FeedParser {
             () => 'OK'
           , setTraded
           , updTraded
-          , delItemIds
+          , delIds
           , getIds
           );
           resolve(response(traded));
@@ -291,7 +302,7 @@ class FeedParser {
             () => 'OK'
           , setBided
           , updBided
-          , delItemIds
+          , delIds
           , getIds
           );
           resolve(response(bided));
@@ -315,7 +326,7 @@ class FeedParser {
             () => 'OK'
           , setStarred
           , updStarred
-          , delItemIds
+          , delIds
           , getIds
           );
           resolve(response(starred));
@@ -339,7 +350,7 @@ class FeedParser {
             () => 'OK'
           , setListed
           , updListed
-          , delItemIds
+          , delIds
           , getIds
           );
           resolve(response(listed));
@@ -424,16 +435,16 @@ class FeedParser {
     return this.request('delete/traded', { user, ids });
   }
 
-  removeItem(user, ids) {
-    return this.request('delete/item', { user, ids });
-  }
-
   addRead(user, ids) {
     return this.request('create/readed', { user, ids });
   }
 
   removeRead(user, ids) {
     return this.request('delete/readed', { user, ids });
+  }
+
+  removeItem(user, ids) {
+    return this.request('delete/item', { user, ids });
   }
 
   removeNote(user, ids) {
@@ -573,16 +584,16 @@ class FeedParser {
     return Rx.Observable.fromPromise(this.removeNote(user, ids));
   }
 
+  deleteItem({ user, ids }) {
+    return Rx.Observable.fromPromise(this.removeItem(user, ids));
+  }
+
   createRead({ user, ids }) {
     return Rx.Observable.fromPromise(this.addRead(user, ids));
   }
 
   deleteRead({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeRead(user, ids));
-  }
-
-  deleteItem({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeItem(user, ids));
   }
 
   createTrade({ user, ids }) {

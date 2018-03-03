@@ -11,6 +11,7 @@ import {
 import {
   ListItem, ListItemText, ListItemSecondaryAction
 }                     from 'material-ui/List';
+import RssButton      from 'Components/RssButton/RssButton';
 
 class BidsItemList extends React.Component {
   constructor(props) {
@@ -69,6 +70,8 @@ class BidsItemList extends React.Component {
       primary: classes.primary
     , secondary: classes.secondary
     };
+    const buttonColor = bided.indexOf(item.guid._) !== -1
+      ? 'green' : 'yellow';
     const buttonText = bided.indexOf(item.guid._) !== -1
       ? '取引チェック 登録済み' : '取引チェック 登録';
     const title = `出品件名：${item.title}`;
@@ -99,9 +102,9 @@ class BidsItemList extends React.Component {
             primary={title} secondary={description}
             className={classes.listItemText}/>
           <ListItemSecondaryAction>
-            <Button variant="raised" color="primary"
+            <RssButton color={buttonColor}
               onClick={this.handleChangeBided.bind(this, item.guid._)}
-              className={classes.button}>{buttonText}</Button>
+              classes={classes.button}>{buttonText}</RssButton>
           </ListItemSecondaryAction>
         </ListItem>
       </Paper>

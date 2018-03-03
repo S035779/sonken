@@ -26,25 +26,25 @@ const thm = {
       , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)' }}}})
 , skyblue: createMuiTheme({ overrides: { MuiButton: {
     root: {
-      background: blue[300], width: 138, color: 'white'
+      background: blue[300]
       , margin: '0 8px'
       , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
       , '&:hover':  { color: 'black'  }}}}})
 , orange: createMuiTheme({ overrides: { MuiButton: {
     root: {
-      background: orange[500], width: 138,  color: 'white'
+      background: orange[500]
       , margin: '0 8px'
       , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
       , '&:hover':  { color: 'black' }}}}})
 , green: createMuiTheme({ overrides: { MuiButton: {
     root: {
-      background: green[500], width: 138,  color: 'white'
+      background: green[500]
       , margin: '0 8px'
       , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
       , '&:hover':  { color: 'black' }}}}})
 , yellow: createMuiTheme({ overrides: { MuiButton: {
     root: {
-      background: yellow[600], width: 138,  color: 'white'
+      background: yellow[600]
       , margin: '0 8px'
       , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
       , '&:hover':  { color: 'black' }}}}})

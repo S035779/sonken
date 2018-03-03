@@ -4,6 +4,8 @@ import MarchantEdit from 'Pages/MarchantEdit/MarchantEdit';
 import SellersEdit from 'Pages/SellersEdit/SellersEdit';
 import Bids from 'Pages/Bids/Bids';
 import Trade from 'Pages/Trade/Trade';
+import Login from 'Pages/Login/Login';
+import Public from 'Pages/Public/Public';
 
 const getUserData = (user, match) => {
   return new Promise((resolve, reject) => {
@@ -13,6 +15,14 @@ const getUserData = (user, match) => {
 
 export default function getRoutes() {
   return [
+    {
+      path: '/public',
+      component: Public
+    },
+    {
+      path: '/login',
+      componrnt: Login
+    },
     { component: App,
       routes: [
         {

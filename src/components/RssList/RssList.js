@@ -73,7 +73,10 @@ class RssList extends React.Component {
     , secondary:  classes.secondary
     };
     const linkTo = `/${note.category}/${note.id}/edit`;
-    const notice = !note.readed ? '99件 NEW' : '';
+    let newRelease = 0;
+    if (note.items)
+      note.items.forEach(item => { if(!item.readed) newRelease++; });
+    const notice = newRelease ? `${newRelease}件 NEW` : '';
     const title = note.title;
     const updated =
       std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');

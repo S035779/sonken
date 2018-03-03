@@ -9,6 +9,7 @@ import {
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
+import RssButton        from 'Components/RssButton/RssButton';
 
 class TradeSearch extends React.Component {
   constructor(props) {
@@ -76,10 +77,9 @@ class TradeSearch extends React.Component {
       <div className={classes.buttons}>
         <div className={classes.button} />
         <div className={classes.space} />
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleDownload.bind(this)}>
-          CSV ダウンロード</Button>
+        <RssButton color={'yellow'} 
+          onClick={this.handleDownload.bind(this)}
+          classes={classes.button}>CSV ダウンロード</RssButton>
         <div className={classes.button} />
       </div>
     </div>;
@@ -88,6 +88,7 @@ class TradeSearch extends React.Component {
 
 const titleHeight = 62;
 const minWidth = 125;
+const buttonWidth = 88;
 const styles = theme => ({
   noteSearchs:{ display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
@@ -98,8 +99,8 @@ const styles = theme => ({
 , inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, margin: theme.spacing.unit /2
-              , minWidth: 88
+, button:     { flex: 1, width: buttonWidth
+              , margin: theme.spacing.unit /2
               , wordBreak: 'keep-all', padding: 4 }
 , results:    { flex: 1, minWidth
               , display: 'flex'

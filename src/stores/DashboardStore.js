@@ -29,50 +29,60 @@ export default class DashboardStore extends ReduceStore {
 
   createRead(state, action) {
     const isNote = obj => action.ids.some(id => id === obj.id)
-    return state.notes.map(note => isNote(note) ? Object.assign({}, note
-    , { readed: true }) : note);
+    const setItem = obj => Object.assign({}, obj, { readed: true });
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(note => isNote(note) ? setNote(note) : note);
   }
 
   deleteRead(state, action) {
     const isNote = obj => action.ids.some(id => id === obj.id)
-    return state.notes.map(note => isNote(note) ? Object.assign({}, note
-    , { readed: false }) : note);
+    const setItem = obj => Object.assign({}, obj, { readed: false });
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(note => isNote(note) ? setNote(note) : note);
   }
 
   createStar(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)? Object.assign({}, obj
-    , { starred: true }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { starred: true }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
   }
 
   deleteStar(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj) ? Object.assign({}, obj
-    , { starred: false }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { starred: false }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
   }
 
   createList(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)? Object.assign({}, obj
-    , { listed: true }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { listed: true }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
   }
 
   deleteList(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj) ? Object.assign({}, obj
-    , { listed: false }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { listed: false }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
   }
 
   reduce(state, action) {

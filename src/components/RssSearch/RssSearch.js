@@ -129,6 +129,7 @@ class RssSearch extends React.Component {
 
 const titleHeight = 62;
 const minWidth = 125;
+const buttonWidth = 88;
 const styles = theme => ({
   noteSearchs:{ display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
@@ -139,7 +140,7 @@ const styles = theme => ({
 , inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1
+, button:     { flex: 1, width: buttonWidth
               , margin: theme.spacing.unit /2
               , wordBreak: 'keep-all', padding: 4 }
 , results:    { flex: 1, minWidth

@@ -29,6 +29,7 @@ class RssButtons extends React.Component {
     const { user, selectedNoteId } = this.props;
     this.logInfo('handleReaded', selectedNoteId);
     NoteAction.createRead(user, selectedNoteId);
+    this.setState({ checked: false });
   }
 
   handleDelete() {
@@ -36,6 +37,7 @@ class RssButtons extends React.Component {
     this.logInfo('handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
       NoteAction.delete(user, selectedNoteId);
+      this.setState({ checked: false });
     }
   }
 

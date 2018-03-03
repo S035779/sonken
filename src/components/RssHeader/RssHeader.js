@@ -41,14 +41,10 @@ class RssHeader extends React.Component {
     </div>;
   }
 };
-//const drawerWidthMdUp = 240;
 const navHeightSmDown = 56;
 const navHeightSmUp = 64;
 const styles = theme => ({
   navHeader:    { position: 'absolute', width: '100%' }
-//              , [theme.breakpoints.up('md')]: {
-//                  width: `calc(100% - ${drawerWidthMdUp}px)`
-//                , marginLeft: drawerWidthMdUp}
   , navIcon:    { marginLeft: -12, marginRight: 'auto' }
   , navBar:     { display: 'flex', flexDirection: 'row'
                 , wordBreak: 'keep-all'
