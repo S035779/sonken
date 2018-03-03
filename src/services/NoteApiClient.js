@@ -227,6 +227,26 @@ export default {
           );
         });
         break;
+      case 'login/authenticate':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/authenticate'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'login/signout':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/authenticate'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'preset/user':
       case 'pagenation/note':
       case 'pagenation/traded':
@@ -399,6 +419,16 @@ export default {
   },
   deleteList(user, ids) {
     return this.request('delete/listed', { user, ids });
+  },
+
+  /*
+   * Login
+   */
+  authenticate(user, password) {
+    return this.request('login/authenticate', { user, password });
+  },
+  signout(user) {
+    return this.request('login/signout', { user });
   },
 
   /*

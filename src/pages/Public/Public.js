@@ -1,47 +1,55 @@
-import React from 'react';
-import PropTypes from 'prop-types'
+import React            from 'react';
+import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
-import getRoutes from 'Main/routes';
+import { Container }    from 'flux/utils';
+import PublicAction       from 'Actions/PublicAction';
+import {
+  getStores, getState
+}                       from 'Stores';
 
-import { withStyles } from 'material-ui/styles';
-import { Reboot } from 'material-ui';
-import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
+import { withStyles }   from 'material-ui/styles';
 
 class Public extends React.Component {
+  static getStores() {
+    return getStores(['publicStore']);
+  }
+
+  static calculateState() {
+    return getState('publicStore');
+  }
+
+  static prefetch(user) {
+    console.info('prefetch', user);
+    return PublicAction.presetUser(user);
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
+  }
+
   render() {
-    const { classes, route } = this.props;
+    this.logInfo('render', this.state);
+    const { classes } = this.props;
     return <div className={classes.root}>
-      <ErrorBoundary>
-      <Reboot />
-      <div className={classes.appFrame}>
-      <div className={classes.content}>
+      <div className={classes.body}>
+        <div className={classes.public}>
+        </div>
       </div>
-      </div>
-      </ErrorBoundary>
     </div>;
   }
 };
 
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
+const publicWidth  = 640;
+const publicHeight = 800;
 const styles = theme => ({
-  root:     { width: '100%', zIndex: 1
-            , overflow: 'hidden', height: '100vh' },
-  appFrame: { position: 'relative'
-            , display: 'flex', flexDirection: 'column'
-            , width: '100%'},
-  content:  { position: 'absolute'
-            , border: '1px solid #CCC'
-            , width: '80%'
-            , height: `calc(100vh - ${barHeightSmDown}px)`
-            , marginTop: barHeightSmDown
-            , [theme.breakpoints.up('sm')]: {
-              height: `calc(100vh - ${barHeightSmUp}px)`
-            , marginTop: barHeightSmUp }}
+  root:     { display: 'flex', flexDirection: 'column' }
+, body:     { display: 'flex', flexDirection: 'row' }
+, public:   { width: publicWidth, minWidth: publicWidth
+            , height: publicHeight }
 });
 Public.displayName = 'Public';
 Public.defaultProps = {};
 Public.propTypes = {
-  classes:  PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Public);
+export default withStyles(styles)(Container.create(Public));

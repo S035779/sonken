@@ -27,12 +27,36 @@ app.use(bodyParser.json());
 
 const feed = FeedParser.of();
 
+const authenticate = (req, res, next) => {
+  const { user, password } = req.body;
+  feed.authenticate({ user, password }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+      res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to Logged in.'); }
+  );
+};
+
+const signout = (req, res, next) => {
+  const { user } = req.query;
+  feed.signout({ user }).subscribe(
+    obj => { res.status(200).send(obj); }
+  , err => {
+      res.status(500).send({ name: err.name, message: err.message });
+      log.error(err.name, ':', err.message);
+    }
+  , () => { log.info('Complete to Logged out.'); }
+  );
+};
+
 const deleteList = (req, res, next) => {
   const { user, ids } = req.query;
   feed.deleteList({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
+    obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete List.'); }  
@@ -44,7 +68,7 @@ const createList = (req, res, next) => {
   feed.createList({ user, ids }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create List.'); }  
@@ -56,7 +80,7 @@ const deleteStar = (req, res, next) => {
   feed.deleteStar({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Star.'); }  
@@ -68,7 +92,7 @@ const createStar = (req, res, next) => {
   feed.createStar({ user, ids }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create Star.'); }  
@@ -80,7 +104,7 @@ const deleteBids = (req, res, next) => {
   feed.deleteBids({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Bids.'); }  
@@ -92,7 +116,7 @@ const createBids = (req, res, next) => {
   feed.createBids({ user, ids }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create Bids.'); }  
@@ -104,7 +128,7 @@ const deleteTrade = (req, res, next) => {
   feed.deleteTrade({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Trade.'); }  
@@ -116,7 +140,7 @@ const createTrade = (req, res, next) => {
   feed.createTrade({ user, ids }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create Trade.'); }  
@@ -128,7 +152,7 @@ const deleteItem = (req, res, next) => {
   feed.deleteItem({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Item.'); }  
@@ -140,7 +164,7 @@ const deleteRead = (req, res, next) => {
   feed.deleteRead({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Read.'); }  
@@ -152,7 +176,7 @@ const createRead = (req, res, next) => {
   feed.createRead({ user, ids }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create Read.'); }  
@@ -164,7 +188,7 @@ const deleteNote = (req, res, next) => {
   feed.deleteNote({ user, ids }).subscribe(
     obj => {  res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to delete Note.'); }  
@@ -176,7 +200,7 @@ const updateNote = (req, res, next) => {
   feed.updateNote({ user, id, data }).subscribe(
     obj => { res.status(200).send(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to update Note.'); }  
@@ -188,7 +212,7 @@ const fetchReadedNotes = (req, res, next) => {
   feed.fetchReadedNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Readed.'); }  
@@ -200,7 +224,7 @@ const fetchTradedNotes = (req, res, next) => {
   feed.fetchTradedNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Traded.'); }  
@@ -212,7 +236,7 @@ const fetchBidedNotes = (req, res, next) => {
   feed.fetchBidedNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Bided.'); }  
@@ -224,7 +248,7 @@ const fetchStarredNotes = (req, res, next) => {
   feed.fetchStarredNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Starred.'); }  
@@ -236,7 +260,7 @@ const fetchListedNotes = (req, res, next) => {
   feed.fetchListedNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Listed.'); }  
@@ -248,7 +272,7 @@ const fetchNote = (req, res, next) => {
   feed.fetchNote({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Note.'); }  
@@ -260,7 +284,7 @@ const fetchNotes = (req, res, next) => {
   feed.fetchNotes({ user }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to fetch Notes.'); }  
@@ -272,7 +296,7 @@ const createNote = (req, res, next) => {
   feed.createNote({ user, url, category }).subscribe(
     obj => { res.json(obj); }
   , err => {
-    res.status(500).send({ name: err.name, message: err.message });
+      res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
     }
   , () => { log.info('Complete to create Note.'); }  
@@ -282,6 +306,12 @@ const createNote = (req, res, next) => {
 const notImplemented = (req, res, next) => {
   next(new Error('not implemented'));
 };
+
+router.route('/authenticate')
+.get(notImplemented)
+.put(notImplemented)
+.post(authenticate)
+.delete(signout);
 
 router.route('/traded')
 .get(fetchTradedNotes)

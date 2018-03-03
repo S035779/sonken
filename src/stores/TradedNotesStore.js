@@ -4,6 +4,7 @@ export default class TradedNotesStore extends ReduceStore {
   getInitialState() {
     return { 
       user: ''
+      , isAuthenticated: false
       , notes: []
       , page: {
         maxNumer: 0
@@ -52,6 +53,10 @@ export default class TradedNotesStore extends ReduceStore {
       case 'user/preset':
         return Object.assign({}, state, {
           user:   action.user
+        });
+      case 'login/authenticate':
+        return Object.assign({}, state, {
+          isAuthenticated: action.isAuthenticated
         });
       case 'note/prefetch/traded':
         return Object.assign({}, state, {

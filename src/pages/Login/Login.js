@@ -1,47 +1,84 @@
-import React from 'react';
-import PropTypes from 'prop-types'
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import { Redirect }     from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
-import getRoutes from 'Main/routes';
+import { Container }    from 'flux/utils';
+import LoginAction       from 'Actions/LoginAction';
+import {
+  getStores, getState
+}                       from 'Stores';
 
-import { withStyles } from 'material-ui/styles';
-import { Reboot } from 'material-ui';
-import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
+import { withStyles }   from 'material-ui/styles';
 
 class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      redirectToRefferer: false
+    };
+  }
+
+  static getStores() {
+    return getStores(['loginStore']);
+  }
+
+  static calculateState() {
+    return getState('loginStore');
+  }
+
+  static prefetch(user) {
+    console.info('prefetch', user);
+    return LoginAction.presetUser(user);
+  }
+
+  handleLogin() {
+    const { user, password } = this.state;
+    LoginAction.authenticate(user, 'Test123$')
+      .then(() => {
+        if(this.state.isAuthenticated)
+          this.setState({ redirectToRefferer: true });
+      });
+  }
+
+  renderMessage(from) {
+    return <div>
+      <p>You must log in to view the page at {from}</p>
+      <button onClick={this.handleLogin.bind(this)}>Log in</button>
+    </div>
+  }
+
+  logInfo(name, info) {
+    console.info('>>> Info:', name, info);
+  }
+
   render() {
-    const { classes, route } = this.props;
+    this.logInfo('render', this.state);
+    const { classes, location } = this.props;
+    const { redirectToRefferer } = this.state;
+    const from = location.state || { pathname: '/' };
+    if(redirectToRefferer) return <Redirect to={from} />;
+    const message = this.renderMessage(from.pathname);
     return <div className={classes.root}>
-      <ErrorBoundary>
-      <Reboot />
-      <div className={classes.appFrame}>
-      <div className={classes.content}>
+      <div className={classes.body}>
+        <div className={classes.login}>
+        {message}
+        </div>
       </div>
-      </div>
-      </ErrorBoundary>
     </div>;
   }
 };
 
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
+const loginWidth  = 640;
+const loginHeight = 800;
 const styles = theme => ({
-  root:     { width: '100%', zIndex: 1
-            , overflow: 'hidden', height: '100vh' },
-  appFrame: { position: 'relative'
-            , display: 'flex', flexDirection: 'column'
-            , width: '100%'},
-  content:  { position: 'absolute'
-            , border: '1px solid #CCC'
-            , width: '80%'
-            , height: `calc(100vh - ${barHeightSmDown}px)`
-            , marginTop: barHeightSmDown
-            , [theme.breakpoints.up('sm')]: {
-              height: `calc(100vh - ${barHeightSmUp}px)`
-            , marginTop: barHeightSmUp }}
+  root:   { display: 'flex', flexDirection: 'column' }
+, body:   { display: 'flex', flexDirection: 'row' }
+, login:  { width: loginWidth, minWidth: loginWidth
+          , height: loginHeight }
 });
 Login.displayName = 'Login';
 Login.defaultProps = {};
 Login.propTypes = {
-  classes:  PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Login);
+export default withStyles(styles)(Container.create(Login));

@@ -24,7 +24,7 @@ export default class ReactSSRenderer {
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
-      console.log(matchs);
+      //console.log(matchs);
       this.getUserData(matchs, user)
       .then(objs => this.prefetchData(matchs, objs))
       .then(() => this.setInitialData(location).pipe(res))
@@ -42,7 +42,7 @@ export default class ReactSSRenderer {
   }
 
   prefetchData(matchs, objs) {
-    console.log(objs);
+    //console.log(objs);
     const promises = matchs.map(({ route, match }, index) =>
       route.component.prefetch 
         ? route.component.prefetch(objs[index], match)

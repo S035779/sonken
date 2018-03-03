@@ -1,21 +1,29 @@
-import React from 'react';
-import PropTypes from 'prop-types'
+import React          from 'react';
+import { withRouter } from 'react-router-dom';
+import PropTypes      from 'prop-types'
+import LoginAction    from 'Actions/LoginAction';
 
 import { withStyles } from 'material-ui/styles';
 import { IconButton } from 'material-ui';
-import { Menu as MenuIcon } from 'material-ui-icons';
-import LoginMenu from 'Components/LoginMenu/LoginMenu';
-import LoginSwitch from 'Components/LoginMenu/LoginSwitch';
-import RssButtonNav from 'Components/RssButtonNav/RssButtonNav';
+import {
+  Menu as MenuIcon
+}                     from 'material-ui-icons';
+import LoginMenu      from 'Components/LoginMenu/LoginMenu';
+import LoginSwitch    from 'Components/LoginMenu/LoginSwitch';
+import RssButtonNav   from 'Components/RssButtonNav/RssButtonNav';
 
 class RssHeader extends React.Component {
   constructor(props) {
     super(props);
-    this.state ={ auth: true };
+    this.state = {
+      auth: props.isAuthenticated
+    };
   }
 
   handleLogin(event, checked) {
+    const { user, history } = this.props;
     this.setState({ auth: checked });
+    if(!auth) LoginAction.signout(user).then(() => history.push('/'));
   }
 
   handleMenu(event) {
@@ -58,4 +66,4 @@ const styles = theme => ({
 RssHeader.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(RssHeader);
+export default withStyles(styles)(withRouter(RssHeader));

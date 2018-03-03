@@ -11,6 +11,9 @@ let traded  = [{ user: 'MyUserName', ids: [] }];
 let bided   = [{ user: 'MyUserName', ids: [] }];
 let starred = [{ user: 'MyUserName', ids: [] }];
 let listed = [{ user: 'MyUserName', ids: [] }];
+let users = [{
+  user: 'MyUserName', password: 'Test123$', isAuthenticated: false
+}]
 
 const pspid = 'FeedParser';
 
@@ -33,18 +36,20 @@ class FeedParser {
   }
 
   request(request, options) {
-    //this.logTrace(request, options);
+    this.logTrace(request, options);
     //this.logTrace('readed:', readed);
     //this.logTrace('traded:', traded);
     //this.logTrace('bided:', bided);
     //this.logTrace('listed:', listed);
     //this.logTrace('starred:', starred);
+    this.logTrace('users:', users);
     const setNotes   = objs => { return notes   = objs };
     const setReaded  = objs => { return readed  = objs };
     const setTraded  = objs => { return traded  = objs };
     const setBided   = objs => { return bided   = objs };
     const setStarred = objs => { return starred = objs };
     const setListed  = objs => { return listed = objs };
+    const setUsers   = objs => { return users = objs };
     const splitNumIds = R.compose(R.map(Number), R.split(','));
     const splitStrIds = R.split(',');
     const isUsr   = obj => obj.user === options.user;
@@ -125,6 +130,18 @@ class FeedParser {
       , bidStopTime: bidStopTime(str) });
     const setItem = R.curry(_setItem);
     const newItem = obj => R.compose( setItem(obj), R.last, R.split('>') );
+    const isPas = obj => options.password === obj.password;
+    const setAuth = obj => R.map(user => user.user === obj.user
+      ? Object.assign({}, user, { isAuthenticated: true })
+      : user ,users);
+    const delAuth = obj => R.map(user => user.user === obj.user
+      ? Object.assign({}, user, { isAuthenticated: false })
+      : user ,users);
+    const isAuth = R.compose(
+      R.head
+    , R.map(obj => obj.isAuthenticated)
+    , R.filter(isUsr)
+    );
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
@@ -356,6 +373,31 @@ class FeedParser {
           resolve(response(listed));
         });
         break;
+      case 'login/authenticate':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => isAuth(users)
+          , setUsers
+          , R.tap(console.log)
+          , R.flatten
+          , R.map(setAuth)
+          , R.filter(isPas)
+          , R.filter(isUsr)
+          );
+          resolve(response(users));
+        });
+        break;
+      case 'login/signout':
+        return new Promise((resolve, reject) => {
+          const response = R.compose(
+            () => isAuth(users)
+          , setUsers
+          , R.flatten
+          , R.map(delAuth)
+          , R.filter(isUsr)
+          );
+          resolve(response(users));
+        });
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
           net.get2(options.url
@@ -401,6 +443,14 @@ class FeedParser {
         });
         break;
     }
+  }
+
+  logIn(user, password) {
+    return this.request('login/authenticate', { user, password });
+  }
+
+  logOut(user) {
+    return this.request('login/signout', { user });
   }
 
   addList(user, ids) {
@@ -626,6 +676,14 @@ class FeedParser {
 
   deleteList({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeList(user, ids));
+  }
+
+  authenticate({ user, password }) {
+    return Rx.Observable.fromPromise(this.logIn(user, password));
+  }
+
+  signout({ user }) {
+    return Rx.Observable.fromPromise(this.logOut(user));
   }
 
   parseFile({ user, file, category }) {

@@ -6,6 +6,7 @@ export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
       user: ''
+      , isAuthenticated: false
       , notes:    []
       , page: {
         maxNumer: 0
@@ -91,6 +92,10 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           user:   action.user
         })
+      case 'login/authenticate':
+        return Object.assign({}, state, {
+          isAuthenticated: action.isAuthenticated
+        });
       case 'note/prefetch/my':
         return Object.assign({}, state, {
           notes:  action.notes

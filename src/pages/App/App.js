@@ -1,6 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types'
 import { renderRoutes } from 'react-router-config';
+import PropTypes from 'prop-types'
 import getRoutes from 'Main/routes';
 
 import { withStyles } from 'material-ui/styles';
@@ -15,7 +15,7 @@ class App extends React.Component {
       <ErrorBoundary>
       <Reboot />
       <div className={classes.appFrame}>
-        <RssHeader />
+        <RssHeader user={user} isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}
         </div>
