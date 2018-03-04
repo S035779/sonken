@@ -1,8 +1,6 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import {
-  Redirect, withRouter
-}                     from 'react-router-dom';
+import { Redirect }   from 'react-router-dom';
 import { Container }  from 'flux/utils';
 import NoteAction     from 'Actions/NoteAction';
 import {
@@ -119,4 +117,4 @@ Trade.defaultProps = { notes: null };
 Trade.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(withRouter(Container.create(Trade)));
+export default withStyles(styles)(Container.create(Trade));

@@ -33,10 +33,9 @@ export default function getRoutes() {
       }]
     }
     , {
-      path: '/:category'
-    , component: App
+      component: App
     , routes: [{
-        path: '/:category/:id'
+      path: '/:category/:id'
       , component: Dashboard
       , loadData: getUserData
       , routes: [{
@@ -49,16 +48,6 @@ export default function getRoutes() {
         }]
       }
       , {
-        path: '/marchant'
-      , component: Dashboard
-      , loadData: getUserData
-      }
-      , {
-        path: '/sellers'
-      , component: Dashboard
-      , loadData: getUserData
-      }
-      , {
         path: '/bids'
       , component: Bids
       , loadData: getUserData
@@ -66,6 +55,11 @@ export default function getRoutes() {
       , {
         path: '/trade'
       , component: Trade
+      , loadData: getUserData
+      }
+      , {
+        path: '/:category'
+      , component: Dashboard
       , loadData: getUserData
       }]
     }];

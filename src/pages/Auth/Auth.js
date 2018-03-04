@@ -10,28 +10,17 @@ import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
 class Auth extends React.Component {
   render() {
     const { classes, route } = this.props;
-    return <div className={classes.root}>
-      <ErrorBoundary>
+    return <ErrorBoundary>
       <Reboot />
-      <div className={classes.authFrame}>
-        <div className={classes.content}>
-          {renderRoutes(route.routes)}
-        </div>
+      <div className={classes.root}>
+        {renderRoutes(route.routes)}
       </div>
-      </ErrorBoundary>
-    </div>;
+    </ErrorBoundary>;
   }
 };
 
 const styles = theme => ({
-  root:       { width: '100%', zIndex: 1
-              , overflow: 'hidden', height: '100vh' },
-  authFrame:  { position: 'relative'
-              , display: 'flex', flexDirection: 'column'
-              , width: '100%'},
-  content:    { position: 'absolute'
-              , border: '1px solid #CCC'
-              , width: '100%', height: '100vh' }
+  root: { width: '100%', height: '100vh', border: '1px solid #CCC' }
 });
 Auth.displayName = 'Auth';
 Auth.defaultProps = {};

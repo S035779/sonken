@@ -1,8 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import {
-  Redirect, withRouter
-}                       from 'react-router-dom';
+import { Redirect }     from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
 import NoteAction       from 'Actions/NoteAction';
@@ -44,7 +42,8 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    this.logInfo('render', this.state);
+    this.logInfo('State', this.state);
+    this.logInfo('Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids } = this.state;
     const _id = Number(match.params.id);
@@ -109,4 +108,4 @@ Dashboard.defaultProps = {};
 Dashboard.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(withRouter(Container.create(Dashboard)));
+export default withStyles(styles)(Container.create(Dashboard));
