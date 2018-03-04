@@ -19,12 +19,12 @@ export default class ReactSSRenderer {
 
   request() {
     return (req, res, next) => {
-      const user = 'MyUserName';
+      console.log(req.session);
+      const  user = req.session.user ? req.session.user : '';
       createStores(createDispatcher());
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
-      //console.log(matchs);
       this.getUserData(matchs, user)
       .then(objs => this.prefetchData(matchs, objs))
       .then(() => this.setInitialData(location).pipe(res))

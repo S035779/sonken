@@ -5,8 +5,8 @@ const pspid = 'NoteAction';
 
 export default {
   presetUser(user) {
-    return NoteApiClient.presetUser(user).then(() => {
-      dispatch({ type: 'user/preset', user });
+    return NoteApiClient.presetUser(user).then(isAuthenticated => {
+      dispatch({ type: 'user/preset', user, isAuthenticated });
     });
   },
   prefetchNotes(user) {

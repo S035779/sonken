@@ -53,6 +53,7 @@ export default class TradedNotesStore extends ReduceStore {
       case 'user/preset':
         return Object.assign({}, state, {
           user:   action.user
+        , isAuthenticated: action.isAuthenticated
         });
       case 'login/authenticate':
         return Object.assign({}, state, {

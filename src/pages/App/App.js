@@ -1,7 +1,11 @@
-import React from 'react';
+import React            from 'react';
+import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
-import PropTypes from 'prop-types'
-import getRoutes from 'Main/routes';
+import { Container }    from 'flux/utils';
+import LoginAction      from 'Actions/LoginAction';
+import {
+  getStores, getState
+}                       from 'Stores';
 
 import { withStyles } from 'material-ui/styles';
 import { Reboot } from 'material-ui';
@@ -9,8 +13,21 @@ import RssHeader from 'Components/RssHeader/RssHeader';
 import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
 
 class App extends React.Component {
+  static getStores() {
+    return getStores(['loginStore']);
+  }
+
+  static calculateState() {
+    return getState('loginStore');
+  }
+
+  logInfo(name, message) {
+    console.info('>>> Info', name, message);
+  }
+
   render() {
     const { classes, route } = this.props;
+    const { user, isAuthenticated } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
@@ -46,4 +63,4 @@ App.defaultProps = {};
 App.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(App);
+export default withStyles(styles)(Container.create(App));

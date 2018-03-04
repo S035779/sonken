@@ -1,15 +1,19 @@
-import dotenv from 'dotenv';
-import http from 'http';
-import express from 'express';
-import bodyParser from 'body-parser';
-import path from 'path';
-import FeedParser from 'Routes/FeedParser/FeedParser';
-import { logs as log } from 'Utilities/logutils';
+import dotenv           from 'dotenv';
+import path             from 'path';
+import http             from 'http';
+import express          from 'express';
+import session          from 'express-session';
+import connect          from 'connect-mongo';
+import mongoose         from 'mongoose';
+import bodyParser       from 'body-parser';
+import FeedParser       from 'Routes/FeedParser/FeedParser';
+import { logs as log }  from 'Utilities/logutils';
 
 dotenv.config()
 const env = process.env.NODE_ENV || 'development';
 const http_port = process.env.API_PORT || 8082;
 const http_host = process.env.API_HOST || '127.0.0.1';
+const mdb_uri = process.env.MDB_URI || 'mongodb://localhost:27017/test';
 
 if (env === 'development') {
   log.config('console', 'color', 'api-server', 'TRACE');
@@ -21,16 +25,32 @@ if (env === 'development') {
 
 const app = express();
 const router = express.Router();
+const connection = mongoose.createConnection(mdb_uri);
+const sessionStore = connect(session);
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(session({
+  secret: 'koobkooCedoN'
+, store: new sessionStore({ mongooseConnection: connection })
+, cookie: {
+    httpOnly: false
+  , maxAge: 60 * 60 * 1000
+  }
+, resave: false
+, saveUninitialized: true
+}))
 
 const feed = FeedParser.of();
 
 const authenticate = (req, res, next) => {
   const { user, password } = req.body;
   feed.authenticate({ user, password }).subscribe(
-    obj => { res.status(200).send(obj); }
+    obj => {
+      if(obj) req.session.user = user;
+      console.log('isAuthenticated:', obj, req.session);
+      res.status(200).send(obj);
+    }
   , err => {
       res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);
@@ -42,7 +62,11 @@ const authenticate = (req, res, next) => {
 const signout = (req, res, next) => {
   const { user } = req.query;
   feed.signout({ user }).subscribe(
-    obj => { res.status(200).send(obj); }
+    obj => {
+      if(!obj) req.session.destroy();
+      console.log('isAuthenticated:', obj, req.session);
+      res.status(200).send(obj);
+    }
   , err => {
       res.status(500).send({ name: err.name, message: err.message });
       log.error(err.name, ':', err.message);

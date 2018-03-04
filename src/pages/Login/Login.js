@@ -15,6 +15,8 @@ class Login extends React.Component {
     super(props);
     this.state = {
       redirectToRefferer: false
+    , username: 'MyUserName'
+    , password: 'Test123$'
     };
   }
 
@@ -32,8 +34,9 @@ class Login extends React.Component {
   }
 
   handleLogin() {
-    const { user, password } = this.state;
-    LoginAction.authenticate(user, 'Test123$')
+    const { username, password } = this.state;
+    LoginAction.authenticate(username, password)
+      .then(() => LoginAction.presetUser(username))
       .then(() => {
         if(this.state.isAuthenticated)
           this.setState({ redirectToRefferer: true });

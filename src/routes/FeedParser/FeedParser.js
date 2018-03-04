@@ -36,13 +36,13 @@ class FeedParser {
   }
 
   request(request, options) {
-    this.logTrace(request, options);
+    //this.logTrace(request, options);
     //this.logTrace('readed:', readed);
     //this.logTrace('traded:', traded);
     //this.logTrace('bided:', bided);
     //this.logTrace('listed:', listed);
     //this.logTrace('starred:', starred);
-    this.logTrace('users:', users);
+    //this.logTrace('users:', users);
     const setNotes   = objs => { return notes   = objs };
     const setReaded  = objs => { return readed  = objs };
     const setTraded  = objs => { return traded  = objs };
@@ -378,7 +378,6 @@ class FeedParser {
           const response = R.compose(
             () => isAuth(users)
           , setUsers
-          , R.tap(console.log)
           , R.flatten
           , R.map(setAuth)
           , R.filter(isPas)

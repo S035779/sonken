@@ -1,5 +1,8 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
+import {
+  Redirect, withRouter
+}                     from 'react-router-dom';
 import { Container }  from 'flux/utils';
 import NoteAction     from 'Actions/NoteAction';
 import {
@@ -63,8 +66,9 @@ class Bids extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes } = this.props;
-    const { user, notes, page, ids, filter } = this.state;
+    const { classes, location } = this.props;
+    const { isAuthenticated, user, notes, page, ids, filter }
+      = this.state;
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -73,6 +77,10 @@ class Bids extends React.Component {
       .filter(item => item.listed && this.itemFilter(filter, item));
     const number = _items.length;
     _items.length = this.itemPage(number, page);
+    if(!isAuthenticated) {
+      return <Redirect to={{
+        pathname: '/login', state: { from: location } }} />;
+    }
     return <div className={classes.root}>
       <BidsSearch
         user={user}
@@ -111,4 +119,4 @@ Bids.defaultProps = { notes: null };
 Bids.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Container.create(Bids));
+export default withStyles(styles)(withRouter(Container.create(Bids)));

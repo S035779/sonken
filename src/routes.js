@@ -17,43 +17,10 @@ const getUserData = (user, match) => {
 export default function getRoutes() {
   return [{
       path: '/'
-    , component: App
     , exact: true
+    , component: App
     , routes: [{
-        path: '/'
-      , exact: true
-      , component: Dashboard
-      , loadData: getUserData
-      }
-      , {
-        path: '/bids'
-      , component: Bids
-      , loadData: getUserData
-      }
-      , {
-        path: '/trade'
-      , component: Trade
-      , loadData: getUserData
-      }
-      , {
-        path: '/:category/:id'
-      , component: Dashboard
-      , loadData: getUserData
-      , routes: [{
-          path: '/marchant/:id/edit'
-        , component: MarchantEdit
-        }
-        , {
-          path: '/sellers/:id/edit'
-        , component: SellersEdit
-        }]
-      }]
-    }
-    , {
-      path: '/public'
-    , component: Auth
-    , routes: [{
-        component: Public
+        component: Dashboard
       , loadData: getUserData
       }]
     }
@@ -69,7 +36,36 @@ export default function getRoutes() {
       path: '/:category'
     , component: App
     , routes: [{
-        component: Dashboard
+        path: '/:category/:id'
+      , component: Dashboard
+      , loadData: getUserData
+      , routes: [{
+          path: '/marchant/:id/edit'
+        , component: MarchantEdit
+        }
+        , {
+          path: '/sellers/:id/edit'
+        , component: SellersEdit
+        }]
+      }
+      , {
+        path: '/marchant'
+      , component: Dashboard
+      , loadData: getUserData
+      }
+      , {
+        path: '/sellers'
+      , component: Dashboard
+      , loadData: getUserData
+      }
+      , {
+        path: '/bids'
+      , component: Bids
+      , loadData: getUserData
+      }
+      , {
+        path: '/trade'
+      , component: Trade
       , loadData: getUserData
       }]
     }];

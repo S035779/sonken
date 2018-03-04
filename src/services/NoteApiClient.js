@@ -248,6 +248,11 @@ export default {
         });
         break;
       case 'preset/user':
+        return new Promise((resolve, reject) => {
+          const isAuthenticated = options.user !== '';
+          setTimeout(() => resolve(isAuthenticated), 200);
+        });
+        break;
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':

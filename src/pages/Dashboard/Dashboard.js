@@ -1,5 +1,8 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import {
+  Redirect, withRouter
+}                       from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
 import NoteAction       from 'Actions/NoteAction';
@@ -42,8 +45,8 @@ class Dashboard extends React.Component {
 
   render() {
     this.logInfo('render', this.state);
-    const { classes, match, route } = this.props;
-    const { user, notes, page, ids } = this.state;
+    const { classes, match, route, location } = this.props;
+    const { isAuthenticated, user, notes, page, ids } = this.state;
     const _id = Number(match.params.id);
     const category = match.params.category
       ? match.params.category : 'marchant';
@@ -52,6 +55,10 @@ class Dashboard extends React.Component {
     const _note = notes.find(note => note.id === _id);
     const number = _notes.length;
     _notes.length = this.notePage(number, page);
+    if(!isAuthenticated) {
+      return <Redirect to={{
+        pathname: '/login', state: { from: location } }} />;
+    }
     return <div className={classes.root}>
         <RssSearch
           user={user}
@@ -102,4 +109,4 @@ Dashboard.defaultProps = {};
 Dashboard.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Container.create(Dashboard));
+export default withStyles(styles)(withRouter(Container.create(Dashboard)));

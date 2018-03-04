@@ -23,11 +23,12 @@ class RssHeader extends React.Component {
   handleLogin(event, checked) {
     const { user, history } = this.props;
     this.setState({ auth: checked });
-    if(!auth) LoginAction.signout(user).then(() => history.push('/'));
+    if(!checked) LoginAction.signout(user)
+      .then(() => LoginAction.presetUser(''))
+      .then(() => history.push('/login'));
   }
 
   handleMenu(event) {
-    this.props.onClickMenu();
   }
 
   render() {
