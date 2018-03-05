@@ -1,11 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types'
+import React            from 'react';
+import PropTypes        from 'prop-types'
 import { renderRoutes } from 'react-router-config';
-import getRoutes from 'Main/routes';
 
-import { withStyles } from 'material-ui/styles';
-import { Reboot } from 'material-ui';
-import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
+import { withStyles }   from 'material-ui/styles';
+import { Reboot }       from 'material-ui';
+import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
 class Auth extends React.Component {
   render() {
@@ -20,7 +19,7 @@ class Auth extends React.Component {
 };
 
 const styles = theme => ({
-  root: { width: '100%', height: '100vh', border: '1px solid #CCC' }
+  root: { width: '100%', height: '100vh' }
 });
 Auth.displayName = 'Auth';
 Auth.defaultProps = {};

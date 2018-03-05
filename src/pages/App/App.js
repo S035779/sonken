@@ -3,14 +3,13 @@ import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
 import LoginAction      from 'Actions/LoginAction';
-import {
-  getStores, getState
-}                       from 'Stores';
+import { getStores, getState }
+                        from 'Stores';
 
-import { withStyles } from 'material-ui/styles';
-import { Reboot } from 'material-ui';
-import RssHeader from 'Components/RssHeader/RssHeader';
-import ErrorBoundary from 'Components/ErrorBoundary/ErrorBoundary';
+import { withStyles }   from 'material-ui/styles';
+import { Reboot }       from 'material-ui';
+import RssHeader        from 'Components/RssHeader/RssHeader';
+import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
 class App extends React.Component {
   static getStores() {

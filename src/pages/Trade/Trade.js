@@ -77,7 +77,7 @@ class Trade extends React.Component {
     _items.length = this.itemPage(number, page);
     if(!isAuthenticated) {
       return <Redirect to={{
-        pathname: '/login', state: { from: location } }} />;
+        pathname: '/login/authenticate', state: { from: location } }} />;
     }
     return <div className={classes.root}>
       <TradeSearch

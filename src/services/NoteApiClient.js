@@ -439,10 +439,13 @@ export default {
   /*
    * Log
    */
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
+  logTrace(name, message) {
+    console.trace('[TRACE]', name, message);
   },
-  logWarn(name, info) {
-    console.warn('<<< Warn:', name, info);
+  logInfo(name, message) {
+    console.info('[INFO]', name, message);
+  },
+  logWarn(name, message) {
+    console.warn('[WARN]', name, message);
   }
 };

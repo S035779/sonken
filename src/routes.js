@@ -6,7 +6,9 @@ import Bids         from 'Pages/Bids/Bids';
 import Trade        from 'Pages/Trade/Trade';
 import Auth         from 'Pages/Auth/Auth';
 import Login        from 'Pages/Login/Login';
-import Public       from 'Pages/Public/Public';
+import LoginAuth    from 'Pages/LoginAuth/LoginAuth';
+import LoginRegist  from 'Pages/LoginRegist/LoginRegist';
+import LoginConfirm from 'Pages/LoginConfirm/LoginConfirm';
 
 const getUserData = (user, match) => {
   return new Promise((resolve, reject) => {
@@ -25,17 +27,29 @@ export default function getRoutes() {
       }]
     }
     , {
-      path: '/login'
+      path: '/login/:page'
     , component: Auth
     , routes: [{
         component: Login
       , loadData: getUserData
+      , routes: [{
+          path: '/login/authenticate'
+        , component: LoginAuth
+        }
+      , {
+          path: '/login/registration'
+        , component: LoginRegist
+        }
+      , {
+          path: '/login/confirmation'
+        , component: LoginConfirm
+        }]
       }]
     }
     , {
       component: App
     , routes: [{
-      path: '/:category/:id'
+        path: '/:category/:id'
       , component: Dashboard
       , loadData: getUserData
       , routes: [{

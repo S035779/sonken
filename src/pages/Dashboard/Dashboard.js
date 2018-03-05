@@ -33,8 +33,12 @@ class Dashboard extends React.Component {
     NoteAction.fetchNotes(this.state.user);
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
+  logInfo(name, message) {
+    console.info('[INFO]', name, message);
+  }
+
+  logTrace(name, message) {
+    console.trace('[TRACE]', name, message);
   }
 
   notePage(number, page) {
@@ -47,16 +51,16 @@ class Dashboard extends React.Component {
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids } = this.state;
     const _id = Number(match.params.id);
-    const category = match.params.category
-      ? match.params.category : 'marchant';
-    const _notes = notes
-      ? notes.filter(note => note.category === category) : [];
-    const _note = notes.find(note => note.id === _id);
+    const category =
+      match.params.category ? match.params.category : 'marchant';
+    const _notes =
+      notes ? notes.filter(obj => obj.category === category) : [];
+    const note = notes.find(obj => obj.id === _id);
     const number = _notes.length;
     _notes.length = this.notePage(number, page);
     if(!isAuthenticated) {
       return <Redirect to={{
-        pathname: '/login', state: { from: location } }} />;
+        pathname: '/login/authenticate', state: { from: location } }} />;
     }
     return <div className={classes.root}>
         <RssSearch
@@ -76,11 +80,7 @@ class Dashboard extends React.Component {
             notePage={page}/>
         </div>
         <div className={classes.noteEdit}>
-          {
-            route.routes
-            ? renderRoutes(route.routes, { user, note: _note })
-            : null
-          }
+        {route.routes ? renderRoutes(route.routes,{ user, note }) : null}
         </div>
       </div>
     </div>;
