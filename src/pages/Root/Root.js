@@ -1,9 +1,8 @@
 import React              from 'react';
-import {
-  BrowserRouter, Switch
-}                         from 'react-router-dom';
+import { BrowserRouter, Switch }
+                          from 'react-router-dom';
 import { renderRoutes }   from 'react-router-config';
-import getRoutes          from 'Main/routes';
+import getRoutes          from 'Routes';
 
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import { green, red } from 'material-ui/colors';

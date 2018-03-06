@@ -15,6 +15,10 @@ const env = process.env.NODE_ENV || 'development';
 const http_port = process.env.API_PORT || 8082;
 const http_host = process.env.API_HOST || '127.0.0.1';
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
+const app = express();
+const router = express.Router();
+const db = mongoose.createConnection();
+const SessionStore = connect(session);
 
 if (env === 'development') {
   log.config('console', 'color', 'api-server', 'TRACE');
@@ -23,17 +27,17 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'api-server', 'INFO');
 }
+db.on('open',  () => log.info( '[MDB]', 'sessions connected.'));
+db.on('close', () => log.info( '[MDB]', 'sessions disconnected.'));
+db.on('error', () => log.error('[MDB]', 'sessions connection error.'));
+db.openUri(mdb_url + '/sessions');
 
-const app = express();
-const router = express.Router();
-const connection = mongoose.createConnection(mdb_url + '/test');
-const sessionStore = connect(session);
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session({
   secret: 'koobkooCedoN'
-, store: new sessionStore({ mongooseConnection: connection })
+, store: new SessionStore({ mongooseConnection: db })
 , cookie: {
     httpOnly: false
   , maxAge: 60 * 60 * 1000
@@ -42,9 +46,16 @@ app.use(session({
 , saveUninitialized: true
 }))
 
-router.route('/authenticate')
+
+router.route('/password')
 .get(profile.notImplemented())
 .put(profile.notImplemented())
+.post(profile.changePassword())
+.delete(profile.notImplemented());
+
+router.route('/authenticate')
+.get(profile.confirmation())
+.put(profile.registration())
 .post(profile.authenticate())
 .delete(profile.signout());
 
@@ -97,6 +108,33 @@ router.route('/note')
 .delete(feed.deleteNote());
 
 app.use('/api', router);
-http.createServer(app).listen(http_port, http_host, () => {
-  log.info(`HTTP Server listening on ${http_host}:${http_port}`);
+const server = http.createServer(app);
+server.listen(http_port, http_host, () => {
+  log.info('[API]', `listening on ${http_host}:${http_port}`);
 });
+
+process.on('SIGUSR2', () => shutdown(null, process.exit));
+process.on('SIGINT',  () => shutdown(null, process.exit));
+process.on('SIGTERM', () => shutdown(null, process.exit));
+process.on('uncaughtException', err => shutdown(err, process.exit));
+process.on('warning', err => messages(err));
+process.on('exit',    (code, signal) => message(null, code, signal));
+
+const messages = (err, code, signal) => {
+  if(err) log.warn('[API]', err.name, ':',  err.message);
+  else    log.info('[API]', `process exit. (s/c): ${signal || code}`);
+};
+
+const shutdown = (err, cbk) => {
+  if(err) log.error('[API]', err.name, ':', err.message);
+  mongoose.disconnect(() => {
+    log.info('[API]', 'mongoose #1 terminated.');
+    server.close(() => {
+      log.info('[API]', 'express terminated.');
+      log.info('[API]', 'log4js terminated.');
+      log.close(() => {
+        cbk()
+      });
+    });
+  });
+};

@@ -3,7 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import { matchRoutes } from 'react-router-config';
 import { dehydrateState, createStores } from 'Stores';
 import { createDispatcher } from 'Main/dispatcher';
-import getRoutes from 'Main/routes';
+import getRoutes from 'Routes';
 import { logs as log } from 'Utilities/logutils';
 
 import Html from 'Pages/Html/Html';

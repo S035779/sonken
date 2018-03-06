@@ -1,11 +1,11 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import { Redirect, withRouter }
+import { Redirect, withRouter, Link }
                         from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 
 import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography }
+import { TextField, Typography, Button }
                         from 'material-ui';
 import RssButton        from 'Components/RssButton/RssButton';
 
@@ -84,13 +84,17 @@ class LoginAuth extends React.Component {
       <div className={classes.notice}>
         <Typography variant="caption" align="center"
           className={classes.notes}>
-        ログインＩＤ・ＰＷを忘れた場合はこちら
+        ログインＩＤ・ＰＷを忘れた場合は
+        <Button mini size="small" variant="flat" color="primary"
+          component={Link} to="/login/confirmation">こちら</Button>
         </Typography>
       </div>
       <div className={classes.notice}>
         <Typography variant="body1" align="center"
           className={classes.notes}>
-        新規ご利用の方：利用申し込み
+        新規ご利用の方：
+        <Button mini size="small" variant="flat" color="primary"
+          component={Link} to="/login/registration">利用申し込み</Button>
         </Typography>
         <Typography variant="body1" align="center"
           className={classes.notes}>

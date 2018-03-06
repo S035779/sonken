@@ -20,6 +20,21 @@ export default {
       dispatch({ type: 'login/authenticate', isAuthenticated });
     });
   },
+  confirmation(email, phone) {
+    return NoteApiClient.confirmation(email, phone).then(user => {
+      dispatch({ type: 'login/confirmation', user });
+    });
+  },
+  changePassword(user, password) {
+    return NoteApiClient.changePassword(user, password).then(() => {
+      dispatch({ type: 'login/changepassword', user })
+    });
+  },
+  registration(user, password, data) {
+    return NoteApiClient.registration(user, password, data).then(() => {
+      dispatch({ type: 'login/registration', user });
+    })
+  },
   rehydrate(state) {
     dispatch({ type: 'login/rehydrate/my', state: state.loginStore });
   }

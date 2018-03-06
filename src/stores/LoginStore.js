@@ -21,6 +21,18 @@ export default class LoginStore extends ReduceStore {
         return Object.assign({}, state, {
           isAuthenticated: action.isAuthenticated
         });
+      case 'login/confirmation':
+        return Object.assign({}, state, {
+          user: action.user
+        });
+      case 'login/changepassword':
+        return Object.assign({}, state, {
+          user: action.user
+        });
+      case 'login/registration':
+        return Object.assign({}, state, {
+          user: action.user
+        });
       case 'login/rehydrate/my':
         return    action.state;
       default: 

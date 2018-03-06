@@ -14,6 +14,12 @@ export default {
   request(request, options) {
     this.logInfo(request, options);
     switch(request) {
+      case 'preset/user':
+        return new Promise((resolve, reject) => {
+          const isAuthenticated = options.user !== '';
+          setTimeout(() => resolve(isAuthenticated), 200);
+        });
+        break;
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
           net.getJSON2(
@@ -227,7 +233,7 @@ export default {
           );
         });
         break;
-      case 'login/authenticate':
+      case 'signin/user':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
             api + '/authenticate'
@@ -237,7 +243,7 @@ export default {
           );
         });
         break;
-      case 'login/signout':
+      case 'signout/user':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
             api + '/authenticate'
@@ -247,10 +253,34 @@ export default {
           );
         });
         break;
-      case 'preset/user':
+      case 'confirm/user':
         return new Promise((resolve, reject) => {
-          const isAuthenticated = options.user !== '';
-          setTimeout(() => resolve(isAuthenticated), 200);
+          xhr.getJSON(
+            api + '/authenticate'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'update/password':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/password'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/user':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/authenticate'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
         });
         break;
       case 'pagenation/note':
@@ -430,10 +460,19 @@ export default {
    * Login
    */
   authenticate(user, password) {
-    return this.request('login/authenticate', { user, password });
+    return this.request('signin/user', { user, password });
   },
   signout(user) {
-    return this.request('login/signout', { user });
+    return this.request('signout/user', { user });
+  },
+  confirmation(email, phone) {
+    return this.request('confirm/user', { email, phone });
+  },
+  changePassword(user, password) {
+    return this.request('update/password', { user, password });
+  },
+  registration(user, password, data) {
+    return this.request('create/user', { user, password, data });
   },
 
   /*

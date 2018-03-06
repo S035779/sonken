@@ -47,13 +47,8 @@ class LoginConfirm extends React.Component {
     const newPassword = std.makeRandPassword(16);
     LoginAction.confirmation(email, phone)
       .then(username => LoginAction.changePassword(username, newPassword))
-      .then(isChanged => {
-        if(isChanged) {
-          this.setState({ openedCorrect: true, newPassword });
-        } else {
-          this.setState({ openedIncorrect: true });
-        }
-      });
+      .then(() => this.setState({ openedCorrect: true, newPassword }))
+      .catch(() => this.setState({ openedIncorrect: true }));
   }
 
   handleChangeText(name, event) {

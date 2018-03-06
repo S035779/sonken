@@ -13,7 +13,10 @@ dotenv.config()
 const env = process.env.NODE_ENV || 'development';
 const http_port = process.env.SSR_PORT || 8081;
 const http_host = process.env.SSR_HOST || '127.0.0.1';
-const mdb_uri = process.env.MDB_URI || 'mongodb://localhost:27017/test';
+const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
+const app = express();
+const db = mongoose.createConnection();
+const SessionStore = connect(session);
 
 if (env === 'development') {
   log.config('console', 'color', 'ssr-server', 'TRACE');
@@ -22,15 +25,16 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
+db.on('open',  () => log.info( '[MDB]', 'sessions connected.'));
+db.on('close', () => log.info( '[MDB]', 'sessions disconnected.'));
+db.on('error', () => log.error('[MDB]', 'sessions connection error.'));
+db.openUri(mdb_url + '/sessions');
 
-const app = express();
-const connection = mongoose.createConnection(mdb_uri);
-const SessionStore = connect(session);
 app.use(log.connect());
 app.use(favicon(path.join(__dirname, 'dist', 'favicon.ico')));
 app.use(session({
   secret: 'koobkooCedoN'
-, store: new SessionStore({ mongooseConnection: connection })
+, store: new SessionStore({ mongooseConnection: db })
 , cookie: {
     httpOnly: false
   , maxAge: 60 * 60 * 1000
@@ -39,7 +43,33 @@ app.use(session({
 , saveUninitialized: true
 }));
 app.use(ReactSSRenderer.of().request());
-
-http.createServer(app).listen(http_port, http_host, () => {
-  log.info(`HTTP Server listening on ${http_host}:${http_port}`);
+const server = http.createServer(app);
+server.listen(http_port, http_host, () => {
+  log.info('[SSR]', `listening on ${http_host}:${http_port}`);
 });
+
+process.on('SIGUSR2', () => shutdown(null, process.exit));
+process.on('SIGINT',  () => shutdown(null, process.exit));
+process.on('SIGTERM', () => shutdown(null, process.exit));
+process.on('uncaughtException', err => shutdown(err, process.exit));
+process.on('warning', err => messages(err));
+process.on('exit',    (code, signal) => message(null, code, signal));
+
+const messages = (err, code, signal) => {
+  if(err) log.warn('[SSR]', err.name, ':',  err.message);
+  else    log.info('[SSR]', `process exit. (s/c): ${signal || code}`);
+};
+
+const shutdown = (err, cbk) => {
+  if(err) log.error('[SSR]', err.name, ':', err.message);
+  mongoose.disconnect(() => {
+    log.info('[SSR]', 'mongoose #1 terminated.');
+    server.close(() => {
+      log.info('[SSR]', 'express terminated.');
+      log.info('[SSR]', 'log4js terminated.');
+      log.close(() => {
+        cbk()
+      });
+    });
+  });
+};
