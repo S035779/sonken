@@ -6,14 +6,15 @@ import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import bodyParser       from 'body-parser';
-import FeedParser       from 'Routes/FeedParser/FeedParser';
 import { logs as log }  from 'Utilities/logutils';
+import feed             from 'Routes/feed';
+import profile          from 'Routes/profile';
 
 dotenv.config()
 const env = process.env.NODE_ENV || 'development';
 const http_port = process.env.API_PORT || 8082;
 const http_host = process.env.API_HOST || '127.0.0.1';
-const mdb_uri = process.env.MDB_URI || 'mongodb://localhost:27017/test';
+const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
 if (env === 'development') {
   log.config('console', 'color', 'api-server', 'TRACE');
@@ -25,7 +26,7 @@ if (env === 'development') {
 
 const app = express();
 const router = express.Router();
-const connection = mongoose.createConnection(mdb_uri);
+const connection = mongoose.createConnection(mdb_url + '/test');
 const sessionStore = connect(session);
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,349 +42,59 @@ app.use(session({
 , saveUninitialized: true
 }))
 
-const feed = FeedParser.of();
-
-const authenticate = (req, res, next) => {
-  const { user, password } = req.body;
-  feed.authenticate({ user, password }).subscribe(
-    obj => {
-      if(obj) req.session.user = user;
-      console.log('isAuthenticated:', obj, req.session);
-      res.status(200).send(obj);
-    }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to Logged in.'); }
-  );
-};
-
-const signout = (req, res, next) => {
-  const { user } = req.query;
-  feed.signout({ user }).subscribe(
-    obj => {
-      if(!obj) req.session.destroy();
-      console.log('isAuthenticated:', obj, req.session);
-      res.status(200).send(obj);
-    }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to Logged out.'); }
-  );
-};
-
-const deleteList = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteList({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete List.'); }  
-  );
-};
-
-const createList = (req, res, next) => {
-  const { user, ids } = req.body;
-  feed.createList({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create List.'); }  
-  );
-};
-
-const deleteStar = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteStar({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Star.'); }  
-  );
-};
-
-const createStar = (req, res, next) => {
-  const { user, ids } = req.body;
-  feed.createStar({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create Star.'); }  
-  );
-};
-
-const deleteBids = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteBids({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Bids.'); }  
-  );
-};
-
-const createBids = (req, res, next) => {
-  const { user, ids } = req.body;
-  feed.createBids({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create Bids.'); }  
-  );
-};
-
-const deleteTrade = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteTrade({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Trade.'); }  
-  );
-};
-
-const createTrade = (req, res, next) => {
-  const { user, ids } = req.body;
-  feed.createTrade({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create Trade.'); }  
-  );
-};
-
-const deleteItem = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteItem({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Item.'); }  
-  );
-};
-
-const deleteRead = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteRead({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Read.'); }  
-  );
-};
-
-const createRead = (req, res, next) => {
-  const { user, ids } = req.body;
-  feed.createRead({ user, ids }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create Read.'); }  
-  );
-};
-
-const deleteNote = (req, res, next) => {
-  const { user, ids } = req.query;
-  feed.deleteNote({ user, ids }).subscribe(
-    obj => {  res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to delete Note.'); }  
-  );
-};
-
-const updateNote = (req, res, next) => {
-  const { user, id, data } = req.body;
-  feed.updateNote({ user, id, data }).subscribe(
-    obj => { res.status(200).send(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to update Note.'); }  
-  );
-};
-
-const fetchReadedNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchReadedNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Readed.'); }  
-  );
-};
-
-const fetchTradedNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchTradedNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Traded.'); }  
-  );
-};
-
-const fetchBidedNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchBidedNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Bided.'); }  
-  );
-};
-
-const fetchStarredNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchStarredNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Starred.'); }  
-  );
-};
-
-const fetchListedNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchListedNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Listed.'); }  
-  );
-};
-
-const fetchNote = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchNote({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Note.'); }  
-  );
-};
-
-const fetchNotes = (req, res, next) => {
-  const { user } = req.query;
-  feed.fetchNotes({ user }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to fetch Notes.'); }  
-  );
-};
-
-const createNote = (req, res, next) => {
-  const { user, url, category } = req.body;
-  feed.createNote({ user, url, category }).subscribe(
-    obj => { res.json(obj); }
-  , err => {
-      res.status(500).send({ name: err.name, message: err.message });
-      log.error(err.name, ':', err.message);
-    }
-  , () => { log.info('Complete to create Note.'); }  
-  );
-};
-
-const notImplemented = (req, res, next) => {
-  next(new Error('not implemented'));
-};
-
 router.route('/authenticate')
-.get(notImplemented)
-.put(notImplemented)
-.post(authenticate)
-.delete(signout);
+.get(profile.notImplemented())
+.put(profile.notImplemented())
+.post(profile.authenticate())
+.delete(profile.signout());
 
 router.route('/traded')
-.get(fetchTradedNotes)
-.put(createTrade)
-.post(notImplemented)
-.delete(deleteTrade);
+.get(feed.fetchTradedNotes())
+.put(feed.createTrade())
+.post(feed.notImplemented())
+.delete(feed.deleteTrade());
 
 router.route('/bided')
-.get(fetchBidedNotes)
-.put(createBids)
-.post(notImplemented)
-.delete(deleteBids);
+.get(feed.fetchBidedNotes())
+.put(feed.createBids())
+.post(feed.notImplemented())
+.delete(feed.deleteBids());
 
 router.route('/starred')
-.get(fetchStarredNotes)
-.put(createStar)
-.post(notImplemented)
-.delete(deleteStar);
+.get(feed.fetchStarredNotes())
+.put(feed.createStar())
+.post(feed.notImplemented())
+.delete(feed.deleteStar());
 
 router.route('/listed')
-.get(fetchListedNotes)
-.put(createList)
-.post(notImplemented)
-.delete(deleteList);
+.get(feed.fetchListedNotes())
+.put(feed.createList())
+.post(feed.notImplemented())
+.delete(feed.deleteList());
 
 router.route('/item')
-.get(notImplemented)
-.put(notImplemented)
-.post(notImplemented)
-.delete(deleteItem);
+.get(feed.notImplemented())
+.put(feed.notImplemented())
+.post(feed.notImplemented())
+.delete(feed.deleteItem());
 
 router.route('/readed')
-.get(fetchReadedNotes)
-.put(createRead)
-.post(notImplemented)
-.delete(deleteRead);
+.get(feed.fetchReadedNotes())
+.put(feed.createRead())
+.post(feed.notImplemented())
+.delete(feed.deleteRead());
 
 router.route('/notes')
-.get(fetchNotes)
-.put(notImplemented)
-.post(notImplemented)
-.delete(notImplemented);
+.get(feed.fetchNotes())
+.put(feed.notImplemented())
+.post(feed.notImplemented())
+.delete(feed.notImplemented());
 
 router.route('/note')
-.get(fetchNote)
-.put(createNote)
-.post(updateNote)
-.delete(deleteNote);
+.get(feed.fetchNote())
+.put(feed.createNote())
+.post(feed.updateNote())
+.delete(feed.deleteNote());
 
 app.use('/api', router);
 http.createServer(app).listen(http_port, http_host, () => {
