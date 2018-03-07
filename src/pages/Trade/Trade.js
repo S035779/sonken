@@ -3,9 +3,9 @@ import PropTypes      from 'prop-types';
 import { Redirect }   from 'react-router-dom';
 import { Container }  from 'flux/utils';
 import NoteAction     from 'Actions/NoteAction';
-import {
-  getStores, getState
-}                     from 'Stores';
+import { getStores, getState }
+                      from 'Stores';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
 import TradeSearch    from 'Components/TradeSearch/TradeSearch';
@@ -22,18 +22,14 @@ class Trade extends React.Component {
   }
 
   static prefetch(user) {
-    console.info('prefetch', user)
+    std.logInfo('prefetch', user);
     return NoteAction.presetUser(user)
       .then(() => NoteAction.prefetchTraded(user));
   }
 
   componentDidMount() {
-    this.logInfo('fetch', 'Trade');
+    std.logInfo('fetch', 'Trade');
     NoteAction.fetchTraded(this.state.user);
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   itemFilter(filter, item) {
@@ -63,7 +59,7 @@ class Trade extends React.Component {
   }
 
   render() {
-    this.logInfo('render', this.state);
+    std.logInfo('render', this.state);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter }
       = this.state;

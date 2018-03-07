@@ -8,10 +8,10 @@ import { getStores, getState }
 
 import { withStyles }   from 'material-ui/styles';
 import { Reboot }       from 'material-ui';
-import RssHeader        from 'Components/RssHeader/RssHeader';
+import AdminHeader        from 'Components/AdminHeader/AdminHeader';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
-class App extends React.Component {
+class Admin extends React.Component {
   static getStores() {
     return getStores(['loginStore']);
   }
@@ -22,12 +22,12 @@ class App extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { user, isAuthenticated } = this.state;
+    const { admin, isAuthenticated } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
-      <div className={classes.appFrame}>
-        <RssHeader user={user} isAuthenticated={isAuthenticated}/>
+      <div className={classes.adminFrame}>
+        <AdminHeader user={admin} isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}
         </div>
@@ -42,7 +42,7 @@ const barHeightSmDown = 104;
 const styles = theme => ({
   root:     { width: '100%', zIndex: 1
             , overflow: 'hidden', height: '100vh' },
-  appFrame: { position: 'relative'
+  adminFrame: { position: 'relative'
             , display: 'flex', flexDirection: 'column'
             , width: '100%'},
   content:  { position: 'absolute'
@@ -53,9 +53,9 @@ const styles = theme => ({
               height: `calc(100vh - ${barHeightSmUp}px)`
             , marginTop: barHeightSmUp }}
 });
-App.displayName = 'App';
-App.defaultProps = {};
-App.propTypes = {
+Admin.displayName = 'Admin';
+Admin.defaultProps = {};
+Admin.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(Container.create(App));
+export default withStyles(styles)(Container.create(Admin));

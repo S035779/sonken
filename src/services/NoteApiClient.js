@@ -12,7 +12,7 @@ const pspid = 'NoteApiClient';
 
 export default {
   request(request, options) {
-    this.logInfo(request, options);
+    std.logInfo(request, options);
     switch(request) {
       case 'preset/user':
         return new Promise((resolve, reject) => {
@@ -490,18 +490,5 @@ export default {
   },
   deleteUser(user) {
     return this.request('delete/user', { user });
-  },
-
-  /*
-   * Log
-   */
-  logTrace(name, message) {
-    console.trace('[TRACE]', name, message);
-  },
-  logInfo(name, message) {
-    console.info('[INFO]', name, message);
-  },
-  logWarn(name, message) {
-    console.warn('[WARN]', name, message);
   }
 };

@@ -10,9 +10,9 @@ import {
 }                     from 'material-ui-icons';
 import LoginMenu      from 'Components/LoginMenu/LoginMenu';
 import LoginSwitch    from 'Components/LoginMenu/LoginSwitch';
-import RssButtonNav   from 'Components/RssButtonNav/RssButtonNav';
+import AdminButtonNav   from 'Components/AdminButtonNav/AdminButtonNav';
 
-class RssHeader extends React.Component {
+class AdminHeader extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -42,7 +42,7 @@ class RssHeader extends React.Component {
           onClick={this.handleMenu.bind(this)}>
           <MenuIcon />
         </IconButton>
-        <RssButtonNav />
+        <AdminButtonNav />
         <div className={classes.loginIcon}>
         <LoginMenu auth={auth} />
         </div>
@@ -50,6 +50,7 @@ class RssHeader extends React.Component {
     </div>;
   }
 };
+
 const navHeightSmDown = 56;
 const navHeightSmUp = 64;
 const styles = theme => ({
@@ -64,9 +65,9 @@ const styles = theme => ({
                 }  
   , loginIcon:  { marginLeft: 'auto' }
 });
-RssHeader.displayName = 'RssHeader';
-RssHeader.defaultProps = {};
-RssHeader.propTypes = {
+AdminHeader.displayName = 'AdminHeader';
+AdminHeader.defaultProps = {};
+AdminHeader.propTypes = {
   classes:  PropTypes.object.isRequired
 };
-export default withStyles(styles)(withRouter(RssHeader));
+export default withStyles(styles)(withRouter(AdminHeader));

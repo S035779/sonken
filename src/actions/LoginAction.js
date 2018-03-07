@@ -1,9 +1,15 @@
 import { dispatch } from 'Main/dispatcher';
 import NoteApiClient from 'Services/NoteApiClient';
+import UserApiClient from 'Services/UserApiClient';
 
 const pspid = 'LoginAction';
 
 export default {
+  presetAdmin(admin) {
+    return UserApiClient.presetAdmin(user).then(isAuthenticated => {
+      dispatch({ type: 'admin/preset', user, isAuthenticated });
+    });
+  },
   presetUser(user) {
     return NoteApiClient.presetUser(user).then(isAuthenticated => {
       dispatch({ type: 'user/preset', user, isAuthenticated });

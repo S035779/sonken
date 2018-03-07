@@ -4,9 +4,9 @@ import mongoose from 'mongoose';
 import { User } from 'Models/profile';
 import { logs as log } from 'Utilities/logutils';
 
-let users = [{
-  user: 'MyUserName', password: 'Test123$', isAuthenticated: false
-}]
+//let users = [{
+//  user: 'MyUserName', password: 'Test123$', isAuthenticated: false
+//}]
 
 /**
  * UserProfiler class.
@@ -22,24 +22,33 @@ export default class UserProfiler {
   }
 
   request(request, options) {
-    log.trace('users:', users);
-    const setUsers   = objs => { return users = objs };
-    const isUsr   = obj => obj.user === options.user;
-    const isPas = obj => options.password === obj.password;
-    const setAuth = obj => R.map(user => user.user === obj.user
-      ? Object.assign({}, user, { isAuthenticated: true })
-      : user ,users);
-    const delAuth = obj => R.map(user => user.user === obj.user
-      ? Object.assign({}, user, { isAuthenticated: false })
-      : user ,users);
-    const isAuth = R.compose(
-      R.head
-    , R.map(obj => obj.isAuthenticated)
-    , R.filter(isUsr)
-    );
-
+    //log.trace('users:', users);
+    //const setUsers   = objs => { return users = objs };
+    //const isUsr   = obj => obj.user === options.user;
+    //const isPas = obj => options.password === obj.password;
+    //const setAuth = obj => R.map(user => user.user === obj.user
+    //  ? Object.assign({}, user, { isAuthenticated: true })
+    //  : user ,users);
+    //const delAuth = obj => R.map(user => user.user === obj.user
+    //  ? Object.assign({}, user, { isAuthenticated: false })
+    //  : user ,users);
+    //const isAuth = R.compose(
+    //  R.head
+    //, R.map(obj => obj.isAuthenticated)
+    //, R.filter(isUsr)
+    //);
     switch(request) {
       case 'fetch/user':
+        return new Promise((resolve, reject) => {
+          User.findOne({
+            email: options.email
+          , phone: new RegExp(options.phone + '$')
+          }, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj ? obj.user : '');
+          });
+        });
         break;
       case 'create/user':
         return new Promise((resolve, reject) => {
@@ -54,21 +63,69 @@ export default class UserProfiler {
           });
           user.save((err, obj) => {
             if(err) return reject(err);
-            console.log(obj);
+            log.trace(request, obj);
             resolve(obj);
           });
         });
         break;
       case 'update/user':
+        return new Promise((resolve, reject) => {
+          User.update({
+            user: options.user
+          }, {
+            password: options.password
+          , updated: Date.now()
+          }, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj.password);
+          });
+        });
         break;
       case 'delete/user':
         break;
+      case 'signin/admin':
+        return new Promise((resolve, reject) => {
+          const isAuthenticated = true;
+          User.findOneAndUpdate({
+            user:     options.user
+          , password: options.password
+          , isAdmin:  true
+          }
+          , { isAuthenticated }
+          , (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(isAuthenticated);
+          })
+        });
+        break;
+      case 'signout/admin':
+        return new Promise((resolve, reject) => {
+          const isAuthenticated = false;
+          User.update({
+            user: options.user
+          , isAdmin: true
+          }
+          , { isAuthenticated }
+          , (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(isAuthenticated);
+          });
+        });
       case 'signin/authenticate':
         return new Promise((resolve, reject) => {
-          User.find({ user: options.user }, (err, obj) => {
+          const isAuthenticated = true;
+          User.findOneAndUpdate({
+            user:     options.user
+          , password: options.password
+          }
+          , { isAuthenticated }
+          , (err, obj) => {
             if(err) return reject(err);
-            console.log(obj);
-            resolve(obj);
+            log.trace(request, obj);
+            resolve(isAuthenticated);
           })
           //const response = R.compose(
           //  () => isAuth(users)
@@ -83,14 +140,24 @@ export default class UserProfiler {
         break;
       case 'signout/authenticate':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => isAuth(users)
-          , setUsers
-          , R.flatten
-          , R.map(delAuth)
-          , R.filter(isUsr)
-          );
-          resolve(response(users));
+          const isAuthenticated = false;
+          User.update({
+            user: options.user
+          }
+          , { isAuthenticated }
+          , (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(isAuthenticated);
+          });
+          //const response = R.compose(
+          //  () => isAuth(users)
+          //, setUsers
+          //, R.flatten
+          ///, R.map(delAuth)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(users));
         });
       default:
         return new Promise((resolve, reject) => {
@@ -116,12 +183,28 @@ export default class UserProfiler {
     return this.request('delete/user', { user });
   }
 
+  logInAdmin(admin, password) {
+    return this.request('signin/admin', { admin, password });
+  }
+
+  logOutAdmin(user) {
+    return this.request('signout/admin', { admin });
+  }
+
   logIn(user, password) {
     return this.request('signin/authenticate', { user, password });
   }
 
   logOut(user) {
     return this.request('signout/authenticate', { user });
+  }
+
+  authAdmin({ admin, password }) {
+    return Rx.Observable.fromPromise(this.logInAdmin(admin, password));
+  }
+
+  signoutAdmin({ admin }) {
+    return Rx.Observable.fromPromise(this.logOutAdmin(admin));
   }
 
   authenticate({ user, password }) {

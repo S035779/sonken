@@ -3,34 +3,34 @@ import PropTypes        from 'prop-types';
 import { Redirect }     from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
-import NoteAction       from 'Actions/NoteAction';
+import UserAction       from 'Actions/UserAction';
 import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import RssSearch        from 'Components/RssSearch/RssSearch';
-import RssButtons       from 'Components/RssButtons/RssButtons';
-import RssList          from 'Components/RssList/RssList';
+import AdminSearch        from 'Components/AdminSearch/AdminSearch';
+import AdminButtons       from 'Components/AdminButtons/AdminButtons';
+import AdminList          from 'Components/AdminList/AdminList';
 
-class Dashboard extends React.Component {
+class Management extends React.Component {
   static getStores() {
-    return getStores(['dashboardStore']);
+    return getStores(['managementStore']);
   }
 
   static calculateState() {
-    return getState('dashboardStore');
+    return getState('managementStore');
   }
 
-  static prefetch(user) {
-    std.logInfo('prefetch', user);
-    return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchNotes(user));
+  static prefetch(admin) {
+    std.logInfo('prefetch', admin);
+    return UserAction.presetAdmin(admin)
+      .then(() => UserAction.prefetchUsers(admin));
   }
 
   componentDidMount() {
-    std.logInfo('fetch', 'Dashboard');
-    NoteAction.fetchNotes(this.state.user);
+    std.logInfo('fetch', 'Management');
+    UserAction.fetchUsers(this.state.admin);
   }
 
   notePage(number, page) {
@@ -41,10 +41,10 @@ class Dashboard extends React.Component {
     std.logInfo('State', this.state);
     std.logInfo('Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids } = this.state;
+    const { isAuthenticated, admin, notes, page, ids } = this.state;
     const _id = Number(match.params.id);
     const category =
-      match.params.category ? match.params.category : 'marchant';
+      match.params.category ? match.params.category : 'user';
     const _notes =
       notes ? notes.filter(obj => obj.category === category) : [];
     const note = notes.find(obj => obj.id === _id);
@@ -55,24 +55,24 @@ class Dashboard extends React.Component {
         pathname: '/login/authenticate', state: { from: location } }} />;
     }
     return <div className={classes.root}>
-        <RssSearch
-          user={user}
+        <AdminSearch
+          user={admin}
           category={category}
           noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <RssButtons
-            user={user}
+          <AdminButtons
+            user={admin}
             notes={_notes}
             selectedNoteId={ids} />
-          <RssList
-            user={user}
+          <AdminList
+            user={admin}
             notes={_notes}
             selectedNoteId={ids}
             notePage={page}/>
         </div>
         <div className={classes.noteEdit}>
-        {route.routes ? renderRoutes(route.routes,{ user, note }) : null}
+        {route.routes ? renderRoutes(route.routes,{ admin, note }) : null}
         </div>
       </div>
     </div>;
@@ -95,9 +95,9 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
 , noteEdit: { flex: 1 }
 });
-Dashboard.displayName = 'Dashboard';
-Dashboard.defaultProps = {};
-Dashboard.propTypes = {
+Management.displayName = 'Management';
+Management.defaultProps = {};
+Management.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(Container.create(Dashboard));
+export default withStyles(styles)(Container.create(Management));

@@ -27,9 +27,9 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'api-server', 'INFO');
 }
-db.on('open',  () => log.info( '[MDB]', 'session connected.'));
-db.on('close', () => log.info( '[MDB]', 'session disconnected.'));
-db.on('error', () => log.error('[MDB]', 'session connection error.'));
+db.on('open',  () => log.info( '[MDB]', 'session #2 connected.'));
+db.on('close', () => log.info( '[MDB]', 'session #2 disconnected.'));
+db.on('error', () => log.error('[MDB]', 'session #2 connection error.'));
 db.openUri(mdb_url + '/session');
 
 app.use(log.connect());
@@ -52,6 +52,12 @@ router.route('/user')
 .put(profile.createUser())
 .post(profile.updateUser())
 .delete(profile.deleteUser());
+
+router.route('/management')
+.get(profile.notImplemented())
+.put(profile.notImplemented())
+.post(profile.authAdmin())
+.delete(profile.signoutAdmin());
 
 router.route('/authenticate')
 .get(profile.notImplemented())
@@ -117,10 +123,10 @@ process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
 process.on('uncaughtException', err => shutdown(err, process.exit));
-process.on('warning', err => messages(err));
+process.on('warning', err => message(err));
 process.on('exit',    (code, signal) => message(null, code, signal));
 
-const messages = (err, code, signal) => {
+const message = (err, code, signal) => {
   if(err) log.warn('[API]', err.name, ':',  err.message);
   else    log.info('[API]', `process exit. (s/c): ${signal || code}`);
 };
@@ -128,10 +134,10 @@ const messages = (err, code, signal) => {
 const shutdown = (err, cbk) => {
   if(err) log.error('[API]', err.name, ':', err.message);
   mongoose.disconnect(() => {
-    log.info('[API]', 'MDB[session #2] terminated.');
+    log.info('[MDB]', 'session #2 terminated.');
     server.close(() => {
-      log.info('[API]', 'express terminated.');
-      log.info('[API]', 'log4js terminated.');
+      log.info('[WWW]', 'express #2 terminated.');
+      log.info('[LOG]', 'log4js #2 terminated.');
       log.close(() => {
         cbk()
       });

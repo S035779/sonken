@@ -25,9 +25,9 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
-db.on('open',  () => log.info( '[MDB]', 'session connected.'));
-db.on('close', () => log.info( '[MDB]', 'session disconnected.'));
-db.on('error', () => log.error('[MDB]', 'session connection error.'));
+db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));
+db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
+db.on('error', () => log.error('[MDB]', 'session #1 connection error.'));
 db.openUri(mdb_url + '/session');
 
 app.use(log.connect());
@@ -52,10 +52,10 @@ process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
 process.on('uncaughtException', err => shutdown(err, process.exit));
-process.on('warning', err => messages(err));
+process.on('warning', err => message(err));
 process.on('exit',    (code, signal) => message(null, code, signal));
 
-const messages = (err, code, signal) => {
+const message = (err, code, signal) => {
   if(err) log.warn('[SSR]', err.name, ':',  err.message);
   else    log.info('[SSR]', `process exit. (s/c): ${signal || code}`);
 };
@@ -63,10 +63,10 @@ const messages = (err, code, signal) => {
 const shutdown = (err, cbk) => {
   if(err) log.error('[SSR]', err.name, ':', err.message);
   mongoose.disconnect(() => {
-    log.info('[SSR]', 'MDB[session #1] terminated.');
+    log.info('[MDB]', 'session #1 terminated.');
     server.close(() => {
-      log.info('[SSR]', 'express terminated.');
-      log.info('[SSR]', 'log4js terminated.');
+      log.info('[WWW]', 'express #1 terminated.');
+      log.info('[LOG]', 'log4js #1 terminated.');
       log.close(() => {
         cbk()
       });

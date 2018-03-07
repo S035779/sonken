@@ -104,6 +104,42 @@ export default {
     };
   },
 
+  authAdmin(options) {
+    return (req, res, next) => {
+      const { admin, password } = req.body;
+      profile.authAdmin({ admin, password }).subscribe(
+        obj => {
+          if(obj) req.session.admin = admin;
+          console.log('isAuthenticated:', obj, req.session);
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to Logged in of ADMIN.'); }
+      );
+    };
+  },
+
+  signoutAdmin(options) {
+    return (req, res, next) => {
+      const { admin } = req.query;
+      profile.signoutAdmin({ admin }).subscribe(
+        obj => {
+          if(!obj) req.session.destroy();
+          console.log('isAuthenticated:', obj, req.session);
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to Logged out of ADMIN.'); }
+      );
+    };
+  },
+
   notImplemented(options) {
     return (req, res, next) => {
       next(new Error('not implemented'));

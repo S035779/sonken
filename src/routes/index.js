@@ -9,6 +9,9 @@ import Login        from 'Pages/Login/Login';
 import LoginAuth    from 'Pages/LoginAuth/LoginAuth';
 import LoginRegist  from 'Pages/LoginRegist/LoginRegist';
 import LoginConfirm from 'Pages/LoginConfirm/LoginConfirm';
+import Admin        from 'Pages/Admin/Admin';
+import Management   from 'Pages/Management/Management';
+import UserEdit     from 'Pages/UserEdit/UserEdit';
 
 const getUserData = (user, match) => {
   return new Promise((resolve, reject) => {
@@ -43,6 +46,30 @@ export default function getRoutes() {
       , {
           path: '/login/confirmation'
         , component: LoginConfirm
+        }]
+      }]
+    }
+    , {
+      path: '/admin/:category'
+    , component: Admin
+    , routes: [{
+        component: Management
+      , loadData: getUserData
+      , routes: [{
+          path: '/admin/user/:id/edit'
+        , component: UserEdit
+        //}
+        //, {
+        //  path: '/admin/approval/:id/edit'
+        //, component: ApprovalEdit
+        //}
+        //, {
+        //  path: '/admin/faq/:id/edit'
+        //, component: FaqEdit
+        //}
+        //,{
+        //  path: '/admin/mail/:id/edit'
+        //, component: MailEdit
         }]
       }]
     }

@@ -616,11 +616,51 @@ export default {
   },
 
   logTrace(name, message) {
-    console.trace('[TRACE]', name, message);
+    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
+    console.trace(date , '[TRACE]', name, '-', message);
   },
 
   logInfo(name, message) {
-    console.info('[INFO]', name, message);
+    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
+    console.info(date, '[INFO]', name, '-', message);
+  },
+
+  getLocalISOTimeStamp (date) {
+    const setDate = [
+      date.getFullYear()
+    , ('00' + (date.getMonth() + 1)).substr(-2)
+    , ('00' + date.getDate()).substr(-2)
+    ];
+    const setTime = [
+      ('00' + date.getHours()).substr(-2)
+    , ('00' + date.getMinutes()).substr(-2)
+    , ('00' + date.getSeconds()).substr(-2)
+    , ('00' + date.getMilliseconds()).substr(-3)
+    ];
+    return [
+      setDate.join('-'), 'T', setTime.join(':')
+    ].join('');
+  },
+
+  getLocalISOZoneStamp (date) {
+    const setOffset = d => {
+      const o = d.getTimezoneOffset() / -60;
+      return ((0 < o) ? '+' : '-')
+        + ('00' + Math.abs(o)).substr(-2) + ':00'; };
+    const setDate = [
+      date.getFullYear()
+    , ('00' + (date.getMonth() + 1)).substr(-2)
+    , ('00' + date.getDate()).substr(-2)
+    ];
+    const setTime = [
+      ('00' + date.getHours()).substr(-2)
+    , ('00' + date.getMinutes()).substr(-2)
+    , ('00' + date.getSeconds()).substr(-2)
+    , ('000' + date.getMilliseconds()).substr(-3)
+    ];
+    return [
+      setDate.join('-'), 'T', setTime.join(':'), setOffset(date)
+    ].join('');
   },
 
   /*

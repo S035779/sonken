@@ -29,7 +29,7 @@ class LoginConfirm extends React.Component {
   }
 
   handleClose(name) {
-    this.logInfo('handleClose', name);
+    std.logInfo('handleClose', name);
     switch(name) {
       case 'authenticate':
         this.setState({ openedCorrect: false });
@@ -42,42 +42,40 @@ class LoginConfirm extends React.Component {
   }
 
   handleSubmit() {
-    this.logInfo('handleSubmit', this.state);
+    std.logInfo('handleSubmit', this.state);
     const { email, phone } = this.state;
     const newPassword = std.makeRandPassword(16);
     LoginAction.confirmation(email, phone)
-      .then(username => LoginAction.changePassword(username, newPassword))
-      .then(() => this.setState({ openedCorrect: true, newPassword }))
-      .catch(() => this.setState({ openedIncorrect: true }));
+    .then(() => {
+      if(this.props.user) {
+        LoginAction.changePassword(this.props.user, newPassword);
+        this.setState({ openedCorrect: true, newPassword });
+      } else {
+        this.setState({ openedIncorrect: true });
+      }
+    });
   }
 
   handleChangeText(name, event) {
     this.setState({ [name]: event.target.value });
   }
 
-  logTrace(name, message) {
-    console.trace('[TRACE]', name, message);
-  }
-
-  logInfo(name, message) {
-    console.info('[INFO]', name, message);
-  }
-
   renderCorrect() {
-    const { fullScreen } = this.props;
-    const { username, password } = this.state;
+    const { fullScreen, user } = this.props;
+    const { openedCorrect, newPassword } = this.state;
     return <Dialog fullScreen={fullScreen}
-      open={open} onClose={this.handleClose.bind(this, 'authenticate')}
+      open={openedCorrect}
+      onClose={this.handleClose.bind(this, 'authenticate')}
       area-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
         ログインＩＤ・ＰＷは以下のとおりです。
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          ログインＩＤ：{username}
+          ログインＩＤ：{user}
         </DialogContentText>
         <DialogContentText>
-          ログインＰＷ：{password}
+          ログインＰＷ：{newPassword}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -91,8 +89,10 @@ class LoginConfirm extends React.Component {
 
   renderIncorrect() {
     const { fullScreen } = this.props;
+    const { openedIncorrect } = this.state;
     return <Dialog fullScreen={fullScreen}
-      open={open} onClose={this.handleClose.bind(this, 'confirmation')}
+      open={openedIncorrect}
+      onClose={this.handleClose.bind(this, 'confirmation')}
       area-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
         合言葉が間違っています。再度ご確認ください。
@@ -112,17 +112,14 @@ class LoginConfirm extends React.Component {
   }
 
   render() {
-    this.logInfo('Props', this.props);
-    this.logInfo('State', this.state);
+    std.logInfo('Props', this.props);
+    std.logInfo('State', this.state);
     const { classes } = this.props;
-    const { email, phone, newPassword, openedCorrect, openedIncorrect }
-      = this.state;
+    const { email, phone } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
-    const renderCorrect
-      = openedCorrect ? this.renderCorrect() : null;
-    const renderIncorrect
-      = openedIncorrect ? this.renderIncorrect() : null;
+    const renderCorrect = this.renderCorrect();
+    const renderIncorrect = this.renderIncorrect();
     return <div className={classes.loginForms}>
       <div className={classes.space} />
       <Typography variant="title" align="center"

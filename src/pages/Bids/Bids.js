@@ -3,9 +3,9 @@ import PropTypes      from 'prop-types';
 import { Redirect }   from 'react-router-dom';
 import { Container }  from 'flux/utils';
 import NoteAction     from 'Actions/NoteAction';
-import {
-  getStores, getState
-}                     from 'Stores';
+import { getStores, getState }
+                      from 'Stores';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
 import BidsSearch     from 'Components/BidsSearch/BidsSearch';
@@ -22,18 +22,14 @@ class Bids extends React.Component {
   }
 
   static prefetch(user) {
-    console.info('prefetch', user)
+    std.logInfo('prefetch', user);
     return NoteAction.presetUser(user)
       .then(() => NoteAction.prefetchBided(user));
   }
 
   componentDidMount() {
-    this.logInfo('fetch', 'Bids');
+    std.logInfo('fetch', 'Bids');
     NoteAction.fetchBided(this.state.user);
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   itemFilter(filter, item) {
@@ -63,7 +59,7 @@ class Bids extends React.Component {
   }
 
   render() {
-    this.logInfo('render', this.state);
+    std.logInfo('render', this.state);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter }
       = this.state;

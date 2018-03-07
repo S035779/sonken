@@ -3,6 +3,7 @@ import PropTypes        from 'prop-types';
 import { Redirect, withRouter, Link }
                         from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Button }
@@ -33,22 +34,14 @@ class LoginAuth extends React.Component {
     this.setState({ [name]: event.target.value });
   }
 
-  logTrace(name, message) {
-    console.trace('[TRACE]', name, message);
-  }
-
-  logInfo(name, message) {
-    console.info('[INFO]', name, message);
-  }
-
   render() {
-    this.logInfo('Props', this.props);
-    this.logInfo('State', this.state);
+    std.logInfo('Props', this.props);
+    std.logInfo('State', this.state);
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
-    const from = location.state || { pathname: '/' };
+    const from = location.state || { pathname: '/marchant' };
     if(redirectToRefferer) return <Redirect to={from} />;
     return <div className={classes.loginForms}>
       <div className={classes.space}/>
