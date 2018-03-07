@@ -27,10 +27,10 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'api-server', 'INFO');
 }
-db.on('open',  () => log.info( '[MDB]', 'sessions connected.'));
-db.on('close', () => log.info( '[MDB]', 'sessions disconnected.'));
-db.on('error', () => log.error('[MDB]', 'sessions connection error.'));
-db.openUri(mdb_url + '/sessions');
+db.on('open',  () => log.info( '[MDB]', 'session connected.'));
+db.on('close', () => log.info( '[MDB]', 'session disconnected.'));
+db.on('error', () => log.error('[MDB]', 'session connection error.'));
+db.openUri(mdb_url + '/session');
 
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,15 +47,15 @@ app.use(session({
 }))
 
 
-router.route('/password')
-.get(profile.notImplemented())
-.put(profile.notImplemented())
-.post(profile.changePassword())
-.delete(profile.notImplemented());
+router.route('/user')
+.get(profile.fetchUser())
+.put(profile.createUser())
+.post(profile.updateUser())
+.delete(profile.deleteUser());
 
 router.route('/authenticate')
-.get(profile.confirmation())
-.put(profile.registration())
+.get(profile.notImplemented())
+.put(profile.notImplemented())
 .post(profile.authenticate())
 .delete(profile.signout());
 
@@ -128,7 +128,7 @@ const messages = (err, code, signal) => {
 const shutdown = (err, cbk) => {
   if(err) log.error('[API]', err.name, ':', err.message);
   mongoose.disconnect(() => {
-    log.info('[API]', 'mongoose #1 terminated.');
+    log.info('[API]', 'MDB[session #2] terminated.');
     server.close(() => {
       log.info('[API]', 'express terminated.');
       log.info('[API]', 'log4js terminated.');

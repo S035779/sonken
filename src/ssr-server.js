@@ -25,10 +25,10 @@ if (env === 'development') {
 } else if (env === 'production') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
-db.on('open',  () => log.info( '[MDB]', 'sessions connected.'));
-db.on('close', () => log.info( '[MDB]', 'sessions disconnected.'));
-db.on('error', () => log.error('[MDB]', 'sessions connection error.'));
-db.openUri(mdb_url + '/sessions');
+db.on('open',  () => log.info( '[MDB]', 'session connected.'));
+db.on('close', () => log.info( '[MDB]', 'session disconnected.'));
+db.on('error', () => log.error('[MDB]', 'session connection error.'));
+db.openUri(mdb_url + '/session');
 
 app.use(log.connect());
 app.use(favicon(path.join(__dirname, 'dist', 'favicon.ico')));
@@ -63,7 +63,7 @@ const messages = (err, code, signal) => {
 const shutdown = (err, cbk) => {
   if(err) log.error('[SSR]', err.name, ':', err.message);
   mongoose.disconnect(() => {
-    log.info('[SSR]', 'mongoose #1 terminated.');
+    log.info('[SSR]', 'MDB[session #1] terminated.');
     server.close(() => {
       log.info('[SSR]', 'express terminated.');
       log.info('[SSR]', 'log4js terminated.');

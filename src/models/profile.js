@@ -11,16 +11,18 @@ const usersSchema = new Schema ({
 , user:     { type: String, unique: true } 
 , password: String
 , plan:     String
+, isAuthenticate: Boolean
+, updated:  { type: Date, default: Date.now() } 
 }, { collection: 'users' });
-mongoose.model('Users', usersSchema);
+mongoose.model('User', usersSchema);
 
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','profiles connected.'));
-db.on('close', () => log.info( '[MDB]','profiles disconnected.'));
-db.on('error', () => log.error('[MDB]','profiles connection error.'));
-db.openUri(mdb_url + '/profiles');
+db.on('open',  () => log.info( '[MDB]','profile connected.'));
+db.on('close', () => log.info( '[MDB]','profile disconnected.'));
+db.on('error', () => log.error('[MDB]','profile connection error.'));
+db.openUri(mdb_url + '/profile');
 process.on('SIGINT', () => {
-  mongoose.disconnect(() => log.info('[API]', 'mongoose #2 terminated.'));
+  mongoose.disconnect(() => log.info('[API]', 'MDB[profile] terminated.'));
 });
 
-export const Users = db.model('Users');
+export const User = db.model('User');

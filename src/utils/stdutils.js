@@ -615,6 +615,14 @@ export default {
     });
   },
 
+  logTrace(name, message) {
+    console.trace('[TRACE]', name, message);
+  },
+
+  logInfo(name, message) {
+    console.info('[INFO]', name, message);
+  },
+
   /*
    * ex) formatDate(new Date('2015/03/04'), 'MMM dt, yyyy [w]');
    * => "Mar 4th, 2015 [Wed]"

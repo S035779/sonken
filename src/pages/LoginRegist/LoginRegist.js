@@ -3,6 +3,7 @@ import PropTypes        from 'prop-types';
 import { Redirect, withRouter }
                         from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Checkbox }
@@ -38,10 +39,9 @@ class LoginRegist extends React.Component {
   }
 
   handleRegist() {
-    const {
-      username, password, confirm_password, name, kana, email, phone, plan
-    } = this.state;
-    if(password === confirm_password) {
+    const { username, password, name, kana, email, phone, plan }
+      = this.state;
+    if(this.isValidate()) {
       LoginAction.registration(username, password
         , { name, kana, email, phone, plan })
         .then(() => LoginAction.presetUser(username))
@@ -53,17 +53,16 @@ class LoginRegist extends React.Component {
     }
   }
 
-  logTrace(name, message) {
-    console.trace('[TRACE]', name, message);
-  }
-
-  logInfo(name, message) {
-    console.info('[INFO]', name, message);
+  isValidate() {
+    const {
+      username, password, confirm_password, name, kana, email, phone, plan
+    } = this.state;
+    return password === confirm_password;
   }
 
   render() {
-    this.logInfo('Props', this.props);
-    this.logInfo('State', this.state);
+    std.logInfo('Props', this.props);
+    std.logInfo('State', this.state);
     const { classes, location } = this.props;
     const {
       redirectToRefferer, username, password, confirm_password, name, kana

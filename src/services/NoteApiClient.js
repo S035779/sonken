@@ -233,7 +233,7 @@ export default {
           );
         });
         break;
-      case 'signin/user':
+      case 'signin/authenticate':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
             api + '/authenticate'
@@ -243,7 +243,7 @@ export default {
           );
         });
         break;
-      case 'signout/user':
+      case 'signout/authenticate':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
             api + '/authenticate'
@@ -253,20 +253,20 @@ export default {
           );
         });
         break;
-      case 'confirm/user':
+      case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
-            api + '/authenticate'
+            api + '/user'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
         break;
-      case 'update/password':
+      case 'update/user':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
-            api + '/password'
+            api + '/user'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -276,7 +276,17 @@ export default {
       case 'create/user':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
-            api + '/authenticate'
+            api + '/user'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/user':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/user'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -457,22 +467,29 @@ export default {
   },
 
   /*
-   * Login
+   * Authenticate
    */
   authenticate(user, password) {
-    return this.request('signin/user', { user, password });
+    return this.request('signin/authenticate', { user, password });
   },
   signout(user) {
-    return this.request('signout/user', { user });
+    return this.request('signout/authenticate', { user });
   },
+
+  /*
+   * User
+   */
   confirmation(email, phone) {
-    return this.request('confirm/user', { email, phone });
+    return this.request('fetch/user', { email, phone });
   },
   changePassword(user, password) {
-    return this.request('update/password', { user, password });
+    return this.request('update/user', { user, password });
   },
   registration(user, password, data) {
     return this.request('create/user', { user, password, data });
+  },
+  deleteUser(user) {
+    return this.request('delete/user', { user });
   },
 
   /*
