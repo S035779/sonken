@@ -81,66 +81,6 @@ export default {
           );
         });
         break;
-      case 'signin/authenticate':
-        return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/management'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'signout/management':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/authenticate'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'fetch/admin':
-        return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/admin'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'update/admin':
-        return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/admin'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'create/admin':
-        return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/admin'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
-      case 'delete/admin':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/admin'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
       case 'pagenation/user':
       case 'select/user':
         return new Promise((resolve, reject) => {
@@ -198,52 +138,5 @@ export default {
   },
   deleteUser(admin, ids) {
     return this.request('delete/user', { admin, ids });
-  },
-  uploadNotes(admin, filename) {
-    return this.request('upload/note', { admin, filename });
-  },
-  downloadNotes(admin, filename) {
-    return this.request('download/note', { admin, filename });
-  },
-
-
-  /*
-   *  Trade
-   */
-  downloadTrade(admin, filename) {
-    return this.request('download/traded', { admin, filename });
-  },
-
-  /*
-   *  Bids
-   */
-  downloadBids(admin, filename) {
-    return this.request('download/bided', { admin, filename });
-  },
-
-  /*
-   * Authenticate
-   */
-  authenticate(admin, password) {
-    return this.request('signin/management', { admin, password });
-  },
-  signout(user) {
-    return this.request('signout/management', { admin });
-  },
-
-  /*
-   * Admin
-   */
-  confirmation(email, phone) {
-    return this.request('fetch/admin', { email, phone });
-  },
-  changePassword(user, password) {
-    return this.request('update/admin', { user, password });
-  },
-  registration(user, password, data) {
-    return this.request('create/admin', { user, password, data });
-  },
-  deleteUser(user) {
-    return this.request('delete/admin', { user });
   }
 };

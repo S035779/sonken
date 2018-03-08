@@ -1,13 +1,14 @@
 import { dispatch } from 'Main/dispatcher';
-import NoteApiClient from 'Services/NoteApiClient';
+import LoginApiClient from 'Services/LoginApiClient';
 import UserApiClient from 'Services/UserApiClient';
+import NoteApiClient from 'Services/NoteApiClient';
 
 const pspid = 'LoginAction';
 
 export default {
   presetAdmin(admin) {
-    return UserApiClient.presetAdmin(user).then(isAuthenticated => {
-      dispatch({ type: 'admin/preset', user, isAuthenticated });
+    return UserApiClient.presetAdmin(admin).then(isAuthenticated => {
+      dispatch({ type: 'admin/preset', admin, isAuthenticated });
     });
   },
   presetUser(user) {
@@ -16,28 +17,28 @@ export default {
     });
   },
   authenticate(user, password) {
-    return NoteApiClient.authenticate(user, password)
+    return LoginApiClient.authenticate(user, password)
       .then(isAuthenticated => {
       dispatch({ type: 'login/authenticate', isAuthenticated });
     });
   },
   signout(user) {
-    return NoteApiClient.signout(user).then(isAuthenticated => {
+    return LoginApiClient.signout(user).then(isAuthenticated => {
       dispatch({ type: 'login/authenticate', isAuthenticated });
     });
   },
   confirmation(email, phone) {
-    return NoteApiClient.confirmation(email, phone).then(user => {
+    return LoginApiClient.confirmation(email, phone).then(user => {
       dispatch({ type: 'login/confirmation', user });
     });
   },
   changePassword(user, password) {
-    return NoteApiClient.changePassword(user, password).then(() => {
+    return LoginApiClient.changePassword(user, password).then(() => {
       dispatch({ type: 'login/changepassword', user })
     });
   },
   registration(user, password, data) {
-    return NoteApiClient.registration(user, password, data).then(() => {
+    return LoginApiClient.registration(user, password, data).then(() => {
       dispatch({ type: 'login/registration', user });
     })
   },

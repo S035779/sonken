@@ -46,6 +46,11 @@ app.use(session({
 , saveUninitialized: true
 }))
 
+router.route('/users')
+.get(profile.fetchUsers())
+.put(profile.notImplemented())
+.post(profile.notImplemented())
+.delete(profile.notImplemented());
 
 router.route('/user')
 .get(profile.fetchUser())
@@ -53,11 +58,11 @@ router.route('/user')
 .post(profile.updateUser())
 .delete(profile.deleteUser());
 
-router.route('/management')
-.get(profile.notImplemented())
-.put(profile.notImplemented())
-.post(profile.authAdmin())
-.delete(profile.signoutAdmin());
+router.route('/login')
+.get(profile.fetchUser())
+.put(profile.createUser())
+.post(profile.updateUser())
+.delete(profile.deleteUser());
 
 router.route('/authenticate')
 .get(profile.notImplemented())

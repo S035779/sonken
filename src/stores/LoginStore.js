@@ -6,12 +6,18 @@ export default class LoginStore extends ReduceStore {
   getInitialState() {
     return { 
       user: ''
+    , admin: ''
     , isAuthenticated: false
     };
   }
   
   reduce(state, action) {
     switch (action.type) { 
+      case 'admin/preset':
+        return Object.assign({}, state, {
+          admin:   action.admin
+        , isAuthenticated: action.isAuthenticated
+        });
       case 'user/preset':
         return Object.assign({}, state, {
           user:   action.user
