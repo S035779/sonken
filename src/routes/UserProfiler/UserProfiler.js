@@ -38,15 +38,30 @@ export default class UserProfiler {
     //, R.filter(isUsr)
     //);
     switch(request) {
-      case 'fetch/user':
+      case 'fetch/users':
         return new Promise((resolve, reject) => {
-          User.findOne({
-            email: options.email
-          , phone: new RegExp(options.phone + '$')
-          }, (err, obj) => {
+          User.find({}, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
-            resolve(obj ? obj.user : '');
+            resolve(obj);
+          });
+        });
+        break;
+      case 'fetch/user':
+        return new Promise((resolve, reject) => {
+          const conditions = options.email
+            ? { email: options.email
+              , phone: new RegExp(options.phone + '$')}
+            : { user: options.user
+              , password: options.password };
+          User.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            const res = {
+              user: obj.user
+            , isAuthenticated: obj.isAuthenticated
+            };
+            resolve(res);
           });
         });
         break;
@@ -54,7 +69,8 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const user = new User({
             user:     options.user
-          , password: options.password
+          , salt:     options.salt
+          , hash:     options.hash
           , name:     options.data.name
           , kana:     options.data.kana
           , email:    options.data.email
@@ -83,12 +99,21 @@ export default class UserProfiler {
         });
         break;
       case 'delete/user':
+        return new Promise((resolve, reject) => {
+          User.remove({
+            user: options.user
+          }, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
         break;
       case 'signin/admin':
         return new Promise((resolve, reject) => {
           const isAuthenticated = true;
-          User.findOneAndUpdate({
-            user:     options.user
+          User.update({
+            user:     options.admin
           , password: options.password
           , isAdmin:  true
           }
@@ -96,7 +121,7 @@ export default class UserProfiler {
           , (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
-            resolve(isAuthenticated);
+            resolve(obj);
           })
         });
         break;
@@ -104,20 +129,20 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const isAuthenticated = false;
           User.update({
-            user: options.user
+            user: options.admin
           , isAdmin: true
           }
           , { isAuthenticated }
           , (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
-            resolve(isAuthenticated);
+            resolve(obj);
           });
         });
-      case 'signin/authenticate':
+      case 'signin/user':
         return new Promise((resolve, reject) => {
           const isAuthenticated = true;
-          User.findOneAndUpdate({
+          User.update({
             user:     options.user
           , password: options.password
           }
@@ -125,7 +150,7 @@ export default class UserProfiler {
           , (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
-            resolve(isAuthenticated);
+            resolve(obj);
           })
           //const response = R.compose(
           //  () => isAuth(users)
@@ -138,7 +163,7 @@ export default class UserProfiler {
           //resolve(response(users));
         });
         break;
-      case 'signout/authenticate':
+      case 'signout/user':
         return new Promise((resolve, reject) => {
           const isAuthenticated = false;
           User.update({
@@ -148,7 +173,7 @@ export default class UserProfiler {
           , (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
-            resolve(isAuthenticated);
+            resolve(obj);
           });
           //const response = R.compose(
           //  () => isAuth(users)
@@ -167,12 +192,20 @@ export default class UserProfiler {
     }
   }
 
-  getUser(email, phone) {
-    return this.request('fetch/user', { email, phone });
+  getSaltAndHash({ password }) {
+    return std.crypto_pbkdf2(password, 256);
   }
 
-  addUser(user, password, data) {
-    return this.request('create/user', { user, password, data })
+  getUsers() {
+    return this.request('fetch/users', {});
+  }
+
+  getUser({ user, password, email, phone }) {
+    return this.request('fetch/user', { user, password, email, phone });
+  }
+
+  addUser(user, salt, hash, data) {
+    return this.request('create/user', { user, salt, hash, data })
   }
 
   replaceUser(user, password) {
@@ -183,44 +216,66 @@ export default class UserProfiler {
     return this.request('delete/user', { user });
   }
 
-  logInAdmin(admin, password) {
+  signinAdmin(admin, password) {
     return this.request('signin/admin', { admin, password });
   }
 
-  logOutAdmin(user) {
+  signoutAdmin(admin) {
     return this.request('signout/admin', { admin });
   }
 
-  logIn(user, password) {
-    return this.request('signin/authenticate', { user, password });
+  signinUser(user, password) {
+    return this.request('signin/user', { user, password });
   }
 
-  logOut(user) {
-    return this.request('signout/authenticate', { user });
+  signoutUser(user) {
+    return this.request('signout/user', { user });
   }
 
-  authAdmin({ admin, password }) {
-    return Rx.Observable.fromPromise(this.logInAdmin(admin, password));
+  authenticate({ admin, user, password }) {
+    const isAdmin = admin !== '';
+    const observable = isAdmin
+      ? Rx.Observable.fromPromise(this.signinAdmin(admin, password))
+      : Rx.Observable.fromPromise(this.signinUser(user, password));
+    const options = isAdmin
+      ? { user: user , password}
+      : { user: admin, password };
+    return observable
+      .flatMap(() => fetchUser(options))
+      .map(obj = obj.isAuthenticated);
   }
 
-  signoutAdmin({ admin }) {
-    return Rx.Observable.fromPromise(this.logOutAdmin(admin));
+  signout({ admin, user }) {
+    const isAdmin = admin !== '';
+    const observable = isAdmin 
+      ? Rx.Observable.fromPromise(this.signoutAdmin(admin))
+      : Rx.Observable.fromPromise(this.signoutUser(user));
+    return observable
+      .flatMap(() => this.fetchUser(options))
+      .map(obj => obj.isAuthenticated);
   }
 
-  authenticate({ user, password }) {
-    return Rx.Observable.fromPromise(this.logIn(user, password));
+  fetchUsers() {
+    return Rx.Observable.fromPromise(this.getUsers());
   }
 
-  signout({ user }) {
-    return Rx.Observable.fromPromise(this.logOut(user));
-  }
 
-  fetchUser({ email, phone }) {
-    return Rx.Observable.fromPromise(this.getUser(email, phone));
+  fetchUser(options) {
+    return Rx.Observable.fromPromise(this.getUser(options));
   }
 
   createUser({ user, password, data }) {
-    return Rx.Observable.fromPromise(this.addUser(user, password, data));
+    return this.createSaltAndHash(password)
+      .flatMap(obj => this._createUser(user, obj.salt, obj.hash, data));
+  }
+
+  _createUser({ user, salt, hash, data }) {
+    return Rx.Observable
+      .fromPromise(this.addUser(user, salt, hash, data));
+  }
+
+  createSaltAndHash({ password }) {
+    return Rx.Observable.fromPromise(this.getSaltAndHash(password));
   }
 
   updateUser({ user, password }) {

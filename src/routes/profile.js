@@ -4,10 +4,9 @@ import { logs as log }  from 'Utilities/logutils';
 const profile = UserProfiler.of();
 
 export default {
-  fetchUser(options) {
+  fetchUsers(options) {
     return (req, res, next) => {
-      const { email, phone } = req.query;
-      profile.fetchUser({ email, phone }).subscribe(
+      profile.fetchUsers().subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -15,8 +14,26 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to fetch User.'); }
-      );
+      , ()  => {
+          log.info('Complete to fetch Users.');
+      });
+    };
+  },
+
+  fetchUser(options) {
+    return (req, res, next) => {
+      const { user, password, email, phone } = req.query;
+      profile.fetchUser({ user, password, email, phone }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to fetch User.');
+      });
     };
   },
 
@@ -31,8 +48,9 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to create User.'); }
-      );
+      , () => {
+          log.info('Complete to create User.');
+      });
     };
   },
 
@@ -47,8 +65,9 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to update User.'); }
-      );
+      , () => {
+          log.info('Complete to update User.');
+      });
     };
   },
 
@@ -63,17 +82,19 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to delete User.'); }
-      );
+      , () => {
+          log.info('Complete to delete User.');
+      });
     };
   },
 
   authenticate(options) {
     return (req, res, next) => {
-      const { user, password } = req.body;
-      profile.authenticate({ user, password }).subscribe(
+      const { admin, user, password } = req.body;
+      profile.authenticate({ admin, user, password }).subscribe(
         obj => {
-          if(obj) req.session.user = user;
+          if(obj && admin !== '') req.session.admin = admin;
+          else if(obj && user !== '') req.session.user = user;
           console.log('isAuthenticated:', obj, req.session);
           res.status(200).send(obj);
         }
@@ -81,15 +102,16 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Logged in.'); }
-      );
+      , () => {
+          log.info('Complete to Logged in.');
+      });
     };
   },
 
   signout(options) {
     return (req, res, next) => {
-      const { user } = req.query;
-      profile.signout({ user }).subscribe(
+      const { admin, user } = req.query;
+      profile.signout({ admin, user }).subscribe(
         obj => {
           if(!obj) req.session.destroy();
           console.log('isAuthenticated:', obj, req.session);
@@ -99,44 +121,9 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Logged out.'); }
-      );
-    };
-  },
-
-  authAdmin(options) {
-    return (req, res, next) => {
-      const { admin, password } = req.body;
-      profile.authAdmin({ admin, password }).subscribe(
-        obj => {
-          if(obj) req.session.admin = admin;
-          console.log('isAuthenticated:', obj, req.session);
-          res.status(200).send(obj);
-        }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
-        }
-      , () => { log.info('Complete to Logged in of ADMIN.'); }
-      );
-    };
-  },
-
-  signoutAdmin(options) {
-    return (req, res, next) => {
-      const { admin } = req.query;
-      profile.signoutAdmin({ admin }).subscribe(
-        obj => {
-          if(!obj) req.session.destroy();
-          console.log('isAuthenticated:', obj, req.session);
-          res.status(200).send(obj);
-        }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
-        }
-      , () => { log.info('Complete to Logged out of ADMIN.'); }
-      );
+      , () => {
+          log.info('Complete to Logged out.');
+      });
     };
   },
 

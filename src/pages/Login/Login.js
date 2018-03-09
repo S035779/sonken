@@ -19,13 +19,13 @@ class Login extends React.Component {
   }
 
   static prefetch(user) {
-    std.logInfo('prefetch', user);
+    std.logInfo(Login.displayName, 'prefetch', user);
     return LoginAction.presetUser(user);
   }
 
   render() {
-    std.logInfo('Props', this.props);
-    std.logInfo('State', this.state);
+    std.logInfo(Login.displayName, 'Props', this.props);
+    std.logInfo(Login.displayName, 'State', this.state);
     const { classes, route } = this.props;
     const { user, isAuthenticated } = this.state;
     return <div className={classes.loginFrame}>

@@ -3,17 +3,20 @@ import { logs as log } from 'Utilities/logutils';
 
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
-mongoose.model('User', new mongoose.Schema ({
-  user:             { type: String, unique: true } 
-, password:         String
+const userSchema = new mongoose.Schema ({
+  user:             { type: String, required: true } 
+, salt:             { type: String, required: true }
+, hash:             { type: String, required: true }
 , isAuthenticated:  { type: Boolean, default: true }
-, name:             String
-, kana:             String
-, email:            String
-, phone:            String
-, plan:             String
+, isAdmin:          { type: Boolean, default: false }
+, name:             { type: String, required: true }
+, kana:             { type: String, required: true }
+, email:            { type: String, required: true }
+, phone:            { type: String, required: true }
+, plan:             { type: String, required: true }
 , updated:          { type: Date, default: Date.now() } 
-}, { collection: 'users' }));
+}, { collection: 'users' })
+userSchema.index({ user: 1, email: 1 }, { unique: true });
 
 const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','profile connected.'));
@@ -23,5 +26,4 @@ db.openUri(mdb_url + '/profile');
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'profile terminated.')));
-
-export const User = db.model('User');
+export const User = db.model('User', userSchema);

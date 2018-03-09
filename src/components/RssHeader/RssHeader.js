@@ -23,7 +23,7 @@ class RssHeader extends React.Component {
   handleLogin(event, checked) {
     const { user, history } = this.props;
     this.setState({ auth: checked });
-    if(!checked) LoginAction.signout(user)
+    if(!checked) LoginAction.signout(user, false)
       .then(() => LoginAction.presetUser(''))
       .then(() => history.push('/login'));
   }
@@ -38,7 +38,7 @@ class RssHeader extends React.Component {
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
       <div className={classes.navBar}>
         <IconButton className={classes.navIcon}
-          color="inherit" aria-label="open drawer"
+          color="primary" aria-label="open drawer"
           onClick={this.handleMenu.bind(this)}>
           <MenuIcon />
         </IconButton>

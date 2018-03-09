@@ -8,11 +8,11 @@ const api_path = process.env.API_PATH || '/api';
 const api = host + api_path;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const pspid = 'NoteApiClient';
+const displayName = 'NoteApiClient';
 
 export default {
   request(request, options) {
-    std.logInfo(request, options);
+    std.logInfo(displayName, request, options);
     switch(request) {
       case 'preset/user':
         return new Promise((resolve, reject) => {

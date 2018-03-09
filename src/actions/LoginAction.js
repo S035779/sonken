@@ -16,14 +16,15 @@ export default {
       dispatch({ type: 'user/preset', user, isAuthenticated });
     });
   },
-  authenticate(user, password) {
-    return LoginApiClient.authenticate(user, password)
-      .then(isAuthenticated => {
+  authenticate(username, password, isAdmin) {
+    return LoginApiClient.authenticate(username, password, isAdmin)
+    .then(isAuthenticated => {
       dispatch({ type: 'login/authenticate', isAuthenticated });
     });
   },
-  signout(user) {
-    return LoginApiClient.signout(user).then(isAuthenticated => {
+  signout(username, isAdmin) {
+    return LoginApiClient.signout(username, isAdmin)
+    .then(isAuthenticated => {
       dispatch({ type: 'login/authenticate', isAuthenticated });
     });
   },

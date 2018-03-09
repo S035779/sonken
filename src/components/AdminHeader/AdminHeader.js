@@ -23,8 +23,8 @@ class AdminHeader extends React.Component {
   handleLogin(event, checked) {
     const { user, history } = this.props;
     this.setState({ auth: checked });
-    if(!checked) LoginAction.signout(user)
-      .then(() => LoginAction.presetUser(''))
+    if(!checked) LoginAction.signout(user, true)
+      .then(() => LoginAction.presetAdmin(''))
       .then(() => history.push('/login'));
   }
 

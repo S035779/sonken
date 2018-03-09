@@ -8,11 +8,11 @@ const api_path = process.env.API_PATH || '/api';
 const api = host + api_path;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const pspid = 'LoginApiClient';
+const displayName = 'LoginApiClient';
 
 export default {
   request(request, options) {
-    std.logInfo(request, options);
+    std.logInfo(displayName, request, options);
     switch(request) {
       case 'signin/authenticate':
         return new Promise((resolve, reject) => {
@@ -85,18 +85,35 @@ export default {
   /*
    * Authenticate
    */
-  authenticate(user, password) {
-    return this.request('signin/authenticate', { user, password });
+  authenticate(username, password, isAdmin) {
+    let admin, user;
+    if(isAdmin) {
+      admin = username;
+      user = '';
+    } else {
+      admin = '';
+      user = username;
+    }
+    return this.request('signin/authenticate', { admin, user, password });
   },
-  signout(user) {
-    return this.request('signout/authenticate', { user });
+  signout(username, isAdmin) {
+    let admin, user;
+    if(isAdmin) {
+      admin = username;
+      user = '';
+    } else {
+      admin = '';
+      user = username;
+    }
+    return this.request('signout/authenticate', { admin, user });
   },
 
   /*
    * User
    */
   confirmation(email, phone) {
-    return this.request('fetch/user', { email, phone });
+    return this.request('fetch/user', { email, phone })
+    .then(obj => obj.user);
   },
   changePassword(user, password) {
     return this.request('update/user', { user, password });

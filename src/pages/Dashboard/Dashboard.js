@@ -23,13 +23,13 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(user) {
-    std.logInfo('prefetch', user);
+    std.logInfo(Dashboard.displayName, 'prefetch', user);
     return NoteAction.presetUser(user)
       .then(() => NoteAction.prefetchNotes(user));
   }
 
   componentDidMount() {
-    std.logInfo('fetch', 'Dashboard');
+    std.logInfo(Dashboard.displayName, 'fetch', 'Dashboard');
     NoteAction.fetchNotes(this.state.user);
   }
 
@@ -38,8 +38,8 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    std.logInfo('State', this.state);
-    std.logInfo('Props', this.props);
+    std.logInfo(Dashboard.displayName, 'State', this.state);
+    std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids } = this.state;
     const _id = Number(match.params.id);

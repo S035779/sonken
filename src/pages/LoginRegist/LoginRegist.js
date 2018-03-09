@@ -12,6 +12,7 @@ import { FormControlLabel }
                         from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -27,6 +28,7 @@ class LoginRegist extends React.Component {
     , phone: ''
     , plan: ''
     , agreed: false
+    , isNotValid: false
     };
   }
 
@@ -48,30 +50,40 @@ class LoginRegist extends React.Component {
         .then(() => {
           if(this.props.isAuthenticated)
             this.setState({ redirectToRefferer: true });
-        });
+        })
+        .catch(err => this.setState({ isNotValid: true }));
     } else {
+      this.setState({ isNotValid: true });
     }
   }
 
+  handleCloseDialog() {
+    this.setState({ isNotValid: false });
+  }
+
   isValidate() {
-    const {
-      username, password, confirm_password, name, kana, email, phone, plan
-    } = this.state;
-    return password === confirm_password;
+    const { username, password, confirm_password, name, kana, email, phone
+      , plan, agreed } = this.state;
+    return (
+      password === confirm_password
+      && username !== '' && name !=='' && kana !==''
+      && std.regexEmail(email) && std.regexNumber(phone) && plan !==''
+      && agreed
+    );
   }
 
   render() {
-    std.logInfo('Props', this.props);
-    std.logInfo('State', this.state);
+    std.logInfo(LoginRegist.displayName, 'Props', this.props);
+    std.logInfo(LoginRegist.displayName, 'State', this.state);
     const { classes, location } = this.props;
     const {
       redirectToRefferer, username, password, confirm_password, name, kana
-    , email, phone, plan, agreed
+    , email, phone, plan, agreed, isNotValid
     } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const inputSelect = { MenuProps: { className: classes.menu } };
-    const to = { pathname: '/' };
+    const to = { pathname: '/marchant' };
     if(redirectToRefferer) return <Redirect to={to} />;
     return <div className={classes.loginForms}>
       <div className={classes.space} />
@@ -162,7 +174,7 @@ class LoginRegist extends React.Component {
         <div className={classes.agreement} />
       </div>
       <div className={classes.form}>
-        <Checkbox
+        <Checkbox color="primary"
           checked={agreed}
           onChange={this.handleChangeCheckbox.bind(this, 'agreed')} />
         <Typography variant="body2" align="center"
@@ -174,6 +186,10 @@ class LoginRegist extends React.Component {
         <RssButton color={'skyblue'}
           onClick={this.handleRegist.bind(this)}
           classes={classes.button}>利用申し込み</RssButton>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this)}>
+        内容に不備があります。もう一度確認してください。
+        </RssDialog>
         <div className={classes.space} />
       </div>
       <div className={classes.notice}>

@@ -565,6 +565,20 @@ export default {
       .digest('base64');
   },
 
+  crypto_pbkdf2(string, length) {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(128, (err, salt) => {
+        if(err) return reject(err);
+        salt = new Buffer(salt). toString('hex');
+        crypto.pbkdf2(string, salt, 7000, length, (err, hash) => {
+          if(err) return reject(err);
+          hash = new Buffer(hash).toString('hex');
+          resolve({ salt, hash });
+        });
+      })
+    });
+  },
+
   /**
    * Function that returns instance for parsed to 
    * associative array object.
@@ -615,14 +629,14 @@ export default {
     });
   },
 
-  logTrace(name, message) {
+  logTrace(caller, name, message) {
     const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
-    console.trace(date , '[TRACE]', name, '-', message);
+    console.trace(date , '[TRACE]', caller, '-', name, ':', message);
   },
 
-  logInfo(name, message) {
+  logInfo(caller, name, message) {
     const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
-    console.info(date, '[INFO]', name, '-', message);
+    console.info(date, '[INFO]', caller, '-', name, ':', message);
   },
 
   getLocalISOTimeStamp (date) {

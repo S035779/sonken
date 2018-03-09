@@ -6,7 +6,7 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography, Button }
+import { TextField, Typography, Button, Checkbox, FormControlLabel }
                         from 'material-ui';
 import RssButton        from 'Components/RssButton/RssButton';
 
@@ -15,18 +15,25 @@ class LoginAuth extends React.Component {
     super(props);
     this.state = {
       redirectToRefferer: false
+    , redirectToManagement: false
     , username: ''
     , password: ''
+    , checked: false
     };
   }
 
   handleLogin() {
-    const { username, password } = this.state;
-    LoginAction.authenticate(username, password)
-      .then(() => LoginAction.presetUser(username))
+    const { username, password, checked } = this.state;
+    LoginAction.authenticate(username, password, checked)
       .then(() => {
-        if(this.props.isAuthenticated)
+        if(cheched) return LoginAction.presetAdmin(username);
+        return LoginAction.presetUser(username);
+      })
+      .then(() => {
+        if(this.props.isAuthenticated) {
+          if(cheched) this.setState({ redirectToManagement: true });
           this.setState({ redirectToRefferer: true });
+        }
       });
   }
 
@@ -34,15 +41,22 @@ class LoginAuth extends React.Component {
     this.setState({ [name]: event.target.value });
   }
 
+  handleChangeCheckbox(name, event) {
+    this.setState({ [name]: event.target.checked });
+  }
+
   render() {
-    std.logInfo('Props', this.props);
-    std.logInfo('State', this.state);
+    std.logInfo(LoginAuth.displayName, 'Props', this.props);
+    std.logInfo(LoginAuth.displayName, 'State', this.state);
     const { classes, location } = this.props;
-    const { redirectToRefferer, username, password } = this.state;
+    const { redirectToRefferer, redirectToManagement, username, password
+      , checked }= this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const from = location.state || { pathname: '/marchant' };
+    const admin = { pathname: '/admin' };
     if(redirectToRefferer) return <Redirect to={from} />;
+    if(redirectToManagement) return <Redirect to={admin} />;
     return <div className={classes.loginForms}>
       <div className={classes.space}/>
       <Typography variant="headline" align="center"
@@ -73,6 +87,16 @@ class LoginAuth extends React.Component {
           onClick={this.handleLogin.bind(this)}
           classes={classes.button}>ログイン</RssButton>
         <div className={classes.space}/>
+      </div>
+      <div className={classes.form}>
+        <FormControlLabel
+          control={
+            <Checkbox color="primary"
+              checked={checked}
+              onChange={this.handleChangeCheckbox.bind(this, 'checked')}/>
+          }
+          label="管理者ログイン"
+        />
       </div>
       <div className={classes.notice}>
         <Typography variant="caption" align="center"
