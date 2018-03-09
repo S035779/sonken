@@ -56,8 +56,8 @@ export default {
 
   updateUser(options) {
     return (req, res, next) => {
-      const { user, password } = req.body;
-      profile.updateUser({ user, password }).subscribe(
+      const { user, password, data } = req.body;
+      profile.updateUser({ user, password, data }).subscribe(
         obj => {
           res.status(200).send(obj);
         }

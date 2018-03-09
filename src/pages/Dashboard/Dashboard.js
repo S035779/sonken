@@ -22,10 +22,10 @@ class Dashboard extends React.Component {
     return getState('dashboardStore');
   }
 
-  static prefetch(user) {
-    std.logInfo(Dashboard.displayName, 'prefetch', user);
-    return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchNotes(user));
+  static prefetch(options) {
+    std.logInfo(Dashboard.displayName, 'prefetch', options);
+    return NoteAction.presetUser(options.user)
+      .then(() => NoteAction.prefetchNotes(options.user));
   }
 
   componentDidMount() {

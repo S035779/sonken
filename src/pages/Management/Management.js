@@ -22,14 +22,14 @@ class Management extends React.Component {
     return getState('managementStore');
   }
 
-  static prefetch(admin) {
-    std.logInfo('prefetch', admin);
-    return UserAction.presetAdmin(admin)
-      .then(() => UserAction.prefetchUsers(admin));
+  static prefetch(options) {
+    std.logInfo(Management.displayName, 'prefetch', options);
+    return UserAction.presetAdmin(options.admin)
+      .then(() => UserAction.prefetchUsers());
   }
 
   componentDidMount() {
-    std.logInfo('fetch', 'Management');
+    std.logInfo(Management.displayName, 'fetch', 'Management');
     UserAction.fetchUsers(this.state.admin);
   }
 
@@ -38,41 +38,40 @@ class Management extends React.Component {
   }
 
   render() {
-    std.logInfo('State', this.state);
-    std.logInfo('Props', this.props);
+    std.logInfo(Management.displayName, 'State', this.state);
+    std.logInfo(Management.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, admin, notes, page, ids } = this.state;
+    const { isAuthenticated, admin, users, page, ids } = this.state;
     const _id = Number(match.params.id);
     const category =
-      match.params.category ? match.params.category : 'user';
-    const _notes =
-      notes ? notes.filter(obj => obj.category === category) : [];
-    const note = notes.find(obj => obj.id === _id);
-    const number = _notes.length;
-    _notes.length = this.notePage(number, page);
+      match.params.category ? match.params.category : 'users';
+    const user = users.find(obj => obj.id === _id);
+    const number = users.length;
+    users.length = this.notePage(number, page);
     if(!isAuthenticated) {
       return <Redirect to={{
         pathname: '/login/authenticate', state: { from: location } }} />;
     }
     return <div className={classes.root}>
         <AdminSearch
-          user={admin}
+          admin={admin}
           category={category}
-          noteNumber={number} notePage={page} />
+          userNumber={number} userPage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
           <AdminButtons
-            user={admin}
-            notes={_notes}
-            selectedNoteId={ids} />
+            admin={admin}
+            users={users}
+            selectedUserId={ids} />
           <AdminList
-            user={admin}
-            notes={_notes}
-            selectedNoteId={ids}
-            notePage={page}/>
+            admin={admin}
+            category={category}
+            users={users}
+            selectedUserId={ids}
+            userPage={page}/>
         </div>
         <div className={classes.noteEdit}>
-        {route.routes ? renderRoutes(route.routes,{ admin, note }) : null}
+        {route.routes ? renderRoutes(route.routes,{ admin, user }) : null}
         </div>
       </div>
     </div>;

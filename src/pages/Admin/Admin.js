@@ -27,7 +27,7 @@ class Admin extends React.Component {
       <ErrorBoundary>
       <Reboot />
       <div className={classes.adminFrame}>
-        <AdminHeader user={admin} isAuthenticated={isAuthenticated}/>
+        <AdminHeader admin={admin} isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}
         </div>

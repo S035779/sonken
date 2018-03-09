@@ -21,19 +21,19 @@ class AdminHeader extends React.Component {
   }
 
   handleLogin(event, checked) {
-    const { user, history } = this.props;
+    const { admin, history } = this.props;
     this.setState({ auth: checked });
-    if(!checked) LoginAction.signout(user, true)
+    if(!checked) LoginAction.signout(admin, true)
       .then(() => LoginAction.presetAdmin(''))
-      .then(() => history.push('/login'));
+      .then(() => history.push('/login/authenticate'));
   }
 
   handleMenu(event) {
   }
 
   render() {
-    const {classes} = this.props;
-    const {auth} = this.state;
+    const { classes } = this.props;
+    const { auth } = this.state;
     return <div className={classes.navHeader}>
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
       <div className={classes.navBar}>

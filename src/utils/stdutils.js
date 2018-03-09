@@ -565,18 +565,27 @@ export default {
       .digest('base64');
   },
 
-  crypto_pbkdf2(string, length) {
+  crypto_pbkdf2(pass, salt, length) {
     return new Promise((resolve, reject) => {
-      crypto.randomBytes(128, (err, salt) => {
-        if(err) return reject(err);
-        salt = new Buffer(salt). toString('hex');
-        crypto.pbkdf2(string, salt, 7000, length, (err, hash) => {
+      const random = cbk => crypto.randomBytes(128, cbk);
+      const pbkdf2 = (slt, cbk) =>
+        crypto.pbkdf2(pass, slt, 7000, length, 'sha256', cbk);
+      const bin2str = bin => new Buffer(bin).toString('hex');
+      if(salt) {
+        pbkdf2(salt, (err, _hash) => {
           if(err) return reject(err);
-          hash = new Buffer(hash).toString('hex');
-          resolve({ salt, hash });
+          resolve({ salt, hash: bin2str(_hash) });
         });
-      })
-    });
+      } else {
+        random((err, _salt) => {
+          salt = bin2str(_salt);
+          pbkdf2(salt, (err, _hash) => {
+            if(err) return reject(err);
+            resolve({ salt, hash: bin2str(_hash) });
+          });
+        })
+      }
+    })
   },
 
   /**

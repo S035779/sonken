@@ -21,14 +21,14 @@ class Trade extends React.Component {
     return getState('tradedNotesStore');
   }
 
-  static prefetch(user) {
-    std.logInfo('prefetch', user);
-    return NoteAction.presetUser(user)
+  static prefetch(options) {
+    std.logInfo(Trade.displayName, 'prefetch', options);
+    return NoteAction.presetUser(options.user)
       .then(() => NoteAction.prefetchTraded(user));
   }
 
   componentDidMount() {
-    std.logInfo('fetch', 'Trade');
+    std.logInfo(Trade.displayName, 'fetch', 'Trade');
     NoteAction.fetchTraded(this.state.user);
   }
 
@@ -59,7 +59,7 @@ class Trade extends React.Component {
   }
 
   render() {
-    std.logInfo('render', this.state);
+    std.logInfo(Trade.displayName, 'State', this.state);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter }
       = this.state;

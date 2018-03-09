@@ -1,6 +1,7 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import NoteAction       from 'Actions/NoteAction';
+import UserAction       from 'Actions/UserAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
 import {
@@ -17,46 +18,46 @@ class AdminSearch extends React.Component {
     this.state = {
       url:      ''
     , filename: ''
-    , perPage:    props.noteNumber
+    , perPage:    props.userNumber
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
-    const { notePage } = nextProps;
-    this.setState({ perPage: notePage.perPage });
+    std.logInfo(AdminSearch.displayName, 'Props', nextProps);
+    const { userPage } = nextProps;
+    this.setState({ perPage: userPage.perPage });
   }
 
   handleSubmit(e) {
     e.preventDefault();
     const { url } = this.state;
-    const { user, category } = this.props;
-    this.logInfo('handleSubmit', url);
-    NoteAction.create(user, { url, category });
+    const { admin, category } = this.props;
+    std.logInfo(AdminSearch.displayName, 'handleSubmit', url);
+    UserAction.create(admin, { url, category });
     this.setState({ url: '' });
   }
 
   handleUpload(e) {
     e.preventDefault();
     const { filename } = this.state;
-    const { user } = this.props;
-    this.logInfo('handleUpload', filename);
-    NoteAction.upload(user, filename);
+    const { admin } = this.props;
+    std.logInfo(AdminSearch.displayName, 'handleUpload', filename);
+    UserAction.upload(admin, filename);
     this.setState({ filename: '' });
   }
 
   handleDownload(e) {
     e.preventDefault();
     const { filename } = this.state;
-    const { user } = this.props;
-    this.logInfo('handleDownload', filename);
-    NoteAction.download(user, filename);
+    const { admin } = this.props;
+    std.logInfo(AdminSearch.displayName, 'handleDownload', filename);
+    UserAction.download(admin, filename);
     this.setState({ filename: '' });
   }
 
   handleChangeText(name, event) {
     const value = event.target.value;
-    this.logInfo('handleChangeText', value);
+    std.logInfo(AdminSearch.displayName, 'handleChangeText', value);
     switch(name) {
       case 'url':
         this.setState({ url: value });
@@ -65,13 +66,13 @@ class AdminSearch extends React.Component {
   }
 
   handleChangeSelect(name, event) {
-    const { user, noteNumber } = this.props;
+    const { admin, userNumber } = this.props;
     const value = event.target.value;
-    this.logInfo('handleChangeSelect', value);
+    std.logInfo(AdminSearch.displayName, 'handleChangeSelect', value);
     switch(name) {
       case 'page':
-        NoteAction.pagenation(user, {
-          maxNumber: Math.ceil(noteNumber / value)
+        UserAction.pagenation(admin, {
+          maxNumber: Math.ceil(userNumber / value)
           , number: 1, perPage: value
         });
         this.setState({ perPage: value });
@@ -79,19 +80,15 @@ class AdminSearch extends React.Component {
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
   render() {
-    const { classes, noteNumber, category } = this.props;
+    const { classes, userNumber, category } = this.props;
     const { url, perPage, filename } = this.state;
-    const color = category === 'marchant' ? 'skyblue' : 'orange';
-    return <div className={classes.noteSearchs}>
+    const color = category === 'users' ? 'skyblue' : 'orange';
+    return <div className={classes.userSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{noteNumber}件中{
-            perPage > noteNumber ? noteNumber : perPage
+          全{userNumber}件中{
+            perPage > userNumber ? userNumber : perPage
           }件表示
         </Typography>
       </div>
@@ -131,7 +128,7 @@ const titleHeight = 62;
 const minWidth = 125;
 const buttonWidth = 88;
 const styles = theme => ({
-  noteSearchs:{ display: 'flex', flexDirection: 'row'
+  userSearchs:{ display: 'flex', flexDirection: 'row'
               , alignItems: 'stretch'
               , height: titleHeight, minHeight: titleHeight
               , boxSizing: 'border-box'

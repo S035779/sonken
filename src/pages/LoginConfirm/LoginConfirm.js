@@ -29,20 +29,20 @@ class LoginConfirm extends React.Component {
   }
 
   handleClose(name) {
-    std.logInfo('handleClose', name);
+    std.logInfo(LoginConfirm.displayName, 'handleClose', name);
     switch(name) {
       case 'authenticate':
         this.setState({ openedCorrect: false });
+        this.props.history.push('/login');
         break;
       case 'confirmation':
         this.setState({ openedIncorrect: false });
         break;
     }
-    this.props.history.push('/login' + name);
   }
 
   handleSubmit() {
-    std.logInfo('handleSubmit', this.state);
+    std.logInfo(LoginConfirm.displayName, 'handleSubmit', this.state);
     const { email, phone } = this.state;
     const newPassword = std.makeRandPassword(16);
     LoginAction.confirmation(email, phone)
@@ -53,7 +53,8 @@ class LoginConfirm extends React.Component {
       } else {
         this.setState({ openedIncorrect: true });
       }
-    });
+    })
+    .catch(err => this.setState({ openedIncorrect: true }));
   }
 
   handleChangeText(name, event) {
@@ -112,8 +113,8 @@ class LoginConfirm extends React.Component {
   }
 
   render() {
-    std.logInfo('Props', this.props);
-    std.logInfo('State', this.state);
+    std.logInfo(LoginConfirm.displayName, 'Props', this.props);
+    std.logInfo(LoginConfirm.displayName, 'State', this.state);
     const { classes } = this.props;
     const { email, phone } = this.state;
     const inputText = { disableUnderline: true

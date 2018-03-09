@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema ({
 , salt:             { type: String, required: true }
 , hash:             { type: String, required: true }
 , isAuthenticated:  { type: Boolean, default: true }
-, isAdmin:          { type: Boolean, default: false }
+, isAdmin:          { type: Boolean, default: true }
 , name:             { type: String, required: true }
 , kana:             { type: String, required: true }
 , email:            { type: String, required: true }

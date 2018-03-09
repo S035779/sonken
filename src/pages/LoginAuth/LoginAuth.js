@@ -9,6 +9,7 @@ import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Button, Checkbox, FormControlLabel }
                         from 'material-ui';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class LoginAuth extends React.Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class LoginAuth extends React.Component {
     , username: ''
     , password: ''
     , checked: false
+    , isNotValid: false
     };
   }
 
@@ -26,14 +28,22 @@ class LoginAuth extends React.Component {
     const { username, password, checked } = this.state;
     LoginAction.authenticate(username, password, checked)
       .then(() => {
-        if(cheched) return LoginAction.presetAdmin(username);
-        return LoginAction.presetUser(username);
+        if(this.props.isAuthenticated) {
+          if(checked) return LoginAction.presetAdmin(username);
+          else        return LoginAction.presetUser(username);
+        } else {
+          this.setState({ isNotValid: true });
+          return null;
+        }
       })
       .then(() => {
         if(this.props.isAuthenticated) {
-          if(cheched) this.setState({ redirectToManagement: true });
-          this.setState({ redirectToRefferer: true });
+          if(checked) this.setState({ redirectToManagement: true });
+          else        this.setState({ redirectToRefferer: true });
         }
+      })
+      .catch(err => {
+        this.setState({ isNotValid: true });
       });
   }
 
@@ -45,16 +55,22 @@ class LoginAuth extends React.Component {
     this.setState({ [name]: event.target.checked });
   }
 
+  handleCloseDialog() {
+    this.setState({ isNotValid: false });
+  }
+
   render() {
     std.logInfo(LoginAuth.displayName, 'Props', this.props);
     std.logInfo(LoginAuth.displayName, 'State', this.state);
     const { classes, location } = this.props;
-    const { redirectToRefferer, redirectToManagement, username, password
-      , checked }= this.state;
+    const {
+      redirectToRefferer, redirectToManagement, username, password
+      , checked, isNotValid
+    }= this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const from = location.state || { pathname: '/marchant' };
-    const admin = { pathname: '/admin' };
+    const admin = { pathname: '/admin/users' };
     if(redirectToRefferer) return <Redirect to={from} />;
     if(redirectToManagement) return <Redirect to={admin} />;
     return <div className={classes.loginForms}>
@@ -86,6 +102,10 @@ class LoginAuth extends React.Component {
         <RssButton color={'skyblue'}
           onClick={this.handleLogin.bind(this)}
           classes={classes.button}>ログイン</RssButton>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this)}>
+          内容に不備があります。もう一度確認してください。
+        </RssDialog>
         <div className={classes.space}/>
       </div>
       <div className={classes.form}>

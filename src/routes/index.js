@@ -13,9 +13,9 @@ import Admin        from 'Pages/Admin/Admin';
 import Management   from 'Pages/Management/Management';
 import UserEdit     from 'Pages/UserEdit/UserEdit';
 
-const getUserData = (user, match) => {
+const getUserData = (options, match) => {
   return new Promise((resolve, reject) => {
-    resolve(user);
+    resolve(options);
   });
 };
 
@@ -53,10 +53,11 @@ export default function getRoutes() {
       path: '/admin/:category'
     , component: Admin
     , routes: [{
-        component: Management
+        path: '/admin/:category/:id'
+      , component: Management
       , loadData: getUserData
       , routes: [{
-          path: '/admin/user/:id/edit'
+          path: '/admin/users/:id/edit'
         , component: UserEdit
         //}
         //, {
@@ -71,6 +72,11 @@ export default function getRoutes() {
         //  path: '/admin/mail/:id/edit'
         //, component: MailEdit
         }]
+      }
+      , {
+        path: '/admin/:category'
+      , component: Management
+      , loadData: getUserData
       }]
     }
     , {
@@ -103,5 +109,6 @@ export default function getRoutes() {
       , component: Dashboard
       , loadData: getUserData
       }]
-    }];
+    }
+  ];
 };

@@ -1,9 +1,11 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import UserAction     from 'Actions/UserAction';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import { Button, Checkbox } from 'material-ui';
+import { Button, Checkbox }
+                      from 'material-ui';
 
 class AdminButtons extends React.Component {
   constructor(props) {
@@ -12,43 +14,39 @@ class AdminButtons extends React.Component {
   }
 
   componentDidMount() {
-    NoteAction.select(this.props.user, []);
+    UserAction.select(this.props.admin, []);
   }
 
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });
 
-    const { user, notes } = this.props;
-    const ids = checked ? notes.map(note => note.id) : [];
-    this.logInfo('handleChangeCheckbox', ids);
-    NoteAction.select(user, ids);
+    const { admin, users } = this.props;
+    const ids = checked ? users.map(user => user.id) : [];
+    std.logInfo(AdminButtons.displayName, 'handleChangeCheckbox', ids);
+    UserAction.select(admin, ids);
   }
 
   handleReaded() {
-    const { user, selectedNoteId } = this.props;
-    this.logInfo('handleReaded', selectedNoteId);
-    NoteAction.createRead(user, selectedNoteId);
+    const { admin, selectedUserId } = this.props;
+    std.logInfo(AdminButtons.displayName, 'handleReaded', selectedUserId);
+    UserAction.createRead(admin, selectedUserId);
     this.setState({ checked: false });
   }
 
   handleDelete() {
-    const { user, selectedNoteId } = this.props;
-    this.logInfo('handleDelete', selectedNoteId);
+    const { admin, selectedUserId } = this.props;
+    std.logInfo(AdminButtons.displayName, 'handleDelete', selectedUserId);
     if(window.confirm('Are you sure?')) {
-      NoteAction.delete(user, selectedNoteId);
+      UserAction.delete(admin, selectedUserId);
       this.setState({ checked: false });
     }
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   render() {
     const { classes } = this.props;
     const { checked } = this.state;
-    return <div className={classes.noteButtons}>
+    return <div className={classes.userButtons}>
       <Checkbox checked={checked}
         className={classes.checkbox}
         onChange={this.handleChangeCheckbox.bind(this)}
@@ -68,7 +66,7 @@ class AdminButtons extends React.Component {
 const titleHeight   = 62;
 const checkboxWidth = 38;
 const styles = theme => ({
-  noteButtons:  { display: 'flex', flexDirection: 'row'
+  userButtons:  { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch', justifyContent: 'flex-start' 
                 , height: titleHeight, minHeight: titleHeight
                 , boxSizing: 'border-box'

@@ -1,7 +1,7 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
-import NoteAction     from 'Actions/NoteAction';
+import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
@@ -11,27 +11,27 @@ import {
 import {
   ListItem, ListItemText, ListItemSecondaryAction
 }                     from 'material-ui/List';
-import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
+//import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
 
 class AdminList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       opened:   []
-    , checked:  props.selectedNoteId
-    , notes:    props.notes
+    , checked:  props.selectedUserId
+    , users:    props.users
     };
   }
 
   componentWillReceiveProps(props) {
-    this.logInfo('comopnentWillReceiveProps', props);
-    const checked = props.selectedNoteId;
-    const notes = props.notes;
-    this.setState({ checked, notes });
+    std.logInfo(AdminList.displayName, 'Props', props);
+    const checked = props.selectedUserId;
+    const users = props.users;
+    this.setState({ checked, users });
   }
 
   handleChangeDialog(id, event) {
-    this.logInfo('handleChangeDialog', id);
+    std.logInfo(AdminList.displayName, 'handleChangeDialog', id);
     const { opened } = this.state;
     const currentIndex = opened.indexOf(id);
     const newOpened = [...opened];
@@ -41,65 +41,63 @@ class AdminList extends React.Component {
   }
 
   handleChangeCheckbox(id, event) {
-    this.logInfo('handleChangeCheckbox', id);
+    std.logInfo(AdminList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
-    const { user } = this.props;
+    const { admin } = this.props;
     const currentIndex = checked.indexOf(id);
     const newChecked = [...checked];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    NoteAction.select(user, newChecked);
+    UserAction.select(admin, newChecked);
   }
   
   handleChangeTitle({ id, title }) {
-    this.logInfo('handleChangeTitle', id);
-    const { notes } = this.state;
-    const { user } = this.props;
-    const curNote = notes.find(obj => obj.id === id);
-    const newNote = Object.assign({}, curNote, { title });
-    const newNotes = notes.map(obj => obj.id === id ? newNote : obj);
-    NoteAction.update(user, newNote);
+    std.logInfo(AdminList.displayName, 'handleChangeTitle', id);
+    const { users } = this.state;
+    const { admin } = this.props;
+    const curUser = users.find(obj => obj.id === id);
+    const newUser = Object.assign({}, curUser, { title });
+    const newUsers = users.map(obj => obj.id === id ? newUser : obj);
+    UserAction.update(admin, newUser);
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
-  renderItem(note) {
-    const { classes } = this.props;
+  renderItem(user, index) {
+    const { classes, category } = this.props;
     const { checked } = this.state;
     const textClass = {
       primary:    classes.primary
     , secondary:  classes.secondary
     };
-    const linkTo = `/${note.category}/${note.id}/edit`;
+    const linkTo = `/admin/${category}/${user._id}/edit`;
     let newRelease = 0;
-    if (note.items)
-      note.items.forEach(item => { if(!item.readed) newRelease++; });
+    if (user.items)
+      user.items.forEach(item => { if(!item.readed) newRelease++; });
     const notice = newRelease ? `${newRelease}件 NEW` : '';
-    const title = note.title;
+    const name = user.name;
     const updated =
-      std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
-    return <div key={note.id} className={classes.noteItem}>
+      std.formatDate(new Date(user.updated), 'YYYY/MM/DD hh:mm');
+    return <div key={index} className={classes.userItem}>
       <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, note.id)}
-        checked={checked.indexOf(note.id) !== -1}
+        onClick={this.handleChangeCheckbox.bind(this, user.id)}
+        checked={checked.indexOf(user._id) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
           component={Link} to={linkTo}>
             <ListItemText classes={textClass}
-              primary={title} secondary={updated}/>
+              primary={name} secondary={updated}/>
             <ListItemSecondaryAction>
+      {/*
               <Button className={classes.button}
-                onClick={this.handleChangeDialog.bind(this, note.id)}
+                onClick={this.handleChangeDialog.bind(this, user.id)}
                 color="primary">編集</Button>
               <RssFormDialog title="タイトルを編集する"
-                note={note}
-                open={this.state.opened.indexOf(note.id) !== -1}
-                onClose={this.handleChangeDialog.bind(this, note.id)}
+                user={user}
+                open={this.state.opened.indexOf(user.id) !== -1}
+                onClose={this.handleChangeDialog.bind(this, user.id)}
                 onSubmit={this.handleChangeTitle.bind(this)}>
                 {title}</RssFormDialog>
+      */}
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>
@@ -111,9 +109,10 @@ class AdminList extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { notes } = this.state;
-    const renderItems = notes.map(note => this.renderItem(note));
-    return <List className={classes.noteList}>
+    const { users } = this.state;
+    const renderItems = users
+      .map((user, index) => this.renderItem(user, index));
+    return <List className={classes.userList}>
       {renderItems}
     </List>;
   }
@@ -128,10 +127,10 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px 
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  noteList:     { width: '100%', overflow: 'scroll'
+  userList:     { width: '100%', overflow: 'scroll'
                 , height: listHeightSmDown
                 , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
-  , noteItem:   { display: 'flex', flexDirection: 'row'
+  , userItem:   { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }
   , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
                 , '&:hover':  { backgroundColor: theme.palette.primary.main
@@ -151,7 +150,7 @@ const styles = theme => ({
                 , minWidth: noticeWidth }
 });
 AdminList.displayName = 'AdminList';
-AdminList.defaultProps = { notes: null }
+AdminList.defaultProps = { users: null }
 AdminList.propTypes = {
   classes: PropTypes.object.isRequired
 };

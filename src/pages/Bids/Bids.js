@@ -21,14 +21,14 @@ class Bids extends React.Component {
     return getState('bidedNotesStore');
   }
 
-  static prefetch(user) {
-    std.logInfo('prefetch', user);
-    return NoteAction.presetUser(user)
+  static prefetch(options) {
+    std.logInfo(Bids.displayName, 'prefetch', options);
+    return NoteAction.presetUser(options.user)
       .then(() => NoteAction.prefetchBided(user));
   }
 
   componentDidMount() {
-    std.logInfo('fetch', 'Bids');
+    std.logInfo(Bids.displayName, 'fetch', 'Bids');
     NoteAction.fetchBided(this.state.user);
   }
 
@@ -59,7 +59,7 @@ class Bids extends React.Component {
   }
 
   render() {
-    std.logInfo('render', this.state);
+    std.logInfo(Bids.displayName, 'State', this.state);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter }
       = this.state;

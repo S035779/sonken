@@ -1,8 +1,9 @@
-import R from 'ramda';
-import Rx from 'rx';
-import mongoose from 'mongoose';
-import { User } from 'Models/profile';
-import { logs as log } from 'Utilities/logutils';
+import R                from 'ramda';
+import Rx               from 'rx';
+import mongoose         from 'mongoose';
+import { User }         from 'Models/profile';
+import std              from 'Utilities/stdutils';
+import { logs as log }  from 'Utilities/logutils';
 
 //let users = [{
 //  user: 'MyUserName', password: 'Test123$', isAuthenticated: false
@@ -22,7 +23,7 @@ export default class UserProfiler {
   }
 
   request(request, options) {
-    //log.trace('users:', users);
+    //log.trace(request, options);
     //const setUsers   = objs => { return users = objs };
     //const isUsr   = obj => obj.user === options.user;
     //const isPas = obj => options.password === obj.password;
@@ -49,33 +50,34 @@ export default class UserProfiler {
         break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          const conditions = options.email
+          const isUser = options.user !=='';
+          const isEmail = !!options.email;
+          if(!isUser) return reject(
+            { name: 'Error', message: 'Request error.' });
+          const conditions = isEmail
             ? { email: options.email
               , phone: new RegExp(options.phone + '$')}
-            : { user: options.user
-              , password: options.password };
+            : { user: options.user };
           User.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
+            if(obj === null) return reject(
+              { name: 'Error', message: 'Not found.' });
             log.trace(request, obj);
-            const res = {
-              user: obj.user
-            , isAuthenticated: obj.isAuthenticated
-            };
-            resolve(res);
+            resolve(obj);
           });
         });
         break;
       case 'create/user':
         return new Promise((resolve, reject) => {
           const user = new User({
-            user:     options.user
-          , salt:     options.salt
-          , hash:     options.hash
-          , name:     options.data.name
-          , kana:     options.data.kana
-          , email:    options.data.email
-          , phone:    options.data.phone
-          , plan:     options.data.plan
+            user:   options.user
+          , salt:   options.salt
+          , hash:   options.hash
+          , name:   options.data.name
+          , kana:   options.data.kana
+          , email:  options.data.email
+          , phone:  options.data.phone
+          , plan:   options.data.plan
           });
           user.save((err, obj) => {
             if(err) return reject(err);
@@ -86,12 +88,23 @@ export default class UserProfiler {
         break;
       case 'update/user':
         return new Promise((resolve, reject) => {
-          User.update({
-            user: options.user
-          }, {
-            password: options.password
-          , updated: Date.now()
-          }, (err, obj) => {
+          const isData = !!options.data;
+          const conditions = { user: options.user };
+          const update = isData
+            ? {
+              name:   options.data.name
+            , kana:   options.data.kana
+            , email:  options.data.email
+            , phone:  options.data.phone
+            , plan:   options.data.plan
+            , updated: Date.now()
+            }
+            : {
+              salt:   options.salt
+            , hash:   options.hash
+            , updated: Date.now()
+            };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj.password);
@@ -100,9 +113,8 @@ export default class UserProfiler {
         break;
       case 'delete/user':
         return new Promise((resolve, reject) => {
-          User.remove({
-            user: options.user
-          }, (err, obj) => {
+          const conditions = { user: options.user };
+          User.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -111,14 +123,14 @@ export default class UserProfiler {
         break;
       case 'signin/admin':
         return new Promise((resolve, reject) => {
-          const isAuthenticated = true;
-          User.update({
+          const conditions = {
             user:     options.admin
-          , password: options.password
+          , salt:     options.salt
+          , hash:     options.hash
           , isAdmin:  true
-          }
-          , { isAuthenticated }
-          , (err, obj) => {
+          };
+          const update = { isAuthenticated: true };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -127,13 +139,13 @@ export default class UserProfiler {
         break;
       case 'signout/admin':
         return new Promise((resolve, reject) => {
-          const isAuthenticated = false;
-          User.update({
+          const conditions = {
             user: options.admin
           , isAdmin: true
-          }
-          , { isAuthenticated }
-          , (err, obj) => {
+          };
+          const update = { isAuthenticated: false };
+          const isAuthenticated = false;
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -141,13 +153,13 @@ export default class UserProfiler {
         });
       case 'signin/user':
         return new Promise((resolve, reject) => {
-          const isAuthenticated = true;
-          User.update({
-            user:     options.user
-          , password: options.password
-          }
-          , { isAuthenticated }
-          , (err, obj) => {
+          const conditions = {
+            user: options.user
+          , salt: options.salt
+          , hash: options.hash
+          };
+          const update = { isAuthenticated: true };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -165,12 +177,9 @@ export default class UserProfiler {
         break;
       case 'signout/user':
         return new Promise((resolve, reject) => {
-          const isAuthenticated = false;
-          User.update({
-            user: options.user
-          }
-          , { isAuthenticated }
-          , (err, obj) => {
+          const conditions = { user: options.user };
+          const update = { isAuthenticated: false };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -186,46 +195,46 @@ export default class UserProfiler {
         });
       default:
         return new Promise((resolve, reject) => {
-          reject({ name: 'error', message: 'request: ' + request });
+          reject({ name: 'Error', message: 'request: ' + request });
         });
         break;
     }
   }
 
-  getSaltAndHash({ password }) {
-    return std.crypto_pbkdf2(password, 256);
+  getSaltAndHash(password, salt) {
+    return std.crypto_pbkdf2(password, salt, 256);
   }
 
   getUsers() {
     return this.request('fetch/users', {});
   }
 
-  getUser({ user, password, email, phone }) {
-    return this.request('fetch/user', { user, password, email, phone });
+  getUser(user, email, phone) {
+    return this.request('fetch/user', { user, email, phone });
   }
 
   addUser(user, salt, hash, data) {
     return this.request('create/user', { user, salt, hash, data })
   }
 
-  replaceUser(user, password) {
-    return this.request('update/user', { user, password });
+  replaceUser(user, salt, hash, data) {
+    return this.request('update/user', { user, salt, hash, data });
   }
 
   removeUser(user) {
     return this.request('delete/user', { user });
   }
 
-  signinAdmin(admin, password) {
-    return this.request('signin/admin', { admin, password });
+  signinAdmin(admin, salt, hash) {
+    return this.request('signin/admin', { admin, salt, hash });
   }
 
   signoutAdmin(admin) {
     return this.request('signout/admin', { admin });
   }
 
-  signinUser(user, password) {
-    return this.request('signin/user', { user, password });
+  signinUser(user, salt, hash) {
+    return this.request('signin/user', { user, salt, hash });
   }
 
   signoutUser(user) {
@@ -234,23 +243,26 @@ export default class UserProfiler {
 
   authenticate({ admin, user, password }) {
     const isAdmin = admin !== '';
-    const observable = isAdmin
-      ? Rx.Observable.fromPromise(this.signinAdmin(admin, password))
-      : Rx.Observable.fromPromise(this.signinUser(user, password));
-    const options = isAdmin
-      ? { user: user , password}
-      : { user: admin, password };
-    return observable
-      .flatMap(() => fetchUser(options))
-      .map(obj = obj.isAuthenticated);
+    const signin = obj => isAdmin
+      ? Rx.Observable
+        .fromPromise(this.signinAdmin(admin, obj.salt, obj.hash))
+      : Rx.Observable
+        .fromPromise(this.signinUser(user, obj.salt, obj.hash));
+    const options = isAdmin ? { user: admin } : { user: user };
+    return this.fetchUser(options)
+      .flatMap(obj => this.createSaltAndHash(password, obj.salt))
+      .flatMap(obj => signin(obj))
+      .flatMap(() => this.fetchUser(options))
+      .map(obj => obj.isAuthenticated);
   }
 
   signout({ admin, user }) {
     const isAdmin = admin !== '';
-    const observable = isAdmin 
+    const signout = isAdmin 
       ? Rx.Observable.fromPromise(this.signoutAdmin(admin))
       : Rx.Observable.fromPromise(this.signoutUser(user));
-    return observable
+    const options = isAdmin ? { user: admin } : { user: user };
+    return signout
       .flatMap(() => this.fetchUser(options))
       .map(obj => obj.isAuthenticated);
   }
@@ -259,14 +271,16 @@ export default class UserProfiler {
     return Rx.Observable.fromPromise(this.getUsers());
   }
 
-
-  fetchUser(options) {
-    return Rx.Observable.fromPromise(this.getUser(options));
+  fetchUser({ user, email, phone }) {
+    return Rx.Observable
+      .fromPromise(this.getUser(user, email, phone));
   }
 
   createUser({ user, password, data }) {
     return this.createSaltAndHash(password)
-      .flatMap(obj => this._createUser(user, obj.salt, obj.hash, data));
+      .flatMap(obj => this._createUser({
+        user, salt: obj.salt, hash: obj.hash, data
+      }));
   }
 
   _createUser({ user, salt, hash, data }) {
@@ -274,12 +288,20 @@ export default class UserProfiler {
       .fromPromise(this.addUser(user, salt, hash, data));
   }
 
-  createSaltAndHash({ password }) {
-    return Rx.Observable.fromPromise(this.getSaltAndHash(password));
+  updateUser({ user, password, data }) {
+    return this.createSaltAndHash(password)
+      .flatMap(obj => this._updateUser({ 
+        user, salt: obj.salt, hash: obj.hash, data
+      }));
   }
 
-  updateUser({ user, password }) {
-    return Rx.Observable.fromPromise(this.replaceUser(user, password));
+  _updateUser({ user, salt, hash, data }) {
+    return Rx.Observable
+      .fromPromise(this.replaceUser(user, salt, hash, data));
+  }
+
+  createSaltAndHash(password, salt) {
+    return Rx.Observable.fromPromise(this.getSaltAndHash(password, salt));
   }
 
   deleteUser({ user }) {

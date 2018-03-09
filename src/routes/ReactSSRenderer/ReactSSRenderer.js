@@ -20,12 +20,15 @@ export default class ReactSSRenderer {
   request() {
     return (req, res, next) => {
       console.log(req.session);
-      const  user = req.session.user ? req.session.user : '';
+      const options = {
+        user: req.session.user ? req.session.user : ''
+      , admin: req.session.admin ? req.session.admin : ''
+      };
       createStores(createDispatcher());
       const routes = getRoutes();
       const location = req.originalUrl;
       const matchs = matchRoutes(routes, location)
-      this.getUserData(matchs, user)
+      this.getUserData(matchs, options)
       .then(objs => this.prefetchData(matchs, objs))
       .then(() => this.setInitialData(location).pipe(res))
       .then(() => next())
@@ -42,7 +45,6 @@ export default class ReactSSRenderer {
   }
 
   prefetchData(matchs, objs) {
-    //console.log(objs);
     const promises = matchs.map(({ route, match }, index) =>
       route.component.prefetch 
         ? route.component.prefetch(objs[index], match)
@@ -50,10 +52,10 @@ export default class ReactSSRenderer {
     return Promise.all(promises);
   }
 
-  getUserData(matchs, user) {
+  getUserData(matchs, options) {
     const  promises = matchs.map(({ route, match }) => 
       route.loadData
-        ? route.loadData(user, match)
+        ? route.loadData(options, match)
         : Promise.resolve(null));
     return Promise.all(promises);
   }
