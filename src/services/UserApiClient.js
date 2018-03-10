@@ -90,9 +90,18 @@ export default {
           , err => { reject(err); }
           );
         });
-      case 'approval/users':
+      case 'create/approval':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
+            api + '/users'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'delete/approval':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
             api + '/users'
           , options
           , obj => { resolve(obj); }
@@ -164,7 +173,10 @@ export default {
   sendmail(admin, ids) {
     return this.request('sendmail/users', { admin, ids });
   },
-  approval(admin, ids) {
-    return this.request('approval/users', { admin, ids });
+  createApproval(admin, ids) {
+    return this.request('create/approval', { admin, ids });
+  },
+  deleteApproval(admin, ids) {
+    return this.request('delete/approval', { admin, ids });
   }
 };

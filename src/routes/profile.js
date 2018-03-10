@@ -144,10 +144,10 @@ export default {
     };
   },
 
-  approval(options) {
+  createApproval(options) {
     return (req, res, next) => {
       const { admin, ids } = req.body;
-      profile.approval({ admin, ids }).subscribe(
+      profile.createApproval({ admin, ids }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -156,7 +156,24 @@ export default {
           log.error(err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to Approval.');
+          log.info('Complete to create Approval.');
+      });
+    };
+  },
+
+  deleteApproval(options) {
+    return (req, res, next) => {
+      const { admin, ids } = req.query;
+      profile.deleteApproval({ admin, ids }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to delete Approval.');
       });
     };
   },

@@ -1,7 +1,8 @@
 import R                from 'ramda';
 import Rx               from 'rx';
 import mongoose         from 'mongoose';
-import { User }         from 'Models/profile';
+import { User, Approved }
+                        from 'Models/profile';
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
@@ -23,7 +24,7 @@ export default class UserProfiler {
   }
 
   request(request, options) {
-    log.trace(request, options);
+    log.debug(request, options);
     //const setUsers   = objs => { return users = objs };
     //const isUsr   = obj => obj.user === options.user;
     //const isPas = obj => options.password === obj.password;
@@ -128,9 +129,27 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           resolve({ response: 'OK' });
         });
-      case 'approval/users':
+      case 'create/approval':
         return new Promise((resolve, reject) => {
-          resolve({ response: 'OK' });
+          const approved = new Approvaled({
+            approved: options.ids
+          });
+          approved.save((err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'delete/approval':
+        return new Promise((resolve, reject) => {
+          const conditions = {
+            approved: R.split(',', options.ids)
+          };
+          Approved.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
         });
       case 'signin/admin':
         return new Promise((resolve, reject) => {
@@ -240,8 +259,12 @@ export default class UserProfiler {
     return this.request('sendmail/users', { admin, ids });
   }
 
-  approvalUsers(admin, ids) {
-    return this.request('approval/users', { admin, ids });
+  addApproval(admin, ids) {
+    return this.request('create/approval', { admin, ids });
+  }
+
+  removeApproval(admin, ids) {
+    return this.request('delete/approval', { admin, ids });
   }
 
   signinAdmin(admin, salt, hash) {
@@ -336,7 +359,11 @@ export default class UserProfiler {
     return Rx.Observable.fromPromise(this.sendmailUsers(admin, ids));
   }
 
-  approval({ admin, ids }) {
-    return Rx.Observable.fromPromise(this.approvalUsers(admin, ids));
+  createApproval({ admin, ids }) {
+    return Rx.Observable.fromPromise(this.addApproval(admin, ids));
+  }
+
+  deleteApproval({ admin, ids }) {
+    return Rx.Observable.fromPromise(this.removeApproval(admin, ids));
   }
 };

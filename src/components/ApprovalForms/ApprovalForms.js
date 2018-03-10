@@ -34,42 +34,24 @@ class ApprovalForms extends React.Component {
     });
   }
 
-  handleSave() {
+  handleApproval() {
     const { admin } = this.props;
     const { user } = this.state;
-    if(this.isValidate() && this.isChanged()) {
-      UserAction.update(admin, user)
-        .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
-    } else {
-      this.setState({ isNotValid: true });
-    }
+    UserAction.createApproval(admin, [user._id])
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
-  handleDelete() {
+  handleNotApproval() {
     const { admin } = this.props;
     const { user } = this.state;
-    UserAction.delete(admin, [user._id])
+    UserAction.deleteApproval(admin, [user._id])
+      .then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleCloseDialog(name) {
     this.setState({ [name]: false });
-  }
-
-  isValidate() {
-    const { name, kana, email, phone, plan } = this.state.user;
-    return (name !== '' && kana !== ''
-      && std.regexEmail(email) && std.regexNumber(phone) && plan !== ''
-    );
-  }
-
-  isChanged() {
-    const { name, kana, email, phone, plan } = this.state.user;
-    const { user } = this.props;
-    return user.name !== name  || user.kana !== kana
-      || user.email !== email  || user.phone !== phone
-      || user.plan !== plan;
   }
 
   render() {
@@ -79,19 +61,19 @@ class ApprovalForms extends React.Component {
     const { user, name, kana, email, phone, plan } = this.state.user;
     const primary = 'skyblue';
     const secondary = 'orange';
-    const isChanged = this.isChanged();
     const title = `${name} (${user})`;
     return <div className={classes.forms}>
       <div className={classes.edit}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{title}</Typography>
+        <Typography variant="title" noWrap className={classes.title}>
+        {title}
+        </Typography>
         <div className={classes.buttons}>
           <RssButton color={primary}
-            onClick={this.handleSave.bind(this)}
+            onClick={this.handleApproval.bind(this)}
             classes={classes.button}>
           承認する</RssButton>
           <RssButton color={secondary}
-            onClick={this.handleDelete.bind(this)}
+            onClick={this.handleNotApproval.bind(this)}
             classes={classes.button}>
           非承認</RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
@@ -105,43 +87,44 @@ class ApprovalForms extends React.Component {
         </div>
       </div>
       <div className={classes.edit}>
-        <FormControl className={classes.text}>
-          <InputLabel htmlFor="name">氏名</InputLabel>
-          <Input id="name" value={name}
-            onChange={this.handleChangeInput.bind(this, 'name')}/>
-        </FormControl>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        氏名
+        </Typography>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        {name}
+        </Typography>
       </div>
       <div className={classes.edit}>
-        <FormControl className={classes.text}>
-          <InputLabel htmlFor="kana">氏名（カナ）</InputLabel>
-          <Input id="kana" value={kana}
-            onChange={this.handleChangeInput.bind(this, 'kana')}/>
-        </FormControl>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        氏名（カナ）
+        </Typography>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        {kana}
+        </Typography>
       </div>
       <div className={classes.edit}>
-        <FormControl className={classes.text}>
-          <InputLabel htmlFor="email">連絡先メールアドレス</InputLabel>
-          <Input id="email" value={email}
-            onChange={this.handleChangeInput.bind(this, 'email')}/>
-        </FormControl>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        連絡先メールアドレス
+        </Typography>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        {email}
+        </Typography>
       </div>
       <div className={classes.edit}>
-        <FormControl className={classes.text}>
-          <InputLabel htmlFor="phone">連絡先電話番号</InputLabel>
-          <Input id="phone" value={phone}
-            onChange={this.handleChangeInput.bind(this, 'phone')}/>
-        </FormControl>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        連絡先電話番号
+        </Typography>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        {phone}
+        </Typography>
       </div>
       <div className={classes.edit}>
-        <FormControl className={classes.text}>
-          <InputLabel htmlFor="plan">申し込みプラン</InputLabel>
-          <Select value={plan}
-            onChange={this.handleChangeInput.bind(this, 'plan')}>
-            <MenuItem value={'plan_A'}>Plan A</MenuItem>
-            <MenuItem value={'plan_B'}>Plan B</MenuItem>
-            <MenuItem value={'plan_C'}>Plan C</MenuItem>
-          </Select>
-        </FormControl>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        申し込みプラン
+        </Typography>
+        <Typography variant="subheading" noWrap className={classes.title}>
+        {plan}
+        </Typography>
       </div>
     </div>;
   }
@@ -169,7 +152,6 @@ const styles = theme => ({
 , buttons:      { display: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
-, text:         { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
 });
 ApprovalForms.displayName = 'ApprovalForms';
 ApprovalForms.defaultProps = { user: null };

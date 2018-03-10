@@ -49,8 +49,8 @@ app.use(session({
 router.route('/users')
 .get(profile.fetchUsers())
 .put(profile.sendmail())
-.post(profile.approval())
-.delete(profile.notImplemented());
+.post(profile.createApproval())
+.delete(profile.deleteApproval());
 
 router.route('/user')
 .get(profile.fetchUser())

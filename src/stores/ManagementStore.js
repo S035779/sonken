@@ -28,6 +28,18 @@ export default class ManagementStore extends ReduceStore {
     return state.users.filter(user => !isUser(user));
   }
 
+  createApproval(state, action) {
+    const isUser = obj => action.ids.some(id => id === obj._id)
+    const setUser = obj => Object.assign({}, obj, { approved: true });
+    return state.users.map(user => isUser(user) ? setUser(user) : user);
+  }
+
+  deleteApproval(state, action) {
+    const isUser = obj => action.ids.some(id => id === obj._id)
+    const setUser = obj => Object.assign({}, obj, { approved: false });
+    return state.users.map(user => isUser(user) ? setUser(user) : user);
+  }
+
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
@@ -72,9 +84,15 @@ export default class ManagementStore extends ReduceStore {
         return Object.assign({}, state, {
           ids: []
         });
-      case 'user/approval':
+      case 'approval/create':
         return Object.assign({}, state, {
-          ids: []
+          users: this.createApproval(state, action)
+        , ids: []
+        });
+      case 'approval/delete':
+        return Object.assign({}, state, {
+          users: this.deleteApproval(state, action)
+        , ids: []
         });
       case 'user/upload':
         return Object.assign({}, state, {

@@ -55,9 +55,14 @@ export default {
       dispatch({ type: 'user/sendmail', ids });
     });
   },
-  approval(admin, ids) {
-    return UserApiClient.approval(admin, ids).then(() => {
-      dispatch({ type: 'user/approval', ids });
+  createApproval(admin, ids) {
+    return UserApiClient.createApproval(admin, ids).then(() => {
+      dispatch({ type: 'approval/create', ids });
+    });
+  },
+  deleteApproval(admin, ids) {
+    return UserApiClient.deleteApproval(admin, ids).then(() => {
+      dispatch({ type: 'approval/delete', ids });
     });
   },
   upload(admin, filename) {
