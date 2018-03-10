@@ -18,12 +18,16 @@ export default class ManagementStore extends ReduceStore {
     };
   }
 
-  updateUser() {
+  updateUser(state, action) {
+    return state.users.map(user => action.user._id === user._id
+      ? Object.assign({}, user, action.user) : user);
   }
 
-  deleteUser() {
+  deleteUser(state, action) {
+    const isUser = obj => action.ids.some(id => id === obj._id)
+    return state.users.filter(user => !isUser(user));
   }
-  
+
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
@@ -63,6 +67,14 @@ export default class ManagementStore extends ReduceStore {
         return Object.assign({}, state, {
           users:  this.deleteUser(state, action)
         , ids:    []
+        });
+      case 'user/sendmail':
+        return Object.assign({}, state, {
+          ids: []
+        });
+      case 'user/approval':
+        return Object.assign({}, state, {
+          ids: []
         });
       case 'user/upload':
         return Object.assign({}, state, {

@@ -50,6 +50,16 @@ export default {
       dispatch({ type: 'user/delete', ids });
     });
   },
+  sendmail(admin, ids) {
+    return UserApiClient.sendmail(admin, ids).then(() => {
+      dispatch({ type: 'user/sendmail', ids });
+    });
+  },
+  approval(admin, ids) {
+    return UserApiClient.approval(admin, ids).then(() => {
+      dispatch({ type: 'user/approval', ids });
+    });
+  },
   upload(admin, filename) {
     return UserApiClient.uploadNotes(admin, filename).then(notes => {
       dispatch({ type: 'user/upload', notes });

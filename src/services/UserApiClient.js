@@ -81,6 +81,24 @@ export default {
           );
         });
         break;
+      case 'sendmail/users':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/users'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'approval/users':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/users'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       case 'pagenation/user':
       case 'select/user':
         return new Promise((resolve, reject) => {
@@ -123,10 +141,10 @@ export default {
         , { name: 'Warning', message: 'Not Data Registory.' });
     return this.request('create/user', { admin, data });
   },
-  updateUser(admin, { id, data }) {
+  updateUser(admin, data) {
     const updated = std.getLocalTimeStamp(Date.now());
-    const _data = Object.assign({}, data, { updated });
-    return this.request('update/user', { admin, id, _data });
+    return this.request('update/user'
+      , { admin, data: Object.assign({}, data, { updated }) });
   },
   pageUser(admin, { maxNumber, number, perPage }) {
     return this.request('pagenation/user', {
@@ -138,5 +156,15 @@ export default {
   },
   deleteUser(admin, ids) {
     return this.request('delete/user', { admin, ids });
+  },
+
+  /*
+   * Mail & Approval
+   */
+  sendmail(admin, ids) {
+    return this.request('sendmail/users', { admin, ids });
+  },
+  approval(admin, ids) {
+    return this.request('approval/users', { admin, ids });
   }
 };

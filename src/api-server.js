@@ -48,8 +48,8 @@ app.use(session({
 
 router.route('/users')
 .get(profile.fetchUsers())
-.put(profile.notImplemented())
-.post(profile.notImplemented())
+.put(profile.sendmail())
+.post(profile.approval())
 .delete(profile.notImplemented());
 
 router.route('/user')

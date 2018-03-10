@@ -12,6 +12,7 @@ import LoginConfirm from 'Pages/LoginConfirm/LoginConfirm';
 import Admin        from 'Pages/Admin/Admin';
 import Management   from 'Pages/Management/Management';
 import UserEdit     from 'Pages/UserEdit/UserEdit';
+import ApprovalEdit from 'Pages/ApprovalEdit/ApprovalEdit';
 
 const getUserData = (options, match) => {
   return new Promise((resolve, reject) => {
@@ -59,10 +60,10 @@ export default function getRoutes() {
       , routes: [{
           path: '/admin/users/:id/edit'
         , component: UserEdit
-        //}
-        //, {
-        //  path: '/admin/approval/:id/edit'
-        //, component: ApprovalEdit
+        }
+        , {
+          path: '/admin/approval/:id/edit'
+        , component: ApprovalEdit
         //}
         //, {
         //  path: '/admin/faq/:id/edit'

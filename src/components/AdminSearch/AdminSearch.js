@@ -4,9 +4,8 @@ import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import {
-  Select, Input, Button, Typography
-}                       from 'material-ui';
+import { Select, Input, Button, Typography }
+                        from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';

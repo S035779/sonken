@@ -33,7 +33,7 @@ class Management extends React.Component {
     UserAction.fetchUsers(this.state.admin);
   }
 
-  notePage(number, page) {
+  userPage(number, page) {
     return number < page.perPage ? number : page.perPage;
   }
 
@@ -42,12 +42,12 @@ class Management extends React.Component {
     std.logInfo(Management.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, admin, users, page, ids } = this.state;
-    const _id = Number(match.params.id);
+    const _id = match.params.id;
     const category =
       match.params.category ? match.params.category : 'users';
-    const user = users.find(obj => obj.id === _id);
+    const user = users.find(obj => obj._id === _id);
     const number = users.length;
-    users.length = this.notePage(number, page);
+    users.length = this.userPage(number, page);
     if(!isAuthenticated) {
       return <Redirect to={{
         pathname: '/login/authenticate', state: { from: location } }} />;
@@ -58,7 +58,7 @@ class Management extends React.Component {
           category={category}
           userNumber={number} userPage={page} />
       <div className={classes.body}>
-        <div className={classes.noteList}>
+        <div className={classes.userList}>
           <AdminButtons
             admin={admin}
             users={users}
@@ -70,7 +70,7 @@ class Management extends React.Component {
             selectedUserId={ids}
             userPage={page}/>
         </div>
-        <div className={classes.noteEdit}>
+        <div className={classes.userEdit}>
         {route.routes ? renderRoutes(route.routes,{ admin, user }) : null}
         </div>
       </div>
@@ -82,17 +82,17 @@ const barHeightSmUp     = 112;
 const barHeightSmDown   = 104;
 const listWidth         = 400;
 const searchHeight      = 62;
-const noteHeightSmUp    = 
+const userHeightSmUp    = 
   `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`;
-const noteHeightSmDown  =
+const userHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
 , body:     { display: 'flex', flexDirection: 'row' }
-, noteList: { width: listWidth, minWidth: listWidth
-            , height: noteHeightSmDown
-            , [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
-, noteEdit: { flex: 1 }
+, userList: { width: listWidth, minWidth: listWidth
+            , height: userHeightSmDown
+            , [theme.breakpoints.up('sm')]: { height: userHeightSmUp }}
+, userEdit: { flex: 1 }
 });
 Management.displayName = 'Management';
 Management.defaultProps = {};

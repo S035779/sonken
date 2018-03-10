@@ -5,39 +5,27 @@ import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import {
-  List, Paper, Checkbox, Button, Typography
-}                     from 'material-ui';
-import {
-  ListItem, ListItemText, ListItemSecondaryAction
-}                     from 'material-ui/List';
-//import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
+import { List, Paper, Checkbox, Button, Typography, Avatar }
+                      from 'material-ui';
+import { ListItem, ListItemText, ListItemSecondaryAction }
+                      from 'material-ui/List';
+import pink           from 'material-ui/colors/pink';
+import { Pageview }   from 'material-ui-icons';
 
 class AdminList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      opened:   []
-    , checked:  props.selectedUserId
+      checked:  props.selectedUserId
     , users:    props.users
     };
   }
 
-  componentWillReceiveProps(props) {
-    std.logInfo(AdminList.displayName, 'Props', props);
-    const checked = props.selectedUserId;
-    const users = props.users;
+  componentWillReceiveProps(nextProps) {
+    std.logInfo(AdminList.displayName, 'Props', nextProps);
+    const checked = nextProps.selectedUserId;
+    const users = nextProps.users;
     this.setState({ checked, users });
-  }
-
-  handleChangeDialog(id, event) {
-    std.logInfo(AdminList.displayName, 'handleChangeDialog', id);
-    const { opened } = this.state;
-    const currentIndex = opened.indexOf(id);
-    const newOpened = [...opened];
-    if (currentIndex === -1)  newOpened.push(id);
-    else newOpened.splice(currentIndex, 1);
-    this.setState({ opened: newOpened });
   }
 
   handleChangeCheckbox(id, event) {
@@ -51,16 +39,6 @@ class AdminList extends React.Component {
     UserAction.select(admin, newChecked);
   }
   
-  handleChangeTitle({ id, title }) {
-    std.logInfo(AdminList.displayName, 'handleChangeTitle', id);
-    const { users } = this.state;
-    const { admin } = this.props;
-    const curUser = users.find(obj => obj.id === id);
-    const newUser = Object.assign({}, curUser, { title });
-    const newUsers = users.map(obj => obj.id === id ? newUser : obj);
-    UserAction.update(admin, newUser);
-  }
-
   renderItem(user, index) {
     const { classes, category } = this.props;
     const { checked } = this.state;
@@ -78,27 +56,18 @@ class AdminList extends React.Component {
       std.formatDate(new Date(user.updated), 'YYYY/MM/DD hh:mm');
     return <div key={index} className={classes.userItem}>
       <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, user.id)}
+        onClick={this.handleChangeCheckbox.bind(this, user._id)}
         checked={checked.indexOf(user._id) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters className={classes.listItem}
-          component={Link} to={linkTo}>
-            <ListItemText classes={textClass}
-              primary={name} secondary={updated}/>
-            <ListItemSecondaryAction>
-      {/*
-              <Button className={classes.button}
-                onClick={this.handleChangeDialog.bind(this, user.id)}
-                color="primary">編集</Button>
-              <RssFormDialog title="タイトルを編集する"
-                user={user}
-                open={this.state.opened.indexOf(user.id) !== -1}
-                onClose={this.handleChangeDialog.bind(this, user.id)}
-                onSubmit={this.handleChangeTitle.bind(this)}>
-                {title}</RssFormDialog>
-      */}
-            </ListItemSecondaryAction>
+        <ListItem dense button disableGutters
+          component={Link} to={linkTo}
+          className={classes.listItem}>
+          <Avatar className={classes.pinkAvatar}>
+            <Pageview />
+          </Avatar>
+          <ListItemText
+            primary={name} secondary={updated} classes={textClass} />
         </ListItem>
       </Paper>
       <div className={classes.notice}>
@@ -127,27 +96,29 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px 
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  userList:     { width: '100%', overflow: 'scroll'
-                , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
-  , userItem:   { display: 'flex', flexDirection: 'row'
-                , alignItems: 'center' }
-  , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
-                , '&:hover':  { backgroundColor: theme.palette.primary.main
-                  , '& $checkbox': { color: theme.palette.common.white }}}
-  , checkbox:   {}
-  , button:     { wordBreak: 'keep-all'
-                , margin: '8px 0'
-                , minWidth: 0
-                , '&:hover':  { color: theme.palette.common.white }}
-  , paper:      { width: '100%', margin: theme.spacing.unit /8
-                , '&:hover':  { backgroundColor: theme.palette.primary.main
-                  , '& $primary, $secondary': {
-                    color: theme.palette.common.white }}}   
-  , primary:    {}
-  , secondary:  {}
-  , notice:     { flex:1, padding: theme.spacing.unit /2
-                , minWidth: noticeWidth }
+  userList:   { width: '100%', overflow: 'scroll'
+              , height: listHeightSmDown
+              , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
+, userItem:   { display: 'flex', flexDirection: 'row'
+              , alignItems: 'center' }
+, listItem:   { height: itemHeight, padding: theme.spacing.unit /2
+              , '&:hover':  { backgroundColor: theme.palette.primary.main
+                , '& $checkbox': { color: theme.palette.common.white }}}
+, checkbox:   {}
+, button:     { wordBreak: 'keep-all'
+              , margin: '8px 0'
+              , minWidth: 0
+              , '&:hover':  { color: theme.palette.common.white }}
+, paper:      { width: '100%', margin: theme.spacing.unit /8
+              , '&:hover':  { backgroundColor: theme.palette.primary.main
+                , '& $primary, $secondary': {
+                  color: theme.palette.common.white }}}   
+, primary:    {}
+, secondary:  {}
+, notice:     { flex:1, padding: theme.spacing.unit /2
+              , minWidth: noticeWidth }
+, pinkAvatar: { marginLeft: theme.spacing.unit
+              , color: '#fff', backgroundColor: pink[500] }
 });
 AdminList.displayName = 'AdminList';
 AdminList.defaultProps = { users: null }

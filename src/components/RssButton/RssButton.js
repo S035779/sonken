@@ -1,11 +1,13 @@
-import React from 'react';
+import React          from 'react';
+import PropTypes      from 'prop-types';
 
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import { Button } from 'material-ui';
-import orange from 'material-ui/colors/orange';
-import green from 'material-ui/colors/green';
-import blue from 'material-ui/colors/blue';
-import yellow from 'material-ui/colors/yellow';
+import { MuiThemeProvider, createMuiTheme }
+                      from 'material-ui/styles';
+import { Button }     from 'material-ui';
+import orange         from 'material-ui/colors/orange';
+import green          from 'material-ui/colors/green';
+import blue           from 'material-ui/colors/blue';
+import yellow         from 'material-ui/colors/yellow';
 
 class RssButton extends React.Component {
   render() {

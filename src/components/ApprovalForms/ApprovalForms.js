@@ -12,7 +12,7 @@ import { MenuItem }     from 'material-ui/Menu';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
 
-class UserForms extends React.Component {
+class ApprovalForms extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,7 +23,7 @@ class UserForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(UserForms.displayName, 'Props', nextProps);
+    std.logInfo(ApprovalForms.displayName, 'Props', nextProps);
     this.setState({ user: nextProps.user });
   }
 
@@ -73,7 +73,7 @@ class UserForms extends React.Component {
   }
 
   render() {
-    std.logInfo(UserForms.displayName, 'State', this.state);
+    std.logInfo(ApprovalForms.displayName, 'State', this.state);
     const { classes } = this.props;
     const { isNotValid, isSuccess } = this.state;
     const { user, name, kana, email, phone, plan } = this.state.user;
@@ -89,11 +89,11 @@ class UserForms extends React.Component {
           <RssButton color={primary}
             onClick={this.handleSave.bind(this)}
             classes={classes.button}>
-          {isChanged ? '*' : ''}変更する</RssButton>
+          承認する</RssButton>
           <RssButton color={secondary}
             onClick={this.handleDelete.bind(this)}
             classes={classes.button}>
-          削除</RssButton>
+          非承認</RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
@@ -171,9 +171,9 @@ const styles = theme => ({
                 , wordBreak: 'keep-all' }
 , text:         { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
 });
-UserForms.displayName = 'UserForms';
-UserForms.defaultProps = { user: null };
-UserForms.propTypes = {
+ApprovalForms.displayName = 'ApprovalForms';
+ApprovalForms.defaultProps = { user: null };
+ApprovalForms.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(UserForms);
+export default withStyles(styles)(ApprovalForms);

@@ -22,8 +22,8 @@ export default {
 
   fetchUser(options) {
     return (req, res, next) => {
-      const { user, password, email, phone } = req.query;
-      profile.fetchUser({ user, password, email, phone }).subscribe(
+      const { user, email, phone } = req.query;
+      profile.fetchUser({ user, email, phone }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -56,8 +56,8 @@ export default {
 
   updateUser(options) {
     return (req, res, next) => {
-      const { user, password, data } = req.body;
-      profile.updateUser({ user, password, data }).subscribe(
+      const { admin, user, password, data } = req.body;
+      profile.updateUser({ admin, user, password, data }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -73,8 +73,8 @@ export default {
 
   deleteUser(options) {
     return (req, res, next) => {
-      const { user } = req.query;
-      profile.deleteUser({ user }).subscribe(
+      const { admin, ids } = req.query;
+      profile.deleteUser({ admin, ids }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -123,6 +123,40 @@ export default {
         }
       , () => {
           log.info('Complete to Logged out.');
+      });
+    };
+  },
+
+  sendmail(options) {
+    return (req, res, next) => {
+      const { admin, ids } = req.body;
+      profile.sendmail({ admin, ids }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to Sendmail.');
+      });
+    };
+  },
+
+  approval(options) {
+    return (req, res, next) => {
+      const { admin, ids } = req.body;
+      profile.approval({ admin, ids }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to Approval.');
       });
     };
   },

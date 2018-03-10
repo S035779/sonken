@@ -22,23 +22,27 @@ class AdminButtons extends React.Component {
     this.setState({ checked });
 
     const { admin, users } = this.props;
-    const ids = checked ? users.map(user => user.id) : [];
+    const ids = checked ? users.map(user => user._id) : [];
     std.logInfo(AdminButtons.displayName, 'handleChangeCheckbox', ids);
     UserAction.select(admin, ids);
   }
 
-  handleReaded() {
+  handleSendmail() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName, 'handleReaded', selectedUserId);
-    UserAction.createRead(admin, selectedUserId);
-    this.setState({ checked: false });
+    std.logInfo(AdminButtons.displayName
+      , 'handleSendmail', selectedUserId);
+    if(window.confirm('Are you sure?')) {
+      UserAction.sendmail(admin, selectedUserId);
+      this.setState({ checked: false });
+    }
   }
 
-  handleDelete() {
+  handleApproval() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName, 'handleDelete', selectedUserId);
+    std.logInfo(AdminButtons.displayName
+      , 'handleApproval', selectedUserId);
     if(window.confirm('Are you sure?')) {
-      UserAction.delete(admin, selectedUserId);
+      UserAction.approval(admin, selectedUserId);
       this.setState({ checked: false });
     }
   }
@@ -54,10 +58,10 @@ class AdminButtons extends React.Component {
       <div className={classes.buttons}>
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleReaded.bind(this)}>既読にする</Button>
+          onClick={this.handleSendmail.bind(this)}>メール配信</Button>
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleDelete.bind(this)}>削除</Button>
+          onClick={this.handleApproval.bind(this)}>開始承認</Button>
       </div>
     </div>;
   }

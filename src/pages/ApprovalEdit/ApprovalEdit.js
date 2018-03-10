@@ -3,16 +3,16 @@ import PropTypes      from 'prop-types';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import UserForms       from 'Components/UserForms/UserForms';
+import ApprovalForms  from 'Components/ApprovalForms/ApprovalForms';
 
-class UserEdit extends React.Component {
+class ApprovalEdit extends React.Component {
   render() {
-    std.logInfo(UserEdit.displayName, 'Props', this.props);
+    std.logInfo(ApprovalEdit.displayName, 'Props', this.props);
     const { classes, admin, user } = this.props
     if(!user || !user._id) return null;
     return <div className={classes.userEdit}>
       <div className={classes.forms}>
-        <UserForms admin={admin} user={user}/>
+        <ApprovalForms admin={admin} user={user}/>
       </div>
     </div>;
   }
@@ -31,9 +31,9 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , forms:    { overflow: 'scroll' }
 });
-UserEdit.displayName= 'UserEdit';
-UserEdit.defaultProps = { user: null };
-UserEdit.propTypes = {
+ApprovalEdit.displayName= 'ApprovalEdit';
+ApprovalEdit.defaultProps = { user: null };
+ApprovalEdit.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(UserEdit);
+export default withStyles(styles)(ApprovalEdit);
