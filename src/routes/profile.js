@@ -6,7 +6,8 @@ const profile = UserProfiler.of();
 export default {
   fetchUsers(options) {
     return (req, res, next) => {
-      profile.fetchUsers().subscribe(
+      const { admin } = req.body;
+      profile.fetchUsers({ admin }).subscribe(
         obj => {
           res.status(200).send(obj);
         }

@@ -42,7 +42,8 @@ export default class UserProfiler {
     switch(request) {
       case 'fetch/users':
         return new Promise((resolve, reject) => {
-          User.find({}, (err, obj) => {
+          const conditions = {};
+          User.find(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -141,6 +142,15 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions = { approved: options.id };
           Approved.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'fetch/approval':
+        return new Promise((resolve, reject) => {
+          const conditions = {};
+          Approved.find(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -308,26 +318,27 @@ export default class UserProfiler {
       .map(obj => obj.isAuthenticated);
   }
 
-  fetchUsers({ admin }) {
-    return this._fetchUsers()
-      .flatMap(users => this.fetchApproval({ admin, users }));
-  }
-
-  fetchApproval({ admin, users }) {
-    return  Rx.Observable.fromPromise(this.getApproval(admin))
-      .map(approved => {
-        const isApproved = obj => R.contains(obj._id, approved);
-        const setApproved = obj =>
-          Object.assign({}, obj, { approved: isApproved(obj) });
-        const setUser = obj => isApproved(obj) ? setApproved(obj) : obj
-        const setUsers = R.map(setUser);
-        return this.fetchUsers({ admin })
-          .map(users => );
-      });
-  }
-
-  fetchUsers({ admin }) {
+  _fetchUsers({ admin }) {
     return Rx.Observable.fromPromise(this.getUsers(admin));
+  }
+
+  fetchUsers({ admin }) {
+    const observables = Rx.Observable
+      .forkJoin([ this.getApproval(admin), this.getUsers(admin) ]);
+    return observables
+    .map(objs => {
+      const approved = R.map(obj => obj.approved, objs[0]); 
+      const users = objs[1];
+
+      const newUsers = R.map(obj => {
+        const isApproved = R.contains(obj._id, approved);
+        const newUser =  Object.assign({}, obj, { approved: isApproved });
+        log.trace(isApproved, obj);
+        return newUser;
+      }, users);
+
+      return newUsers;
+    });
   }
 
   fetchUser({ user, email, phone }) {
