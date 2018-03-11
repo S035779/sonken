@@ -6,11 +6,16 @@ import std            from 'Utilities/stdutils';
 import { withStyles } from 'material-ui/styles';
 import { Button, Checkbox }
                       from 'material-ui';
+import RssDialog      from 'Components/RssDialog/RssDialog';
 
 class AdminButtons extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { checked: false };
+    this.state = {
+      checked: false
+    , isSuccess:          false
+    , isNotValid:         false
+    };
   }
 
   componentDidMount() {
@@ -32,7 +37,9 @@ class AdminButtons extends React.Component {
     std.logInfo(AdminButtons.displayName
       , 'handleSendmail', selectedUserId);
     if(window.confirm('Are you sure?')) {
-      UserAction.sendmail(admin, selectedUserId);
+      UserAction.sendmail(admin, selectedUserId)
+        .then(() => this.setState({ isSuccess: true }))
+        .catch(err => this.setState({ isNotValid: true }));
       this.setState({ checked: false });
     }
   }
@@ -42,14 +49,20 @@ class AdminButtons extends React.Component {
     std.logInfo(AdminButtons.displayName
       , 'handleApproval', selectedUserId);
     if(window.confirm('Are you sure?')) {
-      UserAction.approval(admin, selectedUserId);
+      UserAction.createApproval(admin, selectedUserId)
+        .then(() => this.setState({ isSuccess: true }))
+        .catch(err => this.setState({ isNotValid: true }));
       this.setState({ checked: false });
     }
   }
 
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
+  }
+
   render() {
     const { classes } = this.props;
-    const { checked } = this.state;
+    const { checked, isNotValid, isSuccess } = this.state;
     return <div className={classes.userButtons}>
       <Checkbox checked={checked}
         className={classes.checkbox}
@@ -62,6 +75,14 @@ class AdminButtons extends React.Component {
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleApproval.bind(this)}>開始承認</Button>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
+        </RssDialog>
+        <RssDialog open={isSuccess} title={'送信完了'}
+          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
+        </RssDialog>
       </div>
     </div>;
   }

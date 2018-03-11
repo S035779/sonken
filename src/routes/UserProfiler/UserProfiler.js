@@ -116,24 +116,21 @@ export default class UserProfiler {
         break;
       case 'delete/user':
         return new Promise((resolve, reject) => {
-          const ids = R.split(',', options.ids);
-          const conditions = { _id: ids[0] };
-          User.remove(conditions, (err, obj) => {
+          const conditions = { _id: options.id };
+          User.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
           });
         });
         break;
-      case 'sendmail/users':
+      case 'sendmail/user':
         return new Promise((resolve, reject) => {
           resolve({ response: 'OK' });
         });
       case 'create/approval':
         return new Promise((resolve, reject) => {
-          const approved = new Approvaled({
-            approved: options.ids
-          });
+          const approved = new Approved({ approved: options.id });
           approved.save((err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
@@ -142,9 +139,7 @@ export default class UserProfiler {
         });
       case 'delete/approval':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            approved: R.split(',', options.ids)
-          };
+          const conditions = { approved: options.id };
           Approved.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
@@ -251,20 +246,20 @@ export default class UserProfiler {
     return this.request('update/user', { user, salt, hash, data });
   }
 
-  removeUser(admin, ids) {
-    return this.request('delete/user', { admin, ids });
+  removeUser(admin, id) {
+    return this.request('delete/user', { admin, id });
   }
 
-  sendmailUsers(admin, ids) {
-    return this.request('sendmail/users', { admin, ids });
+  sendmailUser(admin, id) {
+    return this.request('sendmail/user', { admin, id });
   }
 
-  addApproval(admin, ids) {
-    return this.request('create/approval', { admin, ids });
+  addApproval(admin, id) {
+    return this.request('create/approval', { admin, id });
   }
 
-  removeApproval(admin, ids) {
-    return this.request('delete/approval', { admin, ids });
+  removeApproval(admin, id) {
+    return this.request('delete/approval', { admin, id });
   }
 
   signinAdmin(admin, salt, hash) {
@@ -352,18 +347,36 @@ export default class UserProfiler {
   }
 
   deleteUser({ admin, ids }) {
-    return Rx.Observable.fromPromise(this.removeUser(admin, ids));
+    const _ids = R.split(',', ids);
+    const _promise = R.curry(this.removeUser.bind(this));
+    const observable = id => Rx.Observable
+      .fromPromise(_promise(admin, id));
+    const observables = R.map(observable, _ids);
+    return Rx.Observable.forkJoin(observables);
   }
 
   sendmail({ admin, ids }) {
-    return Rx.Observable.fromPromise(this.sendmailUsers(admin, ids));
+    const _promise = R.curry(this.sendmailUser.bind(this)) 
+    const observable = id => Rx.Observable
+      .fromPromise(_promise(admin, id));
+    const observables = R.map(observable, ids);
+    return Rx.Observable.forkJoin(observables);
   }
 
   createApproval({ admin, ids }) {
-    return Rx.Observable.fromPromise(this.addApproval(admin, ids));
+    const _promise = R.curry(this.addApproval.bind(this));
+    const observable = id => Rx.Observable
+      .fromPromise(_promise(admin, id));
+    const observables = R.map(observable, ids);
+    return Rx.Observable.forkJoin(observables);
   }
 
   deleteApproval({ admin, ids }) {
-    return Rx.Observable.fromPromise(this.removeApproval(admin, ids));
+    const _ids = R.split(',', ids);
+    const _promise = R.curry(this.removeApproval.bind(this));
+    const observable = id => Rx.Observable
+      .fromPromise(_promise(admin, id));
+    const observables = R.map(observable, _ids);
+    return Rx.Observable.forkJoin(observables);
   }
 };
