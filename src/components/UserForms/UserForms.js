@@ -1,6 +1,8 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import { Redirect }     from 'react-router-dom';
 import UserAction       from 'Actions/UserAction';
+import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
@@ -17,8 +19,10 @@ class UserForms extends React.Component {
     super(props);
     this.state = {
       user:               props.user
+    , filename:           ''
     , isSuccess:          false
     , isNotValid:         false
+    , redirectToRss:      false
     };
   }
 
@@ -32,6 +36,13 @@ class UserForms extends React.Component {
     this.setState({
       user:   Object.assign({}, user, { [name]: event.target.value })
     });
+  }
+
+  handleRSS() {
+    const { user } = this.props;
+    std.logInfo(UserForms.displayName, 'handleRSS', user.user);
+    LoginAction.presetUser(user.user)
+      .then(() => this.setState({ redirectToRss: true }));
   }
 
   handleSave() {
@@ -75,17 +86,23 @@ class UserForms extends React.Component {
   render() {
     std.logInfo(UserForms.displayName, 'State', this.state);
     const { classes } = this.props;
-    const { isNotValid, isSuccess } = this.state;
+    const { isNotValid, isSuccess, redirectToRss } = this.state;
     const { user, name, kana, email, phone, plan } = this.state.user;
     const primary = 'skyblue';
     const secondary = 'orange';
     const isChanged = this.isChanged();
     const title = `${name} (${user})`;
+    const rss = { pathname: '/marchant' };
+    if(redirectToRss) return <Redirect to={rss} />;
     return <div className={classes.forms}>
       <div className={classes.edit}>
         <Typography variant="title" noWrap
           className={classes.title}>{title}</Typography>
         <div className={classes.buttons}>
+          <RssButton color={primary}
+            onClick={this.handleRSS.bind(this)}
+            classes={classes.button}>
+          ユーザRSS</RssButton>
           <RssButton color={primary}
             onClick={this.handleSave.bind(this)}
             classes={classes.button}>

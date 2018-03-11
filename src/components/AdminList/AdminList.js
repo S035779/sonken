@@ -47,10 +47,7 @@ class AdminList extends React.Component {
     , secondary:  classes.secondary
     };
     const linkTo = `/admin/${category}/${user._id}/edit`;
-    let newRelease = 0;
-    if (user.items)
-      user.items.forEach(item => { if(!item.readed) newRelease++; });
-    const notice = newRelease ? `${newRelease}件 NEW` : '';
+    const notice = user.approved ? '承認済み' : '';
     const name = user.name;
     const updated =
       std.formatDate(new Date(user.updated), 'YYYY/MM/DD hh:mm');

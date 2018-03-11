@@ -15,9 +15,7 @@ class AdminSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      url:      ''
-    , filename: ''
-    , perPage:    props.userNumber
+      perPage:    props.userNumber
     };
   }
 
@@ -25,43 +23,6 @@ class AdminSearch extends React.Component {
     std.logInfo(AdminSearch.displayName, 'Props', nextProps);
     const { userPage } = nextProps;
     this.setState({ perPage: userPage.perPage });
-  }
-
-  handleSubmit(e) {
-    e.preventDefault();
-    const { url } = this.state;
-    const { admin, category } = this.props;
-    std.logInfo(AdminSearch.displayName, 'handleSubmit', url);
-    UserAction.create(admin, { url, category });
-    this.setState({ url: '' });
-  }
-
-  handleUpload(e) {
-    e.preventDefault();
-    const { filename } = this.state;
-    const { admin } = this.props;
-    std.logInfo(AdminSearch.displayName, 'handleUpload', filename);
-    UserAction.upload(admin, filename);
-    this.setState({ filename: '' });
-  }
-
-  handleDownload(e) {
-    e.preventDefault();
-    const { filename } = this.state;
-    const { admin } = this.props;
-    std.logInfo(AdminSearch.displayName, 'handleDownload', filename);
-    UserAction.download(admin, filename);
-    this.setState({ filename: '' });
-  }
-
-  handleChangeText(name, event) {
-    const value = event.target.value;
-    std.logInfo(AdminSearch.displayName, 'handleChangeText', value);
-    switch(name) {
-      case 'url':
-        this.setState({ url: value });
-        break;
-    }
   }
 
   handleChangeSelect(name, event) {
@@ -101,23 +62,12 @@ class AdminSearch extends React.Component {
           <MenuItem value={300}>300</MenuItem>
         </Select>
       </FormControl>
-      <FormControl className={classes.inputText}>
-        <InputLabel htmlFor="url">URL</InputLabel>
-        <Input id="url" value={url}
-          onChange={this.handleChangeText.bind(this, 'url')}/>
-      </FormControl>
+      <div className={classes.inputText} />
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleSubmit.bind(this)}>
-          {this.props.changed ? '*' : ''}URL登録</Button>
+        <div className={classes.button} />
         <div className={classes.space} />
-        <RssButton color={color}
-          onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>CSV ダウンロード</RssButton>
-        <RssButton color={color}
-          onClick={this.handleUpload.bind(this)}
-          classes={classes.button}>CSV アップロード</RssButton>
+        <div classes={classes.button} />
+        <div classes={classes.button} />
       </div>
     </div>;
   }

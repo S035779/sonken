@@ -1,11 +1,11 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import BidsAction       from 'Actions/BidsAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import {
-  Select, Input, Button, Typography
-}                       from 'material-ui';
+import { Select, Input, Button, Typography }
+                        from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
@@ -21,7 +21,7 @@ class BidsSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
+    std.logInfo(BidsSearch.displayName, 'Props', nextProps);
     const { itemPage } = nextProps;
     this.setState({ perPage: itemPage.perPage });
   }
@@ -29,14 +29,14 @@ class BidsSearch extends React.Component {
   handleDownload() {
     const { filename } = this.state;
     const { user } = this.props;
-    this.logInfo('handleDownload', filename);
+    std.logInfo(BidsSearch.displayName, 'handleDownload', filename);
     BidsAction.download(user, filename);
   }
 
   handleChangeSelect(name, event) {
     const { user, itemNumber } = this.props;
     const value = event.target.value;
-    this.logInfo('handleChangeSelet', value);
+    std.logInfo(BidsSearch.displayName, 'handleChangeSelet', value);
     switch(name) {
       case 'page':
         BidsAction.pagenation(user, {
@@ -48,11 +48,8 @@ class BidsSearch extends React.Component {
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
   render() {
+    std.logInfo(BidsSearch.displayName, 'State', this.state);
     const { classes, itemNumber } = this.props;
     const { perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>

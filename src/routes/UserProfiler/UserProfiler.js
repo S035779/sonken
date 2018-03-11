@@ -262,6 +262,10 @@ export default class UserProfiler {
     return this.request('delete/approval', { admin, id });
   }
 
+  getApproval(admin) {
+    return this.request('fetch/approval', { admin });
+  }
+
   signinAdmin(admin, salt, hash) {
     return this.request('signin/admin', { admin, salt, hash });
   }
@@ -304,8 +308,26 @@ export default class UserProfiler {
       .map(obj => obj.isAuthenticated);
   }
 
-  fetchUsers() {
-    return Rx.Observable.fromPromise(this.getUsers());
+  fetchUsers({ admin }) {
+    return this._fetchUsers()
+      .flatMap(users => this.fetchApproval({ admin, users }));
+  }
+
+  fetchApproval({ admin, users }) {
+    return  Rx.Observable.fromPromise(this.getApproval(admin))
+      .map(approved => {
+        const isApproved = obj => R.contains(obj._id, approved);
+        const setApproved = obj =>
+          Object.assign({}, obj, { approved: isApproved(obj) });
+        const setUser = obj => isApproved(obj) ? setApproved(obj) : obj
+        const setUsers = R.map(setUser);
+        return this.fetchUsers({ admin })
+          .map(users => );
+      });
+  }
+
+  fetchUsers({ admin }) {
+    return Rx.Observable.fromPromise(this.getUsers(admin));
   }
 
   fetchUser({ user, email, phone }) {
