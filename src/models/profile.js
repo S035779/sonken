@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'users' });
 userSchema.index({ user: 1, email: 1 }, { unique: true });
+userSchema.set('toObject');
 
 const approvedSchema = new mongoose.Schema({
   approved:         { type: String, required: true }

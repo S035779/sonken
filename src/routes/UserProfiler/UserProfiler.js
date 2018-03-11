@@ -318,26 +318,17 @@ export default class UserProfiler {
       .map(obj => obj.isAuthenticated);
   }
 
-  _fetchUsers({ admin }) {
-    return Rx.Observable.fromPromise(this.getUsers(admin));
-  }
-
   fetchUsers({ admin }) {
     const observables = Rx.Observable
       .forkJoin([ this.getApproval(admin), this.getUsers(admin) ]);
     return observables
     .map(objs => {
       const approved = R.map(obj => obj.approved, objs[0]); 
-      const users = objs[1];
-
-      const newUsers = R.map(obj => {
-        const isApproved = R.contains(obj._id, approved);
-        const newUser =  Object.assign({}, obj, { approved: isApproved });
-        log.trace(isApproved, obj);
-        return newUser;
-      }, users);
-
-      return newUsers;
+      return R.map(obj => {
+          const user = obj.toObject();
+          const isApproved = R.contains(user._id.toString(), approved);
+          return R.merge(user, { approved: isApproved });
+        }, objs[1]);
     });
   }
 
