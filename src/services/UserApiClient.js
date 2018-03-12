@@ -172,7 +172,7 @@ export default {
         break;
       case 'create/posted':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
+          xhr.putJSON(
             api + '/posted'
           , options
           , obj => { resolve(obj); }
@@ -234,7 +234,7 @@ export default {
   },
   createUser(user, data) {
     if(!data) return this.request('not/data'
-        , { name: 'Warning', message: 'Not Data Registory.' });
+      , { name: 'Warning', message: 'Not Data Registory.' });
     return this.request('create/user', { admin, data });
   },
   updateUser(admin, data) {
@@ -243,9 +243,8 @@ export default {
       , { admin, data: Object.assign({}, data, { updated }) });
   },
   pageUser(admin, { maxNumber, number, perPage }) {
-    return this.request('pagenation/user', {
-      admin, maxNumber, number, perPage
-    });
+    return this.request('pagenation/user'
+      , { admin, maxNumber, number, perPage });
   },
   selectUser(admin, ids) {
     return this.request('select/user', { admin, ids });
@@ -283,15 +282,14 @@ export default {
   createFaq(admin) {
     return this.request('create/faq', { admin });
   },
-  updateFaq(admin, { id, title, body }) {
+  updateFaq(admin, id, { title, body }) {
     const updated = std.getLocalTimeStamp(Date.now());
     const data = { title, body, updated };
     return this.request('update/faq', { admin, id, data });
   },
   pageFaq(admin, { maxNumber, number, perPage }) {
-    return this.request('pagenation/faq', {
-      admin, maxNumber, number, perPage
-    });
+    return this.request('pagenation/faq'
+      , { admin, maxNumber, number, perPage });
   },
   selectFaq(admin, ids) {
     return this.request('select/faq', { admin, ids });
@@ -300,9 +298,9 @@ export default {
     return this.request('delete/faq', { admin, ids });
   },
   createPost(admin, ids) {
-    return this.request('create/posted', { user, ids });
+    return this.request('create/posted', { admin, ids });
   },
   deletePost(admin, ids) {
-    return this.request('delete/posted', { user, ids });
+    return this.request('delete/posted', { admin, ids });
   }
 };

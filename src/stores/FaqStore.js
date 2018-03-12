@@ -19,7 +19,7 @@ export default class FaqStore extends ReduceStore {
   }
   
   updateFaq(state, action) {
-    return state.faqs.map(faq => action.faq._id === faq._id
+    return state.faqs.map(faq => action.id === faq._id
       ? Object.assign({}, faq, action.faq) : faq);
   }
 

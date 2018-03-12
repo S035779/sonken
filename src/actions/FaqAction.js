@@ -6,7 +6,7 @@ const pspid = 'FaqAction';
 export default {
   presetAdmin(admin) {
     return UserApiClient.presetAdmin(admin).then(isAuthenticated => {
-      dispatch({ type: 'admin/preset', user, isAuthenticated });
+      dispatch({ type: 'admin/preset', admin, isAuthenticated });
     });
   },
   prefetchFaqs(admin) {
@@ -30,9 +30,9 @@ export default {
       dispatch({ type: 'faq/create', faq });
     });
   },
-  update(admin, faq) {
-    return UserApiClient.updateFaq(admin, faq).then(() => {
-      dispatch({ type: 'faq/update', faq });
+  update(admin, id, { title, body }) {
+    return UserApiClient.updateFaq(admin, id, { title, body }).then(() => {
+      dispatch({ type: 'faq/update', id, faq: { title, body } });
     });
   },
   pagenation(admin, page) {
@@ -61,6 +61,6 @@ export default {
     });
   },
   rehydrate(state) {
-    dispatch({ type: 'faq/rehydrate', state: state.FaqStore });
+    dispatch({ type: 'faq/rehydrate', state: state.faqStore });
   }
 };

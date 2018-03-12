@@ -3,13 +3,13 @@ import PropTypes        from 'prop-types';
 import { Redirect }     from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
-import UserAction       from 'Actions/UserAction';
+import FaqAction        from 'Actions/FaqAction';
 import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import AdminSearch        from 'Components/AdminSearch/AdminSearch';
+import FaqSearch        from 'Components/FaqSearch/FaqSearch';
 import FaqButtons       from 'Components/FaqButtons/FaqButtons';
 import FaqList          from 'Components/FaqList/FaqList';
 
@@ -24,13 +24,13 @@ class Faq extends React.Component {
 
   static prefetch(options) {
     std.logInfo(Faq.displayName, 'prefetch', options);
-    return UserAction.presetAdmin(options.admin)
-      .then(() => UserAction.prefetchFaqs());
+    return FaqAction.presetAdmin(options.admin)
+      .then(() => FaqAction.prefetchFaqs());
   }
 
   componentDidMount() {
     std.logInfo(Faq.displayName, 'fetch', 'Faq');
-    UserAction.fetchFaqs(this.state.admin);
+    FaqAction.fetchFaqs(this.state.admin);
   }
 
   faqPage(number, page) {
@@ -44,6 +44,7 @@ class Faq extends React.Component {
     const { isAuthenticated, admin, faqs, page, ids } = this.state;
     const _id = match.params.id;
     const faq = faqs.find(obj => obj._id === _id);
+    console.log(faqs, _id);
     const number = faqs.length;
     faqs.length = this.faqPage(number, page);
     if(!isAuthenticated) {
@@ -51,7 +52,7 @@ class Faq extends React.Component {
         pathname: '/login/authenticate', state: { from: location } }} />;
     }
     return <div className={classes.root}>
-        <AdminSearch
+        <FaqSearch
           admin={admin}
           faqNumber={number} faqPage={page} />
       <div className={classes.body}>

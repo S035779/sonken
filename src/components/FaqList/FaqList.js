@@ -48,7 +48,7 @@ class FaqList extends React.Component {
     };
     const linkTo = `/admin/faq/${faq._id}/edit`;
     const notice = faq.posted ? '掲載済み' : '';
-    const name = faq.name;
+    const title = faq.title;
     const updated =
       std.formatDate(new Date(faq.updated), 'YYYY/MM/DD hh:mm');
     return <div key={index} className={classes.faqItem}>
@@ -64,7 +64,7 @@ class FaqList extends React.Component {
             <Assignment />
           </Avatar>
           <ListItemText
-            primary={name} secondary={updated} classes={textClass} />
+            primary={title} secondary={updated} classes={textClass} />
         </ListItem>
       </Paper>
       <div className={classes.notice}>

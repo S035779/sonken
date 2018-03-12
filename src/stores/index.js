@@ -1,20 +1,20 @@
-import DashboardStore from 'Stores/DashboardStore';
-import BidedNotesStore from 'Stores/BidedNotesStore';
+import DashboardStore   from 'Stores/DashboardStore';
+import BidedNotesStore  from 'Stores/BidedNotesStore';
 import TradedNotesStore from 'Stores/TradedNotesStore';
-import LoginStore from 'Stores/LoginStore';
-import ManagementStore from 'Stores/ManagementStore';
-import FaqStore from 'Stores/FaqStore';
+import LoginStore       from 'Stores/LoginStore';
+import ManagementStore  from 'Stores/ManagementStore';
+import FaqStore         from 'Stores/FaqStore';
 
 let stores;
 
 export function createStores(dispatcher) {
   stores = {
-    dashboardStore: new DashboardStore(dispatcher)
-  , bidedNotesStore: new BidedNotesStore(dispatcher)
+    dashboardStore:   new DashboardStore(dispatcher)
+  , bidedNotesStore:  new BidedNotesStore(dispatcher)
   , tradedNotesStore: new TradedNotesStore(dispatcher)
-  , loginStore: new LoginStore(dispatcher)
-  , managementStore: new ManagementStore(dispatcher)
-  , faqStore: new FaqStore(dispatcher)
+  , loginStore:       new LoginStore(dispatcher)
+  , managementStore:  new ManagementStore(dispatcher)
+  , faqStore:         new FaqStore(dispatcher)
   };
 };
 
@@ -32,11 +32,11 @@ export function getState(name) {
 
 export function dehydrateState() {
   return {
-    dashboardStore: getState('dashboardStore')
-  , bidedNotesStore: getState('bidedNotesStore')
+    dashboardStore:   getState('dashboardStore')
+  , bidedNotesStore:  getState('bidedNotesStore')
   , tradedNotesStore: getState('tradedNotesStore')
-  , loginStore: getState('loginStore')
-  , managementStore: getState('managementStore')
-  , faqStore: getState('faqStore')
+  , loginStore:       getState('loginStore')
+  , managementStore:  getState('managementStore')
+  , faqStore:         getState('faqStore')
   };
 };

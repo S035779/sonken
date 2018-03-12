@@ -56,7 +56,7 @@ export default function getRoutes() {
       path: '/admin/:category'
     , component: Admin
     , routes: [{
-        path: '/admin/faq'
+      path: '/admin/faq/:id'
       , component: Faq
       , loadData: getUserData
       , routes: [{
@@ -85,6 +85,11 @@ export default function getRoutes() {
           path: '/admin/approval/:id/edit'
         , component: ApprovalEdit
         }]
+      }
+      , {
+        path: '/admin/faq'
+      , component: Faq
+      , loadData: getUserData
       }
       , {
         path: '/admin/:category'

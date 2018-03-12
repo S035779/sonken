@@ -1,6 +1,6 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import UserAction     from 'Actions/UserAction';
+import FaqAction      from 'Actions/FaqAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
@@ -19,7 +19,7 @@ class FaqButtons extends React.Component {
   }
 
   componentDidMount() {
-    UserAction.select(this.props.admin, []);
+    FaqAction.select(this.props.admin, []);
   }
 
   handleChangeCheckbox(event) {
@@ -29,15 +29,25 @@ class FaqButtons extends React.Component {
     const { admin, faqs } = this.props;
     const ids = checked ? faqs.map(faq => faq._id) : [];
     std.logInfo(FaqButtons.displayName, 'handleChangeCheckbox', ids);
-    UserAction.select(admin, ids);
+    FaqAction.select(admin, ids);
   }
 
   handleNew() {
     const { admin, selectedFaqId } = this.props;
     std.logInfo(FaqButtons.displayName
       , 'handleNew', selectedFaqId);
+    FaqAction.create(admin, selectedFaqId)
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
+    this.setState({ checked: false });
+  }
+
+  handlePost() {
+    const { admin, selectedFaqId } = this.props;
+    std.logInfo(FaqButtons.displayName
+      , 'handlePosted', selectedFaqId);
     if(window.confirm('Are you sure?')) {
-      UserAction.createFaq(admin, selectedFaqId)
+      FaqAction.createPost(admin, selectedFaqId)
         .then(() => this.setState({ isSuccess: true }))
         .catch(err => this.setState({ isNotValid: true }));
       this.setState({ checked: false });
@@ -60,6 +70,9 @@ class FaqButtons extends React.Component {
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleNew.bind(this)}>新規作成</Button>
+        <Button variant="raised"
+          className={classes.button}
+          onClick={this.handlePost.bind(this)}>FAQ掲載</Button>
         <RssDialog open={isNotValid} title={'送信エラー'}
           onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
         内容に不備があります。もう一度確認してください。

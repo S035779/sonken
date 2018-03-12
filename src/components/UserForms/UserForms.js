@@ -60,8 +60,10 @@ class UserForms extends React.Component {
   handleDelete() {
     const { admin } = this.props;
     const { user } = this.state;
-    UserAction.delete(admin, [user._id])
-      .catch(err => this.setState({ isNotValid: true }));
+    if(window.confirm('Are you sure?')) {
+      UserAction.delete(admin, [user._id])
+        .catch(err => this.setState({ isNotValid: true }));
+    }
   }
 
   handleCloseDialog(name) {
@@ -183,7 +185,7 @@ const styles = theme => ({
                 , height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box'
                 , padding: '5px' }
-, buttons:      { display: 0, display: 'flex', flexDirection: 'row' }
+, buttons:      { display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 , text:         { flex: 1, marginLeft: theme.spacing.unit * 1.75 }

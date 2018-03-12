@@ -50,9 +50,9 @@ export default {
       dispatch({ type: 'note/create', note });
     });
   },
-  update(user, note) {
-    return NoteApiClient.updateNote(user, note).then(() => {
-      dispatch({ type: 'note/update', note });
+  update(user, id, note) {
+    return NoteApiClient.updateNote(user, id, note).then(() => {
+      dispatch({ type: 'note/update', id, note });
     });
   },
   pagenation(user, page) {

@@ -6,9 +6,6 @@ import { User, Approved }
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
-//let users = [{
-//  user: 'MyUserName', password: 'Test123$', isAuthenticated: false
-//}]
 
 /**
  * UserProfiler class.
@@ -25,20 +22,6 @@ export default class UserProfiler {
 
   request(request, options) {
     log.debug(request, options);
-    //const setUsers   = objs => { return users = objs };
-    //const isUsr   = obj => obj.user === options.user;
-    //const isPas = obj => options.password === obj.password;
-    //const setAuth = obj => R.map(user => user.user === obj.user
-    //  ? Object.assign({}, user, { isAuthenticated: true })
-    //  : user ,users);
-    //const delAuth = obj => R.map(user => user.user === obj.user
-    //  ? Object.assign({}, user, { isAuthenticated: false })
-    //  : user ,users);
-    //const isAuth = R.compose(
-    //  R.head
-    //, R.map(obj => obj.isAuthenticated)
-    //, R.filter(isUsr)
-    //);
     switch(request) {
       case 'fetch/users':
         return new Promise((resolve, reject) => {
@@ -129,6 +112,7 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           resolve({ response: 'OK' });
         });
+        break;
       case 'create/approval':
         return new Promise((resolve, reject) => {
           const approved = new Approved({ approved: options.id });
@@ -138,6 +122,7 @@ export default class UserProfiler {
             resolve(obj);
           });
         });
+        break;
       case 'delete/approval':
         return new Promise((resolve, reject) => {
           const conditions = { approved: options.id };
@@ -147,6 +132,7 @@ export default class UserProfiler {
             resolve(obj);
           });
         });
+        break;
       case 'fetch/approval':
         return new Promise((resolve, reject) => {
           const conditions = {};
@@ -156,6 +142,7 @@ export default class UserProfiler {
             resolve(obj);
           });
         });
+        break;
       case 'signin/admin':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -186,6 +173,7 @@ export default class UserProfiler {
             resolve(obj);
           });
         });
+        break;
       case 'signin/user':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -199,15 +187,6 @@ export default class UserProfiler {
             log.trace(request, obj);
             resolve(obj);
           })
-          //const response = R.compose(
-          //  () => isAuth(users)
-          //, setUsers
-          //, R.flatten
-          //, R.map(setAuth)
-          //, R.filter(isPas)
-          //, R.filter(isUsr)
-          //);
-          //resolve(response(users));
         });
         break;
       case 'signout/user':
@@ -219,15 +198,8 @@ export default class UserProfiler {
             log.trace(request, obj);
             resolve(obj);
           });
-          //const response = R.compose(
-          //  () => isAuth(users)
-          //, setUsers
-          //, R.flatten
-          ///, R.map(delAuth)
-          //, R.filter(isUsr)
-          //);
-          //resolve(response(users));
         });
+        break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
@@ -240,10 +212,6 @@ export default class UserProfiler {
     return std.crypto_pbkdf2(password, salt, 256);
   }
 
-  getUsers() {
-    return this.request('fetch/users', {});
-  }
-
   getUser(user, email, phone) {
     return this.request('fetch/user', { user, email, phone });
   }
@@ -254,6 +222,18 @@ export default class UserProfiler {
 
   replaceUser(user, salt, hash, data) {
     return this.request('update/user', { user, salt, hash, data });
+  }
+
+  signinUser(user, salt, hash) {
+    return this.request('signin/user', { user, salt, hash });
+  }
+
+  signoutUser(user) {
+    return this.request('signout/user', { user });
+  }
+
+  getUsers(admin) {
+    return this.request('fetch/users', { admin });
   }
 
   removeUser(admin, id) {
@@ -282,14 +262,6 @@ export default class UserProfiler {
 
   signoutAdmin(admin) {
     return this.request('signout/admin', { admin });
-  }
-
-  signinUser(user, salt, hash) {
-    return this.request('signin/user', { user, salt, hash });
-  }
-
-  signoutUser(user) {
-    return this.request('signout/user', { user });
   }
 
   authenticate({ admin, user, password }) {

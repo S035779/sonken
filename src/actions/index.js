@@ -11,5 +11,5 @@ export function rehydrateState(state) {
   TradeAction.rehydrate(state);
   LoginAction.rehydrate(state);
   UserAction.rehydrate(state);
-  FaqAction.rehaydrate(state);
+  FaqAction.rehydrate(state);
 };

@@ -1,6 +1,6 @@
 import { ReduceStore } from 'flux/utils';
 
-const pspid = 'DashboardStore';
+const displayName = 'DashboardStore';
 
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
@@ -19,7 +19,7 @@ export default class DashboardStore extends ReduceStore {
   }
   
   updateNote(state, action) {
-    return state.notes.map(note => action.note.id === note.id
+    return state.notes.map(note => action.id === note.id
       ? Object.assign({}, note, action.note) : note);
   }
 

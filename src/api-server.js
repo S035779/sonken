@@ -9,6 +9,7 @@ import bodyParser       from 'body-parser';
 import { logs as log }  from 'Utilities/logutils';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
+import faq              from 'Routes/faq';
 
 dotenv.config()
 const env = process.env.NODE_ENV || 'development';
@@ -47,22 +48,22 @@ app.use(session({
 }))
 
 router.route('/posted')
-.get(feed.fetchPostedFaqs())
-.put(feed.createPost())
-.post(feed.notImplemented())
-.delete(feed.deletePost());
+.get(faq.fetchPostedFaqs())
+.put(faq.createPost())
+.post(faq.notImplemented())
+.delete(faq.deletePost());
 
 router.route('/faqs')
-.get(profile.fetchFaqs())
-.put(profile.notImplemented())
-.post(profile.notImplemented())
-.delete(profile.notImplemented());
+.get(faq.fetchFaqs())
+.put(faq.notImplemented())
+.post(faq.notImplemented())
+.delete(faq.notImplemented());
 
 router.route('/faq')
-.get(profile.fetchFaq())
-.put(profile.createFaq())
-.post(profile.updateFaq())
-.delete(profile.deleteFaq());
+.get(faq.fetchFaq())
+.put(faq.createFaq())
+.post(faq.updateFaq())
+.delete(faq.deleteFaq());
 
 router.route('/users')
 .get(profile.fetchUsers())
