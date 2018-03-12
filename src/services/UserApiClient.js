@@ -190,10 +190,93 @@ export default {
           );
         });
         break;
+      case 'prefetch/mails':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/mails'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'fetch/mails':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/mails'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      //case 'fetch/mail':
+      //  return new Promise((resolve, reject) => {
+      //    xhr.getJSON(
+      //      api + '/mail'
+      //    , options
+      //    , obj => { resolve(obj); }
+      //    , err => { reject(err); }
+      //    );
+      //  });
+      //  break;
+      case 'create/mail':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/mail'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'update/mail':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/mail'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/mail':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/mail'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/selected':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/selected'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/selected':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/selected'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'pagenation/user':
       case 'select/user':
       case 'pagenation/faq':
       case 'select/faq':
+      case 'pagenation/mail':
+      case 'select/mail':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
@@ -217,6 +300,9 @@ export default {
   },
   prefetchFaqs(admin) {
     return this.request('prefetch/faqs', { admin });
+  },
+  prefetchMails(admin) {
+    return this.request('prefetch/mails', { admin });
   },
 
   /*
@@ -274,7 +360,7 @@ export default {
   },
 
   /*
-   *  Faqs
+   *  Faq
    */
   //fetchFaq(admin, id) {
   //  return this.request('fetch/faq', { admin, id });
@@ -302,5 +388,43 @@ export default {
   },
   deletePost(admin, ids) {
     return this.request('delete/posted', { admin, ids });
+  },
+
+  /*
+   * Mails
+   */
+  fetchMails(admin) {
+    return this.request('fetch/mails', { admin });
+  },
+
+  /*
+   *  Mail
+   */
+  //fetchMail(admin, id) {
+  //  return this.request('fetch/mail', { admin, id });
+  //},
+  createMail(admin) {
+    return this.request('create/mail', { admin });
+  },
+  updateMail(admin, id, { title, body }) {
+    const updated = std.getLocalTimeStamp(Date.now());
+    const data = { title, body, updated };
+    return this.request('update/mail', { admin, id, data });
+  },
+  pageMail(admin, { maxNumber, number, perPage }) {
+    return this.request('pagenation/mail'
+      , { admin, maxNumber, number, perPage });
+  },
+  selectMail(admin, ids) {
+    return this.request('select/mail', { admin, ids });
+  },
+  deleteMail(admin, ids) {
+    return this.request('delete/mail', { admin, ids });
+  },
+  createSelect(admin, ids) {
+    return this.request('create/selected', { admin, ids });
+  },
+  deleteSelect(admin, ids) {
+    return this.request('delete/selected', { admin, ids });
   }
 };

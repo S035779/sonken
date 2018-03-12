@@ -10,6 +10,7 @@ import { logs as log }  from 'Utilities/logutils';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
+import mail             from 'Routes/mail';
 
 dotenv.config()
 const env = process.env.NODE_ENV || 'development';
@@ -46,6 +47,24 @@ app.use(session({
 , resave: false
 , saveUninitialized: true
 }))
+
+router.route('/selected')
+.get(mail.fetchSelectedMails())
+.put(mail.createSelect())
+.post(mail.notImplemented())
+.delete(mail.deleteSelect());
+
+router.route('/mails')
+.get(mail.fetchMails())
+.put(mail.notImplemented())
+.post(mail.notImplemented())
+.delete(mail.notImplemented());
+
+router.route('/mail')
+.get(mail.fetchMail())
+.put(mail.createMail())
+.post(mail.updateMail())
+.delete(mail.deleteMail());
 
 router.route('/posted')
 .get(faq.fetchPostedFaqs())

@@ -80,12 +80,12 @@ export default class FaqStore extends ReduceStore {
           faqs:  this.deleteFaq(state, action)
         , ids:    []
         });
-      case 'read/create':
+      case 'post/create':
         return Object.assign({}, state, {
           faqs: this.createPost(state, action)
         , ids:    []
         });
-      case 'read/delete':
+      case 'post/delete':
         return Object.assign({}, state, {
           faqs: this.deletePost(state, action)
         , ids:    []

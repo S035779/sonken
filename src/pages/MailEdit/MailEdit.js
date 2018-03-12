@@ -1,56 +1,56 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import std            from 'Utilities/stdutils';
-import FaqAction      from 'Actions/FaqAction';
+import MailAction      from 'Actions/MailAction';
 
 import { withStyles } from 'material-ui/styles';
 import EditBody       from 'Components/EditBody/EditBody';
 import EditButtons    from 'Components/EditButtons/EditButtons';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 
-class FaqEdit extends React.Component {
+class MailEdit extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      faq:        props.faq
+      mail:        props.mail
     , isSuccess:  false
     , isNotValid: false
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(FaqEdit.displayName, 'Props', nextProps);
-    this.setState({ faq: nextProps.faq });
+    std.logInfo(MailEdit.displayName, 'Props', nextProps);
+    this.setState({ mail: nextProps.mail });
   }
 
   handleChangeTitle(title) {
-    std.logInfo(FaqEdit.displayName, 'handleChangeTitle', title);
-    const { faq } = this.state;
-    this.setState({ faq: Object.assign({}, faq, { title }) });
+    std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
+    const { mail } = this.state;
+    this.setState({ mail: Object.assign({}, mail, { title }) });
   }
 
   handleChangeBody(event) {
-    const { faq } = this.state;
+    const { mail } = this.state;
     const body = event.target.value;
-    std.logInfo(FaqEdit.displayName, 'handleChangeBody', body);
-    this.setState({ faq: Object.assign({}, faq, { body }) });
+    std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
+    this.setState({ mail: Object.assign({}, mail, { body }) });
   }
 
   handleDraft() {
     const { admin } = this.props;
-    const { _id } = this.state.faq;
-    std.logInfo(FaqEdit.displayName, 'handleDraft', _id);
-    FaqAction.deletePost(admin, [_id])
+    const { _id } = this.state.mail;
+    std.logInfo(MailEdit.displayName, 'handleDraft', _id);
+    MailAction.deleteSelect(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleSave() {
-    std.logInfo(FaqEdit.displayName, 'handleSave', this.state.faq);
+    std.logInfo(MailEdit.displayName, 'handleSave', this.state.mail);
     const { admin } = this.props;
-    const { _id, title, body } = this.state.faq;
+    const { _id, title, body } = this.state.mail;
     if(this.isValidate() && this.isChanged()) {
-      FaqAction.update(admin, _id, { title, body })
+      MailAction.update(admin, _id, { title, body })
         .then(() => this.setState({ isSuccess: true }))
         .catch(err => this.setState({ isNotValid: true }));
     } else {
@@ -59,11 +59,11 @@ class FaqEdit extends React.Component {
   }
 
   handleDelete() {
-    std.logInfo(FaqEdit.displayName, 'handleDelete', this.state.faq);
+    std.logInfo(MailEdit.displayName, 'handleDelete', this.state.mail);
     const { admin } = this.props;
-    const { _id } = this.state.faq;
+    const { _id } = this.state.mail;
     if(window.confirm('Are you sure?')) {
-      FaqAction.delete(admin, [_id])
+      MailAction.delete(admin, [_id])
         .catch(err => this.setState({ isNotValid: true }));
     }
   }
@@ -73,24 +73,24 @@ class FaqEdit extends React.Component {
   }
 
   isValidate() {
-    const { title, body } = this.state.faq;
+    const { title, body } = this.state.mail;
     return ( title !== '' && body !== '');
   }
 
   isChanged() {
-    const { title, body } = this.state.faq;
-    const { faq } = this.props;
-    return faq.title !== title || faq.body !== body;
+    const { title, body } = this.state.mail;
+    const { mail } = this.props;
+    return mail.title !== title || mail.body !== body;
   }
 
   render() {
-    std.logInfo(FaqEdit.displayName, 'Props', this.props);
-    const { classes, admin, faq } = this.props;
+    std.logInfo(MailEdit.displayName, 'Props', this.props);
+    const { classes, admin, mail } = this.props;
     const { isNotValid, isSuccess } = this.state;
-    const { title: nextTitle, body: nextBody } = this.state.faq;
-    if(!faq || !faq._id) return null;
-    const isChanged = faq.title !== nextTitle || faq.body !== nextBody;
-    return <div className={classes.faqEdit}>
+    const { title: nextTitle, body: nextBody } = this.state.mail;
+    if(!mail || !mail._id) return null;
+    const isChanged = mail.title !== nextTitle || mail.body !== nextBody;
+    return <div className={classes.mailEdit}>
       <EditButtons changed={isChanged} value={nextTitle}
         onChange={this.handleChangeTitle.bind(this)}
         onDraft={this.handleDraft.bind(this)}
@@ -124,7 +124,7 @@ const editHeightSmDown  =
 const editHeightSmUp    =
   `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  faqEdit:    { display: 'flex', flexDirection: 'column'
+  mailEdit:    { display: 'flex', flexDirection: 'column'
               , height: editHeightSmDown
               , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , editBody:   {
@@ -155,9 +155,9 @@ const styles = theme => ({
                 , borderBottom: '1px solid #CCC'
               }}
 });
-FaqEdit.displayName= 'FaqEdit';
-FaqEdit.defaultProps = { faq: null };
-FaqEdit.propTypes = {
+MailEdit.displayName= 'MailEdit';
+MailEdit.defaultProps = { mail: null };
+MailEdit.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(FaqEdit);
+export default withStyles(styles)(MailEdit);

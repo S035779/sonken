@@ -4,6 +4,7 @@ import TradeAction from 'Actions/TradeAction';
 import LoginAction from 'Actions/LoginAction';
 import UserAction from 'Actions/UserAction';
 import FaqAction from 'Actions/FaqAction';
+import MailAction from 'Actions/MailAction';
 
 export function rehydrateState(state) {
   NoteAction.rehydrate(state);
@@ -12,4 +13,5 @@ export function rehydrateState(state) {
   LoginAction.rehydrate(state);
   UserAction.rehydrate(state);
   FaqAction.rehydrate(state);
+  MailAction.rehydrate(state);
 };

@@ -57,11 +57,11 @@ const styles = theme => ({
               , height: columnHeight, minHeight: columnHeight
               , boxSizing: 'border-box'
               , padding: '5px', borderBottom: '1px solid #CCC' }
-, inputText:  { flex: 2 }
-, buttons:    { flex: 0
-              , padding: theme.spacing.unit
-              , display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1 }
+, inputText:  { flex: 1 }
+, buttons:    { display: 'flex', flexDirection: 'row'
+              , padding: theme.spacing.unit }
+, button:     { flex: 1, margin: theme.spacing.unit
+              , wordBreak: 'keep-all' }
 });
 
 EditButtons.displayName = 'EditButtons';

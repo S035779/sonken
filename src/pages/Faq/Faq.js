@@ -44,7 +44,6 @@ class Faq extends React.Component {
     const { isAuthenticated, admin, faqs, page, ids } = this.state;
     const _id = match.params.id;
     const faq = faqs.find(obj => obj._id === _id);
-    console.log(faqs, _id);
     const number = faqs.length;
     faqs.length = this.faqPage(number, page);
     if(!isAuthenticated) {

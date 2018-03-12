@@ -1,7 +1,7 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
-import FaqAction     from 'Actions/FaqAction';
+import MailAction     from 'Actions/MailAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
@@ -9,58 +9,58 @@ import { List, Paper, Checkbox, Button, Typography, Avatar }
                       from 'material-ui';
 import { ListItem, ListItemText, ListItemSecondaryAction }
                       from 'material-ui/List';
-import { green }      from 'material-ui/colors';
-import { Assignment } from 'material-ui-icons';
+import { yellow }      from 'material-ui/colors';
+import { Folder } from 'material-ui-icons';
 
-class FaqList extends React.Component {
+class MailList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      checked:  props.selectedFaqId
-    , faqs:     props.faqs
+      checked:  props.selectedMailId
+    , mails:     props.mails
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(FaqList.displayName, 'Props', nextProps);
-    const { selectedFaqId: checked, faqs } = nextProps;
-    this.setState({ checked, faqs });
+    std.logInfo(MailList.displayName, 'Props', nextProps);
+    const { selectedMailId: checked, mails } = nextProps;
+    this.setState({ checked, mails });
   }
 
   handleChangeCheckbox(id, event) {
-    std.logInfo(FaqList.displayName, 'handleChangeCheckbox', id);
+    std.logInfo(MailList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { admin } = this.props;
     const currentIndex = checked.indexOf(id);
     const newChecked = [...checked];
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
-    FaqAction.select(admin, newChecked);
+    MailAction.select(admin, newChecked);
   }
   
-  renderItem(faq, index) {
+  renderItem(mail, index) {
     const { classes } = this.props;
     const { checked } = this.state;
     const textClass = {
       primary:    classes.primary
     , secondary:  classes.secondary
     };
-    const linkTo = `/admin/faq/${faq._id}/edit`;
-    const notice = faq.posted ? '掲載済み' : '';
-    const title = faq.title;
+    const linkTo = `/admin/mail/${mail._id}/edit`;
+    const notice = mail.selected ? '選択済み' : '';
+    const title = mail.title;
     const updated =
-      std.formatDate(new Date(faq.updated), 'YYYY/MM/DD hh:mm');
-    return <div key={index} className={classes.faqItem}>
+      std.formatDate(new Date(mail.updated), 'YYYY/MM/DD hh:mm');
+    return <div key={index} className={classes.mailItem}>
       <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, faq._id)}
-        checked={checked.indexOf(faq._id) !== -1}
+        onClick={this.handleChangeCheckbox.bind(this, mail._id)}
+        checked={checked.indexOf(mail._id) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters
           component={Link} to={linkTo}
           className={classes.listItem}>
-          <Avatar className={classes.greenAvatar}>
-            <Assignment />
+          <Avatar className={classes.yellowAvatar}>
+            <Folder />
           </Avatar>
           <ListItemText
             primary={title} secondary={updated} classes={textClass} />
@@ -74,10 +74,10 @@ class FaqList extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { faqs } = this.state;
-    const renderItems = faqs
-      .map((faq, index) => this.renderItem(faq, index));
-    return <List className={classes.faqList}>
+    const { mails } = this.state;
+    const renderItems = mails
+      .map((mail, index) => this.renderItem(mail, index));
+    return <List className={classes.mailList}>
       {renderItems}
     </List>;
   }
@@ -92,10 +92,10 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px 
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  faqList:   { width: '100%', overflow: 'scroll'
+  mailList:   { width: '100%', overflow: 'scroll'
               , height: listHeightSmDown
               , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
-, faqItem:   { display: 'flex', flexDirection: 'row'
+, mailItem:   { display: 'flex', flexDirection: 'row'
               , alignItems: 'center' }
 , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
               , '&:hover':  { backgroundColor: theme.palette.primary.main
@@ -113,12 +113,12 @@ const styles = theme => ({
 , secondary:  {}
 , notice:     { flex:1, padding: theme.spacing.unit /2
               , minWidth: noticeWidth }
-, greenAvatar: { marginLeft: theme.spacing.unit
-              , color: '#fff', backgroundColor: green[500] }
+, yellowAvatar: { marginLeft: theme.spacing.unit
+              , color: '#fff', backgroundColor: yellow[500] }
 });
-FaqList.displayName = 'FaqList';
-FaqList.defaultProps = { faqs: null }
-FaqList.propTypes = {
+MailList.displayName = 'MailList';
+MailList.defaultProps = { mails: null }
+MailList.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(FaqList);
+export default withStyles(styles)(MailList);

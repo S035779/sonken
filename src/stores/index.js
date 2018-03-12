@@ -4,6 +4,7 @@ import TradedNotesStore from 'Stores/TradedNotesStore';
 import LoginStore       from 'Stores/LoginStore';
 import ManagementStore  from 'Stores/ManagementStore';
 import FaqStore         from 'Stores/FaqStore';
+import MailStore        from 'Stores/MailStore';
 
 let stores;
 
@@ -15,6 +16,7 @@ export function createStores(dispatcher) {
   , loginStore:       new LoginStore(dispatcher)
   , managementStore:  new ManagementStore(dispatcher)
   , faqStore:         new FaqStore(dispatcher)
+  , mailStore:        new MailStore(dispatcher)
   };
 };
 
@@ -38,5 +40,6 @@ export function dehydrateState() {
   , loginStore:       getState('loginStore')
   , managementStore:  getState('managementStore')
   , faqStore:         getState('faqStore')
+  , mailStore:        getState('mailStore')
   };
 };
