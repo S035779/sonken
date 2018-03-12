@@ -46,6 +46,24 @@ app.use(session({
 , saveUninitialized: true
 }))
 
+router.route('/posted')
+.get(feed.fetchPostedFaqs())
+.put(feed.createPost())
+.post(feed.notImplemented())
+.delete(feed.deletePost());
+
+router.route('/faqs')
+.get(profile.fetchFaqs())
+.put(profile.notImplemented())
+.post(profile.notImplemented())
+.delete(profile.notImplemented());
+
+router.route('/faq')
+.get(profile.fetchFaq())
+.put(profile.createFaq())
+.post(profile.updateFaq())
+.delete(profile.deleteFaq());
+
 router.route('/users')
 .get(profile.fetchUsers())
 .put(profile.sendmail())

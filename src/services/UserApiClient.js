@@ -108,8 +108,92 @@ export default {
           , err => { reject(err); }
           );
         });
+        break;
+      case 'prefetch/faqs':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/faqs'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'fetch/faqs':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/faqs'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      //case 'fetch/faq':
+      //  return new Promise((resolve, reject) => {
+      //    xhr.getJSON(
+      //      api + '/faq'
+      //    , options
+      //    , obj => { resolve(obj); }
+      //    , err => { reject(err); }
+      //    );
+      //  });
+      //  break;
+      case 'create/faq':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/faq'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'update/faq':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/faq'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/faq':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/faq'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/posted':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/posted'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/posted':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/posted'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'pagenation/user':
       case 'select/user':
+      case 'pagenation/faq':
+      case 'select/faq':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
@@ -130,6 +214,9 @@ export default {
   },
   prefetchUsers(admin) {
     return this.request('prefetch/users', { admin });
+  },
+  prefetchFaqs(admin) {
+    return this.request('prefetch/faqs', { admin });
   },
 
   /*
@@ -178,5 +265,44 @@ export default {
   },
   deleteApproval(admin, ids) {
     return this.request('delete/approval', { admin, ids });
+  },
+
+  /*
+   * Faqs
+   */
+  fetchFaqs(admin) {
+    return this.request('fetch/faqs', { admin });
+  },
+
+  /*
+   *  Faqs
+   */
+  //fetchFaq(admin, id) {
+  //  return this.request('fetch/faq', { admin, id });
+  //},
+  createFaq(admin) {
+    return this.request('create/faq', { admin });
+  },
+  updateFaq(admin, { id, title, body }) {
+    const updated = std.getLocalTimeStamp(Date.now());
+    const data = { title, body, updated };
+    return this.request('update/faq', { admin, id, data });
+  },
+  pageFaq(admin, { maxNumber, number, perPage }) {
+    return this.request('pagenation/faq', {
+      admin, maxNumber, number, perPage
+    });
+  },
+  selectFaq(admin, ids) {
+    return this.request('select/faq', { admin, ids });
+  },
+  deleteFaq(admin, ids) {
+    return this.request('delete/faq', { admin, ids });
+  },
+  createPost(admin, ids) {
+    return this.request('create/posted', { user, ids });
+  },
+  deletePost(admin, ids) {
+    return this.request('delete/posted', { user, ids });
   }
 };

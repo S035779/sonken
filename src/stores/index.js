@@ -3,6 +3,7 @@ import BidedNotesStore from 'Stores/BidedNotesStore';
 import TradedNotesStore from 'Stores/TradedNotesStore';
 import LoginStore from 'Stores/LoginStore';
 import ManagementStore from 'Stores/ManagementStore';
+import FaqStore from 'Stores/FaqStore';
 
 let stores;
 
@@ -13,6 +14,7 @@ export function createStores(dispatcher) {
   , tradedNotesStore: new TradedNotesStore(dispatcher)
   , loginStore: new LoginStore(dispatcher)
   , managementStore: new ManagementStore(dispatcher)
+  , faqStore: new FaqStore(dispatcher)
   };
 };
 
@@ -35,5 +37,6 @@ export function dehydrateState() {
   , tradedNotesStore: getState('tradedNotesStore')
   , loginStore: getState('loginStore')
   , managementStore: getState('managementStore')
+  , faqStore: getState('faqStore')
   };
 };

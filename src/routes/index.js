@@ -13,6 +13,8 @@ import Admin        from 'Pages/Admin/Admin';
 import Management   from 'Pages/Management/Management';
 import UserEdit     from 'Pages/UserEdit/UserEdit';
 import ApprovalEdit from 'Pages/ApprovalEdit/ApprovalEdit';
+import Faq          from 'Pages/Faq/Faq';
+import FaqEdit      from 'Pages/FaqEdit/FaqEdit';
 
 const getUserData = (options, match) => {
   return new Promise((resolve, reject) => {
@@ -54,6 +56,24 @@ export default function getRoutes() {
       path: '/admin/:category'
     , component: Admin
     , routes: [{
+        path: '/admin/faq'
+      , component: Faq
+      , loadData: getUserData
+      , routes: [{
+          path: '/admin/faq/:id/edit'
+        , component: FaqEdit
+        }]
+      }
+      //, {
+      //  path: '/admin/mail/:id'
+      //, component: Mail
+      //, loadData: getUserData
+      //, routes: [{
+      //    path: '/admin/mail/:id/edit'
+      //  , component: MailEdit
+      //  }]
+      //}
+      , {
         path: '/admin/:category/:id'
       , component: Management
       , loadData: getUserData
@@ -64,14 +84,6 @@ export default function getRoutes() {
         , {
           path: '/admin/approval/:id/edit'
         , component: ApprovalEdit
-        //}
-        //, {
-        //  path: '/admin/faq/:id/edit'
-        //, component: FaqEdit
-        //}
-        //,{
-        //  path: '/admin/mail/:id/edit'
-        //, component: MailEdit
         }]
       }
       , {

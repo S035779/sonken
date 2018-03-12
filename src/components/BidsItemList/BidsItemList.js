@@ -5,12 +5,10 @@ import BidsAction     from 'Actions/BidsAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import {
-  List, Paper, Checkbox, Button, Typography
-}                     from 'material-ui';
-import {
-  ListItem, ListItemText, ListItemSecondaryAction
-}                     from 'material-ui/List';
+import { List, Paper, Checkbox, Button, Typography }
+                      from 'material-ui';
+import { ListItem, ListItemText, ListItemSecondaryAction }
+                      from 'material-ui/List';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class BidsItemList extends React.Component {

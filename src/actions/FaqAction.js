@@ -1,0 +1,66 @@
+import { dispatch } from 'Main/dispatcher';
+import UserApiClient from 'Services/UserApiClient';
+
+const pspid = 'FaqAction';
+
+export default {
+  presetAdmin(admin) {
+    return UserApiClient.presetAdmin(admin).then(isAuthenticated => {
+      dispatch({ type: 'admin/preset', user, isAuthenticated });
+    });
+  },
+  prefetchFaqs(admin) {
+    return UserApiClient.prefetchFaqs(admin).then(faqs => {
+      dispatch({ type: 'faq/prefetch', faqs });
+    });
+  },
+  fetchFaqs(admin) {
+    return UserApiClient.fetchFaqs(admin).then(faqs => {
+      dispatch({ type: 'faq/fetch', faqs });
+    });
+  },
+  //fetch(admin, id) {
+  //  dispatch({ type: 'faq/fetch/before' });
+  //  return UserApiClient.fetchFaq(admin, id).then(faq => {
+  //    dispatch({ type: 'faq/fetch', faq });
+  //  });
+  //},
+  create(admin) {
+    return UserApiClient.createFaq(admin).then(faq => {
+      dispatch({ type: 'faq/create', faq });
+    });
+  },
+  update(admin, faq) {
+    return UserApiClient.updateFaq(admin, faq).then(() => {
+      dispatch({ type: 'faq/update', faq });
+    });
+  },
+  pagenation(admin, page) {
+    return UserApiClient.pageFaq(admin, page).then(() => {
+      dispatch({ type: 'faq/pagenation', page });
+    });
+  },
+  select(admin, ids) {
+    return UserApiClient.selectFaq(admin, ids).then(() => {
+      dispatch({ type: 'faq/select', ids });
+    });
+  },
+  delete(admin, ids) {
+    return UserApiClient.deleteFaq(admin, ids).then(() => {
+      dispatch({ type: 'faq/delete', ids });
+    });
+  },
+  createPost(admin, ids) {
+    return UserApiClient.createPost(admin, ids).then(() => {
+      dispatch({ type: 'post/create', ids });
+    });
+  },
+  deletePost(admin, ids) {
+    return UserApiClient.deletePost(admin, ids).then(() => {
+      dispatch({ type: 'post/delete', ids });
+    });
+  },
+  rehydrate(state) {
+    dispatch({ type: 'faq/rehydrate', state: state.FaqStore });
+  }
+};
