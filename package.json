@@ -42,7 +42,8 @@
     "serve-favicon": "2.4.5",
     "serve-static": "1.13.1",
     "xml2js": "0.4.19",
-    "xmlbuilder": "9.0.4"
+    "xmlbuilder": "9.0.4",
+    "ya-csv": "0.10.1"
   },
   "devDependencies": {
     "babel-core": "6.26.0",

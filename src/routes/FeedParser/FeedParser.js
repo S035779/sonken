@@ -1,16 +1,36 @@
-import fs from 'fs';
-import { parseString } from 'xml2js';
-import R from 'ramda';
-import Rx from 'rx';
+import R                from 'ramda';
+import Rx               from 'rx';
+import csv              from 'ya-csv';
+import { parseString }  from 'xml2js';
+import mongoose         from 'mongoose';
+import { Note, Readed, Traded, Bided, Starred, Listed }
+                        from 'Models/feed';
 import std from 'Utilities/stdutils';
 import net from 'Utilities/netutils';
-import { logs as log } from 'Utilities/logutils';
+import { logs as log }  from 'Utilities/logutils';
+
+import fs from 'fs';
 let notes   = require('Services/data');
-let readed  = [{ user: 'MyUserName', ids: [] }];
-let traded  = [{ user: 'MyUserName', ids: [] }];
-let bided   = [{ user: 'MyUserName', ids: [] }];
-let starred = [{ user: 'MyUserName', ids: [] }];
-let listed = [{ user: 'MyUserName', ids: [] }];
+let readed  = [
+  {user: 'MyUserName',    ids: []}
+, {user: 'AdminUserName', ids: []}
+];
+let traded  = [
+  {user: 'MyUserName',    ids: []}
+, {user: 'AdminUserName', ids: []}
+];
+let bided   = [
+  {user: 'MyUserName',    ids: []}
+, {user: 'AdminUserName', ids: []}
+];
+let starred = [
+  {user: 'MyUserName',    ids: []}
+, {user: 'AdminUserName', ids: []}
+];
+let listed = [
+  {user: 'MyUserName',    ids: []}
+, {user: 'AdminUserName', ids: []}
+];
 
 const path = __dirname + '/../xml/'
 const files = [
@@ -46,7 +66,7 @@ export default class FeedParser {
     const splitNumIds = R.compose(R.map(Number), R.split(','));
     const splitStrIds = R.split(',');
     const isUsr   = obj => obj.user === options.user;
-    const isId    = obj => obj.id === options.id;
+    const isId    = obj => obj.id === Number(options.id);
     const _setIds = (ids, obj) => isUsr(obj) ? Object.assign({}, obj
     , { ids }) : obj;
     const setIds = R.curry(_setIds);
@@ -189,6 +209,7 @@ export default class FeedParser {
             setStarItems
           , setListItems
           , setReadItems
+          , R.head
           , R.filter(isId)
           , R.filter(isUsr)
           );
@@ -241,6 +262,7 @@ export default class FeedParser {
             () => 'OK'
           , setReaded
           , updReaded
+          , R.tap(console.log)
           , updReadIds
           , getIds
           );
@@ -355,6 +377,23 @@ export default class FeedParser {
           resolve(response(listed));
         });
         break;
+      //case 'upload/note':
+      //  return new Promise((resolve, reject) => {
+      //    console.log(options.user, options.file);
+      //    fs.writeFile('tmp/' +  options.user, options.file, err => {
+      //      if(err) return reject(err);
+      //      resolve('OK');
+      //    });
+      //  });
+      //  break;
+      //case 'download/note':
+      //  return new Promise((resolve, reject) => {
+      //    fs.readFile('tmp/' + options.user, (err, data) => {
+      //      if(err) return reject(err);
+      //      resolve(data);
+      //    });
+      //  });
+      //  break;
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
           net.get2(options.url
@@ -401,6 +440,14 @@ export default class FeedParser {
         break;
     }
   }
+
+  //downNote(user, id) {
+  //  return this.request('download/note', { user, id });
+  //}
+
+  //upNote(user, file) {
+  //  return this.request('upload/note', { user, file });
+  //}
 
   addList(user, ids) {
     return this.request('create/listed', { user, ids });
@@ -627,6 +674,52 @@ export default class FeedParser {
     return Rx.Observable.fromPromise(this.removeList(user, ids));
   }
 
+  //_uploadNote({ user, file }) {
+  //  return Rx.Observable.fromPromise(this.upNote(user, file));
+  //}
+
+  uploadNote({ user, file }) {
+    const csv = file.toString();
+    const split = arr => R.map(',', arr);
+    const arr = R.compose(
+      R.tap(console.log)
+    , R.map(split)
+    );
+    console.log(arr);
+    return this.createNote({ user, url, category });
+  }
+
+  //_downloadNote({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.downNote({ user, id }));
+  //}
+
+  downloadNote({ user, id }) {
+    const __toCSV =
+      arr => R.map(str => '"' + str + '"', arr);
+    const _toCSV =
+      arr => R.map(val => R.is(Object, val) ? R.values(val) : val, arr);
+    const toCSV = R.compose(
+      R.join('\r\n')
+    , R.map(__toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.flatten)
+    , R.map(_toCSV)
+    , R.map(R.values)
+    );
+    return this.fetchNote({ user, id })
+      .map(obj => obj.items ? toCSV(obj.items) : null)
+      .map(obj => new Buffer(obj));
+  }
+  
   parseFile({ user, file, category }) {
     const setNotes = R.curry(this.setNotes);
     return this.forFile([ file ])

@@ -6745,6 +6745,10 @@ y18n@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/y18n/-/y18n-3.2.1.tgz#6d15fba884c08679c0d77e88e7759e811e07fa41"
 
+ya-csv@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/ya-csv/-/ya-csv-0.10.1.tgz#5f6edc2858ee59056d7821aae4eb51d0d3bbda06"
+
 yallist@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-2.1.2.tgz#1c11f9218f076089a47dd512f93c6699a6a81d52"

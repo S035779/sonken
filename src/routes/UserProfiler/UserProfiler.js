@@ -73,7 +73,7 @@ export default class UserProfiler {
         break;
       case 'update/user':
         return new Promise((resolve, reject) => {
-          const isAdmin = options.admin !== '';
+          const isAdmin = !!options.admin;
           const conditions = isAdmin
             ? { user: options.data.user }
             : { user: options.user };
@@ -322,7 +322,7 @@ export default class UserProfiler {
   }
 
   updateUser({ admin, user, password, data }) {
-    const isAdmin = admin !== '';
+    const isAdmin = !!admin;
     const observable = isAdmin
       ? this._updateUser({ admin, data })
         .flatMap(() => this.fetchUser({ user: data.user }))

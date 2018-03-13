@@ -15,6 +15,7 @@ export default class DashboardStore extends ReduceStore {
       }
     , selected: false
     , ids:      []
+    , file:     null
     };
   }
   
@@ -132,7 +133,7 @@ export default class DashboardStore extends ReduceStore {
         });
       case 'note/download':
         return Object.assign({}, state, {
-          notes:  action.notes
+          file:  action.file
         });
       case 'read/create':
         return Object.assign({}, state, {

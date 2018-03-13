@@ -144,6 +144,12 @@ router.route('/readed')
 .post(feed.notImplemented())
 .delete(feed.deleteRead());
 
+router.route('/file')
+.get(feed.downloadNote())
+.put(feed.uploadNote())
+.post(feed.notImplemented())
+.delete(feed.notImplemented());
+
 router.route('/notes')
 .get(feed.fetchNotes())
 .put(feed.notImplemented())

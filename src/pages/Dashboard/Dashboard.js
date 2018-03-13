@@ -41,7 +41,7 @@ class Dashboard extends React.Component {
     std.logInfo(Dashboard.displayName, 'State', this.state);
     std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids } = this.state;
+    const { isAuthenticated, user, notes, page, ids, file } = this.state;
     const _id = Number(match.params.id);
     const category =
       match.params.category ? match.params.category : 'marchant';
@@ -58,6 +58,8 @@ class Dashboard extends React.Component {
         <RssSearch
           user={user}
           category={category}
+          note={note}
+          file={file}
           noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>

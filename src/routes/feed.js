@@ -4,6 +4,43 @@ import { logs as log }  from 'Utilities/logutils';
 const feed = FeedParser.of();
 
 export default {
+  uploadNote(options) {
+    return (req, res, next) => {
+      const user = req.headers['x-uploadedfilename'];
+      const file = new Buffer(+req.headers['content-length']);
+      let bufferOffset = 0;
+      req.on('data', chunk => {
+        chunk.copy(file, bufferOffset);
+        bufferOffset += chunk.length;
+      }).on('end', () => {
+        feed.uploadNote({ user, file }).subscribe(
+          obj => { res.send(obj); }
+        , err => {
+            res.status(500)
+              .send({ name: err.name, message: err.message });
+            log.error(err.name, ':', err.message);
+          }
+        , () => { log.info('Complete to upload Note.'); }  
+        );
+      });
+    };
+  },
+
+  downloadNote(options) {
+    return (req, res, next) => {
+      const { user, id } = req.query;
+      feed.downloadNote({ user, id }).subscribe(
+        obj => { res.send(obj); }
+      , err => {
+          res.status(500)
+            .send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to download Note.'); }  
+      );
+    };
+  },
+
   deleteList(options) {
     return (req, res, next) => {
       const { user, ids } = req.query;

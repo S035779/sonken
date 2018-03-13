@@ -233,6 +233,26 @@ export default {
           );
         });
         break;
+      case 'upload/note':
+        return new Promise((resolve, reject) => {
+          xhr.putFile(
+            api + '/file'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'download/note':
+        return new Promise((resolve, reject) => {
+          xhr.getFile(
+            api + '/file'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -312,11 +332,11 @@ export default {
   deleteItem(user, ids) {
     return this.request('delete/item', { user, ids });
   },
-  uploadNotes(user, filename) {
-    return this.request('upload/note', { user, filename });
+  uploadNotes(user, file) {
+    return this.request('upload/note', { filename: user, filedata: file });
   },
-  downloadNotes(user, filename) {
-    return this.request('download/note', { user, filename });
+  downloadNotes(user, id) {
+    return this.request('download/note', { user, id });
   },
 
 

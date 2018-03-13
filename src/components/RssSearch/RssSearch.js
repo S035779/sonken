@@ -1,91 +1,98 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import {
-  Select, Input, Button, Typography
-}                       from 'material-ui';
+import { Select, Input, Button, Typography }
+                        from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class RssSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       url:      ''
-    , filename: ''
     , perPage:    props.noteNumber
+    , isSuccess:  false
+    , isNotValid: false
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
-    const { notePage } = nextProps;
+    std.logInfo(RssSearch.displayName, 'Props', nextProps);
+    const { notePage, file } = nextProps;
     this.setState({ perPage: notePage.perPage });
+    if(file) this.downloadFile(file);
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
+  downloadFile(file) {
+    std.logInfo(RssSearch.displayName, 'downloadFile', file);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.target = '_blank';
+    a.download = 'download.csv';
+    a.click();
+  }
+
+  handleSubmit(event) {
     const { url } = this.state;
     const { user, category } = this.props;
-    this.logInfo('handleSubmit', url);
+    std.logInfo(RssSearch.displayName, 'handleSubmit', url);
     NoteAction.create(user, { url, category });
     this.setState({ url: '' });
   }
 
-  handleUpload(e) {
-    e.preventDefault();
-    const { filename } = this.state;
-    const { user } = this.props;
-    this.logInfo('handleUpload', filename);
-    NoteAction.upload(user, filename);
-    this.setState({ filename: '' });
+  handleDownload(event) {
+    const { user, note } = this.props;
+    std.logInfo(RssSearch.displayName, 'handleDownload', note.id);
+    NoteAction.download(user, note.id)
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
-  handleDownload(e) {
-    e.preventDefault();
-    const { filename } = this.state;
+  handleChangeFile(event) {
     const { user } = this.props;
-    this.logInfo('handleDownload', filename);
-    NoteAction.download(user, filename);
-    this.setState({ filename: '' });
+    const file = event.target.files.item(0);
+    std.logInfo(RssSearch.displayName, 'handleChangeFile', file);
+    NoteAction.upload(user, file)
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleChangeText(name, event) {
     const value = event.target.value;
-    this.logInfo('handleChangeText', value);
-    switch(name) {
-      case 'url':
-        this.setState({ url: value });
-        break;
-    }
+    std.logInfo(RssSearch.displayName, 'handleChangeText', value);
+    this.setState({ [name]: value });
   }
 
   handleChangeSelect(name, event) {
     const { user, noteNumber } = this.props;
     const value = event.target.value;
-    this.logInfo('handleChangeSelect', value);
+    std.logInfo(RssSearch.displayName, 'handleChangeSelect', value);
     switch(name) {
-      case 'page':
+      case 'perPage':
+        this.setState({ perPage: value });
         NoteAction.pagenation(user, {
           maxNumber: Math.ceil(noteNumber / value)
-          , number: 1, perPage: value
+        , number: 1
+        , perPage: value
         });
-        this.setState({ perPage: value });
         break;
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   render() {
     const { classes, noteNumber, category } = this.props;
-    const { url, perPage, filename } = this.state;
+    const { isSuccess, isNotValid, url, perPage, filename } = this.state;
     const color = category === 'marchant' ? 'skyblue' : 'orange';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
@@ -98,7 +105,7 @@ class RssSearch extends React.Component {
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
         <Select value={perPage}
-          onChange={this.handleChangeSelect.bind(this, 'page')}>
+          onChange={this.handleChangeSelect.bind(this, 'perPage')}>
           <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
@@ -119,9 +126,21 @@ class RssSearch extends React.Component {
         <RssButton color={color}
           onClick={this.handleDownload.bind(this)}
           classes={classes.button}>CSV ダウンロード</RssButton>
-        <RssButton color={color}
-          onClick={this.handleUpload.bind(this)}
+        <input type="file" id="file" accept="text/plain"
+          onChange={this.handleChangeFile.bind(this)}
+          className={classes.input}/>
+        <label htmlFor="file">
+        <RssButton color={color} component="span"
           classes={classes.button}>CSV アップロード</RssButton>
+        </label>
+        <RssDialog open={isSuccess} title={'送信完了'}
+          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
+        </RssDialog>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
+        </RssDialog>
       </div>
     </div>;
   }
@@ -142,12 +161,14 @@ const styles = theme => ({
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:     { flex: 1, width: buttonWidth
               , margin: theme.spacing.unit /2
+              , textAlign: 'center'
               , wordBreak: 'keep-all', padding: 4 }
 , results:    { flex: 1, minWidth
               , display: 'flex'
               , justifyContent: 'center', alignItems: 'flex-end' }
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
+, input:      { display: 'none' }
 });
 RssSearch.displayName = 'RssSearch';
 RssSearch.defaultProps = {};

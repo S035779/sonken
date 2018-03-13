@@ -24,14 +24,14 @@ class RssList extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    this.logInfo('comopnentWillReceiveProps', props);
+    std.logInfo(RssList.displayName, 'Props', props);
     const checked = props.selectedNoteId;
     const notes = props.notes;
     this.setState({ checked, notes });
   }
 
   handleChangeDialog(id, event) {
-    this.logInfo('handleChangeDialog', id);
+    std.logInfo(RssList.displayName, 'handleChangeDialog', id);
     const { opened } = this.state;
     const currentIndex = opened.indexOf(id);
     const newOpened = [...opened];
@@ -41,7 +41,7 @@ class RssList extends React.Component {
   }
 
   handleChangeCheckbox(id, event) {
-    this.logInfo('handleChangeCheckbox', id);
+    std.logInfo(RssList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { user } = this.props;
     const currentIndex = checked.indexOf(id);
@@ -52,17 +52,13 @@ class RssList extends React.Component {
   }
   
   handleChangeTitle({ id, title }) {
-    this.logInfo('handleChangeTitle', id);
+    std.logInfo(RssList.displayName, 'handleChangeTitle', id);
     const { notes } = this.state;
     const { user } = this.props;
     const curNote = notes.find(obj => obj.id === id);
     const newNote = Object.assign({}, curNote, { title });
     const newNotes = notes.map(obj => obj.id === id ? newNote : obj);
     NoteAction.update(user, newNote);
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   renderItem(note) {

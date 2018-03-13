@@ -334,3 +334,76 @@ const putJSON = function(url, data, success, error) {
 };
 module.exports.putJSON = putJSON;
 
+/**
+ * putFile
+ *
+ * @param {string} url 
+ * @param {object} data 
+ * @param {function} success 
+ * @param {function} error 
+ */
+const putFile = function(url, data, success, error) {
+  const request = new XMLHttpRequest();
+  request.open("PUT", url);
+  request.onreadystatechange = function() {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        const type = request.getResponseHeader("Content-Type");
+        if (type === "text/xml; charset=utf-8") {
+          success(request.responseXML);
+        } else if (type === "application/json; charset=utf-8") {
+          success(JSON.parse(request.responseText));
+        } else {
+          success(request.responseText);
+        }
+      } else {
+        error(JSON.parse(request.responseText));
+      }
+    }
+  };
+  request.onerror = function(e) {
+    error(request.statusText);
+  };
+  request.setRequestHeader("x-uploadedfilename", data.filename);
+  request.send(data.filedata);
+};
+module.exports.putFile = putFile;
+
+/**
+ * getFile
+ *
+ * @param {string} url
+ * @param {object} data 
+ * @param {function} success 
+ * @param {function} error 
+ */
+const getFile = function(url, data, success, error) {
+  const request = new XMLHttpRequest();
+  request.open("GET", url + "?" + encodeFormData(data));
+  request.onreadystatechange = function() {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        const type = request.getResponseHeader("Content-Type");
+        if (type.indexOf("xml") !== -1 && request.responseXML) {
+          success(request.responseXML);
+        } else if (type === "application/json; charset=utf-8") {
+          success(JSON.parse(request.responseText));
+        } else if (type === "application/octet-stream") {
+          const response
+            = new Blob([request.response], {type: "text/csv"});
+          success(response);
+        } else {
+          success(request.responseText);
+        }
+      } else {
+        error(JSON.parse(request.responseText));
+      }
+    }
+  };
+  request.onerror = function(e) {
+    error(JSON.parse(request.statusText));
+  };
+  request.send(null);
+};
+module.exports.getFile = getFile;
+

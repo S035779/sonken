@@ -11,10 +11,12 @@ import yellow         from 'material-ui/colors/yellow';
 
 class RssButton extends React.Component {
   render() {
-    const { classes, color, children, onClick } = this.props;
+    const { classes, color, children, onClick, type, component }
+      = this.props;
     return <MuiThemeProvider theme={thm[color]}>
-      <Button
+      <Button type={type}
         className={classes}
+        component={component}
         onClick={onClick}>{children}</Button>
     </MuiThemeProvider>;
   }
