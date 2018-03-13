@@ -130,6 +130,27 @@ export default {
           );
         });
         break;
+      case 'prefetch/faqs/posted':
+        return new Promise((resolve, reject) => {
+          net.getJSON2(
+            api + '/posted'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'fetch/faqs/posted':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/posted'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       //case 'fetch/faq':
       //  return new Promise((resolve, reject) => {
       //    xhr.getJSON(
@@ -301,6 +322,9 @@ export default {
   prefetchFaqs(admin) {
     return this.request('prefetch/faqs', { admin });
   },
+  prefetchPostedFaqs(admin) {
+    return this.request('prefetch/faqs/posted', {});
+  },
   prefetchMails(admin) {
     return this.request('prefetch/mails', { admin });
   },
@@ -357,6 +381,9 @@ export default {
    */
   fetchFaqs(admin) {
     return this.request('fetch/faqs', { admin });
+  },
+  fetchPostedFaqs(admin) {
+    return this.request('fetch/faqs/posted', {});
   },
 
   /*

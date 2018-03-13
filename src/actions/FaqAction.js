@@ -19,6 +19,16 @@ export default {
       dispatch({ type: 'faq/fetch', faqs });
     });
   },
+  prefetchPostedFaqs() {
+    return UserApiClient.prefetchPostedFaqs().then(faqs => {
+      dispatch({ type: 'faq/prefetch/posted', faqs });
+    });
+  },
+  fetchPostedFaqs() {
+    return UserApiClient.fetchPostedFaqs().then(faqs => {
+      dispatch({ type: 'faq/fetch/posted', faqs });
+    });
+  },
   //fetch(admin, id) {
   //  dispatch({ type: 'faq/fetch/before' });
   //  return UserApiClient.fetchFaq(admin, id).then(faq => {

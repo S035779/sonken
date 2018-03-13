@@ -17,6 +17,8 @@ import Faq          from 'Pages/Faq/Faq';
 import FaqEdit      from 'Pages/FaqEdit/FaqEdit';
 import Mail         from 'Pages/Mail/Mail';
 import MailEdit     from 'Pages/MailEdit/MailEdit';
+import Faqs         from 'Pages/Faqs/Faqs';
+import Inquiry      from 'Pages/Inquiry/Inquiry';
 
 const getUserData = (options, match) => {
   return new Promise((resolve, reject) => {
@@ -33,6 +35,16 @@ export default function getRoutes() {
         component: Dashboard
       , loadData: getUserData
       }]
+    }
+    , {
+      path: '/faqs'
+    , component: Faqs
+    , loadData: getUserData
+    }
+    , {
+      path: '/inquiry'
+    , component: Inquiry
+    , loadData: getUserData
     }
     , {
       path: '/login/:page'

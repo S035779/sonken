@@ -24,7 +24,7 @@ class AdminButtonNav extends React.Component {
       <MuiThemeProvider theme={thm4}>
         <Button component={Link} to="/admin/mail">メール作成</Button>
       </MuiThemeProvider>
-      <Button component={Link} to="/faq">FAQ</Button>
+      <Button component={Link} to="/faqs">FAQ</Button>
       <Button component={Link} to="/inquiry">お問い合わせ</Button>
     </MuiThemeProvider>;
   }
