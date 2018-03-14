@@ -678,15 +678,51 @@ export default class FeedParser {
   //  return Rx.Observable.fromPromise(this.upNote(user, file));
   //}
 
-  uploadNote({ user, file }) {
+  uploadNote({ user, category, file }) {
     const csv = file.toString();
-    const split = arr => R.map(',', arr);
-    const arr = R.compose(
+    const __toArr = R.map(R.slice(1, Infinity));
+    const _toArr = R.split('",');
+    const setItem = arr => ({
+      title:  arr[0]
+    , link: arr[1]
+    , description: {
+        DIV: { A: { $: { HREF: arr[2] }, IMG: { $: {
+          SRC: arr[3], BORDER: arr[4], WIDTH: arr[5], HEIGHT: arr[6]
+          , ALT: arr[7] }}}}}
+    , pubDate: arr[8]
+    , guid: { _: arr[9], $: { isPermaLink: arr[10] } }
+    , price: arr[11]
+    , bids: arr[12]
+    , bidStopTime: arr[13]
+    , readed: arr[14]
+    , starred: arr[15]
+    , listed: arr[16]
+    });
+    const toArr = R.compose(
       R.tap(console.log)
-    , R.map(split)
+    , R.map(setItem)
+    , R.map(__toArr)
+    , R.map(_toArr)
+    , R.split('\r\n')
     );
-    console.log(arr);
-    return this.createNote({ user, url, category });
+    const setNote = {
+      id: std.makeRandInt(9)
+    , url: ''
+    , category: category
+    , user: user
+    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+    , items: toArr(csv)
+    , title: 'Untitled'
+    , asin: ''
+    , name: ''
+    , price: 0
+    , bidsprice: 0
+    , body: ''
+    };
+    const observable =
+      Rx.Observable.fromPromise(this.addNote(user, setNote));
+    return observable
+      .map(R.tap(console.log));
   }
 
   //_downloadNote({ user, id }) {

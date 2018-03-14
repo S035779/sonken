@@ -332,10 +332,12 @@ export default {
   deleteItem(user, ids) {
     return this.request('delete/item', { user, ids });
   },
-  uploadNotes(user, file) {
-    return this.request('upload/note', { filename: user, filedata: file });
+  uploadNote(user, category, file) {
+    const filename = user + '_' + category;
+    const filedata = file;
+    return this.request('upload/note', { filename, filedata });
   },
-  downloadNotes(user, id) {
+  downloadNote(user, id) {
     return this.request('download/note', { user, id });
   },
 

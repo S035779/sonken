@@ -6,14 +6,17 @@ const feed = FeedParser.of();
 export default {
   uploadNote(options) {
     return (req, res, next) => {
-      const user = req.headers['x-uploadedfilename'];
-      const file = new Buffer(+req.headers['content-length']);
+      const filename = req.headers['x-uploadedfilename'];
+      const filedata = new Buffer(+req.headers['content-length']);
       let bufferOffset = 0;
       req.on('data', chunk => {
-        chunk.copy(file, bufferOffset);
+        chunk.copy(filedata, bufferOffset);
         bufferOffset += chunk.length;
       }).on('end', () => {
-        feed.uploadNote({ user, file }).subscribe(
+        const user = filename.split('_')[0];
+        const category = filename.split('_')[1];
+        const file = filedata;
+        feed.uploadNote({ user, category, file }).subscribe(
           obj => { res.send(obj); }
         , err => {
             res.status(500)

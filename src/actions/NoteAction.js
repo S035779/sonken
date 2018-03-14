@@ -70,13 +70,13 @@ export default {
       dispatch({ type: 'note/delete', ids });
     });
   },
-  upload(user, file) {
-    return NoteApiClient.uploadNotes(user, file).then(note => {
+  upload(user, category, file) {
+    return NoteApiClient.uploadNote(user, category, file).then(note => {
       dispatch({ type: 'note/upload', note });
     });
   },
   download(user, id) {
-    return NoteApiClient.downloadNotes(user, id).then(file => {
+    return NoteApiClient.downloadNote(user, id).then(file => {
       dispatch({ type: 'note/download', file });
     });
   },

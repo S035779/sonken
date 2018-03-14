@@ -27,7 +27,6 @@ class RssSearch extends React.Component {
     std.logInfo(RssSearch.displayName, 'Props', nextProps);
     const { notePage, file } = nextProps;
     this.setState({ perPage: notePage.perPage });
-    if(file) this.downloadFile(file);
   }
 
   downloadFile(file) {
@@ -41,25 +40,37 @@ class RssSearch extends React.Component {
 
   handleSubmit(event) {
     const { url } = this.state;
-    const { user, category } = this.props;
+    const { user } = this.props;
     std.logInfo(RssSearch.displayName, 'handleSubmit', url);
-    NoteAction.create(user, { url, category });
-    this.setState({ url: '' });
+    let category =
+      url.substring(0,34) === 'https://auctions.yahoo.co.jp/rss?p'
+        ? 'marchant' :
+          url.substring(0,36) === 'https://auctions.yahoo.co.jp/rss?sid'
+            ? 'sellers'
+            : null;
+    if(!category) return this.setState({ isNotValid: true });
+    NoteAction.create(user, { url, category })
+      .then(() => this.setState({ isSuccess: true, url: '' }))
+      .catch(err => this.setState({ isNotValid: true, url: '' }));
   }
 
   handleDownload(event) {
     const { user, note } = this.props;
+    if(!note) return this.setState({ isNotValid: true });
     std.logInfo(RssSearch.displayName, 'handleDownload', note.id);
     NoteAction.download(user, note.id)
-      .then(() => this.setState({ isSuccess: true }))
+      .then(() => {
+        if(this.props.file) this.downloadFile(this.props.file);
+        this.setState({ isSuccess: true })
+      })
       .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleChangeFile(event) {
-    const { user } = this.props;
+    const { user, category } = this.props;
     const file = event.target.files.item(0);
     std.logInfo(RssSearch.displayName, 'handleChangeFile', file);
-    NoteAction.upload(user, file)
+    NoteAction.upload(user, category, file)
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
   }
