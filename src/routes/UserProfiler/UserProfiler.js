@@ -63,7 +63,8 @@ export default class UserProfiler {
       case 'create/admin':
         return new Promise((resolve, reject) => {
           const admin = new Admin({
-            email:          options.data.email
+            from:           options.data.from
+          , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
           });
@@ -78,7 +79,8 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           const update = {
-            email:          options.data.email
+            from:           options.data.from
+          , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
           , updated:        Date.now()
@@ -141,6 +143,7 @@ export default class UserProfiler {
       case 'update/user':
         return new Promise((resolve, reject) => {
           const isAdmin = !!options.admin;
+          const isData = !!options.data;
           const conditions = isAdmin
             ? { user: options.data.user }
             : { user: options.user };
@@ -153,11 +156,22 @@ export default class UserProfiler {
             , plan:   options.data.plan
             , updated: Date.now()
             }
-            : {
-              salt:   options.salt
-            , hash:   options.hash
-            , updated: Date.now()
-            };
+            : isData
+              ? {
+                  name:   options.data.name
+                , kana:   options.data.kana
+                , email:  options.data.email
+                , phone:  options.data.phone
+                , plan:   options.data.plan
+                , salt:   options.salt
+                , hash:   options.hash
+                , updated: Date.now()
+              }
+              : {
+                salt:   options.salt
+              , hash:   options.hash
+              , updated: Date.now()
+              };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
@@ -441,14 +455,19 @@ export default class UserProfiler {
 
   updateUser({ admin, user, password, data }) {
     const isAdmin = !!admin;
-    const observable = isAdmin
+    const isData = !!data;
+    return isAdmin
       ? this._updateUser({ admin, data })
         .flatMap(() => this.fetchUser({ user: data.user }))
-      : this.createSaltAndHash(password)
-        .flatMap(obj => 
-          this._updateUser({ user, salt: obj.salt, hash: obj.hash }))
-        .flatMap(() => this.fetchUser({ user }));
-    return observable;
+      : isData
+        ? this.createSaltAndHash(password).flatMap(obj => 
+            this._updateUser({
+              user, salt: obj.salt, hash: obj.hash, data
+            })).flatMap(() => this.fetchUser({ user }))
+        : this.createSaltAndHash(password).flatMap(obj => 
+            this._updateUser({
+              user, salt: obj.salt, hash: obj.hash
+            })).flatMap(() => this.fetchUser({ user }));
   }
 
   _updateUser({ user, salt, hash, data }) {
@@ -541,7 +560,8 @@ export default class UserProfiler {
 
   createAdmin({ admin }) {
     const data = {
-      email: mms_from
+      from: mms_from
+    , agreement: 'http://www.example.com'
     , menu: { num1: 9999, num2: 300, num3: 50, num4: 20 }
     , advertisement: {
         url1: 'http://www1.example.com'

@@ -28,7 +28,8 @@ const approvedSchema = new mongoose.Schema({
 approvedSchema.index({ approved: 1 }, { unique: true });
 
 const adminSchema = new mongoose.Schema({
-  email:            { type: String, required: true }
+  from:             { type: String, required: true }
+, agreement:        String
 , menu:             mongoose.Schema.Types.Mixed
 , advertisement:    mongoose.Schema.Types.Mixed
 , updated:          { type: Date, default: Date.now() } 

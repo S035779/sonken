@@ -33,7 +33,7 @@ class LoginFormDialog extends React.Component {
         <Button onClick={this.handleClose.bind(this)} color="primary">
         戻る
         </Button>
-        <Button onClick={this.handleClose.bind(this)} color="primary">
+        <Button onClick={this.handleSubmit.bind(this)} color="primary">
         設定
         </Button>
       </DialogActions>

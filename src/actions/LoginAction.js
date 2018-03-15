@@ -17,13 +17,25 @@ export default {
     });
   },
   fetchProfileAdmin(admin) {
-    return LoginApiClient.fetchProfileAdmin(admin).then(obj => {
-      dispatch({ type: 'admin/profile',  profile: { admin: obj } });
+    return LoginApiClient.fetchProfileAdmin(admin).then(profile => {
+      dispatch({ type: 'admin/profile',  profile });
     });
   },
   fetchProfileUser(user) {
-    return LoginApiClient.fetchProfileUser(user).then(obj => {
-      dispatch({ type: 'user/profile',  profile: { user: obj } });
+    return LoginApiClient.fetchProfileUser(user).then(profile => {
+      dispatch({ type: 'user/profile',  profile });
+    });
+  },
+  updateAdmin(admin, data) {
+    return LoginApiClient.updateAdmin(admin, data)
+      .then(profile => {
+      dispatch({ type: 'admin/update', profile });
+    });
+  },
+  updateUser(user, password, data) {
+    return LoginApiClient.updateUser(user, password, data)
+      .then(profile => {
+      dispatch({ type: 'user/update', profile });
     });
   },
   createAdmin(admin) {

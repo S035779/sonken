@@ -39,11 +39,11 @@ export default class LoginStore extends ReduceStore {
         });
       case 'admin/profile':
         return Object.assign({}, state, {
-          profile: action.profile
+          profile_admin: action.profile
         });
       case 'user/profile':
         return Object.assign({}, state, {
-          profile: action.profile
+          profile_user: action.profile
         });
       case 'login/authenticate':
         return Object.assign({}, state, {

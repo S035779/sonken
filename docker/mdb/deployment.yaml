@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: mongodb
+    spec:
+      containers:
+        - image: asia.gcr.io/feedparser-198104/feedparser/mongodb
+          imagePullPolicy: Always
+          name: mongodb

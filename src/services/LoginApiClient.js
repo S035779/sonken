@@ -164,6 +164,10 @@ export default {
   deleteUser(user) {
     return this.request('delete/user', { user });
   },
+  updateUser(user, password, data) {
+    return this.request('update/user'
+      , { user, id: data._id, password, data });
+  },
 
   /*
    * Profile
@@ -176,6 +180,8 @@ export default {
   },
   createAdmin(admin) {
     return this.request('create/admin', { admin });
+  },
+  updateAdmin(admin, data) {
+    return this.request('update/admin', { admin, id: data._id, data});
   }
-
 };

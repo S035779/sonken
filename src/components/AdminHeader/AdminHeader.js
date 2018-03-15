@@ -32,7 +32,7 @@ class AdminHeader extends React.Component {
   }
 
   render() {
-    const { classes, admin, profile } = this.props;
+    const { classes, admin, profile_admin, profile_user } = this.props;
     const { auth } = this.state;
     return <div className={classes.navHeader}>
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
@@ -44,7 +44,8 @@ class AdminHeader extends React.Component {
         </IconButton>
         <AdminButtonNav />
         <div className={classes.loginIcon}>
-        <AdminMenu auth={auth} admin={admin} profile={profile} />
+        <AdminMenu auth={auth} admin={admin}
+          profile_admin={profile_admin} profile_user={profile_user} />
         </div>
       </div>
     </div>;

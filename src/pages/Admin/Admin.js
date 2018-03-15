@@ -22,12 +22,14 @@ class Admin extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { admin, isAuthenticated, profile } = this.state;
+    const { admin, isAuthenticated, profile_user, profile_admin }
+      = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
       <div className={classes.adminFrame}>
-        <AdminHeader admin={admin} profile={profile}
+        <AdminHeader admin={admin}
+          profile_admin={profile_admin} profile_user={profile_user}
           isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}
