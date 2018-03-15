@@ -37,7 +37,7 @@ class Faqs extends React.Component {
       if(faq.posted) _faqs.push(faq);
     });
     return <div className={classes.root}>
-      <h1 className={classes.title}>Faqs</h1>
+      <h1 className={classes.title}>FAQ</h1>
       <PostedFaqList faqs={_faqs} />
       </div>;
   }

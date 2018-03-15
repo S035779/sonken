@@ -44,6 +44,21 @@ export default {
     };
   },
 
+  downloadItems(options) {
+    return (req, res, next) => {
+      const { user, items } = req.body;
+      feed.downloadItems({ user, items }).subscribe(
+        obj => { res.send(obj); }
+      , err => {
+          res.status(500)
+            .send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to download Items.'); }  
+      );
+    };
+  },
+
   deleteList(options) {
     return (req, res, next) => {
       const { user, ids } = req.query;

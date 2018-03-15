@@ -61,7 +61,7 @@ class RssSearch extends React.Component {
     NoteAction.download(user, note.id)
       .then(() => {
         if(this.props.file) this.downloadFile(this.props.file);
-        this.setState({ isSuccess: true })
+        this.setState({ isSuccess: true });
       })
       .catch(err => this.setState({ isNotValid: true }));
   }

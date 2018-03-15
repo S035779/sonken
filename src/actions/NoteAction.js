@@ -51,7 +51,7 @@ export default {
     });
   },
   update(user, id, note) {
-    return NoteApiClient.updateNote(user, id, note).then(() => {
+    return NoteApiClient.updateNote(user, id, note).then(note => {
       dispatch({ type: 'note/update', id, note });
     });
   },

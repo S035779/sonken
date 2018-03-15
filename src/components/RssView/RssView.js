@@ -5,13 +5,13 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 
 const kpa = '//dyn.keepa.com/pricehistory.png?domain=co.jp&asin=';
-const img = 'http://images-jp.amazon.com/images/P/';
-const imgfile = '.09.LZZZZZZZ.jpg';
+//const img = 'http://images-jp.amazon.com/images/P/';
+//const imgfile = '.09.LZZZZZZZ.jpg';
 
 class RssView extends React.Component {
   render() {
     const {classes, note} = this.props;
-    const link_img = img + note.asin + imgfile;
+    const link_img = note.AmazonImg;//img + note.asin + imgfile;
     const link_kpa = kpa + note.asin;
     return <div className={classes.noteView}>
       <img className={classes.image} src={link_img} />

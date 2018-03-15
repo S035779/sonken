@@ -41,7 +41,7 @@ const get = function(url, data, success, error) {
           success(request.responseText);
         }
       } else {
-        error(request.responseText);
+        error(JSON.parse(request.responseText));
       }
     }
   };
@@ -80,7 +80,7 @@ const getJSON = function(url, data, success, error) {
     }
   };
   request.onerror = function(e) {
-    error(JSON.parse(request.statusText));
+    error(request.statusText);
   };
   request.send(null);
 };
@@ -401,9 +401,47 @@ const getFile = function(url, data, success, error) {
     }
   };
   request.onerror = function(e) {
-    error(JSON.parse(request.statusText));
+    error(request.statusText);
   };
   request.send(null);
 };
 module.exports.getFile = getFile;
 
+/**
+ * postFile
+ *
+ * @param {string} url 
+ * @param {object} data 
+ * @param {function} success 
+ * @param {function} error 
+ */
+const postFile = function(url, data, success, error) {
+  const request = new XMLHttpRequest();
+  request.open("POST", url);
+  request.onreadystatechange = function() {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        const type = request.getResponseHeader("Content-Type");
+        if (type === "text/xml; charset=utf-8") {
+          success(request.responseXML);
+        } else if (type === "application/json; charset=utf-8") {
+          success(JSON.parse(request.responseText));
+        } else if (type === "application/octet-stream") {
+          const response
+            = new Blob([request.response], {type: "text/csv"});
+          success(response);
+        } else {
+          success(request.responseText);
+        }
+      } else {
+        error(JSON.parse(request.responseText));
+      }
+    }
+  };
+  request.onerror = function(e) {
+    error(request.statusText);
+  };
+  request.setRequestHeader("Content-Type", "application/json");
+  request.send(JSON.stringify(data));
+};
+module.exports.postFile = postFile;

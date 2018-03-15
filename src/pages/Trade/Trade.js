@@ -24,7 +24,7 @@ class Trade extends React.Component {
   static prefetch(options) {
     std.logInfo(Trade.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchTraded(user));
+      .then(() => NoteAction.prefetchTraded(options.user));
   }
 
   componentDidMount() {
@@ -61,7 +61,7 @@ class Trade extends React.Component {
   render() {
     std.logInfo(Trade.displayName, 'State', this.state);
     const { classes, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter }
+    const { isAuthenticated, user, notes, page, ids, filter, file }
       = this.state;
     let items = [];
     notes.forEach(note => {
@@ -78,6 +78,8 @@ class Trade extends React.Component {
     return <div className={classes.root}>
       <TradeSearch
         user={user}
+        file={file}
+        items={_items}
         itemNumber={number} itemPage={page}/>
       <TradeFilter
         user={user}

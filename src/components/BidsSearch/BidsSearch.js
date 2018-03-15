@@ -10,13 +10,15 @@ import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class BidsSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      filename:  ''
-    , perPage:   props.itemNumber
+      perPage:   props.itemNumber
+    , isSuccess:  false
+    , isNotValid: false
     };
   }
 
@@ -26,11 +28,25 @@ class BidsSearch extends React.Component {
     this.setState({ perPage: itemPage.perPage });
   }
 
+  downloadFile(file) {
+    std.logInfo(BidsSearch.displayName, 'downloadFile', file);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.target = '_blank';
+    a.download = 'download.csv';
+    a.click();
+  }
+
   handleDownload() {
-    const { filename } = this.state;
-    const { user } = this.props;
-    std.logInfo(BidsSearch.displayName, 'handleDownload', filename);
-    BidsAction.download(user, filename);
+    const { user, items } = this.props;
+    if(!items) return this.setState({ isNotValid: true })
+    std.logInfo(BidsSearch.displayName, 'handleDownload', items);
+    BidsAction.download(user, items)
+      .then(() => {
+        if(this.props.file) this.downloadFile(this.props.file);
+        this.setState({ isSuccess: true });
+      })
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleChangeSelect(name, event) {
@@ -39,19 +55,24 @@ class BidsSearch extends React.Component {
     std.logInfo(BidsSearch.displayName, 'handleChangeSelet', value);
     switch(name) {
       case 'page':
+        this.setState({ perPage: value });
         BidsAction.pagenation(user, {
           maxNumber: Math.ceil(itemNumber / value)
-          , number: 1, perPage: value
+        , number: 1
+        , perPage: value
         });
-        this.setState({ perPage: value });
         break;
     }
+  }
+
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   render() {
     std.logInfo(BidsSearch.displayName, 'State', this.state);
     const { classes, itemNumber } = this.props;
-    const { perPage, filename } = this.state;
+    const { isSuccess, isNotValid, perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -77,6 +98,14 @@ class BidsSearch extends React.Component {
         <RssButton color={'green'}
           onClick={this.handleDownload.bind(this)}
           classes={classes.button}>CSV ダウンロード</RssButton>
+        <RssDialog open={isSuccess} title={'送信完了'}
+          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
+        </RssDialog>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
+        </RssDialog>
         <div className={classes.button} />
       </div>
     </div>;

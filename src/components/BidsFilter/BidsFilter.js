@@ -4,9 +4,8 @@ import BidsAction       from 'Actions/BidsAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import {
-  Input, Button, Checkbox, Typography, TextField
-}                       from 'material-ui';
+import { Input, Button, Checkbox, Typography, TextField }
+                        from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 
@@ -30,13 +29,13 @@ class BidsFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
+    std.logInfo(BidsFilter.displayName, 'Props', nextProps);
     const { selectedItemId, itemFilter } = nextProps;
     this.setState({ selectedItemId, itemFilter });
   }
 
   handleChangeCheckbox(name, event) {
-    this.logInfo('handleChangeCheckbox', name);
+    std.logInfo(BidsFilter.displayName, 'handleChangeCheckbox', name);
     const checked = event.target.checked;
     switch(name) {
       case 'inBidding':
@@ -72,14 +71,14 @@ class BidsFilter extends React.Component {
   handleTraded() {
     const { selectedItemId } = this.state;
     const { user } = this.props;
-    this.logInfo('handleTraded', selectedItemId);
+    std.logInfo(BidsFilter.displayName, 'handleTraded', selectedItemId);
     BidsAction.createTrade(user, selectedItemId);
   }
 
   handleDelete() {
     const { selectedItemId } = this.state;
     const { user } = this.props;
-    this.logInfo('handleDelete', selectedItemId);
+    std.logInfo(BidsFilter.displayName, 'handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       BidsAction.deleteItem(user, selectedItemId);
       this.setState({ checked: false });
@@ -90,7 +89,7 @@ class BidsFilter extends React.Component {
     const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
       = this.state;
     const { user } = this.props;
-    this.logInfo('handleFilter', {
+    std.logInfo(BidsFilter.displayName, 'handleFilter', {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     });
     BidsAction.filter(user, {
@@ -109,12 +108,8 @@ class BidsFilter extends React.Component {
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
   render() {
-    this.logInfo('render', this.state);
+    std.logInfo(BidsFilter.displayName, 'State', this.state);
     const { classes } = this.props;
     const {
       checked

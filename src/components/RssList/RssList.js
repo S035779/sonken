@@ -57,8 +57,7 @@ class RssList extends React.Component {
     const { user } = this.props;
     const curNote = notes.find(obj => obj.id === id);
     const newNote = Object.assign({}, curNote, { title });
-    const newNotes = notes.map(obj => obj.id === id ? newNote : obj);
-    NoteAction.update(user, newNote);
+    NoteAction.update(user, id, newNote);
   }
 
   renderItem(note) {

@@ -5,12 +5,10 @@ import TradeAction     from 'Actions/TradeAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import {
-  List, Paper, Checkbox, Button, Typography
-}                     from 'material-ui';
-import {
-  ListItem, ListItemText, ListItemSecondaryAction
-}                     from 'material-ui/List';
+import { List, Paper, Checkbox, Button, Typography }
+                      from 'material-ui';
+import { ListItem, ListItemText, ListItemSecondaryAction }
+                      from 'material-ui/List';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class TradeItemList extends React.Component {
@@ -23,7 +21,7 @@ class TradeItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
+    std.logInfo(TradeItemList.displayName, 'Props', nextProps);
     const { selectedItemId, items } = nextProps;
     let traded = [];
     items.forEach(item => {
@@ -33,7 +31,7 @@ class TradeItemList extends React.Component {
   }
 
   handleChangeTraded(id, event) {
-    this.logInfo('handleChangeTraded', id);
+    std.logInfo(TradeItemList.displayName, 'handleChangeTraded', id);
     const { traded } = this.state;
     const { user } = this.props;
     const currentIndex = traded.indexOf(id);
@@ -49,7 +47,7 @@ class TradeItemList extends React.Component {
   }
 
   handleChangeCheckbox(id, event) {
-    this.logInfo('handleChangeCheckbox', id);
+    std.logInfo(TradeItemList.displayName, 'handleChangeCheckbox', id);
     const { selectedItemId } = this.state;
     const { user } = this.props;
     const currentIndex = selectedItemId.indexOf(id);
@@ -57,10 +55,6 @@ class TradeItemList extends React.Component {
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
     TradeAction.select(user, newChecked);
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   renderItem(index, item) {

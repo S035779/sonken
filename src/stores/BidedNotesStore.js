@@ -20,6 +20,7 @@ export default class BidedNotesStore extends ReduceStore {
       , bidStartTime: 0
       , bidStopTime:  0
       }
+    , file: null
     };
   }
   
@@ -96,7 +97,7 @@ export default class BidedNotesStore extends ReduceStore {
         });
       case 'bids/download':
         return Object.assign({}, state, {
-          notes:  action.notes
+          file:  action.file
         });
       case 'bids/rehydrate':
         return action.state;

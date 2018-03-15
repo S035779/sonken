@@ -30,13 +30,13 @@ class TradeFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReceiveProps', nextProps);
+    std.logInfo(TradeFilter.displayName, 'Props', nextProps);
     const { selectedItemId, itemFilter } = nextProps;
     this.setState({ selectedItemId, itemFilter });
   }
 
   handleChangeCheckbox(name, event) {
-    this.logInfo('handleChangeCheckbox', name);
+    std.logInfo(TradeFilter.displayName, 'handleChangeCheckbox', name);
     const checked = event.target.checked;
     switch(name) {
       case 'inBidding':
@@ -72,14 +72,14 @@ class TradeFilter extends React.Component {
   handleBided() {
     const { selectedItemId } = this.state;
     const { user } = this.props;
-    this.logInfo('handleBided', selectedItemId);
+    std.logInfo(TradeFilter.displayName, 'handleBided', selectedItemId);
     TradeAction.createBids(user, selectedItemId);
   }
 
   handleDelete() {
     const { selectedItemId } = this.state;
     const { user } = this.props;
-    this.logInfo('handleDelete', selectedItemId);
+    std.logInfo(TradeFilter.displayName, 'handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       TradeAction.deleteItem(user, selectedItemId);
       this.setState({ checked: false });
@@ -90,7 +90,7 @@ class TradeFilter extends React.Component {
     const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
       = this.state;
     const { user } = this.props;
-    this.logInfo('handleFilter', {
+    std.logInfo(TradeFilter.displayName, 'handleFilter', {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     });
     TradeAction.filter(user, {
@@ -109,12 +109,8 @@ class TradeFilter extends React.Component {
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
   render() {
-    this.logInfo('render', this.state);
+    std.logInfo(TradeFilter.displayName, 'State', this.state);
     const { classes } = this.props;
     const {
       checked

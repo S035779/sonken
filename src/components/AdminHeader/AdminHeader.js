@@ -8,8 +8,8 @@ import { IconButton } from 'material-ui';
 import {
   Menu as MenuIcon
 }                     from 'material-ui-icons';
-import LoginMenu      from 'Components/LoginMenu/LoginMenu';
-import LoginSwitch    from 'Components/LoginMenu/LoginSwitch';
+import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
+import AdminMenu      from 'Components/AdminMenu/AdminMenu';
 import AdminButtonNav   from 'Components/AdminButtonNav/AdminButtonNav';
 
 class AdminHeader extends React.Component {
@@ -32,7 +32,7 @@ class AdminHeader extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, admin, profile } = this.props;
     const { auth } = this.state;
     return <div className={classes.navHeader}>
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
@@ -44,7 +44,7 @@ class AdminHeader extends React.Component {
         </IconButton>
         <AdminButtonNav />
         <div className={classes.loginIcon}>
-        <LoginMenu auth={auth} />
+        <AdminMenu auth={auth} admin={admin} profile={profile} />
         </div>
       </div>
     </div>;

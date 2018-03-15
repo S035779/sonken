@@ -1,11 +1,28 @@
-import R                from 'ramda';
-import Rx               from 'rx';
-import mongoose         from 'mongoose';
-import { User, Approved }
-                        from 'Models/profile';
-import std              from 'Utilities/stdutils';
-import { logs as log }  from 'Utilities/logutils';
+import dotenv             from 'dotenv';
+import R                  from 'ramda';
+import Rx                 from 'rx';
+import mongoose           from 'mongoose';
+import { User, Approved, Admin }
+                          from 'Models/profile';
+import { Mail, Selected } from 'Models/mail';
+import std                from 'Utilities/stdutils';
+import Sendmail           from 'Utilities/Sendmail';
+import { logs as log }    from 'Utilities/logutils';
 
+dotenv.config()
+const mms_from = process.env.MMS_FROM || 'info@example.com';
+const smtp_port = process.env.MMS_PORT || 2525;
+const ssmtp_port = process.env.MMS_SSL;
+const isSSL = ssmtp_port ? true : false;
+const mail_keyset = {
+  host:   process.env.MMS_HOST
+, secure: isSSL
+, port:   isSSL ? ssmtp_port : smtp_port
+, auth: {
+    user:   process.env.MMS_USER
+    , pass: process.env.MMS_PASS
+  }
+};
 
 /**
  * UserProfiler class.
@@ -27,6 +44,56 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions = {};
           User.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'fetch/admin':
+        return new Promise((resolve, reject) => {
+          const conditions = {};
+          Admin.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'create/admin':
+        return new Promise((resolve, reject) => {
+          const admin = new Admin({
+            email:          options.data.email
+          , menu:           options.data.menu
+          , advertisement:  options.data.advertisement
+          });
+          admin.save((err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'update/admin':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.id };
+          const update = {
+            email:          options.data.email
+          , menu:           options.data.menu
+          , advertisement:  options.data.advertisement
+          , updated:        Date.now()
+          };
+          Admin.findOneAndUpdate(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'delete/admin':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.id };
+          User.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -108,9 +175,36 @@ export default class UserProfiler {
           });
         });
         break;
-      case 'sendmail/user':
+      case 'mail/address':
         return new Promise((resolve, reject) => {
-          resolve({ response: 'OK' });
+          const conditions = { _id: options.id };
+          User.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            if(obj === null) return reject(
+              { name: 'Error', message: 'User not found.' });
+            log.trace(request, obj);
+            resolve(obj.email);
+          });
+        });
+        break;
+      case 'mail/selected':
+        return new Promise((resolve, reject) => {
+          const conditions = {};
+          Selected.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'mail/message':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.id };
+          Mail.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
         });
         break;
       case 'create/approval':
@@ -208,6 +302,22 @@ export default class UserProfiler {
     }
   }
 
+  getAdmin(admin, id) {
+    return this.request('fetch/admin', { admin, id });
+  }
+
+  addAdmin(admin, data) {
+    return this.request('create/admin', { admin, data });
+  }
+
+  replaceAdmin(admin, id, data) {
+    return this.request('update/admin', { admin, id, data });
+  }
+
+  removeAdmin(admin, id) {
+    return this.request('delete/admin', { admin,id });
+  }
+
   getSaltAndHash(password, salt) {
     return std.crypto_pbkdf2(password, salt, 256);
   }
@@ -240,8 +350,16 @@ export default class UserProfiler {
     return this.request('delete/user', { admin, id });
   }
 
-  sendmailUser(admin, id) {
-    return this.request('sendmail/user', { admin, id });
+  getAddress(admin, id, message) {
+    return this.request('mail/address', { admin, id, message });
+  }
+
+  getMessage(admin, id) {
+    return this.request('mail/message', { admin, id });
+  }
+
+  getSelected(admin) {
+    return this.request('mail/selected', { admin });
   }
 
   addApproval(admin, id) {
@@ -352,11 +470,52 @@ export default class UserProfiler {
   }
 
   sendmail({ admin, ids }) {
-    const _promise = R.curry(this.sendmailUser.bind(this)) 
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
-    const observables = R.map(observable, ids);
+    let messages = [];
+    const sender = 'info@example.com';
+    return this.fetchSelected(admin)
+    .flatMap(objs => this.forMessage(admin, objs))
+    .map(arr => { messages = arr; })
+    .flatMap(() => this.forAddress(admin, ids))
+    .map(maillist => this.setMessage(sender, maillist, messages))
+    .flatMap(objs => this.postMessages(objs));
+  }
+
+  forAddress(admin, ids) {
+    const observables = R.map(id => this.fetchAddress(admin, id), ids);
     return Rx.Observable.forkJoin(observables);
+  }
+
+  forMessage(admin, objs) {
+    const observables =
+      R.map(obj => this.fetchMessage(admin, obj.selected), objs);
+    return Rx.Observable.forkJoin(observables);
+  }
+
+  fetchAddress(admin, id) {
+    return Rx.Observable.fromPromise(this.getAddress(admin, id));
+  }
+
+  fetchMessage(admin, id) {
+    log.trace(admin, id);
+    return Rx.Observable.fromPromise(this.getMessage(admin, id));
+  }
+
+  fetchSelected(admin) {
+    return Rx.Observable.fromPromise(this.getSelected(admin));
+  }
+
+  postMessages(objs) {
+    return Sendmail.of(mail_keyset).createMessages(objs);
+  }
+
+  setMessage(sender, maillist, messages) {
+   return R.map(obj => ({
+      from:       sender
+      , to:       sender
+      , bcc:      maillist
+      , subject:  obj.title
+      , text:     obj.body
+    }), messages);
   }
 
   createApproval({ admin, ids }) {
@@ -374,5 +533,31 @@ export default class UserProfiler {
       .fromPromise(_promise(admin, id));
     const observables = R.map(observable, _ids);
     return Rx.Observable.forkJoin(observables);
+  }
+
+  fetchAdmin({ admin, id }) {
+    return Rx.Observable.fromPromise(this.getAdmin(admin, id));
+  }
+
+  createAdmin({ admin }) {
+    const data = {
+      email: mms_from
+    , menu: { num1: 9999, num2: 300, num3: 50, num4: 20 }
+    , advertisement: {
+        url1: 'http://www1.example.com'
+      , url2: 'http://www2.example.com'
+      , url3: 'http://www3.example.com'
+      , url4: 'http://www4.example.com'
+      }
+    };
+    return Rx.Observable.fromPromise(this.addAdmin(admin, data));
+  }
+
+  updateAdmin({ admin, id, data }) {
+    return Rx.Observable.fromPromise(this.replaceAdmin(admin, id, data));
+  }
+
+  deleteAdmin({ admin, id }) {
+    return Rx.Observable.fromPromise(this.removeAdmin(admin, id));
   }
 };

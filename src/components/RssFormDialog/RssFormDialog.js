@@ -1,11 +1,12 @@
-import React      from 'react';
-import PropTypes  from 'prop-types';
+import React          from 'react';
+import PropTypes      from 'prop-types';
+import std            from 'Utilities/stdutils';
+
 import { Button, Dialog, TextField }
-                  from 'material-ui';
+                      from 'material-ui';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle
-, withMobileDialog }
-                  from 'material-ui/Dialog';
-import { Slide }  from 'material-ui/transitions';
+, withMobileDialog }  from 'material-ui/Dialog';
+import { Slide }      from 'material-ui/transitions';
 
 const Transition =  props => <Slide direction="up" {...props} />;
 
@@ -21,22 +22,14 @@ class RssFormDialog extends React.Component {
 
   handleSubmit() {
     const { title } = this.state;
-    this.logInfo('handleSubmit', title);
+    std.logInfo(RssFormDialog.displayName, 'handleSubmit', title);
     const newNote = Object.assign({}, this.props.note, { title })
     this.props.onSubmit(newNote);
     this.props.onClose();
   }
 
   handleChangeText(name, event) {
-    switch(name) {
-      case 'title':
-        this.setState({ title: event.target.value });
-        break;
-    }
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info', name, info);
+    this.setState({ [name]: event.target.value });
   }
 
   render() {
@@ -64,10 +57,9 @@ class RssFormDialog extends React.Component {
     </Dialog>;
   }
 }
+
 RssFormDialog.displayName = 'RssFormDialog';
-RssFormDialog.defaultProps = {
-  note: null
-};
+RssFormDialog.defaultProps = { note: null };
 RssFormDialog.propTypes = {
   fullScreen: PropTypes.bool.isRequired
 };

@@ -21,7 +21,7 @@ class BidsItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReciveProps', nextProps);
+    std.logInfo(BidsItemList.displayName, 'Props', nextProps);
     const { selectedItemId, items } = nextProps;
     let bided = [];
     items.forEach(item => {
@@ -31,7 +31,7 @@ class BidsItemList extends React.Component {
   }
 
   handleChangeBided(id, event) {
-    this.logInfo('handleChangeBided', id);
+    std.logInfo(BidsItemList.displayName, 'handleChangeBided', id);
     const { bided } = this.state;
     const { user } = this.props;
     const currentIndex = bided.indexOf(id);
@@ -47,7 +47,7 @@ class BidsItemList extends React.Component {
   }
 
   handleChangeCheckbox(id, event) {
-    this.logInfo('handleChangeCheckbox', id);
+    std.logInfo(BidsItemList.displayName, 'handleChangeCheckbox', id);
     const { selectedItemId } = this.state;
     const { user } = this.props;
     const currentIndex = selectedItemId.indexOf(id);
@@ -55,10 +55,6 @@ class BidsItemList extends React.Component {
     if (currentIndex === -1)  newChecked.push(id);
     else newChecked.splice(currentIndex, 1);
     BidsAction.select(user, newChecked);
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   renderItem(index, item) {

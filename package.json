@@ -9,10 +9,11 @@
     "watch": "webpack --config webpack.development.js",
     "start:ssr": "node dist/ssr.node.js",
     "start:api": "node dist/api.node.js",
-    "start:node": "npm-run-all --parallel start:api start:ssr",
+    "start:mms": "node --require ./src/hook/babel-register.js src/mms-server.js",
+    "start:node": "npm-run-all --parallel start:api start:ssr start:mms",
     "build:node": "webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js --watch --progress",
-    "start:all": "npm-run-all --parallel start:api start:ssr start",
+    "start:all": "npm-run-all --parallel start:api start:ssr start:mms start",
     "build:all": "npm-run-all --parallel build:node build",
     "watch:all": "npm-run-all --parallel watch:node watch"
   },

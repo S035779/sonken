@@ -1,15 +1,17 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { Input, Button, Typography, TextField } from 'material-ui';
-import { InputLabel } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import RssItemList    from 'Components/RssItemList/RssItemList';
+import { withStyles }   from 'material-ui/styles';
+import { Input, Button, Typography, TextField }
+                        from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormControl }  from 'material-ui/Form';
+import RssItemList      from 'Components/RssItemList/RssItemList';
 
 const mon = '//www.mnrate.com/item/aid/';
-const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
+//const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
 const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?lang=ja_JP';
 
 class RssForms extends React.Component {
@@ -18,21 +20,23 @@ class RssForms extends React.Component {
     this.state = {
       note:       props.note
     , asin:       props.note.asin
+    , name:       props.name
     , price:      props.note.price
     , bidsprice:  props.note.bidsprice
     , body:       props.note.body
+    , AmazonUrl:  props.AmazonUrl
     };
   }
 
-  componentWillReceiveProps(props) {
-    this.logInfo('props', props);
-    this.setState({ note: props.note });
+  componentWillReceiveProps(nextProps) {
+    std.logInfo(RssForms.displayName, 'Props', nextProps);
+    this.setState({ note: nextProps.note });
   }
 
   handleSave() {
     const { user } = this.props;
-    const { id, asin, price, bidsprice, body } = this.state.note;
-    NoteAction.update(user, { id, asin, price, bidsprice, body });
+    const { note } = this.state;
+    NoteAction.update(user, note.id, note);
   }
 
   handleChangeInput(name, event) {
@@ -66,19 +70,16 @@ class RssForms extends React.Component {
     }
   }
 
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
-  }
-
   render() {
-    this.logInfo('render', this.state);
+    std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note } = this.props;
-    const { asin, price, bidsprice, body } = this.state.note;
+    const { asin, name, price, bidsprice, body, AmazonUrl }
+      = this.state.note;
     const isChanged = note.asin !== asin || note.price !== price
                    || note.bidsprice !== bidsprice || note.body  !== body;
     const link_mon = mon + asin;
     const link_fba = fba;
-    const link_amz = amz + asin;
+    const link_amz = AmazonUrl; //amz + asin;
     const items = note.items ? note.items : [];
     return <div className={classes.forms}>
       <div className={classes.header}>
@@ -111,7 +112,7 @@ class RssForms extends React.Component {
           className={classes.title}>Amazon商品名：</Typography>
         <Button color="primary" size="large" fullWidth
           href={link_amz}
-          className={classes.name}>{note.name}</Button>
+          className={classes.name}>{name}</Button>
       </div>
       {this.props.children}
       <div className={classes.memo}>

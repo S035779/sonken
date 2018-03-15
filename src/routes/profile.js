@@ -21,6 +21,74 @@ export default {
     };
   },
 
+  fetchAdmin(options) {
+    return (req, res, next) => {
+      const { admin, id } = req.query;
+      profile.fetchAdmin({ admin, id }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to fetch Admin.');
+      });
+    };
+  },
+
+  createAdmin(options) {
+    return (req, res, next) => {
+      const { admin, data } = req.body;
+      profile.createAdmin({ admin, data }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to create Admin.');
+      });
+    };
+  },
+
+  updateAdmin(options) {
+    return (req, res, next) => {
+      const { admin, id, data } = req.body;
+      profile.updateAdmin({ admin, id, data }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to update Admin.');
+      });
+    };
+  },
+
+  deleteAdmin(options) {
+    return (req, res, next) => {
+      const { admin, id } = req.query;
+      profile.deleteAdmin({ admin, id }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to delete Admin.');
+      });
+    };
+  },
+
   fetchUser(options) {
     return (req, res, next) => {
       const { user, email, phone } = req.query;

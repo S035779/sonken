@@ -12,7 +12,7 @@ import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 
-dotenv.config()
+dotenv.config();
 const env = process.env.NODE_ENV || 'development';
 const http_port = process.env.API_PORT || 8082;
 const http_host = process.env.API_HOST || '127.0.0.1';
@@ -47,6 +47,12 @@ app.use(session({
 , resave: false
 , saveUninitialized: true
 }))
+
+router.route('/admin')
+.get(profile.fetchAdmin())
+.put(profile.createAdmin())
+.post(profile.updateAdmin())
+.delete(profile.deleteAdmin());
 
 router.route('/selected')
 .get(mail.fetchSelectedMails())
@@ -147,7 +153,7 @@ router.route('/readed')
 router.route('/file')
 .get(feed.downloadNote())
 .put(feed.uploadNote())
-.post(feed.notImplemented())
+.post(feed.downloadItems())
 .delete(feed.notImplemented());
 
 router.route('/notes')

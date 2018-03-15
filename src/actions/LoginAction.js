@@ -16,6 +16,21 @@ export default {
       dispatch({ type: 'user/preset', user, isAuthenticated });
     });
   },
+  fetchProfileAdmin(admin) {
+    return LoginApiClient.fetchProfileAdmin(admin).then(obj => {
+      dispatch({ type: 'admin/profile',  profile: { admin: obj } });
+    });
+  },
+  fetchProfileUser(user) {
+    return LoginApiClient.fetchProfileUser(user).then(obj => {
+      dispatch({ type: 'user/profile',  profile: { user: obj } });
+    });
+  },
+  createAdmin(admin) {
+    return LoginApiClient.createAdmin(admin).then(profile => {
+      dispatch({ type: 'admin/create', profile });
+    });
+  },
   authenticate(username, password, isAdmin) {
     return LoginApiClient.authenticate(username, password, isAdmin)
     .then(isAuthenticated => {
@@ -41,7 +56,7 @@ export default {
   registration(user, password, data) {
     return LoginApiClient.registration(user, password, data).then(() => {
       dispatch({ type: 'login/registration', user });
-    })
+    });
   },
   rehydrate(state) {
     dispatch({ type: 'login/rehydrate/my', state: state.loginStore });

@@ -6,10 +6,11 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { Input, Typography, Select }
+import { Input, Typography, Select, Checkbox }
                         from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
+import { FormControl, FormControlLabel }
+                        from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
@@ -35,6 +36,13 @@ class UserForms extends React.Component {
     const { user } = this.state;
     this.setState({
       user:   Object.assign({}, user, { [name]: event.target.value })
+    });
+  }
+
+  handleChangeCheckbox(name, event) {
+    const { user } = this.state;
+    this.setState({
+      user:   Object.assign({}, user, { [name]: event.target.checked })
     });
   }
 
@@ -78,18 +86,19 @@ class UserForms extends React.Component {
   }
 
   isChanged() {
-    const { name, kana, email, phone, plan } = this.state.user;
+    const { name, kana, email, phone, plan, isAdmin } = this.state.user;
     const { user } = this.props;
-    return user.name !== name  || user.kana !== kana
+    return (user.name !== name  || user.kana !== kana
       || user.email !== email  || user.phone !== phone
-      || user.plan !== plan;
+      || user.plan !== plan || user.isAdmin !== isAdmin);
   }
 
   render() {
     std.logInfo(UserForms.displayName, 'State', this.state);
     const { classes } = this.props;
     const { isNotValid, isSuccess, redirectToRss } = this.state;
-    const { user, name, kana, email, phone, plan } = this.state.user;
+    const { user, name, kana, email, phone, plan, isAdmin }
+      = this.state.user;
     const primary = 'skyblue';
     const secondary = 'orange';
     const isChanged = this.isChanged();
@@ -122,6 +131,15 @@ class UserForms extends React.Component {
           要求を受け付けました。
           </RssDialog>
         </div>
+      </div>
+      <div className={classes.edit}>
+        <FormControlLabel className={classes.checkbox}
+          control={<Checkbox
+            checked={isAdmin}
+            onChange={this.handleChangeCheckbox.bind(this, 'isAdmin')}
+            value="admin"
+            color="primary" />}
+          label="管理者権限を付与する" />
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
@@ -189,6 +207,7 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 , text:         { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
+, checkbox:     { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
 });
 UserForms.displayName = 'UserForms';
 UserForms.defaultProps = { user: null };

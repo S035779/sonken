@@ -5,6 +5,7 @@ import { Mail, Selected }  from 'Models/mail';
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
+
 /**
  * MailEditor class.
  *

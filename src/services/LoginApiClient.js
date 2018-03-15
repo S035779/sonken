@@ -34,6 +34,46 @@ export default {
           );
         });
         break;
+      case 'fetch/admin':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/admin'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'update/admin':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/admin'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/admin':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/admin'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/admin':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/admin'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -123,5 +163,19 @@ export default {
   },
   deleteUser(user) {
     return this.request('delete/user', { user });
+  },
+
+  /*
+   * Profile
+   */
+  fetchProfileUser(user) {
+    return this.request('fetch/user', { user });
+  },
+  fetchProfileAdmin(admin) {
+    return this.request('fetch/admin', { admin });
+  },
+  createAdmin(admin) {
+    return this.request('create/admin', { admin });
   }
+
 };

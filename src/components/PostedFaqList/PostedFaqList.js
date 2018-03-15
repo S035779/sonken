@@ -5,6 +5,7 @@ import std                from 'Utilities/stdutils';
 
 import { withStyles }     from 'material-ui/styles';
 import { AccountCircle }  from 'material-ui-icons';
+import EditBody           from 'Components/EditBody/EditBody';
 
 class PostedFaqList extends React.Component {
   renderList(faq, classes) {
@@ -19,7 +20,7 @@ class PostedFaqList extends React.Component {
         {std.getLocalTimeStamp(faq.updated)}
         </span>
       </div>
-      <div className={classes.body}>{faq.body}</div>
+      <EditBody body={faq.body} />
       </Link>
     </li>;
   }
@@ -33,21 +34,20 @@ class PostedFaqList extends React.Component {
   }
 };
 const styles = theme => ({
-  root:     {},
-  list:     { margin: '10px 0', padding: 0, listStyle: 'none'
-            , borderTop:    '1px solid #CCC' },
-  item:     { borderBottom: '1px solid #CCC' },
-  link:     { display: 'block', color: '#333', padding: '20px 15px'
+  root:     {}
+, list:     { margin: '10px 0', padding: 0, listStyle: 'none'
+            , borderTop:    '1px solid #CCC' }
+, item:     { borderBottom: '1px solid #CCC' }
+, link:     { display: 'block', color: '#333', padding: '20px 15px'
             , textDecoration: 'none'
             , borderLeft: '8px solid transparent'
             , '&:hover': {
-              borderLeftColor: '#2673E8', background: '#F5F5F5' }},
-  title:    { fontWeight: 'bold', fontSize: '20px' },
-  body:     { fontSize: '16px' },
-  meta:     { fontSize: '13px', marginTop: '10px' },
-  author:   { display: 'inline-block', marginRight: '15px' },
-  icon:     { margin: theme.spacing.unit, verticalAlign: 'middle' },
-  updated:  { color: '#666' }
+              borderLeftColor: '#2673E8', background: '#F5F5F5' }}
+, title:    { fontWeight: 'bold', fontSize: '20px' }
+, meta:     { fontSize: '13px', marginTop: '10px' }
+, author:   { display: 'inline-block', marginRight: '15px' }
+, icon:     { margin: theme.spacing.unit, verticalAlign: 'middle' }
+, updated:  { color: '#666' }
 });
 PostedFaqList.displayName = 'PostedFaqList';
 PostedFaqList.defaultProps = { faqs: null };

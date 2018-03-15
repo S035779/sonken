@@ -253,6 +253,16 @@ export default {
           );
         });
         break;
+      case 'download/items':
+        return new Promise((resolve, reject) => {
+          xhr.postFile(
+            api + '/file'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -313,9 +323,12 @@ export default {
         , { name: 'Warning', message: 'Not Url Registory.' });
     return this.request('create/note', { user, url, category });
   },
-  updateNote(user, id, { title, asin, name, price, bidsprice, body }) {
+  updateNote(user, id
+  , { title, asin, name, price, bidsprice, body, AmazonUrl, AmazonImg }) {
     const updated = std.getLocalTimeStamp(Date.now());
-    const data = { title, asin, name, price, bidsprice, body, updated };
+    const data = {
+      title, asin, name, price, bidsprice, body, AmazonUrl, AmazonImg
+      , updated };
     return this.request('update/note', { user, id, data });
   },
   pageNote(user, { maxNumber, number, perPage }) {
@@ -339,6 +352,9 @@ export default {
   },
   downloadNote(user, id) {
     return this.request('download/note', { user, id });
+  },
+  downloadItems(user, items) {
+    return this.request('download/items', { user, items });
   },
 
 
@@ -366,9 +382,6 @@ export default {
     };
     return this.request('filter/traded', { user, filter });
   },
-  downloadTrade(user, filename) {
-    return this.request('download/traded', { user, filename });
-  },
 
   /*
    *  Bids
@@ -393,9 +406,6 @@ export default {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     };
     return this.request('filter/bided', { user, filter });
-  },
-  downloadBids(user, filename) {
-    return this.request('download/bided', { user, filename });
   },
 
   /*

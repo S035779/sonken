@@ -5,8 +5,22 @@ const pspid = 'LoginStore';
 export default class LoginStore extends ReduceStore {
   getInitialState() {
     return { 
-      user: ''
-    , admin: ''
+      user:   ''
+    , admin:  ''
+    , profile_user: {
+        name:     ''
+      , kana:     ''
+      , email:    ''
+      , phone:    ''
+      , username: ''
+      , plan:     ''
+    }
+    , profile_admin: {
+        from: ''
+      , agreement: ''
+      , menu: { num1: 0, num2: 0, num3: 0, num4: 0 }
+      , advertisement: { url1: '', url2: '', url3: '', url4: '' }
+    }
     , isAuthenticated: false
     };
   }
@@ -22,6 +36,14 @@ export default class LoginStore extends ReduceStore {
         return Object.assign({}, state, {
           user:   action.user
         , isAuthenticated: action.isAuthenticated
+        });
+      case 'admin/profile':
+        return Object.assign({}, state, {
+          profile: action.profile
+        });
+      case 'user/profile':
+        return Object.assign({}, state, {
+          profile: action.profile
         });
       case 'login/authenticate':
         return Object.assign({}, state, {

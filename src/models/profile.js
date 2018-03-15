@@ -1,6 +1,8 @@
-import mongoose from 'mongoose';
-import { logs as log } from 'Utilities/logutils';
+import dotenv           from 'dotenv';
+import mongoose         from 'mongoose';
+import { logs as log }  from 'Utilities/logutils';
 
+dotenv.config();
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
 const userSchema = new mongoose.Schema({
@@ -25,6 +27,14 @@ const approvedSchema = new mongoose.Schema({
 }, { collection: 'approved' });
 approvedSchema.index({ approved: 1 }, { unique: true });
 
+const adminSchema = new mongoose.Schema({
+  email:            { type: String, required: true }
+, menu:             mongoose.Schema.Types.Mixed
+, advertisement:    mongoose.Schema.Types.Mixed
+, updated:          { type: Date, default: Date.now() } 
+}, { collection: 'admin' });
+adminSchema.index({ email: 1 }, { unique: true });
+
 const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','profile connected.'));
 db.on('close', () => log.info( '[MDB]','profile disconnected.'));
@@ -35,3 +45,4 @@ process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'profile terminated.')));
 export const User = db.model('User', userSchema);
 export const Approved = db.model('Approved', approvedSchema);
+export const Admin = db.model('Admin', adminSchema);

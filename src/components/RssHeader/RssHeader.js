@@ -8,8 +8,8 @@ import { IconButton } from 'material-ui';
 import {
   Menu as MenuIcon
 }                     from 'material-ui-icons';
-import LoginMenu      from 'Components/LoginMenu/LoginMenu';
-import LoginSwitch    from 'Components/LoginMenu/LoginSwitch';
+import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
+import RssMenu        from 'Components/RssMenu/RssMenu';
 import RssButtonNav   from 'Components/RssButtonNav/RssButtonNav';
 
 class RssHeader extends React.Component {
@@ -32,8 +32,8 @@ class RssHeader extends React.Component {
   }
 
   render() {
-    const {classes} = this.props;
-    const {auth} = this.state;
+    const { classes, user, profile } = this.props;
+    const { auth } = this.state;
     return <div className={classes.navHeader}>
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
       <div className={classes.navBar}>
@@ -44,7 +44,7 @@ class RssHeader extends React.Component {
         </IconButton>
         <RssButtonNav />
         <div className={classes.loginIcon}>
-        <LoginMenu auth={auth} />
+        <RssMenu auth={auth} user={user} profile={profile}/>
         </div>
       </div>
     </div>;
