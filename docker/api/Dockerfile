@@ -3,7 +3,7 @@ MAINTAINER M.H Mamoru Hashimoto <you@example.com>
 WORKDIR /app
 EXPOSE 8081
 RUN adduser -S -g app app
-RUN apk add --no-cache gnupg && apk add --no-cache curl
+RUN apk --update add gnupg curl
 RUN set -ex \
   && for key in \
     94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
