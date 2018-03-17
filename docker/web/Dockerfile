@@ -1,12 +1,23 @@
 FROM alpine:3.7
+MAINTAINER M.H Mamoru Hashimoto <you@example.com>
+
+# timezone
+RUN apk add --no-cache tzdata \
+  && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+  && apk del --purge tzdata
+
+# initialize
+EXPOSE 8080
 VOLUME ["/var/cache/nginx"]
-EXPOSE 80 443
+
+# install nginx
 ENV NGINX_VERSION 1.13.9
-RUN apk --update add pcre-dev openssl-dev \
-  && apk add --virtual build-dependencies build-base curl \
+RUN set -x \
+  && apk add --no-cache pcre-dev openssl-dev \
+  && apk add --no-cache --virtual .depNginx build-base curl \
   && curl -SLO http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-  && tar xzvf nginx-${NGINX_VERSION}.tar.gz \
-  && cd nginx-${NGINX_VERSION} \
+  && tar xzvf nginx-$NGINX_VERSION.tar.gz \
+  && cd nginx-$NGINX_VERSION \
   && ./configure \
   --with-http_ssl_module \
   --with-http_gzip_static_module \
@@ -21,9 +32,10 @@ RUN apk --update add pcre-dev openssl-dev \
   && ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log \
   && cd / \
-  && apk del build-dependencies \
-  && rm -rf \
-  nginx-${NGINX_VERSION} \
-  nginx-${NGINX_VERSION}.tar.gz \
-  /var/cache/apk/*
+  && rm -rf nginx-$NGINX_VERSION nginx-$NGINX_VERSION.tar.gz \
+  && apk del .depNginx
+
+# configuration files
+COPY nginx.conf /etc/nginx/nginx.conf
+
 CMD ["nginx", "-g", "daemon off;"]
