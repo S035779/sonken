@@ -25,66 +25,62 @@ class AdminMenu extends React.Component {
     , isNotValid:         false
     , password:           ''
     , confirm_password:   ''
-    , profile_admin:      props.profile_admin
-    , profile_user:       props.profile_user
+    , preference:         props.preference
+    , profile:            props.profile
     };
   }
 
   componentDidMount() {
     const { admin } = this.props;
-    LoginAction.fetchProfileAdmin(admin);
-    LoginAction.fetchProfileUser(admin);
+    LoginAction.fetchPreference(admin);
+    LoginAction.fetchProfile(admin);
   }
 
   componentWillReceiveProps(nextProps) {
     std.logInfo(AdminMenu.displayName, 'Props', this.props);
-    const { profile_user, profile_admin } = nextProps;
-    this.setState({ profile_admin, profile_user });
+    const { profile, preference } = nextProps;
+    this.setState({ preference, profile });
   }
 
-  handleChangeUser(name, event) {
-    std.logInfo(AdminMenu.displayName, 'handleChangeUser', name);
-    const { profile_user } = this.state;
+  handleChangeProfile(name, event) {
+    std.logInfo(AdminMenu.displayName, 'handleChangeProfile', name);
+    const { profile } = this.state;
     switch(name) {
       case 'password': case 'confirm_password':
         this.setState({ [name]: event.target.value });
         break;
       default:
-        this.setState({ profile_user:
-          Object.assign({}, profile_user, { [name]: event.target.value })
-        });
+        this.setState({ profile: Object.assign({}, profile
+        , { [name]: event.target.value }) });
         break;
     }
   }
 
-  handleChangeAdmin(name, event) {
-    std.logInfo(AdminMenu.displayName, 'handleChangeAdmin', name);
-    const { profile_admin } = this.state;
+  handleChangePreference(name, event) {
+    std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
+    const { preference } = this.state;
     switch(name) {
       case 'num1': case 'num2': case 'num3': case 'num4':
-        const menu = Object.assign({}
-          , profile_admin.menu, { [name]: event.target.value });
-        this.setState({ profile_admin:
-          Object.assign({}, profile_admin, { menu })
-        });
+        const menu = Object.assign({}, preference.menu
+          , { [name]: Number(event.target.value) });
+        this.setState({ preference: Object.assign({}, preference
+          , { menu }) });
         break;
       case 'url1': case 'url2': case 'url3': case 'url4':
-        const advertisement = Object.assign({}
-          , profile_admin.advertisement, { [name]: event.target.value });
-        this.setState({ profile_admin:
-          Object.assign({}, profile_admin, { advertisement })
-        });
+        const advertisement = Object.assign({}, preference.advertisement
+          , { [name]: event.target.value });
+        this.setState({ preference: Object.assign({}, preference
+          , { advertisement }) });
         break;
-      default:
-        this.setState({ profile_admin:
-          Object.assign({}, profile_admin, { [name]: event.target.value })
-        });
+      case 'from': case 'agreement':
+        this.setState({ preference: Object.assign({}, preference
+          , { [name]: event.target.value }) });
         break;
     }
   }
 
   handleMenu(event) {
-    std.logInfo(AdminMenu.displayName, 'handleMenu', event.currentTarget);
+    std.logInfo(AdminMenu.displayName, 'handleMenu', event.target.value);
     this.setState({ anchorEl: event.currentTarget });
   }
 
@@ -94,9 +90,9 @@ class AdminMenu extends React.Component {
   }
 
   handleInitialize(name, event) {
-    std.logInfo(AdminMenu.displayName, 'handleinitialize', name);
+    std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
     const { admin } = this.props;
-    LoginAction.createAdmin(admin)
+    LoginAction.createPreference(admin)
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
   }
@@ -113,12 +109,12 @@ class AdminMenu extends React.Component {
 
   handleSubmitDialog(name, event) {
     std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
-    const { profile_user, profile_admin, password } = this.state;
+    const { profile, preference, password } = this.state;
     const { admin } = this.props;
     switch(name) {
       case 'isProfile':
         if(this.isValidateUser() && this.isChanged()) {
-          LoginAction.updateUser(admin, password, profile_user)
+          LoginAction.updateProfile(admin, password, profile)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
         } else {
@@ -127,27 +123,25 @@ class AdminMenu extends React.Component {
         break;
       case 'isPreference':
         if(this.isValidateAdmin() && this.isChanged()) {
-          LoginAction.updateAdmin(admin, profile_admin)
+          LoginAction.updatePreference(admin, preference)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
         } else {
           this.setState({ isNotValid: true });
         }
         break;
-      default:
-        this.setState({ [name]: false });
-        break;
     }
+    this.setState({ [name]: false });
   }
 
   handleCloseDialog(name) {
+    std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
   isValidateUser() {
-    const { profile_user, password, confirm_password }
-      = this.state;
-    const { name, kana, email, phone } = profile_user;
+    const { profile, password, confirm_password } = this.state;
+    const { name, kana, email, phone } = profile;
     return (password === confirm_password
       && password !== '' && name !== '' && kana !== ''
       && std.regexEmail(email) && std.regexNumber(phone)
@@ -155,9 +149,8 @@ class AdminMenu extends React.Component {
   }
 
   isValidateAdmin() {
-    const { profile_admin }
-      = this.state;
-    const { from, agreement, advertisement, menu } = profile_admin;
+    const { preference } = this.state;
+    const { from, agreement, advertisement, menu } = preference;
     const { url1, url2, url3, url4 } = advertisement;
     const { num1, num2, num3, num4 } = menu;
     return (std.regexEmail(from)  && agreement !== ''
@@ -169,28 +162,27 @@ class AdminMenu extends React.Component {
 
   isChanged() {
     const { password, confirm_password } = this.state;
-    const { name, kana, email, phone } = this.state.profile_user;
-    const { from, agreement, advertisement, menu }
-      = this.state.profile_admin;
+    const { name, kana, email, phone } = this.state.profile;
+    const { from, agreement, advertisement, menu} = this.state.preference;
     const { url1, url2, url3, url4 } = advertisement;
     const { num1, num2, num3, num4 } = menu;
-    const { profile_admin } = this.props;
-    const { profile_user } = this.props;
+    const { preference } = this.props;
+    const { profile } = this.props;
     return (password === confirm_password
-      || profile_user.name !== name
-      || profile_user.kana !== kana
-      || profile_user.email !== email
-      || profile_user.phone !== phone
-      || profile_admin.from !== from
-      || profile_admin.agreement !== agreement
-      || profile_admin.advertisement.url1 !== url1
-      || profile_admin.advertisement.url2 !== url2
-      || profile_admin.advertisement.url3 !== url3
-      || profile_admin.advertisement.url4 !== url4
-      || profile_admin.menu.num1 !== num1
-      || profile_admin.menu.num2 !== num2
-      || profile_admin.menu.num3 !== num3
-      || profile_admin.menu.num4 !== num4
+      || profile.name !== name
+      || profile.kana !== kana
+      || profile.email !== email
+      || profile.phone !== phone
+      || preference.from !== from
+      || preference.agreement !== agreement
+      || preference.advertisement.url1 !== url1
+      || preference.advertisement.url2 !== url2
+      || preference.advertisement.url3 !== url3
+      || preference.advertisement.url4 !== url4
+      || preference.menu.num1 !== num1
+      || preference.menu.num2 !== num2
+      || preference.menu.num3 !== num3
+      || preference.menu.num4 !== num4
     );
   }
 
@@ -198,10 +190,9 @@ class AdminMenu extends React.Component {
     std.logInfo(AdminMenu.displayName, 'State', this.state);
     const { auth, classes } = this.props;
     const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
-      , password, confirm_password, profile_admin, profile_user }
-      = this.state;
-    const { from, agreement, menu, advertisement } = profile_admin;
-    const { name, kana, email, phone, user } = profile_user;
+      , password, confirm_password, preference, profile } = this.state;
+    const { from, agreement, menu, advertisement } = preference;
+    const { name, kana, email, phone, user } = profile;
     const { num1, num2, num3, num4 } = menu;
     const { url1, url2, url3, url4 } = advertisement;
     const open = Boolean(anchorEl);
@@ -244,70 +235,72 @@ class AdminMenu extends React.Component {
             className={classes.title}>{name}（{user}）</Typography>
           <TextField autoFocus margin="dense"
             value={name}
-            onChange={this.handleChangeUser.bind(this, 'name')}
+            onChange={this.handleChangeProfile.bind(this, 'name')}
             label="氏名" type="text" fullWidth />
           <TextField margin="dense"
             value={kana}
-            onChange={this.handleChangeUser.bind(this, 'kana')}
+            onChange={this.handleChangeProfile.bind(this, 'kana')}
             label="氏名（カナ）" type="text" fullWidth />
           <TextField margin="dense"
             value={email}
-            onChange={this.handleChangeUser.bind(this, 'email')}
+            onChange={this.handleChangeProfile.bind(this, 'email')}
             label="連絡先メールアドレス" type="email" fullWidth />
           <TextField margin="dense"
             value={phone}
-            onChange={this.handleChangeUser.bind(this, 'phone')}
+            onChange={this.handleChangeProfile.bind(this, 'phone')}
             label="連絡先電話番号" type="text" fullWidth />
           <TextField margin="dense"
             value={password}
-            onChange={this.handleChangeUser.bind(this, 'password')}
+            onChange={this.handleChangeProfile.bind(this, 'password')}
             label="ユーザＰＷ" type="password" fullWidth />
           <TextField margin="dense"
             value={confirm_password}
-            onChange={this.handleChangeUser.bind(this,'confirm_password')}
+            onChange={
+              this.handleChangeProfile.bind(this,'confirm_password')}
             label="ユーザＰＷ（確認）" type="password" fullWidth/>
         </LoginFormDialog>>
         <LoginFormDialog open={isPreference} title={'設定内容変更'}
           onClose={this.handleCloseDialog.bind(this, 'isPreference')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
-          <TextField autoFocus margin="dense" id="from" value={from}
-            onChange={this.handleChangeAdmin.bind(this, 'from')}
-            label="問合せ先メールアドレス" type="from" fullWidth />
+          <TextField autoFocus margin="dense"
+            value={from}
+            onChange={this.handleChangePreference.bind(this, 'from')}
+            label="問合せ先メールアドレス" type="text" fullWidth />
           <TextField margin="dense"
             value={agreement}
-            onChange={this.handleChangeAdmin.bind(this, 'agreement')}
+            onChange={this.handleChangePreference.bind(this, 'agreement')}
             label="利用規約URL" type="text" fullWidth />
           <TextField margin="dense"
             value={url1}
-            onChange={this.handleChangeAdmin.bind(this, 'url1')}
+            onChange={this.handleChangePreference.bind(this, 'url1')}
             label="広告１URL" type="text" fullWidth />
           <TextField margin="dense"
             value={url2}
-            onChange={this.handleChangeAdmin.bind(this, 'url2')}
+            onChange={this.handleChangePreference.bind(this, 'url2')}
             label="広告２URL" type="text" fullWidth />
           <TextField margin="dense"
             value={url3}
-            onChange={this.handleChangeAdmin.bind(this, 'url3')}
+            onChange={this.handleChangePreference.bind(this, 'url3')}
             label="広告３URL" type="text" fullWidth />
           <TextField margin="dense"
             value={url4}
-            onChange={this.handleChangeAdmin.bind(this, 'url4')}
+            onChange={this.handleChangePreference.bind(this, 'url4')}
             label="広告４URL" type="text" fullWidth />
           <TextField margin="dense"
             value={num1}
-            onChange={this.handleChangeAdmin.bind(this, 'num1')}
+            onChange={this.handleChangePreference.bind(this, 'num1')}
             label="メニュー１登録上限数" type="number" fullWidth />
           <TextField margin="dense"
             value={num2}
-            onChange={this.handleChangeAdmin.bind(this, 'num2')}
+            onChange={this.handleChangePreference.bind(this, 'num2')}
             label="メニュー２登録上限数" type="number" fullWidth />
           <TextField margin="dense"
             value={num3}
-            onChange={this.handleChangeAdmin.bind(this, 'num3')}
+            onChange={this.handleChangePreference.bind(this, 'num3')}
             label="メニュー３登録上限数" type="number" fullWidth />
           <TextField margin="dense"
             value={num4}
-            onChange={this.handleChangeAdmin.bind(this, 'num4')}
+            onChange={this.handleChangePreference.bind(this, 'num4')}
             label="メニュー４登録上限数" type="number" fullWidth />
         </LoginFormDialog>>
       </Menu>

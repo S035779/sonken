@@ -57,8 +57,8 @@ export default {
 
   updateAdmin(options) {
     return (req, res, next) => {
-      const { admin, id, data } = req.body;
-      profile.updateAdmin({ admin, id, data }).subscribe(
+      const { admin, data } = req.body;
+      profile.updateAdmin({ admin, data }).subscribe(
         obj => {
           res.status(200).send(obj);
         }

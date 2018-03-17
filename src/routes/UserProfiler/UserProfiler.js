@@ -50,52 +50,26 @@ export default class UserProfiler {
           });
         });
         break;
-      case 'fetch/admin':
+      case 'signin/user':
         return new Promise((resolve, reject) => {
-          const conditions = {};
-          Admin.findOne(conditions, (err, obj) => {
-            if(err) return reject(err);
-            log.trace(request, obj);
-            resolve(obj);
-          });
-        });
-        break;
-      case 'create/admin':
-        return new Promise((resolve, reject) => {
-          const admin = new Admin({
-            from:           options.data.from
-          , agreement:      options.data.agreement
-          , menu:           options.data.menu
-          , advertisement:  options.data.advertisement
-          });
-          admin.save((err, obj) => {
-            if(err) return reject(err);
-            log.trace(request, obj);
-            resolve(obj);
-          });
-        });
-        break;
-      case 'update/admin':
-        return new Promise((resolve, reject) => {
-          const conditions = { _id: options.id };
-          const update = {
-            from:           options.data.from
-          , agreement:      options.data.agreement
-          , menu:           options.data.menu
-          , advertisement:  options.data.advertisement
-          , updated:        Date.now()
+          const conditions = {
+            user: options.user
+          , salt: options.salt
+          , hash: options.hash
           };
-          Admin.findOneAndUpdate(conditions, update, (err, obj) => {
+          const update = { isAuthenticated: true };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
-          });
+          })
         });
         break;
-      case 'delete/admin':
+      case 'signout/user':
         return new Promise((resolve, reject) => {
-          const conditions = { _id: options.id };
-          User.findOneAndRemove(conditions, (err, obj) => {
+          const conditions = { user: options.user };
+          const update = { isAuthenticated: false };
+          User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -282,26 +256,52 @@ export default class UserProfiler {
           });
         });
         break;
-      case 'signin/user':
+      case 'fetch/admin':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            user: options.user
-          , salt: options.salt
-          , hash: options.hash
-          };
-          const update = { isAuthenticated: true };
-          User.update(conditions, update, (err, obj) => {
+          const conditions = {};
+          Admin.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
-          })
+          });
         });
         break;
-      case 'signout/user':
+      case 'create/admin':
         return new Promise((resolve, reject) => {
-          const conditions = { user: options.user };
-          const update = { isAuthenticated: false };
-          User.update(conditions, update, (err, obj) => {
+          const admin = new Admin({
+            from:           options.data.from
+          , agreement:      options.data.agreement
+          , menu:           options.data.menu
+          , advertisement:  options.data.advertisement
+          });
+          admin.save((err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'update/admin':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.data._id };
+          const update = {
+            from:           options.data.from
+          , agreement:      options.data.agreement
+          , menu:           options.data.menu
+          , advertisement:  options.data.advertisement
+          , updated:        Date.now()
+          };
+          Admin.update(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+        break;
+      case 'delete/admin':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.id };
+          User.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
             resolve(obj);
@@ -324,8 +324,8 @@ export default class UserProfiler {
     return this.request('create/admin', { admin, data });
   }
 
-  replaceAdmin(admin, id, data) {
-    return this.request('update/admin', { admin, id, data });
+  replaceAdmin(admin, data) {
+    return this.request('update/admin', { admin, data });
   }
 
   removeAdmin(admin, id) {
@@ -573,8 +573,9 @@ export default class UserProfiler {
     return Rx.Observable.fromPromise(this.addAdmin(admin, data));
   }
 
-  updateAdmin({ admin, id, data }) {
-    return Rx.Observable.fromPromise(this.replaceAdmin(admin, id, data));
+  updateAdmin({ admin, data }) {
+    return Rx.Observable.fromPromise(this.replaceAdmin(admin, data))
+    .flatMap(() => this.fetchAdmin({ admin, id: data._id }));
   }
 
   deleteAdmin({ admin, id }) {

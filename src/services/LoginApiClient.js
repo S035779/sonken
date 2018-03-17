@@ -34,7 +34,7 @@ export default {
           );
         });
         break;
-      case 'fetch/admin':
+      case 'preference/fetch':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
             api + '/admin'
@@ -44,7 +44,7 @@ export default {
           );
         });
         break;
-      case 'update/admin':
+      case 'preference/update':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
             api + '/admin'
@@ -54,7 +54,7 @@ export default {
           );
         });
         break;
-      case 'create/admin':
+      case 'preference/create':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
             api + '/admin'
@@ -64,16 +64,16 @@ export default {
           );
         });
         break;
-      case 'delete/admin':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/admin'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
+      //case 'preference/delete':
+      //  return new Promise((resolve, reject) => {
+      //    xhr.deleteJSON(
+      //      api + '/admin'
+      //    , options
+      //    , obj => { resolve(obj); }
+      //    , err => { reject(err); }
+      //    );
+      //  });
+      //  break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -151,9 +151,15 @@ export default {
   /*
    * User
    */
+  fetchProfile(user) {
+    return this.request('fetch/user', { user });
+  },
   confirmation(email, phone) {
     return this.request('fetch/user', { email, phone })
     .then(obj => obj.user);
+  },
+  updateProfile(user, password, data) {
+    return this.request('update/user', { user, password, data });
   },
   changePassword(user, password) {
     return this.request('update/user', { user, password });
@@ -164,24 +170,17 @@ export default {
   deleteUser(user) {
     return this.request('delete/user', { user });
   },
-  updateUser(user, password, data) {
-    return this.request('update/user'
-      , { user, id: data._id, password, data });
-  },
 
   /*
-   * Profile
+   * Preference
    */
-  fetchProfileUser(user) {
-    return this.request('fetch/user', { user });
+  fetchPreference(admin) {
+    return this.request('preference/fetch', { admin });
   },
-  fetchProfileAdmin(admin) {
-    return this.request('fetch/admin', { admin });
+  createPreference(admin) {
+    return this.request('preference/create', { admin });
   },
-  createAdmin(admin) {
-    return this.request('create/admin', { admin });
-  },
-  updateAdmin(admin, data) {
-    return this.request('update/admin', { admin, id: data._id, data});
+  updatePreference(admin, data) {
+    return this.request('preference/update', { admin, data});
   }
 };

@@ -1,33 +1,56 @@
-import React              from 'react';
-import PropTypes          from 'prop-types'
-import LoginAction        from 'Actions/LoginAction';
-import std                from 'Utilities/stdutils';
+import React            from 'react';
+import PropTypes        from 'prop-types'
+import LoginAction      from 'Actions/LoginAction';
+import std              from 'Utilities/stdutils';
 
-import { withStyles }     from 'material-ui/styles';
+import { withStyles }   from 'material-ui/styles';
 import { IconButton, Menu, TextField }
-                          from 'material-ui';
-import { MenuItem }       from 'material-ui/Menu';
+                        from 'material-ui';
+import { MenuItem }     from 'material-ui/Menu';
 import { DialogContentText }
-                          from 'material-ui/Dialog';
-import { AccountCircle }  from 'material-ui-icons';
-import LoginFormDialog    from 'Components/LoginFormDialog/LoginFormDialog';
+                        from 'material-ui/Dialog';
+import { AccountCircle }
+                        from 'material-ui-icons';
+import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
 class RssMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       anchorEl:         null
-    , preference:       false
-    , profile:          false
-    , name:             ''
-    , kana:             ''
-    , email:            ''
-    , phone:            ''
-    , username:         ''
+    , isPreference:     false
+    , isProfile:        false
+    , isSuccess:        false
+    , isNotValid:       false
     , password:         ''
     , confirm_password: ''
-    , plan:             ''
+    , profile:          props.profile
     };
+  }
+
+  componentDidMount() {
+    const { user } = this.props;
+    LoginAction.fetchProfile(user);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    std.logInfo(RssMenu.displayName, 'Props', this.props);
+    const { profile } = nextProps;
+    this.setState({ profile });
+  }
+
+  handleChangeProfile(name, event) {
+    std.logInfo(RssMenu.displayName, 'handleChangeProfile', name);
+    const { profile } = this.state;
+    switch(name) {
+      case 'password': case 'confirm_password':
+        this.setState({ [name]: event.target.value });
+        break;
+      default:
+        this.setState({ profile: Object.assign({}, profile
+        , { [name]: event.target.value  }) });
+        break;
+    }
   }
 
   handleMenu(event) {
@@ -52,12 +75,34 @@ class RssMenu extends React.Component {
 
   handleSubmitDialog(name, event) {
     std.logInfo(RssMenu.displayName, 'handleSubmitDialog', name);
+    const { profile, password } = this.this.state;
+    const { user } = this.props;
+    switch(name) {
+      case 'isProfile':
+        it(this.isValidate() && this.isChanged()) {
+          LoginAction.updateProfile(user, password, profile)
+            .then(() => this.setState({ isSuccess: true }))
+            .catch(err => this.setState({ isNotValid: true }));
+        } else {
+          this.setState({ isNotValid: true });
+        }
+        break;
+      case 'isPreference':
+        if(this.isValidate() && this.isChanged()) {
+          LoginAction.updateProfile(user, password, profile)
+            .then(() => this.setState({ isSuccess: true }))
+            .catch(err => this.setState({ isNotValid: true }));
+        } else {
+          this.setState({ isNotValid: true });
+        }
+        break;
+    }
     this.setState({ [name]: false });
   }
 
   render() {
     const { auth } = this.props;
-    const { anchorEl, profile, preference, name, kana, email, phone
+    const { anchorEl, isProfile, isPreference, name, kana, email, phone
       , username, password, confirm_password, plan } = this.state;
     const open = Boolean(anchorEl);
     return auth && (<div>
@@ -72,15 +117,15 @@ class RssMenu extends React.Component {
         transformOrigin={{ vertical: 'top', horizontal: 'right'}}
         open={open}
         onClose={this.handleClose.bind(this)}>
-        <MenuItem onClick={this.handleOpenDialog.bind(this, 'profile')}>
+        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isProfile')}>
         プロファイル
         </MenuItem>
-        <MenuItem onClick={this.handleOpenDialog.bind(this, 'preference')}>
+        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
         契約内容変更
         </MenuItem>
-        <LoginFormDialog open={profile} title={'プロファイル'}
-          onClose={this.handleCloseDialog.bind(this, 'profile')}
-          onSubmit={this.handleSubmitDialog.bind(this, 'profile')}>
+        <LoginFormDialog open={isProfile} title={'プロファイル'}
+          onClose={this.handleCloseDialog.bind(this, 'isProfile')}
+          onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
           <TextField autoFocus margin="dense" id="name" value={name}
             label="氏名" type="text" fullWidth />
           <TextField margin="dense" id="kana" value={kana}
@@ -99,9 +144,9 @@ class RssMenu extends React.Component {
             value={confirm_password}
             label="ユーザＰＷ（確認）" type="confirm_password" fullWidth />
         </LoginFormDialog>>
-        <LoginFormDialog open={preference} title={'契約内容変更'}
-          onClose={this.handleCloseDialog.bind(this, 'preference')}
-          onSubmit={this.handleSubmitDialog.bind(this, 'preference')}>
+        <LoginFormDialog open={isPreference} title={'契約内容変更'}
+          onClose={this.handleCloseDialog.bind(this, 'isPreference')}
+          onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
           <TextField select autoFocus margin="dense" id="plan" value={plan}
             label="契約プラン" fullWidth>
             <MenuItem value={'plan_A'}>Plan A</MenuItem>

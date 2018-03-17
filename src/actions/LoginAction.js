@@ -3,7 +3,7 @@ import LoginApiClient from 'Services/LoginApiClient';
 import UserApiClient from 'Services/UserApiClient';
 import NoteApiClient from 'Services/NoteApiClient';
 
-const pspid = 'LoginAction';
+const displayName = 'LoginAction';
 
 export default {
   presetAdmin(admin) {
@@ -16,31 +16,30 @@ export default {
       dispatch({ type: 'user/preset', user, isAuthenticated });
     });
   },
-  fetchProfileAdmin(admin) {
-    return LoginApiClient.fetchProfileAdmin(admin).then(profile => {
-      dispatch({ type: 'admin/profile',  profile });
+  fetchPreference(admin) {
+    return LoginApiClient.fetchPreference(admin).then(preference => {
+      dispatch({ type: 'preference/fetch',  preference });
     });
   },
-  fetchProfileUser(user) {
-    return LoginApiClient.fetchProfileUser(user).then(profile => {
-      dispatch({ type: 'user/profile',  profile });
+  updatePreference(admin, data) {
+    return LoginApiClient.updatePreference(admin, data).then(preference => {
+      dispatch({ type: 'preference/update', preference });
     });
   },
-  updateAdmin(admin, data) {
-    return LoginApiClient.updateAdmin(admin, data)
+  createPreference(admin) {
+    return LoginApiClient.createPreference(admin).then(preference => {
+      dispatch({ type: 'preference/create', preference });
+    });
+  },
+  fetchProfile(admin) {
+    return LoginApiClient.fetchProfile(admin).then(profile => {
+      dispatch({ type: 'profile/fetch',  profile });
+    });
+  },
+  updateProfile(user, password, data) {
+    return LoginApiClient.updateProfile(user, password, data)
       .then(profile => {
-      dispatch({ type: 'admin/update', profile });
-    });
-  },
-  updateUser(user, password, data) {
-    return LoginApiClient.updateUser(user, password, data)
-      .then(profile => {
-      dispatch({ type: 'user/update', profile });
-    });
-  },
-  createAdmin(admin) {
-    return LoginApiClient.createAdmin(admin).then(profile => {
-      dispatch({ type: 'admin/create', profile });
+      dispatch({ type: 'profile/update', profile });
     });
   },
   authenticate(username, password, isAdmin) {

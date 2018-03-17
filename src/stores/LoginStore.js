@@ -7,7 +7,7 @@ export default class LoginStore extends ReduceStore {
     return { 
       user:   ''
     , admin:  ''
-    , profile_user: {
+    , profile: {
         name:     ''
       , kana:     ''
       , email:    ''
@@ -15,7 +15,7 @@ export default class LoginStore extends ReduceStore {
       , username: ''
       , plan:     ''
     }
-    , profile_admin: {
+    , preference: {
         from: ''
       , agreement: ''
       , menu: { num1: 0, num2: 0, num3: 0, num4: 0 }
@@ -37,13 +37,25 @@ export default class LoginStore extends ReduceStore {
           user:   action.user
         , isAuthenticated: action.isAuthenticated
         });
-      case 'admin/profile':
+      case 'preference/fetch':
         return Object.assign({}, state, {
-          profile_admin: action.profile
+          preference: action.preference
         });
-      case 'user/profile':
+      case 'preference/update':
         return Object.assign({}, state, {
-          profile_user: action.profile
+          preference: action.preference
+        });
+      case 'preference/create':
+        return Object.assing({}, state, {
+          preference: action.preference
+        });
+      case 'profile/fetch':
+        return Object.assign({}, state, {
+          profile: action.profile
+        });
+      case 'profile/update':
+        return Object.assign({}, state, {
+          profile: action.profile
         });
       case 'login/authenticate':
         return Object.assign({}, state, {
