@@ -1,4 +1,6 @@
-import React from 'react';
+import React      from 'react';
+import PropTypes  from 'prop-types';
+import std        from 'Utilities/stdutils';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -8,11 +10,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({ error, errorInfo });
-    this.logError(error, errorInfo);
-  }
-
-  logError(error, errorInfo) {
-    console.error('>>> Error:', error, errorInfo);
+    std.logError(ErrorBoundary.displayName, error, errorInfo);
   }
 
   render() {
@@ -28,4 +26,7 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 };
+ErrorBoundary.displayName = 'ErrorBoundary';
+ErrorBoundary.defaultProps = {};
+ErrorBoundary.propTypes = {};
 export default ErrorBoundary;

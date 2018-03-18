@@ -638,6 +638,11 @@ export default {
     });
   },
 
+  logError(caller, name, message) {
+    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
+    console.error(date , '[ERROR]', caller, '-', name, ':', message);
+  },
+
   logTrace(caller, name, message) {
     const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
     console.trace(date , '[TRACE]', caller, '-', name, ':', message);

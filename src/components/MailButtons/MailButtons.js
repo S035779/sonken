@@ -37,7 +37,7 @@ class MailButtons extends React.Component {
     std.logInfo(MailButtons.displayName
       , 'handleNew', selectedMailId);
     MailAction.create(admin, selectedMailId)
-      .then(() => this.setState({ isSuccess: true }))
+      //.then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
     this.setState({ checked: false });
   }

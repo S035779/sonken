@@ -31,13 +31,13 @@ class AdminMenu extends React.Component {
   }
 
   componentDidMount() {
-    std.logInfo(AdminMenu.displayName, 'Props', this.props);
+    //std.logInfo(AdminMenu.displayName, 'Props', this.props);
     LoginAction.fetchPreference(this.props.admin);
     LoginAction.fetchProfile(this.props.admin);
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(AdminMenu.displayName, 'Props', this.props);
+    //std.logInfo(AdminMenu.displayName, 'Props', this.props);
     const { profile, preference } = nextProps;
     this.setState({ preference, profile });
   }
@@ -199,7 +199,7 @@ class AdminMenu extends React.Component {
   }
 
   render() {
-    std.logInfo(AdminMenu.displayName, 'State', this.state);
+    //std.logInfo(AdminMenu.displayName, 'State', this.state);
     const { auth, classes } = this.props;
     const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
       , password, confirm_password, preference, profile } = this.state;

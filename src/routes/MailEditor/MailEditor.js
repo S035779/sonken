@@ -20,14 +20,14 @@ export default class MailEditor {
   }
 
   request(request, options) {
-    log.debug(request, options);
+    //log.debug(request, options);
     switch(request) {
       case 'fetch/mails':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Mail.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -39,7 +39,7 @@ export default class MailEditor {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'Mail not found.' });
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -69,7 +69,7 @@ export default class MailEditor {
             };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -79,7 +79,7 @@ export default class MailEditor {
           const conditions = { _id: options.id };
           Mail.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -111,18 +111,17 @@ export default class MailEditor {
             resolve(obj);
           });
         });
-      case 'upload/attach':
+      case 'upload/file':
         return new Promise((resolve, reject) => {
-          console.log(options.user, options.file);
           const conditions = { _id: options.id };
           const update = {
               user:     options.admin
-            , attach:   options.file
+            , file:     options.file
             , updated:  Date.now()
             };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
           //fs.writeFile('tmp/' +  options.user, options.file, err => {
@@ -131,7 +130,7 @@ export default class MailEditor {
           //});
         });
         break;
-      //case 'download/attach':
+      //case 'download/file':
       //  return new Promise((resolve, reject) => {
       //    fs.readFile('tmp/' + options.user, (err, data) => {
       //      if(err) return reject(err);
@@ -179,12 +178,12 @@ export default class MailEditor {
     return this.request('fetch/select', { admin });
   }
 
-  //downAttach(admin, id) {
-  //  return this.request('download/attach', { admin, id });
+  //downFile(admin, id) {
+  //  return this.request('download/file', { admin, id });
   //}
 
-  upAttach(admin, id, file) {
-    return this.request('upload/attach', { admin, id, file });
+  upFile(admin, id, file) {
+    return this.request('upload/file', { admin, id, file });
   }
 
   fetchMails({ admin }) {
@@ -244,8 +243,8 @@ export default class MailEditor {
     return Rx.Observable.forkJoin(observables);
   }
 
-  uploadAttach({ admin, id, file }) {
-    return Rx.Observable.fromPromise(this.upAttach(admin, id, file));
+  uploadFile({ admin, id, file }) {
+    return Rx.Observable.fromPromise(this.upFile(admin, id, file));
   }
 
 };

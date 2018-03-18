@@ -9,13 +9,13 @@ const mailSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , title:            { type: String }
 , body:             { type: String }
-, attach:           { type: Buffer }
+, file:             { type: Buffer, default: null }
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'mails' });
 mailSchema.set('toObject');
 
 const selectedSchema = new mongoose.Schema({
-  selected:           { type: String, required: true }
+  selected:         { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'selected' });
 selectedSchema.index({ selected: 1 }, { unique: true });

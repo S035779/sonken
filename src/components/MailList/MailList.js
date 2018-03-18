@@ -22,7 +22,7 @@ class MailList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(MailList.displayName, 'Props', nextProps);
+    //std.logInfo(MailList.displayName, 'Props', nextProps);
     const { selectedMailId: checked, mails } = nextProps;
     this.setState({ checked, mails });
   }

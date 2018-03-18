@@ -20,7 +20,7 @@ class MailSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(MailSearch.displayName, 'Props', nextProps);
+    //std.logInfo(MailSearch.displayName, 'Props', nextProps);
     const { mailPage } = nextProps;
     this.setState({ perPage: mailPage.perPage });
   }
@@ -28,7 +28,7 @@ class MailSearch extends React.Component {
   handleChangeSelect(name, event) {
     const { admin, mailNumber } = this.props;
     const value = event.target.value;
-    std.logInfo(MailSearch.displayName, 'handleChangeSelect', value);
+    //std.logInfo(MailSearch.displayName, 'handleChangeSelect', value);
     switch(name) {
       case 'page':
         MailAction.pagenation(admin, {

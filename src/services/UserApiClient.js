@@ -295,7 +295,7 @@ export default {
       case 'upload/file':
         return new Promise((resolve, reject) => {
           xhr.putFile(
-            api + '/attach'
+            api + '/mails'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -466,6 +466,6 @@ export default {
   uploadFile(admin, id, file) {
     const filename = admin + '_' + id;
     const filedata = file;
-    return this.request('upload/mail', { filename, filedata })
+    return this.request('upload/file', { filename, filedata })
   }
 };

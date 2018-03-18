@@ -13,6 +13,7 @@ class MailEdit extends React.Component {
     super(props);
     this.state = {
       mail:        props.mail
+    , isAttached: !!props.mail.file
     , isSuccess:  false
     , isNotValid: false
     };
@@ -21,7 +22,7 @@ class MailEdit extends React.Component {
   componentWillReceiveProps(nextProps) {
     std.logInfo(MailEdit.displayName, 'Props', nextProps);
     const { mail } = nextProps;
-    this.setState({ mail });
+    this.setState({ mail, isAttached: mail ? !!mail.file : false });
   }
 
   handleChangeTitle(title) {
@@ -70,13 +71,19 @@ class MailEdit extends React.Component {
     }
   }
 
-  handleChangeFile(event) {
+  handleChangeFile(file) {
     std.logInfo(MailEdit.displayName, 'handleChangeFile', file);
+    if(!file) return;
     const { admin } = this.props;
-    const { _id } = this.state.mail;
-    MailAction.upload(admin, _id, file)
-      .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+    const { _id, title, body } = this.state.mail;
+    if(this.isValidate()) {
+      MailAction.update(admin, _id, { title, body })
+        .then(() => MailAction.upload(admin, _id, file))
+        .then(() => this.setState({ isSuccess: true, isAttached: true }))
+        .catch(err => this.setState({ isNotValid: true }));
+    } else {
+      this.setState({ isNotValid: true });
+    }
   }
 
   handleCloseDialog(name) {
@@ -85,24 +92,25 @@ class MailEdit extends React.Component {
 
   isValidate() {
     const { title, body } = this.state.mail;
-    return ( title !== '' && body !== '');
+    return ( title !== '' && body !== '' );
   }
 
   isChanged() {
-    const { title, body } = this.state.mail;
+    if(!this.state.mail) return false;
     const { mail } = this.props;
+    const { title, body } = this.state.mail;
     return mail.title !== title || mail.body !== body;
   }
 
   render() {
-    std.logInfo(MailEdit.displayName, 'Props', this.props);
-    const { classes, admin, mail } = this.props;
-    const { isNotValid, isSuccess } = this.state;
-    const { title: nextTitle, body: nextBody } = this.state.mail;
+    //std.logInfo(MailEdit.displayName, 'State', this.state);
+    const { classes, admin } = this.props;
+    const { mail, isAttached, isNotValid, isSuccess } = this.state;
     if(!mail || !mail._id) return null;
-    const isChanged = mail.title !== nextTitle || mail.body !== nextBody;
+    const isChanged = this.isChanged();
     return <div className={classes.mailEdit}>
-      <EditButtons changed={isChanged} value={nextTitle}
+      <EditButtons changed={isChanged} value={mail.title}
+        isChanged={isChanged} isAttached={isAttached}
         onChange={this.handleChangeTitle.bind(this)}
         onUpload={this.handleChangeFile.bind(this)}
         onDraft={this.handleDraft.bind(this)}
@@ -118,11 +126,11 @@ class MailEdit extends React.Component {
       </RssDialog>
       <div className={classes.editBody}>
         <textarea className={classes.inputArea}
-          id="note-body" value={nextBody}
+          id="note-body" value={mail.body}
           onChange={this.handleChangeBody.bind(this)}/>
       </div>
       <div className={classes.editView}>
-        <EditBody body={nextBody} />
+        <EditBody body={mail.body} />
       </div>
     </div>;
   }

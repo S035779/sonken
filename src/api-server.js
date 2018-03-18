@@ -62,7 +62,7 @@ router.route('/selected')
 
 router.route('/mails')
 .get(mail.fetchMails())
-.put(mail.notImplemented())
+.put(mail.uploadFile())
 .post(mail.notImplemented())
 .delete(mail.notImplemented());
 
@@ -71,12 +71,6 @@ router.route('/mail')
 .put(mail.createMail())
 .post(mail.updateMail())
 .delete(mail.deleteMail());
-
-router.route('/attach')
-.get(mail.notImplemented())
-.put(mail.uploadAttach())
-.post(mail.notImplemented())
-.delete(mail.notImplemented());
 
 router.route('/posted')
 .get(faq.fetchPostedFaqs())

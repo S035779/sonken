@@ -1,5 +1,6 @@
 import React              from 'react';
 import PropTypes          from 'prop-types';
+import std                from 'Utilities/stdutils';
 
 import { withStyles }     from 'material-ui/styles';
 import { Input, Button }  from 'material-ui';
@@ -8,6 +9,19 @@ import { FormControl }    from 'material-ui/Form';
 import RssButton          from 'Components/RssButton/RssButton';
 
 class EditButtons extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isChanged: props.isChanged
+    , isAttached: props.isAttached
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { isChanged, isAttached } = nextProps;
+    this.setState({ isChanged, isAttached });
+  }
+
   handleSave() {
     this.props.onSave();
   }
@@ -25,11 +39,14 @@ class EditButtons extends React.Component {
   }
 
   handleChangeFile(event) {
-    this.props.onUpload(event.target.files.item(0));
+    const file = event.target.files[0];
+    this.props.onUpload(file);
   }
 
   render() {
-    const {classes, value} = this.props;
+    //std.logInfo(EditButtons.displayName, 'Props', this.props);
+    const { classes, value } = this.props;
+    const { isChanged, isAttached } = this.state;
     const primary = 'skyblue';
     const secondary = 'orange';
     return <div className={classes.edit}>
@@ -39,20 +56,21 @@ class EditButtons extends React.Component {
           onChange={this.handleChangeInput.bind(this)}/>
       </FormControl>
       <div className={classes.buttons}>
-        <input type="file" id="file" accept="application/*"
-          onClick={this.handleChangeFile.bind(this)}
-          className={classes.input}/>
-        <label htmlFor="file">
-          <RssButton color={primary} component="span"
-            className={classes.button}>添付</RssButton>
-        </label>
         <RssButton color={primary}
           onClick={this.handleDraft.bind(this)}
           className={classes.button}>下書き</RssButton>
         <RssButton color={primary}
           onClick={this.handleSave.bind(this)}
           className={classes.button}>
-        {this.props.changed ? '*' : ''}変更する</RssButton>
+        {isChanged ? '*' : ''}変更する</RssButton>
+        <input type="file" id="file" accept="application/zip"
+          onChange={this.handleChangeFile.bind(this)}
+          className={classes.input}/>
+        <label htmlFor="file">
+          <RssButton color={primary} component="span"
+            className={classes.button}>
+        {isAttached ? '*' : ''}添付する</RssButton>
+        </label>
         <RssButton color={secondary}
           onClick={this.handleDelete.bind(this)}
           className={classes.button}>削除</RssButton>

@@ -4,7 +4,7 @@ import { logs as log }  from 'Utilities/logutils';
 const mail = MailEditor.of();
 
 export default {
-  uploadAttach(options) {
+  uploadFile(options) {
     return (req, res, next) => {
       const filename = req.headers['x-uploadedfilename'];
       const filedata = new Buffer(+req.headers['content-length']);
@@ -16,7 +16,7 @@ export default {
         const admin = filename.split('_')[0];
         const id = filename.split('_')[1];
         const file = filedata;
-        feed.uploadNote({ admin, id, file }).subscribe(
+        mail.uploadFile({ admin, id, file }).subscribe(
           obj => { res.send(obj); }
         , err => {
             res.status(500)
