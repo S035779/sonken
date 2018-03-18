@@ -25,14 +25,14 @@ class RssHeader extends React.Component {
     this.setState({ auth: checked });
     if(!checked) LoginAction.signout(user, false)
       .then(() => LoginAction.presetUser(''))
-      .then(() => history.push('/login'));
+      .then(() => history.push('/login/authenticate'));
   }
 
   handleMenu(event) {
   }
 
   render() {
-    const { classes, user, profile } = this.props;
+    const { classes, user, preference, profile } = this.props;
     const { auth } = this.state;
     return <div className={classes.navHeader}>
       <LoginSwitch auth={auth} onChange={this.handleLogin.bind(this)}/>
@@ -44,12 +44,14 @@ class RssHeader extends React.Component {
         </IconButton>
         <RssButtonNav />
         <div className={classes.loginIcon}>
-        <RssMenu auth={auth} user={user} profile={profile}/>
+        <RssMenu auth={auth} user={user}
+          preference={preference} profile={profile}/>
         </div>
       </div>
     </div>;
   }
 };
+
 const navHeightSmDown = 56;
 const navHeightSmUp = 64;
 const styles = theme => ({

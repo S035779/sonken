@@ -18,7 +18,7 @@ export default class LoginStore extends ReduceStore {
     , preference: {
         from: ''
       , agreement: ''
-      , menu: { num1: 0, num2: 0, num3: 0, num4: 0 }
+      , menu: []
       , advertisement: { url1: '', url2: '', url3: '', url4: '' }
     }
     , isAuthenticated: false
@@ -46,7 +46,7 @@ export default class LoginStore extends ReduceStore {
           preference: action.preference
         });
       case 'preference/create':
-        return Object.assing({}, state, {
+        return Object.assign({}, state, {
           preference: action.preference
         });
       case 'profile/fetch':

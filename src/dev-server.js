@@ -33,5 +33,5 @@ app.use('/\*'
   , proxy({ target: 'http://localhost:8081', changeOrigin: true }));
 
 https.createServer(ssl_keyset, app).listen(https_port, https_host, () => {
-  log.info(`Secure HTTP Server listening on ${https_host}:${https_port}`);
+  log.info('[DEV]', `listening on ${https_host}:${https_port}`);
 });

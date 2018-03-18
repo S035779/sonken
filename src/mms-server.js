@@ -5,7 +5,9 @@ import path from 'path';
 import { logs as log } from './utils/logutils';
 
 dotenv.config();
-const host = '127.0.0.1';
+const env = process.env.NODE_ENV || 'development';
+const smtp_host = '127.0.0.1';
+const ssmtp_host = '127.0.0.1';
 const user = process.env.MMS_USER;
 const pass = process.env.MMS_PASS;
 const smtp_port = process.env.MMS_PORT || 2525;
@@ -15,15 +17,12 @@ const ssl_keyset = {
   cert: fs.readFileSync(path.join(__dirname, '../ssl/server.crt'))
 };
 
-const env = process.env.NODE_ENV || 'development';
 if (env === 'development') 
   log.config('console', 'color', 'mms-server', 'TRACE');
 if (env === 'staging') 
   log.config('file', 'basic', 'mms-server', 'DEBUG');
 if (env === 'production') 
   log.config('file', 'json', 'mms-server', 'INFO');
-
-const pspid = 'mms-server';
 
 const onAuth = (auth, session, callback) => {
   if ((auth.username === user && auth.password === pass) ||
@@ -81,11 +80,13 @@ const option = {
   onRcptTo,
   onData
 };
+
 const smtp = new SMTPServer(option);
-smtp.on('error', err => { log.error(`${pspid}>`, err.message); });
-smtp.listen(smtp_port, host, () => {
-  log.info(`${pspid}>`
-    , `SMTP Server listening on 127.0.0.1:${smtp_port}`);
+smtp.on('error', err => {
+  if(err) log.error('[MMS]', err.name, ':', err.message); }
+);
+smtp.listen(smtp_port, smtp_host, () => {
+  log.info('[MMS]', `listening on ${smtp_host}:${smtp_port}`);
 });
 
 const ssl_option = {
@@ -103,8 +104,9 @@ const ssl_option = {
   onData
 };
 const ssmtp = new SMTPServer(ssl_option);
-ssmtp.on('error', err => { log.error(`${pspid}>`, err.message); });
-ssmtp.listen(ssmtp_port, host, () => {
-  log.info(`${pspid}>`
-    , `Secure SMTP Server listening on 127.0.0.1:${ssmtp_port}`);
+ssmtp.on('error', err => {
+  if(err) log.error('[MMS]', err.name, ':', err.message); }
+);
+ssmtp.listen(ssmtp_port, ssmtp_host, () => {
+  log.info('[MMS]', `listening on ${ssmtp_host}:${ssmtp_port}`);
 });

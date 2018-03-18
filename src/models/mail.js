@@ -9,6 +9,7 @@ const mailSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , title:            { type: String }
 , body:             { type: String }
+, attach:           { type: Buffer }
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'mails' });
 mailSchema.set('toObject');

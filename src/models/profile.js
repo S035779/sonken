@@ -30,7 +30,7 @@ approvedSchema.index({ approved: 1 }, { unique: true });
 const adminSchema = new mongoose.Schema({
   from:             { type: String, required: true }
 , agreement:        String
-, menu:             mongoose.Schema.Types.Mixed
+, menu:             [mongoose.Schema.Types.Mixed]
 , advertisement:    mongoose.Schema.Types.Mixed
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'admin' });

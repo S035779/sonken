@@ -24,6 +24,10 @@ class EditButtons extends React.Component {
     this.props.onChange(event.target.value);
   }
 
+  handleChangeFile(event) {
+    this.props.onUpload(event.target.files.item(0));
+  }
+
   render() {
     const {classes, value} = this.props;
     const primary = 'skyblue';
@@ -35,6 +39,13 @@ class EditButtons extends React.Component {
           onChange={this.handleChangeInput.bind(this)}/>
       </FormControl>
       <div className={classes.buttons}>
+        <input type="file" id="file" accept="application/*"
+          onClick={this.handleChangeFile.bind(this)}
+          className={classes.input}/>
+        <label htmlFor="file">
+          <RssButton color={primary} component="span"
+            className={classes.button}>添付</RssButton>
+        </label>
         <RssButton color={primary}
           onClick={this.handleDraft.bind(this)}
           className={classes.button}>下書き</RssButton>
@@ -62,6 +73,7 @@ const styles = theme => ({
               , padding: theme.spacing.unit }
 , button:     { flex: 1, margin: theme.spacing.unit
               , wordBreak: 'keep-all' }
+, input:      { display: 'none' }
 });
 
 EditButtons.displayName = 'EditButtons';

@@ -20,7 +20,8 @@ class MailEdit extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     std.logInfo(MailEdit.displayName, 'Props', nextProps);
-    this.setState({ mail: nextProps.mail });
+    const { mail } = nextProps;
+    this.setState({ mail });
   }
 
   handleChangeTitle(title) {
@@ -64,8 +65,18 @@ class MailEdit extends React.Component {
     const { _id } = this.state.mail;
     if(window.confirm('Are you sure?')) {
       MailAction.delete(admin, [_id])
+        .then(() => this.setState({ isSuccess: true }))
         .catch(err => this.setState({ isNotValid: true }));
     }
+  }
+
+  handleChangeFile(event) {
+    std.logInfo(MailEdit.displayName, 'handleChangeFile', file);
+    const { admin } = this.props;
+    const { _id } = this.state.mail;
+    MailAction.upload(admin, _id, file)
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleCloseDialog(name) {
@@ -93,6 +104,7 @@ class MailEdit extends React.Component {
     return <div className={classes.mailEdit}>
       <EditButtons changed={isChanged} value={nextTitle}
         onChange={this.handleChangeTitle.bind(this)}
+        onUpload={this.handleChangeFile.bind(this)}
         onDraft={this.handleDraft.bind(this)}
         onSave={this.handleSave.bind(this)}
         onDelete={this.handleDelete.bind(this)} />

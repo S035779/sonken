@@ -1,7 +1,7 @@
 import { dispatch } from 'Main/dispatcher';
 import UserApiClient from 'Services/UserApiClient';
 
-const pspid = 'MailAction';
+const displayName = 'MailAction';
 
 export default {
   presetAdmin(admin) {
@@ -58,6 +58,11 @@ export default {
   deleteSelect(admin, ids) {
     return UserApiClient.deleteSelect(admin, ids).then(() => {
       dispatch({ type: 'select/delete', ids });
+    });
+  },
+  upload(admin, id, file) {
+    return UserApiClient.uploadFile(admin, id, file).then(mail => {
+      dispatch({ type: 'file/upload', mail })
     });
   },
   rehydrate(state) {

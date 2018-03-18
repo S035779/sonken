@@ -1,7 +1,7 @@
 import { dispatch } from 'Main/dispatcher';
 import NoteApiClient from 'Services/NoteApiClient';
 
-const pspid = 'NoteAction';
+const displayName = 'NoteAction';
 
 export default {
   presetUser(user) {

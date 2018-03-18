@@ -32,6 +32,11 @@ class LoginRegist extends React.Component {
     };
   }
 
+  componentDidMount() {
+    std.logInfo(LoginRegist.displayName, 'Props', this.props);
+    LoginAction.fetchPreference(this.props.user);
+  }
+
   handleChangeText(name, event) {
     this.setState({ [name] : event.target.value });
   }
@@ -72,10 +77,16 @@ class LoginRegist extends React.Component {
     );
   }
 
+  renderItems(item, idx) {
+    return <MenuItem value={item.name} key={idx}>
+      {item.name}（上限数：{item.number}）
+    </MenuItem>;
+  }
+
   render() {
     std.logInfo(LoginRegist.displayName, 'Props', this.props);
     std.logInfo(LoginRegist.displayName, 'State', this.state);
-    const { classes, location } = this.props;
+    const { classes, location, preference } = this.props;
     const {
       redirectToRefferer, username, password, confirm_password, name, kana
     , email, phone, plan, agreed, isNotValid
@@ -84,6 +95,8 @@ class LoginRegist extends React.Component {
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const inputSelect = { MenuProps: { className: classes.menu } };
     const to = { pathname: '/marchant' };
+    const renderItems = preference.menu ? preference.menu
+      .map((item, idx) => this.renderItems(item, idx)) : [];
     if(redirectToRefferer) return <Redirect to={to} />;
     return <div className={classes.loginForms}>
       <div className={classes.space} />
@@ -160,9 +173,7 @@ class LoginRegist extends React.Component {
           value={plan} InputProps={inputText} SelectProps={inputSelect}
           onChange={this.handleChangeText.bind(this, 'plan')}
           className={classes.input}>
-          <MenuItem value={'plan_A'}>Plan A</MenuItem>
-          <MenuItem value={'plan_B'}>Plan B</MenuItem>
-          <MenuItem value={'plan_C'}>Plan C</MenuItem>
+          {renderItems}
         </TextField>
         <div className={classes.space} />
       </div>

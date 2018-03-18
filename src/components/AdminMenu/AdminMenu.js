@@ -31,9 +31,9 @@ class AdminMenu extends React.Component {
   }
 
   componentDidMount() {
-    const { admin } = this.props;
-    LoginAction.fetchPreference(admin);
-    LoginAction.fetchProfile(admin);
+    std.logInfo(AdminMenu.displayName, 'Props', this.props);
+    LoginAction.fetchPreference(this.props.admin);
+    LoginAction.fetchProfile(this.props.admin);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -60,12 +60,6 @@ class AdminMenu extends React.Component {
     std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
     const { preference } = this.state;
     switch(name) {
-      case 'num1': case 'num2': case 'num3': case 'num4':
-        const menu = Object.assign({}, preference.menu
-          , { [name]: Number(event.target.value) });
-        this.setState({ preference: Object.assign({}, preference
-          , { menu }) });
-        break;
       case 'url1': case 'url2': case 'url3': case 'url4':
         const advertisement = Object.assign({}, preference.advertisement
           , { [name]: event.target.value });
@@ -75,6 +69,14 @@ class AdminMenu extends React.Component {
       case 'from': case 'agreement':
         this.setState({ preference: Object.assign({}, preference
           , { [name]: event.target.value }) });
+        break;
+      default:
+        const number = Number(event.target.value);
+        const menu = preference.menu
+          .map(item => item.name === name
+            ? Object.assign({}, item, { name, number }) : item );
+        this.setState(
+          { preference: Object.assign({}, preference, { menu }) } );
         break;
     }
   }
@@ -94,7 +96,10 @@ class AdminMenu extends React.Component {
     const { admin } = this.props;
     LoginAction.createPreference(admin)
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        this.setState({ isNotValid: true })
+        console.log(err);
+      });
   }
   
   handleOpenDialog(name, event) {
@@ -113,7 +118,7 @@ class AdminMenu extends React.Component {
     const { admin } = this.props;
     switch(name) {
       case 'isProfile':
-        if(this.isValidateUser() && this.isChanged()) {
+        if(this.isValidateProfile() && this.isChanged()) {
           LoginAction.updateProfile(admin, password, profile)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
@@ -122,7 +127,7 @@ class AdminMenu extends React.Component {
         }
         break;
       case 'isPreference':
-        if(this.isValidateAdmin() && this.isChanged()) {
+        if(this.isValidatePreference() && this.isChanged()) {
           LoginAction.updatePreference(admin, preference)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
@@ -139,7 +144,7 @@ class AdminMenu extends React.Component {
     this.setState({ [name]: false });
   }
 
-  isValidateUser() {
+  isValidateProfile() {
     const { profile, password, confirm_password } = this.state;
     const { name, kana, email, phone } = profile;
     return (password === confirm_password
@@ -148,15 +153,14 @@ class AdminMenu extends React.Component {
     );
   }
 
-  isValidateAdmin() {
+  isValidatePreference() {
     const { preference } = this.state;
     const { from, agreement, advertisement, menu } = preference;
     const { url1, url2, url3, url4 } = advertisement;
-    const { num1, num2, num3, num4 } = menu;
+    const isNumber = menu.every(item => std.regexNumber(item.number));
     return (std.regexEmail(from)  && agreement !== ''
       && url1 !== '' && url2 !== '' && url3 !== '' && url4 !== ''
-      && std.regexNumber(num1) && std.regexNumber(num2)
-      && std.regexNumber(num3) && std.regexNumber(num4)
+      && isNumber
     );
   }
 
@@ -186,6 +190,14 @@ class AdminMenu extends React.Component {
     );
   }
 
+  renderMenu(item, idx) {
+    const title = `${item.name}登録数上限`;
+    return <TextField margin="dense"
+      value={Number(item.number)} key={idx}
+      onChange={this.handleChangePreference.bind(this, item.name)}
+      label={title} type="number" fullWidth />;
+  }
+
   render() {
     std.logInfo(AdminMenu.displayName, 'State', this.state);
     const { auth, classes } = this.props;
@@ -193,8 +205,9 @@ class AdminMenu extends React.Component {
       , password, confirm_password, preference, profile } = this.state;
     const { from, agreement, menu, advertisement } = preference;
     const { name, kana, email, phone, user } = profile;
-    const { num1, num2, num3, num4 } = menu;
     const { url1, url2, url3, url4 } = advertisement;
+    const renderMenu = menu
+      ? menu.map((obj, idx) => this.renderMenu(obj, idx)) : []; 
     const open = Boolean(anchorEl);
     return auth && (<div>
       <IconButton
@@ -286,22 +299,7 @@ class AdminMenu extends React.Component {
             value={url4}
             onChange={this.handleChangePreference.bind(this, 'url4')}
             label="広告４URL" type="text" fullWidth />
-          <TextField margin="dense"
-            value={num1}
-            onChange={this.handleChangePreference.bind(this, 'num1')}
-            label="メニュー１登録上限数" type="number" fullWidth />
-          <TextField margin="dense"
-            value={num2}
-            onChange={this.handleChangePreference.bind(this, 'num2')}
-            label="メニュー２登録上限数" type="number" fullWidth />
-          <TextField margin="dense"
-            value={num3}
-            onChange={this.handleChangePreference.bind(this, 'num3')}
-            label="メニュー３登録上限数" type="number" fullWidth />
-          <TextField margin="dense"
-            value={num4}
-            onChange={this.handleChangePreference.bind(this, 'num4')}
-            label="メニュー４登録上限数" type="number" fullWidth />
+          {renderMenu}
         </LoginFormDialog>>
       </Menu>
     </div>);

@@ -80,8 +80,8 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const isUser = options.user !=='';
           const isEmail = !!options.email;
-          if(!isUser) return reject(
-            { name: 'Error', message: 'Request error.' });
+          if(!isUser) 
+            return reject({ name: 'Error', message: 'Request error.' });
           const conditions = isEmail
             ? { email: options.email
               , phone: new RegExp(options.phone + '$')}
@@ -118,11 +118,26 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const isAdmin = !!options.admin;
           const isData = !!options.data;
-          const conditions = isAdmin
-            ? { user: options.data.user }
-            : { user: options.user };
-          const update = isAdmin
-            ? {
+          const isPass = !!options.hash && !!options.salt;
+          let conditions = {};
+          let update = {};
+          log.info(isAdmin, isData, isPass);
+          if(isData && isPass) {
+            conditions = { user: options.user };
+            update = {
+              name:   options.data.name
+            , kana:   options.data.kana
+            , email:  options.data.email
+            , phone:  options.data.phone
+            , plan:   options.data.plan
+            , salt:   options.salt
+            , hash:   options.hash
+            , updated: Date.now()
+            }
+          }
+          if(isAdmin && isData) {
+            conditions = { user: options.data.user }
+            update = {
               name:   options.data.name
             , kana:   options.data.kana
             , email:  options.data.email
@@ -130,22 +145,26 @@ export default class UserProfiler {
             , plan:   options.data.plan
             , updated: Date.now()
             }
-            : isData
-              ? {
-                  name:   options.data.name
-                , kana:   options.data.kana
-                , email:  options.data.email
-                , phone:  options.data.phone
-                , plan:   options.data.plan
-                , salt:   options.salt
-                , hash:   options.hash
-                , updated: Date.now()
-              }
-              : {
-                salt:   options.salt
-              , hash:   options.hash
-              , updated: Date.now()
-              };
+          }
+          if(isData) {
+            conditions = { user: options.user };
+            update = {
+              name:   options.data.name
+            , kana:   options.data.kana
+            , email:  options.data.email
+            , phone:  options.data.phone
+            , plan:   options.data.plan
+            , updated: Date.now()
+            }
+          }
+          if(isPass) {
+            conditions = { user: options.user };
+            update = {
+              salt:   options.salt
+            , hash:   options.hash
+            , updated: Date.now()
+            };
+          }
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             log.trace(request, obj);
@@ -454,20 +473,25 @@ export default class UserProfiler {
   }
 
   updateUser({ admin, user, password, data }) {
+    const isPass = !!password;
     const isAdmin = !!admin;
     const isData = !!data;
-    return isAdmin
-      ? this._updateUser({ admin, data })
-        .flatMap(() => this.fetchUser({ user: data.user }))
-      : isData
-        ? this.createSaltAndHash(password).flatMap(obj => 
-            this._updateUser({
-              user, salt: obj.salt, hash: obj.hash, data
-            })).flatMap(() => this.fetchUser({ user }))
-        : this.createSaltAndHash(password).flatMap(obj => 
-            this._updateUser({
-              user, salt: obj.salt, hash: obj.hash
-            })).flatMap(() => this.fetchUser({ user }));
+    log.info(isAdmin, isData, isPass);
+    if(isPass && isData) return this.createSaltAndHash(password)
+      .flatMap(obj => 
+        this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
+      .flatMap(() => this.fetchUser({ user }))
+
+    if(isAdmin && isData) return this._updateUser({ admin, data })
+      .flatMap(() => this.fetchUser({ user: data.user }));
+    
+    if(isData) return this._updateUser({ user, data })
+      .flatMap(() => this.fetchUser({ user }));
+    
+    if(isPass) return this.createSaltAndHash(password)
+      .flatMap(obj => 
+        this._updateUser({ user, salt: obj.salt, hash: obj.hash}))
+      .flatMap(() => this.fetchUser({ user }))
   }
 
   _updateUser({ user, salt, hash, data }) {
@@ -492,11 +516,11 @@ export default class UserProfiler {
     let messages = [];
     const sender = 'info@example.com';
     return this.fetchSelected(admin)
-    .flatMap(objs => this.forMessage(admin, objs))
-    .map(arr => { messages = arr; })
-    .flatMap(() => this.forAddress(admin, ids))
-    .map(maillist => this.setMessage(sender, maillist, messages))
-    .flatMap(objs => this.postMessages(objs));
+      .flatMap(objs => this.forMessage(admin, objs))
+      .map(arr => { messages = arr; })
+      .flatMap(() => this.forAddress(admin, ids))
+      .map(maillist => this.setMessage(sender, maillist, messages))
+      .flatMap(objs => this.postMessages(objs));
   }
 
   forAddress(admin, ids) {
@@ -562,7 +586,12 @@ export default class UserProfiler {
     const data = {
       from: mms_from
     , agreement: 'http://www.example.com'
-    , menu: { num1: 9999, num2: 300, num3: 50, num4: 20 }
+    , menu: [
+        { number: 9999, name: 'Plan A', id: 0 }
+      , { number: 300,  name: 'Plan B', id: 1 }
+      , { number: 50,   name: 'Plan C', id: 2 }
+      , { number: 20,   name: 'Plan D', id: 3 }
+    ]
     , advertisement: {
         url1: 'http://www1.example.com'
       , url2: 'http://www2.example.com'
@@ -581,4 +610,5 @@ export default class UserProfiler {
   deleteAdmin({ admin, id }) {
     return Rx.Observable.fromPromise(this.removeAdmin(admin, id));
   }
+  
 };

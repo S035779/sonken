@@ -111,6 +111,34 @@ export default class MailEditor {
             resolve(obj);
           });
         });
+      case 'upload/attach':
+        return new Promise((resolve, reject) => {
+          console.log(options.user, options.file);
+          const conditions = { _id: options.id };
+          const update = {
+              user:     options.admin
+            , attach:   options.file
+            , updated:  Date.now()
+            };
+          Mail.findOneAndUpdate(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            log.trace(request, obj);
+            resolve(obj);
+          });
+          //fs.writeFile('tmp/' +  options.user, options.file, err => {
+          //  if(err) return reject(err);
+          //  resolve('OK');
+          //});
+        });
+        break;
+      //case 'download/attach':
+      //  return new Promise((resolve, reject) => {
+      //    fs.readFile('tmp/' + options.user, (err, data) => {
+      //      if(err) return reject(err);
+      //      resolve(data);
+      //    });
+      //  });
+      //  break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
@@ -149,6 +177,14 @@ export default class MailEditor {
 
   getSelect(admin) {
     return this.request('fetch/select', { admin });
+  }
+
+  //downAttach(admin, id) {
+  //  return this.request('download/attach', { admin, id });
+  //}
+
+  upAttach(admin, id, file) {
+    return this.request('upload/attach', { admin, id, file });
   }
 
   fetchMails({ admin }) {
@@ -207,4 +243,9 @@ export default class MailEditor {
     const observables = R.map(observable, _ids);
     return Rx.Observable.forkJoin(observables);
   }
+
+  uploadAttach({ admin, id, file }) {
+    return Rx.Observable.fromPromise(this.upAttach(admin, id, file));
+  }
+
 };

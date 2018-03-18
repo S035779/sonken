@@ -22,12 +22,13 @@ class App extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { user, isAuthenticated, profile } = this.state;
+    const { user, isAuthenticated, profile, preference } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <Reboot />
       <div className={classes.appFrame}>
-        <RssHeader user={user} profile={profile}
+        <RssHeader user={user}
+          profile={profile} preference={preference}
           isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}

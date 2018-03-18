@@ -391,23 +391,6 @@ export default class FeedParser {
           resolve(response(listed));
         });
         break;
-      //case 'upload/note':
-      //  return new Promise((resolve, reject) => {
-      //    console.log(options.user, options.file);
-      //    fs.writeFile('tmp/' +  options.user, options.file, err => {
-      //      if(err) return reject(err);
-      //      resolve('OK');
-      //    });
-      //  });
-      //  break;
-      //case 'download/note':
-      //  return new Promise((resolve, reject) => {
-      //    fs.readFile('tmp/' + options.user, (err, data) => {
-      //      if(err) return reject(err);
-      //      resolve(data);
-      //    });
-      //  });
-      //  break;
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
           net.get2(options.url
@@ -454,14 +437,6 @@ export default class FeedParser {
         break;
     }
   }
-
-  //downNote(user, id) {
-  //  return this.request('download/note', { user, id });
-  //}
-
-  //upNote(user, file) {
-  //  return this.request('upload/note', { user, file });
-  //}
 
   addList(user, ids) {
     return this.request('create/listed', { user, ids });
@@ -712,10 +687,6 @@ export default class FeedParser {
   deleteList({ user, ids }) {
     return Rx.Observable.fromPromise(this.removeList(user, ids));
   }
-
-  //_uploadNote({ user, file }) {
-  //  return Rx.Observable.fromPromise(this.upNote(user, file));
-  //}
 
   uploadNote({ user, category, file }) {
     const csv = file.toString();

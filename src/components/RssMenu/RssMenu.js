@@ -4,13 +4,14 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { IconButton, Menu, TextField }
+import { IconButton, Menu, TextField, Typography }
                         from 'material-ui';
 import { MenuItem }     from 'material-ui/Menu';
 import { DialogContentText }
                         from 'material-ui/Dialog';
 import { AccountCircle }
                         from 'material-ui-icons';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
 class RssMenu extends React.Component {
@@ -29,8 +30,9 @@ class RssMenu extends React.Component {
   }
 
   componentDidMount() {
-    const { user } = this.props;
-    LoginAction.fetchProfile(user);
+    std.logInfo(RssMenu.displayName, 'Props', this.props);
+    LoginAction.fetchProfile(this.props.user);
+    LoginAction.fetchPreference(this.props.user);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -75,11 +77,11 @@ class RssMenu extends React.Component {
 
   handleSubmitDialog(name, event) {
     std.logInfo(RssMenu.displayName, 'handleSubmitDialog', name);
-    const { profile, password } = this.this.state;
+    const { profile, password } = this.state;
     const { user } = this.props;
     switch(name) {
       case 'isProfile':
-        it(this.isValidate() && this.isChanged()) {
+        if(this.isValidateProfile() && this.isChanged()) {
           LoginAction.updateProfile(user, password, profile)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
@@ -88,8 +90,8 @@ class RssMenu extends React.Component {
         }
         break;
       case 'isPreference':
-        if(this.isValidate() && this.isChanged()) {
-          LoginAction.updateProfile(user, password, profile)
+        if(this.isValidatePreference() && this.isChanged()) {
+          LoginAction.updateProfile(user, null, profile)
             .then(() => this.setState({ isSuccess: true }))
             .catch(err => this.setState({ isNotValid: true }));
         } else {
@@ -100,11 +102,56 @@ class RssMenu extends React.Component {
     this.setState({ [name]: false });
   }
 
+  handleCloseDialog(name) {
+    std.logInfo(RssMenu.displayName, 'handleCloseDialog', name);
+    this.setState({ [name]: false });
+  }
+
+  isValidateProfile() {
+    const { profile, password, confirm_password } = this.state;
+    const { name, kana, email, phone } = profile;
+    return (password === confirm_password
+      && password !== '' && name !== '' && kana !== ''
+      && std.regexEmail(email) && std.regexNumber(phone)
+    );
+  }
+
+  isValidatePreference() {
+    const { profile } = this.state;
+    const { plan } = profile;
+    return (
+      plan !== ''
+    );
+  }
+
+  isChanged() {
+    const { password, confirm_password } = this.state;
+    const { name, kana, email, phone, plan } = this.state.profile;
+    const { profile } = this.props;
+    return (password === confirm_password
+      || profile.name !== name
+      || profile.kana !== kana
+      || profile.email !== email
+      || profile.phone !== phone
+      || profile.plan !== plan
+    );
+  }
+
+  renderItems(item, idx) {
+    return <MenuItem key={idx} value={item.name}>
+      {item.name}（上限数：{item.number}）
+    </MenuItem>;
+  }
+
   render() {
-    const { auth } = this.props;
-    const { anchorEl, isProfile, isPreference, name, kana, email, phone
-      , username, password, confirm_password, plan } = this.state;
+    std.logInfo(RssMenu.displayName, 'State', this.state);
+    const { preference, auth, classes } = this.props;
+    const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
+      , password, confirm_password, profile } = this.state;
+    const { name, kana, email, phone, user, plan } = profile;
     const open = Boolean(anchorEl);
+    const renderItems = preference.menu ? preference.menu
+      .map((item, idx) => this.renderItems(item, idx)) : [];
     return auth && (<div>
       <IconButton
         aria-owns={open ? 'menu-appbar' : null}
@@ -117,48 +164,72 @@ class RssMenu extends React.Component {
         transformOrigin={{ vertical: 'top', horizontal: 'right'}}
         open={open}
         onClose={this.handleClose.bind(this)}>
-        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isProfile')}>
+        <MenuItem
+          onClick={this.handleOpenDialog.bind(this, 'isProfile')}>
         プロファイル
         </MenuItem>
-        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
+        <MenuItem
+          onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
         契約内容変更
         </MenuItem>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
+        </RssDialog>
+        <RssDialog open={isSuccess} title={'送信完了'}
+          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
+        </RssDialog>
         <LoginFormDialog open={isProfile} title={'プロファイル'}
           onClose={this.handleCloseDialog.bind(this, 'isProfile')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
-          <TextField autoFocus margin="dense" id="name" value={name}
+          <Typography variant="title" noWrap
+            className={classes.title}>{name}（{user}）</Typography>
+          <TextField autoFocus margin="dense"
+            value={name}
+            onChange={this.handleChangeProfile.bind(this, 'name')}
             label="氏名" type="text" fullWidth />
-          <TextField margin="dense" id="kana" value={kana}
+          <TextField margin="dense"
+            value={kana}
+            onChange={this.handleChangeProfile.bind(this, 'kana')}
             label="氏名（カナ）" type="text" fullWidth />
-          <TextField margin="dense" id="email" value={email}
+          <TextField margin="dense"
+            value={email}
+            onChange={this.handleChangeProfile.bind(this, 'email')}
             label="連絡先メールアドレス" type="email" fullWidth />
-          <TextField margin="dense" id="phone" value={phone}
+          <TextField margin="dense"
+            value={phone}
+            onChange={this.handleChangeProfile.bind(this, 'phone')}
             label="連絡先電話番号" type="text" fullWidth />
-          <TextField margin="dense" id="username"
-            value={username}
-            label="ユーザＩＤ" type="text" fullWidth />
-          <TextField margin="dense" id="password"
+          <TextField margin="dense"
             value={password}
+            onChange={this.handleChangeProfile.bind(this, 'password')}
             label="ユーザＰＷ" type="password" fullWidth />
-          <TextField margin="dense" id="confirm_password"
+          <TextField margin="dense"
             value={confirm_password}
-            label="ユーザＰＷ（確認）" type="confirm_password" fullWidth />
-        </LoginFormDialog>>
+            onChange={
+              this.handleChangeProfile.bind(this, 'confirm_password')}
+            label="ユーザＰＷ（確認）" type="password" fullWidth />
+        </LoginFormDialog>
         <LoginFormDialog open={isPreference} title={'契約内容変更'}
           onClose={this.handleCloseDialog.bind(this, 'isPreference')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
-          <TextField select autoFocus margin="dense" id="plan" value={plan}
+          <Typography variant="title" noWrap
+            className={classes.title}>{name}（{user}）</Typography>
+          <TextField select autoFocus margin="dense"
+            value={plan}
+            onChange={this.handleChangeProfile.bind(this, 'plan')}
             label="契約プラン" fullWidth>
-            <MenuItem value={'plan_A'}>Plan A</MenuItem>
-            <MenuItem value={'plan_B'}>Plan B</MenuItem>
-            <MenuItem value={'plan_C'}>Plan C</MenuItem>
+            {renderItems}
           </TextField>
         </LoginFormDialog>>
       </Menu>
     </div>);
   }
 };
-const styles = theme => ({});
+const styles = theme => ({
+  title: { margin: theme.spacing.unit * 1.75 }
+});
 RssMenu.displayName = 'RssMenu';
 RssMenu.defaultProps = {};
 RssMenu.propTypes = {

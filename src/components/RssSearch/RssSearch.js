@@ -137,7 +137,7 @@ class RssSearch extends React.Component {
         <RssButton color={color}
           onClick={this.handleDownload.bind(this)}
           classes={classes.button}>CSV ダウンロード</RssButton>
-        <input type="file" id="file" accept="text/plain"
+        <input type="file" id="file" accept="text/csv"
           onChange={this.handleChangeFile.bind(this)}
           className={classes.input}/>
         <label htmlFor="file">

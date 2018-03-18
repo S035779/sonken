@@ -292,6 +292,15 @@ export default {
           );
         });
         break;
+      case 'upload/file':
+        return new Promise((resolve, reject) => {
+          xhr.putFile(
+            api + '/attach'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       case 'pagenation/user':
       case 'select/user':
       case 'pagenation/faq':
@@ -453,5 +462,10 @@ export default {
   },
   deleteSelect(admin, ids) {
     return this.request('delete/selected', { admin, ids });
+  },
+  uploadFile(admin, id, file) {
+    const filename = admin + '_' + id;
+    const filedata = file;
+    return this.request('upload/mail', { filename, filedata })
   }
 };

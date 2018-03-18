@@ -4,18 +4,19 @@
   "description": "This product adopts Google's Material Design for UI.",
   "author": "Mamoru Hashimoto <you@example.com>",
   "scripts": {
-    "start": "node --require ./src/hook/babel-register.js src/dev-server.js",
-    "build": "webpack --config webpack.production.js",
-    "watch": "webpack --config webpack.development.js",
     "start:ssr": "node dist/ssr.node.js",
     "start:api": "node dist/api.node.js",
     "start:mms": "node --require ./src/hook/babel-register.js src/mms-server.js",
-    "start:node": "npm-run-all --parallel start:api start:ssr start:mms",
+    "start:dev": "node --require ./src/hook/babel-register.js src/dev-server.js",
+    "start:node": "npm-run-all --parallel start:api start:ssr",
     "build:node": "webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js --watch --progress",
-    "start:all": "npm-run-all --parallel start:api start:ssr start:mms start",
-    "build:all": "npm-run-all --parallel build:node build",
-    "watch:all": "npm-run-all --parallel watch:node watch"
+    "start:web":  "npm-run-all --parallel start:mms start:dev", 
+    "build:web": "webpack --config webpack.production.js",
+    "watch:web": "webpack --config webpack.development.js",
+    "start:all": "npm-run-all --parallel start:api start:ssr start:mms start:dev",
+    "build:all": "npm-run-all --parallel build:node build:web",
+    "watch:all": "npm-run-all --parallel watch:node watch:web"
   },
   "license": "ISC",
   "dependencies": {

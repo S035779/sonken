@@ -28,13 +28,15 @@ class Login extends React.Component {
     std.logInfo(Login.displayName, 'Props', this.props);
     std.logInfo(Login.displayName, 'State', this.state);
     const { classes, route } = this.props;
-    const { user, isAuthenticated } = this.state;
+    const { user, isAuthenticated, preference } = this.state;
     return <div className={classes.loginFrame}>
       <div className={classes.drawArea}>
       <div className={classes.space}/>
       <div className={classes.container}>
         {route.routes
-          ? renderRoutes(route.routes, { user, isAuthenticated }) : null}
+          ? renderRoutes(route.routes
+            , { user, isAuthenticated, preference })
+          : null}
       </div>
       <div className={classes.space}/>
       </div>
