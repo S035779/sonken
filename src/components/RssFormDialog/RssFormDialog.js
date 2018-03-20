@@ -13,7 +13,9 @@ const Transition =  props => <Slide direction="up" {...props} />;
 class RssFormDialog extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { title: props.note.title }
+    this.state = {
+       title: props.title
+    }
   }
 
   handleClose() {
@@ -22,10 +24,9 @@ class RssFormDialog extends React.Component {
 
   handleSubmit() {
     const { title } = this.state;
-    std.logInfo(RssFormDialog.displayName, 'handleSubmit', title);
-    const newNote = Object.assign({}, this.props.note, { title })
-    this.props.onSubmit(newNote);
-    this.props.onClose();
+    const { selectedNoteId } = this.props;
+    std.logInfo(RssFormDialog.displayName, 'handleSubmit', selectedNoteId);
+    this.props.onSubmit(selectedNoteId, title);
   }
 
   handleChangeText(name, event) {
@@ -59,7 +60,7 @@ class RssFormDialog extends React.Component {
 }
 
 RssFormDialog.displayName = 'RssFormDialog';
-RssFormDialog.defaultProps = { note: null };
+RssFormDialog.defaultProps = {  };
 RssFormDialog.propTypes = {
   fullScreen: PropTypes.bool.isRequired
 };

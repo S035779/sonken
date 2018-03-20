@@ -21,10 +21,10 @@ var node = {
   },
   plugins: [
     new ManifestPlugin({ fileName: 'manifest.node.json' }),
-    new CleanWebpackPlugin([
-      'dist/*.node.*',
-      'dist/favicon.ico'
-    ], { verbose: false }),
+    //new CleanWebpackPlugin([
+    //  'dist/*.node.*',
+    //  'dist/favicon.ico'
+    //], { verbose: false }),
   ],
   output: {
     filename: '[name].node.js',

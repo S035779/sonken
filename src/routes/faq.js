@@ -4,6 +4,31 @@ import { logs as log }  from 'Utilities/logutils';
 const faq = FaqEditor.of();
 
 export default {
+  uploadFile(options) {
+    return (req, res, next) => {
+      const filename = req.headers['x-uploadedfilename'];
+      const filedata = new Buffer(+req.headers['content-length']);
+      let bufferOffset = 0;
+      req.on('data', chunk => {
+        chunk.copy(filedata, bufferOffset);
+        bufferOffset += chunk.length;
+      }).on('end', () => {
+        const admin = filename.split('_')[0];
+        const id = filename.split('_')[1];
+        const file = filedata;
+        faq.uploadFile({ admin, id, file }).subscribe(
+          obj => { res.send(obj); }
+        , err => {
+            res.status(500)
+              .send({ name: err.name, message: err.message });
+            log.error(err.name, ':', err.message);
+          }
+        , () => { log.info('Complete to upload Attach.'); }  
+        );
+      });
+    };
+  },
+
   fetchFaqs(options) {
     return (req, res, next) => {
       const { admin } = req.body;

@@ -4,19 +4,21 @@
   "description": "This product adopts Google's Material Design for UI.",
   "author": "Mamoru Hashimoto <you@example.com>",
   "scripts": {
-    "start:ssr": "node dist/ssr.node.js",
-    "start:api": "node dist/api.node.js",
-    "start:mms": "node --require ./src/hook/babel-register.js src/mms-server.js",
-    "start:dev": "node --require ./src/hook/babel-register.js src/dev-server.js",
-    "start:node": "npm-run-all --parallel start:api start:ssr",
+    "start:ssr":
+       "supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
+    "start:api":
+       "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
+    "start:mms": "node -r ./src/hook/babel-register.js src/mms-server.js",
+    "start:dev": "node -r ./src/hook/babel-register.js src/dev-server.js",
+    "start:node": "npm-run-all -p start:api start:ssr watch:node",
     "build:node": "webpack --config webpack.node.js",
-    "watch:node": "webpack --config webpack.node.js --watch --progress",
-    "start:web":  "npm-run-all --parallel start:mms start:dev", 
+    "watch:node": "webpack --config webpack.node.js -w --colors",
+    "start:web": "npm-run-all -p start:mms start:dev",
     "build:web": "webpack --config webpack.production.js",
     "watch:web": "webpack --config webpack.development.js",
-    "start:all": "npm-run-all --parallel start:api start:ssr start:mms start:dev",
-    "build:all": "npm-run-all --parallel build:node build:web",
-    "watch:all": "npm-run-all --parallel watch:node watch:web"
+    "start:all": "npm-run-all -p start:api start:ssr start:mms start:dev",
+    "build:all": "npm-run-all -p build:node build:web",
+    "watch:all": "npm-run-all -p watch:node watch:web"
   },
   "license": "ISC",
   "dependencies": {
@@ -68,6 +70,7 @@
     "http-proxy-middleware": "0.17.4",
     "npm-run-all": "4.1.2",
     "smtp-server": "3.4.1",
+    "supervisor": "0.12.0",
     "uglifyjs-webpack-plugin": "1.1.6",
     "webpack": "3.10.0",
     "webpack-dev-middleware": "2.0.4",

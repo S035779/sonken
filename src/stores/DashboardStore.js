@@ -30,7 +30,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createRead(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj.id)
+    const isNote = obj => action.ids.some(id => id === obj._id)
     const setItem = obj => Object.assign({}, obj, { readed: true });
     const setItems = objs => objs.map(setItem)
     const setNote = obj => obj.items
@@ -39,7 +39,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteRead(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj.id)
+    const isNote = obj => action.ids.some(id => id === obj._id)
     const setItem = obj => Object.assign({}, obj, { readed: false });
     const setItems = objs => objs.map(setItem)
     const setNote = obj => obj.items

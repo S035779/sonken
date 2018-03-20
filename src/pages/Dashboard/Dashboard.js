@@ -42,12 +42,12 @@ class Dashboard extends React.Component {
     std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, file } = this.state;
-    const _id = Number(match.params.id);
+    const _id = match.params.id;
     const category =
       match.params.category ? match.params.category : 'marchant';
     const _notes =
       notes ? notes.filter(obj => obj.category === category) : [];
-    const note = notes.find(obj => obj.id === _id);
+    const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
     _notes.length = this.notePage(number, page);
     if(!isAuthenticated) {

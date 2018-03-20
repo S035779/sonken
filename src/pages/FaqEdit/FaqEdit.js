@@ -13,6 +13,7 @@ class FaqEdit extends React.Component {
     super(props);
     this.state = {
       faq:        props.faq
+    , isAttached: !!props.faq.file
     , isSuccess:  false
     , isNotValid: false
     };
@@ -20,7 +21,8 @@ class FaqEdit extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     std.logInfo(FaqEdit.displayName, 'Props', nextProps);
-    this.setState({ faq: nextProps.faq });
+    const { faq } = nextProps;
+    this.setState({ faq, isAttached: faq ? !!faq.file : false });
   }
 
   handleChangeTitle(title) {
@@ -68,6 +70,21 @@ class FaqEdit extends React.Component {
     }
   }
 
+  handleChangeFile(file) {
+    std.logInfo(FaqEdit.displayName, 'handleChangeFile', file);
+    if(!file) return;
+    const { admin } = this.props;
+    const { _id, title, body } = this.state.faq;
+    if(this.isValidate()) {
+      FaqAction.update(admin, _id, { title, body })
+        .then(() => FaqAction.upload(admin, _id, file))
+        .then(() => this.setState({ isSuccess: true, isAttached: true }))
+        .catch(err => this.setState({ isNotValid: true }));
+    } else {
+      this.setState({ isNotValid: true });
+    }
+  }
+
   handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
@@ -78,21 +95,23 @@ class FaqEdit extends React.Component {
   }
 
   isChanged() {
-    const { title, body } = this.state.faq;
+    if(!this.state.faq) return false;
     const { faq } = this.props;
+    const { title, body } = this.state.faq;
     return faq.title !== title || faq.body !== body;
   }
 
   render() {
-    std.logInfo(FaqEdit.displayName, 'Props', this.props);
-    const { classes, admin, faq } = this.props;
-    const { isNotValid, isSuccess } = this.state;
-    const { title: nextTitle, body: nextBody } = this.state.faq;
+    //std.logInfo(FaqEdit.displayName, 'State', this.state);
+    const { classes, admin } = this.props;
+    const { faq, isAttached, isNotValid, isSuccess } = this.state;
     if(!faq || !faq._id) return null;
-    const isChanged = faq.title !== nextTitle || faq.body !== nextBody;
+    const isChanged = this.isChanged();
     return <div className={classes.faqEdit}>
-      <EditButtons changed={isChanged} value={nextTitle}
+      <EditButtons value={faq.title}
+        changed={isChanged} attached={isAttached}
         onChange={this.handleChangeTitle.bind(this)}
+        onUpload={this.handleChangeFile.bind(this)}
         onDraft={this.handleDraft.bind(this)}
         onSave={this.handleSave.bind(this)}
         onDelete={this.handleDelete.bind(this)} />
@@ -106,11 +125,11 @@ class FaqEdit extends React.Component {
       </RssDialog>
       <div className={classes.editBody}>
         <textarea className={classes.inputArea}
-          id="note-body" value={nextBody}
+          id="note-body" value={faq.body}
           onChange={this.handleChangeBody.bind(this)}/>
       </div>
       <div className={classes.editView}>
-        <EditBody body={nextBody} />
+        <EditBody body={faq.body} />
       </div>
     </div>;
   }

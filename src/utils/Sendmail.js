@@ -57,12 +57,12 @@ class Sendmail {
   }
 
   createMessage(message) {
-    log.trace(message);
+    //log.trace(message);
     return this.postMessage(message);
   }
 
   createMessages(messages) {
-    log.trace(messages);
+    //log.trace(messages);
     return this.forMessage(messages);
   }
 };

@@ -8,7 +8,7 @@ import RssView        from 'Components/RssView/RssView';
 class MarchantEdit extends React.Component {
   render() {
     const { classes, user, note } = this.props
-    if(!note || !note.id) return null;
+    if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
       <div className={classes.forms}>
         <RssForms

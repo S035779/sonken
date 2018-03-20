@@ -19,7 +19,6 @@ export default {
           const isAuthenticated = options.admin !== '';
           setTimeout(() => resolve(isAuthenticated), 200);
         });
-        break;
       case 'prefetch/users':
         return new Promise((resolve, reject) => {
           net.getJSON2(
@@ -30,7 +29,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'fetch/users':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -40,7 +38,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -50,7 +47,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/user':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -60,7 +56,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'update/user':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -70,7 +65,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/user':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -80,7 +74,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'sendmail/users':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -108,7 +101,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'prefetch/faqs':
         return new Promise((resolve, reject) => {
           net.getJSON2(
@@ -119,7 +111,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'fetch/faqs':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -129,7 +120,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'prefetch/faqs/posted':
         return new Promise((resolve, reject) => {
           net.getJSON2(
@@ -140,7 +130,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'fetch/faqs/posted':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -150,7 +139,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       //case 'fetch/faq':
       //  return new Promise((resolve, reject) => {
       //    xhr.getJSON(
@@ -160,7 +148,6 @@ export default {
       //    , err => { reject(err); }
       //    );
       //  });
-      //  break;
       case 'create/faq':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -170,7 +157,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'update/faq':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -180,7 +166,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/faq':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -190,7 +175,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/posted':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -200,7 +184,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/posted':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -210,7 +193,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'prefetch/mails':
         return new Promise((resolve, reject) => {
           net.getJSON2(
@@ -221,7 +203,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'fetch/mails':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -231,7 +212,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       //case 'fetch/mail':
       //  return new Promise((resolve, reject) => {
       //    xhr.getJSON(
@@ -241,7 +221,6 @@ export default {
       //    , err => { reject(err); }
       //    );
       //  });
-      //  break;
       case 'create/mail':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -251,7 +230,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'update/mail':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -261,7 +239,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/mail':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -271,7 +248,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/selected':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -281,7 +257,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/selected':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -291,11 +266,19 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
-      case 'upload/file':
+      case 'upload/mail':
         return new Promise((resolve, reject) => {
           xhr.putFile(
             api + '/mails'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'upload/faq':
+        return new Promise((resolve, reject) => {
+          xhr.putFile(
+            api + '/faqs'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -315,7 +298,6 @@ export default {
         return new Promise((resolve, reject) => {
           reject(options);
         });
-        break;
     }
   },
 
@@ -425,6 +407,11 @@ export default {
   deletePost(admin, ids) {
     return this.request('delete/posted', { admin, ids });
   },
+  uploadFaq(admin, id, file) {
+    const filename = admin + '_' + id;
+    const filedata = file;
+    return this.request('upload/faq', { filename, filedata })
+  },
 
   /*
    * Mails
@@ -463,9 +450,9 @@ export default {
   deleteSelect(admin, ids) {
     return this.request('delete/selected', { admin, ids });
   },
-  uploadFile(admin, id, file) {
+  uploadMail(admin, id, file) {
     const filename = admin + '_' + id;
     const filedata = file;
-    return this.request('upload/file', { filename, filedata })
+    return this.request('upload/mail', { filename, filedata })
   }
 };

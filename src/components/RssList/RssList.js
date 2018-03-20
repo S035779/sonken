@@ -51,11 +51,11 @@ class RssList extends React.Component {
     NoteAction.select(user, newChecked);
   }
   
-  handleChangeTitle({ id, title }) {
+  handleChangeTitle(id, title) {
     std.logInfo(RssList.displayName, 'handleChangeTitle', id);
-    const { notes } = this.state;
     const { user } = this.props;
-    const curNote = notes.find(obj => obj.id === id);
+    const { notes } = this.state;
+    const curNote = notes.find(obj => obj._id === id);
     const newNote = Object.assign({}, curNote, { title });
     NoteAction.update(user, id, newNote);
   }
@@ -67,7 +67,7 @@ class RssList extends React.Component {
       primary:    classes.primary
     , secondary:  classes.secondary
     };
-    const linkTo = `/${note.category}/${note.id}/edit`;
+    const linkTo = `/${note.category}/${note._id}/edit`;
     let newRelease = 0;
     if (note.items)
       note.items.forEach(item => { if(!item.readed) newRelease++; });
@@ -75,10 +75,10 @@ class RssList extends React.Component {
     const title = note.title;
     const updated =
       std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
-    return <div key={note.id} className={classes.noteItem}>
+    return <div key={note._id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, note.id)}
-        checked={checked.indexOf(note.id) !== -1}
+        onClick={this.handleChangeCheckbox.bind(this, note._id)}
+        checked={checked.indexOf(note._id) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
@@ -87,12 +87,12 @@ class RssList extends React.Component {
               primary={title} secondary={updated}/>
             <ListItemSecondaryAction>
               <Button className={classes.button}
-                onClick={this.handleChangeDialog.bind(this, note.id)}
+                onClick={this.handleChangeDialog.bind(this, note._id)}
                 color="primary">編集</Button>
               <RssFormDialog title="タイトルを編集する"
-                note={note}
-                open={this.state.opened.indexOf(note.id) !== -1}
-                onClose={this.handleChangeDialog.bind(this, note.id)}
+                selectedNoteId={note._id} title={note.title}
+                open={this.state.opened.indexOf(note._id) !== -1}
+                onClose={this.handleChangeDialog.bind(this, note._id)}
                 onSubmit={this.handleChangeTitle.bind(this)}>
                 {title}</RssFormDialog>
             </ListItemSecondaryAction>

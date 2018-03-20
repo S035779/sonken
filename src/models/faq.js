@@ -7,6 +7,7 @@ const faqSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , title:            { type: String }
 , body:             { type: String }
+, file:             { type: Buffer, default: null }
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'faqs' });
 faqSchema.set('toObject');

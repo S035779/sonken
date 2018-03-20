@@ -90,6 +90,10 @@ export default class FaqStore extends ReduceStore {
           faqs: this.deletePost(state, action)
         , ids:    []
         });
+      case 'faq/upload':
+        return Object.assign({}, state, {
+          faq: this.updateFaq(state, action)
+        });
       case 'faq/rehydrate':
         return    action.state;
       default: 

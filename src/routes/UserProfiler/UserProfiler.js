@@ -38,18 +38,17 @@ export default class UserProfiler {
   }
 
   request(request, options) {
-    log.debug(request, options);
+    //log.debug(request, options);
     switch(request) {
       case 'fetch/users':
         return new Promise((resolve, reject) => {
           const conditions = {};
           User.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'signin/user':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -60,22 +59,20 @@ export default class UserProfiler {
           const update = { isAuthenticated: true };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           })
         });
-        break;
       case 'signout/user':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
           const update = { isAuthenticated: false };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           const isUser = options.user !=='';
@@ -90,11 +87,10 @@ export default class UserProfiler {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'User not found.' });
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/user':
         return new Promise((resolve, reject) => {
           const user = new User({
@@ -109,11 +105,10 @@ export default class UserProfiler {
           });
           user.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'update/user':
         return new Promise((resolve, reject) => {
           const isAdmin = !!options.admin;
@@ -121,7 +116,7 @@ export default class UserProfiler {
           const isPass = !!options.hash && !!options.salt;
           let conditions = {};
           let update = {};
-          log.info(isAdmin, isData, isPass);
+          //log.info(isAdmin, isData, isPass);
           if(isData && isPass) {
             conditions = { user: options.user };
             update = {
@@ -167,21 +162,19 @@ export default class UserProfiler {
           }
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
-            resolve(obj.password);
+            //log.trace(request, obj);
+            resolve(obj);
           });
         });
-        break;
       case 'delete/user':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           User.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'mail/address':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
@@ -189,61 +182,55 @@ export default class UserProfiler {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'User not found.' });
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj.email);
           });
         });
-        break;
       case 'mail/selected':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Selected.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'mail/message':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           Mail.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/approval':
         return new Promise((resolve, reject) => {
           const approved = new Approved({ approved: options.id });
           approved.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'delete/approval':
         return new Promise((resolve, reject) => {
           const conditions = { approved: options.id };
           Approved.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'fetch/approval':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Approved.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'signin/admin':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -255,11 +242,10 @@ export default class UserProfiler {
           const update = { isAuthenticated: true };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           })
         });
-        break;
       case 'signout/admin':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -270,22 +256,20 @@ export default class UserProfiler {
           const isAuthenticated = false;
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
-      case 'fetch/admin':
+      case 'fetch/preference':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Admin.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
-      case 'create/admin':
+      case 'create/preference':
         return new Promise((resolve, reject) => {
           const admin = new Admin({
             from:           options.data.from
@@ -295,12 +279,11 @@ export default class UserProfiler {
           });
           admin.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
-      case 'update/admin':
+      case 'update/preference':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.data._id };
           const update = {
@@ -312,43 +295,40 @@ export default class UserProfiler {
           };
           Admin.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
-      case 'delete/admin':
-        return new Promise((resolve, reject) => {
-          const conditions = { _id: options.id };
-          User.findOneAndRemove(conditions, (err, obj) => {
-            if(err) return reject(err);
-            log.trace(request, obj);
-            resolve(obj);
-          });
-        });
-        break;
+      //case 'delete/preference':
+      //  return new Promise((resolve, reject) => {
+      //    const conditions = { _id: options.id };
+      //    User.findOneAndRemove(conditions, (err, obj) => {
+      //      if(err) return reject(err);
+      //      log.trace(request, obj);
+      //      resolve(obj);
+      //    });
+      //  });
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
         });
-        break;
     }
   }
 
-  getAdmin(admin, id) {
-    return this.request('fetch/admin', { admin, id });
+  getPreference(admin) {
+    return this.request('fetch/preference', { admin });
   }
 
-  addAdmin(admin, data) {
-    return this.request('create/admin', { admin, data });
+  addPreference(admin, data) {
+    return this.request('create/Preference', { admin, data });
   }
 
-  replaceAdmin(admin, data) {
-    return this.request('update/admin', { admin, data });
+  replacePreference(admin, data) {
+    return this.request('update/preference', { admin, data });
   }
 
-  removeAdmin(admin, id) {
-    return this.request('delete/admin', { admin,id });
+  removePreference(admin, id) {
+    return this.request('delete/preference', { admin,id });
   }
 
   getSaltAndHash(password, salt) {
@@ -442,17 +422,31 @@ export default class UserProfiler {
   }
 
   fetchUsers({ admin }) {
-    const observables = Rx.Observable
-      .forkJoin([ this.getApproval(admin), this.getUsers(admin) ]);
-    return observables
-    .map(objs => {
-      const approved = R.map(obj => obj.approved, objs[0]); 
-      return R.map(obj => {
-          const user = obj.toObject();
-          const isApproved = R.contains(user._id.toString(), approved);
-          return R.merge(user, { approved: isApproved });
-        }, objs[1]);
-    });
+    const observables = Rx.Observable.forkJoin([
+      this.getApproval(admin)
+    , this.getUsers(admin)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setApproved(objs[0])
+    , toObject
+    )(objs[1]);
+    return observables.map(setAttribute);
+  }
+
+  toObject(objs) {
+    return R.isNil(objs) ? [] : R.map(obj => obj.toObject(), objs);
+  }
+
+  setApproved(approved) {
+    log.trace('setApproved', approved);
+    const ids = 
+      objs => R.isNil(objs) ? [] : R.map(obj => obj.approved, objs);
+    const isId = id => R.containd(id, ids(approved));
+    const _setApproved =
+      obj => R.merge(obj, { approved: isId(obj._id.toString()) });
+    const results = 
+      objs => R.isNil(objs) ? [] : R.map(_setApproved, objs);
+    return results;
   }
 
   fetchUser({ user, email, phone }) {
@@ -476,7 +470,7 @@ export default class UserProfiler {
     const isPass = !!password;
     const isAdmin = !!admin;
     const isData = !!data;
-    log.info(isAdmin, isData, isPass);
+    //log.info(isAdmin, isData, isPass);
     if(isPass && isData) return this.createSaltAndHash(password)
       .flatMap(obj => 
         this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
@@ -513,13 +507,14 @@ export default class UserProfiler {
   }
 
   sendmail({ admin, ids }) {
-    let messages = [];
-    const sender = 'info@example.com';
+    const observable = objs => Rx.Observable.forkJoin([
+      this.fetchPreference(admin)
+    , this.forAddress(admin, ids)
+    , this.forMessage(admin, objs)
+    ]);
     return this.fetchSelected(admin)
-      .flatMap(objs => this.forMessage(admin, objs))
-      .map(arr => { messages = arr; })
-      .flatMap(() => this.forAddress(admin, ids))
-      .map(maillist => this.setMessage(sender, maillist, messages))
+      .flatMap(objs => observable(objs))
+      .map(objs => this.setMessage(objs[0], objs[1], objs[2]))
       .flatMap(objs => this.postMessages(objs));
   }
 
@@ -539,7 +534,7 @@ export default class UserProfiler {
   }
 
   fetchMessage(admin, id) {
-    log.trace(admin, id);
+    //log.trace(admin, id);
     return Rx.Observable.fromPromise(this.getMessage(admin, id));
   }
 
@@ -552,13 +547,21 @@ export default class UserProfiler {
   }
 
   setMessage(sender, maillist, messages) {
-   return R.map(obj => ({
-      from:       sender
-      , to:       sender
-      , bcc:      maillist
-      , subject:  obj.title
-      , text:     obj.body
-    }), messages);
+    const setMessage = obj => {
+      const message = {
+          from:     sender.from
+        , to:       sender.from
+        , bcc:      maillist
+        , subject:  obj.title
+        , text:     obj.body
+      };
+      const attachments = obj.file
+        ? [{ filename: 'content.zip', content: new Buffer(obj.file) }]
+        : null;
+      return attachments
+        ? Object.assign({}, message, { attachments }) : message;
+    }
+    return R.compose(R.map(setMessage), R.filter(obj => !!obj))(messages);
   }
 
   createApproval({ admin, ids }) {
@@ -578,11 +581,11 @@ export default class UserProfiler {
     return Rx.Observable.forkJoin(observables);
   }
 
-  fetchAdmin({ admin, id }) {
-    return Rx.Observable.fromPromise(this.getAdmin(admin, id));
+  fetchPreference({ admin }) {
+    return Rx.Observable.fromPromise(this.getPreference(admin));
   }
 
-  createAdmin({ admin }) {
+  createPreference({ admin }) {
     const data = {
       from: mms_from
     , agreement: 'http://www.example.com'
@@ -599,16 +602,16 @@ export default class UserProfiler {
       , url4: 'http://www4.example.com'
       }
     };
-    return Rx.Observable.fromPromise(this.addAdmin(admin, data));
+    return Rx.Observable.fromPromise(this.addPreference(admin, data));
   }
 
-  updateAdmin({ admin, data }) {
-    return Rx.Observable.fromPromise(this.replaceAdmin(admin, data))
-    .flatMap(() => this.fetchAdmin({ admin, id: data._id }));
+  updatePreference({ admin, data }) {
+    return Rx.Observable.fromPromise(this.replacePreference(admin, data))
+    .flatMap(() => this.fetchPreference({ admin }));
   }
 
-  deleteAdmin({ admin, id }) {
-    return Rx.Observable.fromPromise(this.removeAdmin(admin, id));
+  deletePreference({ admin, id }) {
+    return Rx.Observable.fromPromise(this.removePreference(admin, id));
   }
   
 };

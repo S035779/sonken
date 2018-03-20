@@ -20,11 +20,11 @@ class RssForms extends React.Component {
     this.state = {
       note:       props.note
     , asin:       props.note.asin
-    , name:       props.name
+    , name:       props.note.name
     , price:      props.note.price
     , bidsprice:  props.note.bidsprice
     , body:       props.note.body
-    , AmazonUrl:  props.AmazonUrl
+    , AmazonUrl:  props.note.AmazonUrl
     };
   }
 
@@ -36,7 +36,7 @@ class RssForms extends React.Component {
   handleSave() {
     const { user } = this.props;
     const { note } = this.state;
-    NoteAction.update(user, note.id, note);
+    NoteAction.update(user, note._id, note);
   }
 
   handleChangeInput(name, event) {

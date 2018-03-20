@@ -90,7 +90,7 @@ export default class MailStore extends ReduceStore {
           mails: this.deleteSelect(state, action)
         , ids:    []
         });
-      case 'file/upload':
+      case 'mail/upload':
         return Object.assign({}, state, {
           mail: this.updateMail(state, action)
         });

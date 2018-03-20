@@ -66,7 +66,6 @@ class MailEdit extends React.Component {
     const { _id } = this.state.mail;
     if(window.confirm('Are you sure?')) {
       MailAction.delete(admin, [_id])
-        .then(() => this.setState({ isSuccess: true }))
         .catch(err => this.setState({ isNotValid: true }));
     }
   }
@@ -109,8 +108,8 @@ class MailEdit extends React.Component {
     if(!mail || !mail._id) return null;
     const isChanged = this.isChanged();
     return <div className={classes.mailEdit}>
-      <EditButtons changed={isChanged} value={mail.title}
-        isChanged={isChanged} isAttached={isAttached}
+      <EditButtons value={mail.title}
+        chenged={isChanged} attached={isAttached}
         onChange={this.handleChangeTitle.bind(this)}
         onUpload={this.handleChangeFile.bind(this)}
         onDraft={this.handleDraft.bind(this)}

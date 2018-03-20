@@ -13,40 +13,44 @@ const noteSchema = new mongoose.Schema({
 , asin:             String
 , name:             String 
 , price:            Number
-, bidprice:         Number
+, bidsprice:        Number
 , body:             String
 , items:            [mongoose.Schema.Types.Mixed]
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
-noteSchema.index({ user: 1 }, { unique: true });
 noteSchema.set('toObject');
 
 const readedSchema = new mongoose.Schema({
-  readed:           { type: String, required: true }
+  user:             { type: String, required: true } 
+, readed:           { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'readed' });
 readedSchema.index({ readed: 1 }, { unique: true });
 
 const tradedSchema = new mongoose.Schema({
-  traded:           { type: String, required: true }
+  user:             { type: String, required: true } 
+, traded:           { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'traded' });
 tradedSchema.index({ traded: 1 }, { unique: true });
 
 const bidedSchema = new mongoose.Schema({
-  bided:            { type: String, required: true }
+  user:             { type: String, required: true } 
+, bided:            { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'bided' });
 bidedSchema.index({ bided: 1 }, { unique: true });
 
 const starredSchema = new mongoose.Schema({
-  starred:          { type: String, required: true }
+  user:             { type: String, required: true } 
+, starred:          { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'starred' });
 starredSchema.index({ starred: 1 }, { unique: true });
 
 const listedSchema = new mongoose.Schema({
-  listed:           { type: String, required: true }
+  user:             { type: String, required: true } 
+, listed:           { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'listed' });
 listedSchema.index({ listed: 1 }, { unique: true });
@@ -59,5 +63,9 @@ db.openUri(mdb_url + '/feed');
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'feed terminated.')));
-export const Note = db.model('Note', noteSchema);
-export const Readed = db.model('Readed', readedSchema);
+export const Note     = db.model('Note',    noteSchema);
+export const Readed   = db.model('Readed',  readedSchema);
+export const Traded   = db.model('Traded',  tradedSchema);
+export const Bided    = db.model('Bided',   bidedSchema);
+export const Starred  = db.model('Starred', starredSchema);
+export const Listed   = db.model('Listed',  listedSchema);

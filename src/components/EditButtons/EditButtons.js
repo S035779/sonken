@@ -12,14 +12,14 @@ class EditButtons extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isChanged: props.isChanged
-    , isAttached: props.isAttached
+      changed: props.chenged
+    , attached: props.attached
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { isChanged, isAttached } = nextProps;
-    this.setState({ isChanged, isAttached });
+    const { changed, attached } = nextProps;
+    this.setState({ changed, attached });
   }
 
   handleSave() {
@@ -46,7 +46,7 @@ class EditButtons extends React.Component {
   render() {
     //std.logInfo(EditButtons.displayName, 'Props', this.props);
     const { classes, value } = this.props;
-    const { isChanged, isAttached } = this.state;
+    const { changed, attached } = this.state;
     const primary = 'skyblue';
     const secondary = 'orange';
     return <div className={classes.edit}>
@@ -62,14 +62,14 @@ class EditButtons extends React.Component {
         <RssButton color={primary}
           onClick={this.handleSave.bind(this)}
           className={classes.button}>
-        {isChanged ? '*' : ''}変更する</RssButton>
+        {changed ? '*' : ''}変更する</RssButton>
         <input type="file" id="file" accept="application/zip"
           onChange={this.handleChangeFile.bind(this)}
           className={classes.input}/>
         <label htmlFor="file">
           <RssButton color={primary} component="span"
             className={classes.button}>
-        {isAttached ? '*' : ''}添付する</RssButton>
+        {attached ? '*' : ''}添付する</RssButton>
         </label>
         <RssButton color={secondary}
           onClick={this.handleDelete.bind(this)}

@@ -53,7 +53,7 @@ export default class MailEditor {
           });
           mail.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -89,7 +89,7 @@ export default class MailEditor {
           const selected = new Selected({ selected: options.id });
           selected.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -98,7 +98,7 @@ export default class MailEditor {
           const conditions = { selected: options.id };
           Selected.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -107,7 +107,7 @@ export default class MailEditor {
           const conditions = {};
           Selected.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -115,10 +115,10 @@ export default class MailEditor {
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           const update = {
-              user:     options.admin
-            , file:     options.file
-            , updated:  Date.now()
-            };
+            user:     options.admin
+          , file:     options.file
+          , updated:  Date.now()
+          };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -246,5 +246,4 @@ export default class MailEditor {
   uploadFile({ admin, id, file }) {
     return Rx.Observable.fromPromise(this.upFile(admin, id, file));
   }
-
 };

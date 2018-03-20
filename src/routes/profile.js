@@ -21,10 +21,10 @@ export default {
     };
   },
 
-  fetchAdmin(options) {
+  fetchPreference(options) {
     return (req, res, next) => {
-      const { admin, id } = req.query;
-      profile.fetchAdmin({ admin, id }).subscribe(
+      const { admin } = req.query;
+      profile.fetchPreference({ admin }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -33,15 +33,15 @@ export default {
           log.error(err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to fetch Admin.');
+          log.info('Complete to fetch Preference.');
       });
     };
   },
 
-  createAdmin(options) {
+  createPreference(options) {
     return (req, res, next) => {
       const { admin, data } = req.body;
-      profile.createAdmin({ admin, data }).subscribe(
+      profile.createPreference({ admin, data }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -50,15 +50,15 @@ export default {
           log.error(err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to create Admin.');
+          log.info('Complete to create Preference.');
       });
     };
   },
 
-  updateAdmin(options) {
+  updatePreference(options) {
     return (req, res, next) => {
       const { admin, data } = req.body;
-      profile.updateAdmin({ admin, data }).subscribe(
+      profile.updatePreference({ admin, data }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -67,15 +67,15 @@ export default {
           log.error(err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to update Admin.');
+          log.info('Complete to update Preference.');
       });
     };
   },
 
-  deleteAdmin(options) {
+  deletePreference(options) {
     return (req, res, next) => {
       const { admin, id } = req.query;
-      profile.deleteAdmin({ admin, id }).subscribe(
+      profile.deletePreference({ admin, id }).subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -84,7 +84,7 @@ export default {
           log.error(err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to delete Admin.');
+          log.info('Complete to delete Preference.');
       });
     };
   },

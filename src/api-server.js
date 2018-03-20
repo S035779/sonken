@@ -48,11 +48,11 @@ app.use(session({
 , saveUninitialized: true
 }))
 
-router.route('/admin')
-.get(profile.fetchAdmin())
-.put(profile.createAdmin())
-.post(profile.updateAdmin())
-.delete(profile.deleteAdmin());
+router.route('/preference')
+.get(profile.fetchPreference())
+.put(profile.createPreference())
+.post(profile.updatePreference())
+.delete(profile.deletePreference());
 
 router.route('/selected')
 .get(mail.fetchSelectedMails())
@@ -80,7 +80,7 @@ router.route('/posted')
 
 router.route('/faqs')
 .get(faq.fetchFaqs())
-.put(faq.notImplemented())
+.put(faq.uploadFile())
 .post(faq.notImplemented())
 .delete(faq.notImplemented());
 

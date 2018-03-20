@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import NoteAction from 'Actions/NoteAction';
+import std        from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
 import { Button, Checkbox } from 'material-ui';
@@ -20,29 +21,25 @@ class RssButtons extends React.Component {
     this.setState({ checked });
 
     const { user, notes } = this.props;
-    const ids = checked ? notes.map(note => note.id) : [];
-    this.logInfo('handleChangeCheckbox', ids);
+    const ids = checked ? notes.map(note => note._id) : [];
+    std.logInfo(RssButtons.displayName, 'handleChangeCheckbox', ids);
     NoteAction.select(user, ids);
   }
 
   handleReaded() {
     const { user, selectedNoteId } = this.props;
-    this.logInfo('handleReaded', selectedNoteId);
+    std.logInfo(RssButtons.displayName, 'handleReaded', selectedNoteId);
     NoteAction.createRead(user, selectedNoteId);
     this.setState({ checked: false });
   }
 
   handleDelete() {
     const { user, selectedNoteId } = this.props;
-    this.logInfo('handleDelete', selectedNoteId);
+    std.logInfo(RssButtons, 'handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
       NoteAction.delete(user, selectedNoteId);
       this.setState({ checked: false });
     }
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   render() {

@@ -70,6 +70,11 @@ export default {
       dispatch({ type: 'post/delete', ids });
     });
   },
+  upload(admin, id, file) {
+    return UserApiClient.uploadFaq(admin, id, file).then(faq => {
+      dispatch({ type: 'faq/upload', faq });
+    });
+  },
   rehydrate(state) {
     dispatch({ type: 'faq/rehydrate', state: state.faqStore });
   }

@@ -1,7 +1,7 @@
 import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rx';
-import csv              from 'ya-csv';
+//import csv              from 'ya-csv';
 import { parseString }  from 'xml2js';
 import mongoose         from 'mongoose';
 import { Note, Readed, Traded, Bided, Starred, Listed }
@@ -19,27 +19,27 @@ const keyset = {
 };
 
 //import fs from 'fs';
-let notes   = []; //require('Services/data');
-let readed  = [
-  {user: 'MyUserName',    ids: []}
-, {user: 'AdminUserName', ids: []}
-];
-let traded  = [
-  {user: 'MyUserName',    ids: []}
-, {user: 'AdminUserName', ids: []}
-];
-let bided   = [
-  {user: 'MyUserName',    ids: []}
-, {user: 'AdminUserName', ids: []}
-];
-let starred = [
-  {user: 'MyUserName',    ids: []}
-, {user: 'AdminUserName', ids: []}
-];
-let listed = [
-  {user: 'MyUserName',    ids: []}
-, {user: 'AdminUserName', ids: []}
-];
+//let notes   = []; //require('Services/data');
+//let readed  = [
+//  {user: 'MyUserName',    ids: []}
+//, {user: 'AdminUserName', ids: []}
+//];
+//let traded  = [
+//  {user: 'MyUserName',    ids: []}
+//, {user: 'AdminUserName', ids: []}
+//];
+//let bided   = [
+//  {user: 'MyUserName',    ids: []}
+//, {user: 'AdminUserName', ids: []}
+//];
+//let starred = [
+//  {user: 'MyUserName',    ids: []}
+//, {user: 'AdminUserName', ids: []}
+//];
+//let listed = [
+//  {user: 'MyUserName',    ids: []}
+//, {user: 'AdminUserName', ids: []}
+//];
 
 //const path = __dirname + '/../xml/'
 //const files = [
@@ -66,331 +66,498 @@ export default class FeedParser {
     //this.logTrace('bided:', bided);
     //this.logTrace('listed:', listed);
     //this.logTrace('starred:', starred);
-    const setNotes   = objs => { return notes   = objs };
-    const setReaded  = objs => { return readed  = objs };
-    const setTraded  = objs => { return traded  = objs };
-    const setBided   = objs => { return bided   = objs };
-    const setStarred = objs => { return starred = objs };
-    const setListed  = objs => { return listed = objs };
-    const splitNumIds = R.compose(R.map(Number), R.split(','));
-    const splitStrIds = R.split(',');
-    const isUsr   = obj => obj.user === options.user;
-    const isId    = obj => obj.id === Number(options.id);
-    const _setIds = (ids, obj) => isUsr(obj) ? Object.assign({}, obj
-    , { ids }) : obj;
-    const setIds = R.curry(_setIds);
-    const getIds = R.compose(obj => obj.ids, R.head, R.filter(isUsr));
-    const updIds = ids =>
-      R.compose(R.concat(ids), R.difference(options.ids))(ids);
-    const delIds = ids =>
-      R.symmetricDifference(splitStrIds(options.ids), ids);
-    const getNote = id => R.find(obj => obj.id === id, notes);
-    const getItems = obj => obj.items;
-    const getItemId = obj => obj.guid._;
-    const getItemIds = R.compose(
-      R.map(getItemId), R.flatten, R.map(getItems)
-      , R.filter(getItems), R.map(getNote));
-    const updReadIds = ids => R.compose(
-      R.concat(ids), R.difference(getItemIds(options.ids)))(ids);
-    const delReadIds = ids => R.symmetricDifference(
-      getItemIds(splitStrIds(options.ids)), ids);
-    const isRead  = obj => R.contains(obj.guid._, getIds(readed)  );
-    const isTrade = obj => R.contains(obj.guid._, getIds(traded)  );
-    const isBids  = obj => R.contains(obj.guid._, getIds(bided)   );
-    const isStar  = obj => R.contains(obj.guid._, getIds(starred) );
-    const isList  = obj => R.contains(obj.guid._, getIds(listed)  );
-    const setRead   = obj => Object.assign({}, obj
-    , { readed:   isRead(obj)   }); 
-    const setTrade  = obj => Object.assign({}, obj
-    , { traded:   isTrade(obj)  }); 
-    const setBids   = obj => Object.assign({}, obj
-    , { bided:    isBids(obj)   }); 
-    const setStar   = obj => Object.assign({}, obj
-    , { starred:  isStar(obj)   }); 
-    const setList   = obj => Object.assign({}, obj
-    , { listed:   isList(obj)   }); 
-    const _setReadItems   = obj => R.map(setRead,   obj.items);
-    const _setTradeItems  = obj => R.map(setTrade,  obj.items);
-    const _setBidsItems   = obj => R.map(setBids,   obj.items);
-    const _setStarItems   = obj => R.map(setStar,   obj.items);
-    const _setListItems   = obj => R.map(setList,   obj.items);
-    const setReadItems    = obj => obj.items ? Object.assign({}, obj
-    , { items: _setReadItems(obj)  }) : obj;
-    const setTradeItems   = obj => obj.items ? Object.assign({}, obj
-    , { items: _setTradeItems(obj) }) : obj;
-    const setBidsItems    = obj => obj.items ? Object.assign({}, obj
-    , { items: _setBidsItems(obj)  }) : obj;
-    const setStarItems    = obj => obj.items ? Object.assign({}, obj
-    , { items: _setStarItems(obj)  }) : obj;
-    const setListItems    = obj => obj.items ? Object.assign({}, obj
-    , { items: _setListItems(obj)  }) : obj;
-    const updReaded   = ids => R.map(setIds(ids), readed  );
-    const updTraded   = ids => R.map(setIds(ids), traded  );
-    const updBided    = ids => R.map(setIds(ids), bided   );
-    const updStarred  = ids => R.map(setIds(ids), starred );
-    const updListed   = ids => R.map(setIds(ids), listed  );
-    const _updNote  = obj => Object.assign({}, obj, options.data);
-    const updNote   = obj => isId(obj) ? _updNote(obj) : obj;
-    const _isNoteIds = (obj, ids) => R.any(id => obj.id === id, ids);
-    const _isItemIds = (obj, ids) => R.any(id => obj.guid._ === id, ids);
-    const delNote = obj => !_isNoteIds(obj, splitNumIds(options.ids));
-    const delItem = obj => !_isItemIds(obj, splitStrIds(options.ids));
-    const _delItems = obj => R.filter(delItem, obj.items);
-    const delItems  = obj => obj.items ? Object.assign({}, obj
-    , { items: _delItems(obj)}) : obj;
-    const price = R.compose(
-      R.join(''), R.map(R.last), R.map(R.split(':'))
-    , R.match(/現在価格:[0-9,]+/g));
-    const bids  = R.compose(
-      R.join(''), R.map(R.last), R.map(R.split(':'))
-    , R.match(/入札数:[0-9-]+/g));
-    const bidStopTime = R.compose(
-      R.join(''), R.map(R.join(':')), R.map(R.tail), R.map(R.split(':'))
-    , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g));
-    const _setItem = (obj, str) => Object.assign({}, options.xml
-    , { description: obj, price: price(str), bids: bids(str)
-      , bidStopTime: bidStopTime(str) });
-    const setItem = R.curry(_setItem);
-    const newItem = obj =>
-      R.compose( setItem(obj), R.last, R.split('>') );
+    //const setNotes   = objs => { return notes   = objs };
+    //const setReaded  = objs => { return readed  = objs };
+    //const setTraded  = objs => { return traded  = objs };
+    //const setBided   = objs => { return bided   = objs };
+    //const setStarred = objs => { return starred = objs };
+    //const setListed  = objs => { return listed = objs };
+    //const splitNumIds = R.compose(R.map(Number), R.split(','));
+    //const splitStrIds = R.split(',');
+    //const isUsr   = obj => obj.user === options.user;
+    //const isId    = obj => obj.id === Number(options.id);
+    //const _setIds = (ids, obj) => isUsr(obj) ? Object.assign({}, obj
+    //, { ids }) : obj;
+    //const setIds = R.curry(_setIds);
+    //const getIds = R.compose(obj => obj.ids, R.head, R.filter(isUsr));
+    //const updIds = ids =>
+    //  R.compose(R.concat(ids), R.difference(options.ids))(ids);
+    //const delIds = ids =>
+    //  R.symmetricDifference(splitStrIds(options.ids), ids);
+    //const getNote = id => R.find(obj => obj.id === id, notes);
+    //const getItems = obj => obj.items;
+    //const getItemId = obj => obj.guid._;
+    //const getItemIds = R.compose(
+    //  R.map(getItemId), R.flatten, R.map(getItems)
+    //  , R.filter(getItems), R.map(getNote));
+    //const updReadIds = ids => R.compose(
+    //  R.concat(ids), R.difference(getItemIds(options.ids)))(ids);
+    //const delReadIds = ids => R.symmetricDifference(
+    //  getItemIds(splitStrIds(options.ids)), ids);
+    //const isRead  = obj => R.contains(obj.guid._, getIds(readed)  );
+    //const isTrade = obj => R.contains(obj.guid._, getIds(traded)  );
+    //const isBids  = obj => R.contains(obj.guid._, getIds(bided)   );
+    //const isStar  = obj => R.contains(obj.guid._, getIds(starred) );
+    //const isList  = obj => R.contains(obj.guid._, getIds(listed)  );
+    //const setRead   = obj => Object.assign({}, obj
+    //, { readed:   isRead(obj)   }); 
+    //const setTrade  = obj => Object.assign({}, obj
+    //, { traded:   isTrade(obj)  }); 
+    //const setBids   = obj => Object.assign({}, obj
+    //, { bided:    isBids(obj)   }); 
+    //const setStar   = obj => Object.assign({}, obj
+    //, { starred:  isStar(obj)   }); 
+    //const setList   = obj => Object.assign({}, obj
+    //, { listed:   isList(obj)   }); 
+    //const _setReadItems   = obj => R.map(setRead,   obj.items);
+    //const _setTradeItems  = obj => R.map(setTrade,  obj.items);
+    //const _setBidsItems   = obj => R.map(setBids,   obj.items);
+    //const _setStarItems   = obj => R.map(setStar,   obj.items);
+    //const _setListItems   = obj => R.map(setList,   obj.items);
+    //const setReadItems    = obj => obj.items ? Object.assign({}, obj
+    //, { items: _setReadItems(obj)  }) : obj;
+    //const setTradeItems   = obj => obj.items ? Object.assign({}, obj
+    //, { items: _setTradeItems(obj) }) : obj;
+    //const setBidsItems    = obj => obj.items ? Object.assign({}, obj
+    //, { items: _setBidsItems(obj)  }) : obj;
+    //const setStarItems    = obj => obj.items ? Object.assign({}, obj
+    //, { items: _setStarItems(obj)  }) : obj;
+    //const setListItems    = obj => obj.items ? Object.assign({}, obj
+    //, { items: _setListItems(obj)  }) : obj;
+    //const updReaded   = ids => R.map(setIds(ids), readed  );
+    //const updTraded   = ids => R.map(setIds(ids), traded  );
+    //const updBided    = ids => R.map(setIds(ids), bided   );
+    //const updStarred  = ids => R.map(setIds(ids), starred );
+    //const updListed   = ids => R.map(setIds(ids), listed  );
+    //const _updNote  = obj => Object.assign({}, obj, options.data);
+    //const updNote   = obj => isId(obj) ? _updNote(obj) : obj;
+    //const _isNoteIds = (obj, ids) => R.any(id => obj.id === id, ids);
+    //const _isItemIds = (obj, ids) => R.any(id => obj.guid._ === id, ids);
+    //const delNote = obj => !_isNoteIds(obj, splitNumIds(options.ids));
+    //const delItem = obj => !_isItemIds(obj, splitStrIds(options.ids));
+    //const _delItems = obj => R.filter(delItem, obj.items);
+    //const delItems  = obj => obj.items ? Object.assign({}, obj
+    //, { items: _delItems(obj)}) : obj;
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setStarItems)
-          , R.map(setListItems)
-          , R.map(setReadItems)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = { user: options.user };
+          Note.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setStarItems)
+          //, R.map(setListItems)
+          //, R.map(setReadItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/readed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setReadItems)
-          , R.filter(isUsr)
-          );
-         resolve(response(notes));
+          const conditions = { user: options.user };
+          Readed.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setReadItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setTradeItems)
-          , R.map(setBidsItems)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = { user: options.user };
+          Traded.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setTradeItems)
+          //, R.map(setBidsItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setBidsItems)
-          , R.map(setListItems)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = { user: options.user };
+          Bided.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setBidsItems)
+          //, R.map(setListItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/starred':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setStarItems)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = { user: options.user };
+          Starred.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setStarItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/listed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            R.map(setListItems)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = { user: options.user };
+          Listed.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  R.map(setListItems)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/note':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            setStarItems
-          , setListItems
-          , setReadItems
-          , R.head
-          , R.filter(isId)
-          , R.filter(isUsr)
-          );
-          resolve(response(notes));
+          const conditions = {
+            _id:  options.id
+          , user: options.user
+          };
+          Note.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  setStarItems
+          //, setListItems
+          //, setReadItems
+          //, R.head
+          //, R.filter(isId)
+          //, R.filter(isUsr)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'fetch/items':
         return new Promise((resolve, reject) => {
+          //const conditions = {
+          //  _id:  options.id
+          //, user: options.user
+          //};
+          //Note.findOne(conditions, (err, obj) => {
+          //  if(err) return reject(err);
+          //  log.trace(request, obj);
+          //  resolve(obj);
+          //});
           resolve(options.items);
         });
-        break;
       case 'create/note':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => options.note
-          , setNotes
-          , R.prepend(options.note)
-          );
-          resolve(response(notes));
+          const note = new Note({
+            user:       options.user
+          , url:        options.data.url
+          , category:   options.data.category
+          , title:      options.data.title
+          , asin:       options.data.asin
+          , name:       options.data.name
+          , price:      options.data.price
+          , bidsprice:  options.data.bidsprice
+          , body:       options.data.body
+          , items:      options.data.items
+          });
+          note.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => options.note
+          //, setNotes
+          //, R.prepend(options.note)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'update/note':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => options.data
-          , setNotes
-          , R.map(updNote)
-          );
-          resolve(response(notes));
+          const conditions = {
+            _id:  options.id
+          , user: options.user
+          };
+          const update = {
+          //  url:        options.data.url
+          //, category:   options.data.category
+            title:      options.data.title
+          , asin:       options.data.asin
+          , name:       options.data.name
+          , price:      options.data.price
+          , bidsprice:  options.data.bidsprice
+          , body:       options.data.body
+          //, items:      options.data.items
+          , updated:    Date.now()
+          };
+          Note.findOneAndUpdate(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => options.data
+          //, setNotes
+          //, R.map(updNote)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setNotes
-          , R.filter(delNote)
-          );
-          resolve(response(notes));
+          const conditions = {
+            _id: options.id
+          , user: options.user
+          };
+          Note.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setNotes
+          //, R.filter(delNote)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'delete/item':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setNotes
-          , R.map(delItems)
-          );
-          resolve(response(notes));
+          const conditions = {
+            _id:  options.id
+          , user: options.user
+          };
+          const update = {
+            items:      options.data.items
+          , updated:    Date.now()
+          };
+          Note.findOneAndUpdate(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setNotes
+          //, R.map(delItems)
+          //);
+          //resolve(response(notes));
         });
-        break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setReaded
-          , updReaded
-          , R.tap(console.log)
-          , updReadIds
-          , getIds
-          );
-          resolve(response(readed));
+          const readed = new Readed({
+            readed: options.id
+          , user:   options.user
+          });
+          readed.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setReaded
+          //, updReaded
+          //, R.tap(console.log)
+          //, updReadIds
+          //, getIds
+          //);
+          //resolve(response(readed));
         });
-        break;
       case 'delete/readed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setReaded
-          , updReaded
-          , delReadIds
-          , getIds
-          );
-          resolve(response(readed));
+          const conditions = {
+            readed: options.id
+          , user:   options.user
+          };
+          Readed.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setReaded
+          //, updReaded
+          //, delReadIds
+          //, getIds
+          //);
+          //resolve(response(readed));
         });
-        break;
       case 'create/traded':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setTraded
-          , updTraded
-          , updIds
-          , getIds
-          );
-          resolve(response(traded));
+          const traded = new Traded({
+            traded: options.id
+          , user:   options.user
+          });
+          traded.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setTraded
+          //, updTraded
+          //, updIds
+          //, getIds
+          //);
+          //resolve(response(traded));
         });
-        break;
       case 'delete/traded':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setTraded
-          , updTraded
-          , delIds
-          , getIds
-          );
-          resolve(response(traded));
+          const conditions = {
+            traded: options.id
+          , user: options.user
+          };
+          Traded.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setTraded
+          //, updTraded
+          //, delIds
+          //, getIds
+          //);
+          //resolve(response(traded));
         });
-        break;
       case 'create/bided':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setBided
-          , updBided
-          , updIds
-          , getIds
-          );
-          resolve(response(bided));
+          const bided = new Bided({
+            bided: options.id
+          , user: options.user
+          });
+          bided.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setBided
+          //, updBided
+          //, updIds
+          //, getIds
+          //);
+          //resolve(response(bided));
         });
-        break;
       case 'delete/bided':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setBided
-          , updBided
-          , delIds
-          , getIds
-          );
-          resolve(response(bided));
+          const conditions = {
+            bided: options.id
+          , user: options.user
+          };
+          Bided.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setBided
+          //, updBided
+          //, delIds
+          //, getIds
+          //);
+          //resolve(response(bided));
         });
-        break;
       case 'create/starred':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setStarred
-          , updStarred
-          , updIds
-          , getIds
-          );
-          resolve(response(starred));
+          const starred = new Starred({
+            starred:  options.id
+          , user:     options.user
+          });
+          starred.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setStarred
+          //, updStarred
+          //, updIds
+          //, getIds
+          //);
+          //resolve(response(starred));
         });
-        break;
       case 'delete/starred':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setStarred
-          , updStarred
-          , delIds
-          , getIds
-          );
-          resolve(response(starred));
+          const conditions = {
+            starred:  options.id
+          , user:     options.user
+          };
+          Starred.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setStarred
+          //, updStarred
+          //, delIds
+          //, getIds
+          //);
+          //resolve(response(starred));
         });
-        break;
       case 'create/listed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setListed
-          , updListed
-          , updIds
-          , getIds
-          );
-          resolve(response(listed));
+          const listed = new Listed({
+            listed: options.id
+          , user:   options.user
+          });
+          listed.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setListed
+          //, updListed
+          //, updIds
+          //, getIds
+          //);
+          //resolve(response(listed));
         });
-        break;
       case 'delete/listed':
         return new Promise((resolve, reject) => {
-          const response = R.compose(
-            () => 'OK'
-          , setListed
-          , updListed
-          , delIds
-          , getIds
-          );
-          resolve(response(listed));
+          const conditions = {
+            listed: options.id
+          , user:   options.user
+          };
+          Listed.findOneAndRemove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+          //const response = R.compose(
+          //  () => 'OK'
+          //, setListed
+          //, updListed
+          //, delIds
+          //, getIds
+          //);
+          //resolve(response(listed));
         });
-        break;
       case 'fetch/rss':
         return new Promise((resolve, reject) => {
           net.get2(options.url
@@ -400,16 +567,6 @@ export default class FeedParser {
           });
         });
         break;
-      //case 'fetch/file':
-      //  return new Promise((resolve, reject) => {
-      //    fs.readFile(path + options.file
-      //    , { encoding: 'utf-8' }
-      //    , (err, data) => {
-      //      if(err) reject(err);
-      //      resolve(data);
-      //    });
-      //  });
-      //  break;
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
           parseString(options.xml
@@ -422,6 +579,22 @@ export default class FeedParser {
         break;
       case 'parse/xml/item':
         return new Promise((resolve, reject) => {
+          const price = R.compose(
+            R.join(''), R.map(R.last), R.map(R.split(':'))
+            , R.match(/現在価格:[0-9,]+/g));
+          const bids  = R.compose(
+            R.join(''), R.map(R.last), R.map(R.split(':'))
+            , R.match(/入札数:[0-9-]+/g));
+          const bidStopTime = R.compose(
+            R.join(''), R.map(R.join(':')), R.map(R.tail)
+            , R.map(R.split(':'))
+            , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g));
+          const _setItem = (obj, str) => Object.assign({}, options.xml
+            , { description: obj, price: price(str), bids: bids(str)
+              , bidStopTime: bidStopTime(str) });
+          const setItem = R.curry(_setItem);
+          const newItem = obj =>
+            R.compose( setItem(obj), R.last, R.split('>') );
           parseString(options.xml.description
             , { trim: true, explicitArray: false, strict: false }
             , (err, data) => {
@@ -438,83 +611,83 @@ export default class FeedParser {
     }
   }
 
-  addList(user, ids) {
-    return this.request('create/listed', { user, ids });
+  addList(user, id) {
+    return this.request('create/listed', { user, id });
   }
 
-  removeList(user, ids) {
-    return this.request('delete/listed', { user, ids });
+  removeList(user, id) {
+    return this.request('delete/listed', { user, id });
   }
 
-  addStar(user, ids) {
-    return this.request('create/starred', { user, ids });
+  addStar(user, id) {
+    return this.request('create/starred', { user, id });
   }
 
-  removeStar(user, ids) {
-    return this.request('delete/starred', { user, ids });
+  removeStar(user, id) {
+    return this.request('delete/starred', { user, id });
   }
 
-  addBids(user, ids) {
-    return this.request('create/bided', { user, ids });
+  addBids(user, id) {
+    return this.request('create/bided', { user, id });
   }
 
-  removeBids(user, ids) {
-    return this.request('delete/bided', { user, ids });
+  removeBids(user, id) {
+    return this.request('delete/bided', { user, id });
   }
 
-  addTrade(user, ids) {
-    return this.request('create/traded', { user, ids });
+  addTrade(user, id) {
+    return this.request('create/traded', { user, id });
   }
 
-  removeTrade(user, ids) {
-    return this.request('delete/traded', { user, ids });
+  removeTrade(user, id) {
+    return this.request('delete/traded', { user, id });
   }
 
-  addRead(user, ids) {
-    return this.request('create/readed', { user, ids });
+  addRead(user, id) {
+    return this.request('create/readed', { user, id });
   }
 
-  removeRead(user, ids) {
-    return this.request('delete/readed', { user, ids });
+  removeRead(user, id) {
+    return this.request('delete/readed', { user, id });
   }
 
-  removeItem(user, ids) {
-    return this.request('delete/item', { user, ids });
+  removeItem(user, id) {
+    return this.request('delete/item', { user, id });
   }
 
-  removeNote(user, ids) {
-    return this.request('delete/note', { user, ids });
+  removeNote(user, id) {
+    return this.request('delete/note', { user, id });
   }
 
   replaceNote(user, id, data) {
     return this.request('update/note', { user, id, data });
   }
 
-  addNote(user, note) {
-    return this.request('create/note', { user, note });
+  addNote(user, data) {
+    return this.request('create/note', { user, data });
   }
 
   getNotes(user) {
     return this.request('fetch/notes', { user });
   }
 
-  getListedNotes(user) {
+  getListed(user) {
     return this.request('fetch/listed', { user });
   }
 
-  getStarredNotes(user) {
+  getStarred(user) {
     return this.request('fetch/starred', { user });
   }
 
-  getBidedNotes(user) {
+  getBided(user) {
     return this.request('fetch/bided', { user });
   }
 
-  getTradedNotes(user) {
+  getTraded(user) {
     return this.request('fetch/traded', { user });
   }
 
-  getReadedNotes(user) {
+  getReaded(user) {
     return this.request('fetch/readed', { user });
   }
 
@@ -596,38 +769,170 @@ export default class FeedParser {
   }
 
   fetchReadedNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getReadedNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getReaded(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setReaded(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.map(setAttribute);
   }
 
   fetchTradedNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getTradedNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getTraded(user)
+    , this.getBided(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setBided(objs[1])
+    , this.setTraded(objs[0])
+    , this.toObject
+    )(objs[2]);
+    return observables.map(setAttribute);
   }
 
   fetchBidedNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getBidedNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getBided(user)
+    , this.getListed(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setListed(objs[1])
+    , this.setBided(objs[0])
+    , this.toObject
+    )(objs[2]);
+    return observables.map(setAttribute);
   }
 
   fetchStarredNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getStarredNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getStarred(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setStarred(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.map(setAttribute);
   }
 
   fetchListedNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getListedNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getListed(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setListed(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.map(setAttribute);
   }
 
   fetchNotes({ user }) {
-    return Rx.Observable.fromPromise(this.getNotes(user));
+    const pbservable =  Rx.Observable.fromPromise(this.getNotes(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getStarred(user)
+    , this.getListed(user)
+    , this.getReaded(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setReaded(objs[2])
+    , this.setListed(objs[1])
+    , this.setStarred(objs[0])
+    , this.toObject
+    )(objs[3]);
+    return observables.map(setAttribute);
+  }
+
+  toObject(objs) {
+    return R.isNil(objs) ? [] : R.map(obj => obj.toObject() , objs);
+  }
+
+  setReaded(readed) {
+    //log.trace('setReaded', readed);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.readed, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(readed));
+    const setRead =       obj => R.merge(obj, { readed: isId(obj) });
+    const _setReadItems = obj => R.map(setRead, obj.items);
+    const setReadItems  = obj => R.isNil(obj.items) 
+      ? obj : R.merge(obj, { items: _setReadItems(obj) }); 
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setReadItems, objs);
+    return results;
+  }
+
+  setListed(listed) {
+    //log.trace('setListed', listed);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.listed, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(listed));
+    const setList =       obj => R.merge(obj, { listed: isId(obj) });
+    const _setListItems = obj => R.map(setList, obj.items);
+    const setListItems =  obj => R.isNil(obj.items) 
+      ? obj : R.merge(obj, { items: _setListItems(obj) });
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setListItems, objs);
+    return results;
+  }
+
+  setStarred(starred) {
+    //log.trace('setStarred', starred);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.starred, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(starred));
+    const setStar =       obj => R.merge(obj, { starred: isId(obj) });
+    const _setStarItems = obj => R.map(setStar, obj.items);
+    const setStarItems =  obj => R.isNil(obj.items)
+      ? obj : R.merge(obj, { items: _setStarItems(obj) });
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setStarItems, objs);
+    return results;
+  }
+
+  setTraded(traded) {
+    //log.trace('setTraded', traded);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.traded, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(traded));
+    const setTrade =      obj => R.merge(obj, { traded: isId(obj) });
+    const _setTradeItems= obj => R.map(setTrade, obj.items);
+    const setTradeItems = obj => R.isNil(obj.items)
+      ? obj : R.merge(obj, { items: _setTradeItems(obj) });
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setTradeItems, objs);
+    return results;
+  }
+
+  setBided(bided) {
+    //log.trace('setBided', bided);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.bided, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(bided));
+    const setBids =       obj => R.merge(obj, { bided: isId(obj) });
+    const _setBidsItems = obj => R.map(setBids, obj.items);
+    const setBidsItems  = obj => R.isNil(obj.items)
+      ? obj : R.merge(obj, { items: _setBidsItems(obj) });
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setBidsItems, objs);
+    return results;
   }
 
   updateNote({ user, id, data }) {
-    return this.fetchItemLookup(data.asin)
-      .map(R.tap(console.log))
-      .map(obj => Object.assign({}, data, {
-        name:       obj.ItemAttributes.Title
-      , AmazonUrl:  obj.DetailPageURL
-      , AmazonImg:  obj.MediumImage.URL
-      }))
-      .flatMap(obj => this._updateNote({ user, id, data: obj }));
+    console.log(user, id, data);
+    return data.asin === ''
+      ? this._updateNote({ user, id, data })
+      : this.fetchItemLookup(data.asin)
+        .map(obj => Object.assign({}, data, {
+          name:       obj.ItemAttributes.Title
+        , AmazonUrl:  obj.DetailPageURL
+        , AmazonImg:  obj.MediumImage.URL }))
+        .flatMap(obj => this._updateNote({ user, id, data: obj }));
   }
 
   _updateNote({ user, id, data }) {
@@ -641,52 +946,126 @@ export default class FeedParser {
   }
 
   deleteNote({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeNote(user, ids));
+    const _ids = R.split(',', ids);
+    const promisess = R.map(id => this.removeNote(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteNote({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeNote(user, id));
+  //}
 
   deleteItem({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeItem(user, ids));
+    const _ids = R.split(',', ids);
+    const promisess = R.map(id => this.removeItem(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
 
+  //_deleteItem({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeItem(user, id));
+  //}
+
   createRead({ user, ids }) {
-    return Rx.Observable.fromPromise(this.addRead(user, ids));
+    const promises = R.map(id => this.getNote(user, id));
+    const observables = Rx.Observable.forkJoin(promises(ids));
+    return observables
+      .map(R.map(obj => obj.items))
+      .map(R.flatten)
+      .map(R.map(obj => obj.guid._))
+      .flatMap(objs => this._createRead({ user, ids: objs }))
+      //.map(R.tap(console.log))
+  }
+
+  _createRead({ user, ids }) {
+    const promises = R.map(id => this.addRead(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
   }
 
   deleteRead({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeRead(user, ids));
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeRead(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteRead({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeRead(user, id));
+  //}
 
   createTrade({ user, ids }) {
-    return Rx.Observable.fromPromise(this.addTrade(user, ids));
+    const promises = R.map(id => this.addTrade(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
   }
+
+  //_createTrade({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.addTrade(user, id));
+  //}
 
   deleteTrade({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeTrade(user, ids));
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeTrade(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteTrade({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeTrade(user, id));
+  //}
 
   createBids({ user, ids }) {
-    return Rx.Observable.fromPromise(this.addBids(user, ids));
+    const promises = R.map(id => this.addBids(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
   }
+
+  //_createBids({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.addBids(user, id));
+  //}
 
   deleteBids({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeBids(user, ids));
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeBids(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteBids({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeBids(user, id));
+  //}
 
   createStar({ user, ids }) {
-    return Rx.Observable.fromPromise(this.addStar(user, ids));
+    const promises = R.map(id => this.addStar(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
   }
+
+  //_createStar({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.addStar(user, id));
+  //}
 
   deleteStar({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeStar(user, ids));
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeStar(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteStar({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeStar(user, id));
+  //}
 
   createList({ user, ids }) {
-    return Rx.Observable.fromPromise(this.addList(user, ids));
+    const promises = R.map(id => this.addList(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
   }
 
+  //_createList({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.addList(user, id));
+  //}
+
   deleteList({ user, ids }) {
-    return Rx.Observable.fromPromise(this.removeList(user, ids));
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeList(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
   }
+
+  //_deleteList({ user, id }) {
+  //  return Rx.Observable.fromPromise(this.removeList(user, id));
+  //}
 
   uploadNote({ user, category, file }) {
     const csv = file.toString();

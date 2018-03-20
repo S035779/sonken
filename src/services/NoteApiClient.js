@@ -324,11 +324,9 @@ export default {
     return this.request('create/note', { user, url, category });
   },
   updateNote(user, id
-  , { title, asin, name, price, bidsprice, body, AmazonUrl, AmazonImg }) {
-    const updated = std.getLocalTimeStamp(Date.now());
-    const data = {
-      title, asin, name, price, bidsprice, body, AmazonUrl, AmazonImg
-      , updated };
+  , { title, asin, name, price, bidsprice, body }) {
+    //const updated = std.getLocalTimeStamp(Date.now());
+    const data = { title, asin, name, price, bidsprice, body };
     return this.request('update/note', { user, id, data });
   },
   pageNote(user, { maxNumber, number, perPage }) {

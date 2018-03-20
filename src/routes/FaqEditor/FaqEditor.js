@@ -19,14 +19,14 @@ export default class FaqEditor {
   }
 
   request(request, options) {
-    log.debug(request, options);
+    //log.debug(request, options);
     switch(request) {
       case 'fetch/faqs':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Faq.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -38,7 +38,7 @@ export default class FaqEditor {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'Faq not found.' });
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -52,7 +52,7 @@ export default class FaqEditor {
           });
           faq.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -68,7 +68,7 @@ export default class FaqEditor {
             };
           Faq.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -78,7 +78,7 @@ export default class FaqEditor {
           const conditions = { _id: options.id };
           Faq.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -88,7 +88,7 @@ export default class FaqEditor {
           const posted = new Posted({ posted: options.id });
           posted.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -97,7 +97,7 @@ export default class FaqEditor {
           const conditions = { posted: options.id };
           Posted.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -106,10 +106,24 @@ export default class FaqEditor {
           const conditions = {};
           Posted.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
+            //log.trace(request, obj);
             resolve(obj);
           });
         });
+      case 'upload/file':
+        return new Promise((resolve, reject) => {
+          const conditions = { _id: options.id };
+          const update = {
+            user:     options.admin
+          , file:     options.file
+          , update:   Date.now()
+          };
+          Faq.findOneAndUpdate(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            resolve(obj);
+          });
+        });
+        break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
@@ -148,6 +162,10 @@ export default class FaqEditor {
 
   getPost(admin) {
     return this.request('fetch/post', { admin });
+  }
+
+  upFile(admin, id, file) {
+    return this.request('upload/file', { admin, id, file });
   }
 
   fetchFaqs({ admin }) {
@@ -205,5 +223,9 @@ export default class FaqEditor {
       .fromPromise(_promise(admin, id));
     const observables = R.map(observable, _ids);
     return Rx.Observable.forkJoin(observables);
+  }
+
+  uploadFile({ admin, id, file }) {
+    return Rx.Observable.fromPromise(this.upFile(admin, id, file));
   }
 };

@@ -61,8 +61,8 @@ export default {
     });
   },
   upload(admin, id, file) {
-    return UserApiClient.uploadFile(admin, id, file).then(mail => {
-      dispatch({ type: 'file/upload', mail })
+    return UserApiClient.uploadMail(admin, id, file).then(mail => {
+      dispatch({ type: 'mail/upload', mail });
     });
   },
   rehydrate(state) {

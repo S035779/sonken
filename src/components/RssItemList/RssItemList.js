@@ -24,7 +24,7 @@ class RssItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.logInfo('componentWillReciveProps', nextProps);
+    std.logInfo(RssItemList.displayName, 'Props', nextProps);
     const { items } = nextProps;
     let listed = [];
     let starred = [];
@@ -36,7 +36,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeListed(id, event) {
-    this.logInfo('handleChangeListed', id);
+    std.logInfo(RssItemList.displayName, 'handleChangeListed', id);
     const { listed } = this.state;
     const { user } = this.props;
     const currentIndex = listed.indexOf(id);
@@ -52,7 +52,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeStarred(id, event) {
-    this.logInfo('handleChangeStarred', id);
+    std.logInfo(RssItemList.displayName, 'handleChangeStarred', id);
     const { starred } = this.state;
     const { user } = this.props;
     const currentIndex = starred.indexOf(id);
@@ -65,10 +65,6 @@ class RssItemList extends React.Component {
       NoteAction.deleteStar(user, [id]);
     }
     this.setState({ starred: newStarred });
-  }
-
-  logInfo(name, info) {
-    console.info('>>> Info:', name, info);
   }
 
   renderStar() {

@@ -37,7 +37,7 @@ export default {
       case 'preference/fetch':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
-            api + '/admin'
+            api + '/preference'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -47,7 +47,7 @@ export default {
       case 'preference/update':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
-            api + '/admin'
+            api + '/preference'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -57,7 +57,7 @@ export default {
       case 'preference/create':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
-            api + '/admin'
+            api + '/preference'
           , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
@@ -67,7 +67,7 @@ export default {
       //case 'preference/delete':
       //  return new Promise((resolve, reject) => {
       //    xhr.deleteJSON(
-      //      api + '/admin'
+      //      api + '/preference'
       //    , options
       //    , obj => { resolve(obj); }
       //    , err => { reject(err); }
