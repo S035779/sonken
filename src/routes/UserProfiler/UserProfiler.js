@@ -436,7 +436,7 @@ export default class UserProfiler {
     ]);
     const setAttribute = objs => R.compose(
       this.setApproved(objs[0])
-    , toObject
+    , this.toObject
     )(objs[1]);
     return observables.map(setAttribute);
   }
@@ -446,10 +446,10 @@ export default class UserProfiler {
   }
 
   setApproved(approved) {
-    log.trace('setApproved', approved);
+    //log.trace('setApproved', approved);
     const ids = 
       objs => R.isNil(objs) ? [] : R.map(obj => obj.approved, objs);
-    const isId = id => R.containd(id, ids(approved));
+    const isId = id => R.contains(id, ids(approved));
     const _setApproved =
       obj => R.merge(obj, { approved: isId(obj._id.toString()) });
     const results = 

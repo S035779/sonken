@@ -1,8 +1,9 @@
+const webpack = require('webpack');
 const merge = require('webpack-merge');
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+//const CleanWebpackPlugin = require('clean-webpack-plugin');
 const common = require('./webpack.common.js');
 
 var node = {
@@ -20,6 +21,9 @@ var node = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.PLATFORM': JSON.stringify('local')
+    }),
     new ManifestPlugin({ fileName: 'manifest.node.json' }),
     //new CleanWebpackPlugin([
     //  'dist/*.node.*',

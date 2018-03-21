@@ -4,32 +4,34 @@ import { URL } from 'url';
 import xml2js from 'xml2js';
 import js2xml from 'xmlbuilder';
 
+const env = process.env.PLATFORM;
+const isNode = env === 'local';
 const color_code = {
-  Reset:      "\x1b[0m"
-, Bright:     "\x1b[1m"
-, Dim:        "\x1b[2m"
-, Underscore: "\x1b[4m"
-, Blink:      "\x1b[5m"
-, Reverse:    "\x1b[7m"
-, Hidden:     "\x1b[8m"
+  Reset:      isNode ? "\x1b[0m" : ''
+, Bright:     isNode ? "\x1b[1m" : ''
+, Dim:        isNode ? "\x1b[2m" : ''
+, Underscore: isNode ? "\x1b[4m" : ''
+, Blink:      isNode ? "\x1b[5m" : ''
+, Reverse:    isNode ? "\x1b[7m" : ''
+, Hidden:     isNode ? "\x1b[8m" : ''
 
-, FgBlack:    "\x1b[30m"
-, FgRed:      "\x1b[31m"
-, FgGreen:    "\x1b[32m"
-, FgYellow:   "\x1b[33m"
-, FgBlue:     "\x1b[34m"
-, FgMagenta:  "\x1b[35m"
-, FgCyan:     "\x1b[36m"
-, FgWhite:    "\x1b[37m"
+, FgBlack:    isNode ? "\x1b[30m" : ''
+, FgRed:      isNode ? "\x1b[31m" : ''
+, FgGreen:    isNode ? "\x1b[32m" : ''
+, FgYellow:   isNode ? "\x1b[33m" : ''
+, FgBlue:     isNode ? "\x1b[34m" : ''
+, FgMagenta:  isNode ? "\x1b[35m" : ''
+, FgCyan:     isNode ? "\x1b[36m" : ''
+, FgWhite:    isNode ? "\x1b[37m" : ''
 
-, BgBlack:    "\x1b[40m"
-, BgRed:      "\x1b[41m"
-, BgGreen:    "\x1b[42m"
-, BgYellow:   "\x1b[43m"
-, BgBlue:     "\x1b[44m"
-, BgMagenta:  "\x1b[45m"
-, BgCyan:     "\x1b[46m"
-, BgWhite:    "\x1b[47m"
+, BgBlack:    isNode ? "\x1b[40m" : ''
+, BgRed:      isNode ? "\x1b[41m" : ''
+, BgGreen:    isNode ? "\x1b[42m" : ''
+, BgYellow:   isNode ? "\x1b[43m" : ''
+, BgBlue:     isNode ? "\x1b[44m" : ''
+, BgMagenta:  isNode ? "\x1b[45m" : ''
+, BgCyan:     isNode ? "\x1b[46m" : ''
+, BgWhite:    isNode ? "\x1b[47m" : ''
 }
 
 export default {
