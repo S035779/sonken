@@ -59,7 +59,8 @@ class Bids extends React.Component {
   }
 
   render() {
-    std.logInfo(Bids.displayName, 'State', this.state);
+    //std.logInfo(Bids.displayName, 'State', this.state);
+    std.logInfo(Bids.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file }
       = this.state;

@@ -323,12 +323,12 @@ export default class UserProfiler {
     }
   }
 
-  getPreference(admin) {
-    return this.request('fetch/preference', { admin });
+  getPreference() {
+    return this.request('fetch/preference');
   }
 
   addPreference(admin, data) {
-    return this.request('create/Preference', { admin, data });
+    return this.request('create/preference', { admin, data });
   }
 
   replacePreference(admin, data) {
@@ -515,15 +515,31 @@ export default class UserProfiler {
   }
 
   sendmail({ admin, ids }) {
-    const observable = objs => Rx.Observable.forkJoin([
-      this.fetchPreference(admin)
+    const observables = objs => Rx.Observable.forkJoin([
+      this.fetchPreference()
     , this.forAddress(admin, ids)
     , this.forMessage(admin, objs)
     ]);
     return this.fetchSelected(admin)
-      .flatMap(objs => observable(objs))
+      .flatMap(objs => observables(objs))
       .map(objs => this.setMessage(objs[0], objs[1], objs[2]))
       .flatMap(objs => this.postMessages(objs));
+  }
+
+  inquiry({ user, data }) {
+    return Rx.Observable
+      .forkJoin([ this.getPreference(), this.getUser(user) ])
+      .map(objs => this.setInquiry(objs[0], objs[1], data))
+      .flatMap(obj => this.postMessage(obj));
+  }
+  
+  setInquiry(sender, user, message) {
+    return {
+      from:     sender.from
+    , to:       user.email
+    , subject:  message.title 
+    , text:     message.body
+    };
   }
 
   forAddress(admin, ids) {
@@ -552,6 +568,10 @@ export default class UserProfiler {
 
   postMessages(objs) {
     return Sendmail.of(mail_keyset).createMessages(objs);
+  }
+
+  postMessage(obj) {
+    return Sendmail.of(mail_keyset).createMessage(obj);
   }
 
   setMessage(sender, maillist, messages) {
@@ -589,8 +609,8 @@ export default class UserProfiler {
     return Rx.Observable.forkJoin(observables);
   }
 
-  fetchPreference({ admin }) {
-    return Rx.Observable.fromPromise(this.getPreference(admin));
+  fetchPreference() {
+    return Rx.Observable.fromPromise(this.getPreference());
   }
 
   createPreference({ admin }) {
@@ -621,5 +641,5 @@ export default class UserProfiler {
   deletePreference({ admin, id }) {
     return Rx.Observable.fromPromise(this.removePreference(admin, id));
   }
-  
+
 };

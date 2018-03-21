@@ -23,8 +23,7 @@ export default {
 
   fetchPreference(options) {
     return (req, res, next) => {
-      const { admin } = req.query;
-      profile.fetchPreference({ admin }).subscribe(
+      profile.fetchPreference().subscribe(
         obj => {
           res.status(200).send(obj);
         }
@@ -243,6 +242,23 @@ export default {
         }
       , () => {
           log.info('Complete to delete Approval.');
+      });
+    };
+  },
+
+  inquiry(options) {
+    return (req, res, next) => {
+      const { user, data } = req.body;
+      profile.inquiry({ user, data }).subscribe(
+        obj => {
+          res.status(200).send(obj);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(err.name, ':', err.message);
+        }
+      , () => {
+          log.info('Complete to Inquiry.');
       });
     };
   },

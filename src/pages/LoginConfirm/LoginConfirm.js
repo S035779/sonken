@@ -28,15 +28,21 @@ class LoginConfirm extends React.Component {
     };
   }
 
+  comopnentDidMount() {
+    std.logInfo(LoginConfirm.displayName, 'fetch', 'Preference');
+    LoginAction.fetchPreference();
+  }
+
   handleClose(name) {
     std.logInfo(LoginConfirm.displayName, 'handleClose', name);
     switch(name) {
       case 'authenticate':
         this.setState({ openedCorrect: false });
-        this.props.history.push('/login');
+        this.props.history.push('/login/authenticate');
         break;
       case 'confirmation':
         this.setState({ openedIncorrect: false });
+        this.props.history.push('/login/authenticate');
         break;
     }
   }
@@ -89,7 +95,7 @@ class LoginConfirm extends React.Component {
   }
 
   renderIncorrect() {
-    const { fullScreen } = this.props;
+    const { fullScreen, preference } = this.props;
     const { openedIncorrect } = this.state;
     return <Dialog fullScreen={fullScreen}
       open={openedIncorrect}
@@ -106,15 +112,15 @@ class LoginConfirm extends React.Component {
       </DialogActions>
       <DialogContent>
         <DialogContentText>
-          お問い合わせ：info@example.com（営業時間９時〜１８時）
+          お問い合わせ：{preference.from}（営業時間９時〜１８時）
         </DialogContentText>
       </DialogContent>
     </Dialog>;
   }
 
   render() {
+    //std.logInfo(LoginConfirm.displayName, 'State', this.state);
     std.logInfo(LoginConfirm.displayName, 'Props', this.props);
-    std.logInfo(LoginConfirm.displayName, 'State', this.state);
     const { classes } = this.props;
     const { email, phone } = this.state;
     const inputText = { disableUnderline: true

@@ -23,7 +23,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'signout/authenticate':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -33,7 +32,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'preference/fetch':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -43,7 +41,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'preference/update':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -53,7 +50,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'preference/create':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -63,7 +59,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       //case 'preference/delete':
       //  return new Promise((resolve, reject) => {
       //    xhr.deleteJSON(
@@ -73,7 +68,6 @@ export default {
       //    , err => { reject(err); }
       //    );
       //  });
-      //  break;
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -83,7 +77,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'update/user':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -93,7 +86,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/user':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -103,7 +95,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/user':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -113,12 +104,19 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
+      case 'inquiry/create':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/inquiry'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       default:
         return new Promise((resolve, reject) => {
           reject(options);
         });
-        break;
     }
   },
 
@@ -174,13 +172,20 @@ export default {
   /*
    * Preference
    */
-  fetchPreference(admin) {
-    return this.request('preference/fetch', { admin });
+  fetchPreference() {
+    return this.request('preference/fetch', {  });
   },
   createPreference(admin) {
     return this.request('preference/create', { admin });
   },
   updatePreference(admin, data) {
     return this.request('preference/update', { admin, data});
+  },
+
+  /*
+   * Inquiry
+   */
+  inquiry(user, data) {
+    return this.request('inquiry/create', { user, data });
   }
 };

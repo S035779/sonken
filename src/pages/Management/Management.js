@@ -38,7 +38,7 @@ class Management extends React.Component {
   }
 
   render() {
-    std.logInfo(Management.displayName, 'State', this.state);
+    //std.logInfo(Management.displayName, 'State', this.state);
     std.logInfo(Management.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, admin, users, page, ids } = this.state;

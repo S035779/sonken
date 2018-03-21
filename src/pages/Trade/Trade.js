@@ -59,7 +59,8 @@ class Trade extends React.Component {
   }
 
   render() {
-    std.logInfo(Trade.displayName, 'State', this.state);
+    //std.logInfo(Trade.displayName, 'State', this.state);
+    std.logInfo(Trade.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file }
       = this.state;

@@ -25,8 +25,8 @@ class Login extends React.Component {
   }
 
   render() {
+    //std.logInfo(Login.displayName, 'State', this.state);
     std.logInfo(Login.displayName, 'Props', this.props);
-    std.logInfo(Login.displayName, 'State', this.state);
     const { classes, route } = this.props;
     const { user, isAuthenticated, preference } = this.state;
     return <div className={classes.loginFrame}>

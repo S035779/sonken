@@ -38,8 +38,8 @@ class Mail extends React.Component {
   }
 
   render() {
-    std.logInfo(Mail.displayName, 'State', this.state);
-    //std.logInfo(Mail.displayName, 'Props', this.props);
+    //std.logInfo(Mail.displayName, 'State', this.state);
+    std.logInfo(Mail.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, admin, mails, page, ids } = this.state;
     const _id = match.params.id;

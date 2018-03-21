@@ -19,22 +19,22 @@ class LoginRegist extends React.Component {
     super(props);
     this.state = {
       redirectToRefferer: false
-    , username: ''
-    , password: ''
-    , confirm_password: ''
-    , name: ''
-    , kana: ''
-    , email: ''
-    , phone: ''
-    , plan: ''
-    , agreed: false
-    , isNotValid: false
+    , username:           ''
+    , password:           ''
+    , confirm_password:   ''
+    , name:               ''
+    , kana:               ''
+    , email:              ''
+    , phone:              ''
+    , plan:               ''
+    , agreed:             false
+    , isNotValid:         false
     };
   }
 
   componentDidMount() {
-    std.logInfo(LoginRegist.displayName, 'Props', this.props);
-    LoginAction.fetchPreference(this.props.user);
+    std.logInfo(LoginRegist.displayName, 'fetch', 'Preference');
+    LoginAction.fetchPreference();
   }
 
   handleChangeText(name, event) {
@@ -84,8 +84,8 @@ class LoginRegist extends React.Component {
   }
 
   render() {
+    //std.logInfo(LoginRegist.displayName, 'State', this.state);
     std.logInfo(LoginRegist.displayName, 'Props', this.props);
-    std.logInfo(LoginRegist.displayName, 'State', this.state);
     const { classes, location, preference } = this.props;
     const {
       redirectToRefferer, username, password, confirm_password, name, kana

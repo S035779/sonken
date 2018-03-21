@@ -34,7 +34,6 @@ const adminSchema = new mongoose.Schema({
 , advertisement:    mongoose.Schema.Types.Mixed
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'admin' });
-adminSchema.index({ email: 1 }, { unique: true });
 
 const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','profile connected.'));

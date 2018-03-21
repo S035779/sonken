@@ -38,21 +38,40 @@ export default {
   logError(caller, name, message) {
     const date = color_code['FgRed']
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
-    const head = color_code['Reset'] + name;
-    console.error(date, '[ERROR]', caller, '-', head, ':', message);
+    const head = color_code['Reset']
+      + name;
+    console.error(date ,'[ERROR]', caller, '-',head, ':', message);
+  },
+
+  logWarn(caller, name, message) {
+    const date = color_code['FgYellow']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset']
+      + name;
+    console.error(date ,'[WARN]', caller, '-',head, ':', message);
+  },
+
+  logDebug(caller, name, message) {
+    const date = color_code['FgCyan']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset']
+      + name;
+    console.error(date ,'[DEBUG]', caller, '-',head, ':', message);
   },
 
   logTrace(caller, name, message) {
     const date = color_code['FgBlue']
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
-    const head = color_code['Reset'] + name;
+    const head = color_code['Reset']
+      + name;
     console.trace(date, '[TRACE]', caller, '-', head, ':', message);
   },
 
   logInfo(caller, name, message) {
     const date = color_code['FgGreen']
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
-    const head = color_code['Reset'] + name;
+    const head = color_code['Reset']
+      + name;
     console.info(date, '[INFO]', caller, '-', head, ':', message);
   },
 

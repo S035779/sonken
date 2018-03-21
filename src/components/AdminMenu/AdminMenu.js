@@ -31,8 +31,9 @@ class AdminMenu extends React.Component {
   }
 
   componentDidMount() {
-    //std.logInfo(AdminMenu.displayName, 'Props', this.props);
-    LoginAction.fetchPreference(this.props.admin);
+    std.logInfo(AdminMenu.displayName, 'fetch', 'Preference');
+    std.logInfo(AdminMenu.displayName, 'fetch', 'Profile');
+    LoginAction.fetchPreference();
     LoginAction.fetchProfile(this.props.admin);
   }
 

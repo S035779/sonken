@@ -60,13 +60,11 @@ class LoginAuth extends React.Component {
   }
 
   render() {
+    //std.logInfo(LoginAuth.displayName, 'State', this.state);
     std.logInfo(LoginAuth.displayName, 'Props', this.props);
-    std.logInfo(LoginAuth.displayName, 'State', this.state);
     const { classes, location } = this.props;
-    const {
-      redirectToRefferer, redirectToManagement, username, password
-      , checked, isNotValid
-    }= this.state;
+    const { redirectToRefferer, redirectToManagement, username, password
+      , checked, isNotValid } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const from = location.state || { pathname: '/marchant' };

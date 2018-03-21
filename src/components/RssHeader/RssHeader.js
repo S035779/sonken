@@ -5,9 +5,8 @@ import LoginAction    from 'Actions/LoginAction';
 
 import { withStyles } from 'material-ui/styles';
 import { IconButton } from 'material-ui';
-import {
-  Menu as MenuIcon
-}                     from 'material-ui-icons';
+import { Menu as MenuIcon }
+                      from 'material-ui-icons';
 import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
 import RssMenu        from 'Components/RssMenu/RssMenu';
 import RssButtonNav   from 'Components/RssButtonNav/RssButtonNav';
@@ -44,8 +43,11 @@ class RssHeader extends React.Component {
         </IconButton>
         <RssButtonNav />
         <div className={classes.loginIcon}>
-        <RssMenu auth={auth} user={user}
-          preference={preference} profile={profile}/>
+          <RssMenu
+            auth={auth} 
+            user={user}
+            preference={preference}
+            profile={profile}/>
         </div>
       </div>
     </div>;

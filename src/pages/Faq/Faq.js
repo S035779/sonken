@@ -38,7 +38,7 @@ class Faq extends React.Component {
   }
 
   render() {
-    std.logInfo(Faq.displayName, 'State', this.state);
+    //std.logInfo(Faq.displayName, 'State', this.state);
     std.logInfo(Faq.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, admin, faqs, page, ids } = this.state;

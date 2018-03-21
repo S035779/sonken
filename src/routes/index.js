@@ -19,6 +19,7 @@ import Mail         from 'Pages/Mail/Mail';
 import MailEdit     from 'Pages/MailEdit/MailEdit';
 import Faqs         from 'Pages/Faqs/Faqs';
 import Inquiry      from 'Pages/Inquiry/Inquiry';
+import InquiryEdit  from 'Pages/InquiryEdit/InquiryEdit';
 
 const getUserData = (options, match) => {
   return new Promise((resolve, reject) => {
@@ -45,6 +46,9 @@ export default function getRoutes() {
       path: '/inquiry'
     , component: Inquiry
     , loadData: getUserData
+    , routes: [{
+      component: InquiryEdit
+    }]
     }
     , {
       path: '/login/:page'

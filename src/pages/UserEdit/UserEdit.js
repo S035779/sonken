@@ -7,7 +7,7 @@ import UserForms       from 'Components/UserForms/UserForms';
 
 class UserEdit extends React.Component {
   render() {
-    std.logInfo(UserEdit.displayName, 'Props', this.props);
+    //std.logInfo(UserEdit.displayName, 'Props', this.props);
     const { classes, admin, user } = this.props
     if(!user || !user._id) return null;
     return <div className={classes.userEdit}>

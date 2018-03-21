@@ -48,6 +48,12 @@ app.use(session({
 , saveUninitialized: true
 }))
 
+router.route('/inquiry')
+.get(profile.notImplemented())
+.put(profile.inquiry())
+.post(profile.notImplemented())
+.delete(profile.notImplemented());
+
 router.route('/preference')
 .get(profile.fetchPreference())
 .put(profile.createPreference())
