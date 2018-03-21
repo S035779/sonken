@@ -230,6 +230,7 @@ export default {
   updateNote(options) {
     return (req, res, next) => {
       const { user, id, data } = req.body;
+      //log.trace(user,id,data);
       feed.updateNote({ user, id, data }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {

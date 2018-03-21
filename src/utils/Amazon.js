@@ -84,18 +84,14 @@ class Amazon {
       .map(R.flatten)
       .map(R.filter(curriedCheckRate))
       .map(R.sort(curriedDiffRate));
-      //.map(R.tap(this.logTrace.bind(this)))
-  }
-
-  logTrace(message) {
-    log.trace(`${pspid}>`, 'Trace:', message);
   }
 
   fetchItemLookup(item_id, id_type) {
     return Rx.Observable
       .fromPromise(this.getItemLookup(item_id, id_type))
       .flatMap(this.parseXml)
-      .map(this.setItem);
+      .map(this.setItem)
+    ;
   }
 
   fetchItemList(keyword, page) {

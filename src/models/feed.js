@@ -16,6 +16,8 @@ const noteSchema = new mongoose.Schema({
 , bidsprice:        Number
 , body:             String
 , items:            [mongoose.Schema.Types.Mixed]
+, AmazonUrl:        String
+, AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
 noteSchema.set('toObject');

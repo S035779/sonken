@@ -85,8 +85,14 @@ export default class FaqEditor {
         break;
       case 'create/post':
         return new Promise((resolve, reject) => {
-          const posted = new Posted({ posted: options.id });
-          posted.save((err, obj) => {
+          const conditions = {
+            posted: options.id
+          };
+          const update = {
+            posted: options.id
+          };
+          Posted.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -94,8 +100,10 @@ export default class FaqEditor {
         });
       case 'delete/post':
         return new Promise((resolve, reject) => {
-          const conditions = { posted: options.id };
-          Posted.findOneAndRemove(conditions, (err, obj) => {
+          const conditions = {
+            posted: options.id
+          };
+          Posted.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);

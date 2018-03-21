@@ -144,7 +144,7 @@ class RssMenu extends React.Component {
   }
 
   render() {
-    std.logInfo(RssMenu.displayName, 'State', this.state);
+    //std.logInfo(RssMenu.displayName, 'State', this.state);
     const { preference, auth, classes } = this.props;
     const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
       , password, confirm_password, profile } = this.state;

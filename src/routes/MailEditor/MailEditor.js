@@ -86,8 +86,14 @@ export default class MailEditor {
         break;
       case 'create/select':
         return new Promise((resolve, reject) => {
-          const selected = new Selected({ selected: options.id });
-          selected.save((err, obj) => {
+          const conditions = {
+            selected: options.id
+          };
+          const update = {
+            selected: options.id
+          };
+          Selected.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -95,8 +101,10 @@ export default class MailEditor {
         });
       case 'delete/select':
         return new Promise((resolve, reject) => {
-          const conditions = { selected: options.id };
-          Selected.findOneAndRemove(conditions, (err, obj) => {
+          const conditions = {
+            selected: options.id
+          };
+          Selected.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);

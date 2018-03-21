@@ -323,10 +323,8 @@ export default {
         , { name: 'Warning', message: 'Not Url Registory.' });
     return this.request('create/note', { user, url, category });
   },
-  updateNote(user, id
-  , { title, asin, name, price, bidsprice, body }) {
-    //const updated = std.getLocalTimeStamp(Date.now());
-    const data = { title, asin, name, price, bidsprice, body };
+  updateNote(user, id, { title, asin, price, bidsprice, body }) {
+    const data = { title, asin, price, bidsprice, body };
     return this.request('update/note', { user, id, data });
   },
   pageNote(user, { maxNumber, number, perPage }) {

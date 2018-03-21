@@ -4,11 +4,61 @@ import { URL } from 'url';
 import xml2js from 'xml2js';
 import js2xml from 'xmlbuilder';
 
+const color_code = {
+  Reset:      "\x1b[0m"
+, Bright:     "\x1b[1m"
+, Dim:        "\x1b[2m"
+, Underscore: "\x1b[4m"
+, Blink:      "\x1b[5m"
+, Reverse:    "\x1b[7m"
+, Hidden:     "\x1b[8m"
+
+, FgBlack:    "\x1b[30m"
+, FgRed:      "\x1b[31m"
+, FgGreen:    "\x1b[32m"
+, FgYellow:   "\x1b[33m"
+, FgBlue:     "\x1b[34m"
+, FgMagenta:  "\x1b[35m"
+, FgCyan:     "\x1b[36m"
+, FgWhite:    "\x1b[37m"
+
+, BgBlack:    "\x1b[40m"
+, BgRed:      "\x1b[41m"
+, BgGreen:    "\x1b[42m"
+, BgYellow:   "\x1b[43m"
+, BgBlue:     "\x1b[44m"
+, BgMagenta:  "\x1b[45m"
+, BgCyan:     "\x1b[46m"
+, BgWhite:    "\x1b[47m"
+}
+
 export default {
+  logError(caller, name, message) {
+    const date = color_code['FgRed']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset'] + name;
+    console.error(date, '[ERROR]', caller, '-', head, ':', message);
+  },
+
+  logTrace(caller, name, message) {
+    const date = color_code['FgBlue']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset'] + name;
+    console.trace(date, '[TRACE]', caller, '-', head, ':', message);
+  },
+
+  logInfo(caller, name, message) {
+    const date = color_code['FgGreen']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset'] + name;
+    console.info(date, '[INFO]', caller, '-', head, ':', message);
+  },
+
   is(type, obj) {
     const clas = Object.prototype.toString.call(obj).slice(8, -1);
     return obj !== undefined && obj !== null && clas === type;
   },
+
   /**
    * Copy the enumerable properties of p to o, and return o.
    * If o and p have a property by the same name, o's property is 
@@ -636,21 +686,6 @@ export default {
       const xml = js2xml.create(obj, option).end();
       resolve(xml);
     });
-  },
-
-  logError(caller, name, message) {
-    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
-    console.error(date , '[ERROR]', caller, '-', name, ':', message);
-  },
-
-  logTrace(caller, name, message) {
-    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
-    console.trace(date , '[TRACE]', caller, '-', name, ':', message);
-  },
-
-  logInfo(caller, name, message) {
-    const date = `[${this.getLocalISOTimeStamp(new Date)}]`;
-    console.info(date, '[INFO]', caller, '-', name, ':', message);
   },
 
   getLocalISOTimeStamp (date) {

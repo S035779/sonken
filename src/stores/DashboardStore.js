@@ -20,12 +20,12 @@ export default class DashboardStore extends ReduceStore {
   }
   
   updateNote(state, action) {
-    return state.notes.map(note => action.id === note.id
+    return state.notes.map(note => action.id === note._id
       ? Object.assign({}, note, action.note) : note);
   }
 
   deleteNote(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj.id)
+    const isNote = obj => action.ids.some(id => id === obj._id)
     return state.notes.filter(note => !isNote(note));
   }
 

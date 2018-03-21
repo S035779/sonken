@@ -5,28 +5,28 @@ import NoteAction     from 'Actions/NoteAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import {
-  List, Paper, Checkbox, Button, Typography
-}                     from 'material-ui';
-import {
-  ListItem, ListItemText, ListItemSecondaryAction
-}                     from 'material-ui/List';
+import { List, Paper, Checkbox, Button, Typography }
+                      from 'material-ui';
+import { ListItem, ListItemText, ListItemSecondaryAction }
+                      from 'material-ui/List';
 import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
+import RssDialog      from 'Components/RssDialog/RssDialog';
 
 class RssList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      opened:   []
-    , checked:  props.selectedNoteId
-    , notes:    props.notes
+      opened:     []
+    , checked:    props.selectedNoteId
+    , notes:      props.notes
+    , isSuccess:  false
+    , isNotValid: false
     };
   }
 
-  componentWillReceiveProps(props) {
-    std.logInfo(RssList.displayName, 'Props', props);
-    const checked = props.selectedNoteId;
-    const notes = props.notes;
+  componentWillReceiveProps(nextProps) {
+    std.logInfo(RssList.displayName, 'Props', nextProps);
+    const { selectedNoteId: checked, notes } = nextProps;
     this.setState({ checked, notes });
   }
 
@@ -57,7 +57,13 @@ class RssList extends React.Component {
     const { notes } = this.state;
     const curNote = notes.find(obj => obj._id === id);
     const newNote = Object.assign({}, curNote, { title });
-    NoteAction.update(user, id, newNote);
+    NoteAction.update(user, id, newNote)
+      .then(() => this.setState({ isSuccess: true }))
+      .catch(err => this.setState({ isNotValid: true }));
+  }
+
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   renderItem(note) {
@@ -106,10 +112,18 @@ class RssList extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { notes } = this.state;
+    const { isSuccess, isNotValid, notes } = this.state;
     const renderItems = notes.map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
+      <RssDialog open={isSuccess} title={'送信完了'}
+        onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+      要求を受け付けました。
+      </RssDialog>
+      <RssDialog open={isNotValid} title={'送信エラー'}
+        onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+      内容に不備があります。もう一度確認してください。
+      </RssDialog>
     </List>;
   }
 };

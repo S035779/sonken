@@ -24,9 +24,9 @@ class RssFormDialog extends React.Component {
 
   handleSubmit() {
     const { title } = this.state;
-    const { selectedNoteId } = this.props;
-    std.logInfo(RssFormDialog.displayName, 'handleSubmit', selectedNoteId);
-    this.props.onSubmit(selectedNoteId, title);
+    std.logInfo(RssFormDialog.displayName, 'handleSubmit', title);
+    this.props.onSubmit(this.props.selectedNoteId, title);
+    this.props.onClose();
   }
 
   handleChangeText(name, event) {

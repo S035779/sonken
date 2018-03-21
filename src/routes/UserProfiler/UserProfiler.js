@@ -206,8 +206,14 @@ export default class UserProfiler {
         });
       case 'create/approval':
         return new Promise((resolve, reject) => {
-          const approved = new Approved({ approved: options.id });
-          approved.save((err, obj) => {
+          const conditions = {
+            approved: options.id
+          };
+          const update = {
+            approved: options.id
+          };
+          Approved.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -215,8 +221,10 @@ export default class UserProfiler {
         });
       case 'delete/approval':
         return new Promise((resolve, reject) => {
-          const conditions = { approved: options.id };
-          Approved.findOneAndRemove(conditions, (err, obj) => {
+          const conditions = {
+            approved: options.id
+          };
+          Approved.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);

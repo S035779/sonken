@@ -11,7 +11,6 @@ import { FormControl }  from 'material-ui/Form';
 import RssItemList      from 'Components/RssItemList/RssItemList';
 
 const mon = '//www.mnrate.com/item/aid/';
-//const amz = '//www.amazon.co.jp/exec/obidos/ASIN/';
 const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?lang=ja_JP';
 
 class RssForms extends React.Component {
@@ -20,17 +19,16 @@ class RssForms extends React.Component {
     this.state = {
       note:       props.note
     , asin:       props.note.asin
-    , name:       props.note.name
     , price:      props.note.price
     , bidsprice:  props.note.bidsprice
     , body:       props.note.body
-    , AmazonUrl:  props.note.AmazonUrl
     };
   }
 
   componentWillReceiveProps(nextProps) {
     std.logInfo(RssForms.displayName, 'Props', nextProps);
-    this.setState({ note: nextProps.note });
+    const { note } = nextProps;
+    this.setState({ note });
   }
 
   handleSave() {
@@ -71,15 +69,15 @@ class RssForms extends React.Component {
   }
 
   render() {
-    std.logInfo(RssForms.displayName, 'State', this.state);
+    //std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note } = this.props;
-    const { asin, name, price, bidsprice, body, AmazonUrl }
-      = this.state.note;
+    const { asin, price, bidsprice, body} = this.state.note;
     const isChanged = note.asin !== asin || note.price !== price
-                   || note.bidsprice !== bidsprice || note.body  !== body;
+      || note.bidsprice !== bidsprice || note.body  !== body;
     const link_mon = mon + asin;
     const link_fba = fba;
-    const link_amz = AmazonUrl; //amz + asin;
+    const link_amz = note.AmazonUrl;
+    const name = note.name;
     const items = note.items ? note.items : [];
     return <div className={classes.forms}>
       <div className={classes.header}>

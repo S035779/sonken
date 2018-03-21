@@ -60,12 +60,6 @@ export default class FeedParser {
   }
 
   request(request, options) {
-    //this.logTrace(request, options);
-    //this.logTrace('readed:', readed);
-    //this.logTrace('traded:', traded);
-    //this.logTrace('bided:', bided);
-    //this.logTrace('listed:', listed);
-    //this.logTrace('starred:', starred);
     //const setNotes   = objs => { return notes   = objs };
     //const setReaded  = objs => { return readed  = objs };
     //const setTraded  = objs => { return traded  = objs };
@@ -289,23 +283,31 @@ export default class FeedParser {
         });
       case 'update/note':
         return new Promise((resolve, reject) => {
+          const isAsin = options.data.asin !== '';
           const conditions = {
             _id:  options.id
           , user: options.user
           };
-          const update = {
-          //  url:        options.data.url
-          //, category:   options.data.category
+          const update = isAsin ? {
             title:      options.data.title
           , asin:       options.data.asin
-          , name:       options.data.name
           , price:      options.data.price
           , bidsprice:  options.data.bidsprice
           , body:       options.data.body
-          //, items:      options.data.items
+          , name:       options.data.name
+          , AmazonUrl:  options.data.AmazonUrl
+          , AmazonImg:  options.data.AmazonImg
+          , updated:    Date.now()
+          } : {
+            title:      options.data.title
+          , asin:       options.data.asin
+          , price:      options.data.price
+          , bidsprice:  options.data.bidsprice
+          , body:       options.data.body
           , updated:    Date.now()
           };
-          Note.findOneAndUpdate(conditions, update, (err, obj) => {
+          //log.debug(update);
+          Note.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -359,11 +361,17 @@ export default class FeedParser {
         });
       case 'create/readed':
         return new Promise((resolve, reject) => {
-          const readed = new Readed({
+          //log.debug(request, options);
+          const conditions = {
             readed: options.id
           , user:   options.user
-          });
-          readed.save((err, obj) => {
+          };
+          const update = {
+            readed: options.id
+          , user:   options.user
+          };
+          Readed.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -380,11 +388,12 @@ export default class FeedParser {
         });
       case 'delete/readed':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
             readed: options.id
           , user:   options.user
           };
-          Readed.findOneAndRemove(conditions, (err, obj) => {
+          Readed.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -400,11 +409,17 @@ export default class FeedParser {
         });
       case 'create/traded':
         return new Promise((resolve, reject) => {
-          const traded = new Traded({
+          //log.debug(request, options);
+          const conditions = {
             traded: options.id
           , user:   options.user
-          });
-          traded.save((err, obj) => {
+          };
+          const update = {
+            traded: options.id
+          , user:   options.user
+          };
+          Traded.update(conditions, update, { upsert: true}
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -420,11 +435,12 @@ export default class FeedParser {
         });
       case 'delete/traded':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
             traded: options.id
-          , user: options.user
+          , user:   options.user
           };
-          Traded.findOneAndRemove(conditions, (err, obj) => {
+          Traded.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -440,11 +456,17 @@ export default class FeedParser {
         });
       case 'create/bided':
         return new Promise((resolve, reject) => {
-          const bided = new Bided({
-            bided: options.id
-          , user: options.user
-          });
-          bided.save((err, obj) => {
+          //log.debug(request, options);
+          const conditions = {
+            bided:  options.id
+          , user:   options.user
+          };
+          const update = {
+            bided:  options.id
+          , user:   options.user
+          };
+          Bided.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -460,11 +482,12 @@ export default class FeedParser {
         });
       case 'delete/bided':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
             bided: options.id
           , user: options.user
           };
-          Bided.findOneAndRemove(conditions, (err, obj) => {
+          Bided.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -480,11 +503,17 @@ export default class FeedParser {
         });
       case 'create/starred':
         return new Promise((resolve, reject) => {
-          const starred = new Starred({
+          //log.debug(request, options);
+          const conditions = {
             starred:  options.id
           , user:     options.user
-          });
-          starred.save((err, obj) => {
+          };
+          const update = {
+            starred:  options.id
+          , user:     options.user
+          };
+          Starred.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -500,11 +529,12 @@ export default class FeedParser {
         });
       case 'delete/starred':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
             starred:  options.id
           , user:     options.user
           };
-          Starred.findOneAndRemove(conditions, (err, obj) => {
+          Starred.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -520,11 +550,17 @@ export default class FeedParser {
         });
       case 'create/listed':
         return new Promise((resolve, reject) => {
-          const listed = new Listed({
+          //log.debug(request, options);
+          const conditions = {
             listed: options.id
           , user:   options.user
-          });
-          listed.save((err, obj) => {
+          };
+          const update = {
+            listed: options.id
+          , user:   options.user
+          };
+          Listed.update(conditions, update, { upsert: true }
+          , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -540,11 +576,12 @@ export default class FeedParser {
         });
       case 'delete/listed':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
             listed: options.id
           , user:   options.user
           };
-          Listed.findOneAndRemove(conditions, (err, obj) => {
+          Listed.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -757,15 +794,44 @@ export default class FeedParser {
       )
       .map(setNotes({ user, url, category }))
       .flatMap(objs => addNote(objs[0]))
-      //.map(R.tap(this.logTrace.bind(this)))
   }
 
   fetchNote({ user, id }) {
-    return Rx.Observable.fromPromise(this.getNote(user, id));
+    const observables = Rx.Observable.forkJoin([
+      this.getStarred(user)
+    , this.getListed(user)
+    , this.getReaded(user)
+    , this.getNote(user, id)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setReaded(objs[2])
+    , this.setListed(objs[1])
+    , this.setStarred(objs[0])
+    , this.toObject
+    )([objs[3]]);
+    return observables
+      .map(setAttribute)
+      .map(R.head);
   }
 
   fetchItems({ user, items }) {
     return Rx.Observable.fromPromise(this.getItems(user, items));
+  }
+
+  fetchNotes({ user }) {
+    const observables = Rx.Observable.forkJoin([
+      this.getStarred(user)
+    , this.getListed(user)
+    , this.getReaded(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setReaded(objs[2])
+    , this.setListed(objs[1])
+    , this.setStarred(objs[0])
+    , this.toObject
+    )(objs[3]);
+    return observables.map(setAttribute);
   }
 
   fetchReadedNotes({ user }) {
@@ -829,23 +895,6 @@ export default class FeedParser {
       this.setListed(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
-  }
-
-  fetchNotes({ user }) {
-    const pbservable =  Rx.Observable.fromPromise(this.getNotes(user));
-    const observables = Rx.Observable.forkJoin([
-      this.getStarred(user)
-    , this.getListed(user)
-    , this.getReaded(user)
-    , this.getNotes(user)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setReaded(objs[2])
-    , this.setListed(objs[1])
-    , this.setStarred(objs[0])
-    , this.toObject
-    )(objs[3]);
     return observables.map(setAttribute);
   }
 
@@ -924,27 +973,27 @@ export default class FeedParser {
   }
 
   updateNote({ user, id, data }) {
-    console.log(user, id, data);
-    return data.asin === ''
-      ? this._updateNote({ user, id, data })
-      : this.fetchItemLookup(data.asin)
-        .map(obj => Object.assign({}, data, {
+    //log.trace(user,id,data);
+    const isAsin = data.asin !== '';
+    const getAmazonData = obj => R.merge(data, {
           name:       obj.ItemAttributes.Title
         , AmazonUrl:  obj.DetailPageURL
-        , AmazonImg:  obj.MediumImage.URL }))
-        .flatMap(obj => this._updateNote({ user, id, data: obj }));
+        , AmazonImg:  obj.MediumImage.URL
+    });
+    return isAsin
+      ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
+        .map(getAmazonData)
+        .flatMap(obj => this._updateNote({ user, id, data: obj }))
+        .flatMap(() => this.fetchNote({ user, id }))
+      : this._updateNote({ user, id, data })
+        .flatMap(() => this.fetchNote({ user, id }))
+    ;
   }
 
   _updateNote({ user, id, data }) {
     return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
   }
   
-  fetchItemLookup(asin) {
-    const item_id = asin;
-    const id_type = 'ASIN';
-    return Amazon.of(keyset).fetchItemLookup(item_id, id_type);
-  }
-
   deleteNote({ user, ids }) {
     const _ids = R.split(',', ids);
     const promisess = R.map(id => this.removeNote(user, id));
@@ -973,10 +1022,12 @@ export default class FeedParser {
       .map(R.flatten)
       .map(R.map(obj => obj.guid._))
       .flatMap(objs => this._createRead({ user, ids: objs }))
-      //.map(R.tap(console.log))
+      //.map(R.tap(log.trace.bind(this)))
+    ;
   }
 
   _createRead({ user, ids }) {
+    //log.debug(user, ids);
     const promises = R.map(id => this.addRead(user, id));
     return Rx.Observable.forkJoin(promises(ids));
   }
@@ -1159,12 +1210,7 @@ export default class FeedParser {
   //  return this.forFile([ file ])
   //    .flatMap(objs => this.forXmlNote(objs))
   //    .map(setNotes({ user, url, category }))
-      //.map(R.tap(this.logTrace.bind(this)));
   //}
-
-  logTrace(name, message) {
-    log.trace('Trace:', name, message);
-  }
 
   setNotes({ user, url, category }, objs) {
     const setNote = obj => ({
