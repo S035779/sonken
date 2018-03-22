@@ -7,7 +7,7 @@ import { withStyles }     from 'material-ui/styles';
 import { AccountCircle }  from 'material-ui-icons';
 import EditBody           from 'Components/EditBody/EditBody';
 
-class PostedFaqList extends React.Component {
+class FaqsList extends React.Component {
   renderList(faq, classes) {
     return <li className={classes.item} key={faq._id}>
       <Link to={`/faqs/${faq._id}`} className={classes.link}>
@@ -49,9 +49,9 @@ const styles = theme => ({
 , icon:     { margin: theme.spacing.unit, verticalAlign: 'middle' }
 , updated:  { color: '#666' }
 });
-PostedFaqList.displayName = 'PostedFaqList';
-PostedFaqList.defaultProps = { faqs: null };
-PostedFaqList.propTypes = {
+FaqsList.displayName = 'FaqsList';
+FaqsList.defaultProps = { faqs: null };
+FaqsList.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(PostedFaqList);
+export default withStyles(styles)(FaqsList);

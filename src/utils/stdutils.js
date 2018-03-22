@@ -1,7 +1,6 @@
 import querystring from 'querystring';
 import crypto from 'crypto';
 import { URL } from 'url';
-import xml2js from 'xml2js';
 import js2xml from 'xmlbuilder';
 
 const env = process.env.PLATFORM;
@@ -668,28 +667,6 @@ export default {
    */
   parse_url(url) {
     return new URL(url)
-  },
-
-  /**
-   * Function that returns instanse for parsed to 
-   * object from xml document.
-   *
-   * @param {string} xml - xml document to be converted.
-   * @return {Promise} - promise instanse.
-   */
-  parse_xml(xml) {
-    const option = {
-      attrkey:          'root'
-      , charkey:        'sub'
-      , trim:           true
-      , explicitArray:  false
-    };
-    return new Promise((resolve, reject) => {
-      xml2js.parseString(xml, option, (error, result) => {
-        if(error) reject(error)
-        resolve(result)
-      });
-    });
   },
 
   /**

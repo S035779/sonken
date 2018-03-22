@@ -1,13 +1,14 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import { renderRoutes } from 'react-router-config';
+import { Redirect }     from 'react-router-dom';
 import { Container }    from 'flux/utils';
-import FaqAction        from 'Actions/FaqAction';
 import { getStores, getState }
                         from 'Stores';
+import FaqAction        from 'Actions/FaqAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import PostedFaqList  from 'Components/PostedFaqList/PostedFaqList';
 
 class Faqs extends React.Component {
   static getStores() {
@@ -20,7 +21,8 @@ class Faqs extends React.Component {
 
   static prefetch(options) {
     std.logInfo(Faqs.displayName, 'prefetch', options)
-    return FaqAction.prefetchPostedFaqs();
+    return FaqAction.presetUser(options.user)
+      .then(() => FaqAction.prefetchPostedFaqs());
   }
 
   componentDidMount() {
@@ -30,15 +32,22 @@ class Faqs extends React.Component {
 
   render() {
     std.logInfo(Faqs.displayName, 'State', this.state);
-    const { classes } = this.props;
-    const { faqs } = this.state;
+    std.logInfo(Faqs.displayName, 'Props', this.props);
+    const { classes, route, location } = this.props;
+    const { isAuthenticated, user, faqs } = this.state;
     let _faqs = [];
-    faqs.forEach(faq => {
-      if(faq.posted) _faqs.push(faq);
-    });
+    faqs.forEach(faq => { if(faq.posted) _faqs.push(faq); });
+    if(!isAuthenticated) {
+      return <Redirect to={{
+        pathname: '/login/authenticate', state: { from: location } }} />;
+    }
     return <div className={classes.root}>
       <h1 className={classes.title}>FAQ</h1>
-      <PostedFaqList faqs={_faqs} />
+      {
+        route.routes
+          ? renderRoutes(route.routes , { faqs: _faqs })
+          : null
+      }
       </div>;
   }
 };

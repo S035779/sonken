@@ -166,7 +166,7 @@ export default class DashboardStore extends ReduceStore {
         , ids:    []
         });
       case 'note/rehydrate/my':
-        return    action.state;
+        return action.state;
       default: 
         return state; 
     } 

@@ -64,16 +64,12 @@ class InquiryEdit extends React.Component {
   render() {
     //std.logInfo(InquiryEdit.displayName, 'State', this.state);
     std.logInfo(InquiryEdit.displayName, 'Props', this.props);
-    const { classes, location, isAuthenticated, preference } = this.props;
+    const { classes, location, preference } = this.props;
     const { redirectToReferer, title, body, isNotValid } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const inputSelect = { MenuProps: { className: classes.menu } };
     const from = location.state || { pathname: '/marchant' };
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
     if(redirectToReferer) return <Redirect to={from} />
     return <div className={classes.inquiryForms}>
       <div className={classes.space} />

@@ -1,5 +1,6 @@
 import R from 'ramda';
 import Rx from 'rx';
+import xml2js from 'xml2js';
 import std from './stdutils';
 import net from './netutils';
 import { logs as log } from './logutils';
@@ -109,7 +110,29 @@ class Amazon {
   }
 
   parseXml(xml) {
-    return Rx.Observable.fromPromise(std.parse_xml(xml));
+    return Rx.Observable.fromPromise(this.parse_xml(xml));
+  }
+
+  /**
+   * Function that returns instanse for parsed to 
+   * object from xml document.
+   *
+   * @param {string} xml - xml document to be converted.
+   * @return {Promise} - promise instanse.
+   */
+  parse_xml(xml) {
+    const option = {
+      attrkey:          'root'
+      , charkey:        'sub'
+      , trim:           true
+      , explicitArray:  false
+    };
+    return new Promise((resolve, reject) => {
+      xml2js.parseString(xml, option, (error, result) => {
+        if(error) reject(error)
+        resolve(result)
+      });
+    });
   }
 
   forkJoin(promises) {

@@ -5,14 +5,14 @@ const displayName = 'FaqStore';
 export default class FaqStore extends ReduceStore {
   getInitialState() {
     return { 
-      admin: ''
-      , isAuthenticated: false
-      , faqs:    []
-      , page: {
+      admin:            ''
+    , isAuthenticated:  false
+    , faqs:             []
+    , page: {
         maxNumer: 0
       , number:   0
       , perPage:  20
-      }
+    }
     , selected: false
     , ids:      []
     };
@@ -46,7 +46,7 @@ export default class FaqStore extends ReduceStore {
         return Object.assign({}, state, {
           admin:   action.admin
         , isAuthenticated: action.isAuthenticated
-        })
+        });
       case 'login/authenticate':
         return Object.assign({}, state, {
           isAuthenticated: action.isAuthenticated

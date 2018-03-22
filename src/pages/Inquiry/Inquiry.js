@@ -1,6 +1,7 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
+import { Redirect }     from 'react-router-dom';
 import { Container }    from 'flux/utils';
 import { getStores, getState }
                         from 'Stores';
@@ -27,18 +28,23 @@ class Inquiry extends React.Component {
   render() {
     std.logInfo(Inquiry.displayName, 'State', this.state);
     std.logInfo(Inquiry.displayName, 'Props', this.props);
-    const { classes, route } = this.props;
+    const { classes, route, location } = this.props;
     const { user, isAuthenticated, preference } = this.state;
+    if(!isAuthenticated) {
+      return <Redirect to={{
+        pathname: '/login/authenticate', state: { from: location } }} />;
+    }
     return <div className={classes.inquiryFrame}>
       <div className={classes.drawArea}>
-      <div className={classes.space}/>
-      <div className={classes.container}>
-        {route.routes
-          ? renderRoutes(route.routes
-            , { user, isAuthenticated, preference })
-          : null}
-      </div>
-      <div className={classes.space}/>
+        <div className={classes.space}/>
+        <div className={classes.container}>
+        {
+          route.routes
+            ? renderRoutes(route.routes, { user, preference })
+          : null
+        }
+        </div>
+        <div className={classes.space}/>
       </div>
     </div>;
   }

@@ -18,6 +18,7 @@ import FaqEdit      from 'Pages/FaqEdit/FaqEdit';
 import Mail         from 'Pages/Mail/Mail';
 import MailEdit     from 'Pages/MailEdit/MailEdit';
 import Faqs         from 'Pages/Faqs/Faqs';
+import FaqsList     from 'Pages/FaqsList/FaqsList';
 import Inquiry      from 'Pages/Inquiry/Inquiry';
 import InquiryEdit  from 'Pages/InquiryEdit/InquiryEdit';
 
@@ -41,6 +42,9 @@ export default function getRoutes() {
       path: '/faqs'
     , component: Faqs
     , loadData: getUserData
+    , routes: [{
+      component: FaqsList
+    }]
     }
     , {
       path: '/inquiry'

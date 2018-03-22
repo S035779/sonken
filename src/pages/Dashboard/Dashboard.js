@@ -38,7 +38,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    //std.logInfo(Dashboard.displayName, 'State', this.state);
+    std.logInfo(Dashboard.displayName, 'State', this.state);
     std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, file } = this.state;
