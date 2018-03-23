@@ -138,9 +138,9 @@ class RssMenu extends React.Component {
     );
   }
 
-  renderItems(item, idx) {
-    return <MenuItem key={idx} value={item.name}>
-      {item.name}（上限数：{item.number}）
+  renderMenu(obj, idx) {
+    return <MenuItem key={idx} value={obj.name}>
+      {obj.name}（上限数：{obj.number}）
     </MenuItem>;
   }
 
@@ -151,8 +151,8 @@ class RssMenu extends React.Component {
       , password, confirm_password, profile } = this.state;
     const { name, kana, email, phone, user, plan } = profile;
     const open = Boolean(anchorEl);
-    const renderItems = preference.menu ? preference.menu
-      .map((item, idx) => this.renderItems(item, idx)) : [];
+    const renderMenu = preference.menu
+     ? preference.menu.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     return auth && (<div>
       <IconButton
         aria-owns={open ? 'menu-appbar' : null}
@@ -221,7 +221,7 @@ class RssMenu extends React.Component {
             value={plan}
             onChange={this.handleChangeProfile.bind(this, 'plan')}
             label="契約プラン" fullWidth>
-            {renderItems}
+            {renderMenu}
           </TextField>
         </LoginFormDialog>>
       </Menu>

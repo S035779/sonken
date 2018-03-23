@@ -46,7 +46,7 @@ class TradeSearch extends React.Component {
         if(this.props.file) this.downloadFile(this.props.file);
         this.setState({ isSuccess: true });
       })
-      //.catch(err => this.setState({ isNotValid: true }));
+      .catch(err => this.setState({ isNotValid: true }));
   }
 
   handleChangeSelect(name, event) {
@@ -70,7 +70,7 @@ class TradeSearch extends React.Component {
   }
 
   render() {
-    std.logInfo(TradeSearch.displayName, 'State', this.state);
+    //std.logInfo(TradeSearch.displayName, 'State', this.state);
     const { classes, itemNumber } = this.props;
     const { isSuccess, isNotValid, perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>

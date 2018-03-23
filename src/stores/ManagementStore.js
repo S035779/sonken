@@ -1,18 +1,24 @@
 import { ReduceStore } from 'flux/utils';
 
-const pspid = 'ManagementStore';
+const displayName = 'ManagementStore';
 
 export default class ManagementStore extends ReduceStore {
   getInitialState() {
     return { 
       admin: ''
-      , isAuthenticated: false
-      , users:    []
-      , page: {
+    , preference: {
+        from: ''
+      , agreement: ''
+      , menu: []
+      , advertisement: { url1: '', url2: '', url3: '', url4: '' }
+    }
+    , isAuthenticated: false
+    , users:    []
+    , page: {
         maxNumer: 0
       , number:   0
       , perPage:  20
-      }
+    }
     , selected: false
     , ids:      []
     };
@@ -47,6 +53,10 @@ export default class ManagementStore extends ReduceStore {
           admin:   action.admin
         , isAuthenticated: action.isAuthenticated
         })
+      case 'preference/fetch':
+        return Object.assign({}, state, {
+          preference: action.preference
+        });
       case 'login/authenticate':
         return Object.assign({}, state, {
           isAuthenticated: action.isAuthenticated

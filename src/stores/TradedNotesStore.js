@@ -42,11 +42,20 @@ export default class TradedNotesStore extends ReduceStore {
     , { items: setItems(note.items) }) : note );
   }
 
-  deleteItem(state, action) {
+  //deleteItem(state, action) {
+  //  const isItem = obj => action.ids.some(id => id === obj.guid._);
+  //  const delItems = objs => objs.filter(item => !isItem(item));
+  //  return state.notes.map(note => note.items ? Object.assign({}, note
+  //  , { items: delItems(note.items) }) : note );
+  //}
+
+  deleteBids(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const delItems = objs => objs.filter(item => !isItem(item));
+    const setItem = obj => isItem(obj) ? Object.assign({}, obj
+    , { bided: false }) : obj;
+    const setItems = objs => objs.map(item =>setItem(item))
     return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: delItems(note.items) }) : note );
+    , { items: setItems(note.items) }) : note );
   }
 
   reduce(state, action) {
@@ -68,9 +77,14 @@ export default class TradedNotesStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  action.notes
         });
-      case 'item/delete/traded':
+      //case 'item/delete/traded':
+      //  return Object.assign({}, state, {
+      //    notes:  this.deleteItem(state, action)
+      //  , ids:    []
+      //  });
+      case 'bids/delete':
         return Object.assign({}, state, {
-          notes:  this.deleteItem(state, action)
+          notes: this.deleteBids(state, action)
         , ids:    []
         });
       case 'trade/create':

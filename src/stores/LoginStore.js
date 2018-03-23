@@ -1,6 +1,6 @@
 import { ReduceStore } from 'flux/utils';
 
-const pspid = 'LoginStore';
+const displayName = 'LoginStore';
 
 export default class LoginStore extends ReduceStore {
   getInitialState() {

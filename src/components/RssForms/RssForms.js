@@ -8,6 +8,7 @@ import { Input, Button, Typography, TextField }
                         from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';
 
 const mon = '//www.mnrate.com/item/aid/';
@@ -22,6 +23,8 @@ class RssForms extends React.Component {
     , price:      props.note.price
     , bidsprice:  props.note.bidsprice
     , body:       props.note.body
+    , isSuccess:  false
+    , isNotValid: false
     };
   }
 
@@ -34,7 +37,13 @@ class RssForms extends React.Component {
   handleSave() {
     const { user } = this.props;
     const { note } = this.state;
-    NoteAction.update(user, note._id, note);
+    if(this.isValidate() && this.isChanged()) {
+      NoteAction.update(user, note._id, note)
+        .then(() => this.setState({ isSuccess: true }))
+        .catch(err => this.setState({ isNotValid: true }));
+    } else {
+      this.setState({ isNotValid: true });
+    }
   }
 
   handleChangeInput(name, event) {
@@ -49,14 +58,14 @@ class RssForms extends React.Component {
         break;
       case 'price':
         this.setState({
-          note: Object.assign({}, note, { price: value })
-        , price: value
+          note: Object.assign({}, note, { price: Number(value) })
+        , price: Number(value)
         });
         break;
       case 'bidsprice':
         this.setState({
-          note: Object.assign({}, note, { bidsprice: value })
-        , bidsprice: value 
+          note: Object.assign({}, note, { bidsprice: Number(value) })
+        , bidsprice: Number(value) 
         });
         break;
       case 'body':
@@ -68,12 +77,30 @@ class RssForms extends React.Component {
     }
   }
 
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
+  }
+
+  isValidate() {
+    const { asin, price, bidsprice, body } = this.state.note;
+    return (asin !== ''
+      && std.regexNumber(price) && std.regexNumber(bidsprice)
+    );
+  }
+
+  isChanged() {
+    const { asin, price, bidsprice, body } = this.state.note;
+    const { note } = this.props;
+    return (note.asin !== asin  || note.price !== price
+      || note.bidsprice !== bidsprice  || note.body !== body);
+  }
+
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note } = this.props;
+    const { isNotValid, isSuccess } = this.state;
     const { asin, price, bidsprice, body} = this.state.note;
-    const isChanged = note.asin !== asin || note.price !== price
-      || note.bidsprice !== bidsprice || note.body  !== body;
+    const isChanged = this.isChanged();
     const link_mon = mon + asin;
     const link_fba = fba;
     const link_amz = note.AmazonUrl;
@@ -95,6 +122,14 @@ class RssForms extends React.Component {
           <Button variant="raised" size="medium"
             onClick={this.handleSave.bind(this)}
             className={classes.button}>{isChanged ? '*' : ''}登録</Button>
+          <RssDialog open={isNotValid} title={'送信エラー'}
+            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
+          </RssDialog>
+          <RssDialog open={isSuccess} title={'送信完了'}
+            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
+          </RssDialog>
         </div>
         <div className={classes.buttons}>
           <Button color="primary" size="large"
@@ -116,20 +151,46 @@ class RssForms extends React.Component {
       <div className={classes.memo}>
         <div className={classes.texts}>
           <div className={classes.edit}>
-            <FormControl className={classes.text}>
+            <TextField
+              id="number"
+              label="想定売値"
+              value={price}
+              onChange={this.handleChangeInput.bind(this, 'price')}
+              type="number"
+              className={classes.text}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="none" />
+          {/*
+          <FormControl className={classes.text}>
               <InputLabel htmlFor="price">想定売値</InputLabel>
               <Input id="price"
                 value={price}
                 onChange={this.handleChangeInput.bind(this, 'price')}/>
             </FormControl>
+          */}
           </div>
           <div className={classes.edit}>
+            <TextField
+              id="number"
+              label="最高入札額"
+              value={bidsprice}
+              onChange={this.handleChangeInput.bind(this, 'bidsprice')}
+              type="number"
+              className={classes.text}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="none" />
+          {/*
             <FormControl className={classes.text}>
               <InputLabel htmlFor="bidsprice">最高入札額</InputLabel>
               <Input id="bidsprice"
                 value={bidsprice}
                 onChange={this.handleChangeInput.bind(this,'bidsprice')}/>
             </FormControl>
+          */}
           </div>
         </div>
         <div className={classes.textarea}>

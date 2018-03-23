@@ -21,8 +21,7 @@ class Inquiry extends React.Component {
 
   static prefetch(options) {
     std.logInfo(Inquiry.displayName, 'prefetch', options);
-    if(options.user) return LoginAction.presetUser(options.user);
-    if(options.admin) return LoginAction.presetAdmin(options.admin);
+    return LoginAction.presetUser(options.user);
   }
 
   render() {

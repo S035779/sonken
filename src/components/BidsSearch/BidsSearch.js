@@ -70,7 +70,7 @@ class BidsSearch extends React.Component {
   }
 
   render() {
-    std.logInfo(BidsSearch.displayName, 'State', this.state);
+    //std.logInfo(BidsSearch.displayName, 'State', this.state);
     const { classes, itemNumber } = this.props;
     const { isSuccess, isNotValid, perPage, filename } = this.state;
     return <div className={classes.noteSearchs}>

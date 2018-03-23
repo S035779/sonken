@@ -144,11 +144,11 @@ router.route('/listed')
 .post(feed.notImplemented())
 .delete(feed.deleteList());
 
-router.route('/item')
-.get(feed.notImplemented())
-.put(feed.notImplemented())
-.post(feed.notImplemented())
-.delete(feed.deleteItem());
+//router.route('/item')
+//.get(feed.notImplemented())
+//.put(feed.notImplemented())
+//.post(feed.notImplemented())
+//.delete(feed.deleteItem());
 
 router.route('/readed')
 .get(feed.fetchReadedNotes())

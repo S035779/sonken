@@ -93,9 +93,15 @@ class UserForms extends React.Component {
       || user.plan !== plan || user.isAdmin !== isAdmin);
   }
 
+  renderMenu(obj, idx) {
+    return <MenuItem key={idx} value={obj.name}>
+      {obj.name}（上限数：{obj.number}）
+    </MenuItem>;
+  }
+
   render() {
-    std.logInfo(UserForms.displayName, 'State', this.state);
-    const { classes } = this.props;
+    //std.logInfo(UserForms.displayName, 'State', this.state);
+    const { classes, preference } = this.props;
     const { isNotValid, isSuccess, redirectToRss } = this.state;
     const { user, name, kana, email, phone, plan, isAdmin }
       = this.state.user;
@@ -103,6 +109,8 @@ class UserForms extends React.Component {
     const secondary = 'orange';
     const isChanged = this.isChanged();
     const title = `${name} (${user})`;
+    const renderMenu = preference.menu
+      ? preference.menu.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     const rss = { pathname: '/marchant' };
     if(redirectToRss) return <Redirect to={rss} />;
     return <div className={classes.forms}>
@@ -174,9 +182,7 @@ class UserForms extends React.Component {
           <InputLabel htmlFor="plan">申し込みプラン</InputLabel>
           <Select value={plan}
             onChange={this.handleChangeInput.bind(this, 'plan')}>
-            <MenuItem value={'plan_A'}>Plan A</MenuItem>
-            <MenuItem value={'plan_B'}>Plan B</MenuItem>
-            <MenuItem value={'plan_C'}>Plan C</MenuItem>
+            {renderMenu}
           </Select>
         </FormControl>
       </div>

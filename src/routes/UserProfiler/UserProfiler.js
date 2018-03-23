@@ -10,7 +10,11 @@ import Sendmail           from 'Utilities/Sendmail';
 import { logs as log }    from 'Utilities/logutils';
 
 dotenv.config()
+const app_name = process.env.APP_NAME;
+const admin_user = process.env.ADMIN_USER;
+const admin_pass = process.env.ADMIN_PASS;
 const mms_from = process.env.MMS_FROM || 'info@example.com';
+const mms_user = process.env.MMS_USER || 'info@example.com';
 const smtp_port = process.env.MMS_PORT || 2525;
 const ssmtp_port = process.env.MMS_SSL;
 const isSSL = ssmtp_port ? true : false;
@@ -31,6 +35,12 @@ const mail_keyset = {
  */
 export default class UserProfiler {
   constructor() {
+    this.createAdmin({ admin: admin_user, password: admin_pass })
+      .subscribe(
+      obj => { log.info(obj); }
+    , err => { log.warn('Adminitrator has already registered.'); }
+    , ( ) => { log.info('Complete to create Administrator!!'); }
+    );
   }
 
   static of() {
@@ -75,34 +85,58 @@ export default class UserProfiler {
         });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const isUser = options.user !=='';
           const isEmail = !!options.email;
-          if(!isUser) 
-            return reject({ name: 'Error', message: 'Request error.' });
+          if(!isUser) return reject({
+            name: 'Error', message: 'Request error.'
+          });
           const conditions = isEmail
-            ? { email: options.email
-              , phone: new RegExp(options.phone + '$')}
-            : { user: options.user };
+            ? {
+              email: options.email
+            , phone: new RegExp(options.phone + '$')
+            }
+            : {
+              user: options.user
+            };
           User.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
-            if(obj === null) return reject(
-              { name: 'Error', message: 'User not found.' });
+            if(obj === null) return reject({
+              name: 'Error', message: 'User not found.'
+            });
             //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/user':
         return new Promise((resolve, reject) => {
-          const user = new User({
-            user:   options.user
-          , salt:   options.salt
-          , hash:   options.hash
-          , name:   options.data.name
-          , kana:   options.data.kana
-          , email:  options.data.email
-          , phone:  options.data.phone
-          , plan:   options.data.plan
-          });
+          //log.debug(request, options);
+          const isAdmin = !!options.admin;
+          const create = isAdmin 
+            ? {
+              user:   options.admin
+            , isAdmin:  true
+            , salt:   options.salt
+            , hash:   options.hash
+            , name:   options.data.name
+            , kana:   options.data.kana
+            , email:  options.data.email
+            , phone:  options.data.phone
+            , plan:   options.data.plan
+            }
+            : {
+              user:   options.user
+            , isAdmin:  false
+            , salt:   options.salt
+            , hash:   options.hash
+            , name:   options.data.name
+            , kana:   options.data.kana
+            , email:  options.data.email
+            , phone:  options.data.phone
+            , plan:   options.data.plan
+            };
+          //log.debug(isAdmin, create);
+          const user = new User(create);
           user.save((err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -111,55 +145,50 @@ export default class UserProfiler {
         });
       case 'update/user':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const isAdmin = !!options.admin;
           const isData = !!options.data;
           const isPass = !!options.hash && !!options.salt;
-          let conditions = {};
-          let update = {};
-          //log.info(isAdmin, isData, isPass);
-          if(isData && isPass) {
-            conditions = { user: options.user };
-            update = {
-              name:   options.data.name
-            , kana:   options.data.kana
-            , email:  options.data.email
-            , phone:  options.data.phone
-            , plan:   options.data.plan
-            , salt:   options.salt
-            , hash:   options.hash
-            , updated: Date.now()
+          //log.debug(isAdmin, isData, isPass, isAdmin && isData);
+          let conditions = isAdmin
+            ? { user: options.data.user }
+            : { user: options.user };
+          let update = isAdmin && isData
+            ? {
+              isAdmin:  options.data.isAdmin
+            , name:     options.data.name
+            , kana:     options.data.kana
+            , email:    options.data.email
+            , phone:    options.data.phone
+            , plan:     options.data.plan
+            , updated:  Date.now()
             }
-          }
-          if(isAdmin && isData) {
-            conditions = { user: options.data.user }
-            update = {
-              name:   options.data.name
-            , kana:   options.data.kana
-            , email:  options.data.email
-            , phone:  options.data.phone
-            , plan:   options.data.plan
-            , updated: Date.now()
-            }
-          }
-          if(isData) {
-            conditions = { user: options.user };
-            update = {
-              name:   options.data.name
-            , kana:   options.data.kana
-            , email:  options.data.email
-            , phone:  options.data.phone
-            , plan:   options.data.plan
-            , updated: Date.now()
-            }
-          }
-          if(isPass) {
-            conditions = { user: options.user };
-            update = {
-              salt:   options.salt
-            , hash:   options.hash
-            , updated: Date.now()
-            };
-          }
+            : isData && isPass 
+              ? {
+                name:   options.data.name
+              , kana:   options.data.kana
+              , email:  options.data.email
+              , phone:  options.data.phone
+              , plan:   options.data.plan
+              , salt:   options.salt
+              , hash:   options.hash
+              , updated: Date.now()
+              }
+              : isData
+                ? {
+                  name:   options.data.name
+                , kana:   options.data.kana
+                , email:  options.data.email
+                , phone:  options.data.phone
+                , plan:   options.data.plan
+                , updated: Date.now()
+                }
+                : {
+                  salt:   options.salt
+                , hash:   options.hash
+                , updated: Date.now()
+                };
+          //log.debug(conditions, update);
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -169,7 +198,7 @@ export default class UserProfiler {
       case 'delete/user':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
-          User.findOneAndRemove(conditions, (err, obj) => {
+          User.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -280,7 +309,8 @@ export default class UserProfiler {
       case 'create/preference':
         return new Promise((resolve, reject) => {
           const admin = new Admin({
-            from:           options.data.from
+            appname:        options.data.appname
+          , from:           options.data.from
           , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
@@ -347,12 +377,16 @@ export default class UserProfiler {
     return this.request('fetch/user', { user, email, phone });
   }
 
+  addAdmin(admin, salt, hash, data) {
+    return this.request('create/user', { admin, salt, hash, data })
+  }
+
   addUser(user, salt, hash, data) {
     return this.request('create/user', { user, salt, hash, data })
   }
 
-  replaceUser(user, salt, hash, data) {
-    return this.request('update/user', { user, salt, hash, data });
+  replaceUser(admin, user, salt, hash, data) {
+    return this.request('update/user', { admin, user, salt, hash, data });
   }
 
   signinUser(user, salt, hash) {
@@ -478,7 +512,7 @@ export default class UserProfiler {
     const isPass = !!password;
     const isAdmin = !!admin;
     const isData = !!data;
-    //log.info(isAdmin, isData, isPass);
+    //log.debug(isAdmin, isData, isPass);
     if(isPass && isData) return this.createSaltAndHash(password)
       .flatMap(obj => 
         this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
@@ -496,9 +530,9 @@ export default class UserProfiler {
       .flatMap(() => this.fetchUser({ user }))
   }
 
-  _updateUser({ user, salt, hash, data }) {
+  _updateUser({ admin, user, salt, hash, data }) {
     return Rx.Observable
-      .fromPromise(this.replaceUser(user, salt, hash, data));
+      .fromPromise(this.replaceUser(admin, user, salt, hash, data));
   }
 
   createSaltAndHash(password, salt) {
@@ -537,8 +571,16 @@ export default class UserProfiler {
     return {
       from:     sender.from
     , to:       user.email
-    , subject:  message.title 
-    , text:     message.body
+    , subject:  '(ヤフオク！RSSリーダ)'
+      + ` ${user.name} 様より問合せがありました。` 
+    , text:
+        `氏　　名： ${user.name}\n`
+      + `アドレス： ${user.email}\n`
+      + `ユーザID： ${user.user}\n`
+      + `タイトル： ${message.title}\n`
+      + `問い合せ： ${message.body}\n\n`
+      + `-------------------------------\n`
+      + `ヤフオク！RSSリーダー\n`
     };
   }
 
@@ -614,8 +656,46 @@ export default class UserProfiler {
   }
 
   createPreference({ admin }) {
-    const data = {
-      from: mms_from
+    const data = this.setPreference();
+    return Rx.Observable.fromPromise(this.addPreference(admin, data));
+  }
+
+  updatePreference({ admin, data }) {
+    return Rx.Observable.fromPromise(this.replacePreference(admin, data))
+    .flatMap(() => this.fetchPreference({ admin }));
+  }
+
+  deletePreference({ admin, id }) {
+    return Rx.Observable.fromPromise(this.removePreference(admin, id));
+  }
+
+  createAdmin({ admin, password }) {
+    const data = this.setAdmin();
+    return this.createSaltAndHash(password)
+      .flatMap(obj => this._createAdmin({
+        admin, salt: obj.salt, hash: obj.hash, data
+      }));
+  }
+
+  _createAdmin({ admin, salt, hash, data }) {
+    return Rx.Observable
+      .fromPromise(this.addAdmin(admin, salt, hash, data));
+  }
+
+  setAdmin() {
+    return {
+      name: '管理者'
+    , kana: 'カンリシャ'
+    , email: mms_user
+    , phone: '090-1234-5678'
+    , plan: 'Plan A'
+    };
+  }
+
+  setPreference() {
+    return {
+      appname: app_name
+    , from: mms_from
     , agreement: 'http://www.example.com'
     , menu: [
         { number: 9999, name: 'Plan A', id: 0 }
@@ -630,16 +710,6 @@ export default class UserProfiler {
       , url4: 'http://www4.example.com'
       }
     };
-    return Rx.Observable.fromPromise(this.addPreference(admin, data));
-  }
-
-  updatePreference({ admin, data }) {
-    return Rx.Observable.fromPromise(this.replacePreference(admin, data))
-    .flatMap(() => this.fetchPreference({ admin }));
-  }
-
-  deletePreference({ admin, id }) {
-    return Rx.Observable.fromPromise(this.removePreference(admin, id));
   }
 
 };

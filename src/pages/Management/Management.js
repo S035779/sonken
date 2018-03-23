@@ -38,10 +38,11 @@ class Management extends React.Component {
   }
 
   render() {
-    //std.logInfo(Management.displayName, 'State', this.state);
+    std.logInfo(Management.displayName, 'State', this.state);
     std.logInfo(Management.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, admin, users, page, ids } = this.state;
+    const { isAuthenticated, admin, users, page, ids, preference }
+     = this.state;
     const _id = match.params.id;
     const category =
       match.params.category ? match.params.category : 'users';
@@ -71,7 +72,11 @@ class Management extends React.Component {
             userPage={page}/>
         </div>
         <div className={classes.userEdit}>
-        {route.routes ? renderRoutes(route.routes,{ admin, user }) : null}
+        {
+          route.routes
+            ? renderRoutes(route.routes,{ admin, user, preference })
+            : null
+        }
         </div>
       </div>
     </div>;

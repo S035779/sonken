@@ -1,7 +1,6 @@
 import querystring from 'querystring';
 import crypto from 'crypto';
 import { URL } from 'url';
-import js2xml from 'xmlbuilder';
 
 const env = process.env.PLATFORM;
 const isNode = env === 'local';
@@ -667,23 +666,6 @@ export default {
    */
   parse_url(url) {
     return new URL(url)
-  },
-
-  /**
-   * Function that returns instanse for parsed to 
-   * xml document from associative array object.
-   *
-   * @param {string} obj - associative array object to be converted.
-   * @return {Promise} - promise instanse.
-   */
-  build_xml(obj) {
-    const option = {
-      encoding: 'utf-8'
-    };
-    return new Promise(resolve => {
-      const xml = js2xml.create(obj, option).end();
-      resolve(xml);
-    });
   },
 
   getLocalISOTimeStamp (date) {

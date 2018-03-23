@@ -1,9 +1,9 @@
-import nodemailer from 'nodemailer';
 import R from 'ramda';
 import Rx from 'rx';
-import { logs as log } from './logutils';
+import nodemailer from 'nodemailer';
+import { logs as log } from 'Utilities/logutils';
 
-const pspid = 'Sendmail';
+const displayName = 'Sendmail';
 
 /**
  * Sendmail class.
@@ -57,12 +57,12 @@ class Sendmail {
   }
 
   createMessage(message) {
-    //log.trace(message);
+    log.trace(message);
     return this.postMessage(message);
   }
 
   createMessages(messages) {
-    //log.trace(messages);
+    log.trace(messages);
     return this.forMessage(messages);
   }
 };

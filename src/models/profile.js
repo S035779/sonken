@@ -28,12 +28,14 @@ const approvedSchema = new mongoose.Schema({
 approvedSchema.index({ approved: 1 }, { unique: true });
 
 const adminSchema = new mongoose.Schema({
-  from:             { type: String, required: true }
+  appname:          { type: String, required: true }
+, from:             { type: String, required: true }
 , agreement:        String
 , menu:             [mongoose.Schema.Types.Mixed]
 , advertisement:    mongoose.Schema.Types.Mixed
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'admin' });
+adminSchema.index({ appname: 1 }, { unique: true });
 
 const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','profile connected.'));

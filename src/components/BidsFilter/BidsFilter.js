@@ -80,7 +80,7 @@ class BidsFilter extends React.Component {
     const { user } = this.props;
     std.logInfo(BidsFilter.displayName, 'handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
-      BidsAction.deleteItem(user, selectedItemId);
+      BidsAction.deleteList(user, selectedItemId);
       this.setState({ checked: false });
     }
   }
@@ -109,7 +109,7 @@ class BidsFilter extends React.Component {
   }
 
   render() {
-    std.logInfo(BidsFilter.displayName, 'State', this.state);
+    //std.logInfo(BidsFilter.displayName, 'State', this.state);
     const { classes } = this.props;
     const {
       checked
@@ -154,12 +154,12 @@ class BidsFilter extends React.Component {
           <Typography variant="subheading" noWrap
             className={classes.title}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
-            <TextField id="date" label="始め" type="datetime-local"
+            <TextField id="start-time" label="始め" type="datetime-local"
               InputLabelProps={{shrink: true}}
               value={bidStartTime}
               onChange={this.handleChangeText.bind(this, 'bidStartTime')}
               className={classes.text}/>
-            <TextField id="date" label="終わり" type="datetime-local"
+            <TextField id="end-time" label="終わり" type="datetime-local"
               InputLabelProps={{shrink: true}}
               value={bidStopTime}
               onChange={this.handleChangeText.bind(this, 'bidStopTime')}

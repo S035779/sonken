@@ -42,11 +42,21 @@ export default class BidedNotesStore extends ReduceStore {
     , { items: setItems(note.items) }) : note );
   }
 
-  deleteItem(state, action) {
+  //deleteItem(state, action) {
+  //  const isItem = obj => action.ids.some(id => id === obj.guid._);
+  //  const delItems = objs => objs.filter(item => !isItem(item));
+  //  return state.notes.map(note => note.items ? Object.assign({}, note
+  //  , { items: delItems(note.items) }) : note );
+  //}
+
+  deleteList(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const delItems = objs => objs.filter(item => !isItem(item));
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: delItems(note.items) }) : note );
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { listed: false }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
   }
 
   reduce(state, action) {
@@ -68,9 +78,14 @@ export default class BidedNotesStore extends ReduceStore {
         return Object.assign({}, state, {
           notes: action.notes
         });
-      case 'item/delete/bided':
+      //case 'item/delete/bided':
+      //  return Object.assign({}, state, {
+      //    notes:  this.deleteItem(state, action)
+      //  , ids:    []
+      //  });
+      case 'list/delete':
         return Object.assign({}, state, {
-          notes:  this.deleteItem(state, action)
+          notes: this.deleteList(state, action)
         , ids:    []
         });
       case 'bids/create':

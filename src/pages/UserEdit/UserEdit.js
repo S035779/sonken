@@ -8,11 +8,11 @@ import UserForms       from 'Components/UserForms/UserForms';
 class UserEdit extends React.Component {
   render() {
     //std.logInfo(UserEdit.displayName, 'Props', this.props);
-    const { classes, admin, user } = this.props
+    const { classes, admin, user, preference } = this.props
     if(!user || !user._id) return null;
     return <div className={classes.userEdit}>
       <div className={classes.forms}>
-        <UserForms admin={admin} user={user}/>
+        <UserForms admin={admin} user={user} preference={preference} />
       </div>
     </div>;
   }

@@ -35,7 +35,7 @@ class RssButtons extends React.Component {
 
   handleDelete() {
     const { user, selectedNoteId } = this.props;
-    std.logInfo(RssButtons, 'handleDelete', selectedNoteId);
+    std.logInfo(RssButtons.displayName, 'handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
       NoteAction.delete(user, selectedNoteId);
       this.setState({ checked: false });

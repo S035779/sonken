@@ -325,7 +325,7 @@ export default class FeedParser {
             _id: options.id
           , user: options.user
           };
-          Note.findOneAndRemove(conditions, (err, obj) => {
+          Note.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -337,28 +337,28 @@ export default class FeedParser {
           //);
           //resolve(response(notes));
         });
-      case 'delete/item':
-        return new Promise((resolve, reject) => {
-          const conditions = {
-            _id:  options.id
-          , user: options.user
-          };
-          const update = {
-            items:      options.data.items
-          , updated:    Date.now()
-          };
-          Note.findOneAndUpdate(conditions, update, (err, obj) => {
-            if(err) return reject(err);
+      //case 'delete/item':
+      //  return new Promise((resolve, reject) => {
+      //    const conditions = {
+      //      _id:  options.id
+      //    , user: options.user
+      //    };
+      //    const update = {
+      //      items:      options.data.items
+      //    , updated:    Date.now()
+      //    };
+      //    Note.findOneAndUpdate(conditions, update, (err, obj) => {
+      //      if(err) return reject(err);
             //log.trace(request, obj);
-            resolve(obj);
-          });
+      //      resolve(obj);
+      //    });
           //const response = R.compose(
           //  () => 'OK'
           //, setNotes
           //, R.map(delItems)
           //);
           //resolve(response(notes));
-        });
+      //  });
       case 'create/readed':
         return new Promise((resolve, reject) => {
           //log.debug(request, options);
@@ -603,7 +603,6 @@ export default class FeedParser {
             resolve(body);
           });
         });
-        break;
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
           parseString(options.xml
@@ -613,7 +612,6 @@ export default class FeedParser {
             resolve(data);
           }); 
         });
-        break;
       case 'parse/xml/item':
         return new Promise((resolve, reject) => {
           const price = R.compose(
@@ -639,12 +637,10 @@ export default class FeedParser {
               resolve(newItem(data)(options.xml.description));
             }); 
         });
-        break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'error', message: 'request: ' + request });
         });
-        break;
     }
   }
 
@@ -996,22 +992,14 @@ export default class FeedParser {
   
   deleteNote({ user, ids }) {
     const _ids = R.split(',', ids);
-    const promisess = R.map(id => this.removeNote(user, id));
+    const promises = R.map(id => this.removeNote(user, id));
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteNote({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeNote(user, id));
-  //}
-
-  deleteItem({ user, ids }) {
-    const _ids = R.split(',', ids);
-    const promisess = R.map(id => this.removeItem(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
-  }
-
-  //_deleteItem({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeItem(user, id));
+  //deleteItem({ user, ids }) {
+  //  const _ids = R.split(',', ids);
+  //  const promises = R.map(id => this.removeItem(user, id));
+  //  return Rx.Observable.forkJoin(promises(_ids));
   //}
 
   createRead({ user, ids }) {

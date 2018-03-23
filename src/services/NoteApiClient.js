@@ -123,16 +123,16 @@ export default {
           );
         });
         break;
-      case 'delete/item':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/item'
-          , options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
-        break;
+      //case 'delete/item':
+      //  return new Promise((resolve, reject) => {
+      //    xhr.deleteJSON(
+      //      api + '/item'
+      //    , options
+      //    , obj => { resolve(obj); }
+      //    , err => { reject(err); }
+      //    );
+      //  });
+      //  break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -338,9 +338,9 @@ export default {
   deleteNote(user, ids) {
     return this.request('delete/note', { user, ids });
   },
-  deleteItem(user, ids) {
-    return this.request('delete/item', { user, ids });
-  },
+  //deleteItem(user, ids) {
+  //  return this.request('delete/item', { user, ids });
+  //},
   uploadNote(user, category, file) {
     const filename = user + '_' + category;
     const filedata = file;

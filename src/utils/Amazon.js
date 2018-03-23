@@ -32,48 +32,64 @@ class Amazon {
   }
 
   request(operation, options) {
-    options = Object.assign({}, params, options);
-    options['AssociateTag']   = this.associ_tag;
-    options['AWSAccessKeyId'] = this.access_key;
-    options['Operation']      = operation;
-    options['Timestamp']      = std.getTimeStamp();
-    const query = this.query(options);
-    const signature = this.signature(query);
-    const url = this.url(query, signature);
-
-    return new Promise((resolve, reject) => {
-      net.get(url, null, (err, head, body) => {
-        if(err) reject(err.message);
-        resolve(body);
-      });
-    });
+    switch(operation) {
+      case 'parse/xml':
+        const option = {
+          attrkey:          'root'
+          , charkey:        'sub'
+          , trim:           true
+          , explicitArray:  false
+        };
+        return new Promise((resolve, reject) => {
+          xml2js.parseString(options.xml, option, (error, result) => {
+            if(error) reject(error)
+            resolve(result)
+          });
+        });
+      default:
+        options = Object.assign({}, params, options);
+        options['AssociateTag']   = this.associ_tag;
+        options['AWSAccessKeyId'] = this.access_key;
+        options['Operation']      = operation;
+        options['Timestamp']      = std.getTimeStamp();
+        const query = this.query(options);
+        const signature = this.signature(query);
+        const url = this.url(query, signature);
+        return new Promise((resolve, reject) => {
+          net.get(url, null, (err, head, body) => {
+            if(err) reject(err.message);
+            resolve(body);
+          });
+        });
+    }
   }
 
   fetchNewReleases(node_id) {
-    return Rx.Observable
-      .fromPromise(this.getNewReleases(node_id))
-      .flatMap(this.parseXml)
+    return Rx.Observable.fromPromise(this.getNewReleases(node_id))
+      .flatMap(this.parseXml.bind(this))
       .map(this.setTopItems)
       .flatMap(this.forItemLookup.bind(this))
       .flatMap(this.forParseXml.bind(this))
-      .map(this.forItem.bind(this));
+      .map(this.forItem.bind(this))
+    ;
   }
 
   fetchBestSellers(node_id) {
-    return Rx.Observable
-      .fromPromise(this.getBestSellers(node_id))
-      .flatMap(this.parseXml)
+    return Rx.Observable.fromPromise(this.getBestSellers(node_id))
+      .flatMap(this.parseXml.bind(this))
       .map(this.setTopItems)
       .flatMap(this.forItemLookup.bind(this))
       .flatMap(this.forParseXml.bind(this))
-      .map(this.forItem.bind(this));
+      .map(this.forItem.bind(this))
+    ;
   }
 
   fetchReleaseDate(node_id, category, page) {
     return Rx.Observable
       .fromPromise(this.getReleaseDate(node_id, category, page))
-      .flatMap(this.parseXml)
-      .map(this.setItems);
+      .flatMap(this.parseXml.bind(this))
+      .map(this.setItems)
+    ;
   }
 
   fetchSalesRanking(node_id, category, rate, patern) {
@@ -84,55 +100,33 @@ class Amazon {
       .map(this.forItems.bind(this))
       .map(R.flatten)
       .map(R.filter(curriedCheckRate))
-      .map(R.sort(curriedDiffRate));
+      .map(R.sort(curriedDiffRate))
+    ;
   }
 
   fetchItemLookup(item_id, id_type) {
-    return Rx.Observable
-      .fromPromise(this.getItemLookup(item_id, id_type))
-      .flatMap(this.parseXml)
+    return Rx.Observable.fromPromise(this.getItemLookup(item_id, id_type))
+      .flatMap(this.parseXml.bind(this))
       .map(this.setItem)
     ;
   }
 
   fetchItemList(keyword, page) {
-    return Rx.Observable
-      .fromPromise(this.getItemList(keyword, page))
-      .flatMap(this.parseXml)
-      .map(this.setItems);
+    return Rx.Observable.fromPromise(this.getItemList(keyword, page))
+      .flatMap(this.parseXml.bind(this))
+      .map(this.setItems)
+    ;
   }
 
   fetchNodeList(node_id) {
-    return Rx.Observable
-      .fromPromise(this.getNodeList(node_id))
-      .flatMap(this.parseXml)
-      .map(this.setNodes);
+    return Rx.Observable.fromPromise(this.getNodeList(node_id))
+      .flatMap(this.parseXml.bind(this))
+      .map(this.setNodes)
+    ;
   }
 
   parseXml(xml) {
-    return Rx.Observable.fromPromise(this.parse_xml(xml));
-  }
-
-  /**
-   * Function that returns instanse for parsed to 
-   * object from xml document.
-   *
-   * @param {string} xml - xml document to be converted.
-   * @return {Promise} - promise instanse.
-   */
-  parse_xml(xml) {
-    const option = {
-      attrkey:          'root'
-      , charkey:        'sub'
-      , trim:           true
-      , explicitArray:  false
-    };
-    return new Promise((resolve, reject) => {
-      xml2js.parseString(xml, option, (error, result) => {
-        if(error) reject(error)
-        resolve(result)
-      });
-    });
+    return Rx.Observable.fromPromise(this.getXml(xml));
   }
 
   forkJoin(promises) {
@@ -210,6 +204,10 @@ class Amazon {
   setNodes(obj) {
     const items = obj.BrowseNodeLookupResponse.BrowseNodes;
     return items.BrowseNode.Children.BrowseNode;
+  }
+
+  getXml(xml) {
+    return this.request('parse/xml', { xml });
   }
 
   getNodeList(node_id) {
