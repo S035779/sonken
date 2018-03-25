@@ -45,14 +45,8 @@ spec:
           - mountPath: /app/assets
             name: assets
         env:
-          - name: TOP_URL
-            value: "http://35.200.100.73"
-          - name: API_PATH
-            value: "/api"
-          - name: NODE_TLS_REJECT_UNAUTHORIZED
-            value: "0"
-          - name: NODE_ENV
-            value: "staging"
+          - name: API_URL
+            value: "http://35.200.100.73/api"
       - name: node-api
         image: asia.gcr.io/feedparser-198104/feedparser/node_api
         resources:
@@ -62,11 +56,5 @@ spec:
         ports:
           - containerPort: 8082
         env:
-          - name: TOP_URL
-            value: "http://35.200.100.73"
-          - name: API_PATH
-            value: "/api"
-          - name: NODE_TLS_REJECT_UNAUTHORIZED
-            value: "0"
-          - name: NODE_ENV
-            value: "staging"
+          - name: API_URL
+            value: "http://35.200.100.73/api"
