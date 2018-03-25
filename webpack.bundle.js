@@ -1,6 +1,5 @@
 const merge = require('webpack-merge');
 const path = require('path');
-const dotenv = require('dotenv-webpack');
 const webpack = require('webpack');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
@@ -27,7 +26,6 @@ var web = {
     ],
   },
   plugins: [
-    new dotenv(),
     new ManifestPlugin({ fileName: 'manifest.bundle.json' }),
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),

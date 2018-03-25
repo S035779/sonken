@@ -24,7 +24,7 @@ RUN buildDeps='xz-utils' \
     i386) ARCH='x86';; \
     *) echo "unsupported architecture"; exit 1 ;; \
   esac \
-  && apt-get update && apt-get install -y $buildDeps --no-install-recommends git \
+  && apt-get update && apt-get install -y $buildDeps --no-install-recommends git vim\
   && rm -rf /var/lib/apt/lists/* \
 # gpg keys listed at https://github.com/nodejs/node#release-team
   && set -ex \

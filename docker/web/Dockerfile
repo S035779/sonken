@@ -35,6 +35,6 @@ RUN set -x \
   && apk del .depNginx
 
 # configuration files
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf/nginx.conf
 
 CMD ["nginx", "-g", "daemon off;"]

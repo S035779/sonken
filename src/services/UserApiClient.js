@@ -2,11 +2,10 @@ import net from 'Utilities/netutils';
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
 
-const env = process.env.NODE_ENV || 'development';
-const host = process.env.TOP_URL || 'https://localhost:4443';
-const api_path = process.env.API_PATH || '/api';
+const env = process.env.NODE_ENV;
+const host = process.env.TOP_URL;
+const api_path = process.env.API_PATH;
 const api = host + api_path;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const displayName = 'UserApiClient';
 
