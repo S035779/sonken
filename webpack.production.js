@@ -7,7 +7,7 @@ var production = {
   devtool: 'source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production')
+      'process.env.NODE_ENV': JSON.stringify('development')
     , 'process.env.PLATFORM': JSON.stringify('web')
     , 'process.env.API_URL':  JSON.stringify('http://35.200.100.73/api')
     }),
