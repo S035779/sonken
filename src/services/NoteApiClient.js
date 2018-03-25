@@ -2,11 +2,7 @@ import net from 'Utilities/netutils';
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
 
-const env = process.env.NODE_ENV;
-const host = process.env.TOP_URL;
-const api_path = process.env.API_PATH;
-const api = host + api_path;
-const local_api = 'http://localhost:8080/api';
+const api = process.env.API_URL;
 
 const displayName = 'NoteApiClient';
 
@@ -23,7 +19,7 @@ export default {
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
           net.getJSON(
-            local_api + '/notes'
+            api + '/notes'
           , options
           , (err, head, obj) => {
             if(err) reject(err);
@@ -34,7 +30,7 @@ export default {
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
           net.getJSON(
-            local_api + '/traded'
+            api + '/traded'
           , options
           , (err, head, obj) => {
             if(err) reject(err);
@@ -45,7 +41,7 @@ export default {
       case 'prefetch/bided':
         return new Promise((resolve, reject) => {
           net.getJSON(
-            local_api + '/bided'
+            api + '/bided'
           , options
           , (err, head, obj) => {
             if(err) reject(err);

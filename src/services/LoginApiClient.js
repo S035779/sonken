@@ -2,10 +2,7 @@ import net from 'Utilities/netutils';
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
 
-const env = process.env.NODE_ENV;
-const host = process.env.TOP_URL;
-const api_path = process.env.API_PATH;
-const api = host + api_path;
+const api = process.env.API_URL;
 
 const displayName = 'LoginApiClient';
 

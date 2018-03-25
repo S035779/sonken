@@ -9,9 +9,7 @@ var production = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     , 'process.env.PLATFORM': JSON.stringify('web')
-    , 'process.env.TOP_URL':  JSON.stringify('http://35.200.100.73')
-    , 'process.env.API_PATH': JSON.stringify('/api')
-    , 'process.env.NODE_TLS_REJECT_UNAUTHORIZED': JSON.stringify('0')
+    , 'process.env.API_URL':  JSON.stringify('http://35.200.100.73/api')
     }),
     new UglifyJSPlugin({
       sourceMap: true
