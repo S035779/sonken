@@ -11,10 +11,12 @@
     "start:mms": "node -r ./src/hook/babel-register.js src/mms-server.js",
     "start:dev": "node -r ./src/hook/babel-register.js src/dev-server.js",
     "start:node": "npm-run-all -p start:api start:ssr watch:node",
-    "build:node": "webpack --config webpack.node.js",
+    "build:node":
+      "NODE_ENV=production webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js -w --colors",
     "start:web": "npm-run-all -p start:mms start:dev",
-    "build:web": "webpack --config webpack.production.js",
+    "build:web":
+      "NODE_ENV=production webpack --config webpack.production.js",
     "watch:web": "webpack --config webpack.development.js",
     "start:all": "npm-run-all -p start:api start:ssr start:mms start:dev",
     "build:all": "npm-run-all -p build:node build:web",

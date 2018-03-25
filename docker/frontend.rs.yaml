@@ -47,6 +47,8 @@ spec:
         env:
           - name: API_URL
             value: "http://35.200.100.73/api"
+          - name: NODE_ENV
+            value: "production"
       - name: node-api
         image: asia.gcr.io/feedparser-198104/feedparser/node_api
         resources:
@@ -58,3 +60,5 @@ spec:
         env:
           - name: API_URL
             value: "http://35.200.100.73/api"
+          - name: NODE_ENV
+            value: "production"

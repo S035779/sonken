@@ -77,6 +77,8 @@ RUN set -ex \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
 
 # install applications
+ENV NODE_ENV production
+ENV NPM_CONFIG_PRODUCTION false
 RUN cd /app \
     && git clone https://github.com/S035779/sonken.git
 COPY .env /app/sonken
