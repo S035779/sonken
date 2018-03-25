@@ -30,6 +30,11 @@ spec:
             name: assets
       - name: node-ssr
         image: asia.gcr.io/feedparser-198104/feedparser/node_ssr
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - "/app/sonken/docker/install.sh"
         resources:
           requests:
             cpu: 100m
