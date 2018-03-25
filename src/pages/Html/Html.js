@@ -21,8 +21,8 @@ if (env === 'development') {
   path_to_js = '/'; 
   path_to_img = '/';
 } else if (env === 'staging' || env === 'production') {
-  path_to_js  = host + assets + '/js';
-  path_to_img = host + assets + '/image';
+  path_to_js  = host + assets + '/js/';
+  path_to_img = host + assets + '/image/';
 }
 
 class Html extends React.Component {
