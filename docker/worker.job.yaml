@@ -18,16 +18,20 @@ spec:
         tier: worker
     spec:
       restartPolicy: Never
-      volumes:
-        - name: assets
       containers:
       - name: node-job
         image: asia.gcr.io/feedparser-198104/feedparser/node_job
         command: ["yarn", "run", "release"]
-        volumeMounts:
-          - mountPath: /app/assets
-            name: assets
         resources:
           requests:
             cpu: 256m
             memory: 128Mi
+        volumeMounts:
+          - mountPath: /app/assets/
+            name: assets-volume
+      volumes:
+      - name: assets-volume
+        hostPath:
+          path: /mnt/disks/ssd0
+      nodeSelector:
+        cloud.google.com/gke-local-ssd: true

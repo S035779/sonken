@@ -84,3 +84,5 @@ RUN cd /app/sonken \
     && yarn install \
     && yarn run build:web \
     && chown -R app:app /app
+
+CMD ['node']
