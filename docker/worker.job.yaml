@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: batch/v1
 kind: Job
 metadata:
   name: worker
@@ -17,6 +17,8 @@ spec:
         app: feedparser
         tier: worker
     spec:
+      volumes:
+      - name: assets
       restartPolicy: Never
       containers:
       - name: node-job
@@ -28,10 +30,4 @@ spec:
             memory: 128Mi
         volumeMounts:
           - mountPath: /app/assets/
-            name: assets-volume
-      volumes:
-      - name: assets-volume
-        hostPath:
-          path: /mnt/disks/ssd0
-      nodeSelector:
-        cloud.google.com/gke-local-ssd: true
+            name: assets

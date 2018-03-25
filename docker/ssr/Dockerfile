@@ -82,7 +82,7 @@ RUN cd /app \
 COPY .env /app/sonken
 RUN cd /app/sonken \
     && yarn install \
-    && yarn run build:all \
+    && yarn run build:node \
     && chown -R app:app /app
 
 USER app

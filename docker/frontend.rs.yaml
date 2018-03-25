@@ -30,7 +30,6 @@ spec:
             name: assets
       - name: node-ssr
         image: asia.gcr.io/feedparser-198104/feedparser/node_ssr
-        command: ["yarn", "run", "release"]
         resources:
           requests:
             cpu: 100m
