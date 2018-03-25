@@ -10,7 +10,7 @@ var development = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development')
     , 'process.env.PLATFORM': JSON.stringify('web')
-    , 'process.env.TOP_URL':  JSON.stringify('https://localhost:4443')
+    , 'process.env.TOP_URL':  JSON.stringify('http://localhost:8080')
     , 'process.env.API_PATH': JSON.stringify('/api')
     , 'process.env.NODE_TLS_REJECT_UNAUTHORIZED': JSON.stringify('0')
     }),
@@ -19,7 +19,7 @@ var development = {
     contentBase: './dist',
     hot: true,
     host: '0.0.0.0',
-    port: 4443,
+    port: 8080,
     historyApiFallback: true,
     watchContentBase: true,
     disableHostCheck: true,

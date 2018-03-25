@@ -6,6 +6,7 @@ const env = process.env.NODE_ENV;
 const host = process.env.TOP_URL;
 const api_path = process.env.API_PATH;
 const api = host + api_path;
+const local_api = 'http://localhost:8080/api';
 
 const displayName = 'NoteApiClient';
 
@@ -21,8 +22,8 @@ export default {
         break;
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/notes'
+          net.getJSON(
+            local_api + '/notes'
           , options
           , (err, head, obj) => {
             if(err) reject(err);
@@ -32,8 +33,8 @@ export default {
         break;
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/traded'
+          net.getJSON(
+            local_api + '/traded'
           , options
           , (err, head, obj) => {
             if(err) reject(err);
@@ -43,8 +44,8 @@ export default {
         break;
       case 'prefetch/bided':
         return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/bided'
+          net.getJSON(
+            local_api + '/bided'
           , options
           , (err, head, obj) => {
             if(err) reject(err);

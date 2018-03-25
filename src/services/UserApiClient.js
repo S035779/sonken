@@ -6,6 +6,7 @@ const env = process.env.NODE_ENV;
 const host = process.env.TOP_URL;
 const api_path = process.env.API_PATH;
 const api = host + api_path;
+const local_api = 'http://localhost:8080/api';
 
 const displayName = 'UserApiClient';
 
@@ -20,8 +21,8 @@ export default {
         });
       case 'prefetch/users':
         return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/users'
+          net.getJSON(
+            local_api + '/users'
           , options
           , (err, head, obj) => {
             if(err) reject(err);
