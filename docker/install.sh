@@ -1,12 +1,13 @@
 #!/bin/sh
 ASSETS=/app/assets
+WORKDIR=/app/sonken
 
 if [ ! -d $ASSETS/js ]; then
     mkdir $ASSETS/js
 fi
-cp dist/*.bundle.js dist/*.bundle.js.map $ASSETS/js/
+cp $WORKDIR/dist/*.bundle.js $WORKDIR/dist/*.bundle.js.map $ASSETS/js/
 
 if [ ! -d $ASSETS/image ]; then
     mkdir $ASSETS/image
 fi
-cp dist/*.ico $ASSETS/image/
+cp $WORKDIR/dist/*.ico $ASSETS/image/
