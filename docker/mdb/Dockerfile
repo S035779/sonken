@@ -32,4 +32,6 @@ RUN apt-get -y install apt-transport-https ca-certificates \
      mongodb-org-tools=$LIST_VERSION.$RELEASE_VERSION \
   && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["/usr/bin/mongod"]
+RUN date
+
+ENTRYPOINT ["/usr/bin/mongod", "--bind_ip", "0.0.0.0"]

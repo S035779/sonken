@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: feedparser
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: frontend
+    matchExpressions:
+      - { key: tier, operator: In, values: [frontend] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: frontend
+    spec:
+      volumes:
+        - name: assets
+      containers:
+      - name: nginx
+        image: asia.gcr.io/feedparser-198104/feedparser/nginx
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - mountPath: /app/assets
+            name: assets
+      - name: node-ssr
+        image: asia.gcr.io/feedparser-198104/feedparser/node_ssr
+        command: ["yarn", "run", "release"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+          - containerPort: 8081
+        volumeMounts:
+          - mountPath: /app/assets
+            name: assets
+      - name: node-api
+        image: asia.gcr.io/feedparser-198104/feedparser/node_api
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+          - containerPort: 8082

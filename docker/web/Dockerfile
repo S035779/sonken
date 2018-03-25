@@ -8,7 +8,6 @@ RUN apk add --no-cache tzdata \
 
 # initialize
 EXPOSE 8080
-VOLUME ["/var/cache/nginx"]
 
 # install nginx
 ENV NGINX_VERSION 1.13.9

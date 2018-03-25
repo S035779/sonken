@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Job
+metadata:
+  name: worker
+  labels:
+    app: feedparser
+    tier: worker
+spec:
+  selector:
+    matchLabels:
+      tier: worker
+    matchExpressions:
+      - { key: tier, operator: In, values: [worker] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: worker
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: assets
+      containers:
+      - name: node-job
+        image: asia.gcr.io/feedparser-198104/feedparser/node_job
+        command: ["yarn", "run", "release"]
+        volumeMounts:
+          - mountPath: /app/assets
+            name: assets
+        resources:
+          requests:
+            cpu: 256m
+            memory: 128Mi

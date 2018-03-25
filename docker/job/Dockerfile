@@ -6,8 +6,8 @@ RUN echo $TZ | tee /etc/timezone \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # initialize
-EXPOSE 8081
 WORKDIR /app/sonken
+EXPOSE 8081
 RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
 
@@ -82,8 +82,5 @@ RUN cd /app \
 COPY .env /app/sonken
 RUN cd /app/sonken \
     && yarn install \
-    && yarn run build:node \
+    && yarn run build:web \
     && chown -R app:app /app
-
-USER app
-CMD ["node", "dist/api.node.js"]

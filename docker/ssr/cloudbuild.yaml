@@ -2,4 +2,5 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   env: ['PROJECT_ROOT=feedparser']
   args: ['build', '--tag=asia.gcr.io/$PROJECT_ID/feedparser/node_ssr', '.']
+timeout: '1800s'
 images: ['asia.gcr.io/$PROJECT_ID/feedparser/node_ssr']
