@@ -418,7 +418,7 @@ export default class FeedParser {
             traded: options.id
           , user:   options.user
           };
-          Traded.update(conditions, update, { upsert: true}
+          Traded.update(conditions, update, { upsert: true }
           , (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);

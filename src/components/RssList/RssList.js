@@ -105,7 +105,7 @@ class RssList extends React.Component {
         </ListItem>
       </Paper>
       <div className={classes.notice}>
-        <Typography noWrap>{notice}</Typography>
+        <Typography color="secondary" noWrap>{notice}</Typography>
       </div>
     </div>;
   }

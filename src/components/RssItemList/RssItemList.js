@@ -87,7 +87,7 @@ class RssItemList extends React.Component {
     const buttonColor = listed.indexOf(item.guid._) !== -1
       ? 'green' : 'yellow';
     const buttonText = listed.indexOf(item.guid._) !== -1
-      ? '取引リスト 登録済み' : '取引リスト 登録';
+      ? '入札リスト 登録済み' : '入札リスト 登録';
     const title = `出品件名：${item.title}`;
     const description = 
         `配信時間：${
@@ -109,11 +109,11 @@ class RssItemList extends React.Component {
             <div className={classes.description}>
               <a href={item.description.DIV.A.$.HREF}>
               <img
-                src={     item.description.DIV.A.IMG.$.SRC      }
-                border={  item.description.DIV.A.IMG.$.BORDER   }
-                width={   item.description.DIV.A.IMG.$.WIDTH    }
-                height={  item.description.DIV.A.IMG.$.HEIGHT   }
-                alt={     item.description.DIV.A.IMG.$.ALT      }
+                src={item.description.DIV.A.IMG.$.SRC}
+                border={item.description.DIV.A.IMG.$.BORDER}
+                width={item.description.DIV.A.IMG.$.WIDTH * 1.5}
+                height={item.description.DIV.A.IMG.$.HEIGHT * 1.5}
+                alt={item.description.DIV.A.IMG.$.ALT}
               />
               </a>
             </div>
@@ -138,8 +138,8 @@ class RssItemList extends React.Component {
     return <List>{renderItems}</List>;
   }
 };
-const itemHeight        = 142;
-const descMinWidth      = 133;
+const itemHeight        = 142 * 1.5;
+const descMinWidth      = 133 * 1.5;
 const noticeWidth       = 72;
 const styles = theme => ({
 noteItem:       { display: 'flex', flexDirection: 'row'

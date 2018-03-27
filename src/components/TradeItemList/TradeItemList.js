@@ -87,9 +87,9 @@ class TradeItemList extends React.Component {
             <a href={item.description.DIV.A.$.HREF}>
             <img src={item.description.DIV.A.IMG.$.SRC}
               border={item.description.DIV.A.IMG.$.BORDER}
-              width={ item.description.DIV.A.IMG.$.WIDTH}
-              height={item.description.DIV.A.IMG.$.HEIGHT}
-              alt={   item.description.DIV.A.IMG.$.ALT}/>
+              width={item.description.DIV.A.IMG.$.WIDTH * 1.5}
+              height={item.description.DIV.A.IMG.$.HEIGHT * 1.5}
+              alt={item.description.DIV.A.IMG.$.ALT}/>
             </a>
           </div>
           <ListItemText classes={textClass}
@@ -114,8 +114,8 @@ class TradeItemList extends React.Component {
   }
 };
 
-const itemHeight        = 160;
-const descMinWidth      = 133;
+const itemHeight        = 160 * 1.5;
+const descMinWidth      = 133 * 1.5;
 const styles = theme => ({
   noteItem:     { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }

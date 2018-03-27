@@ -10,7 +10,8 @@
        "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
     "start:mms": "node -r ./src/hook/babel-register.js src/mms-server.js",
     "start:dev": "node -r ./src/hook/babel-register.js src/dev-server.js",
-    "start:node": "npm-run-all -p start:api start:ssr watch:node",
+    "start:node":
+      "API_URL=http://localhost:8080/api npm-run-all -p start:api start:ssr watch:node",
     "build:node":
       "NODE_ENV=production webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js -w --colors",

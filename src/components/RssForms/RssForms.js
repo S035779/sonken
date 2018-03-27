@@ -133,10 +133,10 @@ class RssForms extends React.Component {
         </div>
         <div className={classes.buttons}>
           <Button color="primary" size="large"
-            href={link_mon}
+            href={link_mon} target="_blank"
             className={classes.link}>モノレート</Button>
           <Button color="primary" size="large" 
-            href={link_fba}
+            href={link_fba} target="_blank"
             className={classes.link}>FBA料金シュミレーター</Button>
         </div>
       </div>
