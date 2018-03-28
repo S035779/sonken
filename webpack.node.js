@@ -18,6 +18,9 @@ var node = {
     ],
     api: [
       './api-server.js',
+    ],
+    job: [
+      './job-worker.js',
     ]
   },
   plugins: [

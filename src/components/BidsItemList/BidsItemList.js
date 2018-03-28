@@ -87,9 +87,10 @@ class BidsItemList extends React.Component {
             <a href={item.description.DIV.A.$.HREF}>
             <img src={item.description.DIV.A.IMG.$.SRC}
               border={item.description.DIV.A.IMG.$.BORDER}
-              width={item.description.DIV.A.IMG.$.WIDTH * 1.5}
-              height={item.description.DIV.A.IMG.$.HEIGHT * 1.5}
-              alt={item.description.DIV.A.IMG.$.ALT}/>
+              width={item.description.DIV.A.IMG.$.WIDTH}
+              height={item.description.DIV.A.IMG.$.HEIGHT}
+              alt={item.description.DIV.A.IMG.$.ALT}
+              className={classes.image}/>
             </a>
           </div>
           <ListItemText classes={textClass}
@@ -135,6 +136,7 @@ const styles = theme => ({
 , secondary:    {}
 , description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
+, image:        { width: '100%', height: '100%' }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });
 BidsItemList.displayName = 'BidsItemList';

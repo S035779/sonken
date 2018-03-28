@@ -111,9 +111,10 @@ class RssItemList extends React.Component {
               <img
                 src={item.description.DIV.A.IMG.$.SRC}
                 border={item.description.DIV.A.IMG.$.BORDER}
-                width={item.description.DIV.A.IMG.$.WIDTH * 1.5}
-                height={item.description.DIV.A.IMG.$.HEIGHT * 1.5}
+                width={item.description.DIV.A.IMG.$.WIDTH}
+                height={item.description.DIV.A.IMG.$.HEIGHT}
                 alt={item.description.DIV.A.IMG.$.ALT}
+                className={classes.image}
               />
               </a>
             </div>
@@ -160,6 +161,7 @@ noteItem:       { display: 'flex', flexDirection: 'row'
 , secondary:    {}
 , description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
+, image:        { height: '100%', width: '100%' }
 });
 RssItemList.displayName = 'RssItemList';
 RssItemList.defaultProps = { items: null }

@@ -162,14 +162,6 @@ class RssForms extends React.Component {
                 shrink: true
               }}
               margin="none" />
-          {/*
-          <FormControl className={classes.text}>
-              <InputLabel htmlFor="price">想定売値</InputLabel>
-              <Input id="price"
-                value={price}
-                onChange={this.handleChangeInput.bind(this, 'price')}/>
-            </FormControl>
-          */}
           </div>
           <div className={classes.edit}>
             <TextField
@@ -183,14 +175,6 @@ class RssForms extends React.Component {
                 shrink: true
               }}
               margin="none" />
-          {/*
-            <FormControl className={classes.text}>
-              <InputLabel htmlFor="bidsprice">最高入札額</InputLabel>
-              <Input id="bidsprice"
-                value={bidsprice}
-                onChange={this.handleChangeInput.bind(this,'bidsprice')}/>
-            </FormControl>
-          */}
           </div>
         </div>
         <div className={classes.textarea}>

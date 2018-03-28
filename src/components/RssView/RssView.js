@@ -4,9 +4,8 @@ import PropTypes from 'prop-types';
 
 import { withStyles } from 'material-ui/styles';
 
-const kpa = '//dyn.keepa.com/pricehistory.png?domain=co.jp&asin=';
-//const img = 'http://images-jp.amazon.com/images/P/';
-//const imgfile = '.09.LZZZZZZZ.jpg';
+//const kpa = '//dyn.keepa.com/pricehistory.png?domain=co.jp&asin=';
+const kpa = '//dyn.keepa.com/pricehistory.png?cAmazon=0f5702&cNew=77ce43&cUsed=f26e3c&cFont=31393d&cBackground=ffffff&amazon=1&new=1&used=1&range=90&salesrank=1&domain=co.jp&width=1000&height=200&asin=';
 
 class RssView extends React.Component {
   render() {
@@ -25,8 +24,8 @@ const styles = theme => ({
   noteView: { display: 'flex', flexDirection: 'row'
             , alignItems: 'center', height: rowHeight * 4 - 30
             , justifyContent: 'space-around' }
-, image:    { height: 100, border: '1px solid #CCC' }
-, graph:    { height: 200, width: 500, border: '1px solid #CCC' }
+, image:    { width: '15%', border: '1px solid #CCC' }
+, graph:    { width: '80%', height: '100%', border: '1px solid #CCC' }
 });
 RssView.displayName = 'RssView';
 RssView.defaultProps = { note: null };

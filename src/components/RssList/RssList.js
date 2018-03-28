@@ -62,6 +62,12 @@ class RssList extends React.Component {
       .catch(err => this.setState({ isNotValid: true }));
   }
 
+  handleReaded(id) {
+    std.logInfo(RssList.displayName, 'handleReaded', id);
+    const { user } = this.props;
+    NoteAction.createRead(user, [id]);
+  }
+
   handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
@@ -88,6 +94,7 @@ class RssList extends React.Component {
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
+          onClick={this.handleReaded.bind(this, note._id)}
           component={Link} to={linkTo}>
             <ListItemText classes={textClass}
               primary={title} secondary={updated}/>

@@ -4,24 +4,25 @@
   "description": "This product adopts Google's Material Design for UI.",
   "author": "Mamoru Hashimoto <you@example.com>",
   "scripts": {
+    "start:all": "npm-run-all -p start:api start:ssr start:mms start:dev",
+    "start:web": "npm-run-all -p start:mms start:dev",
     "start:ssr":
-       "supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
+       "API_URL=http://localhost:8080/api supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
     "start:api":
        "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
+    "start:job":
+       "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:mms": "node -r ./src/hook/babel-register.js src/mms-server.js",
     "start:dev": "node -r ./src/hook/babel-register.js src/dev-server.js",
-    "start:node":
-      "API_URL=http://localhost:8080/api npm-run-all -p start:api start:ssr watch:node",
-    "build:node":
-      "NODE_ENV=production webpack --config webpack.node.js",
-    "watch:node": "webpack --config webpack.node.js -w --colors",
-    "start:web": "npm-run-all -p start:mms start:dev",
+    "start:node": "npm-run-all -p start:api start:ssr watch:node",
+    "build:all": "npm-run-all -p build:node build:web build:job",
     "build:web":
       "NODE_ENV=production webpack --config webpack.production.js",
-    "watch:web": "webpack --config webpack.development.js",
-    "start:all": "npm-run-all -p start:api start:ssr start:mms start:dev",
-    "build:all": "npm-run-all -p build:node build:web",
+    "build:node":
+      "NODE_ENV=production webpack --config webpack.node.js",
     "watch:all": "npm-run-all -p watch:node watch:web",
+    "watch:web": "webpack --config webpack.development.js",
+    "watch:node": "webpack --config webpack.node.js -w --colors",
     "release": "docker/install.sh"
   },
   "license": "ISC",
