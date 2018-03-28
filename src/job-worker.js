@@ -24,25 +24,33 @@ const request = (operation, options) => {
   switch(operation) {
     case 'of':
       observable = of(options);
+      result(observable);
       break;
     case 'schedule':
       observable = schedule(options);
+      result(observable);
       break;
     case 'from':
       observable = from(options);
+      result(observable);
       break;
     case 'bindCallback':
       observable = bindCallback(options);
+      result(observable);
       break;
     case 'bindNodeCallback':
       observable = bindNodeCallback(options);
+      result(observable);
       break;
     case 'bufferTime':
       observable = bufferTime(options);
+      result(observable);
+      break;
     case 'subject':
       observable = subject(options);
+      result2(observable);
+      break;
   }
-  result(observable);
 }
 
 const result = (observable) => {
@@ -53,6 +61,20 @@ const result = (observable) => {
   , ()  => log.info( '[JOB]', 'Complete to worker job.')
   );
   log.trace('[JOB]', 'just after subscribe');
+}
+
+const result2 = (observable) => {
+  log.trace('[JOB]', 'just befor subscribe');
+  observable.subscribe(
+    val => log.debug('[JOB]', 'got value', val)
+  , err => log.error('[JOB]', err.name, ':', err.message)
+  , ()  => log.info( '[JOB]', 'Complete to worker job.')
+  );
+  log.trace('[JOB]', 'just after subscribe');
+  observable.next('a');
+  observable.next('b');
+  observable.next('c');
+  observable.complete();
 }
 
 const of = () => {
@@ -100,7 +122,7 @@ const worker = () => {
   //request('bufferTime', {});
   request('subject', {});
 };
-//worker();
+worker();
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
