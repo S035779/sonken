@@ -11,7 +11,7 @@ class LoginSwitch extends React.Component {
   }
 
   renderSwitch(auth) {
-    return <Switch checked={auth}
+    return <Switch checked={auth} color="primary"
       onChange={this.handleChange.bind(this)}
       aria-label="LoginSwitch" />;
   }

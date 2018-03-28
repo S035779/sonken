@@ -7,8 +7,8 @@ import { getStores, getState }
                         from 'Stores';
 
 import { withStyles }   from 'material-ui/styles';
-import { Reboot }       from 'material-ui';
-import AdminHeader        from 'Components/AdminHeader/AdminHeader';
+import { CssBaseline }  from 'material-ui';
+import AdminHeader      from 'Components/AdminHeader/AdminHeader';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
 class Admin extends React.Component {
@@ -26,7 +26,7 @@ class Admin extends React.Component {
       = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
-      <Reboot />
+      <CssBaseline />
       <div className={classes.adminFrame}>
         <AdminHeader admin={admin}
           preference={preference} profile={profile}

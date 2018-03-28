@@ -122,14 +122,14 @@ class TradeFilter extends React.Component {
         <div className={classes.space}/>
         <Typography variant="subheading" noWrap
           className={classes.title}>絞込件数：</Typography>
-        <Checkbox
+        <Checkbox color="primary"
           className={classes.checkbox}
           checked={endBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'endBidding')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.title}>本日入札終了</Typography>
-        <Checkbox
+        <Checkbox color="primary"
           className={classes.checkbox}
           checked={allBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'allBidding')}
@@ -147,7 +147,7 @@ class TradeFilter extends React.Component {
           </div>
         </div>
         <div className={classes.datetimes}>
-          <Checkbox
+          <Checkbox color="primary"
             checked={inBidding}
             onChange={this.handleChangeCheckbox.bind(this, 'inBidding')}
             tabIndex={-1} disableRipple

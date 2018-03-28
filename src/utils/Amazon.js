@@ -1,5 +1,5 @@
 import R from 'ramda';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 import xml2js from 'xml2js';
 import std from './stdutils';
 import net from './netutils';

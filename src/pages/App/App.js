@@ -7,7 +7,7 @@ import { getStores, getState }
                         from 'Stores';
 
 import { withStyles }   from 'material-ui/styles';
-import { Reboot }       from 'material-ui';
+import { CssBaseline }  from 'material-ui';
 import RssHeader        from 'Components/RssHeader/RssHeader';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
@@ -25,7 +25,7 @@ class App extends React.Component {
     const { user, isAuthenticated, profile, preference } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
-      <Reboot />
+      <CssBaseline />
       <div className={classes.appFrame}>
         <RssHeader user={user}
           profile={profile} preference={preference}

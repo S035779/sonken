@@ -1,5 +1,5 @@
 import R from 'ramda';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 import nodemailer from 'nodemailer';
 import { logs as log } from 'Utilities/logutils';
 

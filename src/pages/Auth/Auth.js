@@ -3,14 +3,14 @@ import PropTypes        from 'prop-types'
 import { renderRoutes } from 'react-router-config';
 
 import { withStyles }   from 'material-ui/styles';
-import { Reboot }       from 'material-ui';
+import { CssBaseline }  from 'material-ui';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 
 class Auth extends React.Component {
   render() {
     const { classes, route } = this.props;
     return <ErrorBoundary>
-      <Reboot />
+      <CssBaseline />
       <div className={classes.root}>
         {renderRoutes(route.routes)}
       </div>

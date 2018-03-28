@@ -1,5 +1,5 @@
 import R                from 'ramda';
-import Rx               from 'rx';
+import Rx               from 'rxjs/Rx';
 import mongoose         from 'mongoose';
 import { Faq, Posted }  from 'Models/faq';
 import std              from 'Utilities/stdutils';

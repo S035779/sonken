@@ -1,6 +1,6 @@
 import dotenv             from 'dotenv';
 import R                  from 'ramda';
-import Rx                 from 'rx';
+import Rx                 from 'rxjs/Rx';
 import mongoose           from 'mongoose';
 import { User, Approved, Admin }
                           from 'Models/profile';

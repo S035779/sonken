@@ -1,5 +1,5 @@
 import R                from 'ramda';
-import Rx               from 'rx';
+import Rx               from 'rxjs/Rx';
 import mongoose         from 'mongoose';
 import { Mail, Selected }  from 'Models/mail';
 import std              from 'Utilities/stdutils';

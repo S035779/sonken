@@ -1,6 +1,6 @@
 import dotenv           from 'dotenv';
 import R                from 'ramda';
-import Rx               from 'rx';
+import Rx               from 'rxjs/Rx';
 //import csv              from 'ya-csv';
 import { parseString }  from 'xml2js';
 import mongoose         from 'mongoose';
