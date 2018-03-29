@@ -30,33 +30,23 @@ class Login extends React.Component {
     const { classes, route } = this.props;
     const { user, isAuthenticated, preference } = this.state;
     return <div className={classes.loginFrame}>
-      <div className={classes.drawArea}>
-      <div className={classes.space}/>
-      <div className={classes.container}>
-        {route.routes
-          ? renderRoutes(route.routes
-            , { user, isAuthenticated, preference })
-          : null}
-      </div>
-      <div className={classes.space}/>
-      </div>
+      {
+        route.routes
+          ? renderRoutes(route.routes, {
+            user, isAuthenticated, preference
+          })
+          : null
+      }
     </div>;
   }
 };
 
-const loginWidth  = 640;
-const loginHeight = 800;
-const rowHeight = 62;
 const styles = theme => ({
   loginFrame: { display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', alignItems: 'center'
-              , height: '100vh' }
-, drawArea:   { height: '100%', overFlow: 'scroll'}
-, space:      { minHeight: '5%' }
-, container:  { width: loginWidth, height: loginHeight
-              , border: '1px solid #CCC', borderRadius: 4
-              , paddingLeft: theme.spacing.unit * 4
-              , paddingRight: theme.spacing.unit * 4 }
+              , height: '100vh'
+              , background:
+                  'linear-gradient(#E0E0E0, #5F5F5F)' }
 });
 Login.displayName = 'Login';
 Login.defaultProps = {};

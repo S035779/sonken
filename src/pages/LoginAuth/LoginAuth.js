@@ -8,8 +8,8 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Button, Checkbox, FormControlLabel }
                         from 'material-ui';
-import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssInput         from 'Components/RssInput/RssInput';
 
 class LoginAuth extends React.Component {
   constructor(props) {
@@ -71,35 +71,29 @@ class LoginAuth extends React.Component {
     const admin = { pathname: '/admin/users' };
     if(redirectToRefferer) return <Redirect to={from} />;
     if(redirectToManagement) return <Redirect to={admin} />;
-    return <div className={classes.loginForms}>
+
+    return <div className={classes.container}>
+     <div className={classes.loginForms}>
       <div className={classes.space}/>
       <Typography variant="headline" align="center"
-        className={classes.title}>ヤフオク！RSSリーダー</Typography>
+        className={classes.title}>Login</Typography>
       <div className={classes.space}/>
       <div className={classes.form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>ログインＩＤ</Typography>
-        <TextField
-          value={username} InputProps={inputText}
+        <RssInput label="USER ID" value={username}
           onChange={this.handleChangeText.bind(this, 'username')}
           className={classes.input}/>
-        <div className={classes.space}/>
       </div>
       <div className={classes.form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>ログインＰＷ</Typography>
-        <TextField type="password"
-          value={password} InputProps={inputText}
+        <RssInput type="password" label="PASSWORD" value={password}
           onChange={this.handleChangeText.bind(this, 'password')}
           className={classes.input}/>
-        <div className={classes.space}/>
       </div>
       <div className={classes.space}/>
       <div className={classes.buttons}>
         <div className={classes.space}/>
-        <RssButton color={'skyblue'}
+        <Button variant="raised" color="primary"
           onClick={this.handleLogin.bind(this)}
-          classes={classes.button}>ログイン</RssButton>
+          className={classes.button}>Login</Button>
         <RssDialog open={isNotValid} title={'送信エラー'}
           onClose={this.handleCloseDialog.bind(this)}>
           内容に不備があります。もう一度確認してください。
@@ -137,13 +131,21 @@ class LoginAuth extends React.Component {
         </Typography>
       </div>
       <div className={classes.space}/>
+      </div>
+      <div className={classes.space}/>
     </div>;
   }
 };
 
-const rowHeight = 62;
+const loginWidth  = 320;
+const loginHeight = 480;
+const rowHeight = 80;
 const styles = theme => ({
-  loginForms: { display: 'flex', flexDirection: 'column'
+  container:  { width: loginWidth, height: loginHeight
+              , border: '1px solid #CCC', borderRadius: 8
+              , backgroundColor: theme.palette.common.white
+              , padding: theme.spacing.unit *3 }
+, loginForms: { display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', height: '100%' }
 , space:      { flex: 1 }
 , title:      { padding: theme.spacing.unit * 2, height: rowHeight }
@@ -155,7 +157,7 @@ const styles = theme => ({
               , display: 'flex', flexDirection: 'row'
               , justifyContent: 'center', alignItems: 'center'
               , height: rowHeight }
-, button:     { flex: 1, height: '100%' }
+, button:     { flex: 1 }
 , notice:     { padding: theme.spacing.unit
               , display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', alignItems: 'center'

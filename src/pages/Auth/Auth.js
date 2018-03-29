@@ -11,7 +11,7 @@ class Auth extends React.Component {
     const { classes, route } = this.props;
     return <ErrorBoundary>
       <CssBaseline />
-      <div className={classes.root}>
+       <div className={classes.root}>
         {renderRoutes(route.routes)}
       </div>
     </ErrorBoundary>;

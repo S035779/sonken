@@ -5,9 +5,19 @@ import { renderRoutes }   from 'react-router-config';
 import getRoutes          from 'Routes';
 
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import { green, red } from 'material-ui/colors';
 
-const theme = createMuiTheme();
+const theme = createMuiTheme({
+  palette:{
+    primary: {
+      main: '#FEA826'
+    , contrastText: '#FFFFFF'
+    }
+  , secondary: {
+      main: '#E55200'
+    , contrastText: '#FFFFFF'
+    }
+  }
+});
 
 export default class Root extends React.Component {
   componentDidMount() {

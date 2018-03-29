@@ -6,7 +6,6 @@ metadata:
     app: feedparser
     tier: frontend
 spec:
-  type: LoadBalancer
   selector:
     app: feedparser
     tier: frontend
@@ -15,10 +14,6 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 8080
-  - name: https
-    protocol: TCP
-    port: 443
-    targetPort: 4443
   - name: node-ssr
     protocol: TCP
     port: 8081
@@ -27,3 +22,6 @@ spec:
     protocol: TCP
     port: 8082
     targetPort: 8082
+  type: LoadBalancer
+  clusterIP: 10.63.246.136
+  loadBalancerIP: 35.200.100.73
