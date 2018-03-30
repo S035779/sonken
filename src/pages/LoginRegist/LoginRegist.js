@@ -13,6 +13,7 @@ import { FormControlLabel }
 import { MenuItem }     from 'material-ui/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssInput         from 'Components/RssInput/RssInput';
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -98,7 +99,8 @@ class LoginRegist extends React.Component {
     const renderItems = preference.menu ? preference.menu
       .map((item, idx) => this.renderItems(item, idx)) : [];
     if(redirectToRefferer) return <Redirect to={to} />;
-    return <div className={classes.loginForms}>
+    return <div className={classes.container}>
+      <div className={classes.loginForms}>
       <div className={classes.space} />
       <Typography variant="title" align="center"
         className={classes.title}>新規ご利用申し込み</Typography>
@@ -209,14 +211,18 @@ class LoginRegist extends React.Component {
         決済画面に移動します。
         </Typography>
       </div>
+      </div>
     </div>;
   }
 };
 
-const rowHeight = 62;
+const loginWidth = 640;
+const rowHeight = 64;
 const styles = theme => ({
-  loginForms: { display: 'flex', flexDirection: 'column'
-              , justifyContent: 'center', height: '100%'}
+  container:  { width: loginWidth, overflow: 'scroll'  }
+, loginForms: { display: 'flex', flexDirection: 'column'
+              , justifyContent: 'center'
+              }
 , space:      { flex: 1 }
 , title:      { padding: theme.spacing.unit * 2, height: rowHeight }
 , form:       { padding: theme.spacing.unit

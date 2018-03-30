@@ -10,7 +10,7 @@ class RssInput extends React.Component {
   }
 
   render() {
-    const { classes, type, id, label, value } = this.props;
+    const { classes, type, id, label, value, ...other } = this.props;
     const inputProps = {
       disableUnderline: true,
       classes: {
@@ -31,6 +31,7 @@ class RssInput extends React.Component {
       InputProps={inputProps}
       InputLabelProps={inputLabelProps}
       onChange={this.handleChange.bind(this)}
+      { ...other }
     />;
   }
 }

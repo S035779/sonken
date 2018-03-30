@@ -42,11 +42,12 @@ class Login extends React.Component {
 };
 
 const styles = theme => ({
-  loginFrame: { display: 'flex', flexDirection: 'column'
-              , justifyContent: 'center', alignItems: 'center'
-              , height: '100vh'
-              , background:
-                  'linear-gradient(#E0E0E0, #5F5F5F)' }
+  loginFrame: {
+    display: 'flex', flexDirection: 'column'
+  , justifyContent: 'center', alignItems: 'center'
+  , height: '100vh'
+  , background: 'linear-gradient(to bottom, #5F5F5F 0%, #E0E0E0 100%)'
+  }
 });
 Login.displayName = 'Login';
 Login.defaultProps = {};

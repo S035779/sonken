@@ -7,14 +7,11 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Dialog, Button }
                         from 'material-ui';
-import {
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  withMobileDialog
-}                       from 'material-ui/Dialog';
+import { DialogActions, DialogContent, DialogContentText, DialogTitle,
+  withMobileDialog }
+                        from 'material-ui/Dialog';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssInput         from 'Components/RssInput/RssInput';
 
 class LoginConfirm extends React.Component {
   constructor(props) {
@@ -123,52 +120,51 @@ class LoginConfirm extends React.Component {
     std.logInfo(LoginConfirm.displayName, 'Props', this.props);
     const { classes } = this.props;
     const { email, phone } = this.state;
-    const inputText = { disableUnderline: true
-      , classes: { root: classes.textRoot, input: classes.textInput } }
     const renderCorrect = this.renderCorrect();
     const renderIncorrect = this.renderIncorrect();
-    return <div className={classes.loginForms}>
+
+    return <div className={classes.container}>
+      <div className={classes.loginForms}>
       <div className={classes.space} />
       <Typography variant="title" align="center"
-        className={classes.title}>ログインＩＤ・ＰＷ確認フォーム
-      </Typography>
-      <div className={classes.space} />
+        className={classes.title}>Unlock</Typography>
       <div className={classes.form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>登録メールアドレス</Typography>
-        <TextField
-          value={email} InputProps={inputText}
+        <RssInput label="E-MAIL ADDRESS" value={email}
+          placeholder="Enter E-mail address"
           onChange={this.handleChangeText.bind(this, 'email')}
           className={classes.input} />
-        <div className={classes.space} /> 
       </div>
       <div className={classes.form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>登録電話番号下四桁</Typography>
-        <TextField
-          value={phone} InputProps={inputText}
+        <RssInput type="password" label="PHONE NUMBER" value={phone}
+          placeholder="Phone number (Lower 4 digits)"
           onChange={this.handleChangeText.bind(this, 'phone')}
           className={classes.input} />
-        <div className={classes.space} />
       </div>
-      <div className={classes.space} />
+      <div className={classes.form} />
       <div className={classes.buttons}>
         <div className={classes.space} />
-        <RssButton color={'skyblue'}
+        <RssButton color="warning"
           onClick={this.handleSubmit.bind(this)}
-          classes={classes.button}>送信</RssButton>
+          classes={classes.button}>Confirm</RssButton>
         {renderCorrect}
         {renderIncorrect}
         <div className={classes.space} />
       </div>
       <div className={classes.space} />
+      </div>
     </div>;
   }
 };
 
-const rowHeight = 62;
+const loginWidth = 320;
+const loginHeight = 480;
+const rowHeight = 88;
 const styles = theme => ({
-  loginForms: { display: 'flex', flexDirection: 'column'
+  container:  { width: loginWidth, height: loginHeight
+              , border: '1px solid $CCC', borderRadius: 8
+              , backgroundColor: theme.palette.common.white
+              , padding: theme.spacing.unit *3 } 
+, loginForms: { display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', height: '100%'}
 , space:      { flex: 1 }
 , title:      { padding: theme.spacing.unit * 2, height: rowHeight }
@@ -180,25 +176,8 @@ const styles = theme => ({
               , display: 'flex', flexDirection: 'row'
               , justifyContent: 'center', alignItems: 'center'
               , height: rowHeight }
-, button:     { flex: 1, height: '100%' }
-, notice:     { padding: theme.spacing.unit
-              , display: 'flex', flexDirection: 'column'
-              , justifyContent: 'center', alignItems: 'center'
-              , height: rowHeight }
-, text:       { flex: 1 }
-, notes:      { flex: 1 }
+, button:     { flex: 1 }
 , input:      { flex: 1 }
-, textRoot:   { padding: 0
-              , 'label + &': { marginTop: theme.spacing.unit * 3 } }
-, textInput:  { borderRadius: 4
-              , backgroundColor: theme.palette.common.white
-              , border: '1px solid #ced4da', fontSize: 16
-              , padding: '10px 12px', width: 'calc(100% - 24px)'
-              , transition:
-                  theme.transitions.create(['border-color', 'box-shadow'])
-              , '&:focus': {
-                  borderColor: '#80bdff'
-                , boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)' } }
 });
 LoginConfirm.displayName = 'LoginConfirm';
 LoginConfirm.defaultProps = {};

@@ -8,8 +8,10 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from 'material-ui/styles';
 import { TextField, Typography, Button, Checkbox, FormControlLabel }
                         from 'material-ui';
+import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
+import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 
 class LoginAuth extends React.Component {
   constructor(props) {
@@ -65,8 +67,6 @@ class LoginAuth extends React.Component {
     const { classes, location } = this.props;
     const { redirectToRefferer, redirectToManagement, username, password
       , checked, isNotValid } = this.state;
-    const inputText = { disableUnderline: true
-      , classes: { root: classes.textRoot, input: classes.textInput } }
     const from = location.state || { pathname: '/marchant' };
     const admin = { pathname: '/admin/users' };
     if(redirectToRefferer) return <Redirect to={from} />;
@@ -80,66 +80,46 @@ class LoginAuth extends React.Component {
       <div className={classes.space}/>
       <div className={classes.form}>
         <RssInput label="USER ID" value={username}
+          placeholder="Enter User ID"
           onChange={this.handleChangeText.bind(this, 'username')}
           className={classes.input}/>
       </div>
       <div className={classes.form}>
         <RssInput type="password" label="PASSWORD" value={password}
+          placeholder="Password"
           onChange={this.handleChangeText.bind(this, 'password')}
           className={classes.input}/>
-      </div>
-      <div className={classes.space}/>
-      <div className={classes.buttons}>
-        <div className={classes.space}/>
-        <Button variant="raised" color="primary"
-          onClick={this.handleLogin.bind(this)}
-          className={classes.button}>Login</Button>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this)}>
-          内容に不備があります。もう一度確認してください。
-        </RssDialog>
-        <div className={classes.space}/>
       </div>
       <div className={classes.form}>
         <FormControlLabel
           control={
-            <Checkbox color="primary"
+            <RssCheckbox color="secondary"
               checked={checked}
               onChange={this.handleChangeCheckbox.bind(this, 'checked')}/>
           }
           label="管理者ログイン"
         />
       </div>
-      <div className={classes.notice}>
-        <Typography variant="caption" align="center"
-          className={classes.notes}>
-        ログインＩＤ・ＰＷを忘れた場合は
-        <Button mini size="small" variant="flat" color="primary"
-          component={Link} to="/login/confirmation">こちら</Button>
-        </Typography>
-      </div>
-      <div className={classes.notice}>
-        <Typography variant="body1" align="center"
-          className={classes.notes}>
-        新規ご利用の方：
-        <Button mini size="small" variant="flat" color="primary"
-          component={Link} to="/login/registration">利用申し込み</Button>
-        </Typography>
-        <Typography variant="body1" align="center"
-          className={classes.notes}>
-        （＿＿について：＿）
-        </Typography>
+      <div className={classes.buttons}>
+        <div className={classes.space}/>
+        <RssButton color="warning"
+          onClick={this.handleLogin.bind(this)}
+          className={classes.button}>Login</RssButton>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this)}>
+          内容に不備があります。もう一度確認してください。
+        </RssDialog>
+        <div className={classes.space}/>
       </div>
       <div className={classes.space}/>
       </div>
-      <div className={classes.space}/>
     </div>;
   }
 };
 
 const loginWidth  = 320;
 const loginHeight = 480;
-const rowHeight = 80;
+const rowHeight = 88;
 const styles = theme => ({
   container:  { width: loginWidth, height: loginHeight
               , border: '1px solid #CCC', borderRadius: 8
@@ -158,24 +138,7 @@ const styles = theme => ({
               , justifyContent: 'center', alignItems: 'center'
               , height: rowHeight }
 , button:     { flex: 1 }
-, notice:     { padding: theme.spacing.unit
-              , display: 'flex', flexDirection: 'column'
-              , justifyContent: 'center', alignItems: 'center'
-              , height: rowHeight }
-, text:       { flex: 1 }
-, notes:      { flex: 1 }
 , input:      { flex: 1 }
-, textRoot:   { padding: 0
-              , 'label + &': { marginTop: theme.spacing.unit * 3 } }
-, textInput:  { borderRadius: 4
-              , backgroundColor: theme.palette.common.white
-              , border: '1px solid #ced4da', fontSize: 16
-              , padding: '10px 12px', width: 'calc(100% - 24px)'
-              , transition:
-                  theme.transitions.create(['border-color', 'box-shadow'])
-              , '&:focus': {
-                  borderColor: '#80bdff'
-                , boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)' } }
 });
 LoginAuth.displayName = 'LoginAuth';
 LoginAuth.defaultProps = {};
