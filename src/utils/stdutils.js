@@ -33,6 +33,13 @@ const color_code = {
 }
 
 export default {
+  toRGBa(str, a) {
+    const r = parseInt(str.substr(1,2), 16);
+    const g = parseInt(str.substr(3,2), 16);
+    const b = parseInt(str.substr(5,2), 16);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  },
+
   logError(caller, name, message) {
     const date = color_code['FgRed']
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
@@ -437,6 +444,18 @@ export default {
     }
   },
 
+  /**
+   * @param {function} fn - monitor callback (return true or false).
+   * @param {function} rs - resolve callback (monitor results).
+   * @param {function} rj - reject callback (time out).
+   * @param {function} ed - complete callback;
+   * @param {number} s -  Wait start milliseconds, then call fn().
+   * @param {number} i -  Call fn() every interval milliseconds.
+   * @param {number} e -  Stopping after a total of start+end 
+   *                      milliseconds.
+   * 
+   *
+   */
   invoke2(fn, rs, rj, ed, s, i, e) {
     if (!s) s = 0;
     setTimeout(() => {

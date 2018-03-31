@@ -27,7 +27,8 @@ var common = {
       Services: path.resolve(__dirname, 'src/services'),
       Pages: path.resolve(__dirname, 'src/pages'),
       Routes: path.resolve(__dirname, 'src/routes'),
-      Models: path.resolve(__dirname, 'src/models')
+      Models: path.resolve(__dirname, 'src/models'),
+      Tasks: path.resolve(__dirname, 'src/tasks')
     }
   },
 };

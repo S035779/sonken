@@ -137,8 +137,7 @@ const theme = {
       backgroundColor: fade(default_color, 0.12)
     }}
   , label: { textTransform: 'capitalize' }
-  }
-  }})
+  }}})
 , flatDefault: createMuiTheme({ overrides: { MuiButton: {
     root: {
       color: default_color
@@ -206,6 +205,19 @@ const theme = {
     }}
   , label: { textTransform: 'capitalize' }
   }}})
+, white: createMuiTheme({ overrides: { MuiButton: {
+    root: {
+      background: common_white
+    , color: default_color
+    , borderRadius
+    , margin
+    , fontWeight: 'normal'
+    , '&:hover':  {
+      backgroundColor: common_white
+    , filter: 'brightness(90%)'
+    }}
+  , label: { textTransform: 'capitalize' }
+  }}})
 , default: createMuiTheme({ overrides: { MuiButton: {
     root: {
       background: default_color
@@ -218,8 +230,7 @@ const theme = {
     , filter: 'brightness(90%)'
     }}
   , label: { textTransform: 'capitalize' }
-  }
-  }})
+  }}})
 , primary: createMuiTheme({ overrides: { MuiButton: {
     root: {
       background: primary_color

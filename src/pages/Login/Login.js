@@ -26,7 +26,7 @@ class Login extends React.Component {
 
   render() {
     //std.logInfo(Login.displayName, 'State', this.state);
-    std.logInfo(Login.displayName, 'Props', this.props);
+    //std.logInfo(Login.displayName, 'Props', this.props);
     const { classes, route } = this.props;
     const { user, isAuthenticated, preference } = this.state;
     return <div className={classes.loginFrame}>
@@ -45,8 +45,7 @@ const styles = theme => ({
   loginFrame: {
     display: 'flex', flexDirection: 'column'
   , justifyContent: 'center', alignItems: 'center'
-  , height: '100vh'
-  , background: 'linear-gradient(to bottom, #5F5F5F 0%, #E0E0E0 100%)'
+  , height: '100%'
   }
 });
 Login.displayName = 'Login';

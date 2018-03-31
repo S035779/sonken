@@ -1,16 +1,18 @@
 import React          from 'react';
 import PropTypes      from 'prop-types'
 import { Link }       from 'react-router-dom';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
 import { AppBar, Toolbar, Typography, Button }
                       from 'material-ui';
-import { RssFeed, DonutSmall, Fingerprint, PhoneIphone, LockOpen }
+import { RssFeed, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
                       from 'material-ui-icons';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class LoginHeader extends React.Component {
   render() {
+    //std.logInfo(LoginHeader.displayName, 'Props', this.props);
     const { classes } = this.props;
     return <div className={classes.navHeader}>
       <AppBar position="static" className={classes.navBar}>
@@ -26,7 +28,7 @@ class LoginHeader extends React.Component {
         <div className={classes.link}>
         <RssButton color="flatWhite"
           component={Link} to="/marchant">
-          <DonutSmall className={classes.icon} />
+          <PieChartOutlined className={classes.icon} />
           Dashboard
         </RssButton>
         <RssButton color="flatWhite"
@@ -55,7 +57,7 @@ const navHeightSmDown = 56;
 const navHeightSmUp = 64;
 const styles = theme => ({
   navHeader:  { flexGrow: 1 }
-, navBar:     { background: '#5F5F5F'
+, navBar:     { background: 'transparent'
               , justifyContent: 'space-around'
               , display: 'flex', flexDirection: 'row'
               , height: navHeightSmDown, width: '100%'

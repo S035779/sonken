@@ -117,7 +117,7 @@ class LoginConfirm extends React.Component {
 
   render() {
     //std.logInfo(LoginConfirm.displayName, 'State', this.state);
-    std.logInfo(LoginConfirm.displayName, 'Props', this.props);
+    //std.logInfo(LoginConfirm.displayName, 'Props', this.props);
     const { classes } = this.props;
     const { email, phone } = this.state;
     const renderCorrect = this.renderCorrect();
@@ -143,9 +143,9 @@ class LoginConfirm extends React.Component {
       <div className={classes.form} />
       <div className={classes.buttons}>
         <div className={classes.space} />
-        <RssButton color="warning"
+        <RssButton color="secondary"
           onClick={this.handleSubmit.bind(this)}
-          classes={classes.button}>Confirm</RssButton>
+          classes={classes.button}>Unlock</RssButton>
         {renderCorrect}
         {renderIncorrect}
         <div className={classes.space} />

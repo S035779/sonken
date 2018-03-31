@@ -63,15 +63,15 @@ class LoginAuth extends React.Component {
 
   render() {
     //std.logInfo(LoginAuth.displayName, 'State', this.state);
-    std.logInfo(LoginAuth.displayName, 'Props', this.props);
+    //std.logInfo(LoginAuth.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { redirectToRefferer, redirectToManagement, username, password
       , checked, isNotValid } = this.state;
     const from = location.state || { pathname: '/marchant' };
     const admin = { pathname: '/admin/users' };
+
     if(redirectToRefferer) return <Redirect to={from} />;
     if(redirectToManagement) return <Redirect to={admin} />;
-
     return <div className={classes.container}>
      <div className={classes.loginForms}>
       <div className={classes.space}/>
@@ -91,8 +91,7 @@ class LoginAuth extends React.Component {
           className={classes.input}/>
       </div>
       <div className={classes.form}>
-        <FormControlLabel
-          control={
+        <FormControlLabel control={
             <RssCheckbox color="secondary"
               checked={checked}
               onChange={this.handleChangeCheckbox.bind(this, 'checked')}/>

@@ -3,7 +3,6 @@ const merge = require('webpack-merge');
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const ManifestPlugin = require('webpack-manifest-plugin');
-//const CleanWebpackPlugin = require('clean-webpack-plugin');
 const common = require('./webpack.common.js');
 
 var node = {
@@ -21,6 +20,9 @@ var node = {
     ],
     job: [
       './job-worker.js',
+    ],
+    wrk: [
+      './tasks/index.js',
     ]
   },
   plugins: [
@@ -28,10 +30,6 @@ var node = {
       'process.env.PLATFORM': JSON.stringify('local')
     }),
     new ManifestPlugin({ fileName: 'manifest.node.json' }),
-    //new CleanWebpackPlugin([
-    //  'dist/*.node.*',
-    //  'dist/favicon.ico'
-    //], { verbose: false }),
   ],
   output: {
     filename: '[name].node.js',

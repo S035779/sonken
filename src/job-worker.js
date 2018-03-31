@@ -1,13 +1,15 @@
 import dotenv           from 'dotenv';
-import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
-import { Note, Readed, Traded, Bided, Starred, Listed }
-                        from 'Models/feed';
+import path             from 'path';
+import os               from 'os';
+import child_process    from 'child_process';
+import async            from 'async';
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
 dotenv.config();
 const env = process.env.NODE_ENV || 'development';
+const cpu_num = os.cpus().length;
+const job = path.join(__dirname, 'dist', 'wrk.node.js');
 
 if(env === 'development') {
   log.config('console', 'color',  'job-worker', 'TRACE' );
@@ -19,110 +21,46 @@ if(env === 'production') {
   log.config('file',    'json',   'job-worker', 'INFO'  );
 }
 
-const request = (operation, options) => {
-  let observable;
-  switch(operation) {
-    case 'of':
-      observable = of(options);
-      result(observable);
-      break;
-    case 'schedule':
-      observable = schedule(options);
-      result(observable);
-      break;
-    case 'from':
-      observable = from(options);
-      result(observable);
-      break;
-    case 'bindCallback':
-      observable = bindCallback(options);
-      result(observable);
-      break;
-    case 'bindNodeCallback':
-      observable = bindNodeCallback(options);
-      result(observable);
-      break;
-    case 'bufferTime':
-      observable = bufferTime(options);
-      result(observable);
-      break;
-    case 'subject':
-      observable = subject(options);
-      result2(observable);
-      break;
-  }
-}
-
-const result = (observable) => {
-  log.trace('[JOB]', 'just befor subscribe');
-  observable.subscribe(
-    val => log.debug('[JOB]', 'got value', val)
-  , err => log.error('[JOB]', err.name, ':', err.message)
-  , ()  => log.info( '[JOB]', 'Complete to worker job.')
-  );
-  log.trace('[JOB]', 'just after subscribe');
-}
-
-const result2 = (observable) => {
-  log.trace('[JOB]', 'just befor subscribe');
-  observable.subscribe(
-    val => log.debug('[JOB]', 'got value', val)
-  , err => log.error('[JOB]', err.name, ':', err.message)
-  , ()  => log.info( '[JOB]', 'Complete to worker job.')
-  );
-  log.trace('[JOB]', 'just after subscribe');
-  observable.next('a');
-  observable.next('b');
-  observable.next('c');
-  observable.complete();
-}
-
-const of = () => {
-  return Rx.Observable.of('Hello World');
-}
-
-const schedule = () => {
-  return Rx.Observable.range(1,5)
-    .do(val => log.trace('[JOB]', 'set value', val))
-    .observeOn(Rx.Scheduler.async);
-}
-
-const from = () => {
-  return Rx.Observable.from([ 1, 2, 3 ])
-    .map(val => val * 2);
-}
-
-const bindCallback = () => {
-  const fn = (message, callback) => callback('Hello ' + message);
-  return Rx.Observable.bindCallback(fn)('World');
-}
-
-const bindNodeCallback = () => {
-  const fn = require('fs').readdir;
-  return Rx.Observable.bindNodeCallback(fn)('./');
-}
-
-const bufferTime = () => {
-  return Rx.Observable.interval(100)
-    .bufferTime(300);
-}
-
-const subject = () => {
-  const subject = new Rx.Subject();
-  return subject;
-}
-
-const worker = () => {
-  log.info('[JOB]', 'starting worker job.')
-  //request('of', {});
-  //request('schedule', {});
-  //request('from', {});
-  //request('bindCallback', {});
-  //request('bindNodeCallback', {});
-  //request('bufferTime', {});
-  request('subject', {});
+const fork = () => {
+  const cps = child_process.fork(job);
+  cps.on('message', mes =>
+    log.info('[JOB]', 'got message.', mes));
+  cps.on('error',   err =>
+    log.error('[JOB]', err.name, ':', err.message));
+  cps.on('disconnect', () =>
+    log.info('[JOB]', 'worker disconnected.'));
+  cps.on('exit', (code, signal) =>
+    log.warn('[JOB]', `worker terminated. (s/c): ${signal || code}`));
+  cps.on('close', (code, signal) =>
+    log.warn('[JOB]', `worker exit. (s/c): ${signal || code}`));
+  log.info('[JOB]', 'forked worker pid', ':', cps.pid);
+  return cps;
 };
-worker();
+
+let pids = [];
+let idx = 0;
+const worker = (task, callback) => {
+  idx = idx < cpu_num ? idx : 0;
+  log.debug('[JOB]', 'task', task.name, idx, cpu_num);
+  if(pids[idx] === undefined || !pids[idx].connected) pids[idx] = fork();
+  pids[idx].send(task, err => {
+    if(err) log.error('[JOB]', err.name, ':', err.message);
+    idx = idx + 1;
+    callback();
+  });
+};
+
+const main = () => {
+  log.info('[JOB]', 'start job worker.')
+  const queue = async.queue(worker, cpu_num);
+  queue.drain = () => log.info('[JOB]', 'send to request work.');
+  std.invoke(() => {
+    queue.push({ name: 'foo' }, err => {
+      if(err) log.error('[JOB]', err.name, ':', err.message);
+    });
+  }, 0, 1000*60*1);
+};
+main();
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
@@ -138,7 +76,7 @@ const message = (err, code, signal) => {
 
 const shutdown = (err, cbk) => {
   if(err) log.error('[JOB]', err.name, ':', err.message);
-  log.info('[JOB]', 'worker #1 terminated.');
+  log.info('[JOB]', 'scheduler terminated.');
   log.info('[LOG]', 'log4js #3 terminated.');
   log.close(() => {
     cbk()
