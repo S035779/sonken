@@ -626,7 +626,9 @@ export default {
     for(let key in obj) {
       if(obj.hasOwnProperty(key)) keys.push(key);
     }
-    return keys.map((key, idx) => `${key}=${obj[key]}`).join('&');
+    return keys.map((key, idx) => `${key}=${obj[key]}`)
+      .map(pair => pair.replace(" ", "+"))
+      .join('&');
   },
 
   /**

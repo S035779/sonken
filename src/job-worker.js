@@ -3,6 +3,7 @@ import path             from 'path';
 import os               from 'os';
 import child_process    from 'child_process';
 import async            from 'async';
+import { Note }         from 'Models/feed';
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
@@ -41,7 +42,7 @@ let pids = [];
 let idx = 0;
 const worker = (task, callback) => {
   idx = idx < cpu_num ? idx : 0;
-  log.debug('[JOB]', 'task', task.name, idx, cpu_num);
+  log.debug('[JOB]', 'task', task.id, idx, cpu_num);
   if(pids[idx] === undefined || !pids[idx].connected) pids[idx] = fork();
   pids[idx].send(task, err => {
     if(err) log.error('[JOB]', err.name, ':', err.message);
@@ -52,13 +53,49 @@ const worker = (task, callback) => {
 
 const main = () => {
   log.info('[JOB]', 'start job worker.')
+  const task0 = {
+    id: '00000000'
+  , api: '/search', path: '/search'
+  , query: {
+      n: 50
+    , p: 'nintendo SWITCH'
+    }
+  };
+
+  const task1 = {
+    id: '00000001'
+  , api: '/seller', path: '/hogscoop'
+  , query: {
+      n: 50
+    , sid: 'hogscoop'
+    }
+  };
+
+  const task2 = {
+    id: '00000002'
+  , api: '/rss', path: ''
+  , query: {
+      n: 50
+    , p: 'nintendo SWITCH'
+    }
+  };
+
+  const task3 = {
+    id: '00000003'
+  , api: '/rss', path: ''
+  , query: {
+      n: 50
+    , sid: 'hogscoop'
+    }
+  };
+
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info('[JOB]', 'send to request work.');
   std.invoke(() => {
-    queue.push({ name: 'foo' }, err => {
+    queue.push(task3, err => {
       if(err) log.error('[JOB]', err.name, ':', err.message);
     });
-  }, 0, 1000*60*1);
+  }, 0, 1000*60*5);
 };
 main();
 
