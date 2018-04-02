@@ -11,6 +11,17 @@ import authImg          from 'Assets/image/full-screen-image-2.jpg';
 import rgstImg          from 'Assets/image/bg5.jpg';
 import cnfmImg          from 'Assets/image/bg4.jpg';
 
+const env = process.env.NODE_ENV || 'development';
+const api = process.env.API_URL;
+
+let assets;
+if(env === 'development') {
+  assets = '';
+} else
+if(env === 'production') {
+  assets = api + '/image';
+}
+
 class Auth extends React.Component {
   render() {
     //std.logInfo(Auth.displayName, 'Props', this.props);
@@ -43,14 +54,11 @@ const cnfm_btm = std.toRGBa('#943BEA', 0.8);
 const barHeightSmDown = 56;
 const barHeightSmUp = 64;
 const styles = theme => ({
-  authenticate: Object.assign({}, root, { background:
-    `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${authImg})`
+  authenticate: Object.assign({}, root, { background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${assets + authImg})`
   })
-, registration: Object.assign({}, root, { background:
-    `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${rgstImg})`
+, registration: Object.assign({}, root, { background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${assets + rgstImg})`
   })
-, confirmation: Object.assign({}, root, { background:
-    `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${cnfmImg})`
+, confirmation: Object.assign({}, root, { background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${assets + cnfmImg})`
   })
 , authFrame:{ position: 'relative'
             , display: 'flex', flexDirection: 'column'
