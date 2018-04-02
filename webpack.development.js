@@ -10,7 +10,10 @@ var development = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development')
     , 'process.env.PLATFORM': JSON.stringify('web')
-    , 'process.env.API_URL':  JSON.stringify('http://localhost:8080/api')
+    , 'process.env.API_URL':
+        JSON.stringify('http://localhost:8080/api')
+    , 'process.env.ASSET_URL':
+        JSON.stringify('http://localhost:8080')
     }),
   ],
   devServer: {

@@ -11,16 +11,7 @@ import authImg          from 'Assets/image/full-screen-image-2.jpg';
 import rgstImg          from 'Assets/image/bg5.jpg';
 import cnfmImg          from 'Assets/image/bg4.jpg';
 
-const env = process.env.NODE_ENV || 'development';
-const api = process.env.API_URL;
-
-let assets;
-if(env === 'development') {
-  assets = '';
-} else
-if(env === 'production') {
-  assets = api + '/image';
-}
+const assets = process.env.ASSET_URL;
 
 class Auth extends React.Component {
   render() {
