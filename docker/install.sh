@@ -15,4 +15,7 @@ cp $WORKDIR/dist/view.bundle.js.map $ASSETS/js/
 if [ ! -d $ASSETS/image ]; then
     mkdir $ASSETS/image
 fi
-cp $WORKDIR/dist/favicon.ico $ASSETS/image/
+cp $WORKDIR/dist/favicon.ico             $ASSETS/image/
+cp $WORKDIR/dist/bg4.jpg                 $ASSETS/image/
+cp $WORKDIR/dist/bg5.jpg                 $ASSETS/image/
+cp $WORKDIR/dist/full-screen-image-2.jpg $ASSETS/image/
