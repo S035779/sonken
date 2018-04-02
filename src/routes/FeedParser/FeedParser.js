@@ -6,7 +6,7 @@ import { Note, Readed, Traded, Bided, Starred, Listed }
                         from 'Models/feed';
 import std              from 'Utilities/stdutils';
 import Amazon           from 'Utilities/Amazon';
-import HtmlParser       from 'Utilities/HtmlParser';
+import Yahoo            from 'Utilities/Yahoo';
 import { logs as log }  from 'Utilities/logutils';
 
 dotenv.config();
@@ -418,7 +418,7 @@ export default class FeedParser {
   createNote({ user, url, category }) {
     const addNote =
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-    return HtmlParser.of().fetchRss({ url })
+    return Yahoo.of().fetchRss({ url })
       .map(obj => this.setNote({ user, url, category }, obj))
       .flatMap(addNote);
   }

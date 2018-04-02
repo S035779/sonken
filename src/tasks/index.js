@@ -1,10 +1,10 @@
 import dotenv           from 'dotenv';
 import async            from 'async';
-import HtmlParser       from 'Utilities/HtmlParser';
+import Yahoo            from 'Utilities/Yahoo';
 import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 
-const html = HtmlParser.of();
+const yahoo = Yahoo.of();
 
 dotenv.config();
 const env = process.env.NODE_ENV || 'development';
@@ -18,24 +18,16 @@ if (env === 'development') {
   log.config('file', 'json', 'wrk-proces', 'INFO');
 }
 
-const parseHtml = url => {
-  return html.fetchContents({ url });
-};
-const parseRss = url => {
-  return html.fetchRss({ url });
-};
-
 const worker = ({ id, api, path, query }, callback) => {
-  log.debug('[WRK]', 'got message.', id);
   let observable;
   const url = base_url + api + path + '?' + std.urlencode(query);
   switch(api) {
     case '/search':
     case '/seller':
-      observable = parseHtml(url);
+      observable = yahoo.fetchHtml({ url });
       break;
     case '/rss':
-      observable = parseRss(url);
+      observable = yahoo.fetchRss({ url });
       break;
   }
   observable.subscribe(
@@ -50,9 +42,10 @@ const main = () => {
   queue.drain = () => log.info('[WRK]', 'Completed to work.');
 
   process.on('message', task => {
-    log.debug('[WRK]', 'got work.', task.id);
+    log.debug('[WRK]', 'got message.', task.id);
     queue.push(task, err => {
       if(err) log.error('[WRK]', err.name, ':', err.message);
+      log.info('[WRK]', 'finished work.');
     });
   });
 

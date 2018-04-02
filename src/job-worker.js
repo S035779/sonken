@@ -64,10 +64,10 @@ const main = () => {
 
   const task1 = {
     id: '00000001'
-  , api: '/seller', path: '/hogscoop'
+  , api: '/seller', path: '/masatake_12_6'
   , query: {
       n: 50
-    , sid: 'hogscoop'
+    , sid: 'masatake_12_6'
     }
   };
 
@@ -85,7 +85,7 @@ const main = () => {
   , api: '/rss', path: ''
   , query: {
       n: 50
-    , sid: 'hogscoop'
+    , sid: 'masatake_12_6'
     }
   };
 

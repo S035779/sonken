@@ -11,7 +11,6 @@ const params = {
   , Version: '2011-07-27'
 }
 
-const pspid = 'amazon-api';
 /**
  * Amazon Api Client class.
  *
@@ -288,4 +287,5 @@ class Amazon {
   }
 
 };
+Amazon.displayName = 'amazon-api';
 export default Amazon;
