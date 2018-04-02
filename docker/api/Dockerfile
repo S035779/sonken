@@ -1,4 +1,4 @@
-FROM buildpack-deps:jessie-curl
+FROM buildpack-deps:stretch-curl
 
 # timezone
 ENV TZ=Asia/Tokyo
@@ -12,7 +12,7 @@ RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
 
 #install nodejs
-ENV NODE_VERSION 9.9.0
+ENV NODE_VERSION 9.10.1
 RUN buildDeps='xz-utils' \
   && ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -24,7 +24,7 @@ RUN buildDeps='xz-utils' \
     i386) ARCH='x86';; \
     *) echo "unsupported architecture"; exit 1 ;; \
   esac \
-  && apt-get update && apt-get install -y $buildDeps --no-install-recommends git vim\
+  && apt-get update && apt-get install -y $buildDeps --no-install-recommends\
   && rm -rf /var/lib/apt/lists/* \
 # gpg keys listed at https://github.com/nodejs/node#release-team
   && set -ex \
@@ -45,14 +45,14 @@ RUN buildDeps='xz-utils' \
     || gpg --keyserver pgp.mit.edu --recv-keys "$key" \
     || gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
   ; done \
-    && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
-    && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
-    && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
-    && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-    && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
-    && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
-    && apt-get purge -y --auto-remove $buildDeps \
-    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+  && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
+  && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+  && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
+  && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+  && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+  && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
+  && apt-get purge -y --auto-remove $buildDeps \
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 ENV YARN_VERSION 1.5.1
 
@@ -76,14 +76,24 @@ RUN set -ex \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
 
+RUN buildDeps='git' \
+  && apt-get update && apt-get install -y $buildDeps \
+  && rm -rf /var/lib/apt/lists/* \
 # install applications
-RUN cd /app \
-    && git clone https://github.com/S035779/sonken.git
+  && cd /app \
+  && git clone https://github.com/S035779/sonken.git \
+  && apt-get purge -y --auto-remove $buildDeps
+
 COPY .env /app/sonken
-RUN cd /app/sonken \
-    && yarn install \
-    && yarn run build:node \
-    && chown -R app:app /app
+
+RUN buildDeps='build-essential python' \
+  && apt-get update && apt-get install -y $buildDeps \
+  && rm -rf /var/lib/apt/lists/* \
+  && cd /app/sonken \
+  && yarn install \
+  && yarn run build:node \
+  && chown -R app:app /app \
+  && apt-get purge -y --auto-remove $buildDeps
 
 USER app
 CMD ["node", "dist/api.node.js"]

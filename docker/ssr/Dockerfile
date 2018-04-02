@@ -1,4 +1,4 @@
-FROM buildpack-deps:jessie-curl
+FROM buildpack-deps:stretch-curl
 
 # timezone
 ENV TZ=Asia/Tokyo
@@ -6,13 +6,13 @@ RUN echo $TZ | tee /etc/timezone \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # initialize
-WORKDIR /app/sonken
 EXPOSE 8081
+WORKDIR /app/sonken
 RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
 
 #install nodejs
-ENV NODE_VERSION 9.9.0
+ENV NODE_VERSION 9.10.1
 RUN buildDeps='xz-utils' \
   && ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -24,7 +24,7 @@ RUN buildDeps='xz-utils' \
     i386) ARCH='x86';; \
     *) echo "unsupported architecture"; exit 1 ;; \
   esac \
-  && apt-get update && apt-get install -y $buildDeps --no-install-recommends git vim \
+  && apt-get update && apt-get install -y $buildDeps --no-install-recommends\
   && rm -rf /var/lib/apt/lists/* \
 # gpg keys listed at https://github.com/nodejs/node#release-team
   && set -ex \
@@ -76,14 +76,24 @@ RUN set -ex \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
 
+RUN buildDeps='git' \
+  && apt-get update && apt-get install -y $buildDeps \
+  && rm -rf /var/lib/apt/list/* \
 # install applications
-RUN cd /app \
-    && git clone https://github.com/S035779/sonken.git
+  && cd /app \
+  && git clone https://github.com/S035779/sonken.git \
+  && apt-get purge -y --auto-remove $buildDeps
+
 COPY .env /app/sonken
-RUN cd /app/sonken \
-    && yarn install \
-    && yarn run build:all \
-    && chown -R app:app /app
+
+RUN buildDeps='python build-essential' \
+  && apt-get update && apt-get install -y $buildDeps \
+  && rm -rf /var/lib/apt/list/* \
+  && cd /app/sonken \
+  && yarn install \
+  && yarn run build:all \
+  && chown -R app:app /app \
+  && apt-get purge -y --auto-remove $buildDeps
 
 USER app
 CMD ["node", "dist/ssr.node.js"]

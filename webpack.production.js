@@ -9,7 +9,8 @@ var production = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     , 'process.env.PLATFORM': JSON.stringify('web')
-    , 'process.env.API_URL':  JSON.stringify('http://35.200.100.73/api')
+    , 'process.env.API_URL':
+        JSON.stringify('https://feedparser.alpha-one-rss.jp/api')
     }),
     new UglifyJSPlugin({
       sourceMap: true
