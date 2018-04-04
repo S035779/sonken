@@ -19,10 +19,10 @@ var node = {
       './api-server.js',
     ],
     job: [
-      './job-worker.js',
+      './job-server.js',
     ],
     wrk: [
-      './tasks/index.js',
+      './job-worker.js',
     ]
   },
   plugins: [

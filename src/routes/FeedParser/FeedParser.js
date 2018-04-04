@@ -123,30 +123,38 @@ export default class FeedParser {
         });
       case 'update/note':
         return new Promise((resolve, reject) => {
+          const isItems = !!options.data.items;
           const isAsin = options.data.asin !== '';
           const conditions = {
             _id:  options.id
           , user: options.user
           };
-          const update = isAsin ? {
-            title:      options.data.title
-          , asin:       options.data.asin
-          , price:      options.data.price
-          , bidsprice:  options.data.bidsprice
-          , body:       options.data.body
-          , name:       options.data.name
-          , AmazonUrl:  options.data.AmazonUrl
-          , AmazonImg:  options.data.AmazonImg
-          , updated:    Date.now()
-          } : {
-            title:      options.data.title
-          , asin:       options.data.asin
-          , price:      options.data.price
-          , bidsprice:  options.data.bidsprice
-          , body:       options.data.body
-          , updated:    Date.now()
-          };
-          //log.debug(update);
+          const update = isItems
+            ? {
+              items:      options.data.items
+            , updated:    options.data.updated
+            }
+            : isAsin
+              ? {
+                title:      options.data.title
+              , asin:       options.data.asin
+              , price:      options.data.price
+              , bidsprice:  options.data.bidsprice
+              , body:       options.data.body
+              , name:       options.data.name
+              , AmazonUrl:  options.data.AmazonUrl
+              , AmazonImg:  options.data.AmazonImg
+              , updated:    Date.now()
+              }
+              : {
+                title:      options.data.title
+              , asin:       options.data.asin
+              , price:      options.data.price
+              , bidsprice:  options.data.bidsprice
+              , body:       options.data.body
+              , updated:    Date.now()
+              };
+          //log.debug(update.items, conditions);
           Note.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -445,6 +453,11 @@ export default class FeedParser {
     return Rx.Observable.fromPromise(this.getItems(user, items));
   }
 
+  fetchAllNotes({ users }) {
+    const observables = R.map(user => this.getNotes(user));
+    return Rx.Observable.forkJoin(observables(users));
+  }
+
   fetchNotes({ user }) {
     const observables = Rx.Observable.forkJoin([
       this.getStarred(user)
@@ -617,6 +630,22 @@ export default class FeedParser {
     ;
   }
 
+  updateHtml({ user, id, html }) {
+    const data = {
+      updated:  html.updated
+    , items:    html.items  
+    };
+    return this._updateNote({ user, id, data });
+  }
+
+  updateRss({ user, id, rss }) {
+    const data = {
+      updated:  rss.updated
+    , items:    rss.items  
+    };
+    return this._updateNote({ user, id, data });
+  }
+
   _updateNote({ user, id, data }) {
     return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
   }
@@ -745,11 +774,11 @@ export default class FeedParser {
       title:  arr[0]
     , link: arr[1]
     , description: {
-        DIV: { A: { $: { HREF: arr[2] }, IMG: { $: {
+        DIV: { A: { attr: { HREF: arr[2] }, IMG: { attr: {
         SRC: arr[3], BORDER: arr[4], WIDTH: arr[5], HEIGHT: arr[6]
         , ALT: arr[7] }}}}}
     , pubDate: arr[8]
-    , guid: { _: arr[9], $: { isPermaLink: arr[10] } }
+    , guid: { _: arr[9], attr: { isPermaLink: arr[10] } }
     , price: arr[11]
     , bids: arr[12]
     , bidStopTime: arr[13]

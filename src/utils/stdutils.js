@@ -1,6 +1,6 @@
 import querystring from 'querystring';
 import crypto from 'crypto';
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 
 const env = process.env.PLATFORM;
 const isNode = env === 'local';
@@ -679,14 +679,23 @@ export default {
   },
 
   /**
-   * Function that returns instance for parsed to 
-   * associative array object.
+   * Function that returns instance. 
    *
    * @param {string} url - url character string.
-   * @return {object} - parsed associative array object.
+   * @return {object} - return url instance.
    */
   parse_url(url) {
-    return new URL(url)
+    return new URL(url);
+  },
+
+  /**
+   * Function that returns instance. 
+   *
+   * @param {object} query - search query object.
+   * @return {object} - return URLSearchParams instance.
+   */
+  parse_query(query) {
+    return new URLSearchParams(query);
   },
 
   getLocalISOTimeStamp (date) {

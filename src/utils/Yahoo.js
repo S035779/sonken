@@ -118,14 +118,17 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           net.get2(options.url, null, (err, head, body) => {
             if(err) reject(err);
-            log.trace(Yahoo.displayName, body);
+            //log.trace(Yahoo.displayName, body);
             resolve(body);
           });
         });
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
           parseString(options.xml
-          , { trim: true, explicitArray: false }
+          , {
+              trim: true, explicitArray: false
+            , attrkey: 'attr', charkey: '_'
+            }
           , (err, data) => {
             if(err) reject(err);
             resolve(data);
@@ -150,7 +153,10 @@ class Yahoo {
           const newItem = obj =>
             R.compose( setItem(obj), R.last, R.split('>') );
           parseString(options.xml.description
-            , { trim: true, explicitArray: false, strict: false }
+            , {
+                trim: true, explicitArray: false, strict: false
+              , attrkey: 'attr', charkey: '_'
+              }
             , (err, data) => {
               if(err) reject(err);
               resolve(newItem(data)(options.xml.description));
@@ -160,43 +166,45 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           let results = [];
           osmosis
-          .get(options.url)
-          .set({ title: 'title' })
-          .find('div#list01')
-          .set({
-            items: [
-              osmosis.find('td.a1').set({
-                link:     'div.a1wrp > h3 > a@href'
+            .get(options.url)
+            .set({ title: 'title' })
+            .find('div#list01')
+            .set({ item: [ osmosis
+              .find('td.a1')
+              .set({
+                link: 'div.a1wrp > h3 > a@href'
               , category: [ 'p.com_slider > a' ]
               })
-              .follow('div.a1wrp h3 a@href').set({
-                title:    'h1.ProductTitle__text > text()'
-              , seller:   'span.Seller__name > a'
-              , images:
-                  [ 'a.ProductImage__link.rapid-noclick-resp > img@src' ]
-              , bids:     'li.Count__count.Count__count > dl '
-                            + '> dd.Count__number > text()'
+              .follow('div.a1wrp h3 a@href')
+              .set({
+                title: 'h1.ProductTitle__text > text()'
+              , seller: 'span.Seller__name > a'
+              , images: [
+                  'a.ProductImage__link.rapid-noclick-resp > img@src'
+                ]
+              , bids: 'li.Count__count.Count__count > dl '
+                  + '> dd.Count__number > text()'
               , bidRestTime: {
-                  count:  'li.Count__count.Count__count--sideLine > dl '
-                            + '> dd.Count__number > text()'
-                , unit:   'li.Count__count.Count__count--sideLine > dl '
-                            + '> dd.Count__number > span.Count__unit'
+                  count: 'li.Count__count.Count__count--sideLine > dl '
+                    + '> dd.Count__number > text()'
+                , unit: 'li.Count__count.Count__count--sideLine > dl '
+                    + '> dd.Count__number > span.Count__unit'
                 }
-              , price:    'div.Price.Price--current '
-                            + '> dl.Price__body > dd.Price__value > text()'
+              , price: 'div.Price.Price--current '
+                  + '> dl.Price__body > dd.Price__value > text()'
               , buynowPrice: 'div.Price.Price--buynow '
-                            + '> dl.Price__body > dd.Price__value > text()'
+                  + '> dl.Price__body > dd.Price__value > text()'
               , detail: {
-                  title:       [ 'dt.ProductDetail__title'       ]
+                  title: [ 'dt.ProductDetail__title'       ]
                 , description: [ 'dd.ProductDetail__description' ]
-              }})
-            ]
-          })
-          .data(obj => results.push(Yahoo.displayName, obj))
-          .log(msg => log.debug(Yahoo.displayName, msg))
-          .debug(msg => log.debug(Yahoo.displayName, msg))
-          .error(reject)
-          .done(resolve(results));
+                }
+              })
+            ]})
+            .data(  obj => results.push(Yahoo.displayName, obj))
+            //.log(   msg => log.debug(Yahoo.displayName, msg))
+            //.debug( msg => log.debug(Yahoo.displayName, msg))
+            .error( err => reject(err))
+            .done(  ()  => resolve(results));
         });
     }
   }
