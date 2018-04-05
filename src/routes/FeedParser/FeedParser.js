@@ -426,7 +426,8 @@ export default class FeedParser {
   createNote({ user, url, category }) {
     const addNote =
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-    return Yahoo.of().fetchRss({ url })
+    return Yahoo.of().fetchHtml({ url })
+      //.map(R.tap(log.trace.bind(this)))
       .map(obj => this.setNote({ user, url, category }, obj))
       .flatMap(addNote);
   }

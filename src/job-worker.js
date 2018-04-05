@@ -6,39 +6,36 @@ import std              from 'Utilities/stdutils';
 import { logs as log }  from 'Utilities/logutils';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 
+const displayName = 'job-worker';
 const yahoo = Yahoo.of();
 const feed = FeedParser.of();
 
 dotenv.config();
 const env = process.env.NODE_ENV || 'development';
-
 if (env === 'development') {
-  log.config('console', 'color', 'job-worker', 'TRACE');
+  log.config('console', 'color', displayName, 'TRACE');
 } else if (env === 'staging') {
-  log.config('file', 'basic', 'job-worker', 'DEBUG');
+  log.config('file', 'basic', displayName, 'DEBUG');
 } else if (env === 'production') {
-  log.config('file', 'json', 'job-worker', 'INFO');
+  log.config('file', 'json', displayName, 'INFO');
 }
 
 const request = (operation, { user, id, url }) => {
+  //log.debug(operation, user, id, url);
   switch(operation) {
     case 'search':
     case 'seller':
       return yahoo.fetchHtml({ url })
-        .map(obj => ({
-          updated: Date.now()
-        , items: obj.item
-        }))
-        //.map(R.tap(console.log))
+        .map(R.tap(log.trace.bind(this)))
+        .map(obj => ({ updated: Date.now(), items: obj.item }))
         .flatMap(obj => feed.updateHtml({ user, id, html: obj }))
       ;
     case 'rss':
       return yahoo.fetchRss({ url })
+        .map(R.tap(log.trace.bind(this)))
         .map(obj => ({
-          updated: new Date(obj.lastBuildDate)
-        , items: obj.item
+          updated: new Date(obj.lastBuildDate) , items: obj.item
         }))
-        //.map(R.tap(console.log))
         .flatMap(obj => feed.updateRss({ user, id, rss: obj }))
       ;
     default:

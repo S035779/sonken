@@ -42,12 +42,31 @@ class RssSearch extends React.Component {
     const { url } = this.state;
     const { user } = this.props;
     std.logInfo(RssSearch.displayName, 'handleSubmit', url);
-    let category =
-      url.substring(0,34) === 'https://auctions.yahoo.co.jp/rss?p'
-        ? 'marchant' :
-          url.substring(0,36) === 'https://auctions.yahoo.co.jp/rss?sid'
+    const parser = new URL(url);
+    const api = parser.pathname.split('/')[1];
+    const query = parser.searchParams;
+    let category;
+    switch(api) {
+      case 'search':
+        category = 'marchant';
+        break;
+      case 'seller':
+        category = 'seller';
+        break;
+      case 'rss':
+        category = query.has('p')
+          ? 'marchant'
+          : query.has('sid')
             ? 'sellers'
             : null;
+        break;
+    }
+    //let category = 
+    //  url.substring(0,34) === 'https://auctions.yahoo.co.jp/rss?p'
+    //    ? 'marchant' :
+    //      url.substring(0,36) === 'https://auctions.yahoo.co.jp/rss?sid'
+    //        ? 'sellers'
+    //        : null;
     if(!category) return this.setState({ isNotValid: true });
     NoteAction.create(user, { url, category })
       .then(() => this.setState({ isSuccess: true, url: '' }))

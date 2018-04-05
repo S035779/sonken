@@ -124,12 +124,10 @@ class Yahoo {
         });
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
-          parseString(options.xml
-          , {
-              trim: true, explicitArray: false
-            , attrkey: 'attr', charkey: '_'
-            }
-          , (err, data) => {
+          parseString(options.xml, {
+            trim: true, explicitArray: false
+          , attrkey: 'attr', charkey: '_'
+          }, (err, data) => {
             if(err) reject(err);
             resolve(data);
           }); 
@@ -152,24 +150,36 @@ class Yahoo {
           const setItem = R.curry(_setItem);
           const newItem = obj =>
             R.compose( setItem(obj), R.last, R.split('>') );
-          parseString(options.xml.description
-            , {
-                trim: true, explicitArray: false, strict: false
-              , attrkey: 'attr', charkey: '_'
-              }
-            , (err, data) => {
-              if(err) reject(err);
-              resolve(newItem(data)(options.xml.description));
-            }); 
+          parseString(options.xml.description, {
+            trim: true, explicitArray: false, strict: false
+          , attrkey: 'attr', charkey: '_'
+          }, (err, data) => {
+            if(err) reject(err);
+            resolve(newItem(data)(options.xml.description));
+          }); 
         });
       case 'fetch/html':
         return new Promise((resolve, reject) => {
           let results = [];
           osmosis
             .get(options.url)
-            .set({ title: 'title' })
+            .set({
+              title: 'title'
+            })
             .find('div#list01')
             .set({ item: [ osmosis
+              .find('td.i')
+              .set({
+                pubDate: Date.now()
+              , desctiption: { DIV: { A: {
+                  attr: { HREF: 'a@href' }
+                , IMG: { attr: {
+                    SRC: 'img@href'
+                  , ALT: 'img@alt'
+                  , BORDER: 0, WIDTH: 134, HEIGHT: 100
+                  }}
+                }}}
+              })
               .find('td.a1')
               .set({
                 link: 'div.a1wrp > h3 > a@href'
@@ -194,15 +204,22 @@ class Yahoo {
                   + '> dl.Price__body > dd.Price__value > text()'
               , buynowPrice: 'div.Price.Price--buynow '
                   + '> dl.Price__body > dd.Price__value > text()'
-              , detail: {
-                  title: [ 'dt.ProductDetail__title'       ]
-                , description: [ 'dd.ProductDetail__description' ]
-                }
+              , state:          'dt.ProductDetail__description[0] > text()'
+              , number:         'dt.ProductDetail__description[1] > text()'
+              , bidStartTime:   'dt.ProductDetail__description[2] > text()'
+              , bidStopTime:    'dt.ProductDetail__description[3] > text()'
+              , autoExtention:  'dt.ProductDetail__description[4] > text()'
+              , returnExchange: 'dt.ProductDetail__description[5] > text()'
+              , bidderRating:   'dt.ProductDetail__description[6] > text()'
+              , bidderAuth:     'dt.ProductDetail__description[7] > text()'
+              , startPrice:     'dt.ProductDetail__description[8] > text()'
+              , auctionId:      'dt.ProductDetail__description[9] > text()'
+              , guid: { _: 'dt.ProductDetail__description[9] > text()' }
               })
             ]})
             .data(  obj => results.push(Yahoo.displayName, obj))
-            //.log(   msg => log.debug(Yahoo.displayName, msg))
-            //.debug( msg => log.debug(Yahoo.displayName, msg))
+            .log(   msg => log.debug(Yahoo.displayName, msg))
+            .debug( msg => log.debug(Yahoo.displayName, msg))
             .error( err => reject(err))
             .done(  ()  => resolve(results));
         });
@@ -245,9 +262,9 @@ class Yahoo {
     return this._fetchRss(url)
       .flatMap(obj => this._fetchXmlNote(obj))
       .map(obj => _note = obj)
+      //.map(R.tap(log.trace.bind(this)))
       .flatMap(obj => this.forXmlItem(obj))
       .map(objs => setItems(_note,objs))
-      //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
@@ -451,4 +468,3 @@ class Yahoo {
 };
 Yahoo.displayName = 'yahoo-api';
 export default Yahoo;
-

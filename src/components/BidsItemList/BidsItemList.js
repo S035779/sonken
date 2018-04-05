@@ -84,12 +84,12 @@ class BidsItemList extends React.Component {
         <ListItem dense button disableGutters
           className={classes.listItem}>
           <div className={classes.description}>
-            <a href={item.description.DIV.A.$.HREF}>
-            <img src={item.description.DIV.A.IMG.$.SRC}
-              border={item.description.DIV.A.IMG.$.BORDER}
-              width={item.description.DIV.A.IMG.$.WIDTH}
-              height={item.description.DIV.A.IMG.$.HEIGHT}
-              alt={item.description.DIV.A.IMG.$.ALT}
+            <a href={item.description.DIV.A.attr.HREF}>
+            <img src={item.description.DIV.A.IMG.attr.SRC}
+              border={item.description.DIV.A.IMG.attr.BORDER}
+              width={item.description.DIV.A.IMG.attr.WIDTH}
+              height={item.description.DIV.A.IMG.attr.HEIGHT}
+              alt={item.description.DIV.A.IMG.attr.ALT}
               className={classes.image}/>
             </a>
           </div>

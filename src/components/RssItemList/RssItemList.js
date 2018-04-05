@@ -108,8 +108,7 @@ class RssItemList extends React.Component {
           <ListItemIcon>{renderStar}</ListItemIcon>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF}>
-              <img
-                src={item.description.DIV.A.IMG.attr.SRC}
+              <img src={item.description.DIV.A.IMG.attr.SRC}
                 border={item.description.DIV.A.IMG.attr.BORDER}
                 width={item.description.DIV.A.IMG.attr.WIDTH}
                 height={item.description.DIV.A.IMG.attr.HEIGHT}
