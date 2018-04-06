@@ -51,7 +51,7 @@ class RssSearch extends React.Component {
         category = 'marchant';
         break;
       case 'seller':
-        category = 'seller';
+        category = 'sellers';
         break;
       case 'rss':
         category = query.has('p')

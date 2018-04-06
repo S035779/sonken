@@ -423,11 +423,19 @@ export default class FeedParser {
     return this.request('fetch/items', { user, items });
   }
 
+  //createNote({ user, url, category }) {
+  //  const addNote =
+  //    obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+  //  return Yahoo.of().fetchRss({ url })
+  //    .map(obj => this.setNote({ user, url, category }, obj))
+  //    .flatMap(addNote);
+  //}
+
   createNote({ user, url, category }) {
     const addNote =
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
     return Yahoo.of().fetchHtml({ url })
-      //.map(R.tap(log.trace.bind(this)))
+      .map(R.tap(log.trace.bind(this)))
       .map(obj => this.setNote({ user, url, category }, obj))
       .flatMap(addNote);
   }
@@ -775,9 +783,17 @@ export default class FeedParser {
       title:  arr[0]
     , link: arr[1]
     , description: {
-        DIV: { A: { attr: { HREF: arr[2] }, IMG: { attr: {
-        SRC: arr[3], BORDER: arr[4], WIDTH: arr[5], HEIGHT: arr[6]
-        , ALT: arr[7] }}}}}
+        DIV: { A: {
+          attr: { HREF: arr[2] }
+        , IMG: { attr: {
+            SRC: arr[3]
+          , BORDER: arr[4]
+          , WIDTH: arr[5]
+          , HEIGHT: arr[6]
+          , ALT: arr[7]
+          }}
+        }}
+      }
     , pubDate: arr[8]
     , guid: { _: arr[9], attr: { isPermaLink: arr[10] } }
     , price: arr[11]
@@ -795,8 +811,7 @@ export default class FeedParser {
     , R.split('\r\n')
     );
     const setNote = {
-      id: std.makeRandInt(9)
-    , url: ''
+      url: ''
     , category: category
     , user: user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
@@ -856,12 +871,10 @@ export default class FeedParser {
 
   setNote({ user, url, category }, obj) {
     return ({
-      id: std.makeRandInt(9)
-    , url: url
+      url: url
     , category: category
     , user: user
-    , updated:
-      std.formatDate(new Date(obj.lastBuildDate), 'YYYY/MM/DD hh:mm:ss')
+    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
     , items: obj.item
     , title: obj.title
     , asin: ''

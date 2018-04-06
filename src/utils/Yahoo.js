@@ -160,35 +160,105 @@ class Yahoo {
         });
       case 'fetch/html':
         return new Promise((resolve, reject) => {
-          let results = [];
+          osmosis.get(option.url).get({ title: 'title' })
+            .find('div#list01 tr')
+            .set({
+              description: { DIV: { A: {
+                attr: { HREF: 'td.i a@href' }
+              , IMG: { SRC: 'td.i img@src', ALT: 'td.i img@alt' }
+              } } }
+            , link: 'td.a1 a@href'
+            , category: [ 'td.a1 a.com_slider > a' ]
+            })
+            .follow('div.a1wrp > h3 > a@href')
+            .set({
+              title: 'h1.ProductTitle__text > text()'
+            , seller: {
+                name: 'span.Seller__name > a'
+              , href: 'span.Seller__name > a@href'
+              }
+            , images: [
+                'a.ProductImage__link.rapid-noclick-resp > img@src'
+              ]
+            , bids: 'li.Count__count.Count__count > dl '
+                + '> dd.Count__number > text()'
+            , bidRestTime: {
+                count: 'li.Count__count.Count__count--sideLine > dl '
+                  + '> dd.Count__number > text()'
+              , unit: 'li.Count__count.Count__count--sideLine > dl '
+                  + '> dd.Count__number > span.Count__unit'
+              }
+            , price: 'div.Price.Price--current '
+                + '> dl.Price__body > dd.Price__value > text()'
+            , buynowPrice: 'div.Price.Price--buynow '
+                + '> dl.Price__body > dd.Price__value > text()'
+            , details: [ 'dd.ProductDetail__description > text()' ]
+            })
+            .data(obj => {
+              const setImage = _obj => {
+                _obj.description.DIV.A.IMG['attr'] = R.merge({
+                  BORDER: 0, WIDTH: 134, HEIGHT: 100
+                }, _obj.description.DIV.A.IMG.attr);
+                return _obj;
+              }
+              const setPrice = obj => R.replace(/円|,/g, '', obj);
+              const setDate = R.compose(
+                R.replace(/（.）/g, ' ')
+              , R.replace(/\./g, '/')
+              );
+              const setAnchor = _obj => R.merge(_obj ,{
+                  guid: {
+                      _: _obj.details[10]
+                    , attr: { isPermaLink: false }
+                  }
+                , pubDate: new Date()
+                , price: setPrice(_obj.price)
+                , bidStopTime: setDate(_obj.details[3])
+                });
+              const images = R.map(setImage, obj.i);
+              const anchors = R.map(setAnchor, obj.a1);
+              const _item = R.zip(images, anchors);
+              const item =
+                R.map(_obj => R.merge(_obj[0], _obj[1]), _item);
+              return results = { title: obj.title, item }
+            })
+            //.log(   msg => log.trace(Yahoo.displayName, msg))
+            //.debug( msg => log.debug(Yahoo.displayName, msg))
+            .error( err => reject({ name: 'osmosis', message: err }))
+            .done(  ()  => resolve(results));
+        });
+      case 'fetch/html_':
+        return new Promise((resolve, reject) => {
+          let results;
           osmosis
             .get(options.url)
             .set({
               title: 'title'
             })
             .find('div#list01')
-            .set({ item: [ osmosis
-              .find('td.i')
-              .set({
-                pubDate: Date.now()
-              , desctiption: { DIV: { A: {
-                  attr: { HREF: 'a@href' }
+            .set({ 
+              i: [ osmosis.find('td.i').set({
+                description: { DIV: { A: {
+                  attr: {
+                    HREF: 'a@href'
+                  }
                 , IMG: { attr: {
-                    SRC: 'img@href'
+                    SRC: 'img@src'
                   , ALT: 'img@alt'
-                  , BORDER: 0, WIDTH: 134, HEIGHT: 100
                   }}
                 }}}
-              })
-              .find('td.a1')
-              .set({
+              })]
+            , a1: [ osmosis.find('td.a1').set({
                 link: 'div.a1wrp > h3 > a@href'
-              , category: [ 'p.com_slider > a' ]
+              , category: [ 'div.a1wrp > div.sinfwrp > p.com_slider > a' ]
               })
-              .follow('div.a1wrp h3 a@href')
+              .follow('div.a1wrp > h3 > a@href')
               .set({
                 title: 'h1.ProductTitle__text > text()'
-              , seller: 'span.Seller__name > a'
+              , seller: {
+                  name: 'span.Seller__name > a'
+                , url: 'span.Seller__name > a@href'
+                }
               , images: [
                   'a.ProductImage__link.rapid-noclick-resp > img@src'
                 ]
@@ -204,23 +274,40 @@ class Yahoo {
                   + '> dl.Price__body > dd.Price__value > text()'
               , buynowPrice: 'div.Price.Price--buynow '
                   + '> dl.Price__body > dd.Price__value > text()'
-              , state:          'dt.ProductDetail__description[0] > text()'
-              , number:         'dt.ProductDetail__description[1] > text()'
-              , bidStartTime:   'dt.ProductDetail__description[2] > text()'
-              , bidStopTime:    'dt.ProductDetail__description[3] > text()'
-              , autoExtention:  'dt.ProductDetail__description[4] > text()'
-              , returnExchange: 'dt.ProductDetail__description[5] > text()'
-              , bidderRating:   'dt.ProductDetail__description[6] > text()'
-              , bidderAuth:     'dt.ProductDetail__description[7] > text()'
-              , startPrice:     'dt.ProductDetail__description[8] > text()'
-              , auctionId:      'dt.ProductDetail__description[9] > text()'
-              , guid: { _: 'dt.ProductDetail__description[9] > text()' }
-              })
-            ]})
-            .data(  obj => results.push(Yahoo.displayName, obj))
-            .log(   msg => log.debug(Yahoo.displayName, msg))
-            .debug( msg => log.debug(Yahoo.displayName, msg))
-            .error( err => reject(err))
+              , details: [ 'dd.ProductDetail__description > text()' ]
+              })]
+            })
+            .data(obj => {
+              const setImage = _obj => {
+                _obj.description.DIV.A.IMG['attr'] = R.merge({
+                  BORDER: 0, WIDTH: 134, HEIGHT: 100
+                }, _obj.description.DIV.A.IMG.attr);
+                return _obj;
+              }
+              const setPrice = obj => R.replace(/円|,/g, '', obj);
+              const setDate = R.compose(
+                R.replace(/（.）/g, ' ')
+              , R.replace(/\./g, '/')
+              );
+              const setAnchor = _obj => R.merge(_obj ,{
+                  guid: {
+                      _: _obj.details[10]
+                    , attr: { isPermaLink: false }
+                  }
+                , pubDate: new Date()
+                , price: setPrice(_obj.price)
+                , bidStopTime: setDate(_obj.details[3])
+                });
+              const images = R.map(setImage, obj.i);
+              const anchors = R.map(setAnchor, obj.a1);
+              const _item = R.zip(images, anchors);
+              const item =
+                R.map(_obj => R.merge(_obj[0], _obj[1]), _item);
+              return results = { title: obj.title, item }
+            })
+            //.log(   msg => log.trace(Yahoo.displayName, msg))
+            //.debug( msg => log.debug(Yahoo.displayName, msg))
+            .error( err => reject({ name: 'osmosis', message: err }))
             .done(  ()  => resolve(results));
         });
     }

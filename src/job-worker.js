@@ -26,16 +26,14 @@ const request = (operation, { user, id, url }) => {
     case 'search':
     case 'seller':
       return yahoo.fetchHtml({ url })
-        .map(R.tap(log.trace.bind(this)))
-        .map(obj => ({ updated: Date.now(), items: obj.item }))
+        //.map(R.tap(log.trace.bind(this)))
+        .map(obj => ({ updated: new Date(), items: obj.item }))
         .flatMap(obj => feed.updateHtml({ user, id, html: obj }))
       ;
     case 'rss':
       return yahoo.fetchRss({ url })
-        .map(R.tap(log.trace.bind(this)))
-        .map(obj => ({
-          updated: new Date(obj.lastBuildDate) , items: obj.item
-        }))
+        //.map(R.tap(log.trace.bind(this)))
+        .map(obj => ({ updated: new Date() , items: obj.item }))
         .flatMap(obj => feed.updateRss({ user, id, rss: obj }))
       ;
     default:
