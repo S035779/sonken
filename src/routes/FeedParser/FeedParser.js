@@ -8,6 +8,7 @@ import std              from 'Utilities/stdutils';
 import Amazon           from 'Utilities/Amazon';
 import Yahoo            from 'Utilities/Yahoo';
 import { logs as log }  from 'Utilities/logutils';
+import js2Csv           from 'Utilities/js2Csv';
 
 dotenv.config();
 const keyset = {
@@ -846,28 +847,32 @@ export default class FeedParser {
   }
   
   toCSV(objs) {
-    const __toCSV =
-      arr => R.map(str => '"' + str + '"', arr);
-    const _toCSV =
-      arr => R.map(val => R.is(Object, val) ? R.values(val) : val, arr);
-    return R.compose(
-      R.join('\r\n')
-    , R.map(__toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.flatten)
-    , R.map(_toCSV)
-    , R.map(R.values)
-    )(objs);
-  }
+    const keys = [ 'auctionId', 'title', 'link', 'sellerName', 'sellerLink'
+      , 'bids', 'price', 'buynowPrice', 'bidStopTime', 'pubDate' ];
+    return js2Csv.of({ csv: objs, keys }).parse();
+  };
+
+  //toCSV_(objs) {
+  //  const __toCSV = R.map(str => '"' + str + '"');
+  //  const _toCSV = R.map(val => R.is(Object, val) ? R.values(val) : val);
+  //  return R.compose(
+  //   R.join('\r\n')
+  //  , R.map(__toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.flatten)
+  //  , R.map(_toCSV)
+  //  , R.map(R.values)
+  //  )(objs);
+  //}
 
   setNote({ user, url, category }, obj) {
     return ({

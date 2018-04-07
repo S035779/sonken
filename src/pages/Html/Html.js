@@ -36,7 +36,7 @@ class Html extends React.Component {
     return <html>
       <head>
       <meta charSet="utf-8" />
-      <title>WatchNote</title>
+      <title>RSS Reader !!</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
       <link rel="stylesheet"    href={ roboto_font }/>
       <link rel="stylesheet"    href={ noto_font }/>

@@ -1,6 +1,7 @@
 import MailEditor     from 'Routes/MailEditor/MailEditor';
 import { logs as log }  from 'Utilities/logutils';
 
+const displayName = 'mail';
 const mail = MailEditor.of();
 
 export default {
@@ -21,7 +22,7 @@ export default {
         , err => {
             res.status(500)
               .send({ name: err.name, message: err.message });
-            log.error(err.name, ':', err.message);
+            log.error(displayName, err.name, ':', err.message);
           }
         , () => { log.info('Complete to upload Attach.'); }  
         );
@@ -38,7 +39,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , ()  => {
           log.info('Complete to fetch Mails.');
@@ -55,7 +56,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , ()  => {
           log.info('Complete to fetch SelectedMails.');
@@ -72,7 +73,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to fetch Mail.');
@@ -89,7 +90,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Mail.');
@@ -107,7 +108,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to update Mail.');
@@ -124,7 +125,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Mail.');
@@ -141,7 +142,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Select.');
@@ -158,7 +159,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Select.');

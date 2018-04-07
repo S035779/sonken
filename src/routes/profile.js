@@ -1,6 +1,7 @@
 import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
 import { logs as log }  from 'Utilities/logutils';
 
+const displayName = 'profile';
 const profile = UserProfiler.of();
 
 export default {
@@ -13,7 +14,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , ()  => {
           log.info('Complete to fetch Users.');
@@ -29,7 +30,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to fetch Preference.');
@@ -46,7 +47,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Preference.');
@@ -63,7 +64,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to update Preference.');
@@ -80,7 +81,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Preference.');
@@ -97,7 +98,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to fetch User.');
@@ -114,7 +115,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create User.');
@@ -131,7 +132,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to update User.');
@@ -148,7 +149,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete User.');
@@ -168,7 +169,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to Logged in.');
@@ -187,7 +188,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to Logged out.');
@@ -204,7 +205,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to Sendmail.');
@@ -221,7 +222,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Approval.');
@@ -238,7 +239,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Approval.');
@@ -255,7 +256,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to Inquiry.');

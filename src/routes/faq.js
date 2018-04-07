@@ -1,6 +1,7 @@
 import FaqEditor     from 'Routes/FaqEditor/FaqEditor';
 import { logs as log }  from 'Utilities/logutils';
 
+const displayName = 'faq';
 const faq = FaqEditor.of();
 
 export default {
@@ -21,7 +22,7 @@ export default {
         , err => {
             res.status(500)
               .send({ name: err.name, message: err.message });
-            log.error(err.name, ':', err.message);
+            log.error(displayName, err.name, ':', err.message);
           }
         , () => { log.info('Complete to upload Attach.'); }  
         );
@@ -38,7 +39,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , ()  => {
           log.info('Complete to fetch Faqs.');
@@ -55,7 +56,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , ()  => {
           log.info('Complete to fetch PostedFaqs.');
@@ -72,7 +73,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to fetch Faq.');
@@ -89,7 +90,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Faq.');
@@ -107,7 +108,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to update Faq.');
@@ -124,7 +125,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Faq.');
@@ -141,7 +142,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to create Post.');
@@ -158,7 +159,7 @@ export default {
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => {
           log.info('Complete to delete Post.');

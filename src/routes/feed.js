@@ -1,6 +1,7 @@
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import { logs as log }  from 'Utilities/logutils';
 
+const displayName = 'feed';
 const feed = FeedParser.of();
 
 export default {
@@ -21,7 +22,7 @@ export default {
         , err => {
             res.status(500)
               .send({ name: err.name, message: err.message });
-            log.error(err.name, ':', err.message);
+            log.error(displayName, err.name, ':', err.message);
           }
         , () => { log.info('Complete to upload Note.'); }  
         );
@@ -37,7 +38,7 @@ export default {
       , err => {
           res.status(500)
             .send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to download Note.'); }  
       );
@@ -52,7 +53,7 @@ export default {
       , err => {
           res.status(500)
             .send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to download Items.'); }  
       );
@@ -66,7 +67,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete List.'); }  
       );
@@ -80,7 +81,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create List.'); }  
       );
@@ -94,7 +95,7 @@ export default {
         obj => {  res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete Star.'); }  
       );
@@ -108,7 +109,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Star.'); }  
       );
@@ -122,7 +123,7 @@ export default {
         obj => {  res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete Bids.'); }  
       );
@@ -136,7 +137,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Bids.'); }  
       );
@@ -150,7 +151,7 @@ export default {
         obj => {  res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete Trade.'); }  
       );
@@ -164,7 +165,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Trade.'); }  
       );
@@ -178,7 +179,7 @@ export default {
   //      obj => {  res.status(200).send(obj); }
   //    , err => {
   //        res.status(500).send({ name: err.name, message: err.message });
-  //        log.error(err.name, ':', err.message);
+  //        log.error(displayName, err.name, ':', err.message);
   //      }
   //    , () => { log.info('Complete to delete Item.'); }  
   //    );
@@ -192,7 +193,7 @@ export default {
         obj => {  res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete Read.'); }  
       );
@@ -206,7 +207,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Read.'); }  
       );
@@ -220,7 +221,7 @@ export default {
         obj => {  res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to delete Note.'); }  
       );
@@ -235,7 +236,7 @@ export default {
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to update Note.'); }  
       );
@@ -249,7 +250,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Readed.'); }  
       );
@@ -263,7 +264,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Traded.'); }  
       );
@@ -277,7 +278,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Bided.'); }  
       );
@@ -291,7 +292,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Starred.'); }  
       );
@@ -305,7 +306,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Listed.'); }  
       );
@@ -319,7 +320,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Note.'); }  
       );
@@ -333,7 +334,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to fetch Notes.'); }  
       );
@@ -347,7 +348,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Note.'); }  
       );

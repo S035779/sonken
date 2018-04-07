@@ -786,6 +786,10 @@ const numFormat = {
   }
 };
 
+/*
+ * std.dateFormat(new Date(), 'YYYY/MM/DD hh:mm');
+ *
+ */ 
 const dateFormat = {
   fmt : {
     hh:   function(date) { return ('0' + date.getHours()).slice(-2); },
