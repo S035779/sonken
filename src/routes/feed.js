@@ -172,19 +172,19 @@ export default {
     };
   },
 
-  //deleteItem(options) {
-  //  return (req, res, next) => {
-  //    const { user, ids } = req.query;
-  //    feed.deleteItem({ user, ids }).subscribe(
-  //      obj => {  res.status(200).send(obj); }
-  //    , err => {
-  //        res.status(500).send({ name: err.name, message: err.message });
-  //        log.error(displayName, err.name, ':', err.message);
-  //      }
-  //    , () => { log.info('Complete to delete Item.'); }  
-  //    );
-  //  };
-  //},
+  deleteItem(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.query;
+      feed.deleteItem({ user, ids }).subscribe(
+        obj => {  res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to delete Item.'); }  
+      );
+    };
+  },
 
   deleteRead(options) {
     return (req, res, next) => {

@@ -50,7 +50,7 @@ const worker = ({ user, id, api, options }, callback) => {
   const url = api.toString();
   request(operation, { user, id, url }).subscribe(
     obj => log.debug('[JOB]', 'data parse is proceeding...')
-  , err => log.error('[JOB]', err.name, ':', err.message)
+  , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
   , ()  => callback()
   );
 };
@@ -62,7 +62,8 @@ const main = () => {
   process.on('message', task => {
     log.debug('[JOB]', 'got message. pid:', process.pid);
     queue.push(task, err => {
-      if(err) log.error('[JOB]', err.name, ':', err.message);
+      if(err)
+        log.error('[JOB]', err.name, ':', err.message, ':', err.stak);
       log.info('[JOB]', 'finished work. pid:', process.pid);
     });
   });
@@ -82,12 +83,12 @@ process.on('warning', err => message(err));
 process.on('exit',    (code, signal) => message(null, code, signal));
 
 const message = (err, code, signal) => {
-  if(err) log.error('[JOB]', err.name, ':',  err.message);
+  if(err) log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
   else    log.info('[JOB]', `worker exit. (s/c): ${signal || code}`);
 };
 
 const shutdown = (err, cbk) => {
-  if(err) log.error('[JOB]', err.name, ':', err.message);
+  if(err) log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
   log.info('[JOB]', 'worker terminated.');
   log.info('[LOG]', 'log4js #4 terminated.');
   log.close(() => {

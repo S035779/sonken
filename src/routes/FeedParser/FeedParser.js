@@ -145,7 +145,7 @@ export default class FeedParser {
               , name:       options.data.name
               , AmazonUrl:  options.data.AmazonUrl
               , AmazonImg:  options.data.AmazonImg
-              , updated:    Date.now()
+              , updated:    new Date
               }
               : {
                 title:      options.data.title
@@ -153,7 +153,7 @@ export default class FeedParser {
               , price:      options.data.price
               , bidsprice:  options.data.bidsprice
               , body:       options.data.body
-              , updated:    Date.now()
+              , updated:    new Date
               };
           //log.debug(update.items, conditions);
           Note.update(conditions, update, (err, obj) => {
@@ -169,6 +169,22 @@ export default class FeedParser {
           , user: options.user
           };
           Note.remove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'delete/item':
+        return new Promise((resolve, reject) => {
+          const conditions = {
+            _id: options.id
+          , user: options.user
+          };
+          const update = {
+            items: options.data.items
+          , update: new Date
+          };
+          Note.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -436,7 +452,7 @@ export default class FeedParser {
     const addNote =
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
     return Yahoo.of().fetchHtml({ url })
-      .map(R.tap(log.trace.bind(this)))
+      //.map(R.tap(log.trace.bind(this)))
       .map(obj => this.setNote({ user, url, category }, obj))
       .flatMap(addNote);
   }
@@ -666,11 +682,11 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //deleteItem({ user, ids }) {
-  //  const _ids = R.split(',', ids);
-  //  const promises = R.map(id => this.removeItem(user, id));
-  //  return Rx.Observable.forkJoin(promises(_ids));
-  //}
+  deleteItem({ user, ids }) {
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeItem(user,id));
+    return Rx.Observable.forkJoin(promises(_ids));
+  }
 
   createRead({ user, ids }) {
     const promises = R.map(id => this.getNote(user, id));
@@ -696,18 +712,10 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteRead({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeRead(user, id));
-  //}
-
   createTrade({ user, ids }) {
     const promises = R.map(id => this.addTrade(user, id));
     return Rx.Observable.forkJoin(promises(ids));
   }
-
-  //_createTrade({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.addTrade(user, id));
-  //}
 
   deleteTrade({ user, ids }) {
     const _ids = R.split(',', ids);
@@ -715,18 +723,10 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteTrade({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeTrade(user, id));
-  //}
-
   createBids({ user, ids }) {
     const promises = R.map(id => this.addBids(user, id));
     return Rx.Observable.forkJoin(promises(ids));
   }
-
-  //_createBids({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.addBids(user, id));
-  //}
 
   deleteBids({ user, ids }) {
     const _ids = R.split(',', ids);
@@ -734,18 +734,10 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteBids({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeBids(user, id));
-  //}
-
   createStar({ user, ids }) {
     const promises = R.map(id => this.addStar(user, id));
     return Rx.Observable.forkJoin(promises(ids));
   }
-
-  //_createStar({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.addStar(user, id));
-  //}
 
   deleteStar({ user, ids }) {
     const _ids = R.split(',', ids);
@@ -753,18 +745,10 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteStar({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeStar(user, id));
-  //}
-
   createList({ user, ids }) {
     const promises = R.map(id => this.addList(user, id));
     return Rx.Observable.forkJoin(promises(ids));
   }
-
-  //_createList({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.addList(user, id));
-  //}
 
   deleteList({ user, ids }) {
     const _ids = R.split(',', ids);
@@ -772,51 +756,55 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  //_deleteList({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.removeList(user, id));
-  //}
-
   uploadNote({ user, category, file }) {
-    const csv = file.toString();
-    const _toArr = R.map(R.slice(1, Infinity));
-    const toArr = R.split('",');
-    const setItem = arr => ({
-      title:  arr[0]
-    , link: arr[1]
-    , description: {
-        DIV: { A: {
-          attr: { HREF: arr[2] }
-        , IMG: { attr: {
-            SRC: arr[3]
-          , BORDER: arr[4]
-          , WIDTH: arr[5]
-          , HEIGHT: arr[6]
-          , ALT: arr[7]
-          }}
+    const data = this.setObj({ user, category, file });
+    return Rx.Observable.fromPromise(this.addNote(user, data));
+  }
+
+  setObj({ user, category, file }) {
+    const toRcords = R.split('"\n');
+    const toColumn = R.map(R.split('",'));
+    const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+    const toCutRec = R.filter(objs => R.length(objs) > 1);
+    const setItems = R.map(arr => ({
+      title:            arr[0]
+    , link:             arr[1]
+    , description: { DIV: { A: {
+        attr: {
+          HREF:         arr[2]
+        }
+      , IMG: { attr: {
+          SRC:          arr[3]
+        , BORDER:       arr[4]
+        , WIDTH:        arr[5]
+        , HEIGHT:       arr[6]
+        , ALT:          arr[7]
         }}
-      }
-    , pubDate: arr[8]
-    , guid: { _: arr[9], attr: { isPermaLink: arr[10] } }
-    , price: arr[11]
-    , bids: arr[12]
-    , bidStopTime: arr[13]
-    , readed: arr[14].substring(0,5) === 'false' ? false : true
-    , listed: arr[15].substring(0,5) === 'false' ? false : true
-    , starred: arr[16].substring(0,5) === 'false' ? false : true
-    });
-    const setItems = R.compose(
-      R.map(setItem)
-    //, R.tap(console.log)
-    , R.map(_toArr)
-    , R.map(toArr)
-    , R.split('\r\n')
-    );
-    const setNote = {
+      }}}
+    , attr_HREF:        arr[2]
+    , img_SRC:          arr[3]
+    , img_BORDER:       arr[4]
+    , img_WIDTH:        arr[5]
+    , img_HEIGHT:       arr[6]
+    , img_ALT:          arr[7]
+    , pubDate:          arr[8]
+    , guid: {
+        _:              arr[9]
+      , attr: {
+        isPermaLink:    arr[10]
+      }}
+    , guid__:           arr[9]
+    , guid_isPermaLink: arr[10]
+    , price:            arr[11]
+    , bids:             arr[12]
+    , bidStopTime:      arr[13]
+    }));
+    const setNote = objs => ({
       url: ''
-    , category: category
-    , user: user
+    , category
+    , user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , items: setItems(csv)
+    , items: objs
     , title: 'Untitled'
     , asin: ''
     , name: ''
@@ -825,54 +813,48 @@ export default class FeedParser {
     , body: ''
     , AmazonUrl: ''
     , AmazonImg: ''
-    };
-    return Rx.Observable.fromPromise(this.addNote(user, setNote));
-      //.map(R.tap(console.log));
+    });
+    return R.compose(
+      setNote
+    , setItems
+    , toCutRec
+    , toCutHed
+    , toColumn
+    , toRcords
+    )(file.toString());
   }
-
-  //_downloadNote({ user, id }) {
-  //  return Rx.Observable.fromPromise(this.downNote({ user, id }));
-  //}
 
   downloadNote({ user, id }) {
     return this.fetchNote({user, id})
-      .map(obj => obj.items ? this.toCSV(obj.items) : null)
+      .map(obj => obj.items ? this.setCsv(obj.items) : null)
       .map(obj => new Buffer(obj));
   }
   
   downloadItems({ user, items }) {
     return this.fetchItems({ user, items })
-      .map(objs => this.toCSV(objs))
+      .map(objs => this.setCsv(objs))
       .map(obj => new Buffer(obj));
   }
   
-  toCSV(objs) {
-    const keys = [ 'auctionId', 'title', 'link', 'sellerName', 'sellerLink'
-      , 'bids', 'price', 'buynowPrice', 'bidStopTime', 'pubDate' ];
+  setCsv(objs) {
+    const keys = [
+      'title'
+    , 'link'
+    , 'attr_HREF'
+    , 'img_SRC'
+    , 'img_BORDER'
+    , 'img_WIDTH'
+    , 'img_HEIGHT'
+    , 'img_ALT'
+    , 'pubDate'
+    , 'guid__'
+    , 'guid_isPermaLink'
+    , 'price'
+    , 'bids'
+    , 'bidStopTime'
+    ];
     return js2Csv.of({ csv: objs, keys }).parse();
   };
-
-  //toCSV_(objs) {
-  //  const __toCSV = R.map(str => '"' + str + '"');
-  //  const _toCSV = R.map(val => R.is(Object, val) ? R.values(val) : val);
-  //  return R.compose(
-  //   R.join('\r\n')
-  //  , R.map(__toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.flatten)
-  //  , R.map(_toCSV)
-  //  , R.map(R.values)
-  //  )(objs);
-  //}
 
   setNote({ user, url, category }, obj) {
     return ({

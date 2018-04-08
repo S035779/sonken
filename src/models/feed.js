@@ -5,9 +5,29 @@ import { logs as log }  from 'Utilities/logutils';
 dotenv.config();
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
+const itemSchema = new mongoose.Schema({
+  title:            { type: String, required: true }
+, link:             { type: String, required: true }
+, description:      { type: Object, required: true }
+, attr_HREF:        { type: String, required: true }
+, img_SRC:          { type: String, required: true }
+, img_ALT:          { type: String, required: true }
+, img_BORDER:       Number
+, img_WIDTH:        Number
+, img_HEIGHT:       Number
+, guid:             { type: Object, required: true }
+, guid__:           { type: String, required: true }
+, guid_isPermaLink: Boolean
+, bids:             String
+, price:            String
+, details:          { type: Array, required: true }
+, bidStopTime:      Date
+, pubDate:          { type: Date, default: Date.now() }
+});
+
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
-, url:              { type: String, required: true }
+, url:              String
 , category:         { type: String, required: true }
 , title:            { type: String, required: true }
 , asin:             String
@@ -15,7 +35,7 @@ const noteSchema = new mongoose.Schema({
 , price:            Number
 , bidsprice:        Number
 , body:             String
-, items:            [mongoose.Schema.Types.Mixed]
+, items:            [itemSchema]
 , AmazonUrl:        String
 , AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 

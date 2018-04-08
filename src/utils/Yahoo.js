@@ -169,37 +169,25 @@ class Yahoo {
                 .find('div#list01 tr')
                 .filter('td.i, td.a1')
                 .set({
-                  description: { DIV: { A: {
-                    attr: {
-                      HREF: 'div.th a@href'
-                    }
+                  link: 'div.a1wrp a@href'
+                , attr_HREF : 'div.th a@href'
+                , img_SRC:    'div.th img@src' 
+                , img_ALT:    'div.th img@alt'
+                , description: {
+                    DIV: { A: {
+                      attr: { HREF: 'div.th a@href' }
                   , IMG: { attr: {
                       SRC:  'div.th img@src'
                     , ALT: 'div.th img@alt'
                     }}
                   }}}
-                , link: 'div.a1wrp a@href'
-                , category: [ 'div.a1wrp p.com_slider > a' ]
                 })
                 .follow('div.a1wrp h3 a')
                 .set({
                   title: 'h1.ProductTitle__text > text()'
-                , sellerName: 'span.Seller__name > a'
-                , sellerLink: 'span.Seller__name > a@href'
-                , images: [
-                    'a.ProductImage__link.rapid-noclick-resp > img@src'
-                  ]
                 , bids: 'li.Count__count.Count__count > dl '
                     + '> dd.Count__number > text()'
-                , bidRestTime: {
-                    count: 'li.Count__count.Count__count--sideLine > dl '
-                      + '> dd.Count__number > text()'
-                  , unit: 'li.Count__count.Count__count--sideLine > dl '
-                      + '> dd.Count__number > span.Count__unit'
-                  }
                 , price: 'div.Price.Price--current '
-                    + '> dl.Price__body > dd.Price__value > text()'
-                , buynowPrice: 'div.Price.Price--buynow '
                     + '> dl.Price__body > dd.Price__value > text()'
                 , details: [ 'dd.ProductDetail__description > text()' ]
                 })
@@ -210,14 +198,19 @@ class Yahoo {
                 _obj.description.DIV.A.IMG['attr'] = R.merge({
                   BORDER: 0, WIDTH: 134, HEIGHT: 100
                 }, _obj.description.DIV.A.IMG.attr);
-                return _obj;
+                return R.merge(_obj, {
+                  img_BORDER: 0
+                , img_WIDTH:  134
+                , img_HEIGHT: 100
+                });
               }
               const setAuctionId    = _obj => R.merge(_obj, {
                 guid: {
                   _:    _obj.details[10]
                 , attr: { isPermaLink: false }
                 }
-              , auctionId: _obj.details[10]
+              , guid__: _obj.details[10]
+              , guid_isPermaLink: false
               });
               const setPubDate      = _obj => 
                 R.merge(_obj, {
@@ -228,26 +221,19 @@ class Yahoo {
               const setPrice        = _obj => _obj.price
                 ? R.merge(_obj, { price: _setPrice(_obj.price) })
                 : R.merge(_obj, { price: '-' });
-              const setBuyNowPrice  = _obj => _obj.buynowPrice
-                ? R.merge(_obj, {
-                    buynowPrice: _setPrice(_obj.buynowPrice) })
-                : R.merge(_obj, {
-                    buynowPrice: '-' });
               const _setDate = R.compose(
                 R.replace(/（.）/g, ' ')
               , R.replace(/\./g, '/')
               );
               const setBidStopTime  = _obj => R.merge(_obj, {
-                bidStopTime: _setDate(_obj.details[3]) });
+                bidStopTime: _setDate(_obj.details[3])
+              });
               const setItem = R.compose(
-                setBuyNowPrice
-              //, R.tap(log.trace.bind(this))
-              , setPrice
+                setPrice
               , setBidStopTime
               , setPubDate
               , setAuctionId
               , setImage
-              //, R.tap(log.trace.bind(this))
               );
               const setItems = R.compose(
                 R.map(setItem)

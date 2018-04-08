@@ -65,7 +65,7 @@ export default class MailEditor {
               user:     options.admin
             , title:    options.data.title
             , body:     options.data.body
-            , updated:  Date.now()
+            , updated:  new Date
             };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
@@ -125,7 +125,7 @@ export default class MailEditor {
           const update = {
             user:     options.admin
           , file:     options.file
-          , updated:  Date.now()
+          , updated:  new Date
           };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);

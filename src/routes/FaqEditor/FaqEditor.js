@@ -64,7 +64,7 @@ export default class FaqEditor {
               user:     options.admin
             , title:    options.data.title
             , body:     options.data.body
-            , updated:  Date.now()
+            , updated:  new Date
             };
           Faq.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
@@ -124,7 +124,7 @@ export default class FaqEditor {
           const update = {
             user:     options.admin
           , file:     options.file
-          , update:   Date.now()
+          , update:   new Date
           };
           Faq.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);

@@ -161,7 +161,7 @@ export default class UserProfiler {
             , email:    options.data.email
             , phone:    options.data.phone
             , plan:     options.data.plan
-            , updated:  Date.now()
+            , updated:  new Date
             }
             : isData && isPass 
               ? {
@@ -172,7 +172,7 @@ export default class UserProfiler {
               , plan:   options.data.plan
               , salt:   options.salt
               , hash:   options.hash
-              , updated: Date.now()
+              , updated: new Date
               }
               : isData
                 ? {
@@ -181,12 +181,12 @@ export default class UserProfiler {
                 , email:  options.data.email
                 , phone:  options.data.phone
                 , plan:   options.data.plan
-                , updated: Date.now()
+                , updated: new Date
                 }
                 : {
                   salt:   options.salt
                 , hash:   options.hash
-                , updated: Date.now()
+                , updated: new Date
                 };
           //log.debug(conditions, update);
           User.update(conditions, update, (err, obj) => {
@@ -329,7 +329,7 @@ export default class UserProfiler {
           , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
-          , updated:        Date.now()
+          , updated:        new Date
           };
           Admin.update(conditions, update, (err, obj) => {
             if(err) return reject(err);

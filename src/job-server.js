@@ -52,6 +52,7 @@ const request = queue => {
     .map(R.map(obj => obj.user))
     .flatMap(objs => feed.fetchAllNotes({ users: objs }))
     .map(R.flatten)
+    .map(R.filter(obj => obj.url !== ''))
     .map(R.map(obj => ({ user: obj.user, id: obj._id, api: obj.url })))
     .map(R.map(obj => queue.push(obj, err => {
       if(err) log.error('[JOB]', err.name, ':', err.message);
