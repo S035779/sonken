@@ -172,20 +172,6 @@ export default {
     };
   },
 
-  deleteItem(options) {
-    return (req, res, next) => {
-      const { user, ids } = req.query;
-      feed.deleteItem({ user, ids }).subscribe(
-        obj => {  res.status(200).send(obj); }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message);
-        }
-      , () => { log.info('Complete to delete Item.'); }  
-      );
-    };
-  },
-
   deleteRead(options) {
     return (req, res, next) => {
       const { user, ids } = req.query;
@@ -210,6 +196,62 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to create Read.'); }  
+      );
+    };
+  },
+
+  deleteAdd(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.query;
+      feed.deleteAdd({ user, ids }).subscribe(
+        obj => {  res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to delete Add.'); }  
+      );
+    };
+  },
+
+  createAdd(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.body;
+      feed.createAdd({ user, ids }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to create Add.'); }  
+      );
+    };
+  },
+
+  deleteDelete(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.query;
+      feed.deleteDelete({ user, ids }).subscribe(
+        obj => {  res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to delete Delete.'); }  
+      );
+    };
+  },
+
+  createDelete(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.body;
+      feed.createDelete({ user, ids }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to create Delete.'); }  
       );
     };
   },
@@ -239,6 +281,34 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to update Note.'); }  
+      );
+    };
+  },
+
+  fetchAddedNotes(options) {
+    return (req, res, next) => {
+      const { user } = req.query;
+      feed.fetchAddedNotes({ user }).subscribe(
+        obj => { res.json(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to fetch Added.'); }  
+      );
+    };
+  },
+
+  fetchDeletedNotes(options) {
+    return (req, res, next) => {
+      const { user } = req.query;
+      feed.fetchDeletedNotes({ user }).subscribe(
+        obj => { res.json(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to fetch Deleted.'); }  
       );
     };
   },

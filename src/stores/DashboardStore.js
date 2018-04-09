@@ -47,6 +47,46 @@ export default class DashboardStore extends ReduceStore {
     return state.notes.map(note => isNote(note) ? setNote(note) : note);
   }
 
+  createAdd(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { added: true }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
+  }
+
+  deleteAdd(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { added: false }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
+  }
+
+  createDelete(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { deleted: true }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
+  }
+
+  deleteDelete(state, action) {
+    const isItem = obj => action.ids.some(id => id === obj.guid._);
+    const setItem = obj => isItem(obj)
+      ? Object.assign({}, obj, { deleted: false }) : obj;
+    const setItems = objs => objs.map(setItem)
+    const setNote = obj => obj.items
+      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
+    return state.notes.map(setNote);
+  }
+
   createStar(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
     const setItem = obj => isItem(obj)
@@ -134,6 +174,26 @@ export default class DashboardStore extends ReduceStore {
       case 'note/download':
         return Object.assign({}, state, {
           file:  action.file
+        });
+      case 'add/create':
+        return Object.assign({}, state, {
+          notes: this.createAdd(state, action)
+        , ids:    []
+        });
+      case 'add/delete':
+        return Object.assign({}, state, {
+          notes: this.deleteAdd(state, action)
+        , ids:    []
+        });
+      case 'delete/create':
+        return Object.assign({}, state, {
+          notes: this.createDelete(state, action)
+        , ids:    []
+        });
+      case 'delete/delete':
+        return Object.assign({}, state, {
+          notes: this.deleteDelete(state, action)
+        , ids:    []
         });
       case 'read/create':
         return Object.assign({}, state, {

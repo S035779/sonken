@@ -194,24 +194,24 @@ class Yahoo {
               ]
             })
             .data(obj => {
+              const setSize         = _obj =>
+                R.merge(_obj
+                  , { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
               const setImage        = _obj => {
                 _obj.description.DIV.A.IMG['attr'] = R.merge({
                   BORDER: 0, WIDTH: 134, HEIGHT: 100
                 }, _obj.description.DIV.A.IMG.attr);
-                return R.merge(_obj, {
-                  img_BORDER: 0
-                , img_WIDTH:  134
-                , img_HEIGHT: 100
-                });
+                return _obj;
               }
-              const setAuctionId    = _obj => R.merge(_obj, {
-                guid: {
-                  _:    _obj.details[10]
-                , attr: { isPermaLink: false }
-                }
-              , guid__: _obj.details[10]
-              , guid_isPermaLink: false
-              });
+              const setAuctionId    = _obj =>
+                R.merge(_obj, {
+                  guid: {
+                    _:    _obj.details[10]
+                  , attr: { isPermaLink: false }
+                  }
+                , guid__: _obj.details[10]
+                , guid_isPermaLink: false
+                });
               const setPubDate      = _obj => 
                 R.merge(_obj, {
                   pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
@@ -221,28 +221,22 @@ class Yahoo {
               const setPrice        = _obj => _obj.price
                 ? R.merge(_obj, { price: _setPrice(_obj.price) })
                 : R.merge(_obj, { price: '-' });
-              const _setDate = R.compose(
-                R.replace(/（.）/g, ' ')
-              , R.replace(/\./g, '/')
-              );
-              const setBidStopTime  = _obj => R.merge(_obj, {
-                bidStopTime: _setDate(_obj.details[3])
-              });
-              const setItem = R.compose(
-                setPrice
-              , setBidStopTime
-              , setPubDate
-              , setAuctionId
-              , setImage
-              );
-              const setItems = R.compose(
-                R.map(setItem)
+              const _setDate        =
+                R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
+              const setBidStopTime  = _obj =>
+                R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
+              const setItems = objs => ({ title: obj.title, item:  objs });
+              return results = R.compose(
+                setItems
+              , R.map(setPrice)
+              , R.map(setBidStopTime)
+              , R.map(setPubDate)
+              , R.filter(_obj => !!_obj.guid__)
+              , R.map(setAuctionId)
+              , R.map(setSize)
+              , R.map(setImage)
               , R.filter(R.is(Object))
-              );
-              return results = {
-                title: obj.title
-              , item: setItems(obj.item)
-              };
+              )(obj.item);
             })
             //.log(   msg => log.trace(Yahoo.displayName, msg))
             //.debug( msg => log.debug(Yahoo.displayName, msg))

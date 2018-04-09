@@ -119,16 +119,46 @@ export default {
           );
         });
         break;
-      //case 'delete/item':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.deleteJSON(
-      //      api + '/item'
-      //    , options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
-      //  break;
+      case 'create/added':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/added'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/added':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/added'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'create/deleted':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/deleted'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
+      case 'delete/deleted':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/deleted'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+        break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -334,9 +364,6 @@ export default {
   deleteNote(user, ids) {
     return this.request('delete/note', { user, ids });
   },
-  //deleteItem(user, ids) {
-  //  return this.request('delete/item', { user, ids });
-  //},
   uploadNote(user, category, file) {
     const filename = user + '_' + category;
     const filedata = file;
@@ -398,6 +425,26 @@ export default {
       endBidding, allBidding, inBidding, bidStartTime, bidStopTime
     };
     return this.request('filter/bided', { user, filter });
+  },
+
+  /*
+   *  Add
+   */
+  createAdd(user, ids) {
+    return this.request('create/added', { user, ids });
+  },
+  deleteAdd(user, ids) {
+    return this.request('delete/added', { user, ids });
+  },
+
+  /*
+   *  Delete
+   */
+  createDelete(user, ids) {
+    return this.request('create/deleted', { user, ids });
+  },
+  deleteDelete(user, ids) {
+    return this.request('delete/deleted', { user, ids });
   },
 
   /*

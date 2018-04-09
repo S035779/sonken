@@ -24,6 +24,7 @@ const itemSchema = new mongoose.Schema({
 , bidStopTime:      Date
 , pubDate:          { type: Date, default: Date.now() }
 });
+//itemSchema.index({ guid__: 1 }, { unique: true });
 
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
@@ -41,6 +42,20 @@ const noteSchema = new mongoose.Schema({
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
 noteSchema.set('toObject');
+
+const addedSchema = new mongoose.Schema({
+  user:             { type: String, required: true } 
+, added:            { type: String, required: true }
+, created:          { type: Date, default: Date.now() }
+}, { collection: 'added' });
+addedSchema.index({ added: 1 }, { unique: true });
+
+const deletedSchema = new mongoose.Schema({
+  user:             { type: String, required: true } 
+, deleted:          { type: String, required: true }
+, created:          { type: Date, default: Date.now() }
+}, { collection: 'deleted' });
+deletedSchema.index({ deleted: 1 }, { unique: true });
 
 const readedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
@@ -86,6 +101,8 @@ db.openUri(mdb_url + '/feed');
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'feed terminated.')));
 export const Note     = db.model('Note',    noteSchema);
+export const Added    = db.model('Added',   addedSchema);
+export const Deleted  = db.model('Deleted', deletedSchema);
 export const Readed   = db.model('Readed',  readedSchema);
 export const Traded   = db.model('Traded',  tradedSchema);
 export const Bided    = db.model('Bided',   bidedSchema);

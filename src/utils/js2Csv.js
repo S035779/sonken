@@ -1,4 +1,5 @@
 import R from 'ramda';
+import std from 'Utilities/stdutils';
 
 class js2Csv {
   constructor(data, keys = false) {
@@ -79,8 +80,11 @@ class js2Csv {
   static prepare(field) {
     field = R.isNil(field)
       ? ''
-      : R.is(Object, field) || R.is(Array, field)
-        ? JSON.stringify(field) : field;
+      : R.is(Date, field) 
+        ? std.formatDate(new Date(field), 'YYYY/MM/DD hh:mm')
+        : R.is(Object, field) || R.is(Array, field)
+          ? JSON.stringify(field)
+          : field;
     return '"' + (''+field).replace(/"/g, '""') + '"'
   }
 

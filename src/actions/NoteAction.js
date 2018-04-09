@@ -112,6 +112,34 @@ export default {
       })
     ;
   },
+  createAdd(user, ids) {
+    return NoteApiClient.createAdd(user, ids)
+      .then(() => {
+        dispatch({ type: 'add/create', ids });
+      })
+    ;
+  },
+  deleteAdd(user, ids) {
+    return NoteApiClient.deleteAdd(user, ids)
+      .then(() => {
+        dispatch({ type: 'add/delete', ids });
+      })
+    ;
+  },
+  createDelete(user, ids) {
+    return NoteApiClient.createDelete(user, ids)
+      .then(() => {
+        dispatch({ type: 'delete/create', ids });
+      })
+    ;
+  },
+  deleteDelete(user, ids) {
+    return NoteApiClient.deleteDelete(user, ids)
+      .then(() => {
+        dispatch({ type: 'delete/delete', ids });
+      })
+    ;
+  },
   createRead(user, ids) {
     return NoteApiClient.createRead(user, ids)
       .then(() => {

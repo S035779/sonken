@@ -144,17 +144,23 @@ router.route('/listed')
 .post(feed.notImplemented())
 .delete(feed.deleteList());
 
-//router.route('/item')
-//.get(feed.notImplemented())
-//.put(feed.notImplemented())
-//.post(feed.notImplemented())
-//.delete(feed.deleteItem());
-
 router.route('/readed')
 .get(feed.fetchReadedNotes())
 .put(feed.createRead())
 .post(feed.notImplemented())
 .delete(feed.deleteRead());
+
+router.route('/deleted')
+.get(feed.fetchDeletedNotes())
+.put(feed.createDelete())
+.post(feed.notImplemented())
+.delete(feed.deleteDelete());
+
+router.route('/added')
+.get(feed.fetchAddedNotes())
+.put(feed.createAdd())
+.post(feed.notImplemented())
+.delete(feed.deleteAdd());
 
 router.route('/file')
 .get(feed.downloadNote())

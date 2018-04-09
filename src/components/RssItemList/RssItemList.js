@@ -6,20 +6,24 @@ import std                  from 'Utilities/stdutils';
 
 import { withStyles }       from 'material-ui/styles';
 import {
-  List, Paper, Checkbox, Button, Typography
+  List, Paper, Checkbox, Button, Typography, IconButton
 }                           from 'material-ui';
 import {
   ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
 }                           from 'material-ui/List';
-import { Star, StarBorder } from 'material-ui-icons';
+import {
+  Star, StarBorder, Delete, NewReleases
+}                           from 'material-ui-icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
 class RssItemList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      listed:  []
-    , starred: []
+      listed:   []
+    , starred:  []
+    , added:    []
+    , deleted:  []
     };
   }
 
@@ -28,11 +32,15 @@ class RssItemList extends React.Component {
     const { items } = nextProps;
     let listed = [];
     let starred = [];
+    let deleted = [];
+    let added = [];
     items.forEach(item => {
       if(item.listed) listed.push(item.guid._);
       if(item.starred) starred.push(item.guid._);
+      if(item.deleted) deleted.push(item.guid._);
+      if(item.added)   added.push(item.guid._);
     });
-    this.setState({ listed, starred });
+    this.setState({ listed, starred, deleted, added });
   }
 
   handleChangeListed(id, event) {
@@ -67,19 +75,68 @@ class RssItemList extends React.Component {
     this.setState({ starred: newStarred });
   }
 
+  handleChangeDeleted(id, event) {
+    std.logInfo(RssItemList.displayName, 'handleChangeDeleted', id);
+    const { deleted } = this.state;
+    const { user } = this.props;
+    const currentIndex = deleted.indexOf(id);
+    const newDeleted = [...deleted];
+    if (currentIndex === -1) {
+      newDeleted.push(id);
+      NoteAction.createDelete(user, [id]);
+    } else {
+      newDeleted.splice(currentIndex, 1);
+      NoteAction.deleteDelete(user, [id]);
+    }
+    this.setState({ deleted: newDeleted });
+  }
+
+  handleChangeAdded(id, event) {
+    std.logInfo(RssItemList.displayName, 'handleChangeAdded', id);
+    const { added } = this.state;
+    const { user } = this.props;
+    const currentIndex = added.indexOf(id);
+    const newAdded = [...added];
+    if (currentIndex === -1) {
+      newAdded.push(id);
+      NoteAction.createAdd(user, [id]);
+    } else {
+      newAdded.splice(currentIndex, 1);
+      NoteAction.deleteAdd(user, [id]);
+    }
+    this.setState({ added: newAdded });
+  }
+
+  handleMouseLeaveAdded(id, event) {
+    std.logInfo(RssItemList.displayName, 'handleMouseLeaveAdded', id);
+    const { added } = this.state;
+    const { user } = this.props;
+    const currentIndex = added.indexOf(id);
+    const newAdded = [...added];
+    if (currentIndex === -1) {
+      newAdded.splice(currentIndex, 1);
+      NoteAction.createAdd(user, [id]);
+    }
+    this.setState({ added: newAdded });
+  }
+
   renderStar() {
     const { classes } = this.props;
-    return <Star className={classes.star}/>;
+    return <Star />;
   }
 
   renderUnStar() {
     const { classes } = this.props;
-    return <StarBorder className={classes.star}/>;
+    return <StarBorder />;
+  }
+
+  renderNewReleases() {
+    return <NewReleases color="error"/>
   }
 
   renderItem(index, item) {
     const { classes } = this.props;
-    const { listed, starred } = this.state;
+    const { listed, starred, added, deleted } = this.state;
     const textClass = {
       primary: classes.primary
     , secondary: classes.secondary
@@ -90,22 +147,36 @@ class RssItemList extends React.Component {
       ? '入札リスト 登録済み' : '入札リスト 登録';
     const title = `出品件名：${item.title}`;
     const description = 
-        `配信時間：${
-          std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
-      + `現在価格：${item.price}円、`
-      + `入札数：${item.bids}、`
-      + `入札終了時間：${item.bidStopTime}、`
-      + `AuctionID：${item.guid._}`
+      `配信時間：${
+        std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm')
+      }、`
+    + `現在価格：${item.price}円、`
+    + `入札数：${item.bids}、`
+    + `入札終了時間：${
+        std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm')
+      }、`
+    + `AuctionID：${item.guid._}`
     ;
     const notice = '';
     const renderStar = starred.indexOf(item.guid._) !== -1
       ? this.renderStar() : this.renderUnStar();
+    const renderNewReleases = added.indexOf(item.guid._) !== -1
+      ? null : this.renderNewReleases();
+    if(deleted.indexOf(item.guid._) !== -1) return;
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters
-          onClick={this.handleChangeStarred.bind(this, item.guid._)}
+        <ListItem dense disableGutters
+          onMouseLeave={
+            this.handleMouseLeaveAdded.bind(this, item.guid._)}
           className={classes.listItem}>
-          <ListItemIcon>{renderStar}</ListItemIcon>
+            <IconButton
+              onClick={this.handleChangeStarred.bind(this, item.guid._)}>
+              {renderStar}
+            </IconButton>
+            <IconButton
+              onClick={this.handleChangeAdded.bind(this, item.guid._)}>
+              {renderNewReleases}
+            </IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF}>
               <img src={item.description.DIV.A.IMG.attr.SRC}
@@ -125,6 +196,10 @@ class RssItemList extends React.Component {
               <RssButton color={buttonColor}
                 onClick={this.handleChangeListed.bind(this, item.guid._)}
                 classes={classes.button}>{buttonText}</RssButton>
+              <IconButton
+                onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
+                <Delete />
+              </IconButton>
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>
@@ -149,7 +224,6 @@ noteItem:       { display: 'flex', flexDirection: 'row'
                   backgroundColor: theme.palette.primary.main
                   , '& $star': { color: theme.palette.common.white }}}
 , listItemText: { marginRight: descMinWidth }
-, star:         { marginLeft: theme.spacing.unit }
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {

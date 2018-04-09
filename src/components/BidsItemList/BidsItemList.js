@@ -69,19 +69,24 @@ class BidsItemList extends React.Component {
     const buttonText = bided.indexOf(item.guid._) !== -1
       ? '取引チェック 登録済み' : '取引チェック 登録';
     const title = `出品件名：${item.title}`;
-    const description = `配信時間：${
-      std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
-      + `現在価格：${item.price}円、`
-      + `入札数：${item.bids}、`
-      + `入札終了時間：${item.bidStopTime}、`
-      + `AuctionID：${item.guid._}`;
+    const description =
+      `配信時間：${
+        std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm')
+      }、`
+    + `現在価格：${item.price}円、`
+    + `入札数：${item.bids}、`
+    + `入札終了時間：${
+        std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm')
+      }、`
+    + `AuctionID：${item.guid._}`
+    ;
     return <div key={index} className={classes.noteItem}>
       <Checkbox className={classes.checkbox}
         onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
         checked={selectedItemId.indexOf(item.guid._) !== -1}
         tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters
+        <ListItem dense disableGutters
           className={classes.listItem}>
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF}>

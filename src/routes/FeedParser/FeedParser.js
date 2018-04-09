@@ -2,7 +2,7 @@ import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import mongoose         from 'mongoose';
-import { Note, Readed, Traded, Bided, Starred, Listed }
+import { Note, Added, Deleted, Readed, Traded, Bided, Starred, Listed }
                         from 'Models/feed';
 import std              from 'Utilities/stdutils';
 import Amazon           from 'Utilities/Amazon';
@@ -38,6 +38,22 @@ export default class FeedParser {
           Note.find(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'fetch/added':
+        return new Promise((resolve, reject) => {
+          const conditions = { user: options.user };
+          Added.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            resolve(obj);
+          });
+        });
+      case 'fetch/deleted':
+        return new Promise((resolve, reject) => {
+          const conditions = { user: options.user };
+          Deleted.find(conditions, (err, obj) => {
+            if(err) return reject(err);
             resolve(obj);
           });
         });
@@ -174,17 +190,63 @@ export default class FeedParser {
             resolve(obj);
           });
         });
-      case 'delete/item':
+      case 'create/added':
         return new Promise((resolve, reject) => {
+          //log.debug(request, options);
           const conditions = {
-            _id: options.id
-          , user: options.user
+            added: options.id
+          , user:   options.user
           };
           const update = {
-            items: options.data.items
-          , update: new Date
+            added: options.id
+          , user:   options.user
           };
-          Note.update(conditions, update, (err, obj) => {
+          Added.update(conditions, update, { upsert: true }
+          , (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'delete/added':
+        return new Promise((resolve, reject) => {
+          //log.debug(request, options);
+          const conditions = {
+            added: options.id
+          , user:   options.user
+          };
+          Added.remove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'create/deleted':
+        return new Promise((resolve, reject) => {
+          //log.debug(request, options);
+          const conditions = {
+            deleted: options.id
+          , user:   options.user
+          };
+          const update = {
+            deleted: options.id
+          , user:   options.user
+          };
+          Deleted.update(conditions, update, { upsert: true }
+          , (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'delete/deleted':
+        return new Promise((resolve, reject) => {
+          //log.debug(request, options);
+          const conditions = {
+            deleted: options.id
+          , user:   options.user
+          };
+          Deleted.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -392,9 +454,21 @@ export default class FeedParser {
     return this.request('delete/readed', { user, id });
   }
 
-  removeItem(user, id) {
-    return this.request('delete/item', { user, id });
-  }
+  addAdd(user, id) {
+    return this.request('create/added', { user, id });
+  };
+
+  removeAdd(user, id) {
+    return this.request('delete/added', { user, id });
+  };
+
+  addDelete(user, id) {
+    return this.request('create/deleted', { user, id });
+  };
+
+  removeDelete(user, id) {
+    return this.request('delete/deleted', { user, id });
+  };
 
   removeNote(user, id) {
     return this.request('delete/note', { user, id });
@@ -431,6 +505,14 @@ export default class FeedParser {
   getReaded(user) {
     return this.request('fetch/readed', { user });
   }
+
+  getAdded(user) {
+    return this.request('fetch/added', { user });
+  };
+
+  getDeleted(user) {
+    return this.request('fetch/deleted', { user });
+  };
 
   getNote(user, id) {
     return this.request('fetch/note', { user, id });
@@ -489,14 +571,42 @@ export default class FeedParser {
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
+    , this.getDeleted(user)
+    , this.getAdded(user)
     , this.getNotes(user)
     ]);
     const setAttribute = objs => R.compose(
-      this.setReaded(objs[2])
+      this.setAdded(objs[4])
+    , this.setDeleted(objs[3])
+    , this.setReaded(objs[2])
     , this.setListed(objs[1])
     , this.setStarred(objs[0])
     , this.toObject
-    )(objs[3]);
+    )(objs[5]);
+    return observables.map(setAttribute);
+  }
+
+  fetchAddedNotes({ user }) {
+    const observables = Rx.Observable.forkJoin([
+      this.getAdded(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setAdded(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.map(setAttribute);
+  }
+
+  fetchDeletedNotes({ user }) {
+    const observables = Rx.Observable.forkJoin([
+      this.getDeleted(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setDeleted(objs[0])
+    , this.toObject
+    )(objs[1]);
     return observables.map(setAttribute);
   }
 
@@ -566,6 +676,34 @@ export default class FeedParser {
 
   toObject(objs) {
     return R.isNil(objs) ? [] : R.map(obj => obj.toObject() , objs);
+  }
+
+  setAdded(added) {
+    //log.trace('setAdded', added);
+    const ids =           objs => R.isNil(objs)
+      ? [] : R.map(obj => obj.added, objs);
+    const isId =          obj => R.contains(obj.guid._, ids(added));
+    const setAdd =        obj => R.merge(obj, { added: isId(obj) });
+    const _setAddItems =  obj => R.map(setAdd, obj.items);
+    const setAddItems  =  obj => R.isNil(obj.items) 
+      ? obj : R.merge(obj, { items: _setAddItems(obj) }); 
+    const results =       objs => R.isNil(objs)
+      ? [] : R.map(setAddItems, objs);
+    return results;
+  }
+
+  setDeleted(deleted) {
+    //log.trace('setDeleted', deleted);
+    const ids =             objs => R.isNil(objs)
+      ? [] : R.map(obj =>   obj.deleted, objs);
+    const isId =            obj => R.contains(obj.guid._, ids(deleted));
+    const setDelete =       obj => R.merge(obj, { deleted: isId(obj) });
+    const _setDeleteItems = obj => R.map(setDelete, obj.items);
+    const setDeleteItems  = obj => R.isNil(obj.items) 
+      ? obj : R.merge(obj, { items: _setDeleteItems(obj) }); 
+    const results =         objs => R.isNil(objs)
+      ? [] : R.map(setDeleteItems, objs);
+    return results;
   }
 
   setReaded(readed) {
@@ -682,9 +820,25 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  deleteItem({ user, ids }) {
+  createAdd({ user, ids }) {
+    const promises = R.map(id => this.addAdd(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
+  }
+
+  deleteAdd({ user, ids }) {
     const _ids = R.split(',', ids);
-    const promises = R.map(id => this.removeItem(user,id));
+    const promises = R.map(id => this.removeAdd(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
+  }
+
+  createDelete({ user, ids }) {
+    const promises = R.map(id => this.addDelete(user, id));
+    return Rx.Observable.forkJoin(promises(ids));
+  }
+
+  deleteDelete({ user, ids }) {
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeDelete(user, id));
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
