@@ -61,12 +61,6 @@ class RssSearch extends React.Component {
             : null;
         break;
     }
-    //let category = 
-    //  url.substring(0,34) === 'https://auctions.yahoo.co.jp/rss?p'
-    //    ? 'marchant' :
-    //      url.substring(0,36) === 'https://auctions.yahoo.co.jp/rss?sid'
-    //        ? 'sellers'
-    //        : null;
     if(!category) return this.setState({ isNotValid: true });
     NoteAction.create(user, { url, category })
       .then(() => this.setState({ isSuccess: true, url: '' }))

@@ -1,96 +1,128 @@
-import React from 'react';
-import PropTypes from 'prop-types'
-import { withRouter } from 'react-router-dom';
+import React              from 'react';
+import PropTypes          from 'prop-types'
+import { withRouter }     from 'react-router-dom';
 
-import { withStyles } from 'material-ui/styles';
-import { Divider, List } from 'material-ui';
-import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import {
-  AccountBox        as UsersIcon  
-  , VerifiedUser    as ApprovalIcon 
-  , LiveHelp        as FaqIcon
-  , Feedback        as InquiryIcon   
-  , MonetizationOn  as InventoryIcon
-} from 'material-ui-icons';
+import { withStyles }     from 'material-ui/styles';
+import { Divider, List, Avatar }
+                          from 'material-ui';
+import { ListItem, ListItemIcon, ListItemText }
+                          from 'material-ui/List';
+import { Collapse }       from 'material-ui/transitions';
+import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
+, RssFeed }               from 'material-ui-icons';
 
 class DrawerList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { open: false };
+  }
+
   handleClickButton(name, event) {
     switch(name) {
-      case 'users':
-        this.props.history.push('/users');
+      case 'title':
+        this.props.history.push('/login/authenticate');
         break;
-      case 'approval':
-        this.props.history.push('/approval');
+      case 'marchant':
+        this.props.history.push('/marchant');
         break;
-      case 'inquiry':
-        this.props.history.push('/inquiry');
+      case 'sellers':
+        this.props.history.push('/sellers');
         break;
-      case 'faq':
-        this.props.history.push('/faq');
+      case 'bids':
+        this.props.history.push('/bids');
         break;
-      case 'inventry':
-        this.props.history.push('/inventry');
+      case 'trade':
+        this.props.history.push('/trade');
         break;
-      default:
-        break;
+      case 'user':
+        this.setState({ open: !this.state.open });
     }
   }
 
   renderListItems() {
     return <div>
       <ListItem button
-        onClick={this.handleClickButton.bind(this, 'users')}>
-        <ListItemIcon>
-          <UsersIcon />
-        </ListItemIcon>
-        <ListItemText primary="Users" />
+        onClick={this.handleClickButton.bind(this, 'marchant')}>
+        <ListItemIcon><LocalMall /></ListItemIcon>
+        <ListItemText primary="Marchandise" />
       </ListItem>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'approval')}>
-        <ListItemIcon>
-          <ApprovalIcon />
-        </ListItemIcon>
-        <ListItemText primary="Approval" />
+        onClick={this.handleClickButton.bind(this, 'sellers')}>
+        <ListItemIcon><People /></ListItemIcon>
+        <ListItemText primary="Sellers" />
       </ListItem>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'faq')}>
-        <ListItemIcon>
-          <FaqIcon />
-        </ListItemIcon>
-        <ListItemText primary="FAQ" />
+        onClick={this.handleClickButton.bind(this, 'bids')}>
+        <ListItemIcon><Timeline /></ListItemIcon>
+        <ListItemText primary="Bids" />
       </ListItem>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'inquiry')}>
-        <ListItemIcon>
-          <InquiryIcon />
-        </ListItemIcon>
-        <ListItemText primary="Inquiry" />
+        onClick={this.handleClickButton.bind(this, 'trade')}>
+        <ListItemIcon><Gavel /></ListItemIcon>
+        <ListItemText primary="Trade" />
       </ListItem>
     </div>;
   }
     
-  renderOtherListItems() {
+  renderUserListItems() {
+    const { classes, user } = this.props;
+    const { open } = this.state;
     return <div>
       <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'inventory')}>
+        onClick={this.handleClickButton.bind(this, 'user')}>
         <ListItemIcon>
-          <InventoryIcon />
+          <Avatar className={classes.avatar}>{user.substr(0,2)}</Avatar>
         </ListItemIcon>
-        <ListItemText primary="Inventory" />
+        <ListItemText primary={user} />
+        {open ? <ArrowDropUp /> : <ArrowDropDown />}
       </ListItem>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          <ListItem button>
+            <ListItemIcon>
+              <Avatar className={classes.avatar}>MP</Avatar>
+            </ListItemIcon>
+            <ListItemText primary="My Profile" />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              <Avatar className={classes.avatar}>EP</Avatar>
+            </ListItemIcon>
+            <ListItemText primary="Edit Profile" />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              <Avatar className={classes.avatar}>S</Avatar>
+            </ListItemIcon>
+            <ListItemText primary="Setting" />
+          </ListItem>
+        </List>
+      </Collapse>
     </div>;
   }
     
+  renderTitleListItems() {
+    const { classes } = this.props;
+    return <div>
+      <ListItem button
+        onClick={this.handleClickButton.bind(this, 'title')}>
+        <ListItemIcon><RssFeed /></ListItemIcon>
+        <ListItemText primary="RSS Reader !!" />
+      </ListItem>
+    </div>;
+  }
+
   render() {
-    const {classes} = this.props;
+    const { classes } = this.props;
+    const renderTitleListItems = this.renderTitleListItems();
     const renderListItems = this.renderListItems();
-    const renderOtherListItems = this.renderOtherListItems();
+    const renderUserListItems = this.renderUserListItems();
     return <div>
-      <div className={classes.drawerHeader} />
-      <Divider />
-      <List>{renderListItems}</List>
-      <Divider />
-      <List>{renderOtherListItems}</List>
+      <div className={classes.header}>
+        <List>{renderTitleListItems}</List>
+      </div>
+      <Divider /><List>{renderUserListItems}</List>
+      <Divider /><List>{renderListItems}</List>
     </div>;
   }
 };
@@ -98,9 +130,12 @@ class DrawerList extends React.Component {
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const styles = theme => ({
-  drawerHeader: { height: barHeightSmDown
-                , [theme.breakpoints.up('sm')]: {
-                  height: barHeightSmUp }}
+  header: {
+    height: barHeightSmDown
+  , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
+  }
+, avatar: { width: 24, height: 24, fontSize: 12 }
+, nested: { }
 });
 
 DrawerList.propTypes = {

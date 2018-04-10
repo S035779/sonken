@@ -10,7 +10,7 @@ import { withStyles }   from 'material-ui/styles';
 import { CssBaseline }
                         from 'material-ui';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
-import DrawerNav        from 'Components/DrawerNav/DrawerNav';
+import RssDrawer        from 'Components/RssDrawer/RssDrawer';
 
 class App extends React.Component {
   static getStores() {
@@ -28,41 +28,28 @@ class App extends React.Component {
       <ErrorBoundary>
       <CssBaseline />
       <div className={classes.appFrame}>
-        <DrawerNav
+        <RssDrawer
           user={user}
           isAuthenticated={isAuthenticated}
           profile={profile}
-          preference={preference}/>
-        <div className={classes.content}>
+          preference={preference}>
           {renderRoutes(route.routes)}
-        </div>
+        </RssDrawer>
       </div>
       </ErrorBoundary>
     </div>;
   }
 };
 
-const drawerWidthMdUp = 240;
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
 const styles = theme => ({
-  root:     { width: '100%', zIndex: 1
-            , overflow: 'hidden', height: '100vh' },
-  appFrame: { position: 'relative'
-            , display: 'flex', flexDirection: 'column'
-            , width: '100%'},
-  content:  { position: 'absolute'
-            , width: '100%', height: `calc(100vh - ${barHeightSmDown}px)`
-            , marginTop: barHeightSmDown
-            , [theme.breakpoints.up('md')]: {
-                width: `calc(100% - ${drawerWidthMdUp}px)`
-              , marginLeft: drawerWidthMdUp
-              }
-            , [theme.breakpoints.up('sm')]: {
-                height: `calc(100vh - ${barHeightSmUp}px)`
-              , marginTop: barHeightSmUp
-              }
-            }
+  root:     {
+    width: '100%', zIndex: 1, overflow: 'hidden', height: '100vh'
+  }
+, appFrame: {
+    position: 'relative'
+  , display: 'flex', flexDirection: 'column'
+  , width: '100%'
+  }
 });
 App.displayName = 'App';
 App.defaultProps = {};

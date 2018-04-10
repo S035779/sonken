@@ -188,7 +188,8 @@ class RssItemList extends React.Component {
               />
               </a>
             </div>
-            <ListItemText classes={textClass}
+            <ListItemText
+              classes={textClass}
               className={classes.listItemText}
               primary={title}
               secondary={description}/>
@@ -230,8 +231,8 @@ noteItem:       { display: 'flex', flexDirection: 'row'
                   backgroundColor: theme.palette.primary.main
                   , '& $primary, $secondary': {
                     color: theme.palette.common.white }}}   
-, primary:      {}
-, secondary:    {}
+, primary:      { }
+, secondary:    { }
 , description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
 , image:        { height: '100%', width: '100%' }
