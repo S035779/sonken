@@ -81,8 +81,8 @@ class Dashboard extends React.Component {
   }
 };
 
-const barHeightSmUp     = 112;
-const barHeightSmDown   = 104;
+const barHeightSmUp     = 64;//112;
+const barHeightSmDown   = 56;//104;
 const listWidth         = 400;
 const searchHeight      = 62;
 const noteHeightSmUp    = 

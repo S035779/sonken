@@ -120,15 +120,23 @@ class TradeItemList extends React.Component {
   }
 };
 
-const itemHeight        = 160 * 1.5;
+const itemHeight        = 142 * 1.5;
+const itemMinWidth      = 720;
 const descMinWidth      = 133 * 1.5;
 const styles = theme => ({
   noteItem:     { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }
-, listItem:     { height: itemHeight, padding: theme.spacing.unit /2
-                , '&:hover':  {
-                  backgroundColor: theme.palette.primary.main
-                  , '& $checkbox': { color: theme.palette.common.white }}}
+, listItem:     {
+    height: itemHeight
+  , minWidth: itemMinWidth
+  , padding: theme.spacing.unit /2
+  , '&:hover':  {
+      backgroundColor: theme.palette.primary.main
+    , '& $checkbox': { 
+        color: theme.palette.common.white
+      }
+    }
+  }
 , listItemText: { marginRight: descMinWidth }
 , checkbox:     {}
 , button:       { width: 80, wordBreak: 'keep-all' }
@@ -137,8 +145,8 @@ const styles = theme => ({
                   backgroundColor: theme.palette.primary.main
                   , '& $primary, $secondary': {
                     color: theme.palette.common.white }}}   
-, primary:      {}
-, secondary:    {}
+, primary:      { }
+, secondary:    { }
 , description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
 , image:        { width: '100%', height: '100%' }

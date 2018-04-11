@@ -6,6 +6,17 @@ import { withStyles }   from 'material-ui/styles';
 import { Hidden, Drawer }
                         from 'material-ui';
 import DrawerList       from 'Components/DrawerList/DrawerList';
+import rgstImg          from 'Assets/image/sidebar-5.jpg';
+
+const env = process.env.NODE_ENV || 'development';
+const assets = process.env.ASSET_URL;
+let image;
+if(env === 'development') {
+  image = assets;
+} else
+if(env === 'production' || env === 'staging') {
+  image = assets + '/image';
+}
 
 class DrawerTemporary extends React.Component {
   handleToggle() {
@@ -15,7 +26,7 @@ class DrawerTemporary extends React.Component {
   render() {
     std.logInfo(DrawerTemporary.displayName, 'Props', this.props);
     std.logInfo(DrawerTemporary.displayName, 'State', this.state);
-    const { classes, open, user } = this.props;
+    const { classes, user, profile, preference, open } = this.props;
     const modalProps = { keepMounted: true };
     const paperClass = { paper: classes.paper };
     return <Hidden mdUp>
@@ -25,7 +36,11 @@ class DrawerTemporary extends React.Component {
         onClose={this.handleToggle.bind(this)}
         classes={paperClass}
         ModalProps={modalProps}>
-        <DrawerList user={user} />
+        <DrawerList
+          user={user}
+          profile={profile}
+          preference={preference}
+        />
       </Drawer>
     </Hidden>;
   }
@@ -33,9 +48,13 @@ class DrawerTemporary extends React.Component {
 
 const drawerWidthMdUp = 240;
 const drawerWidthMdDown = 250;
+const rgst_top = std.toRGBa('#FFA534', 0.8);
+const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper:{
-    width: drawerWidthMdDown
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm})`
+      + `, url(${image + rgstImg})`
+  , width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: {
       position: 'relative', width: drawerWidthMdUp, height: '100%'
     }

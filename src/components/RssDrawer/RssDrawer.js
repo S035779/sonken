@@ -10,7 +10,7 @@ import DrawerTemporary  from 'Components/DrawerTemporary/DrawerTemporary';
 class RssDrawer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: true };
+    this.state = { open: false };
   }
 
   handleToggle() {
@@ -37,11 +37,15 @@ class RssDrawer extends React.Component {
       <DrawerTemporary
         open={open}
         user={user}
+        preference={preference}
+        profile={profile}
         onClose={this.handleToggle.bind(this)}
       />
       <DrawerPermanent
         open={open}
         user={user}
+        preference={preference}
+        profile={profile}
       />
     </div>;
   }

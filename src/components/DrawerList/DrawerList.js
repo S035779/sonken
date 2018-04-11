@@ -1,20 +1,27 @@
-import React              from 'react';
-import PropTypes          from 'prop-types'
-import { withRouter }     from 'react-router-dom';
+import React            from 'react';
+import PropTypes        from 'prop-types'
+import { withRouter }   from 'react-router-dom';
+import std              from 'Utilities/stdutils';
 
-import { withStyles }     from 'material-ui/styles';
+import { withStyles }   from 'material-ui/styles';
 import { Divider, List, Avatar }
-                          from 'material-ui';
+                        from 'material-ui';
 import { ListItem, ListItemIcon, ListItemText }
-                          from 'material-ui/List';
-import { Collapse }       from 'material-ui/transitions';
+                        from 'material-ui/List';
+import { Collapse }     from 'material-ui/transitions';
 import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
-, RssFeed }               from 'material-ui-icons';
+, RssFeed }             from 'material-ui-icons';
+import LoginProfile     from 'Components/LoginProfile/LoginProfile';
+import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 
 class DrawerList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: false };
+    this.state = {
+      open: false
+    , isProfile: false
+    , isPreference: false
+    };
   }
 
   handleClickButton(name, event) {
@@ -36,78 +43,132 @@ class DrawerList extends React.Component {
         break;
       case 'user':
         this.setState({ open: !this.state.open });
+        break;
+      case 'isPreference':
+      case 'isProfile':
+        this.setState({ [name]: true });
+        break;
     }
   }
 
+  handleCloseDialog(name, event) {
+    std.logInfo(DrawerList.displayName, 'handleCloseDialog', name);
+    this.setState({ [name]: false });
+  }
+
   renderListItems() {
+    const { classes } = this.props;
+    const textClass =
+      { primary: classes.primary, secondary: classes.secondary };
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'marchant')}>
-        <ListItemIcon><LocalMall /></ListItemIcon>
-        <ListItemText primary="Marchandise" />
+        <ListItemIcon>
+          <LocalMall className={classes.icon} />
+        </ListItemIcon>
+        <ListItemText primary="Merchandise" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'sellers')}>
-        <ListItemIcon><People /></ListItemIcon>
-        <ListItemText primary="Sellers" />
+        <ListItemIcon>
+          <People className={classes.icon} />
+        </ListItemIcon>
+        <ListItemText primary="Sellers" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'bids')}>
-        <ListItemIcon><Timeline /></ListItemIcon>
-        <ListItemText primary="Bids" />
+        <ListItemIcon>
+          <Timeline className={classes.icon} />
+        </ListItemIcon>
+        <ListItemText primary="Bids" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'trade')}>
-        <ListItemIcon><Gavel /></ListItemIcon>
-        <ListItemText primary="Trade" />
+        <ListItemIcon>
+          <Gavel className={classes.icon} />
+        </ListItemIcon>
+        <ListItemText primary="Trade" classes={textClass} />
       </ListItem>
     </div>;
   }
     
   renderUserListItems() {
-    const { classes, user } = this.props;
-    const { open } = this.state;
+    const { classes, profile, preference } = this.props;
+    const { open, isProfile, isPreference } = this.state;
+    const { name, user, kana, email, phone, plan } = profile;
+    const textClass =
+      { primary: classes.primary, secondary: classes.secondary };
     return <div>
-      <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'user')}>
-        <ListItemIcon>
-          <Avatar className={classes.avatar}>{user.substr(0,2)}</Avatar>
-        </ListItemIcon>
-        <ListItemText primary={user} />
-        {open ? <ArrowDropUp /> : <ArrowDropDown />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          <ListItem button>
-            <ListItemIcon>
-              <Avatar className={classes.avatar}>MP</Avatar>
-            </ListItemIcon>
-            <ListItemText primary="My Profile" />
-          </ListItem>
-          <ListItem button>
-            <ListItemIcon>
-              <Avatar className={classes.avatar}>EP</Avatar>
-            </ListItemIcon>
-            <ListItemText primary="Edit Profile" />
-          </ListItem>
-          <ListItem button>
-            <ListItemIcon>
-              <Avatar className={classes.avatar}>S</Avatar>
-            </ListItemIcon>
-            <ListItemText primary="Setting" />
-          </ListItem>
-        </List>
-      </Collapse>
-    </div>;
+        <ListItem button 
+          onClick={this.handleClickButton.bind(this, 'user')}>
+          <ListItemIcon>
+            <Avatar className={classes.avatar}>
+              {user ? user.substr(0,2) : ''}</Avatar>
+          </ListItemIcon>
+          <ListItemText primary={user} classes={textClass} />
+          {open
+            ? <ArrowDropUp className={classes.icon} />
+            : <ArrowDropDown className={classes.icon} />
+          }
+        </ListItem>
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button>
+              <ListItemIcon>
+                <Avatar className={classes.avatar}>MP</Avatar>
+              </ListItemIcon>
+              <ListItemText primary="My Profile" classes={textClass} />
+            </ListItem>
+            <ListItem button
+              onClick={this.handleClickButton.bind(this, 'isProfile')}>
+              <ListItemIcon>
+                <Avatar className={classes.avatar}>EP</Avatar>
+              </ListItemIcon>
+              <ListItemText primary="Edit Profile" classes={textClass} />
+            </ListItem>
+            <ListItem button
+              onClick={this.handleClickButton.bind(this, 'isPreference')}>
+              <ListItemIcon>
+                <Avatar className={classes.avatar}>S</Avatar>
+              </ListItemIcon>
+              <ListItemText primary="Setting" classes={textClass} />
+            </ListItem>
+          </List>
+          <LoginProfile
+            open={isProfile}
+            profile={profile}
+            name={name}
+            user={user}
+            kana={kana}
+            email={email}
+            phone={phone}
+            onClose={this.handleCloseDialog.bind(this, 'isProfile')}
+          />
+          <LoginPreference 
+            open={isPreference}
+            profile={profile}
+            preference={preference}
+            name={name}
+            user={user}
+            plan={plan}
+            onClose={this.handleCloseDialog.bind(this, 'isPreference')}
+          />
+        </Collapse>
+      </div>
+    ;
   }
     
   renderTitleListItems() {
     const { classes } = this.props;
+    const textClass =
+      { primary: classes.title, secondary: classes.secondary };
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'title')}>
-        <ListItemIcon><RssFeed /></ListItemIcon>
-        <ListItemText primary="RSS Reader !!" />
+        <ListItemIcon>
+          <RssFeed className={classes.icon} />
+        </ListItemIcon>
+        <ListItemText primary="RSS Reader !!" classes={textClass}/>
       </ListItem>
     </div>;
   }
@@ -127,15 +188,32 @@ class DrawerList extends React.Component {
   }
 };
 
-const barHeightSmUp = 112;
-const barHeightSmDown = 104;
+const barHeightSmUp   = 64;//112;
+const barHeightSmDown = 56;//104;
 const styles = theme => ({
   header: {
     height: barHeightSmDown
   , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
   }
-, avatar: { width: 24, height: 24, fontSize: 12 }
-, nested: { }
+, icon: {
+  color: theme.palette.common.white
+}
+, avatar: {
+    color: theme.palette.common.white
+  , background: 'inherit'
+  , width: 24, height: 24, fontSize: 16
+}
+, nested: {}
+, primary: {
+    whiteSpace: 'nowrap'
+  , color: theme.palette.common.white
+  }
+, secondary: {}
+, title:  {
+    whiteSpace: 'nowrap'
+  , color: theme.palette.common.white
+  , fontSize: 20
+  }
 });
 
 DrawerList.propTypes = {

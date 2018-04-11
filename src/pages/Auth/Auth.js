@@ -50,14 +50,20 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const cnfm_top = std.toRGBa('#9368E9', 0.8);
 const cnfm_btm = std.toRGBa('#943BEA', 0.8);
+const barHeightSmUp   = 64;
 const barHeightSmDown = 56;
-const barHeightSmUp = 64;
 const styles = theme => ({
-  authenticate: Object.assign({}, root, { background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image + authImg})`
+  authenticate: Object.assign({}, root, {
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm})`
+      + `, url(${image + authImg})`
   })
-, registration: Object.assign({}, root, { background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image + rgstImg})`
+, registration: Object.assign({}, root, {
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm})`
+      + `, url(${image + rgstImg})`
   })
-, confirmation: Object.assign({}, root, { background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${image + cnfmImg})`
+, confirmation: Object.assign({}, root, {
+    background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm})`
+      + `, url(${image + cnfmImg})`
   })
 , authFrame:{ position: 'relative'
             , display: 'flex', flexDirection: 'column'

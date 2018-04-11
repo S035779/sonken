@@ -3,14 +3,14 @@ import { withRouter } from 'react-router-dom';
 import PropTypes      from 'prop-types'
 import classNames     from 'classnames';
 import LoginAction    from 'Actions/LoginAction';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import { IconButton } from 'material-ui';
-import { Menu as MenuIcon }
+import { AppBar, Toolbar, Typography, Button }
+                      from 'material-ui';
+import { Menu, MoreVert }
                       from 'material-ui-icons';
-import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
 import RssMenu        from 'Components/RssMenu/RssMenu';
-import RssButtonNav   from 'Components/RssButtonNav/RssButtonNav';
 
 class RssHeader extends React.Component {
   constructor(props) {
@@ -20,36 +20,57 @@ class RssHeader extends React.Component {
     };
   }
 
-  handleLogin(event, checked) {
-    const { user, history } = this.props;
-    this.setState({ auth: checked });
-    if(!checked) LoginAction.signout(user, false)
-      .then(() => LoginAction.presetUser(''))
-      .then(() => history.push('/login/authenticate'));
-  }
-
   handleToggle(event) {
     this.props.onClick();
   }
 
   render() {
-    const { classes, user, preference, profile, open, children }
-      = this.props;
+    std.logInfo(RssHeader.displayName, 'Props', this.props);
+    std.logInfo(RssHeader.displayName, 'State', this.state);
+    const {
+      classes, user, preference, profile, open, children, location
+    } = this.props;
     const { auth } = this.state;
-    return <div className={classNames(classes.navHeader
-      , open && classes.navHeaderShift)}>
-      <LoginSwitch
-        auth={auth}
-        onChange={this.handleLogin.bind(this)}/>
-      <div className={classes.navBar}>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
+    let category = location.pathname.split('/')[1];
+    switch(category) {
+      case 'marchant':
+        category='Merchandise';
+        break;
+      case 'sellers':
+        category='Sellers';
+        break;
+      case 'bids':
+        category='Bids';
+        break;
+      case 'trade':
+        category='Trade';
+        break;
+      default:
+        category='Merchandise';
+        break;
+    }
+    return <div className={
+        classNames(classes.navHeader, open && classes.navHeaderShift)
+      }>
+      <AppBar
+        color="default"
+        position="static"
+        className={classes.navBar}>
+      <Toolbar>
+        <Button
+          mini
+          variant="fab"
+          color="primary"
           onClick={this.handleToggle.bind(this)}
           className={classes.navIcon}>
-          <MenuIcon />
-        </IconButton>
-        <RssButtonNav />
+          {open ? <MoreVert /> : <Menu />}
+        </Button>
+        <Typography
+          variant="title"
+          color="inherit"
+          className={classes.title}>
+          {category}
+        </Typography>
         <div className={classes.loginIcon}>
           <RssMenu
             auth={auth} 
@@ -58,7 +79,8 @@ class RssHeader extends React.Component {
             profile={profile}
           />
         </div>
-      </div>
+      </Toolbar>
+      </AppBar>
       <div className={classes.content}>
         {children}
       </div>
@@ -66,13 +88,13 @@ class RssHeader extends React.Component {
   }
 };
 
-const drawerMinWidthMdDown  = 0;
 const drawerMinWidthMdUp    = 72;
+const drawerMinWidthMdDown  = 0;
 const drawerWidth           = 240;
 const navHeightSmUp         = 64;
 const navHeightSmDown       = 56;
-const barHeightSmUp         = 112;
-const barHeightSmDown       = 104;
+const barHeightSmUp         = 64;//112;
+const barHeightSmDown       = 56;//104;
 const styles = theme => ({
   navHeader:  {
     marginLeft: drawerMinWidthMdDown
@@ -96,14 +118,20 @@ const styles = theme => ({
     })
   }
 , navBar:     {
-    display: 'flex', flexDirection: 'row'
-  , wordBreak: 'keep-all', overflow: 'scroll' 
-  , height: navHeightSmDown, padding: 2
+//    display: 'flex', flexDirection: 'row'
+//  , wordBreak: 'keep-all', overflow: 'scroll' 
+    height: navHeightSmDown, padding: 2
   , [theme.breakpoints.up('sm')]: {
       height: navHeightSmUp, padding: 6
     }
-  }  
-, navIcon:    { marginLeft: -12, marginRight: 'auto' }
+  }
+, navIcon:    {
+  //margin: theme.spacing.unit
+  marginLeft: -12, marginRight: 20
+}
+, title: {
+    flex: 1, color: '#888888'
+  }
 , loginIcon:  { marginLeft: 'auto' }
 , content:  {
     width: '100%'

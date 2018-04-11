@@ -23,8 +23,8 @@ class MarchantEdit extends React.Component {
   }
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
+const barHeightSmUp     = 64;//112;
+const barHeightSmDown   = 56;//104;
 const rowHeight         = 62
 const editHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;

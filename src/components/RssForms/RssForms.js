@@ -194,8 +194,8 @@ class RssForms extends React.Component {
   }
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
+const barHeightSmUp     = 64;//112;
+const barHeightSmDown   = 56;//104;
 const searchHeight      = 62;
 const filterHeight      = 62 * 9;
 const listHeightSmDown  =

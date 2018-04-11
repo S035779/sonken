@@ -137,10 +137,8 @@ class RssItemList extends React.Component {
   renderItem(index, item) {
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
-    const textClass = {
-      primary: classes.primary
-    , secondary: classes.secondary
-    };
+    const textClass =
+      { primary: classes.primary, secondary: classes.secondary };
     const buttonColor = listed.indexOf(item.guid._) !== -1
       ? 'green' : 'yellow';
     const buttonText = listed.indexOf(item.guid._) !== -1
@@ -215,15 +213,22 @@ class RssItemList extends React.Component {
   }
 };
 const itemHeight        = 142 * 1.5;
+const itemMinWidth      = 720;
 const descMinWidth      = 133 * 1.5;
-const noticeWidth       = 72;
 const styles = theme => ({
 noteItem:       { display: 'flex', flexDirection: 'row'
                 , alignItems: 'center' }
-, listItem:     { height: itemHeight, padding: theme.spacing.unit /2
-                , '&:hover':  {
-                  backgroundColor: theme.palette.primary.main
-                  , '& $star': { color: theme.palette.common.white }}}
+, listItem:     {
+    height: itemHeight
+  , minWidth: itemMinWidth
+  , padding: theme.spacing.unit /2
+  , '&:hover':  {
+      backgroundColor: theme.palette.primary.main
+    , '& $star': {
+        color: theme.palette.common.white
+      }
+    }
+  }
 , listItemText: { marginRight: descMinWidth }
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8

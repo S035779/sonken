@@ -135,8 +135,8 @@ class RssList extends React.Component {
   }
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
+const barHeightSmUp     = 64;//112;
+const barHeightSmDown   = 56;//104;
 const titleHeight       = 62;
 const searchHeight      = 62;
 const itemHeight        = 64;

@@ -22,7 +22,7 @@ class DrawerPermanent extends React.Component {
   render() {
     std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
     std.logInfo(DrawerPermanent.displayName, 'State', this.state);
-    const { classes, user, open } = this.props;
+    const { classes, user, profile, preference, open } = this.props;
     const paperClass = {
       paper: classNames(classes.paper, !open && classes.paperClose)
     };
@@ -31,7 +31,11 @@ class DrawerPermanent extends React.Component {
         variant="permanent"
         open={open}
         classes={paperClass}>
-        <DrawerList user={user} />
+        <DrawerList
+          user={user}
+          profile={profile}
+          preference={preference}
+        />
       </Drawer>
     </Hidden>
   }
@@ -43,7 +47,8 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper:{
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image + rgstImg})`
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm})`
+      + `, url(${image + rgstImg})`
   , backgroundSize: 'cover'
   , width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: {
