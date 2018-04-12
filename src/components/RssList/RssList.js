@@ -25,7 +25,7 @@ class RssList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(RssList.displayName, 'Props', nextProps);
+    //std.logInfo(RssList.displayName, 'Props', nextProps);
     const { selectedNoteId: checked, notes } = nextProps;
     this.setState({ checked, notes });
   }
@@ -75,10 +75,8 @@ class RssList extends React.Component {
   renderItem(note) {
     const { classes } = this.props;
     const { checked } = this.state;
-    const textClass = {
-      primary:    classes.primary
-    , secondary:  classes.secondary
-    };
+    const textClass =
+      { primary: classes.primary, secondary: classes.secondary };
     const linkTo = `/${note.category}/${note._id}/edit`;
     let newRelease = 0;
     if (note.items)

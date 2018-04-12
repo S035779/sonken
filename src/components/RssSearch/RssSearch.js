@@ -24,7 +24,7 @@ class RssSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(RssSearch.displayName, 'Props', nextProps);
+    //std.logInfo(RssSearch.displayName, 'Props', nextProps);
     const { notePage, file } = nextProps;
     this.setState({ perPage: notePage.perPage });
   }

@@ -122,12 +122,12 @@ class RssItemList extends React.Component {
 
   renderStar() {
     const { classes } = this.props;
-    return <Star />;
+    return <Star className={classes.star} />;
   }
 
   renderUnStar() {
     const { classes } = this.props;
-    return <StarBorder />;
+    return <StarBorder className={classes.star} />;
   }
 
   renderNewReleases() {
@@ -230,6 +230,7 @@ noteItem:       { display: 'flex', flexDirection: 'row'
     }
   }
 , listItemText: { marginRight: descMinWidth }
+, star:         {}
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {

@@ -81,7 +81,7 @@ class TradeItemList extends React.Component {
     + `AuctionID：${item.guid._}`
     ;
     return <div key={index} className={classes.noteItem}>
-      <Checkbox className={classes.checkbox}
+      <Checkbox
         onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
         checked={selectedItemId.indexOf(item.guid._) !== -1}
         tabIndex={-1} disableRipple />
@@ -132,13 +132,9 @@ const styles = theme => ({
   , padding: theme.spacing.unit /2
   , '&:hover':  {
       backgroundColor: theme.palette.primary.main
-    , '& $checkbox': { 
-        color: theme.palette.common.white
-      }
     }
   }
 , listItemText: { marginRight: descMinWidth }
-, checkbox:     {}
 , button:       { width: 80, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {

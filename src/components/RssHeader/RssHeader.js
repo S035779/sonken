@@ -24,13 +24,7 @@ class RssHeader extends React.Component {
     this.props.onClick();
   }
 
-  render() {
-    std.logInfo(RssHeader.displayName, 'Props', this.props);
-    std.logInfo(RssHeader.displayName, 'State', this.state);
-    const {
-      classes, user, preference, profile, open, children, location
-    } = this.props;
-    const { auth } = this.state;
+  getCategory(location) {
     let category = location.pathname.split('/')[1];
     switch(category) {
       case 'marchant':
@@ -49,6 +43,17 @@ class RssHeader extends React.Component {
         category='Merchandise';
         break;
     }
+    return category;
+  }
+
+  render() {
+    //std.logInfo(RssHeader.displayName, 'Props', this.props);
+    //std.logInfo(RssHeader.displayName, 'State', this.state);
+    const {
+      classes, user, preference, profile, open, children, location
+    } = this.props;
+    const { auth } = this.state;
+    const category = this.getCategory(location);
     return <div className={
         classNames(classes.navHeader, open && classes.navHeaderShift)
       }>

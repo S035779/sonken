@@ -5,18 +5,19 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { IconButton, Menu }
+import { IconButton, Menu, Divider }
                         from 'material-ui';
 import { MenuItem }     from 'material-ui/Menu';
-import { AccountCircle }
-                        from 'material-ui-icons';
+import { ListItemIcon } from 'material-ui/List';
+import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew
+  , Settings }          from 'material-ui-icons';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 
 class RssMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      anchorEl:       null
+      anchorEl:     null
     , isPreference: false
     };
   }
@@ -87,18 +88,23 @@ class RssMenu extends React.Component {
         onClose={this.handleClose.bind(this)}>
         <MenuItem
           onClick={this.handleClickButton.bind(this, 'faq')}>
+          <ListItemIcon><ImportContacts /></ListItemIcon>
           FAQ
         </MenuItem>
         <MenuItem
           onClick={this.handleClickButton.bind(this, 'inquiry')}>
+          <ListItemIcon><Feedback /></ListItemIcon>
           Help Center
         </MenuItem>
         <MenuItem
           onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
+          <ListItemIcon><Settings /></ListItemIcon>
           Setting
         </MenuItem>
+        <Divider />
         <MenuItem
           onClick={this.handleLogin.bind(this)}>
+          <ListItemIcon><PowerSettingsNew /></ListItemIcon>
           Log Out
         </MenuItem>
         <LoginPreference

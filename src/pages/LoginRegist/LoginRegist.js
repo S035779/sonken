@@ -96,7 +96,6 @@ class LoginRegist extends React.Component {
     } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
-    const inputSelect = { MenuProps: { className: classes.menu } };
     const to = { pathname: '/marchant' };
     const renderItems = preference.menu ? preference.menu
       .map((item, idx) => this.renderItems(item, idx)) : [];
@@ -210,7 +209,7 @@ class LoginRegist extends React.Component {
         </div>
         <div className={classes.form}>
           <TextField select
-            value={plan} InputProps={inputText} SelectProps={inputSelect}
+            value={plan} InputProps={inputText}
             placeholder="Select Plan menu"
             onChange={this.handleChangeText.bind(this, 'plan')}
             className={classes.input}>
@@ -259,7 +258,7 @@ const styles = theme => ({
               , display: 'flex', flexDirection: 'row'
               , justifyContent: 'center', alignItems: 'center'
               , height: rowHeight }
-, button:     {}
+, button:     { }
 , divider:    { backgroundColor: theme.palette.common.white }
 , input:      { flex: 1 }
 , textRoot:   { padding: 0

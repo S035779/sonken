@@ -9,6 +9,20 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
+import { CssBaseline }  from 'material-ui';
+import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
+import LoginHeader      from 'Components/LoginHeader/LoginHeader';
+import iqryImg          from 'Assets/image/bg6.jpg';
+
+const env = process.env.NODE_ENV || 'development';
+const assets = process.env.ASSET_URL;
+let image;
+if(env === 'development') {
+  image = assets;
+} else
+if(env === 'production' || env === 'staging') {
+  image = assets + '/image';
+}
 
 class Inquiry extends React.Component {
   static getStores() {
@@ -25,43 +39,48 @@ class Inquiry extends React.Component {
   }
 
   render() {
-    std.logInfo(Inquiry.displayName, 'State', this.state);
-    std.logInfo(Inquiry.displayName, 'Props', this.props);
+    //std.logInfo(Inquiry.displayName, 'State', this.state);
+    //std.logInfo(Inquiry.displayName, 'Props', this.props);
     const { classes, route, location } = this.props;
     const { user, isAuthenticated, preference } = this.state;
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
-    return <div className={classes.inquiryFrame}>
-      <div className={classes.drawArea}>
-        <div className={classes.space}/>
-        <div className={classes.container}>
-        {
-          route.routes
-            ? renderRoutes(route.routes, { user, preference })
-          : null
-        }
+    const to = 
+      { pathname: '/login/authenticate', state: { from: location } };
+    if(!isAuthenticated) return <Redirect to={to} />;
+    return <div className={classes.root}>
+      <ErrorBoundary>
+      <CssBaseline />
+      <div className={classes.inquiryFrame}>
+        <LoginHeader />
+        <div className={classes.content}>
+          {route.routes ?
+            renderRoutes(route.routes, { user, preference }): null}
         </div>
-        <div className={classes.space}/>
       </div>
+      </ErrorBoundary>
     </div>;
   }
 };
 
-const inquiryWidth = 640;
-const inquiryHeight = 800;
-const rowHeight = 62;
+const iqry_top = std.toRGBa('#8f2785', 0.8);
+const iqry_btm = std.toRGBa('#e4b1db', 0.8);
+const barHeightSmUp   = 64;
+const barHeightSmDown = 56;
+const rowHeight       = 62;
 const styles = theme => ({
-  inquiryFrame: { display: 'flex', flexDirection: 'column'
+  root:         { width: '100vw', zIndex: 1, overflow: 'hidden'
+                , height: '100vh'
+                , background:
+                    `linear-gradient(315deg, ${iqry_top}, ${iqry_btm})`
+                      + `, url(${image + iqryImg})`
+                , backgroundSize: 'cover' }
+, inquiryFrame: { position: 'relative', height: '100%' }
+, content:      { position: 'absolute', width: '100%'
+                , display: 'flex', flexDirection: 'column'
                 , justifyContent: 'center', alignItems: 'center'
-                , height: '100vh' }
-, drawArea:     { height: '100%', overFlow: 'scroll' }
-, space:        { minHeight: '5%' }
-, container:    { width: inquiryWidth, height: inquiryHeight
-                , border: '1px solid #CCC', borderRadius: 4
-                , paddingLeft: theme.spacing.unit * 4
-                , paddingRight: theme.spacing.unit *4 }
+                , height: `calc(100vh - ${barHeightSmDown}px)`
+                , [theme.breakpoints.up('sm')]: {
+                    height: `calc(100vh - ${barHeightSmUp}px)`
+                }}
 });
 Inquiry.displayName = 'Inquiry';
 Inquiry.defaultProps = {};

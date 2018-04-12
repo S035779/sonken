@@ -20,8 +20,8 @@ if(env === 'production' || env === 'staging') {
 
 class DrawerPermanent extends React.Component {
   render() {
-    std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
-    std.logInfo(DrawerPermanent.displayName, 'State', this.state);
+    //std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
+    //std.logInfo(DrawerPermanent.displayName, 'State', this.state);
     const { classes, user, profile, preference, open } = this.props;
     const paperClass = {
       paper: classNames(classes.paper, !open && classes.paperClose)

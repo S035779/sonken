@@ -215,7 +215,8 @@ const styles = theme => ({
   , fontSize: 20
   }
 });
-
+DrawerList.displayName = 'DrawerList';
+DrawerList.defaultProps = {};
 DrawerList.propTypes = {
   classes:  PropTypes.object.isRequired
 };

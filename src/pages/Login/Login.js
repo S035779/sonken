@@ -30,23 +30,16 @@ class Login extends React.Component {
     const { classes, route } = this.props;
     const { user, isAuthenticated, preference } = this.state;
     return <div className={classes.loginFrame}>
-      {
-        route.routes
-          ? renderRoutes(route.routes, {
-            user, isAuthenticated, preference
-          })
-          : null
-      }
+      {route.routes ? renderRoutes(route.routes
+        , { user, isAuthenticated, preference }) : null}
     </div>;
   }
 };
 
 const styles = theme => ({
-  loginFrame: {
-    display: 'flex', flexDirection: 'column'
-  , justifyContent: 'center', alignItems: 'center'
-  , height: '100%'
-  }
+  loginFrame: { display: 'flex', flexDirection: 'column'
+              , justifyContent: 'center', alignItems: 'center'
+              , height: '100%' }
 });
 Login.displayName = 'Login';
 Login.defaultProps = {};

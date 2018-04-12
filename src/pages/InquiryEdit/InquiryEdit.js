@@ -6,7 +6,7 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography, Checkbox }
+import { TextField, Typography, Divider }
                         from 'material-ui';
 import { FormControlLabel }
                         from 'material-ui/Form';
@@ -63,87 +63,86 @@ class InquiryEdit extends React.Component {
 
   render() {
     //std.logInfo(InquiryEdit.displayName, 'State', this.state);
-    std.logInfo(InquiryEdit.displayName, 'Props', this.props);
+    //std.logInfo(InquiryEdit.displayName, 'Props', this.props);
     const { classes, location, preference } = this.props;
-    const { redirectToReferer, title, body, isNotValid } = this.state;
+    const {
+      redirectToReferer, title, body, isNotValid
+    } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
-    const inputSelect = { MenuProps: { className: classes.menu } };
-    const from = location.state || { pathname: '/marchant' };
-    if(redirectToReferer) return <Redirect to={from} />
-    return <div className={classes.inquiryForms}>
-      <div className={classes.space} />
-      <Typography variant="title" align="center"
-        className={classes.title}>お問い合わせ</Typography>
-      <div className={classes.space} />
-      <div className={classes.form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>タイトル</Typography>
-        <TextField
-          value={title} InputProps={inputText}
-          onChange={this.handleChangeText.bind(this, 'title')}
-          className={classes.input} />
-      </div>
-      <div className={classes._form}>
-        <Typography variant="body2" align="center"
-          className={classes.text}>問合せ内容</Typography>
-        <TextField multiline rows="10"
-          value={body} InputProps={inputText}
-          onChange={this.handleChangeText.bind(this, 'body')}
-          className={classes.input} />
-      </div>
-      <div className={classes.space} />
-      <div className={classes.buttons}>
+    const to = { pathname: '/marchant' };
+    if(redirectToReferer) return <Redirect to={to} />
+    return <div className={classes.container}>
+      <div className={classes.inquiryForms}>
         <div className={classes.space} />
-        <RssButton color={'skyblue'}
-          onClick={this.handleInquiry.bind(this)}
-          classes={classes.button}>送信</RssButton>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this)}>
-        内容に不備があります。もう一度確認してください。
-        </RssDialog>
-        <div className={classes.space} />
-      </div>
-      <div className={classes.notice}>
-        <Typography variant="caption" align="center"
-          className={classes.notes}>
-        お問い合わせ：{preference.from}（営業時間９時〜１８時）
+        <Typography variant="display1" align="center"
+          className={classes.title}>Inquiry</Typography>
+        <Typography variant="headline" align="center"
+          className={classes.title}>
+          Please list the contents of your inquiries below.
         </Typography>
+        <Divider light className={classes.divider}/>
+        <div className={classes.space} />
+        <div className={classes.forms}>
+          <div className={classes.form}>
+            <TextField
+              value={title} InputProps={inputText}
+              placeholder="Title"
+              onChange={this.handleChangeText.bind(this, 'title')}
+              className={classes.input} />
+          </div>
+          <div className={classes.textArea}>
+            <TextField multiline rows="10"
+              value={body} InputProps={inputText}
+              placeholder="Message"
+              onChange={this.handleChangeText.bind(this, 'body')}
+              className={classes.input} />
+          </div>
+          <div className={classes.buttons}>
+            <RssButton color="white"
+              onClick={this.handleInquiry.bind(this)}
+              classes={classes.button}>Send Inquiry</RssButton>
+            <RssDialog open={isNotValid} title={'送信エラー'}
+              onClose={this.handleCloseDialog.bind(this)}>
+            内容に不備があります。もう一度確認してください。
+            </RssDialog>
+          </div>
+          <div className={classes.notice}>
+            <Typography variant="caption" align="center"
+              className={classes.notes}>
+              お問い合わせ：{preference.from}（営業時間９時〜１８時）
+            </Typography>
+          </div>
+        </div>
       </div>
     </div>;
   }
 };
 
-const rowHeight = 62;
+const inquiryWidth = 640;
+const rowHeight = 56;
 const styles = theme => ({
-  inquiryForms: { display: 'flex', flexDirection: 'column'
-                , justifyContent: 'center', height: '100%'}
-, space:        { flex: 1, minHeight: '5%' }
-, title:        { padding: theme.spacing.unit * 2, height: rowHeight }
-, _form:        { padding: theme.spacing.unit
-                , display: 'flex', flexDirection: 'row'
-                , justifyContent: 'center', alignItems: 'center'
-                , height: rowHeight*4 }
+  container:    { width: inquiryWidth, overflow: 'scroll' }
+, inquiryForms: { display: 'flex', flexDirection: 'column'
+                , justifyContent: 'center' }
+, space:        { flex: 1, minHeight: theme.spacing.unit *2 }
+, title:        { padding: theme.spacing.unit * 2, height: rowHeight
+                , color: theme.palette.common.white }
 , form:         { padding: theme.spacing.unit
                 , display: 'flex', flexDirection: 'row'
                 , justifyContent: 'center', alignItems: 'center'
                 , height: rowHeight }
-, menu:         { width: 200 }
-, term:         { display: 'flex', flexDirection: 'row'
+, textArea:     { padding: theme.spacing.unit
+                , display: 'flex', flexDirection: 'row'
                 , justifyContent: 'center', alignItems: 'center'
-                , height: rowHeight * 2 }
+                , height: rowHeight*4 }
 , buttons:      { padding: theme.spacing.unit
                 , display: 'flex', flexDirection: 'row'
                 , justifyContent: 'center', alignItems: 'center'
                 , height: rowHeight }
-, button:       { flex: 1, height: '100%' }
-, notice:       { padding: theme.spacing.unit
-                , display: 'flex', flexDirection: 'column'
-                , justifyContent: 'center', alignItems: 'center'
-                , height: rowHeight }
-, text:         { flex: 1, textAlign: 'left' }
-, notes:        { flex: 1 }
-, input:        { flex: 2 }
+, button:       { }
+, divider:      { backgroundColor: theme.palette.common.white }
+, input:        { flex: 1 }
 , textRoot:     { padding: 0
                 , 'label + &': { marginTop: theme.spacing.unit * 3 } }
 , textInput:    { borderRadius: 4
@@ -155,6 +154,12 @@ const styles = theme => ({
                 , '&:focus': {
                   borderColor: '#80bdff',
                   boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)' } }
+, notice:       { padding: theme.spacing.unit
+                , display: 'flex', flexDirection: 'column'
+                , justifyContent: 'center', alignItems: 'center'
+                , height: rowHeight }
+, notes:        { flex: 1
+                , color: theme.palette.common.white }
 });
 InquiryEdit.displayName = 'InquiryEdit';
 InquiryEdit.defaultProps = {};

@@ -24,8 +24,8 @@ class DrawerTemporary extends React.Component {
   }
 
   render() {
-    std.logInfo(DrawerTemporary.displayName, 'Props', this.props);
-    std.logInfo(DrawerTemporary.displayName, 'State', this.state);
+    //std.logInfo(DrawerTemporary.displayName, 'Props', this.props);
+    //std.logInfo(DrawerTemporary.displayName, 'State', this.state);
     const { classes, user, profile, preference, open } = this.props;
     const modalProps = { keepMounted: true };
     const paperClass = { paper: classes.paper };

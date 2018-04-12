@@ -19,8 +19,8 @@ class RssDrawer extends React.Component {
   }
 
   render() {
-    std.logInfo(RssDrawer.displayName, 'Props', this.props);
-    std.logInfo(RssDrawer.displayName, 'State', this.state);
+    //std.logInfo(RssDrawer.displayName, 'Props', this.props);
+    //std.logInfo(RssDrawer.displayName, 'State', this.state);
     const { classes, user, isAuthenticated, profile, preference, children }
       = this.props;
     const { open } = this.state;
