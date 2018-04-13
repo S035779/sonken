@@ -2,7 +2,6 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import { Redirect, withRouter }
                         from 'react-router-dom';
-import PDF              from 'react-pdf-js';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
