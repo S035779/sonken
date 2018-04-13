@@ -14,7 +14,6 @@ import { MenuItem }     from 'material-ui/Menu';
 import { PersonAdd, Public, NetworkCheck } from 'material-ui-icons';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import agrPdf           from 'Assets/image/agreement.pdf';
@@ -44,13 +43,21 @@ class LoginRegist extends React.Component {
     , plan:               ''
     , agreed:             false
     , isNotValid:         false
-    , openAgree:          false
     };
   }
 
   componentDidMount() {
     std.logInfo(LoginRegist.displayName, 'fetch', 'Preference');
     LoginAction.fetchPreference();
+  }
+
+  downloadFile(file) {
+    std.logInfo(LoginRegist.displayName, 'downloadFile', file);
+    const a = document.createElement("a");
+    a.href = file;
+    a.target = '_target';
+    a.type = 'application/pdf';
+    a.click();
   }
 
   handleChangeText(name, event) {
@@ -80,7 +87,7 @@ class LoginRegist extends React.Component {
         }
         break;
       case 'agreement':
-        this.setState({ openAgree: true });
+        this.downloadFile(image + agrPdf);
         break;
     }
   }
@@ -118,7 +125,7 @@ class LoginRegist extends React.Component {
     const { classes, location, preference } = this.props;
     const { username, password, confirm_password
       , name, kana, email, phone, plan, agreed
-      , redirectToRefferer, isNotValid, openAgree } = this.state;
+      , redirectToRefferer, isNotValid } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const renderItems = preference.menu ? preference.menu
@@ -257,10 +264,6 @@ class LoginRegist extends React.Component {
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssFullDialog open={openAgree} title={'Agreement'}
-            onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
-            <iframe src={image + agrPdf} className={classes.pdf}/>
-          </RssFullDialog>
         </div>
       </div>
       </div>
