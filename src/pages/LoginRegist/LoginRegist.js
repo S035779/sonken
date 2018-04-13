@@ -11,13 +11,13 @@ import { TextField, Typography, Divider }
 import { FormControlLabel }
                         from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
-import { PersonAdd, Public, NetworkCheck } from 'material-ui-icons';
+import { PersonAdd, Public, NetworkCheck }
+                        from 'material-ui-icons';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
-import agrPdf           from 'Assets/doc/agreement.pdf';
 import agrTxt           from 'Assets/doc/agreement.txt';
 
 const env = process.env.NODE_ENV || 'development';
