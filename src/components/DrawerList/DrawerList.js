@@ -168,7 +168,7 @@ class DrawerList extends React.Component {
         <ListItemIcon>
           <RssFeed className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="RSS Reader !!" classes={textClass}/>
+        <ListItemText primary="アルファOne" classes={textClass}/>
       </ListItem>
     </div>;
   }

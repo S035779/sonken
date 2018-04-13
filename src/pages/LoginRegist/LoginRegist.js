@@ -2,6 +2,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import { Redirect, withRouter }
                         from 'react-router-dom';
+import PDF              from 'react-pdf-js';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
@@ -14,8 +15,20 @@ import { MenuItem }     from 'material-ui/Menu';
 import { PersonAdd, Public, NetworkCheck } from 'material-ui-icons';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
+import agrPdf           from 'Assets/image/agreement.pdf';
+
+const env = process.env.NODE_ENV || 'development';
+const assets = process.env.ASSET_URL;
+let image;
+if(env === 'development') {
+  image = assets;
+} else
+if(env === 'production' || env === 'staging') {
+  image = assets + '/image';
+}
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -32,6 +45,7 @@ class LoginRegist extends React.Component {
     , plan:               ''
     , agreed:             false
     , isNotValid:         false
+    , openAgree:          false
     };
   }
 
@@ -48,25 +62,32 @@ class LoginRegist extends React.Component {
     this.setState({ [name]: event.target.checked });
   }
 
-  handleRegist() {
+  handleClickButton(request, event) {
     const { username, password, name, kana, email, phone, plan }
       = this.state;
-    if(this.isValidate()) {
-      LoginAction.registration(username, password
-        , { name, kana, email, phone, plan })
-        .then(() => LoginAction.presetUser(username))
-        .then(() => {
-          if(this.props.isAuthenticated)
-            this.setState({ redirectToRefferer: true });
-        })
-        .catch(err => this.setState({ isNotValid: true }));
-    } else {
-      this.setState({ isNotValid: true });
+    switch(request) {
+      case 'registration':
+        if(this.isValidate()) {
+          LoginAction.registration(username, password
+            , { name, kana, email, phone, plan })
+            .then(() => LoginAction.presetUser(username))
+            .then(() => {
+              if(this.props.isAuthenticated)
+                this.setState({ redirectToRefferer: true });
+            })
+            .catch(err => this.setState({ isNotValid: true }));
+        } else {
+          this.setState({ isNotValid: true });
+        }
+        break;
+      case 'agreement':
+        this.setState({ openAgree: true });
+        break;
     }
   }
 
-  handleCloseDialog() {
-    this.setState({ isNotValid: false });
+  handleCloseDialog(name, event) {
+    this.setState({ [name]: false });
   }
 
   isValidate() {
@@ -80,6 +101,12 @@ class LoginRegist extends React.Component {
     );
   }
 
+  getRefferer(name) {
+    const { menu } = this.props.preference;
+    const plan = menu.find(_menu => _menu.name === name);
+    return plan ? plan.link : null;
+  }
+
   renderItems(item, idx) {
     return <MenuItem value={item.name} key={idx}>
       {item.name}（上限数：{item.number}）
@@ -88,19 +115,16 @@ class LoginRegist extends React.Component {
 
   render() {
     //std.logInfo(LoginRegist.displayName, 'State', this.state);
-    //std.logInfo(LoginRegist.displayName, 'Props', this.props);
+    std.logInfo(LoginRegist.displayName, 'Props', this.props);
     const { classes, location, preference } = this.props;
-    const {
-      redirectToRefferer, username, password, confirm_password, name, kana
-    , email, phone, plan, agreed, isNotValid
-    } = this.state;
+    const { username, password, confirm_password
+      , name, kana, email, phone, plan, agreed
+      , redirectToRefferer, isNotValid, openAgree } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
-    const to = { pathname: '/marchant' };
     const renderItems = preference.menu ? preference.menu
       .map((item, idx) => this.renderItems(item, idx)) : [];
-
-    if(redirectToRefferer) return <Redirect to={to} />;
+    if(redirectToRefferer) window.location = this.getRefferer(plan);
     return <div className={classes.container}>
       <div className={classes.loginForms}>
       <div className={classes.space} />
@@ -222,16 +246,22 @@ class LoginRegist extends React.Component {
               onChange={this.handleChangeCheckbox.bind(this, 'agreed')} />
             }
             label="規約に同意する" />
-          <RssButton color="flatWhite">利用規約を表示</RssButton>
+          <RssButton color="flatWhite"
+            onClick={this.handleClickButton.bind(this, 'agreement')}
+          >利用規約を表示</RssButton>
         </div>
         <div className={classes.buttons}>
           <RssButton color="white"
-            onClick={this.handleRegist.bind(this)}
+            onClick={this.handleClickButton.bind(this, 'registration')}
             classes={classes.button}>Create Account</RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this)}>
-          内容に不備があります。もう一度確認してください。
+            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
           </RssDialog>
+          <RssFullDialog open={openAgree} title={'Agreement'}
+            onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
+            <iframe src={assets + agrPdf} className={classes.pdf}/>
+          </RssFullDialog>
         </div>
       </div>
       </div>
@@ -270,8 +300,10 @@ const styles = theme => ({
               , transition:
                 theme.transitions.create(['border-color', 'box-shadow'])
               , '&:focus': {
-                borderColor: '#80bdff',
-                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)' } }
+                  borderColor: theme.palette.primary.main
+                , boxShadow: '0 0 0 0.2rem '
+                    + std.toRGBa(theme.palette.primary.main, 0.25)
+              }}
 , column:     { display: 'flex', flexDirection: 'row' }
 , description:{ flex: 1 }
 , forms:      { flex: 1 }
@@ -281,6 +313,7 @@ const styles = theme => ({
               , fontSize: 32, color: theme.palette.common.white}
 , mediaBody:  { display: 'table-cell', verticalAlign: 'top', flex: 1
               , marginLeft: theme.spacing.unit *2 }
+, pdf:        { width: '100%', border: 0, height: '100%' }
 });
 LoginRegist.displayName = 'LoginRegist';
 LoginRegist.defaultProps = {};

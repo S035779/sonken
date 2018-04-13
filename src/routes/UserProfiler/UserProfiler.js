@@ -688,7 +688,7 @@ export default class UserProfiler {
     , kana: 'カンリシャ'
     , email: mms_user
     , phone: '090-1234-5678'
-    , plan: 'Plan A'
+    , plan: 'リスト500（月払）'
     };
   }
 
@@ -696,20 +696,41 @@ export default class UserProfiler {
     return {
       appname: app_name
     , from: mms_from
-    , agreement: 'http://www.example.com'
     , menu: [
-        { number: 9999, name: 'Plan A', id: 0 }
-      , { number: 300,  name: 'Plan B', id: 1 }
-      , { number: 50,   name: 'Plan C', id: 2 }
-      , { number: 20,   name: 'Plan D', id: 3 }
-    ]
+        { id: 1, name: 'リスト500（月払）',     number: 500
+        , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
+      , { id: 2, name: 'リスト1000（月払）',    number: 1000
+        , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
+      , { id: 3, name: 'リスト2500（月払）',    number: 2500
+        , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
+      , { id: 4, name: 'リスト5000（月払）',    number: 5000
+        , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
+      , { id: 5, name: 'リスト7500（月払）',    number: 7500
+        , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
+      , { id: 6, name: 'リスト10000（月払）',   number: 10000
+        , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
+      , { id: 7, name: 'リスト5000（半年払）',  number: 5000
+        , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
+      , { id: 8, name: 'リスト7500（半年払）',  number: 7500
+        , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
+      , { id: 9, name: 'リスト10000（半年払）', number: 10000
+        , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
+      ]
     , advertisement: {
-        url1: 'http://www1.example.com'
-      , url2: 'http://www2.example.com'
-      , url3: 'http://www3.example.com'
-      , url4: 'http://www4.example.com'
+        url1: '/advertisement1.html'
+      , url2: '/advertisement2.html'
+      , url3: '/advertisement3.html'
+      , url4: '/advertisement4.html'
       }
     };
   }
-
 };

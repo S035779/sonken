@@ -20,7 +20,7 @@ class AdminSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(AdminSearch.displayName, 'Props', nextProps);
+    //std.logInfo(AdminSearch.displayName, 'Props', nextProps);
     const { userPage } = nextProps;
     this.setState({ perPage: userPage.perPage });
   }

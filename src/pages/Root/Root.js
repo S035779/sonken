@@ -9,16 +9,16 @@ import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 const theme = createMuiTheme({
   palette:{
     primary: {
-      main: '#FEA826'
-    , contrastText: '#FFF'
+      main: '#ffa726'
+    , light: '#ffd95b'
+    , dark: '#c77800'
+    , contrastText: '#fff'
     }
   , secondary: {
-      main: '#E55200'
-    , contrastText: '#FFF'
-    }
-  , error: {
-      main: '#FA404B'
-    , contrastText: '#FFF'
+      main: '#e65100'
+    , light: '#ff833a'
+    , dark: '#ac1900'
+    , contrastText: '#fff'
     }
   }
 });

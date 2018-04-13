@@ -8,7 +8,7 @@ import { logs as log } from 'Utilities/logutils';
 
 import Html from 'Pages/Html/Html';
 
-export default class ReactSSRenderer {
+class ReactSSRenderer {
   constructor(options) {
     this.options = options;
   }
@@ -19,7 +19,7 @@ export default class ReactSSRenderer {
 
   request() {
     return (req, res, next) => {
-      console.log(req.session);
+      log.info(ReactSSRenderer.displayName, 'Session', req.session);
       const options = {
         user: req.session.user ? req.session.user : ''
       , admin: req.session.admin ? req.session.admin : ''
@@ -60,3 +60,5 @@ export default class ReactSSRenderer {
     return Promise.all(promises);
   }
 };
+ReactSSRenderer.displayName = 'ReactSSRenderer';
+export default ReactSSRenderer;

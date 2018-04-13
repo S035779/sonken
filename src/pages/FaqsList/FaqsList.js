@@ -4,6 +4,7 @@ import { Link }           from 'react-router-dom';
 import std                from 'Utilities/stdutils';
 
 import { withStyles }     from 'material-ui/styles';
+import { Typography }     from 'material-ui';
 import { AccountCircle }  from 'material-ui-icons';
 import EditBody           from 'Components/EditBody/EditBody';
 
@@ -30,17 +31,17 @@ class FaqsList extends React.Component {
     const { classes, faqs } = this.props;
     const renderList = faqs.map(faq => this.renderList(faq, classes));
     return <div className={classes.container}>
-      <h1 className={classes.title}>FAQ</h1>
+      <Typography variant="display1">FAQ</Typography>
       <ul className={classes.list}>{renderList}</ul>
     </div>;
   }
 };
-const faqsWidth = 640;
+const faqsWidth = '80%';
+const faqsHeight = '95%';
 const styles = theme => ({
-  container:  { width: faqsWidth, overflow: 'scroll'
-              , border: '1px solid #CCC'
+  container:  { width: faqsWidth, height: faqsHeight, overflow: 'scroll'
+              , border: '1px solid #CCC', borderRadius: 8
               , backgroundColor: theme.palette.common.white}
-, title:      { fontSize: '32px', fontWeight: 'bold', margin: '20px 10px' }
 , list:       { margin: '10px 0', padding: 0, listStyle: 'none'
               , borderTop:    '1px solid #CCC' }
 , item:       { borderBottom: '1px solid #CCC' }

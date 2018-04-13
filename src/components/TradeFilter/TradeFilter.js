@@ -128,24 +128,14 @@ class TradeFilter extends React.Component {
           onChange={this.handleChangeCheckbox.bind(this, 'endBidding')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
-          className={classes.title}>本日入札終了</Typography>
+          className={classes.title}>取引完了済み</Typography>
         <Checkbox color="primary"
           className={classes.checkbox}
           checked={allBidding}
           onChange={this.handleChangeCheckbox.bind(this, 'allBidding')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
-          className={classes.title}>全て表示</Typography>
-      </div>
-      <div className={classes.edit}>
-        <div className={classes.space}/>
-        <div className={classes.buttons}>
-          <div className={classes.buttons}>
-            <Button variant="raised"
-              onClick={this.handleFilter.bind(this)}
-              className={classes.button}>絞り込み</Button>
-          </div>
-        </div>
+          className={classes.title}>取引未完了</Typography>
         <div className={classes.datetimes}>
           <Checkbox color="primary"
             checked={inBidding}
@@ -166,6 +156,16 @@ class TradeFilter extends React.Component {
               onChange={this.handleChangeText.bind(this, 'bidStopTime')}
               className={classes.text}/>
           </form>
+        </div>
+      </div>
+      <div className={classes.edit}>
+        <div className={classes.space}/>
+        <div className={classes.buttons}>
+          <div className={classes.buttons}>
+            <Button variant="raised"
+              onClick={this.handleFilter.bind(this)}
+              className={classes.button}>絞り込み</Button>
+          </div>
         </div>
       </div>
       <div className={classes.edit}>

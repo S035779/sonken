@@ -230,7 +230,7 @@ noteItem:       { display: 'flex', flexDirection: 'row'
     }
   }
 , listItemText: { marginRight: descMinWidth }
-, star:         {}
+, star:         { color: theme.palette.primary.main }
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
                 , '&:hover':  {

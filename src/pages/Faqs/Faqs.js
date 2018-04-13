@@ -81,7 +81,7 @@ const styles = theme => ({
                     + `, url(${image + faqsImg})`
               , backgroundSize: 'cover' }
 , faqsFrame:  { position: 'relative', height: '100%' }
-, content:    { position: 'absolute', width: '100%'
+, content:    { position: 'absolute', width: '100%', zIndex: 500
               , display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', alignItems: 'center'
               , height: `calc(100vh - ${barHeightSmDown}px)`

@@ -7,7 +7,22 @@ import { JssProvider }    from 'react-jss';
 import { createGenerateClassName, MuiThemeProvider, createMuiTheme }
                           from 'material-ui/styles';
 
-const theme = createMuiTheme();
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#ffa726'
+    , light: '#ffd95b'
+    , dark: '#c77800'
+    , contrastText: '#fff'
+    }
+  , secondary: {
+      main: '#e65100'
+    , light: '#ff833a'
+    , dark: '#ac1900'
+    , contrastText: '#fff'
+    }  
+  }
+});
 
 export default class Static extends React.Component {
   render() {

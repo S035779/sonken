@@ -22,7 +22,7 @@ class LoginHeader extends React.Component {
           component={Link} to="/marchant"
           className={classes.name}>
           <RssFeed className={classes.icon} />
-          RSS Reader !!
+          アルファOne
         </RssButton>
         </div>
         <div className={classes.link}>

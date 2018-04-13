@@ -22,7 +22,7 @@ class AdminList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(AdminList.displayName, 'Props', nextProps);
+    //std.logInfo(AdminList.displayName, 'Props', nextProps);
     const checked = nextProps.selectedUserId;
     const users = nextProps.users;
     this.setState({ checked, users });
@@ -42,10 +42,8 @@ class AdminList extends React.Component {
   renderItem(user, index) {
     const { classes, category } = this.props;
     const { checked } = this.state;
-    const textClass = {
-      primary:    classes.primary
-    , secondary:  classes.secondary
-    };
+    const textClass =
+      { primary:    classes.primary, secondary:  classes.secondary };
     const linkTo = `/admin/${category}/${user._id}/edit`;
     const notice = user.approved ? '承認済み' : '';
     const name = user.name;

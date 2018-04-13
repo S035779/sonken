@@ -35,7 +35,8 @@ var web = {
     }),
     new CleanWebpackPlugin([
       'dist/*.bundle.*',
-      'dist/*.jpg'
+      'dist/*.jpg',
+      'dist/*.pdf'
     ], { verbose: false, }),
   ],
   output: {

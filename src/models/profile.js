@@ -27,12 +27,19 @@ const approvedSchema = new mongoose.Schema({
 }, { collection: 'approved' });
 approvedSchema.index({ approved: 1 }, { unique: true });
 
+const menuSchema = new mongoose.Schema({
+  id:               { type: Number, required: true }
+, name:             { type: String, required: true }
+, link:             { type: String, required: true }
+, number:           { type: Number, required: true }
+, price:            { type: Number, required: true }
+});
+
 const adminSchema = new mongoose.Schema({
   appname:          { type: String, required: true }
 , from:             { type: String, required: true }
-, agreement:        String
-, menu:             [mongoose.Schema.Types.Mixed]
-, advertisement:    mongoose.Schema.Types.Mixed
+, menu:             [menuSchema]
+, advertisement:    { type: Object, required: true }
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'admin' });
 adminSchema.index({ appname: 1 }, { unique: true });

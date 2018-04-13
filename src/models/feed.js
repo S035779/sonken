@@ -24,7 +24,6 @@ const itemSchema = new mongoose.Schema({
 , bidStopTime:      Date
 , pubDate:          { type: Date, default: Date.now() }
 });
-//itemSchema.index({ guid__: 1 }, { unique: true });
 
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
