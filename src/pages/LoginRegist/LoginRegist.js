@@ -14,18 +14,20 @@ import { MenuItem }     from 'material-ui/Menu';
 import { PersonAdd, Public, NetworkCheck } from 'material-ui-icons';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
-import agrPdf           from 'Assets/image/agreement.pdf';
+import agrPdf           from 'Assets/doc/agreement.pdf';
+import agrTxt           from 'Assets/doc/agreement.txt';
 
 const env = process.env.NODE_ENV || 'development';
 const assets = process.env.ASSET_URL;
-let image;
+let doc;
 if(env === 'development') {
-  image = assets;
+  doc = assets;
 } else
 if(env === 'production' || env === 'staging') {
-  image = assets + '/image';
+  doc = assets + '/doc';
 }
 
 class LoginRegist extends React.Component {
@@ -43,21 +45,13 @@ class LoginRegist extends React.Component {
     , plan:               ''
     , agreed:             false
     , isNotValid:         false
+    , openAgree:          false
     };
   }
 
   componentDidMount() {
     std.logInfo(LoginRegist.displayName, 'fetch', 'Preference');
     LoginAction.fetchPreference();
-  }
-
-  downloadFile(file) {
-    std.logInfo(LoginRegist.displayName, 'downloadFile', file);
-    const a = document.createElement("a");
-    a.href = file;
-    a.target = '_target';
-    a.type = 'application/pdf';
-    a.click();
   }
 
   handleChangeText(name, event) {
@@ -87,7 +81,7 @@ class LoginRegist extends React.Component {
         }
         break;
       case 'agreement':
-        this.downloadFile(image + agrPdf);
+        this.setState({ openAgree: true });
         break;
     }
   }
@@ -125,7 +119,7 @@ class LoginRegist extends React.Component {
     const { classes, location, preference } = this.props;
     const { username, password, confirm_password
       , name, kana, email, phone, plan, agreed
-      , redirectToRefferer, isNotValid } = this.state;
+      , redirectToRefferer, isNotValid, openAgree } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const renderItems = preference.menu ? preference.menu
@@ -264,6 +258,10 @@ class LoginRegist extends React.Component {
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
+          <RssFullDialog open={openAgree} title={'Agreement'}
+            onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
+            <iframe src={doc + agrTxt} className={classes.iframe} />
+          </RssFullDialog>
         </div>
       </div>
       </div>
@@ -315,7 +313,7 @@ const styles = theme => ({
               , fontSize: 32, color: theme.palette.common.white}
 , mediaBody:  { display: 'table-cell', verticalAlign: 'top', flex: 1
               , marginLeft: theme.spacing.unit *2 }
-, pdf:        { width: '100%', border: 0, height: '100%' }
+, iframe:     { width: '100%', border: 0, height: '100%' }
 });
 LoginRegist.displayName = 'LoginRegist';
 LoginRegist.defaultProps = {};
