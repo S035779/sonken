@@ -17,4 +17,8 @@ if [ ! -d $ASSET/image ]; then
 fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
-cp $WORKDIR/dist/*.pdf              $ASSET/image/
+
+if [ ! -d $ASSET/doc ]; then
+    mkdir $ASSET/doc
+fi
+cp $WORKDIR/dist/*.txt              $ASSET/doc/
