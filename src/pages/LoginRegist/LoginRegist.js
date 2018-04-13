@@ -259,7 +259,7 @@ class LoginRegist extends React.Component {
           </RssDialog>
           <RssFullDialog open={openAgree} title={'Agreement'}
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
-            <iframe src={assets + agrPdf} className={classes.pdf}/>
+            <iframe src={image + agrPdf} className={classes.pdf}/>
           </RssFullDialog>
         </div>
       </div>
