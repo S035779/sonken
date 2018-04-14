@@ -1,28 +1,27 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: ReplicaSet
 metadata:
   name: worker
   labels:
     app: feedparser
     tier: worker
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: worker
+    matchExpressions:
+      - { key: tier, operator: In, values: [worker] }
   template:
     metadata:
       labels:
         app: feedparser
         tier: worker
     spec:
-      volumes:
-      - name: assets
-      restartPolicy: Never
       containers:
       - name: node-job
         image: asia.gcr.io/feedparser-198104/feedparser/node_job
-        command: ["/app/sonken/docker/install.sh"]
         resources:
           requests:
-            cpu: 256m
-            memory: 128Mi
-        volumeMounts:
-          - mountPath: /app/assets/
-            name: assets
+            cpu: 100m
+            memory: 100Mi

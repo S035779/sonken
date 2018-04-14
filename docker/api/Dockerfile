@@ -6,7 +6,7 @@ RUN echo $TZ | tee /etc/timezone \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # initialize
-EXPOSE 8081
+EXPOSE 8082
 WORKDIR /app/sonken
 RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
