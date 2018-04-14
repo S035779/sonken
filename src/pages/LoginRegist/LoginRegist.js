@@ -18,17 +18,7 @@ import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
-import agrTxt           from 'Assets/doc/agreement.txt';
-
-const env = process.env.NODE_ENV || 'development';
-const assets = process.env.ASSET_URL;
-let doc;
-if(env === 'development') {
-  doc = assets;
-} else
-if(env === 'production' || env === 'staging') {
-  doc = assets + '/doc';
-}
+import agrTxt           from 'Main/agreement';
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -260,7 +250,11 @@ class LoginRegist extends React.Component {
           </RssDialog>
           <RssFullDialog open={openAgree} title={'Agreement'}
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
-            <iframe src={doc + agrTxt} className={classes.iframe} />
+            <iframe
+              src={URL.createObjectURL(new Blob(
+                [std.decode_base64(agrTxt)], { type: 'text/html' }
+              ))}
+              className={classes.iframe} />
           </RssFullDialog>
         </div>
       </div>
