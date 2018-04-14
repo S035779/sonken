@@ -12,7 +12,7 @@ var common = {
         test: /\.js$/,
         loader: [ 'babel-loader' ]
       },{
-        test: /\.(gif|jpg|png|svg|ico|pdf|txt)$/,
+        test: /\.(gif|jpg|png|svg|ico)$/,
         use: [ 'file-loader?name=[name].[ext]' ]
       }]
   },
