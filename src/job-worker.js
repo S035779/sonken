@@ -7,16 +7,20 @@ import { logs as log }  from 'Utilities/logutils';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 
 const displayName = 'job-worker';
+
 const yahoo = Yahoo.of();
 const feed = FeedParser.of();
 
 dotenv.config();
 const env = process.env.NODE_ENV || 'development';
+
 if (env === 'development') {
   log.config('console', 'color', displayName, 'TRACE');
-} else if (env === 'staging') {
+} else
+if (env === 'staging') {
   log.config('file', 'basic', displayName, 'DEBUG');
-} else if (env === 'production') {
+} else
+if (env === 'production') {
   log.config('file', 'json', displayName, 'INFO');
 }
 
@@ -26,13 +30,13 @@ const request = (operation, { user, id, url }) => {
     case 'search':
     case 'seller':
       return yahoo.fetchHtml({ url })
-        //.map(R.tap(log.trace.bind(this)))
+        //.map(R.tap(console.log))
         .map(obj => ({ updated: new Date(), items: obj.item }))
         .flatMap(obj => feed.updateHtml({ user, id, html: obj }))
       ;
     case 'rss':
       return yahoo.fetchRss({ url })
-        //.map(R.tap(log.trace.bind(this)))
+        //.map(R.tap(console.log))
         .map(obj => ({ updated: new Date() , items: obj.item }))
         .flatMap(obj => feed.updateRss({ user, id, rss: obj }))
       ;
@@ -61,9 +65,9 @@ const main = () => {
 
   process.on('message', task => {
     log.debug('[JOB]', 'got message. pid:', process.pid);
-    queue.push(task, err => {
+    if(task) queue.push(task, err => {
       if(err)
-        log.error('[JOB]', err.name, ':', err.message, ':', err.stak);
+        log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
       log.info('[JOB]', 'finished work. pid:', process.pid);
     });
   });

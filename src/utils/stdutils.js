@@ -444,6 +444,20 @@ export default {
     }
   },
 
+  invokeMap(fn, s, i, e) {
+    const argLen = arguments.length;
+    if(!s) s = 0;
+    let idx = 0;
+    return arr => {
+      const arrLen = arr.length;
+      const setTime = (obj, idx) => setTimeout(fn.bind(this, obj), i*idx);
+      setTimeout(fn.bind(this, arr.shift()), s);
+      if (argLen >= 3) {
+        setTimeout(() => arr.forEach(setTime), s);
+      }
+    };
+  },
+
   /**
    * @param {function} fn - monitor callback (return true or false).
    * @param {function} rs - resolve callback (monitor results).

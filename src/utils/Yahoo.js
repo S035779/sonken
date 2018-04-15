@@ -160,6 +160,7 @@ class Yahoo {
         });
       case 'fetch/html':
         return new Promise((resolve, reject) => {
+          log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
           let results;
           osmosis
             .get(options.url)
