@@ -10,7 +10,7 @@ import { ListItem, ListItemIcon, ListItemText }
                         from 'material-ui/List';
 import { Collapse }     from 'material-ui/transitions';
 import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
-, RssFeed }             from 'material-ui-icons';
+, AccountBox, BlurOn }  from 'material-ui-icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 
@@ -27,7 +27,7 @@ class DrawerList extends React.Component {
   handleClickButton(name, event) {
     switch(name) {
       case 'title':
-        this.props.history.push('/login/authenticate');
+        this.props.history.push('/');
         break;
       case 'marchant':
         this.props.history.push('/marchant');
@@ -66,28 +66,28 @@ class DrawerList extends React.Component {
         <ListItemIcon>
           <LocalMall className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="Merchandise" classes={textClass} />
+        <ListItemText primary="商品RSS" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'sellers')}>
         <ListItemIcon>
           <People className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="Sellers" classes={textClass} />
+        <ListItemText primary="出品者RSS" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'bids')}>
         <ListItemIcon>
           <Timeline className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="Bids" classes={textClass} />
+        <ListItemText primary="入札リスト" classes={textClass} />
       </ListItem>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'trade')}>
         <ListItemIcon>
           <Gavel className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="Trade" classes={textClass} />
+        <ListItemText primary="取引チェック" classes={textClass} />
       </ListItem>
     </div>;
   }
@@ -102,8 +102,7 @@ class DrawerList extends React.Component {
         <ListItem button 
           onClick={this.handleClickButton.bind(this, 'user')}>
           <ListItemIcon>
-            <Avatar className={classes.avatar}>
-              {user ? user.substr(0,2) : ''}</Avatar>
+            <AccountBox className={classes.icon} />
           </ListItemIcon>
           <ListItemText primary={user} classes={textClass} />
           {open
@@ -166,7 +165,7 @@ class DrawerList extends React.Component {
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'title')}>
         <ListItemIcon>
-          <RssFeed className={classes.icon} />
+          <BlurOn className={classes.icon} />
         </ListItemIcon>
         <ListItemText primary="アルファOne" classes={textClass}/>
       </ListItem>
@@ -182,8 +181,8 @@ class DrawerList extends React.Component {
       <div className={classes.header}>
         <List>{renderTitleListItems}</List>
       </div>
-      <Divider /><List>{renderUserListItems}</List>
       <Divider /><List>{renderListItems}</List>
+      <Divider /><List>{renderUserListItems}</List>
     </div>;
   }
 };

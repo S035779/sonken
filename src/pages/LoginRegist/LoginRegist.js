@@ -268,7 +268,7 @@ class LoginRegist extends React.Component {
 const loginWidth = 640;
 const rowHeight = 56;
 const styles = theme => ({
-  container:  { width: loginWidth, overflow: 'scroll'  }
+  container:  { width: loginWidth, overflow: 'hidden'  }
 , loginForms: { display: 'flex', flexDirection: 'column'
               , justifyContent: 'center' }
 , space:      { flex: 1, minHeight: theme.spacing.unit *2 }

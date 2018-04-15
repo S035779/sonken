@@ -28,19 +28,19 @@ class RssHeader extends React.Component {
     let category = location.pathname.split('/')[1];
     switch(category) {
       case 'marchant':
-        category='Merchandise';
+        category='商品RSS';
         break;
       case 'sellers':
-        category='Sellers';
+        category='出品者RSS';
         break;
       case 'bids':
-        category='Bids';
+        category='入札リスト';
         break;
       case 'trade':
-        category='Trade';
+        category='取引チェック';
         break;
       default:
-        category='Merchandise';
+        category='商品RSS';
         break;
     }
     return category;

@@ -6,7 +6,7 @@ import std            from 'Utilities/stdutils';
 import { withStyles } from 'material-ui/styles';
 import { AppBar, Toolbar, Typography, Button }
                       from 'material-ui';
-import { RssFeed, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
+import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
                       from 'material-ui-icons';
 import RssButton      from 'Components/RssButton/RssButton';
 
@@ -21,7 +21,7 @@ class LoginHeader extends React.Component {
         <RssButton color="flatWhite"
           component={Link} to="/marchant"
           className={classes.name}>
-          <RssFeed className={classes.icon} />
+          <BlurOn className={classes.icon} />
           アルファOne
         </RssButton>
         </div>
