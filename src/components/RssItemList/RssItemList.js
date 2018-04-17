@@ -12,7 +12,7 @@ import {
   ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
 }                           from 'material-ui/List';
 import {
-  Star, StarBorder, Delete, NewReleases
+  Star, StarBorder, Delete, FiberNew
 }                           from 'material-ui-icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
@@ -130,8 +130,8 @@ class RssItemList extends React.Component {
     return <StarBorder className={classes.star} />;
   }
 
-  renderNewReleases() {
-    return <NewReleases color="error"/>
+  renderFiberNew() {
+    return <FiberNew color="error"/>
   }
 
   renderItem(index, item) {
@@ -158,8 +158,8 @@ class RssItemList extends React.Component {
     const notice = '';
     const renderStar = starred.indexOf(item.guid._) !== -1
       ? this.renderStar() : this.renderUnStar();
-    const renderNewReleases = added.indexOf(item.guid._) !== -1
-      ? null : this.renderNewReleases();
+    const renderFiberNew = added.indexOf(item.guid._) !== -1
+      ? null : this.renderFiberNew();
     if(deleted.indexOf(item.guid._) !== -1) return;
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
@@ -173,7 +173,7 @@ class RssItemList extends React.Component {
             </IconButton>
             <IconButton
               onClick={this.handleChangeAdded.bind(this, item.guid._)}>
-              {renderNewReleases}
+              {renderFiberNew}
             </IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF}>
@@ -207,8 +207,20 @@ class RssItemList extends React.Component {
 
   render() {
     const { classes, items } = this.props;
-    const renderItems =
-      items.map((item, index) => this.renderItem(index, item));
+    const compareFavorite = (a, b) => {
+      if(a.starred === true  && b.starred === false) return -1;
+      if(a.starred === false && b.starred === true ) return 1;
+      return 0;
+    };
+    const compareId = (a, b) => {
+      if(a._id < b._id) return -1;
+      if(a._id > b._id) return 1;
+      return 0;
+    };
+    const renderItems = items
+      .sort(compareId)
+      .sort(compareFavorite)
+      .map((item, index) => this.renderItem(index, item));
     return <List>{renderItems}</List>;
   }
 };

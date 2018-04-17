@@ -5,7 +5,7 @@ const displayName = 'feed';
 const feed = FeedParser.of();
 
 export default {
-  uploadNote(options) {
+  uploadNotes(options) {
     return (req, res, next) => {
       const filename = req.headers['x-uploadedfilename'];
       const filedata = new Buffer(+req.headers['content-length']);
@@ -17,7 +17,7 @@ export default {
         const user = filename.split('_')[0];
         const category = filename.split('_')[1];
         const file = filedata;
-        feed.uploadNote({ user, category, file }).subscribe(
+        feed.uploadNotes({ user, category, file }).subscribe(
           obj => { res.send(obj); }
         , err => {
             res.status(500)
@@ -30,10 +30,10 @@ export default {
     };
   },
 
-  downloadNote(options) {
+  downloadNotes(options) {
     return (req, res, next) => {
       const { user, id } = req.query;
-      feed.downloadNote({ user, id }).subscribe(
+      feed.downloadNotes({ user, id }).subscribe(
         obj => { res.send(obj); }
       , err => {
           res.status(500)

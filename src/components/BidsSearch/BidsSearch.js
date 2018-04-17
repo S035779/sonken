@@ -23,7 +23,7 @@ class BidsSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(BidsSearch.displayName, 'Props', nextProps);
+    //std.logInfo(BidsSearch.displayName, 'Props', nextProps);
     const { itemPage } = nextProps;
     this.setState({ perPage: itemPage.perPage });
   }

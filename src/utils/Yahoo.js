@@ -162,36 +162,35 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
           let results;
-          osmosis
-            .get(options.url)
+          osmosis.get(options.url)
             .set({
               title: 'title'
-            , item: [ osmosis
-                .find('div#list01 tr')
-                .filter('td.i, td.a1')
-                .set({
-                  link: 'div.a1wrp a@href'
-                , attr_HREF : 'div.th a@href'
-                , img_SRC:    'div.th img@src' 
-                , img_ALT:    'div.th img@alt'
-                , description: {
-                    DIV: { A: {
-                      attr: { HREF: 'div.th a@href' }
-                  , IMG: { attr: {
-                      SRC:  'div.th img@src'
-                    , ALT: 'div.th img@alt'
-                    }}
-                  }}}
-                })
-                .follow('div.a1wrp h3 a')
-                .set({
-                  title: 'h1.ProductTitle__text > text()'
-                , bids: 'li.Count__count.Count__count > dl '
-                    + '> dd.Count__number > text()'
-                , price: 'div.Price.Price--current '
-                    + '> dl.Price__body > dd.Price__value > text()'
-                , details: [ 'dd.ProductDetail__description > text()' ]
-                })
+            , item: [
+                osmosis.find('div#list01 tr')
+                  .filter('td.i, td.a1')
+                  .set({
+                    link: 'div.a1wrp a@href'
+                  , attr_HREF : 'div.th a@href'
+                  , img_SRC:    'div.th img@src' 
+                  , img_ALT:    'div.th img@alt'
+                  , description: {
+                      DIV: { A: {
+                        attr: { HREF: 'div.th a@href' }
+                    , IMG: { attr: {
+                        SRC:  'div.th img@src'
+                      , ALT: 'div.th img@alt'
+                      }}
+                    }}}
+                  })
+                  .follow('div.a1wrp h3 a')
+                  .set({
+                    title: 'h1.ProductTitle__text > text()'
+                  , bids: 'li.Count__count.Count__count > dl '
+                      + '> dd.Count__number > text()'
+                  , price: 'div.Price.Price--current '
+                      + '> dl.Price__body > dd.Price__value > text()'
+                  , details: [ 'dd.ProductDetail__description > text()' ]
+                  })
               ]
             })
             .data(obj => {
@@ -239,10 +238,10 @@ class Yahoo {
               , R.filter(R.is(Object))
               )(obj.item);
             })
-            //.log(   msg => log.trace(Yahoo.displayName, msg))
-            //.debug( msg => log.debug(Yahoo.displayName, msg))
-            .error( err => reject({ name: 'osmosis', message: err }))
-            .done(  ()  => resolve(results));
+            //.log(msg => log.trace(Yahoo.displayName, msg))
+            //.debug(msg => log.debug(Yahoo.displayName, msg))
+            .error(msg => log.warn(Yahoo.displayName, msg))
+            .done(()  => resolve(results));
         });
     }
   }

@@ -164,7 +164,7 @@ export default {
         obj => {
           if(obj && admin !== '') req.session.admin = admin;
           else if(obj && user !== '') req.session.user = user;
-          console.log('isAuthenticated:', obj, req.session);
+          log.info('LOGIN', obj, req.session);
           res.status(200).send(obj);
         }
       , err => {
@@ -183,7 +183,7 @@ export default {
       profile.signout({ admin, user }).subscribe(
         obj => {
           if(!obj) req.session.destroy();
-          console.log('isAuthenticated:', obj, req.session);
+          log.info('LOGOUT', obj, req.session);
           res.status(200).send(obj);
         }
       , err => {

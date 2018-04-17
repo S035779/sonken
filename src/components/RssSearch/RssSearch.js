@@ -68,10 +68,9 @@ class RssSearch extends React.Component {
   }
 
   handleDownload(event) {
-    const { user, note } = this.props;
-    if(!note) return this.setState({ isNotValid: true });
-    std.logInfo(RssSearch.displayName, 'handleDownload', note._id);
-    NoteAction.download(user, note._id)
+    const { user } = this.props;
+    std.logInfo(RssSearch.displayName, 'handleDownload', user);
+    NoteAction.download(user)
       .then(() => {
         if(this.props.file) this.downloadFile(this.props.file);
         this.setState({ isSuccess: true });
@@ -85,7 +84,10 @@ class RssSearch extends React.Component {
     std.logInfo(RssSearch.displayName, 'handleChangeFile', file);
     NoteAction.upload(user, category, file)
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(RssSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid: true })
+      });
   }
 
   handleChangeText(name, event) {

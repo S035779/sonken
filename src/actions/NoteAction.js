@@ -99,16 +99,16 @@ export default {
     ;
   },
   upload(user, category, file) {
-    return NoteApiClient.uploadNote(user, category, file)
-      .then(note => {
-        dispatch({ type: 'note/upload', note });
+    return NoteApiClient.uploadNotes(user, category, file)
+      .then(notes => {
+        dispatch({ type: 'notes/upload', notes });
       })
     ;
   },
-  download(user, id) {
-    return NoteApiClient.downloadNote(user, id)
+  download(user) {
+    return NoteApiClient.downloadNotes(user)
       .then(file => {
-        dispatch({ type: 'note/download', file });
+        dispatch({ type: 'notes/download', file });
       })
     ;
   },

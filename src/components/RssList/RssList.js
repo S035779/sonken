@@ -118,16 +118,23 @@ class RssList extends React.Component {
   render() {
     const { classes } = this.props;
     const { isSuccess, isNotValid, notes } = this.state;
-    const renderItems = notes.map(note => this.renderItem(note));
+    const compareId = (a, b) => {
+      if(a._id < b._id) return 1;
+      if(a._id > b._id) return -1;
+      return 0;
+    };
+    const renderItems = notes
+      .sort(compareId)
+      .map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
       <RssDialog open={isSuccess} title={'送信完了'}
         onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-      要求を受け付けました。
+        要求を受け付けました。
       </RssDialog>
       <RssDialog open={isNotValid} title={'送信エラー'}
         onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-      内容に不備があります。もう一度確認してください。
+        内容に不備があります。もう一度確認してください。
       </RssDialog>
     </List>;
   }

@@ -163,8 +163,8 @@ router.route('/added')
 .delete(feed.deleteAdd());
 
 router.route('/file')
-.get(feed.downloadNote())
-.put(feed.uploadNote())
+.get(feed.downloadNotes())
+.put(feed.uploadNotes())
 .post(feed.downloadItems())
 .delete(feed.notImplemented());
 

@@ -14,8 +14,8 @@ export default class TradedNotesStore extends ReduceStore {
     , selected: false
     , ids:      []
       , filter: {
-        endBidding:   true
-      , allBidding:   true
+        endTrading:   true
+      , allTrading:   true
       , inBidding:    false
       , bidStartTime: 0
       , bidStopTime:  0

@@ -114,8 +114,14 @@ class BidsItemList extends React.Component {
 
   render() {
     const { classes, items } = this.props;
-    const _items = 
-      items.map((item, index) => this.renderItem(index, item));
+    const compareId = ((a, b) => {
+      if(a._id < b._id) return -1;
+      if(a._id > b._id) return 1;
+      return 0;
+    });
+    const _items = items
+      .sort(compareId)
+      .map((item, index) => this.renderItem(index, item));
     return <List>{_items}</List>;
   }
 };

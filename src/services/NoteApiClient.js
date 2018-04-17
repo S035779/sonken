@@ -259,7 +259,7 @@ export default {
           );
         });
         break;
-      case 'upload/note':
+      case 'upload/notes':
         return new Promise((resolve, reject) => {
           xhr.putFile(
             api + '/file'
@@ -269,7 +269,7 @@ export default {
           );
         });
         break;
-      case 'download/note':
+      case 'download/notes':
         return new Promise((resolve, reject) => {
           xhr.getFile(
             api + '/file'
@@ -364,13 +364,13 @@ export default {
   deleteNote(user, ids) {
     return this.request('delete/note', { user, ids });
   },
-  uploadNote(user, category, file) {
+  uploadNotes(user, category, file) {
     const filename = user + '_' + category;
     const filedata = file;
-    return this.request('upload/note', { filename, filedata });
+    return this.request('upload/notes', { filename, filedata });
   },
-  downloadNote(user, id) {
-    return this.request('download/note', { user, id });
+  downloadNotes(user) {
+    return this.request('download/notes', { user });
   },
   downloadItems(user, items) {
     return this.request('download/items', { user, items });
@@ -395,9 +395,9 @@ export default {
     return this.request('select/traded', { user, ids });
   },
   filterTrade(user, {
-    endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
+    endTrading, allTrading, inBidding, bidStartTime, bidStopTime}) {
     const filter = {
-      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+      endTrading, allTrading, inBidding, bidStartTime, bidStopTime
     };
     return this.request('filter/traded', { user, filter });
   },

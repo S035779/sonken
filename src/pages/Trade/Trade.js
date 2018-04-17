@@ -42,15 +42,16 @@ class Trade extends React.Component {
     const day       = date.getDate();
     const today     = new Date(year, month, day+1);
     const yesterday = new Date(year, month, day);
-    const isDay = yesterday <= now && now < today; 
+    //const isDay = yesterday <= now && now < today; 
+    const isTrade = item.traded;
     const isAll = true;
     const isNow = start <= now && now <= stop;
     return filter.inBidding
       ? isNow
-      : filter.endBidding && filter.allBidding
+      : filter.endTrading && filter.allTrading
         ? isAll
-        : filter.endBidding
-          ? isDay
+        : filter.endTrading
+          ? isTrade
           : true; 
   }
 

@@ -777,17 +777,18 @@ export default class FeedParser {
   }
 
   updateNote({ user, id, data }) {
-    //log.trace(user,id,data);
+    log.trace(user,id,data);
     const isAsin = data.asin !== '';
-    const getAmazonData = obj => R.merge(data, {
+    const setAmazonData = obj => R.merge(data, {
           name:       obj.ItemAttributes.Title
         , AmazonUrl:  obj.DetailPageURL
         , AmazonImg:  obj.MediumImage.URL
     });
     return isAsin
       ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
-        .map(getAmazonData)
+        .map(setAmazonData)
         .flatMap(obj => this._updateNote({ user, id, data: obj }))
+        //.map(R.tap(console.log))
         .flatMap(() => this.fetchNote({ user, id }))
       : this._updateNote({ user, id, data })
         .flatMap(() => this.fetchNote({ user, id }))
@@ -910,12 +911,52 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(_ids));
   }
 
-  uploadNote({ user, category, file }) {
-    const data = this.setObj({ user, category, file });
-    return Rx.Observable.fromPromise(this.addNote(user, data));
+  uploadNotes({ user, category, file }) {
+    const notes = this.setNotesObj({ user, category, file });
+    const promises = R.map(note => this.addNote(user, note));
+    return Rx.Observable.forkJoin(promises(notes))
+      .flatMap(() => this.fetchNotes({ user }))
+      .flatMap(objs => this.updateNotes(user, objs))
+      //.map(R.tap(console.log))
+  }
+  
+  updateNotes(user, notes) {
+    const observables = R.map(
+      obj => this.updateNote({ user, id: obj._id.toString(), data: obj })
+    );
+    return Rx.Observable.forkJoin(observables(notes));
   }
 
-  setObj({ user, category, file }) {
+  setNotesObj({ user, category, file }) {
+    const toRcords = R.split('"\n');
+    const toColumn = R.map(R.split('",'));
+    const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+    const toCutRec = R.filter(objs => R.length(objs) > 1);
+    const setNotes = R.map(arr => ({
+      url:              arr[1]
+    , category
+    , user
+    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+    , items:            []
+    , title:            arr[0]
+    , asin:             arr[2]
+    , name:             ''
+    , price:            0
+    , bidsprice:        0
+    , body:             ''
+    , AmazonUrl:        ''
+    , AmazonImg:        ''
+    }));
+    return R.compose(
+      setNotes
+    , toCutRec
+    , toCutHed
+    , toColumn
+    , toRcords
+    )(file.toString());
+  }
+
+  setItemsObj({ user, category, file }) {
     const toRcords = R.split('"\n');
     const toColumn = R.map(R.split('",'));
     const toCutHed = R.map(R.map(R.slice(1, Infinity)));
@@ -978,19 +1019,28 @@ export default class FeedParser {
     )(file.toString());
   }
 
-  downloadNote({ user, id }) {
-    return this.fetchNote({user, id})
-      .map(obj => obj.items ? this.setCsv(obj.items) : null)
+  downloadNotes({ user }) {
+    return this.fetchNotes({ user })
+      .map(objs => this.setNotesCsv(objs))
       .map(obj => new Buffer(obj));
   }
   
   downloadItems({ user, items }) {
     return this.fetchItems({ user, items })
-      .map(objs => this.setCsv(objs))
+      .map(objs => this.setItemsCsv(objs))
       .map(obj => new Buffer(obj));
   }
   
-  setCsv(objs) {
+  setNotesCsv(objs) {
+    const keys = [
+      'title'
+    , 'url'
+    , 'asin'
+    ];
+    return js2Csv.of({ csv: objs, keys }).parse();
+  };
+
+  setItemsCsv(objs) {
     const keys = [
       'title'
     , 'link'

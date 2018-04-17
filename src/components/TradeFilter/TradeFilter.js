@@ -17,8 +17,8 @@ class TradeFilter extends React.Component {
       selectedItemId: props.selectedItemId
     , itemFilter:     props.itemFilter
     , checked:        false
-    , endBidding:     true
-    , allBidding:     true
+    , endTrading:     true
+    , allTrading:     true
     , inBidding:      false
     , bidStartTime:   std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , bidStopTime:    std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
@@ -42,22 +42,22 @@ class TradeFilter extends React.Component {
       case 'inBidding':
         this.setState({
           inBidding:  checked
-        , allBidding: !checked
-        , endBidding: !checked
+        , allTrading: !checked
+        , endTrading: !checked
         });
         break;
-      case 'allBidding':
+      case 'allTrading':
         this.setState({
           inBidding:  false
-        , allBidding: checked
-        , endBidding: true
+        , allTrading: checked
+        , endTrading: true
         });
         break;
-      case 'endBidding':
+      case 'endTrading':
         this.setState({
           inBidding:  !checked
-        , allBidding: false
-        , endBidding: checked
+        , allTrading: false
+        , endTrading: checked
         });
         break;
       case 'checked':
@@ -87,14 +87,14 @@ class TradeFilter extends React.Component {
   }
 
   handleFilter() {
-    const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }
+    const { endTrading, allTrading, inBidding, bidStartTime, bidStopTime }
       = this.state;
     const { user } = this.props;
     std.logInfo(TradeFilter.displayName, 'handleFilter', {
-      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+      endTrading, allTrading, inBidding, bidStartTime, bidStopTime
     });
     TradeAction.filter(user, {
-      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
+      endTrading, allTrading, inBidding, bidStartTime, bidStopTime
     });
   }
 
@@ -115,7 +115,7 @@ class TradeFilter extends React.Component {
     const {
       checked
     , bidStartTime, bidStopTime
-    , endBidding, allBidding, inBidding
+    , endTrading, allTrading, inBidding
     } = this.state;
     return <div className={classes.forms}>
       <div className={classes.edit}>
@@ -124,15 +124,15 @@ class TradeFilter extends React.Component {
           className={classes.title}>絞込件数：</Typography>
         <Checkbox color="primary"
           className={classes.checkbox}
-          checked={endBidding}
-          onChange={this.handleChangeCheckbox.bind(this, 'endBidding')}
+          checked={endTrading}
+          onChange={this.handleChangeCheckbox.bind(this, 'endTrading')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.title}>取引完了済み</Typography>
         <Checkbox color="primary"
           className={classes.checkbox}
-          checked={allBidding}
-          onChange={this.handleChangeCheckbox.bind(this, 'allBidding')}
+          checked={allTrading}
+          onChange={this.handleChangeCheckbox.bind(this, 'allTrading')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.title}>取引未完了</Typography>

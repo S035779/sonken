@@ -167,11 +167,11 @@ export default class DashboardStore extends ReduceStore {
           notes:  this.deleteNote(state, action)
         , ids:    []
         });
-      case 'note/upload':
+      case 'notes/upload':
         return Object.assign({}, state, {
-          notes:  [action.note, ...state.notes]
+          notes:  action.notes
         });
-      case 'note/download':
+      case 'notes/download':
         return Object.assign({}, state, {
           file:  action.file
         });

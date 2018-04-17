@@ -23,7 +23,7 @@ class TradeSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(TradeSearch.displayName, 'Props', nextProps);
+    //std.logInfo(TradeSearch.displayName, 'Props', nextProps);
     const { itemPage } = nextProps;
     this.setState({ perPage: itemPage.perPage });
   }
