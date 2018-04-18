@@ -225,7 +225,11 @@ class Yahoo {
                 R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
               const setBidStopTime  = _obj =>
                 R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
-              const setItems = objs => ({ title: obj.title, item:  objs });
+              const setItems = objs => ({
+                title: obj.title
+              , url: options.url
+              , item:  objs
+              });
               return results = R.compose(
                 setItems
               , R.map(setPrice)

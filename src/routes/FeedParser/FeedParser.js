@@ -777,7 +777,7 @@ export default class FeedParser {
   }
 
   updateNote({ user, id, data }) {
-    log.trace(user,id,data);
+    //log.trace(user,id,data);
     const isAsin = data.asin !== '';
     const setAmazonData = obj => R.merge(data, {
           name:       obj.ItemAttributes.Title
@@ -788,7 +788,6 @@ export default class FeedParser {
       ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
         .map(setAmazonData)
         .flatMap(obj => this._updateNote({ user, id, data: obj }))
-        //.map(R.tap(console.log))
         .flatMap(() => this.fetchNote({ user, id }))
       : this._updateNote({ user, id, data })
         .flatMap(() => this.fetchNote({ user, id }))
@@ -912,19 +911,38 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, file }) {
-    const notes = this.setNotesObj({ user, category, file });
-    const promises = R.map(note => this.addNote(user, note));
-    return Rx.Observable.forkJoin(promises(notes))
+    return this.createNotes({ user, category, file })
+      .map(R.tap(console.log))
       .flatMap(() => this.fetchNotes({ user }))
-      .flatMap(objs => this.updateNotes(user, objs))
-      //.map(R.tap(console.log))
+      .flatMap(objs => this.updateNotes({ user, notes: objs }))
+    ;
   }
   
-  updateNotes(user, notes) {
-    const observables = R.map(
-      obj => this.updateNote({ user, id: obj._id.toString(), data: obj })
-    );
-    return Rx.Observable.forkJoin(observables(notes));
+  createNotes({ user, category, file }) {
+    const observables =
+      R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
+    const notes = this.setNotesObj({ user, category, file });
+    const setNotes = R.map(obj =>
+      R.merge(obj, R.find(note => note.url === obj.url, notes)));
+    const promises = objs =>
+      R.map(obj => this.addNote(user, setNote(obj)));
+    const _createNotes = objs =>  Rx.Observable.forkJoin(promises(objs));
+    return Rx.Observable.forkJoin(observables(notes))
+      .map(objs => setNotes(objs))
+      .flatMap(objs => _createNotes(objs));
+  }
+
+  updateNotes({ user, notes }) {
+    const setNote = obj => ({ user, id: obj._id, data: {
+      asin:       obj.asin
+    , title:      obj.title
+    , price:      obj.price
+    , bidsprice:  obj.bidsprice
+    , body:       obj.body
+    , name:       obj.name
+    }});
+    const _updateNotes = R.map(obj => this.updateNote(setNote(obj)));
+    return Rx.Observable.forkJoin(_updateNotes(notes));
   }
 
   setNotesObj({ user, category, file }) {
