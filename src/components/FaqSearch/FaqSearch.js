@@ -82,7 +82,7 @@ const styles = theme => ({
               , height: titleHeight, minHeight: titleHeight
               , boxSizing: 'border-box'
               , padding: '5px'
-              , overflow: 'scroll' }
+              , overflow: 'hidden' }
 , inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }

@@ -11,7 +11,10 @@ class RssCheckbox extends React.Component {
     const { classes, color, onChange, type, value
       , checked, ...other } = this.props;
     return <Checkbox type={type}
-        classes={{ checked: classes[color] }}
+        classes={{
+          root: classes[color]
+        , checked: classes.checked
+        }}
         value={value}
         checked={checked}
         icon={<CheckBoxOutlineBlank className={classes.sizeIcon} />}
@@ -32,23 +35,42 @@ const theme = {
 };
 const styles = theme => ({
   sizeIcon: { fontSize: 16 }
+, checked: {}
 , default: {
+    color: default_color
+  , '&$checked': {
       color: default_color
+    }
   }
 , primary: {
+    color: primary_color
+  , '&$checked': {
       color: primary_color
+    }
   }
 , secondary: {
+    color: secondary_color
+  , '&$checked': {
       color: secondary_color
+    }
   }
 , warning: {
+    color: warning_color
+  , '&$checked': {
       color: warning_color
+    }
   }
 , success: {
+    color: success_color
+  , '&$checked': {
       color: success_color
+    }
   }
 , danger: {
+    color: danger_color
+  , '&$checked': {
       color: danger_color
+    }
   }
 });
 RssCheckbox.displayName = 'RssCheckbox';

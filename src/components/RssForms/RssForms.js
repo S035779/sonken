@@ -29,7 +29,7 @@ class RssForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(RssForms.displayName, 'Props', nextProps);
+    //std.logInfo(RssForms.displayName, 'Props', nextProps);
     const { note } = nextProps;
     this.setState({ note });
   }
@@ -38,11 +38,11 @@ class RssForms extends React.Component {
     const { user } = this.props;
     const { note } = this.state;
     if(this.isValidate() && this.isChanged()) {
-      NoteAction.update(user, note._id, note)
-        .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
-    } else {
-      this.setState({ isNotValid: true });
+      NoteAction.update(user, note._id, note);
+        //.then(() => this.setState({ isSuccess: true }))
+        //.catch(err => this.setState({ isNotValid: true }));
+    //} else {
+      //this.setState({ isNotValid: true });
     }
   }
 
@@ -156,6 +156,7 @@ class RssForms extends React.Component {
               label="想定売値"
               value={price}
               onChange={this.handleChangeInput.bind(this, 'price')}
+              onBlur={this.handleSave.bind(this)}
               type="number"
               className={classes.text}
               InputLabelProps={{
@@ -169,6 +170,7 @@ class RssForms extends React.Component {
               label="最高入札額"
               value={bidsprice}
               onChange={this.handleChangeInput.bind(this, 'bidsprice')}
+              onBlur={this.handleSave.bind(this)}
               type="number"
               className={classes.text}
               InputLabelProps={{
@@ -182,6 +184,7 @@ class RssForms extends React.Component {
           rows="4" fullWidth margin="none"
           value={body}
           onChange={this.handleChangeInput.bind(this, 'body')}
+          onBlur={this.handleSave.bind(this)}
           className={classes.field}/>
         </div>
       </div>

@@ -29,7 +29,7 @@ class BidsFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(BidsFilter.displayName, 'Props', nextProps);
+    //std.logInfo(BidsFilter.displayName, 'Props', nextProps);
     const { selectedItemId, itemFilter } = nextProps;
     this.setState({ selectedItemId, itemFilter });
   }

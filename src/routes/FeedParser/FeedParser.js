@@ -544,14 +544,18 @@ export default class FeedParser {
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
+    , this.getDeleted(user)
+    , this.getAdded(user)
     , this.getNote(user, id)
     ]);
     const setAttribute = objs => R.compose(
-      this.setReaded(objs[2])
+      this.setAdded(objs[4])
+    , this.setDeleted(objs[3])
+    , this.setReaded(objs[2])
     , this.setListed(objs[1])
     , this.setStarred(objs[0])
     , this.toObject
-    )([objs[3]]);
+    )([objs[5]]);
     return observables
       .map(setAttribute)
       .map(R.head);
@@ -846,11 +850,11 @@ export default class FeedParser {
     const promises = R.map(id => this.getNote(user, id));
     const observables = Rx.Observable.forkJoin(promises(ids));
     return observables
+      //.map(R.tap(log.trace.bind(this)))
       .map(R.map(obj => obj.items))
       .map(R.flatten)
       .map(R.map(obj => obj.guid._))
       .flatMap(objs => this._createRead({ user, ids: objs }))
-      //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
@@ -912,72 +916,80 @@ export default class FeedParser {
 
   uploadNotes({ user, category, file }) {
     return this.createNotes({ user, category, file })
-      .map(R.tap(console.log))
       .flatMap(() => this.fetchNotes({ user }))
       .flatMap(objs => this.updateNotes({ user, notes: objs }))
     ;
   }
   
   createNotes({ user, category, file }) {
-    const observables =
-      R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
     const notes = this.setNotesObj({ user, category, file });
-    const setNotes = R.map(obj =>
-      R.merge(obj, R.find(note => note.url === obj.url, notes)));
-    const promises = objs =>
-      R.map(obj => this.addNote(user, setNote(obj)));
+    const promises = R.map(obj => this.addNote(user, obj));
     const _createNotes = objs =>  Rx.Observable.forkJoin(promises(objs));
-    return Rx.Observable.forkJoin(observables(notes))
+    const isNote = obj => R.find(note => note.url === obj.url, notes);
+    const setItem = (note, obj)  =>
+      R.merge(obj
+        , { title: note.title, asin:  note.asin, items: obj.items });
+    const setItems = 
+      R.map(obj => setItem(isNote(obj), obj));
+    const setNotes =
+      R.map(obj => this.setNote({ user, url: obj.url, category }, obj));
+    const observable =
+      R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
+    return Rx.Observable.forkJoin(observable(notes))
       .map(objs => setNotes(objs))
-      .flatMap(objs => _createNotes(objs));
+      .map(objs => setItems(objs))
+      //.map(R.tap(console.log))
+      .flatMap(objs => _createNotes(objs))
+    ;
   }
 
   updateNotes({ user, notes }) {
-    const setNote = obj => ({ user, id: obj._id, data: {
+    const setNote = obj => ({
       asin:       obj.asin
     , title:      obj.title
     , price:      obj.price
     , bidsprice:  obj.bidsprice
     , body:       obj.body
-    , name:       obj.name
-    }});
-    const _updateNotes = R.map(obj => this.updateNote(setNote(obj)));
-    return Rx.Observable.forkJoin(_updateNotes(notes));
+    });
+    const observables = R.map(obj =>
+      this.updateNote({ user, id: obj._id, data: setNote(obj) }));
+    return Rx.Observable.forkJoin(observables(notes))
+    ;
   }
 
   setNotesObj({ user, category, file }) {
     const toRcords = R.split('"\n');
+    const toTailes = R.tail;
     const toColumn = R.map(R.split('",'));
     const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+    const toCutLst = R.map(R.map(R.replace(/"/g, '')))
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setNotes = R.map(arr => ({
       url:              arr[1]
     , category
     , user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , items:            []
     , title:            arr[0]
     , asin:             arr[2]
-    , name:             ''
-    , price:            0
-    , bidsprice:        0
-    , body:             ''
-    , AmazonUrl:        ''
-    , AmazonImg:        ''
     }));
     return R.compose(
       setNotes
     , toCutRec
+    , toCutLst
     , toCutHed
     , toColumn
+    , toTailes
+    , R.tap(console.log)
     , toRcords
     )(file.toString());
   }
 
   setItemsObj({ user, category, file }) {
     const toRcords = R.split('"\n');
+    const toTailes = R.tail;
     const toColumn = R.map(R.split('",'));
     const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+    const toCutLst = R.map(R.map(R.replace(/"/g, '')))
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setItems = R.map(arr => ({
       title:            arr[0]
@@ -1031,8 +1043,10 @@ export default class FeedParser {
       setNote
     , setItems
     , toCutRec
+    , toCutLst
     , toCutHed
     , toColumn
+    , toTailes
     , toRcords
     )(file.toString());
   }

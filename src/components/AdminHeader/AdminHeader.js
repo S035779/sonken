@@ -59,7 +59,7 @@ const styles = theme => ({
   , navIcon:    { marginLeft: -12, marginRight: 'auto' }
   , navBar:     { display: 'flex', flexDirection: 'row'
                 , wordBreak: 'keep-all'
-                , height: navHeightSmDown, padding: 2, overflow: 'scroll' 
+                , height: navHeightSmDown, padding: 2, overflow: 'hidden' 
                 , [theme.breakpoints.up('sm')]: {
                   height: navHeightSmUp, padding: 6
                 }

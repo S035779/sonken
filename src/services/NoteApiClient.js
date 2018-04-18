@@ -8,7 +8,7 @@ const displayName = 'NoteApiClient';
 
 export default {
   request(request, options) {
-    std.logInfo(displayName, request, options);
+    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'preset/user':
         return new Promise((resolve, reject) => {

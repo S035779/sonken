@@ -28,7 +28,7 @@ class RssItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(RssItemList.displayName, 'Props', nextProps);
+    //std.logInfo(RssItemList.displayName, 'Props', nextProps);
     const { items } = nextProps;
     let listed = [];
     let starred = [];
@@ -44,7 +44,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeListed(id, event) {
-    std.logInfo(RssItemList.displayName, 'handleChangeListed', id);
+    //std.logInfo(RssItemList.displayName, 'handleChangeListed', id);
     const { listed } = this.state;
     const { user } = this.props;
     const currentIndex = listed.indexOf(id);
@@ -60,7 +60,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeStarred(id, event) {
-    std.logInfo(RssItemList.displayName, 'handleChangeStarred', id);
+    //std.logInfo(RssItemList.displayName, 'handleChangeStarred', id);
     const { starred } = this.state;
     const { user } = this.props;
     const currentIndex = starred.indexOf(id);
@@ -76,7 +76,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeDeleted(id, event) {
-    std.logInfo(RssItemList.displayName, 'handleChangeDeleted', id);
+    //std.logInfo(RssItemList.displayName, 'handleChangeDeleted', id);
     const { deleted } = this.state;
     const { user } = this.props;
     const currentIndex = deleted.indexOf(id);
@@ -92,7 +92,7 @@ class RssItemList extends React.Component {
   }
 
   handleChangeAdded(id, event) {
-    std.logInfo(RssItemList.displayName, 'handleChangeAdded', id);
+    //std.logInfo(RssItemList.displayName, 'handleChangeAdded', id);
     const { added } = this.state;
     const { user } = this.props;
     const currentIndex = added.indexOf(id);
@@ -108,7 +108,7 @@ class RssItemList extends React.Component {
   }
 
   handleMouseLeaveAdded(id, event) {
-    std.logInfo(RssItemList.displayName, 'handleMouseLeaveAdded', id);
+    //std.logInfo(RssItemList.displayName, 'handleMouseLeaveAdded', id);
     const { added } = this.state;
     const { user } = this.props;
     const currentIndex = added.indexOf(id);

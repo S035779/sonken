@@ -122,7 +122,7 @@ class InquiryEdit extends React.Component {
 const inquiryWidth = 640;
 const rowHeight = 56;
 const styles = theme => ({
-  container:    { width: inquiryWidth, overflow: 'scroll' }
+  container:    { width: inquiryWidth, overflow: 'hidden' }
 , inquiryForms: { display: 'flex', flexDirection: 'column'
                 , justifyContent: 'center' }
 , space:        { flex: 1, minHeight: theme.spacing.unit *2 }

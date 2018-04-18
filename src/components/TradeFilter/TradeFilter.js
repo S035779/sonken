@@ -30,7 +30,7 @@ class TradeFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(TradeFilter.displayName, 'Props', nextProps);
+    //std.logInfo(TradeFilter.displayName, 'Props', nextProps);
     const { selectedItemId, itemFilter } = nextProps;
     this.setState({ selectedItemId, itemFilter });
   }

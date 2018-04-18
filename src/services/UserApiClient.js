@@ -8,7 +8,7 @@ const displayName = 'UserApiClient';
 
 export default {
   request(request, options) {
-    std.logInfo(displayName, request, options);
+    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'preset/admin':
         return new Promise((resolve, reject) => {

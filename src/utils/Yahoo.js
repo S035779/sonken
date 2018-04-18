@@ -226,8 +226,8 @@ class Yahoo {
               const setBidStopTime  = _obj =>
                 R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
               const setItems = objs => ({
-                title: obj.title
-              , url: options.url
+                url: options.url
+              , title: obj.title
               , item:  objs
               });
               return results = R.compose(

@@ -8,7 +8,7 @@ const displayName = 'LoginApiClient';
 
 export default {
   request(request, options) {
-    std.logInfo(displayName, request, options);
+    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'signin/authenticate':
         return new Promise((resolve, reject) => {

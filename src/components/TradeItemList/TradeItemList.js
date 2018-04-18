@@ -21,7 +21,7 @@ class TradeItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(TradeItemList.displayName, 'Props', nextProps);
+    //std.logInfo(TradeItemList.displayName, 'Props', nextProps);
     const { selectedItemId, items } = nextProps;
     let traded = [];
     items.forEach(item => {

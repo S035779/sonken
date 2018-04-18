@@ -21,7 +21,7 @@ class BidsItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(BidsItemList.displayName, 'Props', nextProps);
+    //std.logInfo(BidsItemList.displayName, 'Props', nextProps);
     const { selectedItemId, items } = nextProps;
     let bided = [];
     items.forEach(item => {
