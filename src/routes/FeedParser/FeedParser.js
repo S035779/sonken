@@ -783,11 +783,13 @@ export default class FeedParser {
   updateNote({ user, id, data }) {
     //log.trace(user,id,data);
     const isAsin = data.asin !== '';
-    const setAmazonData = obj => R.merge(data, {
+    const setAmazonData = obj => obj
+      ? R.merge(data, {
           name:       obj.ItemAttributes.Title
         , AmazonUrl:  obj.DetailPageURL
         , AmazonImg:  obj.MediumImage.URL
-    });
+      })
+      : R.merge(data, { name: '', AmazonUrl: '', AmazonImg: '' });
     return isAsin
       ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
         .map(setAmazonData)

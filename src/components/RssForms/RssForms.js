@@ -38,11 +38,19 @@ class RssForms extends React.Component {
     const { user } = this.props;
     const { note } = this.state;
     if(this.isValidate() && this.isChanged()) {
+      NoteAction.update(user, note._id, note)
+        .then(() => this.setState({ isSuccess: true }))
+        .catch(err => this.setState({ isNotValid: true }));
+    } else {
+      this.setState({ isNotValid: true });
+    }
+  }
+
+  handleAutoSave() {
+    const { user } = this.props;
+    const { note } = this.state;
+    if(this.isValidate() && this.isChanged()) {
       NoteAction.update(user, note._id, note);
-        //.then(() => this.setState({ isSuccess: true }))
-        //.catch(err => this.setState({ isNotValid: true }));
-    //} else {
-      //this.setState({ isNotValid: true });
     }
   }
 
@@ -144,7 +152,7 @@ class RssForms extends React.Component {
         <Typography variant="subheading" noWrap
           className={classes.title}>Amazon商品名：</Typography>
         <Button color="primary" size="large" fullWidth
-          href={link_amz}
+          href={link_amz} target="_blank"
           className={classes.name}>{name}</Button>
       </div>
       {this.props.children}
@@ -156,7 +164,7 @@ class RssForms extends React.Component {
               label="想定売値"
               value={price}
               onChange={this.handleChangeInput.bind(this, 'price')}
-              onBlur={this.handleSave.bind(this)}
+              onBlur={this.handleAutoSave.bind(this)}
               type="number"
               className={classes.text}
               InputLabelProps={{
@@ -170,7 +178,7 @@ class RssForms extends React.Component {
               label="最高入札額"
               value={bidsprice}
               onChange={this.handleChangeInput.bind(this, 'bidsprice')}
-              onBlur={this.handleSave.bind(this)}
+              onBlur={this.handleAutoSave.bind(this)}
               type="number"
               className={classes.text}
               InputLabelProps={{
@@ -184,7 +192,7 @@ class RssForms extends React.Component {
           rows="4" fullWidth margin="none"
           value={body}
           onChange={this.handleChangeInput.bind(this, 'body')}
-          onBlur={this.handleSave.bind(this)}
+          onBlur={this.handleAutoSave.bind(this)}
           className={classes.field}/>
         </div>
       </div>
