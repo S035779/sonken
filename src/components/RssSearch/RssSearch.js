@@ -29,13 +29,19 @@ class RssSearch extends React.Component {
     this.setState({ perPage: notePage.perPage });
   }
 
-  downloadFile(file) {
-    std.logInfo(RssSearch.displayName, 'downloadFile', file);
+  downloadFile(blob) {
+    std.logInfo(RssSearch.displayName, 'downloadFile', blob);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(file);
-    a.target = '_blank';
-    a.download = 'download.csv';
-    a.click();
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      const csv = new Blob([bom, this.result], { type: 'text/csv' });
+      a.href = URL.createObjectURL(csv);
+      a.target = '_blank';
+      a.download = 'download.csv';
+      a.click();
+    }
+    fileReader.readAsArrayBuffer(blob);
   }
 
   handleSubmit(event) {

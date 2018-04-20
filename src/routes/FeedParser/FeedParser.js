@@ -1056,15 +1056,24 @@ export default class FeedParser {
   downloadNotes({ user }) {
     return this.fetchNotes({ user })
       .map(objs => this.setNotesCsv(objs))
-      .map(obj => new Buffer(obj));
+      .map(csv => this.setUtfBom(csv));
   }
   
   downloadItems({ user, items }) {
     return this.fetchItems({ user, items })
       .map(objs => this.setItemsCsv(objs))
-      .map(obj => new Buffer(obj));
+      .map(csv => this.setUtfBom(csv));
   }
   
+  setUtfBom(str) {
+    const csv = Buffer.from(str, 'utf8');
+    //const bom = Buffer.from('efbbbf', 'hex');
+    //const len = bom.length + csv.length;
+    //const buf = Buffer.concat([ bom, csv ], len);
+    //console.log(bom, csv, len);
+    return csv;
+  }
+
   setNotesCsv(objs) {
     const keys = [
       'title'
@@ -1112,3 +1121,4 @@ export default class FeedParser {
     });
   }
 };
+FeedParser.displayName = 'FeedParser';

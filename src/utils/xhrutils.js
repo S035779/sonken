@@ -389,8 +389,8 @@ const getFile = function(url, data, success, error) {
         } else if (type === "application/json; charset=utf-8") {
           success(JSON.parse(request.responseText));
         } else if (type === "application/octet-stream") {
-          const response
-            = new Blob([request.response], {type: "text/csv"});
+          const response = new Blob([request.response]
+            , {type: "application/octet-stream"});
           success(response);
         } else {
           success(request.responseText);
