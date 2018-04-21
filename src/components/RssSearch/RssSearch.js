@@ -2,6 +2,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
+import Spin             from 'Utilities/spnutils';
 
 import { withStyles }   from 'material-ui/styles';
 import { Select, Input, Button, Typography }
@@ -25,18 +26,19 @@ class RssSearch extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     //std.logInfo(RssSearch.displayName, 'Props', nextProps);
-    const { notePage, file } = nextProps;
+    const { notePage } = nextProps;
     this.setState({ perPage: notePage.perPage });
   }
 
   downloadFile(blob) {
+    //const spn = Spin.of('app');
     std.logInfo(RssSearch.displayName, 'downloadFile', blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      const csv = new Blob([bom, this.result], { type: 'text/csv' });
-      a.href = URL.createObjectURL(csv);
+      a.href = URL.createObjectURL(
+        new Blob([bom, this.result], { type: 'text/csv' }) );
       a.target = '_blank';
       a.download = 'download.csv';
       a.click();
@@ -69,31 +71,29 @@ class RssSearch extends React.Component {
     }
     if(!category) return this.setState({ isNotValid: true });
     NoteAction.create(user, { url, category })
-      .then(() => this.setState({ isSuccess: true, url: '' }))
-      .catch(err => this.setState({ isNotValid: true, url: '' }));
+      .then(()    => this.setState({ isSuccess:   true, url: '' }))
+      .catch(err  => this.setState({ isNotValid:  true, url: '' }))
+    ;
   }
 
   handleDownload(event) {
-    const { user } = this.props;
+    const { user, category } = this.props;
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
-    NoteAction.download(user)
-      .then(() => {
-        if(this.props.file) this.downloadFile(this.props.file);
-        this.setState({ isSuccess: true });
-      })
-      .catch(err => this.setState({ isNotValid: true }));
+    NoteAction.download(user, category)
+      .then(()    => this.setState({ isSuccess:   true }))
+      .then(()    => this.downloadFile(this.props.file)  )
+      .catch(err  => this.setState({ isNotValid:  true }))
+    ;
   }
 
   handleChangeFile(event) {
     const { user, category } = this.props;
-    const file = event.target.files.item(0);
-    std.logInfo(RssSearch.displayName, 'handleChangeFile', file);
-    NoteAction.upload(user, category, file)
-      .then(() => this.setState({ isSuccess: true }))
-      .catch(err => {
-        std.logError(RssSearch.displayName, err.name, err.message);
-        this.setState({ isNotValid: true })
-      });
+    const blob = event.target.files.item(0);
+    std.logInfo(RssSearch.displayName, 'handleChangeFile', blob);
+    NoteAction.upload(user, category, blob)
+      .then(()    => this.setState({ isSuccess:   true }))
+      .catch(err  => this.setState({ isNotValid:  true }))
+    ;
   }
 
   handleChangeText(name, event) {

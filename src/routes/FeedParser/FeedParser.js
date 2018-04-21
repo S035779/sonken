@@ -981,7 +981,7 @@ export default class FeedParser {
     , toCutHed
     , toColumn
     , toTailes
-    , R.tap(console.log)
+    //, R.tap(console.log)
     , toRcords
     )(file.toString());
   }
@@ -1053,33 +1053,27 @@ export default class FeedParser {
     )(file.toString());
   }
 
-  downloadNotes({ user }) {
+  downloadNotes({ user, category }) {
+    const isCategory = obj => obj.category === category;
     return this.fetchNotes({ user })
-      .map(objs => this.setNotesCsv(objs))
-      .map(csv => this.setUtfBom(csv));
+      .map(objs => R.filter(isCategory, objs))
+      .map(objs => this.setNotesCsv(category, objs))
+      .map(csv  => this.setOctetStream(csv));
   }
   
   downloadItems({ user, items }) {
     return this.fetchItems({ user, items })
       .map(objs => this.setItemsCsv(objs))
-      .map(csv => this.setUtfBom(csv));
+      .map(csv  => this.setOctetStream(csv));
   }
   
-  setUtfBom(str) {
-    const csv = Buffer.from(str, 'utf8');
-    //const bom = Buffer.from('efbbbf', 'hex');
-    //const len = bom.length + csv.length;
-    //const buf = Buffer.concat([ bom, csv ], len);
-    //console.log(bom, csv, len);
-    return csv;
+  setOctetStream(str) {
+    return Buffer.from(str, 'utf8');
   }
 
-  setNotesCsv(objs) {
-    const keys = [
-      'title'
-    , 'url'
-    , 'asin'
-    ];
+  setNotesCsv(category, objs) {
+    const keys = category === 'marchant'
+      ? ['title', 'url', 'asin'] : ['title', 'url'];
     return js2Csv.of({ csv: objs, keys }).parse();
   };
 

@@ -369,8 +369,8 @@ export default {
     const filedata = file;
     return this.request('upload/notes', { filename, filedata });
   },
-  downloadNotes(user) {
-    return this.request('download/notes', { user });
+  downloadNotes(user, category) {
+    return this.request('download/notes', { user, category });
   },
   downloadItems(user, items) {
     return this.request('download/items', { user, items });

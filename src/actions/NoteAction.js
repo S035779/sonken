@@ -105,8 +105,8 @@ export default {
       })
     ;
   },
-  download(user) {
-    return NoteApiClient.downloadNotes(user)
+  download(user, category) {
+    return NoteApiClient.downloadNotes(user, category)
       .then(file => {
         dispatch({ type: 'notes/download', file });
       })

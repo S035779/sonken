@@ -32,8 +32,8 @@ export default {
 
   downloadNotes(options) {
     return (req, res, next) => {
-      const { user, id } = req.query;
-      feed.downloadNotes({ user, id }).subscribe(
+      const { user, category } = req.query;
+      feed.downloadNotes({ user, category }).subscribe(
         obj => {
           res.set('Content-Type', 'application/octet-stream');
           res.send(obj);
