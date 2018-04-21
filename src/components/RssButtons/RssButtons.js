@@ -1,15 +1,22 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import NoteAction from 'Actions/NoteAction';
-import std        from 'Utilities/stdutils';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
-import { withStyles } from 'material-ui/styles';
-import { Button, Checkbox } from 'material-ui';
+import { withStyles }   from 'material-ui/styles';
+import { Button, Checkbox }
+                        from 'material-ui';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class RssButtons extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { checked: false };
+    this.state = {
+      checked: false
+    , isSuccess: false
+    , isNotValid: false
+    };
   }
 
   componentDidMount() {
@@ -37,14 +44,28 @@ class RssButtons extends React.Component {
     const { user, selectedNoteId } = this.props;
     std.logInfo(RssButtons.displayName, 'handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
-      NoteAction.delete(user, selectedNoteId);
-      this.setState({ checked: false });
+      const spn = Spinner.of('app');
+      spn.start();
+      NoteAction.delete(user, selectedNoteId)
+        .then(()    => this.setState({ isSuccess: true }) )
+        .then(()    => this.setState({ checked: false })  )
+        .then(()    => spn.stop()                         )
+        .catch(err  => {
+          std.logError(RssButtons.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          spn.stop();
+        })
+      ;
     }
+  }
+
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   render() {
     const { classes } = this.props;
-    const { checked } = this.state;
+    const { isSuccess, isNotValid, checked } = this.state;
     return <div className={classes.noteButtons}>
       <Checkbox checked={checked}
         className={classes.checkbox}
@@ -57,6 +78,14 @@ class RssButtons extends React.Component {
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleDelete.bind(this)}>削除</Button>
+        <RssDialog open={isSuccess} title={'送信完了'}
+          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
+        </RssDialog>
+        <RssDialog open={isNotValid} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
+        </RssDialog>
       </div>
     </div>;
   }

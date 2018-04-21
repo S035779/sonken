@@ -2,7 +2,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
-import Spin             from 'Utilities/spnutils';
+import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from 'material-ui/styles';
 import { Select, Input, Button, Typography }
@@ -31,7 +31,6 @@ class RssSearch extends React.Component {
   }
 
   downloadFile(blob) {
-    //const spn = Spin.of('app');
     std.logInfo(RssSearch.displayName, 'downloadFile', blob);
     const a = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -79,10 +78,17 @@ class RssSearch extends React.Component {
   handleDownload(event) {
     const { user, category } = this.props;
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
+    const spn = Spinner.of('app');
+    spn.start();
     NoteAction.download(user, category)
-      .then(()    => this.setState({ isSuccess:   true }))
-      .then(()    => this.downloadFile(this.props.file)  )
-      .catch(err  => this.setState({ isNotValid:  true }))
+      .then(()    => this.setState({ isSuccess:   true }) )
+      .then(()    => this.downloadFile(this.props.file)   )
+      .then(()    => spn.stop()                           )
+      .catch(err  => {
+        std.logError(RssSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid:  true });
+        spn.stop();
+      })
     ;
   }
 
@@ -90,9 +96,16 @@ class RssSearch extends React.Component {
     const { user, category } = this.props;
     const blob = event.target.files.item(0);
     std.logInfo(RssSearch.displayName, 'handleChangeFile', blob);
+    const spn = Spinner.of('app');
+    spn.start();
     NoteAction.upload(user, category, blob)
-      .then(()    => this.setState({ isSuccess:   true }))
-      .catch(err  => this.setState({ isNotValid:  true }))
+      .then(()    => this.setState({ isSuccess:   true }) )
+      .then(()    => spn.stop()                           )
+      .catch(err  => {
+        std.logError(RssSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid:  true });
+        spn.stop();
+      })
     ;
   }
 

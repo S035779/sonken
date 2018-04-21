@@ -37,6 +37,7 @@ class DrawerTemporary extends React.Component {
         classes={paperClass}
         ModalProps={modalProps}>
         <DrawerList
+          open={open}
           user={user}
           profile={profile}
           preference={preference}

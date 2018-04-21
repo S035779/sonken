@@ -32,6 +32,7 @@ class DrawerPermanent extends React.Component {
         open={open}
         classes={paperClass}>
         <DrawerList
+          open={open}
           user={user}
           profile={profile}
           preference={preference}

@@ -1,16 +1,16 @@
-import Spinner from 'Utilities/spin';
+import {Spinner as Spin} from 'Utilities/spin';
 
-export default class Spin {
+export default class Spinner {
   constructor(target) {
     this.target = document.getElementById(target);
-    this.Spinner = new Spinner(opts);
+    this.Spinner = new Spin(opts);
   }
 
   static of(target) {
-    return new Spin(target);
+    return new Spinner(target);
   }
 
-  spin() {
+  start() {
     this.Spinner.spin(this.target);
   }
 
