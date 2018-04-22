@@ -27,6 +27,7 @@ class DrawerList extends React.Component {
     , isPreference:     false
     , dragged:          false
     , dropZoneEntered:  false
+    , dragSrcEl:        null
     };
   }
 
@@ -64,6 +65,20 @@ class DrawerList extends React.Component {
     this.setState({ [name]: false });
   }
 
+  handleDragStart(name, event) {
+    std.logInfo(DrawerList.displayName, 'handleDragStart', name)
+    const dragSrcEl = event.currentTarget;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/html', dragSrcEl.innerHTML)
+    this.setState({ dragged: true, dragSrcEl: dragSrcEl });
+  }
+
+  handleDragOver(name, event) {
+    std.logInfo(DrawerList.displayName, 'handleDragOver', name)
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
   handleDragEnter(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragEnter', name)
     this.setState({ dropZoneEntered: true });
@@ -74,24 +89,15 @@ class DrawerList extends React.Component {
     this.setState({ dropZoneEntered: false });
   }
 
-  handleDragStart(name, event) {
-    std.logInfo(DrawerList.displayName, 'handleDragStart', name)
-    this.setState({ dragged: true });
+  handleDrop(name, event) {
+    std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
+    event.stopPropagation();
   }
 
   handleDragEnd(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragEnd', name)
-    this.setState({ dragged: false });
-  }
-
-  handleDragOver(name, event) {
-    std.logInfo(DrawerList.displayName, 'handleDragOver', name)
-    event.preventDefault();
-  }
-
-  handleDrop(name, event) {
-    std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
     this.setState({ dropZoneEntered: false });
+    //this.setState({ dragged: false });
   }
 
   renderCategoryList(category) {
