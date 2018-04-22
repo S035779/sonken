@@ -28,6 +28,18 @@ class DrawerList extends React.Component {
     , dragged:          false
     , dropZoneEntered:  false
     , dragSrcEl:        null
+    , categorys:        [
+      { main: 'marchant', sub: '01category' }
+    , { main: 'marchant', sub: '02category' }
+    , { main: 'marchant', sub: '03category' }
+    , { main: 'marchant', sub: '04category' }
+    , { main: 'marchant', sub: '05category' }
+    , { main: 'sellers', sub: '06category' }
+    , { main: 'sellers', sub: '07category' }
+    , { main: 'sellers', sub: '08category' }
+    , { main: 'sellers', sub: '09category' }
+    , { main: 'sellers', sub: '10category' }
+    ]
     };
   }
 
@@ -91,13 +103,19 @@ class DrawerList extends React.Component {
 
   handleDrop(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
+    const { dragSrcEl } = this.state;
     event.stopPropagation();
+    if(dragSrcEl !== event.currentTarget) {
+      dragSrcEl.innerHTML = event.currentTarget.innerHTML;
+      this.setState({ dragSrcEl: dragSrcEl });
+      event.currentTarget.innerHTML
+        = event.dataTransfer.getData('text/html');
+    }
   }
 
   handleDragEnd(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragEnd', name)
-    this.setState({ dropZoneEntered: false });
-    //this.setState({ dragged: false });
+    this.setState({ dropZoneEntered: false, dragged: false });
   }
 
   renderCategoryList(category) {
@@ -105,23 +123,26 @@ class DrawerList extends React.Component {
     const { dragged, dropZoneEntered } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
-    return <ListItem button>
+    return <ListItem button
+        draggable="true"
+        onDragOver={this.handleDragOver.bind(this, category)}
+        onDragEnter={this.handleDragEnter.bind(this, category)}
+        onDragLeave={this.handleDragLeave.bind(this, category)}
+        onDragStart={this.handleDragStart.bind(this, category)}
+        onDragEnd={this.handleDragEnd.bind(this, category)}
+        onDrop={this.handleDrop.bind(this, category)}
+        className={classNames(
+            classes.draggable
+          , dragged && classes.dragged
+          , dropZoneEntered && classes.dragOver
+        )}
+      >
         <ListItemIcon>
-          <Avatar className={classes.avatar}>MC</Avatar>
+          <Avatar className={classes.avatar}>
+            {category.substr(0,2)}
+          </Avatar>
         </ListItemIcon>
         <ListItemText primary={category} classes={textClass}
-          draggable="true"
-          onDragOver={this.handleDragOver.bind(this, category)}
-          onDragEnter={this.handleDragEnter.bind(this, category)}
-          onDragLeave={this.handleDragLeave.bind(this, category)}
-          onDragStart={this.handleDragStart.bind(this, category)}
-          onDragEnd={this.handleDragEnd.bind(this, category)}
-          onDrop={this.handleDrop.bind(this, category)}
-          className={classNames(
-              classes.draggable
-            , dragged && classes.dragged
-            , dropZoneEntered && classes.dragOver
-          )}
         />
       </ListItem>;
   }
