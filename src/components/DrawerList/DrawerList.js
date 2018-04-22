@@ -11,7 +11,7 @@ import { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction }
                         from 'material-ui/List';
 import { Collapse }     from 'material-ui/transitions';
 import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
-, AccountBox, BlurOn, Settings }
+, AccountBox, BlurOn, SettingsApplications }
                         from 'material-ui-icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
@@ -28,17 +28,18 @@ class DrawerList extends React.Component {
     , dragged:          false
     , dropZoneEntered:  false
     , dragSrcEl:        null
+    , dragDstEl:        null
     , categorys:        [
-      { main: 'marchant', sub: '01category' }
-    , { main: 'marchant', sub: '02category' }
-    , { main: 'marchant', sub: '03category' }
-    , { main: 'marchant', sub: '04category' }
-    , { main: 'marchant', sub: '05category' }
-    , { main: 'sellers', sub: '06category' }
-    , { main: 'sellers', sub: '07category' }
-    , { main: 'sellers', sub: '08category' }
-    , { main: 'sellers', sub: '09category' }
-    , { main: 'sellers', sub: '10category' }
+      { main: 'marchant', sub: '01category', index: 1000 }
+    , { main: 'marchant', sub: '02category', index: 1100 }
+    , { main: 'marchant', sub: '03category', index: 1200 }
+    , { main: 'marchant', sub: '04category', index: 1300 }
+    , { main: 'marchant', sub: '05category', index: 1400 }
+    , { main: 'sellers', sub: '06category', index: 2000 }
+    , { main: 'sellers', sub: '07category', index: 2100 }
+    , { main: 'sellers', sub: '08category', index: 2200 }
+    , { main: 'sellers', sub: '09category', index: 2300 }
+    , { main: 'sellers', sub: '10category', index: 2400 }
     ]
     };
   }
@@ -79,9 +80,9 @@ class DrawerList extends React.Component {
 
   handleDragStart(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragStart', name)
-    const dragSrcEl = event.currentTarget;
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/html', dragSrcEl.innerHTML)
+    const dragSrcEl = this.state.categorys.find(obj => obj.sub === name);
+    event.dataTransfer.setData('text/plain', dragSrcEl.index);
     this.setState({ dragged: true, dragSrcEl: dragSrcEl });
   }
 
@@ -93,7 +94,8 @@ class DrawerList extends React.Component {
 
   handleDragEnter(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragEnter', name)
-    this.setState({ dropZoneEntered: true });
+    const dragDstEl = this.state.categorys.find(obj => obj.sub === name);
+    this.setState({ dropZoneEntered: true, dragDstEl });
   }
 
   handleDragLeave(name, event) {
@@ -103,13 +105,18 @@ class DrawerList extends React.Component {
 
   handleDrop(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
-    const { dragSrcEl } = this.state;
     event.stopPropagation();
-    if(dragSrcEl !== event.currentTarget) {
-      dragSrcEl.innerHTML = event.currentTarget.innerHTML;
-      this.setState({ dragSrcEl: dragSrcEl });
-      event.currentTarget.innerHTML
-        = event.dataTransfer.getData('text/html');
+    const { dragSrcEl, categorys } = this.state;
+    const dragDstEl = this.state.categorys.find(obj => obj.sub === name);
+    if(dragSrcEl.index !== dragDstEl.index) {
+      dragSrcEl.index = dragDstEl.index;
+      dragDstEl.index = Number(event.dataTransfer.getData('text/plain'));
+      const _categorys = categorys.map(obj => {
+        if(dragSrcEl.sub === obj.sub) return dragSrcEl;
+        if(dragDstEl.sub === obj.sub) return dragDstEl;
+        return obj;
+      });
+      this.setState({ dragSrcEl, dragDstEl, categorys: _categorys });
     }
   }
 
@@ -118,42 +125,46 @@ class DrawerList extends React.Component {
     this.setState({ dropZoneEntered: false, dragged: false });
   }
 
-  renderCategoryList(category) {
+  renderCategoryList(index, name) {
     const { classes } = this.props;
-    const { dragged, dropZoneEntered } = this.state;
+    const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
+    const isDragDstEl = dragDstEl && dragDstEl.sub === name;
+    const isDragSrcEl = dragSrcEl && dragSrcEl.sub === name;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
-    return <ListItem button
+    return <ListItem button key={index}
         draggable="true"
-        onDragOver={this.handleDragOver.bind(this, category)}
-        onDragEnter={this.handleDragEnter.bind(this, category)}
-        onDragLeave={this.handleDragLeave.bind(this, category)}
-        onDragStart={this.handleDragStart.bind(this, category)}
-        onDragEnd={this.handleDragEnd.bind(this, category)}
-        onDrop={this.handleDrop.bind(this, category)}
+        onDragOver={this.handleDragOver.bind(this, name)}
+        onDragEnter={this.handleDragEnter.bind(this, name)}
+        onDragLeave={this.handleDragLeave.bind(this, name)}
+        onDragStart={this.handleDragStart.bind(this, name)}
+        onDragEnd={this.handleDragEnd.bind(this, name)}
+        onDrop={this.handleDrop.bind(this, name)}
         className={classNames(
             classes.draggable
-          , dragged && classes.dragged
-          , dropZoneEntered && classes.dragOver
+          , isDragSrcEl && dragged && classes.dragged
+          , isDragDstEl && dropZoneEntered && classes.dragOver
         )}
       >
         <ListItemIcon>
           <Avatar className={classes.avatar}>
-            {category.substr(0,2)}
+            {name.substr(0,2)}
           </Avatar>
         </ListItemIcon>
-        <ListItemText primary={category} classes={textClass}
+        <ListItemText primary={name} classes={textClass}
         />
       </ListItem>;
   }
 
   renderListItems() {
     const { classes, open } = this.props;
-    const { openMarchant, openSellers } = this.state;
+    const { openMarchant, openSellers, categorys } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
-    const renderCategoryList =
-      category => this.renderCategoryList(category);
+    const renderCategoryList = category => categorys
+      .filter(obj => category === obj.main)
+      .sort((a, b) => a.index < b.index ? -1 : a.index > b.index ? 1 : 0)
+      .map((c, i) => this.renderCategoryList(i, c.sub));
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'marchant')}>
@@ -168,7 +179,7 @@ class DrawerList extends React.Component {
         {open
           ? <ListItemSecondaryAction>
               <IconButton>
-                <Settings className={classes.icon} />
+                <SettingsApplications className={classes.icon} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
@@ -192,7 +203,7 @@ class DrawerList extends React.Component {
         {open
           ? <ListItemSecondaryAction>
               <IconButton>
-                <Settings className={classes.icon} />
+                <SettingsApplications className={classes.icon} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
@@ -344,7 +355,7 @@ const styles = theme => ({
   }
 , draggable:  { cursor: 'move' }
 , dragged:    { opacity: 0.4 }
-, dragOver:   { border: '2px dashed #000' }
+, dragOver:   { border: '1px dashed #FFF' }
 });
 DrawerList.displayName = 'DrawerList';
 DrawerList.defaultProps = {};
