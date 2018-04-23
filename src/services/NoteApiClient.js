@@ -15,7 +15,6 @@ export default {
           const isAuthenticated = options.user !== '';
           setTimeout(() => resolve(isAuthenticated), 200);
         });
-        break;
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
           net.getJSON(
@@ -26,7 +25,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
           net.getJSON(
@@ -37,7 +35,6 @@ export default {
             resolve(obj);
           });
         });
-        break;
       case 'prefetch/bided':
         return new Promise((resolve, reject) => {
           net.getJSON(
@@ -48,7 +45,15 @@ export default {
             resolve(obj);
           });
         });
-        break;
+      case 'fetch/categorys':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/categorys'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -58,7 +63,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -68,7 +72,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
           xhr.getJSON(
@@ -78,7 +81,42 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
+      case 'fetch/category':
+        return new Promise((resolve, reject) => {
+          xhr.getJSON(
+            api + '/category'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'create/category':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(
+            api + '/category'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'update/category':
+        return new Promise((resolve, reject) => {
+          xhr.postJSON(
+            api + '/category'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
+      case 'delete/category':
+        return new Promise((resolve, reject) => {
+          xhr.deleteJSON(
+            api + '/category'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       //case 'fetch/note':
       //  return new Promise((resolve, reject) => {
       //    xhr.getJSON(
@@ -88,7 +126,6 @@ export default {
       //    , err => { reject(err); }
       //    );
       //  });
-      //  break;
       case 'create/note':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -98,7 +135,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'update/note':
         return new Promise((resolve, reject) => {
           xhr.postJSON(
@@ -108,7 +144,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/note':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -118,7 +153,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/added':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -128,7 +162,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/added':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -138,7 +171,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/deleted':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -148,7 +180,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/deleted':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -158,7 +189,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/readed':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -168,7 +198,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/readed':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -178,7 +207,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/traded':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -188,7 +216,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/traded':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -198,7 +225,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/bided':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -208,7 +234,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/bided':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -218,7 +243,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/starred':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -228,7 +252,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/starred':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -238,7 +261,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'create/listed':
         return new Promise((resolve, reject) => {
           xhr.putJSON(
@@ -248,7 +270,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'delete/listed':
         return new Promise((resolve, reject) => {
           xhr.deleteJSON(
@@ -258,7 +279,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'upload/notes':
         return new Promise((resolve, reject) => {
           xhr.putFile(
@@ -268,7 +288,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'download/notes':
         return new Promise((resolve, reject) => {
           xhr.getFile(
@@ -278,7 +297,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'download/items':
         return new Promise((resolve, reject) => {
           xhr.postFile(
@@ -288,7 +306,6 @@ export default {
           , err => { reject(err); }
           );
         });
-        break;
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -300,12 +317,10 @@ export default {
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
         });
-        break;
       default:
         return new Promise((resolve, reject) => {
           reject(options);
         });
-        break;
     }
   },
 
@@ -336,6 +351,32 @@ export default {
   },
   fetchBidedNotes(user) {
     return this.request('fetch/bided', { user });
+  },
+
+  /*
+   * Categorys
+   */
+  fetchCategorys(user) {
+    return this.request('fetch/categorys', { user });
+  },
+
+  /*
+   * Category
+   */
+  fetchCategory(user, id) {
+    return this.request('fetch/category', { user, id });
+  },
+  createCategory(user, { cagtegory, subcategory }) {
+    return this
+      .request('create/category', { user, category, subcategory });
+  },
+  upcateCategory(user, id, { category, subcategory, subcategoryId }) {
+    const data = { category, subcategory, subcategoryId };
+    return this
+      .request('update/category', { user, id, data })
+  },
+  deleteCategory(user, ids) {
+    return this.request('delete/category', { user, ids });
   },
 
   /*

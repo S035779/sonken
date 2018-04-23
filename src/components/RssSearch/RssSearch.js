@@ -12,6 +12,7 @@ import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssAddDialog     from 'Components/RssAddDialog/RssAddDialog';
 
 class RssSearch extends React.Component {
   constructor(props) {
@@ -21,6 +22,7 @@ class RssSearch extends React.Component {
     , perPage:    props.noteNumber
     , isSuccess:  false
     , isNotValid: false
+    , isAddNote: false
     };
   }
 
@@ -49,30 +51,34 @@ class RssSearch extends React.Component {
     const { url } = this.state;
     const { user } = this.props;
     std.logInfo(RssSearch.displayName, 'handleSubmit', url);
-    const parser = new URL(url);
-    const api = parser.pathname.split('/')[1];
-    const query = parser.searchParams;
-    let category;
-    switch(api) {
-      case 'search':
-        category = 'marchant';
-        break;
-      case 'seller':
-        category = 'sellers';
-        break;
-      case 'rss':
-        category = query.has('p')
-          ? 'marchant'
-          : query.has('sid')
-            ? 'sellers'
-            : null;
-        break;
-    }
+    const category = url ? this.getCategory(url) : null;
     if(!category) return this.setState({ isNotValid: true });
     NoteAction.create(user, { url, category })
       .then(()    => this.setState({ isSuccess:   true, url: '' }))
       .catch(err  => this.setState({ isNotValid:  true, url: '' }))
     ;
+  }
+
+  handleAddNote(event) {
+    this.setState({ isAddNote: true });
+  }
+
+  getCategory(url) {
+    const parser = new URL(url);
+    const api = parser.pathname.split('/')[1];
+    const query = parser.searchParams;
+    switch(api) {
+      case 'search':
+        return 'marchant';
+      case 'seller':
+        return 'sellers';
+      case 'rss':
+        return query.has('p')
+          ? 'marchant'
+          : query.has('sid')
+            ? 'sellers'
+            : null;
+    }
   }
 
   handleDownload(event) {
@@ -137,7 +143,8 @@ class RssSearch extends React.Component {
 
   render() {
     const { classes, noteNumber, category } = this.props;
-    const { isSuccess, isNotValid, url, perPage, filename } = this.state;
+    const { isAddNote, isSuccess, isNotValid, url, perPage, filename }
+      = this.state;
     const color = category === 'marchant' ? 'skyblue' : 'orange';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
@@ -165,8 +172,13 @@ class RssSearch extends React.Component {
       <div className={classes.buttons}>
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleSubmit.bind(this)}>
+          onClick={this.handleAddNote.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
+        <RssAddDialog 
+          category={category}
+          open={isAddNote}
+          onClose={this.handleCloseDialog.bind(this, 'isAddNote')}
+        />
         <div className={classes.space} />
         <RssButton color={color}
           onClick={this.handleDownload.bind(this)}

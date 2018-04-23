@@ -33,6 +33,13 @@ export default {
       })
     ;
   },
+  fetchCategorys(user) {
+    return NoteApiClient.fetchCategorys(user)
+      .then(categorys => {
+        dispatch({ type: 'category/fetch/my', categorys });
+      })
+    ;
+  },
   fetchNotes(user) {
     return NoteApiClient.fetchNotes(user)
       .then(notes => {
@@ -54,6 +61,35 @@ export default {
       })
     ;
   },
+  fetchCategory(user, id) {
+    dispatch({ type: 'category/fetch' });
+    return NoteApiClient.fetchCategory(user, id)
+      .then(category => {
+        dispatch({ type: 'category/fetch', note });
+      })
+    ;
+  },
+  createCategory(user, data) {
+    return NoteApiClient.createCategory(user, data)
+      .then(category => {
+        dispatch({ type: 'category/create', note });
+      })
+    ;
+  },
+  updateCategory(user, id, data) {
+    return NoteApiClient.updateCategory(user, id, data)
+      .then(category => {
+        dispatch({ type: 'category/update', id, note });
+      })
+    ;
+  },
+  deleteCategory(user, ids) {
+    return NoteApiClient.deleteCategory(user, ids)
+      .then(() => {
+        dispatch({ type: 'category/delete', ids });
+      })
+    ;
+  },
   //fetch(user, id) {
   //  dispatch({ type: 'note/fetch/before' });
   //  return NoteApiClient.fetchNote(user, id)
@@ -72,7 +108,6 @@ export default {
   update(user, id, data) {
     return NoteApiClient.updateNote(user, id, data)
       .then(note => {
-        //std.logTrace(displayName, 'Note', note);
         dispatch({ type: 'note/update', id, note });
       })
     ;
@@ -101,14 +136,14 @@ export default {
   upload(user, category, file) {
     return NoteApiClient.uploadNotes(user, category, file)
       .then(notes => {
-        dispatch({ type: 'notes/upload', notes });
+        dispatch({ type: 'note/upload/my', notes });
       })
     ;
   },
   download(user, category) {
     return NoteApiClient.downloadNotes(user, category)
       .then(file => {
-        dispatch({ type: 'notes/download', file });
+        dispatch({ type: 'note/download/my', file });
       })
     ;
   },

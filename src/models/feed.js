@@ -29,6 +29,7 @@ const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , url:              String
 , category:         { type: String, required: true }
+, subcategoryId:    String
 , title:            { type: String, required: true }
 , asin:             String
 , name:             String 
@@ -41,6 +42,15 @@ const noteSchema = new mongoose.Schema({
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
 noteSchema.set('toObject');
+
+const categorySchema = new mongoose.Schema({
+  user:             { type: String, required: true }
+, category:         { type: String, required: true }
+, subcategory:      { type: String, required: true }
+, subcategoryId:    mongoose.Schema.Types.ObjectId
+, created:          { type: Date, default: Date.now() }
+}, { collection: 'categorys' });
+categorySchema.index({ subcategoryId: 1 }, { unique: true });
 
 const addedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
@@ -99,11 +109,12 @@ db.openUri(mdb_url + '/feed');
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'feed terminated.')));
-export const Note     = db.model('Note',    noteSchema);
-export const Added    = db.model('Added',   addedSchema);
-export const Deleted  = db.model('Deleted', deletedSchema);
-export const Readed   = db.model('Readed',  readedSchema);
-export const Traded   = db.model('Traded',  tradedSchema);
-export const Bided    = db.model('Bided',   bidedSchema);
-export const Starred  = db.model('Starred', starredSchema);
-export const Listed   = db.model('Listed',  listedSchema);
+export const Note     = db.model('Note',      noteSchema);
+export const Category = db.model('Category',  categorySchema);
+export const Added    = db.model('Added',     addedSchema);
+export const Deleted  = db.model('Deleted',   deletedSchema);
+export const Readed   = db.model('Readed',    readedSchema);
+export const Traded   = db.model('Traded',    tradedSchema);
+export const Bided    = db.model('Bided',     bidedSchema);
+export const Starred  = db.model('Starred',   starredSchema);
+export const Listed   = db.model('Listed',    listedSchema);

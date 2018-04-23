@@ -174,11 +174,23 @@ router.route('/notes')
 .post(feed.notImplemented())
 .delete(feed.notImplemented());
 
+router.route('/categorys')
+.get(feed.fetchCategorys())
+.put(feed.notImplemented())
+.post(feed.notImplemented())
+.delete(feed.notImplemented());
+
 router.route('/note')
-.get(feed.fetchNote())
+//.get(feed.fetchNote())
 .put(feed.createNote())
 .post(feed.updateNote())
 .delete(feed.deleteNote());
+
+router.route('/category')
+.get(feed.fetchCategory())
+.put(feed.createCategory())
+.post(feed.updateCategory())
+.delete(feed.deleteCategory());
 
 app.use('/api', router);
 const server = http.createServer(app);

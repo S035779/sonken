@@ -15,6 +15,7 @@ import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
                         from 'material-ui-icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
+import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
 
 class DrawerList extends React.Component {
   constructor(props) {
@@ -25,22 +26,24 @@ class DrawerList extends React.Component {
     , openSellers:      false
     , isProfile:        false
     , isPreference:     false
+    , isEditMarchant:   false 
+    , isEditSellers:    false 
     , dragged:          false
     , dropZoneEntered:  false
     , dragSrcEl:        null
     , dragDstEl:        null
     , categorys:        [
-      { main: 'marchant', sub: '01category', index: 1000 }
-    , { main: 'marchant', sub: '02category', index: 1100 }
-    , { main: 'marchant', sub: '03category', index: 1200 }
-    , { main: 'marchant', sub: '04category', index: 1300 }
-    , { main: 'marchant', sub: '05category', index: 1400 }
-    , { main: 'sellers', sub: '06category', index: 2000 }
-    , { main: 'sellers', sub: '07category', index: 2100 }
-    , { main: 'sellers', sub: '08category', index: 2200 }
-    , { main: 'sellers', sub: '09category', index: 2300 }
-    , { main: 'sellers', sub: '10category', index: 2400 }
-    ]
+        { main: 'marchant', sub: '01category', index: 1000 }
+      , { main: 'marchant', sub: '02category', index: 1100 }
+      , { main: 'marchant', sub: '03category', index: 1200 }
+      , { main: 'marchant', sub: '04category', index: 1300 }
+      , { main: 'marchant', sub: '05category', index: 1400 }
+      , { main: 'sellers', sub: '06category', index: 2000 }
+      , { main: 'sellers', sub: '07category', index: 2100 }
+      , { main: 'sellers', sub: '08category', index: 2200 }
+      , { main: 'sellers', sub: '09category', index: 2300 }
+      , { main: 'sellers', sub: '10category', index: 2400 }
+      ]
     };
   }
 
@@ -68,6 +71,8 @@ class DrawerList extends React.Component {
         break;
       case 'isPreference':
       case 'isProfile':
+      case 'isEditMarchant':
+      case 'isEditSellers':
         this.setState({ [name]: true });
         break;
     }
@@ -158,7 +163,8 @@ class DrawerList extends React.Component {
 
   renderListItems() {
     const { classes, open } = this.props;
-    const { openMarchant, openSellers, categorys } = this.state;
+    const { isEditMarchant, isEditSellers, openMarchant, openSellers
+      , categorys } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
     const renderCategoryList = category => categorys
@@ -178,18 +184,24 @@ class DrawerList extends React.Component {
         }
         {open
           ? <ListItemSecondaryAction>
-              <IconButton>
+              <IconButton
+                onClick={
+                  this.handleClickButton.bind(this, 'isEditMarchant')}>
                 <SettingsApplications className={classes.icon} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
         }
       </ListItem>
-        <Collapse in={openMarchant} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {renderCategoryList('marchant')}
-          </List>
-        </Collapse>
+      <RssEditDialog category="marchant"
+        open={isEditMarchant}
+        onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')}
+      />
+      <Collapse in={openMarchant} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {renderCategoryList('marchant')}
+        </List>
+      </Collapse>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'sellers')}>
         <ListItemIcon>
@@ -202,18 +214,24 @@ class DrawerList extends React.Component {
         }
         {open
           ? <ListItemSecondaryAction>
-              <IconButton>
+              <IconButton
+                onClick={
+                  this.handleClickButton.bind(this, 'isEditSellers')}>
                 <SettingsApplications className={classes.icon} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
         }
       </ListItem>
-        <Collapse in={openSellers} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {renderCategoryList('sellers')}
-          </List>
-        </Collapse>
+      <RssEditDialog category="sellers"
+        open={isEditSellers}
+        onClose={this.handleCloseDialog.bind(this, 'isEditSellers')}
+      />
+      <Collapse in={openSellers} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {renderCategoryList('sellers')}
+        </List>
+      </Collapse>
       <ListItem button 
         onClick={this.handleClickButton.bind(this, 'bids')}>
         <ListItemIcon>

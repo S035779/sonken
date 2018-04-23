@@ -6,19 +6,30 @@ export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
       user: ''
-      , isAuthenticated: false
-      , notes:    []
-      , page: {
+    , isAuthenticated: false
+    , categorys:  []
+    , notes:      []
+    , page: {
         maxNumer: 0
       , number:   0
       , perPage:  20
       }
-    , selected: false
-    , ids:      []
-    , file:     null
+    , selected:   false
+    , ids:        []
+    , file:       null
     };
   }
   
+  updateCategory(state, action) {
+    return state.categorys.map(category => action.id === category._id
+      ? Object.assign({}, category, action.category) : category);
+  }
+
+  deleteCategory(state, action) {
+    const isCategory = obj => action.ids.some(id => id === obj._id);
+    return state.categorys.filter(category => !isCategory(category));
+  }
+
   updateNote(state, action) {
     return state.notes.map(note => action.id === note._id
       ? Object.assign({}, note, action.note) : note);
@@ -146,6 +157,23 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  action.notes
         });
+      case 'category/fetch/my':
+        return Object.assign({}, state, {
+          categorys: action.categorys
+        });
+      case 'category/create':
+        return Object.assign({}, state, {
+          categorys:  [action.category, ...state.categorys]
+        });
+      case 'category/update': 
+        return Object.assign({}, state, {
+          categorys:  this.updateCategory(state, action)
+        });
+      case 'category/delete':
+        return Object.assign({}, state, {
+          categorys:  this.deleteCategory(state, action)
+        , ids:    []
+        });
       case 'note/create':
         return Object.assign({}, state, {
           notes:  [action.note, ...state.notes]
@@ -167,11 +195,11 @@ export default class DashboardStore extends ReduceStore {
           notes:  this.deleteNote(state, action)
         , ids:    []
         });
-      case 'notes/upload':
+      case 'note/upload/my':
         return Object.assign({}, state, {
           notes:  action.notes
         });
-      case 'notes/download':
+      case 'note/download/my':
         return Object.assign({}, state, {
           file:  action.file
         });

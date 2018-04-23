@@ -259,6 +259,20 @@ export default {
     };
   },
 
+  createNote(options) {
+    return (req, res, next) => {
+      const { user, url, category } = req.body;
+      feed.createNote({ user, url, category }).subscribe(
+        obj => { res.json(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to create Note.'); }  
+      );
+    };
+  },
+
   deleteNote(options) {
     return (req, res, next) => {
       const { user, ids } = req.query;
@@ -284,6 +298,49 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => { log.info('Complete to update Note.'); }  
+      );
+    };
+  },
+
+  createCategory(options) {
+    return (req, res, next) => {
+      const { user, category, subcategory } = req.body;
+      feed.createCategory({ user, category, subcategory }).subscribe(
+        obj => { res.json(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to create Category.'); }  
+      );
+    };
+  },
+
+  deleteCategory(options) {
+    return (req, res, next) => {
+      const { user, ids } = req.query;
+      feed.deleteCategory({ user, ids }).subscribe(
+        obj => {  res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to delete Category.'); }  
+      );
+    };
+  },
+
+  updateCategory(options) {
+    return (req, res, next) => {
+      const { user, id, data } = req.body;
+      //log.trace(user,id,data);
+      feed.updateCategory({ user, id, data }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => { log.info('Complete to update Category.'); }  
       );
     };
   },
@@ -386,16 +443,30 @@ export default {
     };
   },
 
-  fetchNote(options) {
+  //fetchNote(options) {
+  //  return (req, res, next) => {
+  //    const { user, id } = req.query;
+  //    feed.fetchNote({ user, id }).subscribe(
+  //      obj => { res.json(obj); }
+  //    , err => {
+  //        res.status(500).send({ name: err.name, message: err.message });
+  //        log.error(displayName, err.name, ':', err.message);
+  //      }
+  //    , () => { log.info('Complete to fetch Note.'); }  
+  //    );
+  //  };
+  //},
+
+  fetchCategory(options) {
     return (req, res, next) => {
-      const { user } = req.query;
-      feed.fetchNote({ user }).subscribe(
+      const { user, id } = req.query;
+      feed.fetchCategory({ user, id }).subscribe(
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to fetch Note.'); }  
+      , () => { log.info('Complete to fetch Category.'); }  
       );
     };
   },
@@ -414,16 +485,16 @@ export default {
     };
   },
 
-  createNote(options) {
+  fetchCategorys(options) {
     return (req, res, next) => {
-      const { user, url, category } = req.body;
-      feed.createNote({ user, url, category }).subscribe(
+      const { user } = req.query;
+      feed.fetchCategorys({ user }).subscribe(
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to create Note.'); }  
+      , () => { log.info('Complete to fetch Categorys.'); }  
       );
     };
   },

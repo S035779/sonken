@@ -2,7 +2,8 @@ import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import mongoose         from 'mongoose';
-import { Note, Added, Deleted, Readed, Traded, Bided, Starred, Listed }
+import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred
+  , Listed }
                         from 'Models/feed';
 import std              from 'Utilities/stdutils';
 import Amazon           from 'Utilities/Amazon';
@@ -40,6 +41,15 @@ export default class FeedParser {
             //log.trace(request, obj);
             resolve(obj);
           });
+        });
+      case 'fetch/categorys':
+        return new Promise((resolve, reject) => {
+          const conditions = { user: options.user };
+          Category.find(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          })
         });
       case 'fetch/added':
         return new Promise((resolve, reject) => {
@@ -109,6 +119,18 @@ export default class FeedParser {
           , user: options.user
           };
           Note.findOne(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'fetch/category':
+        return new Promise((resolve, reject) => {
+          const conditions = {
+            _id:  options.id
+          , user: options.user
+          };
+          Category.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -185,6 +207,50 @@ export default class FeedParser {
           , user: options.user
           };
           Note.remove(conditions, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'create/category':
+        return new Promise((resolve, reject) => {
+          const category = new Category({
+            user:           options.user
+          , category:       options.data.category
+          , subcategory:    options.data.subcategory
+          , subcategoryId:  new mongoose.Types.ObjectId
+          });
+          category.save((err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'update/category':
+        return new Promise((resolve, reject) => {
+          const conditions = {
+            _id:  options.id
+          , user: options.user
+          };
+          const update = {
+            category:       options.data.category
+          , subcategory:    options.data.subcategory
+          , subcategoryId:  new mongoose.Types
+                              .ObjectId(options.data.subcategoryId)
+          };
+          Category.update(conditions, update, (err, obj) => {
+            if(err) return reject(err);
+            //log.trace(request, obj);
+            resolve(obj);
+          });
+        });
+      case 'delete/category':
+        return new Promise((resolve, reject) => {
+          const conditions = {
+            _id: options.id
+          , user: options.user
+          };
+          Category.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
             resolve(obj);
@@ -474,16 +540,33 @@ export default class FeedParser {
     return this.request('delete/note', { user, id });
   }
 
+  removeCategory(user, id) {
+    return this.request('delete/category', { user, id });
+  }
+
   replaceNote(user, id, data) {
     return this.request('update/note', { user, id, data });
+  }
+
+  replaceCategory(user, id, data) {
+    return this.request('update/category', { user, id, data });
   }
 
   addNote(user, data) {
     return this.request('create/note', { user, data });
   }
+  
+  addCategory(user, category, subcategory) {
+    return this
+      .request('create/category', { user, category, subcategory });
+  }
 
   getNotes(user) {
     return this.request('fetch/notes', { user });
+  }
+
+  getCategorys(user) {
+    return this.request('fetch.categorys', { user });
   }
 
   getListed(user) {
@@ -518,56 +601,16 @@ export default class FeedParser {
     return this.request('fetch/note', { user, id });
   }
 
+  getCategory(user, id) {
+    return this.request('fetch/category', { user, id });
+  }
+
   getItems(user, items) {
     return this.request('fetch/items', { user, items });
   }
 
-  //createNote({ user, url, category }) {
-  //  const addNote =
-  //    obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-  //  return Yahoo.of().fetchRss({ url })
-  //    .map(obj => this.setNote({ user, url, category }, obj))
-  //    .flatMap(addNote);
-  //}
-
-  createNote({ user, url, category }) {
-    const addNote =
-      obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-    return Yahoo.of().fetchHtml({ url })
-      //.map(R.tap(log.trace.bind(this)))
-      .map(obj => this.setNote({ user, url, category }, obj))
-      .flatMap(addNote);
-  }
-
-  fetchNote({ user, id }) {
-    const observables = Rx.Observable.forkJoin([
-      this.getStarred(user)
-    , this.getListed(user)
-    , this.getReaded(user)
-    , this.getDeleted(user)
-    , this.getAdded(user)
-    , this.getNote(user, id)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setAdded(objs[4])
-    , this.setDeleted(objs[3])
-    , this.setReaded(objs[2])
-    , this.setListed(objs[1])
-    , this.setStarred(objs[0])
-    , this.toObject
-    )([objs[5]]);
-    return observables
-      .map(setAttribute)
-      .map(R.head);
-  }
-
-  fetchItems({ user, items }) {
-    return Rx.Observable.fromPromise(this.getItems(user, items));
-  }
-
-  fetchAllNotes({ users }) {
-    const observables = R.map(user => this.getNotes(user));
-    return Rx.Observable.forkJoin(observables(users));
+  fetchCategorys({ user }) {
+    return Rx.Observable.fromPromise(this.getCategorys(user));
   }
 
   fetchNotes({ user }) {
@@ -588,6 +631,15 @@ export default class FeedParser {
     , this.toObject
     )(objs[5]);
     return observables.map(setAttribute);
+  }
+
+  fetchAllNotes({ users }) {
+    const observables = R.map(user => this.getNotes(user));
+    return Rx.Observable.forkJoin(observables(users));
+  }
+
+  fetchItems({ user, items }) {
+    return Rx.Observable.fromPromise(this.getItems(user, items));
   }
 
   fetchAddedNotes({ user }) {
@@ -676,6 +728,32 @@ export default class FeedParser {
     , this.toObject
     )(objs[1]);
     return observables.map(setAttribute);
+  }
+
+  fetchNote({ user, id }) {
+    const observables = Rx.Observable.forkJoin([
+      this.getStarred(user)
+    , this.getListed(user)
+    , this.getReaded(user)
+    , this.getDeleted(user)
+    , this.getAdded(user)
+    , this.getNote(user, id)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setAdded(objs[4])
+    , this.setDeleted(objs[3])
+    , this.setReaded(objs[2])
+    , this.setListed(objs[1])
+    , this.setStarred(objs[0])
+    , this.toObject
+    )([objs[5]]);
+    return observables
+      .map(setAttribute)
+      .map(R.head);
+  }
+
+  fetchCategory({ user, id }) {
+    return Rx.Observable.fromPromise(this.getCategory(user, id));
   }
 
   toObject(objs) {
@@ -780,6 +858,23 @@ export default class FeedParser {
     return results;
   }
 
+  //createNote({ user, url, category }) {
+  //  const addNote =
+  //    obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+  //  return Yahoo.of().fetchRss({ url })
+  //    .map(obj => this.setNote({ user, url, category }, obj))
+  //    .flatMap(addNote);
+  //}
+
+  createNote({ user, url, category }) {
+    const addNote =
+      obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+    return Yahoo.of().fetchHtml({ url })
+      //.map(R.tap(log.trace.bind(this)))
+      .map(obj => this.setNote({ user, url, category }, obj))
+      .flatMap(addNote);
+  }
+
   updateNote({ user, id, data }) {
     //log.trace(user,id,data);
     const isAsin = data.asin !== '';
@@ -800,6 +895,32 @@ export default class FeedParser {
     ;
   }
 
+  _updateNote({ user, id, data }) {
+    return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
+  }
+  
+  deleteNote({ user, ids }) {
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeNote(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
+  }
+
+  createCategory({ user, category, subcategory }) {
+    return Rx.Observable
+      .fromPromise(this.addCategory(user, category, subcategory));
+  }
+
+  updateCategory({ user, id, data }) {
+    return Rx.Observable
+      .fromPromise(this.replaceCategory(user, id, data));
+  }
+
+  deleteCategory({ user, ids }) {
+    const _ids = R.split(',', ids);
+    const promises = R.map(id => this.removeCategory(user, id));
+    return Rx.Observable.forkJoin(promises(_ids));
+  }
+
   updateHtml({ user, id, html }) {
     const data = {
       updated:  html.updated
@@ -814,16 +935,6 @@ export default class FeedParser {
     , items:    rss.items  
     };
     return this._updateNote({ user, id, data });
-  }
-
-  _updateNote({ user, id, data }) {
-    return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
-  }
-  
-  deleteNote({ user, ids }) {
-    const _ids = R.split(',', ids);
-    const promises = R.map(id => this.removeNote(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
   }
 
   createAdd({ user, ids }) {

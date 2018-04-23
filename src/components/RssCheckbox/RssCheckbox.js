@@ -43,31 +43,31 @@ const styles = theme => ({
     }
   }
 , primary: {
-    color: primary_color
+    color: default_color
   , '&$checked': {
       color: primary_color
     }
   }
 , secondary: {
-    color: secondary_color
+    color: default_color
   , '&$checked': {
       color: secondary_color
     }
   }
 , warning: {
-    color: warning_color
+    color: default_color
   , '&$checked': {
       color: warning_color
     }
   }
 , success: {
-    color: success_color
+    color: default_color
   , '&$checked': {
       color: success_color
     }
   }
 , danger: {
-    color: danger_color
+    color: default_color
   , '&$checked': {
       color: danger_color
     }
