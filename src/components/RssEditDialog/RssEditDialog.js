@@ -22,8 +22,11 @@ class RssEditDialog extends React.Component {
     this.state = {
       isSuccess:  false
     , isNotValid: false
-    , title:      ''
+    , openAdd:    false
+    , openUpd:    []
+    , openDel:    []
     , checked:    []
+    , title:      ''
     };
   }
 
@@ -31,17 +34,18 @@ class RssEditDialog extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleClickButton(name, event) {
+  handleClickButton(name) {
     std.logInfo(RssEditDialog.displayName, 'handleClickButton', name);
+    this.setState({ [name]: true });
   }
 
   handleChangeText(name, event) {
     std.logInfo(RssEditDialog.displayName, 'handleChangeText', name);
   }
 
-  handleChangeToggle(value) {
-    std.logInfo(RssEditDialog.displayName, 'handleChangeToggle', value);
-    const { checked } = this.state;
+  handleChangeToggle(name, value) {
+    std.logInfo(RssEditDialog.displayName, 'handleChangeToggle', name);
+    const checked = this.state[name];
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
     if(currentIndex === -1) {
@@ -49,7 +53,7 @@ class RssEditDialog extends React.Component {
     } else {
       newChecked.splice(currentIndex, 1);
     }
-    this.setState({ checked: newChecked });
+    this.setState({ [name]: newChecked });
   }
 
   handleCloseDialog(name, event) {
@@ -93,13 +97,13 @@ class RssEditDialog extends React.Component {
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{title}カテゴリー</FormLabel>
           <RssButton color="success"
-            onClick={this.handleClickButton.bind(this, 'category')}
+            onClick={this.handleClickButton.bind(this, 'openAdd')}
             classes={classes.button}>新規追加</RssButton>
           <List dense>
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => (
-            <ListItem key={value} dense button
-              onClick={this.handleChangeToggle.bind(this, value)}
-            >
+            <ListItem key={value} dense button onClick={
+              this.handleChangeToggle.bind(this, 'checked', value)
+            }>
               <RssCheckbox color="secondary"
                 checked={checked.indexOf(value) !== -1}
                 tabIndex={-1}
@@ -107,10 +111,14 @@ class RssEditDialog extends React.Component {
               />
               <ListItemText primary={`Line item ${value + 1}`}/>
               <ListItemSecondaryAction>
-                <IconButton>
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openUpd', value)
+                }>
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
-                <IconButton>
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openDel', value)
+                }>
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>
