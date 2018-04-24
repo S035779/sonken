@@ -4,7 +4,6 @@ import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
 import { getStores, getState }
                         from 'Stores';
-import LoginAction      from 'Actions/LoginAction';
 
 import { withStyles }   from 'material-ui/styles';
 import { CssBaseline }
@@ -23,7 +22,8 @@ class App extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { user, isAuthenticated, profile, preference } = this.state;
+    const { user, isAuthenticated, profile, preference, categorys }
+      = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <CssBaseline />
@@ -32,7 +32,9 @@ class App extends React.Component {
           user={user}
           isAuthenticated={isAuthenticated}
           profile={profile}
-          preference={preference}>
+          preference={preference}
+          categorys={categorys}
+        >
           {renderRoutes(route.routes)}
         </RssDrawer>
       </div>

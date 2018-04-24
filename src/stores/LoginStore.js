@@ -5,23 +5,24 @@ const displayName = 'LoginStore';
 export default class LoginStore extends ReduceStore {
   getInitialState() {
     return { 
-      user:   ''
-    , admin:  ''
+      user:             ''
+    , isAuthenticated:  false
+    , admin:            ''
     , profile: {
-        name:     ''
-      , kana:     ''
-      , email:    ''
-      , phone:    ''
-      , username: ''
-      , plan:     ''
-    }
+        name:           ''
+      , kana:           ''
+      , email:          ''
+      , phone:          ''
+      , username:       ''
+      , plan:           ''
+      }
     , preference: {
-        from: ''
-      , agreement: ''
-      , menu: []
-      , advertisement: { url1: '', url2: '', url3: '', url4: '' }
-    }
-    , isAuthenticated: false
+        from:           ''
+      , agreement:      ''
+      , menu:           []
+      , advertisement:  { url1: '', url2: '', url3: '', url4: '' }
+      }
+    , categorys:        []
     };
   }
   
@@ -36,6 +37,14 @@ export default class LoginStore extends ReduceStore {
         return Object.assign({}, state, {
           user:   action.user
         , isAuthenticated: action.isAuthenticated
+        });
+      case 'category/prefetch/my':
+        return Object.assign({}, state, {
+          categorys: action.categorys
+        });
+      case 'category/fetch/my':
+        return Object.assign({}, state, {
+          categorys: action.categorys
         });
       case 'preference/fetch':
         return Object.assign({}, state, {

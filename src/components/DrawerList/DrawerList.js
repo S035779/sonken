@@ -32,19 +32,14 @@ class DrawerList extends React.Component {
     , dropZoneEntered:  false
     , dragSrcEl:        null
     , dragDstEl:        null
-    , categorys:        [
-        { main: 'marchant', sub: '01category', index: 1000 }
-      , { main: 'marchant', sub: '02category', index: 1100 }
-      , { main: 'marchant', sub: '03category', index: 1200 }
-      , { main: 'marchant', sub: '04category', index: 1300 }
-      , { main: 'marchant', sub: '05category', index: 1400 }
-      , { main: 'sellers', sub: '06category', index: 2000 }
-      , { main: 'sellers', sub: '07category', index: 2100 }
-      , { main: 'sellers', sub: '08category', index: 2200 }
-      , { main: 'sellers', sub: '09category', index: 2300 }
-      , { main: 'sellers', sub: '10category', index: 2400 }
-      ]
+    , categorys:        props.categorys
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    std.logInfo(DrawerList.displayName, 'Props', nextProps);
+    const { categorys } = nextProps;
+    this.setState({ categorys });
   }
 
   handleClickButton(name, event) {
@@ -86,7 +81,8 @@ class DrawerList extends React.Component {
   handleDragStart(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragStart', name)
     event.dataTransfer.effectAllowed = 'move';
-    const dragSrcEl = this.state.categorys.find(obj => obj.sub === name);
+    const dragSrcEl
+      = this.state.categorys.find(obj => obj.subcategory === name);
     event.dataTransfer.setData('text/plain', dragSrcEl.index);
     this.setState({ dragged: true, dragSrcEl: dragSrcEl });
   }
@@ -99,7 +95,8 @@ class DrawerList extends React.Component {
 
   handleDragEnter(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragEnter', name)
-    const dragDstEl = this.state.categorys.find(obj => obj.sub === name);
+    const dragDstEl
+      = this.state.categorys.find(obj => obj.subcategory === name);
     this.setState({ dropZoneEntered: true, dragDstEl });
   }
 
@@ -112,13 +109,14 @@ class DrawerList extends React.Component {
     std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
     event.stopPropagation();
     const { dragSrcEl, categorys } = this.state;
-    const dragDstEl = this.state.categorys.find(obj => obj.sub === name);
+    const dragDstEl
+      = this.state.categorys.find(obj => obj.subcategory === name);
     if(dragSrcEl.index !== dragDstEl.index) {
       dragSrcEl.index = dragDstEl.index;
       dragDstEl.index = Number(event.dataTransfer.getData('text/plain'));
       const _categorys = categorys.map(obj => {
-        if(dragSrcEl.sub === obj.sub) return dragSrcEl;
-        if(dragDstEl.sub === obj.sub) return dragDstEl;
+        if(dragSrcEl.subcategory === obj.subcategory) return dragSrcEl;
+        if(dragDstEl.subcategory === obj.subcategory) return dragDstEl;
         return obj;
       });
       this.setState({ dragSrcEl, dragDstEl, categorys: _categorys });
@@ -133,8 +131,8 @@ class DrawerList extends React.Component {
   renderCategoryList(index, name) {
     const { classes } = this.props;
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
-    const isDragDstEl = dragDstEl && dragDstEl.sub === name;
-    const isDragSrcEl = dragSrcEl && dragSrcEl.sub === name;
+    const isDragDstEl = dragDstEl && dragDstEl.subcategory === name;
+    const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === name;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
     return <ListItem button key={index}
@@ -162,15 +160,21 @@ class DrawerList extends React.Component {
   }
 
   renderListItems() {
-    const { classes, open } = this.props;
+    const { classes, open, profile } = this.props;
     const { isEditMarchant, isEditSellers, openMarchant, openSellers
       , categorys } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
-    const renderCategoryList = category => categorys
-      .filter(obj => category === obj.main)
-      .sort((a, b) => a.index < b.index ? -1 : a.index > b.index ? 1 : 0)
-      .map((c, i) => this.renderCategoryList(i, c.sub));
+    const _categorys
+      = category => categorys
+        .filter(obj => category === obj.category)
+        .sort((a, b) =>
+          a.index < b.index ? -1 : a.index > b.index ? 1 : 0);
+    const categoryList
+      = category => categorys ? _categorys(category) : null;
+    const renderCategoryList
+      = category => categorys ? _categorys(category)
+        .map((c, i) => this.renderCategoryList(i, c.subcategory)) : null;
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'marchant')}>
@@ -193,7 +197,10 @@ class DrawerList extends React.Component {
           : null
         }
       </ListItem>
-      <RssEditDialog category="marchant"
+      <RssEditDialog
+        user={profile.user}
+        category="marchant"
+        categorys={categoryList('marchant')}
         open={isEditMarchant}
         onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')}
       />
@@ -223,7 +230,10 @@ class DrawerList extends React.Component {
           : null
         }
       </ListItem>
-      <RssEditDialog category="sellers"
+      <RssEditDialog
+        user={profile.user}
+        category="sellers"
+        categorys={categoryList('sellers')}
         open={isEditSellers}
         onClose={this.handleCloseDialog.bind(this, 'isEditSellers')}
       />

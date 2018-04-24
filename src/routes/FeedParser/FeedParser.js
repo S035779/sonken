@@ -556,9 +556,9 @@ export default class FeedParser {
     return this.request('create/note', { user, data });
   }
   
-  addCategory(user, category, subcategory) {
+  addCategory(user, data) {
     return this
-      .request('create/category', { user, category, subcategory });
+      .request('create/category', { user, data });
   }
 
   getNotes(user) {
@@ -566,7 +566,7 @@ export default class FeedParser {
   }
 
   getCategorys(user) {
-    return this.request('fetch.categorys', { user });
+    return this.request('fetch/categorys', { user });
   }
 
   getListed(user) {
@@ -906,8 +906,9 @@ export default class FeedParser {
   }
 
   createCategory({ user, category, subcategory }) {
+    //log.debug(user,category,subcategory);
     return Rx.Observable
-      .fromPromise(this.addCategory(user, category, subcategory));
+      .fromPromise(this.addCategory(user, { category, subcategory }));
   }
 
   updateCategory({ user, id, data }) {

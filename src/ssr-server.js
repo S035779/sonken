@@ -56,12 +56,12 @@ process.on('warning', err => message(err));
 process.on('exit',    (code, signal) => message(null, code, signal));
 
 const message = (err, code, signal) => {
-  if(err) log.warn('[SSR]', err.name, ':',  err.message);
+  if(err) log.warn('[SSR]', err.name, ':',  err.message, ':', err.stack);
   else    log.info('[SSR]', `process exit. (s/c): ${signal || code}`);
 };
 
 const shutdown = (err, cbk) => {
-  if(err) log.error('[SSR]', err.name, ':', err.message);
+  if(err) log.error('[SSR]', err.name, ':', err.message, ':', err.stack);
   mongoose.disconnect(() => {
     log.info('[MDB]', 'session #1 terminated.');
     server.close(() => {

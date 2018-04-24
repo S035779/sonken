@@ -25,12 +25,16 @@ class Dashboard extends React.Component {
   static prefetch(options) {
     std.logInfo(Dashboard.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchNotes(options.user));
+      .then(() => NoteAction.prefetchNotes(options.user))
+      .then(() => NoteAction.prefetchCategorys(options.user))
+    ;
   }
 
   componentDidMount() {
     std.logInfo(Dashboard.displayName, 'fetch', 'Dashboard');
-    NoteAction.fetchNotes(this.state.user);
+    NoteAction.fetchNotes(this.state.user)
+      .then(() => NoteAction.fetchCategorys(this.state.user))
+    ;
   }
 
   notePage(number, page) {
@@ -42,6 +46,11 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, file } = this.state;
+    if(!isAuthenticated) {
+      const to =
+        { pathname: '/login/authenticate', state: { from: location } };
+      return <Redirect to={to}/>;
+    }
     const _id = match.params.id;
     const category =
       match.params.category ? match.params.category : 'marchant';
@@ -50,10 +59,6 @@ class Dashboard extends React.Component {
     const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
     _notes.length = this.notePage(number, page);
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
     return <div className={classes.root}>
         <RssSearch
           user={user}

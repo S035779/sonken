@@ -21,8 +21,8 @@ class RssDrawer extends React.Component {
   render() {
     //std.logInfo(RssDrawer.displayName, 'Props', this.props);
     //std.logInfo(RssDrawer.displayName, 'State', this.state);
-    const { classes, user, isAuthenticated, profile, preference, children }
-      = this.props;
+    const { classes, user, isAuthenticated, profile, preference, categorys
+      , children } = this.props;
     const { open } = this.state;
     return <div className={classes.root}>
       <RssHeader
@@ -31,7 +31,8 @@ class RssDrawer extends React.Component {
         isAuthenticated={isAuthenticated}
         preference={preference}
         profile={profile}
-        onClick={this.handleToggle.bind(this)}>
+        onClick={this.handleToggle.bind(this)}
+      >
         {children}
       </RssHeader>
       <DrawerTemporary
@@ -39,6 +40,7 @@ class RssDrawer extends React.Component {
         user={user}
         preference={preference}
         profile={profile}
+        categorys={categorys}
         onClose={this.handleToggle.bind(this)}
       />
       <DrawerPermanent
@@ -46,6 +48,7 @@ class RssDrawer extends React.Component {
         user={user}
         preference={preference}
         profile={profile}
+        categorys={categorys}
       />
     </div>;
   }

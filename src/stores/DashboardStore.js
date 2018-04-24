@@ -5,18 +5,18 @@ const displayName = 'DashboardStore';
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
-      user: ''
-    , isAuthenticated: false
-    , categorys:  []
-    , notes:      []
+      user:             ''
+    , isAuthenticated:  false
+    , notes:            []
     , page: {
-        maxNumer: 0
-      , number:   0
-      , perPage:  20
+        maxNumer:       0
+      , number:         0
+      , perPage:        20
       }
-    , selected:   false
-    , ids:        []
-    , file:       null
+    , selected:         false
+    , ids:              []
+    , file:             null
+    , categorys:        []
     };
   }
   
@@ -152,6 +152,10 @@ export default class DashboardStore extends ReduceStore {
       case 'note/prefetch/my':
         return Object.assign({}, state, {
           notes:  action.notes
+        });
+      case 'category/prefetch/my':
+        return Object.assign({}, state, {
+          categorys: action.categorys
         });
       case 'note/fetch/my':
         return Object.assign({}, state, {

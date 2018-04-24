@@ -14,6 +14,7 @@ import { Clear, ContentPaste }
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssNewDialog     from 'Components/RssNewDialog/RssNewDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
 class RssFormDialog extends React.Component {
@@ -22,8 +23,11 @@ class RssFormDialog extends React.Component {
     this.state = {
       isSuccess:  false
     , isNotValid: false
-    , title:      props.title
+    , openAdd:    false
+    , openUpd:    []
+    , openDel:    []
     , checked:    []
+    , title:      props.title
     };
   }
 
@@ -31,8 +35,9 @@ class RssFormDialog extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleClickButton(name, event) {
+  handleClickButton(name) {
     std.logInfo(RssFormDialog.displayName, 'handleClickButton', name);
+    this.setState({ [name]: true });
   }
 
   handleChangeText(name, event) {
@@ -40,9 +45,9 @@ class RssFormDialog extends React.Component {
     this.setState({ [name]: event.target.value });
   }
 
-  handleChangeToggle(value) {
+  handleChangeToggle(name, value) {
     std.logInfo(RssFormDialog.displayName, 'handleChangeToggle', name);
-    const { checked } = this.state;
+    const checked = this.state[name];
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
     if(currentIndex === -1) {
@@ -50,25 +55,21 @@ class RssFormDialog extends React.Component {
     } else {
       newChecked.splice(currentIndex, 1);
     }
-    this.setState({ checked: newChecked });
+    this.setState({ [name]: newChecked });
   }
 
-  handleCloseDialog(name, event) {
-    this.props.onClose(name, event);
+  handleCloseDialog() {
+    this.props.onClose();
   }
 
-  handleSubmitDialog(name, event) {
-    std.logInfo(RssFormDialog.displayName, 'handleSubmitDialog', name);
-    switch(name) {
-      case 'isEditNote':
-        if(this.isValidate() && this.isChanged()) {
-          const { title } = this.state;
-          this.props.onSubmit(this.props.selectedNoteId, title);
-          this.props.onClose();
-        } else {
-          this.setState({ isNotValid: true });
-        }
-        break;
+  handleSubmitDialog() {
+    if(this.isValidate() && this.isChanged()) {
+      const { title } = this.state;
+      const { selectedNoteId } = this.props;
+      this.props.onSubmit(selectedNoteId, title);
+      this.props.onClose();
+    } else {
+      this.setState({ isNotValid: true });
     }
   }
 
@@ -81,35 +82,40 @@ class RssFormDialog extends React.Component {
   }
 
   render() {
-    std.logInfo(RssFormDialog.displayName, 'Props', this.props);
-    std.logInfo(RssFormDialog.displayName, 'State', this.state);
+    //std.logInfo(RssFormDialog.displayName, 'Props', this.props);
+    //std.logInfo(RssFormDialog.displayName, 'State', this.state);
     const { classes, open, category, title } = this.props;
-    const { isNotValid, isSuccess, checked } = this.state;
+    const { isNotValid, isSuccess, checked, openAdd, openUpd }
+      = this.state;
     const name = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
     return <LoginFormDialog
         open={open}
         title={'ノート編集'}
-        onClose={this.handleCloseDialog.bind(this, 'isEditNote')}
-        onSubmit={this.handleSubmitDialog.bind(this, 'isEditNote')}
+        onClose={this.handleCloseDialog.bind(this)}
+        onSubmit={this.handleSubmitDialog.bind(this)}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
-          <FormLabel component="legend">{name}タイトル</FormLabel>
           <TextField autoFocus margin="dense"
             value={this.state.title}
             onChange={this.handleChangeText.bind(this, 'title')}
-            label="タイトル" type="text" fullWidth />
+            label={name + 'タイトル'} type="text" fullWidth />
         </FormControl>
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{name}カテゴリー</FormLabel>
           <RssButton color="success"
-            onClick={this.handleClickButton.bind(this, 'category')}
+            onClick={this.handleClickButton.bind(this, 'openAdd')}
             classes={classes.button}>新規追加</RssButton>
+          <RssNewDialog
+            open={openAdd}
+            category={category}
+            onClose={this.handleClose.bind(this, 'openAdd')}
+          />
           <List dense>
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => (
-            <ListItem key={value} dense button
-              onClick={this.handleChangeToggle.bind(this, value)}
-            >
+            <ListItem key={value} dense button onClick={
+              this.handleChangeToggle.bind(this, 'checked', value)
+            }>
               <RssCheckbox color="secondary"
                 checked={checked.indexOf(value) !== -1}
                 tabIndex={-1}
@@ -117,10 +123,22 @@ class RssFormDialog extends React.Component {
               />
               <ListItemText primary={`Line item ${value + 1}`}/>
               <ListItemSecondaryAction>
-                <IconButton>
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openUpd', value)
+                }>
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
-                <IconButton>
+                <RssNewDialog
+                  open={openUpd.indexOf(value) !== -1}
+                  category={category}
+                  title={`Line item ${value +1}`}
+                  onClose={
+                    this.handleChangeToggle.bind(this, 'openUpd', value)
+                  }
+                />
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openDel', value)
+                }>
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>

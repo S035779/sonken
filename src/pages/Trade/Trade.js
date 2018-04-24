@@ -24,12 +24,16 @@ class Trade extends React.Component {
   static prefetch(options) {
     std.logInfo(Trade.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchTraded(options.user));
+      .then(() => NoteAction.prefetchTraded(options.user))
+      .then(() => NoteAction.prefetchCategory(options.user))
+    ;
   }
 
   componentDidMount() {
     std.logInfo(Trade.displayName, 'fetch', 'Trade');
-    NoteAction.fetchTraded(this.state.user);
+    NoteAction.fetchTraded(this.state.user)
+      .then(() => NoteAction.fetchCategorys(this.state.user))
+    ;
   }
 
   itemFilter(filter, item) {

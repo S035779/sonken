@@ -26,7 +26,8 @@ class DrawerTemporary extends React.Component {
   render() {
     //std.logInfo(DrawerTemporary.displayName, 'Props', this.props);
     //std.logInfo(DrawerTemporary.displayName, 'State', this.state);
-    const { classes, user, profile, preference, open } = this.props;
+    const { classes, user, profile, preference, open, categorys }
+      = this.props;
     const modalProps = { keepMounted: true };
     const paperClass = { paper: classes.paper };
     return <Hidden mdUp>
@@ -41,6 +42,7 @@ class DrawerTemporary extends React.Component {
           user={user}
           profile={profile}
           preference={preference}
+          categorys={categorys}
         />
       </Drawer>
     </Hidden>;

@@ -19,6 +19,13 @@ export default {
       })
     ;
   },
+  prefetchCategorys(user) {
+    return NoteApiClient.prefetchCategorys(user)
+      .then(categorys => {
+        dispatch({ type: 'category/prefetch/my', categorys });
+      })
+    ;
+  },
   prefetchBided(user) {
     return NoteApiClient.prefetchBidedNotes(user)
       .then(notes => {
@@ -65,21 +72,21 @@ export default {
     dispatch({ type: 'category/fetch' });
     return NoteApiClient.fetchCategory(user, id)
       .then(category => {
-        dispatch({ type: 'category/fetch', note });
+        dispatch({ type: 'category/fetch', category });
       })
     ;
   },
   createCategory(user, data) {
     return NoteApiClient.createCategory(user, data)
       .then(category => {
-        dispatch({ type: 'category/create', note });
+        dispatch({ type: 'category/create', category });
       })
     ;
   },
   updateCategory(user, id, data) {
     return NoteApiClient.updateCategory(user, id, data)
       .then(category => {
-        dispatch({ type: 'category/update', id, note });
+        dispatch({ type: 'category/update', id, category });
       })
     ;
   },

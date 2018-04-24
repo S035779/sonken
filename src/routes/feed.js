@@ -305,6 +305,7 @@ export default {
   createCategory(options) {
     return (req, res, next) => {
       const { user, category, subcategory } = req.body;
+      //log.trace(user,category,subcategory);
       feed.createCategory({ user, category, subcategory }).subscribe(
         obj => { res.json(obj); }
       , err => {

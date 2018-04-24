@@ -14,6 +14,7 @@ import { Clear, ContentPaste }
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
+import RssNewDialog     from 'Components/RssNewDialog/RssNewDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
 class RssAddDialog extends React.Component {
@@ -22,8 +23,11 @@ class RssAddDialog extends React.Component {
     this.state = {
       isSuccess:  false
     , isNotValid: false
-    , title:      ''
+    , openAdd:    false
+    , openUpd:    []
+    , openDel:    []
     , checked:    []
+    , title:      ''
     };
   }
 
@@ -31,17 +35,19 @@ class RssAddDialog extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleClickButton(name, event) {
+  handleClickButton(name) {
     std.logInfo(RssAddDialog.displayName, 'handleClickButton', name);
+    this.setState({ [name]: true });
   }
 
   handleChangeText(name, event) {
     std.logInfo(RssAddDialog.displayName, 'handleChangeText', name);
+    this.setState({ [name]: event.target.value });
   }
 
-  handleChangeToggle(value) {
+  handleChangeToggle(name, value) {
     std.logInfo(RssAddDialog.displayName, 'handleChangeToggle', name);
-    const { checked } = this.state;
+    const checked = this.state[name];
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
     if(currentIndex === -1) {
@@ -49,23 +55,18 @@ class RssAddDialog extends React.Component {
     } else {
       newChecked.splice(currentIndex, 1);
     }
-    this.setState({ checked: newChecked });
+    this.setState({ [name]: newChecked });
   }
 
-  handleCloseDialog(name, event) {
-    this.props.onClose(name, event);
+  handleCloseDialog() {
+    this.props.onClose();
   }
 
-  handleSubmitDialog(name, event) {
-    std.logInfo(RssAddDialog.displayName, 'handleSubmitDialog', name);
-    switch(name) {
-      case 'isAddNote':
-        if(this.isValidate() && this.isChanged()) {
+  handleSubmitDialog() {
+    if(this.isValidate() && this.isChanged()) {
 
-        } else {
-          this.setState({ isNotValid: true });
-        }
-        break;
+    } else {
+      this.setState({ isNotValid: true });
     }
   }
 
@@ -78,35 +79,40 @@ class RssAddDialog extends React.Component {
   }
 
   render() {
-    std.logInfo(RssAddDialog.displayName, 'Props', this.props);
-    std.logInfo(RssAddDialog.displayName, 'State', this.state);
+    //std.logInfo(RssAddDialog.displayName, 'Props', this.props);
+    //std.logInfo(RssAddDialog.displayName, 'State', this.state);
     const { classes, open, category } = this.props;
-    const { isNotValid, isSuccess, title, checked } = this.state;
+    const { isNotValid, isSuccess, title, checked, openAdd, openUpd }
+      = this.state;
     const name = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
     return <LoginFormDialog 
         open={open} 
         title={'新規登録'}
-        onClose={this.handleCloseDialog.bind(this, 'isAddNote')}
-        onSubmit={this.handleSubmitDialog.bind(this, 'isAddNote')}
+        onClose={this.handleCloseDialog.bind(this)}
+        onSubmit={this.handleSubmitDialog.bind(this)}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
-          <FormLabel component="legend">{name}タイトル</FormLabel>
           <TextField autoFocus margin="dense"
             value={title}
             onChange={this.handleChangeText.bind(this, 'title')}
-            label="タイトル" type="text" fullWidth />
+            label={name + 'タイトル'} type="text" fullWidth />
         </FormControl>
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{name}カテゴリー</FormLabel>
           <RssButton color="success"
-            onClick={this.handleClickButton.bind(this, 'category')}
+            onClick={this.handleClickButton.bind(this, 'openAdd')}
             classes={classes.button}>新規追加</RssButton>
+          <RssNewDialog
+            open={openAdd}
+            category={category}
+            onClose={this.handleClose.bind(this, 'openAdd')}
+          />
           <List dense>
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => (
-            <ListItem key={value} dense button
-              onClick={this.handleChangeToggle.bind(this, value)}
-            >
+            <ListItem key={value} dense button onClick={
+              this.handleChangeToggle.bind(this, 'checked', value)
+            }>
               <RssCheckbox color="secondary"
                 checked={checked.indexOf(value) !== -1}
                 tabIndex={-1}
@@ -114,10 +120,22 @@ class RssAddDialog extends React.Component {
               />
               <ListItemText primary={`Line item ${value + 1}`}/>
               <ListItemSecondaryAction>
-                <IconButton>
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openUpd', value)
+                }>
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
-                <IconButton>
+                <RssNewDialog
+                  open={openUpd.indexOf(value) !== -1}
+                  category={category}
+                  title={`Line item ${value +1}`}
+                  onClose={
+                    this.handleChangeToggle.bind(this, 'openUpd', value)
+                  }
+                />
+                <IconButton onClick={
+                  this.handleChangeToggle.bind(this, 'openDel', value)
+                }>
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>

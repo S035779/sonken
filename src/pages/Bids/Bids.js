@@ -24,12 +24,16 @@ class Bids extends React.Component {
   static prefetch(options) {
     std.logInfo(Bids.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchBided(options.user));
+      .then(() => NoteAction.prefetchBided(options.user))
+      .then(() => NoteAction.prefetchCategorys(options.user))
+    ;
   }
 
   componentDidMount() {
     std.logInfo(Bids.displayName, 'fetch', 'Bids');
-    NoteAction.fetchBided(this.state.user);
+    NoteAction.fetchBided(this.state.user)
+      .then(() => NoteAction.fetchCategorys(this.state.user))
+    ;
   }
 
   itemFilter(filter, item) {

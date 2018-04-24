@@ -25,6 +25,16 @@ export default {
             resolve(obj);
           });
         });
+      case 'prefetch/categorys':
+        return new Promise((resolve, reject) => {
+          net.getJSON(
+            api + '/categorys'
+          , options
+          , (err, head, obj) => {
+            if(err) reject(err);
+            resolve(obj);
+          });
+        });
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
           net.getJSON(
@@ -333,6 +343,9 @@ export default {
   prefetchNotes(user) {
     return this.request('prefetch/notes', { user });
   },
+  prefetchCategorys(user) {
+    return this.request('prefetch/categorys', { user });
+  },
   prefetchTradedNotes(user) {
     return this.request('prefetch/traded', { user });
   },
@@ -366,14 +379,13 @@ export default {
   fetchCategory(user, id) {
     return this.request('fetch/category', { user, id });
   },
-  createCategory(user, { cagtegory, subcategory }) {
+  createCategory(user, { category, subcategory }) {
     return this
       .request('create/category', { user, category, subcategory });
   },
   upcateCategory(user, id, { category, subcategory, subcategoryId }) {
     const data = { category, subcategory, subcategoryId };
-    return this
-      .request('update/category', { user, id, data })
+    return this.request('update/category', { user, id, data })
   },
   deleteCategory(user, ids) {
     return this.request('delete/category', { user, ids });

@@ -22,10 +22,10 @@ class DrawerPermanent extends React.Component {
   render() {
     //std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
     //std.logInfo(DrawerPermanent.displayName, 'State', this.state);
-    const { classes, user, profile, preference, open } = this.props;
-    const paperClass = {
-      paper: classNames(classes.paper, !open && classes.paperClose)
-    };
+    const { classes, user, profile, preference, open, categorys }
+      = this.props;
+    const paperClass
+      = { paper: classNames(classes.paper, !open && classes.paperClose) };
     return <Hidden smDown implementation="css">
       <Drawer
         variant="permanent"
@@ -36,6 +36,7 @@ class DrawerPermanent extends React.Component {
           user={user}
           profile={profile}
           preference={preference}
+          categorys={categorys}
         />
       </Drawer>
     </Hidden>
