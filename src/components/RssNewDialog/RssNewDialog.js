@@ -33,8 +33,13 @@ class RssNewDialog extends React.Component {
   }
 
   handleSubmitDialog() {
-    const { title } = this.state;
-    this.props.onSubmit(title);
+    if(this.isValidate() && this.isChanged()) {
+      const { title } = this.state;
+      this.props.onSubmit(title);
+      this.props.onClose();
+    } else {
+      this.setState({ isNotValid: true });
+    }
   }
 
   isValidate() {

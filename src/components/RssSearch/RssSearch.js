@@ -18,11 +18,11 @@ class RssSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      url:      ''
-    , perPage:    props.noteNumber
-    , isSuccess:  false
-    , isNotValid: false
-    , isAddNote: false
+      url:          ''
+    , perPage:      props.noteNumber
+    , isSuccess:    false
+    , isNotValid:   false
+    , isAddNote:    false
     };
   }
 
@@ -47,19 +47,29 @@ class RssSearch extends React.Component {
     fileReader.readAsArrayBuffer(blob);
   }
 
-  handleSubmit(event) {
+  handleSubmit(title, categoryIds) {
+    std.logInfo(RssSearch.displayName, 'handleSubmit', title);
     const { url } = this.state;
     const { user } = this.props;
-    std.logInfo(RssSearch.displayName, 'handleSubmit', url);
     const category = url ? this.getCategory(url) : null;
-    if(!category) return this.setState({ isNotValid: true });
-    NoteAction.create(user, { url, category })
-      .then(()    => this.setState({ isSuccess:   true, url: '' }))
-      .catch(err  => this.setState({ isNotValid:  true, url: '' }))
-    ;
+    if(category) {
+      const spn = Spinner.of('app');
+      spn.start();
+      NoteAction.create(user, { url, category, title, categoryIds })
+        .then(()    => this.setState({ isSuccess:   true, url: '' }))
+        .then(()    => spn.stop())
+        .catch(err  => {
+          std.logError(RssSearch.displayName, err.name, err.message);
+          this.setState({ isNotValid:  true, url: '' });
+          spn.stop();
+        })
+      ;
+    } else {
+      this.setState({ isNotValid: true });
+    }
   }
 
-  handleAddNote(event) {
+  handleClickButton() {
     this.setState({ isAddNote: true });
   }
 
@@ -183,14 +193,15 @@ class RssSearch extends React.Component {
       <div className={classes.buttons}>
         <Button variant="raised"
           className={classes.button}
-          onClick={this.handleAddNote.bind(this)}>
+          onClick={this.handleClickButton.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
         <RssAddDialog 
+          open={isAddNote}
           user={user}
           category={category}
           categorys={categoryList(category)}
-          open={isAddNote}
           onClose={this.handleCloseDialog.bind(this, 'isAddNote')}
+          onSubmit={this.handleSubmit.bind(this)}
         />
         <div className={classes.space} />
         <RssButton color={color}

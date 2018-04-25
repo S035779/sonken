@@ -183,7 +183,7 @@ class RssEditDialog extends React.Component {
           ))}
           </List>
           <FormHelperText>
-            該当するカテゴリーを追加・選択することが出来ます。
+            カテゴリーを追加・編集することが出来ます。
           </FormHelperText>
         </FormControl>
         <RssDialog open={isNotValid} title={'送信エラー'}

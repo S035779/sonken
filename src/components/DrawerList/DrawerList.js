@@ -2,6 +2,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types'
 import { withRouter }   from 'react-router-dom';
 import classNames       from 'classnames';
+import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
@@ -83,7 +84,7 @@ class DrawerList extends React.Component {
     event.dataTransfer.effectAllowed = 'move';
     const dragSrcEl
       = this.state.categorys.find(obj => obj.subcategory === name);
-    event.dataTransfer.setData('text/plain', dragSrcEl.index);
+    event.dataTransfer.setData('text/plain', dragSrcEl.subcategoryId);
     this.setState({ dragged: true, dragSrcEl: dragSrcEl });
   }
 
@@ -108,18 +109,34 @@ class DrawerList extends React.Component {
   handleDrop(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragDrop', name)
     event.stopPropagation();
+    const { profile } = this.props;
     const { dragSrcEl, categorys } = this.state;
     const dragDstEl
       = this.state.categorys.find(obj => obj.subcategory === name);
-    if(dragSrcEl.index !== dragDstEl.index) {
-      dragSrcEl.index = dragDstEl.index;
-      dragDstEl.index = Number(event.dataTransfer.getData('text/plain'));
-      const _categorys = categorys.map(obj => {
-        if(dragSrcEl.subcategory === obj.subcategory) return dragSrcEl;
-        if(dragDstEl.subcategory === obj.subcategory) return dragDstEl;
-        return obj;
-      });
-      this.setState({ dragSrcEl, dragDstEl, categorys: _categorys });
+    if(dragSrcEl.subcategoryId !== dragDstEl.subcategoryId) {
+      dragSrcEl.subcategoryId = dragDstEl.subcategoryId;
+      dragDstEl.subcategoryId = event.dataTransfer.getData('text/plain');
+      //const _categorys = categorys.map(obj => {
+      //  if(dragSrcEl.subcategory === obj.subcategory) return dragSrcEl;
+      //  if(dragDstEl.subcategory === obj.subcategory) return dragDstEl;
+      //  return obj;
+      //});
+      //this.setState({ dragSrcEl, dragDstEl, categorys: _categorys });
+      LoginAction.updateCategory(profile.user, dragDstEl._id, {
+        category:       dragDstEl.category
+      , subcategory:    dragDstEl.subcategory
+      , subcategoryId:  dragDstEl.subcategoryId })
+        .then(()    =>
+          LoginAction.updateCategory(profile.user, dragSrcEl._id, {
+            category:       dragSrcEl.category
+          , subcategory:    dragSrcEl.subcategory
+          , subcategoryId:  dragSrcEl.subcategoryId }))
+        .then(()    => this.setState({ dragSrcEl, dragDstEl }))
+        .catch(err  => {
+          std.logError(DrawerList.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
     }
   }
 

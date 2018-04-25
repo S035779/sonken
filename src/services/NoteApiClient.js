@@ -397,10 +397,11 @@ export default {
   //fetchNote(user, id) {
   //  return this.request('fetch/note', { user, id });
   //},
-  createNote(user, { url, category }) {
+  createNote(user, { url, category, categoryIds, title }) {
     if(!url) return this.request('not/url'
         , { name: 'Warning', message: 'Not Url Registory.' });
-    return this.request('create/note', { user, url, category });
+    return this.request('create/note'
+      , { user, url, category, categoryIds, title });
   },
   updateNote(user, id, { title, asin, price, bidsprice, body }) {
     const data = { title, asin, price, bidsprice, body };

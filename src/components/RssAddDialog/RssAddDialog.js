@@ -27,13 +27,13 @@ class RssAddDialog extends React.Component {
     , openAdd:    false
     , openUpd:    []
     , checked:    []
-    , title:      ''
+    , title:      'Untitled'
     };
   }
 
-  componentWillReceiveProp(nextProps) {
+  componentWillReceiveProps(nextProps) {
     //std.logInfo(RssAddDialog.displayName, 'Props', nextProps);
-    const { categorys } = nextPros;
+    const { categorys } = nextProps;
     this.setState({ categorys });
   }
   
@@ -114,7 +114,9 @@ class RssAddDialog extends React.Component {
 
   handleSubmitDialog() {
     if(this.isValidate() && this.isChanged()) {
-
+      const { title, checked } = this.state;
+      this.props.onSubmit(title, checked);
+      this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
     }

@@ -1,5 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
@@ -25,10 +26,15 @@ class RssFormDialog extends React.Component {
     , isNotValid: false
     , openAdd:    false
     , openUpd:    []
-    , openDel:    []
     , checked:    []
     , title:      props.title
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    //std.logInfo(RssFormDialog.displayName, 'Props', nextProps);
+    const { categorys } = nextProps;
+    this.setState({ categorys });
   }
 
   handleClose(name, event) {
@@ -40,21 +46,65 @@ class RssFormDialog extends React.Component {
     this.setState({ [name]: true });
   }
 
+  handleCreate(subcategory) {
+    std.logInfo(RssFormDialog.displayName, 'handleCreate', subcategory);
+    const { user, category } = this.props;
+    if(this.isValidate() && this.isChanged()) {
+      NoteAction.createCategory(user, { category, subcategory })
+        .then(()    => this.setState({ isSuccess: true }))
+        .catch(err  => {
+          std.logError(RssFormDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
+    } else {
+      this.setState({ isNotValid: true });
+    }
+  }
+
+  handleDelete(id) {
+    std.logInfo(RssFormDialog.displayName, 'handleDelete', id);
+    const { user } = this.props;
+    if(window.confirm('Are you sure ?')) {
+      NoteAction.deleteCategory(user, [id])
+        .then(()    => this.setState({ isSuccess: true }))
+        .catch(err  => {
+          std.logError(RssFormDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
+    }
+  }
+
+  handleUpdate(id, subcategoryId, subcategory) {
+    std.logInfo(RssFormDialog.displayName, 'handleUpdate', id);
+    const { user, category } = this.props;
+    if(this.isValidate() && this.isChanged()) {
+      NoteAction.updateCategory(user, id
+        , { category, subcategory, subcategoryId })
+        .then(()    => this.setState({ isSuccess: true }))
+        .catch(err  => {
+          std.logError(RssFormDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
+    } else {
+      this.setState({ isNotValid: true });
+    }
+  }
+
   handleChangeText(name, event) {
     std.logInfo(RssFormDialog.displayName, 'handleChangeText', name);
     this.setState({ [name]: event.target.value });
   }
 
-  handleChangeToggle(name, value) {
+  handleChangeToggle(name, id) {
     std.logInfo(RssFormDialog.displayName, 'handleChangeToggle', name);
     const checked = this.state[name];
-    const currentIndex = checked.indexOf(value);
+    const currentIndex = checked.indexOf(id);
     const newChecked = [...checked];
-    if(currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
+    if(currentIndex === -1) newChecked.push(id);
+    else newChecked.splice(currentIndex, 1);
     this.setState({ [name]: newChecked });
   }
 
@@ -84,7 +134,7 @@ class RssFormDialog extends React.Component {
   render() {
     //std.logInfo(RssFormDialog.displayName, 'Props', this.props);
     //std.logInfo(RssFormDialog.displayName, 'State', this.state);
-    const { classes, open, category, title } = this.props;
+    const { classes, open, user, category, categorys, title } = this.props;
     const { isNotValid, isSuccess, checked, openAdd, openUpd }
       = this.state;
     const name = category === 'marchant'
@@ -108,37 +158,44 @@ class RssFormDialog extends React.Component {
             classes={classes.button}>新規追加</RssButton>
           <RssNewDialog
             open={openAdd}
+            user={user}
             category={category}
+            title={'Untitled'}
             onClose={this.handleClose.bind(this, 'openAdd')}
+            onSubmit={this.handleCreate.bind(this)}
           />
           <List dense>
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => (
-            <ListItem key={value} dense button onClick={
-              this.handleChangeToggle.bind(this, 'checked', value)
-            }>
+          {categorys.map(obj => (
+            <ListItem key={obj._id} dense button
+              onClick={this.handleChangeToggle
+                .bind(this, 'checked', obj._id)}
+            >
               <RssCheckbox color="secondary"
-                checked={checked.indexOf(value) !== -1}
+                checked={checked.indexOf(obj._id) !== -1}
                 tabIndex={-1}
                 disableRipple
               />
-              <ListItemText primary={`Line item ${value + 1}`}/>
+              <ListItemText primary={obj.subcategory}/>
               <ListItemSecondaryAction>
-                <IconButton onClick={
-                  this.handleChangeToggle.bind(this, 'openUpd', value)
-                }>
+                <IconButton
+                  onClick={this.handleChangeToggle
+                    .bind(this, 'openUpd', obj._id)}
+                >
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
-                  open={openUpd.indexOf(value) !== -1}
+                  open={openUpd.indexOf(obj._id) !== -1}
+                  user={user}
                   category={category}
-                  title={`Line item ${value +1}`}
-                  onClose={
-                    this.handleChangeToggle.bind(this, 'openUpd', value)
-                  }
+                  title={obj.subcategory}
+                  onClose={this.handleChangeToggle
+                    .bind(this, 'openUpd', obj._id)}
+                  onSubmit={this.handleUpdate
+                    .bind(this, obj._id, obj.subcategoryId)}
                 />
-                <IconButton onClick={
-                  this.handleChangeToggle.bind(this, 'openDel', value)
-                }>
+                <IconButton
+                  onClick={this.handleDelete.bind(this, obj._id)}
+                >
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>

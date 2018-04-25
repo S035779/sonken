@@ -261,8 +261,9 @@ export default {
 
   createNote(options) {
     return (req, res, next) => {
-      const { user, url, category } = req.body;
-      feed.createNote({ user, url, category }).subscribe(
+      const { user, url, category, categoryIds, title } = req.body;
+      feed.createNote({ user, url, category, categoryIds, title })
+        .subscribe(
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

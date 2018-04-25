@@ -29,7 +29,7 @@ const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , url:              String
 , category:         { type: String, required: true }
-, subcategoryId:    String
+, categoryIds:      [mongoose.Schema.Types.ObjectId]
 , title:            { type: String, required: true }
 , asin:             String
 , name:             String 
@@ -50,7 +50,6 @@ const categorySchema = new mongoose.Schema({
 , subcategoryId:    mongoose.Schema.Types.ObjectId
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'categorys' });
-categorySchema.index({ subcategoryId: 1 }, { unique: true });
 
 const addedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 

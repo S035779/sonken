@@ -143,16 +143,17 @@ export default class FeedParser {
       case 'create/note':
         return new Promise((resolve, reject) => {
           const note = new Note({
-            user:       options.user
-          , url:        options.data.url
-          , category:   options.data.category
-          , title:      options.data.title
-          , asin:       options.data.asin
-          , name:       options.data.name
-          , price:      options.data.price
-          , bidsprice:  options.data.bidsprice
-          , body:       options.data.body
-          , items:      options.data.items
+            user:         options.user
+          , url:          options.data.url
+          , category:     options.data.category
+          , categoryIds:  options.data.categoryIds
+          , title:        options.data.title
+          , asin:         options.data.asin
+          , name:         options.data.name
+          , price:        options.data.price
+          , bidsprice:    options.data.bidsprice
+          , body:         options.data.body
+          , items:        options.data.items
           });
           note.save((err, obj) => {
             if(err) return reject(err);
@@ -866,12 +867,13 @@ export default class FeedParser {
   //    .flatMap(addNote);
   //}
 
-  createNote({ user, url, category }) {
+  createNote({ user, url, category, categoryIds, title }) {
     const addNote =
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
     return Yahoo.of().fetchHtml({ url })
       //.map(R.tap(log.trace.bind(this)))
-      .map(obj => this.setNote({ user, url, category }, obj))
+      .map(obj => this.setNote({ user, url, category, categoryIds, title }
+      , obj))
       .flatMap(addNote);
   }
 
@@ -1215,14 +1217,17 @@ export default class FeedParser {
     return js2Csv.of({ csv: objs, keys }).parse();
   };
 
-  setNote({ user, url, category }, obj) {
+  setNote({ user, url, category, categoryIds, title }, obj) {
+    log.debug(FeedParser.displayName, 'FeedParser'
+      , { user, title, category, categoryIds, url });
     return ({
       url: url
     , category: category
+    , categoryIds: categoryIds
     , user: user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
     , items: obj.item
-    , title: obj.title
+    , title: title ? title : obj.title
     , asin: ''
     , name: ''
     , price: 0
