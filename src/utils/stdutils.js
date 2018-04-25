@@ -53,7 +53,7 @@ export default {
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset']
       + name;
-    console.error(date ,'[WARN]', caller, '-',head, ':', message);
+    console.warn(date ,'[WARN]', caller, '-',head, ':', message);
   },
 
   logDebug(caller, name, message) {
@@ -61,7 +61,7 @@ export default {
       + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset']
       + name;
-    console.error(date ,'[DEBUG]', caller, '-',head, ':', message);
+    console.log(date ,'[DEBUG]', caller, '-',head, ':', message);
   },
 
   logTrace(caller, name, message) {

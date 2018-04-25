@@ -6,8 +6,7 @@ import { getStores, getState }
                         from 'Stores';
 
 import { withStyles }   from 'material-ui/styles';
-import { CssBaseline }
-                        from 'material-ui';
+import { CssBaseline }  from 'material-ui';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 import RssDrawer        from 'Components/RssDrawer/RssDrawer';
 

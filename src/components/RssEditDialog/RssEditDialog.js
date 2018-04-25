@@ -26,13 +26,12 @@ class RssEditDialog extends React.Component {
     , isNotValid:     false
     , openAdd:        false
     , openUpd:        []
-    , title:          ''
     , categorys:      props.categorys
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(RssEditDialog.displayName, 'Props', nextProps);
+    //std.logInfo(RssEditDialog.displayName, 'Props', nextProps);
     const { categorys } = nextProps;
     this.setState({ categorys });
   }
@@ -46,16 +45,50 @@ class RssEditDialog extends React.Component {
     this.setState({ [name]: true });
   }
 
+  handleCreate(subcategory) {
+    std.logInfo(RssEditDialog.displayName, 'handleCreate', subcategory);
+    const { user, category } = this.props;
+    if(this.isValidate() && this.isChanged()) {
+      LoginAction.createCategory(user, { category, subcategory })
+        .then(()    => this.setState({ isSuccess: true }))
+        .catch(err  => {
+          std.logError(RssEditDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
+    } else {
+      this.setState({ isNotValid: true });
+    }
+  }
+
   handleDelete(id) {
-    const { user } = this.props;
     std.logInfo(RssEditDialog.displayName, 'handleDelete', id);
+    const { user } = this.props;
     if(window.confirm('Are you sure ?')) {
       LoginAction.deleteCategory(user, [id])
         .then(()    => this.setState({ isSuccess: true }))
         .catch(err  => {
           std.logError(RssEditDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-        });
+        })
+      ;
+    }
+  }
+
+  handleUpdate(id, subcategoryId, subcategory) {
+    std.logInfo(RssEditDialog.displayName, 'handleUpdate', id);
+    const { user, category } = this.props;
+    if(this.isValidate() && this.isChanged()) {
+      LoginAction.updateCategory(user, id
+        , { category, subcategory, subcategoryId })
+        .then(()    => this.setState({ isSuccess: true }))
+        .catch(err  => {
+          std.logError(RssEditDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        })
+      ;
+    } else {
+      this.setState({ isNotValid: true });
     }
   }
 
@@ -93,7 +126,7 @@ class RssEditDialog extends React.Component {
     //std.logInfo(RssEditDialog.displayName, 'Props', this.props);
     //std.logInfo(RssEditDialog.displayName, 'State', this.state);
     const { classes, open, user, category } = this.props;
-    const { isNotValid, isSuccess, checked, openAdd, openUpd, categorys }
+    const { isNotValid, isSuccess, openAdd, openUpd, categorys }
       = this.state;
     const title = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
@@ -114,6 +147,7 @@ class RssEditDialog extends React.Component {
             category={category}
             title={'Untitled'}
             onClose={this.handleClose.bind(this, 'openAdd')}
+            onSubmit={this.handleCreate.bind(this)}
           />
           <List dense>
           {categorys.map(obj => (
@@ -123,10 +157,10 @@ class RssEditDialog extends React.Component {
               </ListItemAvatar>
               <ListItemText primary={obj.subcategory}/>
               <ListItemSecondaryAction>
-                <IconButton onClick={
-                  this.handleChangeToggle
-                    .bind(this, 'openUpd', obj._id)
-                }>
+                <IconButton
+                  onClick={this.handleChangeToggle
+                    .bind(this, 'openUpd', obj._id)}
+                >
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
@@ -134,9 +168,10 @@ class RssEditDialog extends React.Component {
                   user={user}
                   category={category}
                   title={obj.subcategory}
-                  onClose={
-                    this.handleChangeToggle.bind(this, 'openUpd', obj._id)
-                  }
+                  onClose={this.handleChangeToggle
+                    .bind(this, 'openUpd', obj._id)}
+                  onSubmit={this.handleUpdate
+                    .bind(this, obj._id, obj.subcategoryId)}
                 />
                 <IconButton
                   onClick={this.handleDelete.bind(this, obj._id)}

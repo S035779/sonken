@@ -305,9 +305,11 @@ export default {
   createCategory(options) {
     return (req, res, next) => {
       const { user, category, subcategory } = req.body;
-      //log.trace(user,category,subcategory);
       feed.createCategory({ user, category, subcategory }).subscribe(
-        obj => { res.json(obj); }
+        obj => {
+          //log.trace(displayName, 'createCategory', obj);
+          res.status(200).send(obj);
+        }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);

@@ -383,7 +383,7 @@ export default {
     return this
       .request('create/category', { user, category, subcategory });
   },
-  upcateCategory(user, id, { category, subcategory, subcategoryId }) {
+  updateCategory(user, id, { category, subcategory, subcategoryId }) {
     const data = { category, subcategory, subcategoryId };
     return this.request('update/category', { user, id, data })
   },

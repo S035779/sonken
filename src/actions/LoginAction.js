@@ -1,7 +1,8 @@
-import { dispatch } from 'Main/dispatcher';
+import { dispatch }   from 'Main/dispatcher';
 import LoginApiClient from 'Services/LoginApiClient';
-import UserApiClient from 'Services/UserApiClient';
-import NoteApiClient from 'Services/NoteApiClient';
+import UserApiClient  from 'Services/UserApiClient';
+import NoteApiClient  from 'Services/NoteApiClient';
+import std            from 'Utilities/stdutils';
 
 const displayName = 'LoginAction';
 
@@ -35,9 +36,9 @@ export default {
     ;
   },
   fetchCategory(user, id) {
-    dispatch({ type: 'category/fetch' });
     return NoteApiClient.fetchCategory(user, id)
       .then(category => {
+        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/fetch', category });
       })
     ;
@@ -45,6 +46,7 @@ export default {
   createCategory(user, data) {
     return NoteApiClient.createCategory(user, data)
       .then(category => {
+        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/create', category });
       })
     ;
@@ -52,6 +54,7 @@ export default {
   updateCategory(user, id, data) {
     return NoteApiClient.updateCategory(user, id, data)
       .then(category => {
+        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/update', id, category });
       })
     ;

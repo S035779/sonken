@@ -30,7 +30,8 @@ class DrawerPermanent extends React.Component {
       <Drawer
         variant="permanent"
         open={open}
-        classes={paperClass}>
+        classes={paperClass}
+      >
         <DrawerList
           open={open}
           user={user}

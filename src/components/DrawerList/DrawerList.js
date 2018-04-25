@@ -133,8 +133,8 @@ class DrawerList extends React.Component {
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
     const isDragDstEl = dragDstEl && dragDstEl.subcategory === name;
     const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === name;
-    const textClass =
-      { primary: classes.primary, secondary: classes.secondary };
+    const textClass
+      = { primary: classes.primary, secondary: classes.secondary };
     return <ListItem button key={index}
         draggable="true"
         onDragOver={this.handleDragOver.bind(this, name)}
@@ -169,7 +169,11 @@ class DrawerList extends React.Component {
       = category => categorys
         .filter(obj => category === obj.category)
         .sort((a, b) =>
-          a.index < b.index ? -1 : a.index > b.index ? 1 : 0);
+          parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
+            ? 1  :
+          parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
+            ? -1 : 0
+        );
     const categoryList
       = category => categorys ? _categorys(category) : null;
     const renderCategoryList

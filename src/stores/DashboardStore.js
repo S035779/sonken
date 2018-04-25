@@ -149,17 +149,9 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           isAuthenticated: action.isAuthenticated
         });
-      case 'note/prefetch/my':
-        return Object.assign({}, state, {
-          notes:  action.notes
-        });
       case 'category/prefetch/my':
         return Object.assign({}, state, {
           categorys: action.categorys
-        });
-      case 'note/fetch/my':
-        return Object.assign({}, state, {
-          notes:  action.notes
         });
       case 'category/fetch/my':
         return Object.assign({}, state, {
@@ -176,7 +168,14 @@ export default class DashboardStore extends ReduceStore {
       case 'category/delete':
         return Object.assign({}, state, {
           categorys:  this.deleteCategory(state, action)
-        , ids:    []
+        });
+      case 'note/prefetch/my':
+        return Object.assign({}, state, {
+          notes:  action.notes
+        });
+      case 'note/fetch/my':
+        return Object.assign({}, state, {
+          notes:  action.notes
         });
       case 'note/create':
         return Object.assign({}, state, {

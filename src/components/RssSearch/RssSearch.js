@@ -142,10 +142,21 @@ class RssSearch extends React.Component {
   }
 
   render() {
-    const { classes, noteNumber, category } = this.props;
+    const { classes, noteNumber, user, category, categorys } = this.props;
     const { isAddNote, isSuccess, isNotValid, url, perPage, filename }
       = this.state;
     const color = category === 'marchant' ? 'skyblue' : 'orange';
+    const _categorys
+      = category => categorys
+        .filter(obj => category === obj.category)
+        .sort((a, b) => 
+          parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
+            ? 1   :
+          parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
+            ? -1  : 0
+        );
+    const categoryList
+      = category => categorys ? _categorys(category) : null;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -175,7 +186,9 @@ class RssSearch extends React.Component {
           onClick={this.handleAddNote.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
         <RssAddDialog 
+          user={user}
           category={category}
+          categorys={categoryList(category)}
           open={isAddNote}
           onClose={this.handleCloseDialog.bind(this, 'isAddNote')}
         />

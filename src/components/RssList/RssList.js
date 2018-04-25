@@ -73,7 +73,7 @@ class RssList extends React.Component {
   }
 
   renderItem(note) {
-    const { classes } = this.props;
+    const { classes, user, categorys } = this.props;
     const { checked } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
@@ -104,6 +104,7 @@ class RssList extends React.Component {
                 selectedNoteId={note._id}
                 title={note.title}
                 category={note.category}
+                categorys={categorys}
                 open={this.state.opened.indexOf(note._id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note._id)}
                 onSubmit={this.handleChangeTitle.bind(this)}

@@ -1,6 +1,5 @@
 import React            from 'react';
 import PropTypes        from 'prop-types'
-import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
@@ -34,18 +33,8 @@ class RssNewDialog extends React.Component {
   }
 
   handleSubmitDialog() {
-    if(this.isValidate() && this.isChanged()) {
-      const { user, category } = this.props;
-      const { title } = this.state;
-      LoginAction.createCategory(user, { category, subcategory: title })
-        .then(()    => this.setState({ isSuccess: true }))
-        .catch(err  => {
-          std.logError(RssNewDialog.displayName, err.name, err.message);
-          this.setState({ isNotValid: true })
-        });
-    } else {
-      this.setState({ isNotValid: true });
-    }
+    const { title } = this.state;
+    this.props.onSubmit(title);
   }
 
   isValidate() {
@@ -96,8 +85,9 @@ RssNewDialog.defaultProps = {
   open: false
 };
 RssNewDialog.propTypes = {
-  classes:            PropTypes.object.isRequired
-, onClose:            PropTypes.func.isRequired
-, open:               PropTypes.bool.isRequired
+  classes:  PropTypes.object.isRequired
+, onClose:  PropTypes.func.isRequired
+, onSubmit: PropTypes.func.isRequired
+, open:     PropTypes.bool.isRequired
 };
 export default withStyles(styles)(RssNewDialog);

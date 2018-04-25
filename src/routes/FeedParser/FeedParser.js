@@ -912,6 +912,12 @@ export default class FeedParser {
   }
 
   updateCategory({ user, id, data }) {
+    return this._updateCategory({ user, id, data })
+      .flatMap(() => this.fetchCategory({ user, id }))
+    ;
+  }
+
+  _updateCategory({ user, id, data }) {
     return Rx.Observable
       .fromPromise(this.replaceCategory(user, id, data));
   }

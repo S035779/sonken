@@ -1,4 +1,5 @@
 import { ReduceStore } from 'flux/utils';
+import std              from 'Utilities/stdutils';
 
 const displayName = 'LoginStore';
 
@@ -26,7 +27,18 @@ export default class LoginStore extends ReduceStore {
     };
   }
   
+  updateCategory(state, action) {
+    return state.categorys.map(category => action.id === category._id
+      ? Object.assign({}, category, action.category) : category);
+  }
+
+  deleteCategory(state, action) {
+    const isCategory = obj => action.ids.some(id => id === obj._id);
+    return state.categorys.filter(category => !isCategory(category));
+  }
+
   reduce(state, action) {
+    //std.logDebug(displayName, 'Store', action);
     switch (action.type) { 
       case 'admin/preset':
         return Object.assign({}, state, {
@@ -45,6 +57,18 @@ export default class LoginStore extends ReduceStore {
       case 'category/fetch/my':
         return Object.assign({}, state, {
           categorys: action.categorys
+        });
+      case 'category/create':
+        return Object.assign({}, state, {
+          categorys: [action.category, ...state.categorys]
+        });
+      case 'category/update':
+        return Object.assign({}, state, {
+          categorys: this.updateCategory(state, action)
+        });
+      case 'category/delete':
+        return Object.assign({}, state, {
+          categorys: this.deleteCategory(state, action)
         });
       case 'preference/fetch':
         return Object.assign({}, state, {
