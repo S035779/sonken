@@ -884,11 +884,12 @@ export default class FeedParser {
       ? R.merge(data, {
           name:       obj.ItemAttributes.Title
         , AmazonUrl:  obj.DetailPageURL
-        , AmazonImg:  obj.MediumImage.URL
+        , AmazonImg:  obj.Medium ? obj.MediumImage.URL : ''
       })
       : R.merge(data, { name: '', AmazonUrl: '', AmazonImg: '' });
     return isAsin
       ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
+        //.map(R.tap(log.trace.bind(this)))
         .map(setAmazonData)
         .flatMap(obj => this._updateNote({ user, id, data: obj }))
         .flatMap(() => this.fetchNote({ user, id }))

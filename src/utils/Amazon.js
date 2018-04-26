@@ -41,8 +41,8 @@ class Amazon {
         };
         return new Promise((resolve, reject) => {
           xml2js.parseString(options.xml, option, (error, result) => {
-            if(error) reject(error)
-            resolve(result)
+            if(error) return reject(error);
+            resolve(result);
           });
         });
       default:
@@ -56,7 +56,7 @@ class Amazon {
         const url = this.url(query, signature);
         return new Promise((resolve, reject) => {
           net.get(url, null, (err, head, body) => {
-            if(err) reject(err.message);
+            if(err) return reject(err.message);
             resolve(body);
           });
         });
