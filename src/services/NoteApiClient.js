@@ -403,8 +403,9 @@ export default {
     return this.request('create/note'
       , { user, url, category, categoryIds, title });
   },
-  updateNote(user, id, { title, asin, price, bidsprice, body }) {
-    const data = { title, asin, price, bidsprice, body };
+  updateNote(user, id
+  , { title, asin, price, bidsprice, body, categoryIds }) {
+    const data = { title, asin, price, bidsprice, body, categoryIds };
     return this.request('update/note', { user, id, data });
   },
   pageNote(user, { maxNumber, number, perPage }) {

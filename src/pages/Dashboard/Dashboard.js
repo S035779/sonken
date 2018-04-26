@@ -37,8 +37,28 @@ class Dashboard extends React.Component {
     ;
   }
 
-  notePage(number, page) {
+  getPageNumber(number, page) {
     return number < page.perPage ? number : page.perPage;
+  }
+
+  filterNotes(notes, category, categoryId) {
+    const isCategory
+      = obj => obj.category === category;
+    const isCategoryId
+      = obj => obj.categoryIds
+        ? obj.categoryIds.some(id => id === categoryId) : false;
+    const isNonCategoryId
+      = obj => obj.categoryIds
+        ? obj.categoryIds.length === 0 : true;
+    if(!notes) return [];
+    switch(categoryId) {
+      case 'all':
+        return notes.filter(isCategory);
+      case 'none':
+        return notes.filter(isCategory).filter(isNonCategoryId);
+      default:
+        return notes.filter(isCategory).filter(isCategoryId);
+    }
   }
 
   render() {
@@ -48,18 +68,22 @@ class Dashboard extends React.Component {
     const { isAuthenticated, user, notes, page, ids, file, categorys }
       = this.state;
     if(!isAuthenticated) {
-      const to =
-        { pathname: '/login/authenticate', state: { from: location } };
+      const to = {
+        pathname: '/login/authenticate'
+      , state: { from: location }
+      };
       return <Redirect to={to}/>;
     }
     const _id = match.params.id;
-    const category =
-      match.params.category ? match.params.category : 'marchant';
-    const _notes =
-      notes ? notes.filter(obj => obj.category === category) : [];
+    const category
+      = match.params.category ? match.params.category : 'marchant';
+    const categoryId
+      = location.state && location.state.categoryId
+        ? location.state.categoryId : 'all';
+    const _notes = this.filterNotes(notes, category, categoryId);
     const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
-    _notes.length = this.notePage(number, page);
+    _notes.length = this.getPageNumber(number, page);
     return <div className={classes.root}>
         <RssSearch
           user={user}
@@ -78,6 +102,7 @@ class Dashboard extends React.Component {
             user={user}
             notes={_notes}
             categorys={categorys}
+            categoryId={categoryId}
             selectedNoteId={ids}
             notePage={page}/>
         </div>

@@ -51,12 +51,12 @@ class RssList extends React.Component {
     NoteAction.select(user, newChecked);
   }
   
-  handleChangeTitle(id, title) {
+  handleChangeTitle(id, title, categoryIds) {
     std.logInfo(RssList.displayName, 'handleChangeTitle', id);
     const { user } = this.props;
     const { notes } = this.state;
     const curNote = notes.find(obj => obj._id === id);
-    const newNote = Object.assign({}, curNote, { title });
+    const newNote = Object.assign({}, curNote, { title, categoryIds });
     NoteAction.update(user, id, newNote)
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => this.setState({ isNotValid: true }));
@@ -73,11 +73,14 @@ class RssList extends React.Component {
   }
 
   renderItem(note) {
-    const { classes, user, categorys } = this.props;
+    const { classes, user, categorys, categoryId } = this.props;
     const { checked } = this.state;
     const textClass
       = { primary: classes.primary, secondary: classes.secondary };
-    const linkTo = `/${note.category}/${note._id}/edit`;
+    const linkTo = {
+      pathname: `/${note.category}/${note._id}/edit`
+    , state: { categoryId }
+    };
     let newRelease = 0;
     if (note.items) note.items
       .forEach(item => { if(!item.readed) newRelease++; });
@@ -117,6 +120,7 @@ class RssList extends React.Component {
                 title={note.title}
                 category={note.category}
                 categorys={categoryList(note.category)}
+                categoryIds={note.categoryIds}
                 open={this.state.opened.indexOf(note._id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note._id)}
                 onSubmit={this.handleChangeTitle.bind(this)}

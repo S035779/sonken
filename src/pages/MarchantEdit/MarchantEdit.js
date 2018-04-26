@@ -13,7 +13,8 @@ class MarchantEdit extends React.Component {
       <div className={classes.forms}>
         <RssForms
           user={user}
-          note={note}>
+          note={note}
+        >
           <div className={classes.view}>
             <RssView note={note}/>
           </div>

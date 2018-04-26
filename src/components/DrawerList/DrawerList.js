@@ -6,7 +6,7 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { Divider, List, Avatar, IconButton }
+import { Divider, List, Avatar, IconButton, Badge }
                         from 'material-ui';
 import { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction }
                         from 'material-ui/List';
@@ -38,12 +38,12 @@ class DrawerList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(DrawerList.displayName, 'Props', nextProps);
+    //std.logInfo(DrawerList.displayName, 'Props', nextProps);
     const { categorys } = nextProps;
     this.setState({ categorys });
   }
 
-  handleClickButton(name, event) {
+  handleClickButton(name) {
     switch(name) {
       case 'title':
         this.props.history.push('/');
@@ -72,6 +72,11 @@ class DrawerList extends React.Component {
         this.setState({ [name]: true });
         break;
     }
+  }
+
+  handleCategoryList(category, categoryId) {
+    std.logInfo(DrawerList.displayName, category, categoryId);
+    this.props.history.push(category, { categoryId })
   }
 
   handleCloseDialog(name, event) {
@@ -145,13 +150,23 @@ class DrawerList extends React.Component {
     this.setState({ dropZoneEntered: false, dragged: false });
   }
 
-  renderCategoryList(index, name) {
+  renderCategoryList(index, name, category, categoryId) {
     const { classes } = this.props;
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
     const isDragDstEl = dragDstEl && dragDstEl.subcategory === name;
     const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === name;
-    const textClass
-      = { primary: classes.primary, secondary: classes.secondary };
+    const release = 4;
+    const isRelease = release > 0;
+    const textClass = {
+      primary:        classes.textPrimary
+    , secondary:      classes.textSecondary
+    };
+    const badgeClass = {
+      colorPrimary:   classes.badgePrimary
+    , colorSecondary: classes.badgeSecondary
+    , colorError:     classes.badgeError
+    , badge:          classNames(!isRelease && classes.nonbadge)
+    };
     return <ListItem button key={index}
         draggable="true"
         onDragOver={this.handleDragOver.bind(this, name)}
@@ -160,6 +175,7 @@ class DrawerList extends React.Component {
         onDragStart={this.handleDragStart.bind(this, name)}
         onDragEnd={this.handleDragEnd.bind(this, name)}
         onDrop={this.handleDrop.bind(this, name)}
+        onClick={this.handleCategoryList.bind(this, category, categoryId)}
         className={classNames(
             classes.draggable
           , isDragSrcEl && dragged && classes.dragged
@@ -167,12 +183,45 @@ class DrawerList extends React.Component {
         )}
       >
         <ListItemIcon>
-          <Avatar className={classes.avatar}>
-            {name.substr(0,2)}
-          </Avatar>
+          <Badge
+            badgeContent={release}
+            color="error"
+            classes={badgeClass}
+          >
+            <Avatar className={classes.avatar}>{name.substr(0,1)}</Avatar>
+          </Badge>
         </ListItemIcon>
-        <ListItemText primary={name} classes={textClass}
-        />
+        <ListItemText primary={name} classes={textClass} />
+      </ListItem>;
+  }
+
+  renderNonCategoryList(index, name, category) {
+    const { classes } = this.props;
+    const release = 3;
+    const isRelease = release > 0;
+    const textClass = {
+      primary:        classes.textPrimary
+    , secondary:      classes.textSecondary
+    };
+    const badgeClass = {
+      colorPrimary:   classes.badgePrimary
+    , colorSecondary: classes.badgeSecondary
+    , colorError:     classes.badgeError
+    , badge:          classNames(!isRelease && classes.nonbadge)
+    };
+    return <ListItem button key={index}
+        onClick={this.handleCategoryList.bind(this, category, 'none')}
+      >
+        <ListItemIcon>
+          <Badge
+            badgeContent={release}
+            color="error"
+            classes={badgeClass}
+          >
+            <Avatar className={classes.avatar}>{name.substr(0,1)}</Avatar>
+          </Badge>
+        </ListItemIcon>
+        <ListItemText primary={name} classes={textClass} />
       </ListItem>;
   }
 
@@ -180,8 +229,9 @@ class DrawerList extends React.Component {
     const { classes, open, profile } = this.props;
     const { isEditMarchant, isEditSellers, openMarchant, openSellers
       , categorys } = this.state;
-    const textClass =
-      { primary: classes.primary, secondary: classes.secondary };
+    const textClass
+      = { primary: classes.textPrimary
+        , secondary: classes.textSecondary };
     const _categorys
       = category => categorys
         .filter(obj => category === obj.category)
@@ -194,11 +244,16 @@ class DrawerList extends React.Component {
     const categoryList
       = category => categorys ? _categorys(category) : null;
     const renderCategoryList
-      = category => categorys ? _categorys(category)
-        .map((c, i) => this.renderCategoryList(i, c.subcategory)) : null;
+      = category => categorys
+        ? _categorys(category).map((c, i) => 
+            this.renderCategoryList(i, c.subcategory, category, c._id))
+        : null;
+    const renderNonCategoryList
+      = category => this.renderNonCategoryList(99, '未分類', category);
     return <div>
       <ListItem button
-        onClick={this.handleClickButton.bind(this, 'marchant')}>
+        onClick={this.handleClickButton.bind(this, 'marchant')}
+      >
         <ListItemIcon>
           <LocalMall className={classes.icon} />
         </ListItemIcon>
@@ -228,6 +283,7 @@ class DrawerList extends React.Component {
       <Collapse in={openMarchant} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {renderCategoryList('marchant')}
+          {renderNonCategoryList('marchant')}
         </List>
       </Collapse>
       <ListItem button 
@@ -261,6 +317,7 @@ class DrawerList extends React.Component {
       <Collapse in={openSellers} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {renderCategoryList('sellers')}
+          {renderNonCategoryList('sellers')}
         </List>
       </Collapse>
       <ListItem button 
@@ -284,8 +341,9 @@ class DrawerList extends React.Component {
     const { classes, profile, preference } = this.props;
     const { openUser, isProfile, isPreference } = this.state;
     const { name, user, kana, email, phone, plan } = profile;
-    const textClass =
-      { primary: classes.primary, secondary: classes.secondary };
+    const textClass
+      = { primary: classes.textPrimary
+        , secondary: classes.textSecondary };
     return <div>
         <ListItem button 
           onClick={this.handleClickButton.bind(this, 'user')}>
@@ -347,8 +405,9 @@ class DrawerList extends React.Component {
     
   renderTitleListItems() {
     const { classes } = this.props;
-    const textClass =
-      { primary: classes.title, secondary: classes.secondary };
+    const textClass
+      = { primary: classes.textPrimary
+        , secondary: classes.textSecondary };
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'title')}>
@@ -379,24 +438,45 @@ class DrawerList extends React.Component {
 
 const barHeightSmUp   = 64;//112;
 const barHeightSmDown = 56;//104;
+const primary_color   = '#477AF7';
+const secondary_color = '#29CBEF';
+const warning_color   = '#FEA634';
+const success_color   = '#87CC16';
+const danger_color    = '#FA404B';
 const styles = theme => ({
   header: {
     height: barHeightSmDown
   , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
   }
 , icon: {
-  color: theme.palette.common.white
-}
+    color: theme.palette.common.white
+  }
 , avatar: {
     color: theme.palette.common.white
   , background: 'inherit'
   , width: 24, height: 24, fontSize: 16
-}
-, primary: {
+  }
+, badge: {}
+, nonbadge: {
+    display: 'none'
+  }
+, badgePrimary: {
+    backgroundColor: primary_color
+  }
+, badgeSecondary: {
+    backgroundColor: secondary_color
+  }
+, badgeError: {
+    backgroundColor: danger_color
+  }
+, textPrimary: {
     whiteSpace: 'nowrap'
   , color: theme.palette.common.white
   }
-, secondary: {}
+, textSecondary: {
+    whiteSpace: 'nowrap'
+  , color: theme.palette.common.white
+  }
 , title:  {
     whiteSpace: 'nowrap'
   , color: theme.palette.common.white

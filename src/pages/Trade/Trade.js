@@ -25,7 +25,7 @@ class Trade extends React.Component {
     std.logInfo(Trade.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
       .then(() => NoteAction.prefetchTraded(options.user))
-      .then(() => NoteAction.prefetchCategory(options.user))
+      .then(() => NoteAction.prefetchCategorys(options.user))
     ;
   }
 

@@ -106,22 +106,6 @@ class RssEditDialog extends React.Component {
     this.props.onClose();
   }
 
-  handleSubmitDialog() {
-    if(this.isValidate() && this.isChanged()) {
-
-    } else {
-      this.setState({ isNotValid: true });
-    }
-  }
-
-  isValidate() {
-    return true;
-  }
-
-  isChanged() {
-    return true;
-  }
-
   render() {
     //std.logInfo(RssEditDialog.displayName, 'Props', this.props);
     //std.logInfo(RssEditDialog.displayName, 'State', this.state);
@@ -130,11 +114,12 @@ class RssEditDialog extends React.Component {
       = this.state;
     const title = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const paperClass = { paper: classes.dialog }
     return <LoginFormDialog 
         open={open} 
         title={'カテゴリー編集'}
         onClose={this.handleCloseDialog.bind(this)}
-        onSubmit={this.handleSubmitDialog.bind(this)}
+        classes={paperClass}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{title}カテゴリー</FormLabel>
@@ -200,7 +185,9 @@ class RssEditDialog extends React.Component {
 };
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
-, column:     { flex: 1, width: '100%', marginTop: theme.spacing.unit *2 }
+, dialog:     { width: 512 }
+, column:     { flex: 1, width: '100%'
+              , marginTop: theme.spacing.unit *2 }
 , button:     { margin: theme.spacing.unit *2 }
 , clearIcon:  { fontSize: 16, color: '#FA404B' }
 , editIcon:   { fontSize: 16, color: '#FEA634' }

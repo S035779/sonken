@@ -138,11 +138,13 @@ class RssAddDialog extends React.Component {
       = this.state;
     const name = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const paperClass = { paper: classes.dialog }
     return <LoginFormDialog 
         open={open} 
         title={'新規登録'}
         onClose={this.handleCloseDialog.bind(this)}
         onSubmit={this.handleSubmitDialog.bind(this)}
+        isSubmit classes={paperClass}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
           <TextField autoFocus margin="dense"
@@ -219,6 +221,7 @@ class RssAddDialog extends React.Component {
 };
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
+, dialog:     { width: 512 }
 , column:     { flex: 1, width: '100%', marginTop: theme.spacing.unit *2 }
 , button:     { margin: theme.spacing.unit *2 }
 , clearIcon:  { fontSize: 16, color: '#FA404B' }

@@ -176,23 +176,25 @@ export default class FeedParser {
             }
             : isAsin
               ? {
-                title:      options.data.title
-              , asin:       options.data.asin
-              , price:      options.data.price
-              , bidsprice:  options.data.bidsprice
-              , body:       options.data.body
-              , name:       options.data.name
-              , AmazonUrl:  options.data.AmazonUrl
-              , AmazonImg:  options.data.AmazonImg
-              , updated:    new Date
+                title:        options.data.title
+              , asin:         options.data.asin
+              , price:        options.data.price
+              , bidsprice:    options.data.bidsprice
+              , body:         options.data.body
+              , name:         options.data.name
+              , AmazonUrl:    options.data.AmazonUrl
+              , AmazonImg:    options.data.AmazonImg
+              , categoryIds:  options.data.categoryIds
+              , updated:      new Date
               }
               : {
-                title:      options.data.title
-              , asin:       options.data.asin
-              , price:      options.data.price
-              , bidsprice:  options.data.bidsprice
-              , body:       options.data.body
-              , updated:    new Date
+                title:        options.data.title
+              , asin:         options.data.asin
+              , price:        options.data.price
+              , bidsprice:    options.data.bidsprice
+              , body:         options.data.body
+              , categoryIds:  options.data.categoryIds
+              , updated:      new Date
               };
           //log.debug(update.items, conditions);
           Note.update(conditions, update, (err, obj) => {
@@ -872,8 +874,8 @@ export default class FeedParser {
       obj => Rx.Observable.fromPromise(this.addNote(user, obj));
     return Yahoo.of().fetchHtml({ url })
       //.map(R.tap(log.trace.bind(this)))
-      .map(obj => this.setNote({ user, url, category, categoryIds, title }
-      , obj))
+      .map(obj =>
+        this.setNote({ user, url, category, categoryIds, title }, obj))
       .flatMap(addNote);
   }
 
@@ -884,7 +886,7 @@ export default class FeedParser {
       ? R.merge(data, {
           name:       obj.ItemAttributes.Title
         , AmazonUrl:  obj.DetailPageURL
-        , AmazonImg:  obj.Medium ? obj.MediumImage.URL : ''
+        , AmazonImg:  obj.MediumImage ? obj.MediumImage.URL : ''
       })
       : R.merge(data, { name: '', AmazonUrl: '', AmazonImg: '' });
     return isAsin
@@ -1041,29 +1043,39 @@ export default class FeedParser {
     return this.createNotes({ user, category, file })
       .flatMap(() => this.fetchNotes({ user }))
       .flatMap(objs => this.updateNotes({ user, notes: objs }))
+      //.map(R.tap(log.trace.bind(this)))
     ;
   }
   
   createNotes({ user, category, file }) {
     const notes = this.setNotesObj({ user, category, file });
-    const promises = R.map(obj => this.addNote(user, obj));
-    const _createNotes = objs =>  Rx.Observable.forkJoin(promises(objs));
     const isNote = obj => R.find(note => note.url === obj.url, notes);
-    const setItem = (note, obj)  =>
-      R.merge(obj
-        , { title: note.title, asin:  note.asin, items: obj.items });
-    const setItems = 
-      R.map(obj => setItem(isNote(obj), obj));
-    const setNotes =
-      R.map(obj => this.setNote({ user, url: obj.url, category }, obj));
-    const observable =
-      R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
+    const setNotes = R.map(obj => this.setNote({
+        user
+      , url: obj.url
+      , category
+      }, obj));
+    const setDatas = R.map(obj => setData(isNote(obj), obj));
+    const setData = (note, obj)  => R.merge(obj, {
+        title:      note.title
+      , asin:       note.asin
+      , price:      note.price
+      , bidsprice:  note.bidsprice
+      , body:       note.body
+      });
+    const observable
+      = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
     return Rx.Observable.forkJoin(observable(notes))
       .map(objs => setNotes(objs))
-      .map(objs => setItems(objs))
-      //.map(R.tap(console.log))
-      .flatMap(objs => _createNotes(objs))
+      .map(objs => setDatas(objs))
+      .flatMap(objs => this._createNotes({ user, notes: objs }))
+      //.map(R.tap(log.trace.bind(this)))
     ;
+  }
+
+  _createNotes({ user, notes }) {
+    const promises = R.map(obj => this.addNote(user, obj));
+    return Rx.Observable.forkJoin(promises(notes));
   }
 
   updateNotes({ user, notes }) {
@@ -1088,12 +1100,15 @@ export default class FeedParser {
     const toCutLst = R.map(R.map(R.replace(/"/g, '')))
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setNotes = R.map(arr => ({
-      url:              arr[1]
+      user
+    , url:          arr[1]
     , category
-    , user
-    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , title:            arr[0]
-    , asin:             arr[2]
+    , title:        arr[0]
+    , asin:         arr[2]
+    , price:        arr[3]
+    , bidsprice:    arr[4]
+    , body:         arr[5]
+    , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
     }));
     return R.compose(
       setNotes
@@ -1194,7 +1209,8 @@ export default class FeedParser {
 
   setNotesCsv(category, objs) {
     const keys = category === 'marchant'
-      ? ['title', 'url', 'asin'] : ['title', 'url'];
+      ? ['title', 'url', 'asin', 'price', 'bidsprice', 'body']
+      : ['title', 'url'];
     return js2Csv.of({ csv: objs, keys }).parse();
   };
 
@@ -1219,12 +1235,12 @@ export default class FeedParser {
   };
 
   setNote({ user, url, category, categoryIds, title }, obj) {
-    log.debug(FeedParser.displayName, 'FeedParser'
-      , { user, title, category, categoryIds, url });
+    //log.debug(FeedParser.displayName, 'setNote'
+    //  , { user, title, category, categoryIds, url });
     return ({
       url: url
     , category: category
-    , categoryIds: categoryIds
+    , categoryIds: categoryIds ? categoryIds : []
     , user: user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
     , items: obj.item

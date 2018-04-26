@@ -251,9 +251,9 @@ class LoginRegist extends React.Component {
           <RssFullDialog open={openAgree} title={'Agreement'}
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
             <iframe
-              src={URL.createObjectURL(new Blob(
-                [std.decode_base64(agrTxt)], { type: 'text/html' }
-              ))}
+              src={`data:text/html;charset=utf-8;base64,${agrTxt}`}
+              //src={URL.createObjectURL(new Blob(
+              //  [std.decode_base64(agrTxt)], { type: 'text/html' })) }
               className={classes.iframe} />
           </RssFullDialog>
         </div>

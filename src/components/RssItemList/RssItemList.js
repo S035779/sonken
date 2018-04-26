@@ -163,7 +163,7 @@ class RssItemList extends React.Component {
     if(deleted.indexOf(item.guid._) !== -1) return;
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
-        <ListItem dense disableGutters
+        <ListItem disableGutters
           onMouseLeave={
             this.handleMouseLeaveAdded.bind(this, item.guid._)}
           className={classes.listItem}>
@@ -176,7 +176,8 @@ class RssItemList extends React.Component {
               {renderFiberNew}
             </IconButton>
             <div className={classes.description}>
-              <a href={item.description.DIV.A.attr.HREF}>
+              <a href={item.description.DIV.A.attr.HREF}
+                target="_blank">
               <img src={item.description.DIV.A.IMG.attr.SRC}
                 border={item.description.DIV.A.IMG.attr.BORDER}
                 width={item.description.DIV.A.IMG.attr.WIDTH}
@@ -225,7 +226,7 @@ class RssItemList extends React.Component {
   }
 };
 const itemHeight        = 142 * 1.5;
-const itemMinWidth      = 720;
+const itemMinWidth      = 800;
 const descMinWidth      = 133 * 1.5;
 const styles = theme => ({
 noteItem:       { display: 'flex', flexDirection: 'row'

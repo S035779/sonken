@@ -26,15 +26,15 @@ class RssFormDialog extends React.Component {
     , isNotValid: false
     , openAdd:    false
     , openUpd:    []
-    , checked:    []
+    , checked:    props.categoryIds ? props.categoryIds : []
     , title:      props.title
     };
   }
 
   componentWillReceiveProps(nextProps) {
     //std.logInfo(RssFormDialog.displayName, 'Props', nextProps);
-    const { categorys } = nextProps;
-    this.setState({ categorys });
+    const { categorys, categoryIds } = nextProps;
+    this.setState({ categorys, checked: categoryIds ? categoryIds : [] });
   }
 
   handleClose(name, event) {
@@ -114,9 +114,9 @@ class RssFormDialog extends React.Component {
 
   handleSubmitDialog() {
     if(this.isValidate() && this.isChanged()) {
-      const { title } = this.state;
+      const { title, checked } = this.state;
       const { selectedNoteId } = this.props;
-      this.props.onSubmit(selectedNoteId, title);
+      this.props.onSubmit(selectedNoteId, title, checked);
       this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
@@ -134,16 +134,19 @@ class RssFormDialog extends React.Component {
   render() {
     //std.logInfo(RssFormDialog.displayName, 'Props', this.props);
     //std.logInfo(RssFormDialog.displayName, 'State', this.state);
-    const { classes, open, user, category, categorys, title } = this.props;
+    const { classes, open, user, category, categorys, title }
+      = this.props;
     const { isNotValid, isSuccess, checked, openAdd, openUpd }
       = this.state;
     const name = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const paperClass = { paper: classes.dialog };
     return <LoginFormDialog
         open={open}
         title={'ノート編集'}
         onClose={this.handleCloseDialog.bind(this)}
         onSubmit={this.handleSubmitDialog.bind(this)}
+        isSubmit classes={paperClass}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
           <TextField autoFocus margin="dense"
@@ -220,6 +223,7 @@ class RssFormDialog extends React.Component {
 };
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
+, dialog:     { width: 512 }
 , column:     { flex: 1, width: '100%', marginTop: theme.spacing.unit *2 }
 , button:     { margin: theme.spacing.unit * 2 }
 , clearIcon:  { fontSize: 16, color: '#FA404B' }
@@ -227,11 +231,11 @@ const styles = theme => ({
 });
 RssFormDialog.displayName = 'RssFormDialog';
 RssFormDialog.defaultProps = { 
-  open: false
+  open:         false
 };
 RssFormDialog.propTypes = {
-  classes:  PropTypes.object.isRequired
-, onClose:  PropTypes.func.isRequired
-, open:     PropTypes.bool.isRequired
+  classes:      PropTypes.object.isRequired
+, onClose:      PropTypes.func.isRequired
+, open:         PropTypes.bool.isRequired
 };
 export default withStyles(styles)(RssFormDialog);

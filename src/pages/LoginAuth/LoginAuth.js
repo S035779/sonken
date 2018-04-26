@@ -1,6 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import { Redirect, withRouter, Link }
+import { Redirect, withRouter }
                         from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
@@ -67,11 +67,17 @@ class LoginAuth extends React.Component {
     const { classes, location } = this.props;
     const { redirectToRefferer, redirectToManagement, username, password
       , checked, isNotValid } = this.state;
-    const from = location.state || { pathname: '/marchant' };
-    const admin = { pathname: '/admin/users' };
-
-    if(redirectToRefferer) return <Redirect to={from} />;
-    if(redirectToManagement) return <Redirect to={admin} />;
+    if(redirectToRefferer) {
+      const from = location.state || {
+        pathname: '/marchant'
+      //, state: { categoryId: 'all' }
+      };
+      return <Redirect to={from} />;
+    }
+    if(redirectToManagement) {
+      const admin = { pathname: '/admin/users' };
+      return <Redirect to={admin} />;
+    }
     return <div className={classes.container}>
      <div className={classes.loginForms}>
       <div className={classes.space}/>

@@ -17,11 +17,24 @@ class LoginFormDialog extends React.Component {
     this.props.onSubmit();
   }
 
+  renderSubmitButton() {
+    return <Button
+        onClick={this.handleSubmit.bind(this)}
+        color="primary">
+        設定
+      </Button>
+    ;
+  }
+
   render() {
-    const { open, fullScreen, children, title } = this.props;
+    const { open, fullScreen, children, title, isSubmit, classes }
+      = this.props;
+    const renderSubmitButton
+      = isSubmit ? this.renderSubmitButton() : null;
     return <Dialog fullScreen={fullScreen}
       transition={Transition} open={open}
       onClose={this.handleClose.bind(this)}
+      classes={classes}
       aria-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
       {title}
@@ -33,9 +46,7 @@ class LoginFormDialog extends React.Component {
         <Button onClick={this.handleClose.bind(this)} color="primary">
         戻る
         </Button>
-        <Button onClick={this.handleSubmit.bind(this)} color="primary">
-        設定
-        </Button>
+        {renderSubmitButton}
       </DialogActions>
     </Dialog>;
   }
