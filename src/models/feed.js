@@ -41,7 +41,6 @@ const noteSchema = new mongoose.Schema({
 , AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
-noteSchema.set('toObject');
 
 const categorySchema = new mongoose.Schema({
   user:             { type: String, required: true }

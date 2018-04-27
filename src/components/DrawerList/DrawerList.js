@@ -38,7 +38,7 @@ class DrawerList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(DrawerList.displayName, 'Props', nextProps);
+    std.logInfo(DrawerList.displayName, 'Props', nextProps);
     const { categorys } = nextProps;
     this.setState({ categorys });
   }
@@ -150,12 +150,11 @@ class DrawerList extends React.Component {
     this.setState({ dropZoneEntered: false, dragged: false });
   }
 
-  renderCategoryList(index, name, category, categoryId) {
+  renderCategoryList(index, category, name, categoryId, release) {
     const { classes } = this.props;
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
     const isDragDstEl = dragDstEl && dragDstEl.subcategory === name;
     const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === name;
-    const release = 4;
     const isRelease = release > 0;
     const textClass = {
       primary:        classes.textPrimary
@@ -195,7 +194,7 @@ class DrawerList extends React.Component {
       </ListItem>;
   }
 
-  renderNonCategoryList(index, name, category) {
+  renderNonCategoryList(index, category, name) {
     const { classes } = this.props;
     const release = 3;
     const isRelease = release > 0;
@@ -243,13 +242,21 @@ class DrawerList extends React.Component {
         );
     const categoryList
       = category => categorys ? _categorys(category) : null;
-    const renderCategoryList
-      = category => categorys
-        ? _categorys(category).map((c, i) => 
-            this.renderCategoryList(i, c.subcategory, category, c._id))
-        : null;
+    const renderCategoryList = category => categorys
+      ? _categorys(category)
+        .map((obj, index) => 
+          this.renderCategoryList(
+            index
+          , category
+          , obj.subcategory
+          , obj._id
+          , obj.newRelease.true ? obj.newRelease.true : 0
+          )
+        )
+      : null;
     const renderNonCategoryList
-      = category => this.renderNonCategoryList(99, '未分類', category);
+      = category =>
+        this.renderNonCategoryList(99, category, '未分類');
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'marchant')}

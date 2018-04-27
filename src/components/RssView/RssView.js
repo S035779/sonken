@@ -10,7 +10,7 @@ const kpa = '//dyn.keepa.com/pricehistory.png?cAmazon=0f5702&cNew=77ce43&cUsed=f
 
 class RssView extends React.Component {
   render() {
-    std.logInfo(RssView.displayName, 'Props', this.props);
+    //std.logInfo(RssView.displayName, 'Props', this.props);
     const {classes, note} = this.props;
     const link_img = note.AmazonImg !== ''
       ? note.AmazonImg

@@ -612,8 +612,62 @@ export default class FeedParser {
     return this.request('fetch/items', { user, items });
   }
 
+  //fetchCategorys({ user }) {
+  //  return Rx.Observable.fromPromise(this.getCategorys(user));
+  //}
+
   fetchCategorys({ user }) {
-    return Rx.Observable.fromPromise(this.getCategorys(user));
+    const observables = Rx.Observable.forkJoin([
+      this.getReaded(user)
+    , this.getCategorys(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setCategorys(objs[1])
+    , this.setReaded(objs[0])
+    , this.toObject
+    )(objs[2]);
+    return observables.map(setAttribute);
+  }
+
+  setCategorys(categorys) {
+    const _categorys = this.toObject(categorys);
+    // 1. Match of categoryId.
+    const _isNote
+      = (categoryId, obj) => R.contains(categoryId, obj.categoryIds);
+    const isNote = R.curry(_isNote);
+    const isNotes
+      = (objs, categoryId) => R.filter(isNote(categoryId), objs);
+    // 2. Match of non categoryId.
+    const _isNotNote
+      = (category, obj) =>
+        obj.category === category && obj.categoryIds.length === 0;
+    const isNotNotes
+      = (objs, category) => R.filter(isNotNotes(category), objs);
+    // 3. Get readed item of note categoryId.
+    const isNotRead = R.filter(obj => !obj.readed);
+    const isNotReads
+      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    const newRelease = R.countBy(R.lt(0));
+    // 4. Merge.
+    const setNotes
+      = objs => R.map(category =>
+        R.merge(category, {
+          newRelease: newRelease(isNotReads(isNotes(objs, category._id)))
+        }), _categorys);
+    const setNotNotes
+      = objs => R.map(category =>
+        R.merge(category, {
+          newRelease: newRelease(isNotReads(isNotNotes(objs), category))
+        }), [
+          { category: 'marchant', subcategory: '未分類' }
+        , { category: 'sellers',  subcategory: '未分類' }
+        ]);
+    const results
+      = objs => R.isNil(objs)
+        ? _categorys 
+        : R.concat(setNotes(objs), setNotNotes(objs));
+    return results;
   }
 
   fetchNotes({ user }) {
