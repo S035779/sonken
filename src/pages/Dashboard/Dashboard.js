@@ -23,6 +23,7 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(options) {
+    if(!options.user) return null;
     std.logInfo(Dashboard.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
       .then(() => NoteAction.prefetchNotes(options.user))
@@ -31,6 +32,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
+    if(!this.state.user) return;
     std.logInfo(Dashboard.displayName, 'fetch', 'Dashboard');
     NoteAction.fetchNotes(this.state.user)
       .then(() => NoteAction.fetchCategorys(this.state.user))

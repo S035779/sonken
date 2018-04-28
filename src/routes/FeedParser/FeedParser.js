@@ -632,19 +632,20 @@ export default class FeedParser {
 
   setCategorys(categorys) {
     const _categorys = this.toObject(categorys);
-    // 1. Match of categoryId.
+    // 1. Match of the same categoryId.
     const _isNote
       = (categoryId, obj) => R.contains(categoryId, obj.categoryIds);
     const isNote = R.curry(_isNote);
     const isNotes
       = (objs, categoryId) => R.filter(isNote(categoryId), objs);
-    // 2. Match of non categoryId.
+    // 2. Match of the non same categoryId.
     const _isNotNote
       = (category, obj) =>
-        obj.category === category && obj.categoryIds.length === 0;
+        obj.category === category && R.length(obj.categoryIds) === 0;
+    const isNotNote = R.curry(_isNotNote);
     const isNotNotes
-      = (objs, category) => R.filter(isNotNotes(category), objs);
-    // 3. Get readed item of note categoryId.
+      = (objs, category) => R.filter(isNotNote(category), objs);
+    // 3. Get readed item of the same categoryId.
     const isNotRead = R.filter(obj => !obj.readed);
     const isNotReads
       = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
@@ -658,10 +659,11 @@ export default class FeedParser {
     const setNotNotes
       = objs => R.map(category =>
         R.merge(category, {
-          newRelease: newRelease(isNotReads(isNotNotes(objs), category))
+          newRelease:
+            newRelease(isNotReads(isNotNotes(objs, category.category)))
         }), [
-          { category: 'marchant', subcategory: '未分類' }
-        , { category: 'sellers',  subcategory: '未分類' }
+          { _id: '9999', category: 'marchant', subcategory: '未分類' }
+        , { _id: '9999', category: 'sellers',  subcategory: '未分類' }
         ]);
     const results
       = objs => R.isNil(objs)

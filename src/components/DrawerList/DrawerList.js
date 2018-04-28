@@ -38,7 +38,7 @@ class DrawerList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(DrawerList.displayName, 'Props', nextProps);
+    //std.logInfo(DrawerList.displayName, 'Props', nextProps);
     const { categorys } = nextProps;
     this.setState({ categorys });
   }
@@ -49,21 +49,43 @@ class DrawerList extends React.Component {
         this.props.history.push('/');
         break;
       case 'marchant':
-        this.setState({ openMarchant: !this.state.openMarchant });
+        this.setState({
+          openMarchant: !this.state.openMarchant
+        , openSellers:  false
+        , openUser:     false
+        });
         this.props.history.push('/marchant');
         break;
       case 'sellers':
-        this.setState({ openSellers: !this.state.openSellers });
+        this.setState({
+          openMarchant: false
+        , openSellers:  !this.state.openSellers
+        , openUser:     false
+        });
         this.props.history.push('/sellers');
         break;
       case 'bids':
+        this.setState({
+          openMarchant: false
+        , openSellers:  false
+        , openUser:     false
+        });
         this.props.history.push('/bids');
         break;
       case 'trade':
+        this.setState({
+          openMarchant: false
+        , openSellers:  false
+        , openUser:     false
+        });
         this.props.history.push('/trade');
         break;
       case 'user':
-        this.setState({ openUser: !this.state.openUser });
+        this.setState({
+          openMarchant: false
+        , openSellers:  false
+        , openUser: !this.state.openUser
+        });
         break;
       case 'isPreference':
       case 'isProfile':
@@ -150,11 +172,13 @@ class DrawerList extends React.Component {
     this.setState({ dropZoneEntered: false, dragged: false });
   }
 
-  renderCategoryList(index, category, name, categoryId, release) {
+  renderCategoryList(index, category, subcategory, categoryId, release) {
     const { classes } = this.props;
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
-    const isDragDstEl = dragDstEl && dragDstEl.subcategory === name;
-    const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === name;
+    const isDragDstEl
+      = dragDstEl && dragDstEl.subcategory === subcategory;
+    const isDragSrcEl
+      = dragSrcEl && dragSrcEl.subcategory === subcategory;
     const isRelease = release > 0;
     const textClass = {
       primary:        classes.textPrimary
@@ -166,14 +190,14 @@ class DrawerList extends React.Component {
     , colorError:     classes.badgeError
     , badge:          classNames(!isRelease && classes.nonbadge)
     };
-    return <ListItem button key={index}
+    return <ListItem dense button key={index}
         draggable="true"
-        onDragOver={this.handleDragOver.bind(this, name)}
-        onDragEnter={this.handleDragEnter.bind(this, name)}
-        onDragLeave={this.handleDragLeave.bind(this, name)}
-        onDragStart={this.handleDragStart.bind(this, name)}
-        onDragEnd={this.handleDragEnd.bind(this, name)}
-        onDrop={this.handleDrop.bind(this, name)}
+        onDragOver={this.handleDragOver.bind(this, subcategory)}
+        onDragEnter={this.handleDragEnter.bind(this, subcategory)}
+        onDragLeave={this.handleDragLeave.bind(this, subcategory)}
+        onDragStart={this.handleDragStart.bind(this, subcategory)}
+        onDragEnd={this.handleDragEnd.bind(this, subcategory)}
+        onDrop={this.handleDrop.bind(this, subcategory)}
         onClick={this.handleCategoryList.bind(this, category, categoryId)}
         className={classNames(
             classes.draggable
@@ -187,16 +211,17 @@ class DrawerList extends React.Component {
             color="error"
             classes={badgeClass}
           >
-            <Avatar className={classes.avatar}>{name.substr(0,1)}</Avatar>
+            <Avatar className={classes.avatar}>
+              {subcategory.substr(0,1)}
+            </Avatar>
           </Badge>
         </ListItemIcon>
-        <ListItemText primary={name} classes={textClass} />
+        <ListItemText primary={subcategory} classes={textClass} />
       </ListItem>;
   }
 
-  renderNonCategoryList(index, category, name) {
+  renderNonCategoryList(index, category, subcategory, release) {
     const { classes } = this.props;
-    const release = 3;
     const isRelease = release > 0;
     const textClass = {
       primary:        classes.textPrimary
@@ -208,7 +233,7 @@ class DrawerList extends React.Component {
     , colorError:     classes.badgeError
     , badge:          classNames(!isRelease && classes.nonbadge)
     };
-    return <ListItem button key={index}
+    return <ListItem dense button key={index}
         onClick={this.handleCategoryList.bind(this, category, 'none')}
       >
         <ListItemIcon>
@@ -217,10 +242,12 @@ class DrawerList extends React.Component {
             color="error"
             classes={badgeClass}
           >
-            <Avatar className={classes.avatar}>{name.substr(0,1)}</Avatar>
+            <Avatar className={classes.avatar}>
+              {subcategory.substr(0,1)}
+            </Avatar>
           </Badge>
         </ListItemIcon>
-        <ListItemText primary={name} classes={textClass} />
+        <ListItemText primary={subcategory} classes={textClass} />
       </ListItem>;
   }
 
@@ -233,6 +260,7 @@ class DrawerList extends React.Component {
         , secondary: classes.textSecondary };
     const _categorys
       = category => categorys
+        .filter(obj => obj._id !== '9999')
         .filter(obj => category === obj.category)
         .sort((a, b) =>
           parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
@@ -240,6 +268,10 @@ class DrawerList extends React.Component {
           parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
             ? -1 : 0
         );
+    const _noncategorys
+      = category => categorys
+        .filter(obj => obj._id === '9999')
+        .filter(obj => category === obj.category);
     const categoryList
       = category => categorys ? _categorys(category) : null;
     const renderCategoryList = category => categorys
@@ -250,13 +282,23 @@ class DrawerList extends React.Component {
           , category
           , obj.subcategory
           , obj._id
-          , obj.newRelease.true ? obj.newRelease.true : 0
+          , obj.newRelease && obj.newRelease.true
+            ? obj.newRelease.true : 0
           )
         )
       : null;
-    const renderNonCategoryList
-      = category =>
-        this.renderNonCategoryList(99, category, '未分類');
+    const renderNonCategoryList = category => categorys
+      ? _noncategorys(category)
+        .map((obj, index) =>
+          this.renderNonCategoryList(
+            index
+          , category
+          , obj.subcategory
+          , obj.newRelease && obj.newRelease.true
+            ? obj.newRelease.true : 0
+          )
+        )
+      : null;
     return <div>
       <ListItem button
         onClick={this.handleClickButton.bind(this, 'marchant')}
@@ -413,7 +455,7 @@ class DrawerList extends React.Component {
   renderTitleListItems() {
     const { classes } = this.props;
     const textClass
-      = { primary: classes.textPrimary
+      = { primary: classes.title
         , secondary: classes.textSecondary };
     return <div>
       <ListItem button
@@ -454,6 +496,9 @@ const styles = theme => ({
   header: {
     height: barHeightSmDown
   , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
+  }
+, title: {
+    fontSize: 24
   }
 , icon: {
     color: theme.palette.common.white

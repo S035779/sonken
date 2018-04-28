@@ -123,7 +123,8 @@ class RssAddDialog extends React.Component {
   }
 
   isValidate() {
-    return true;
+    const { title } = this.state;
+    return title !== '';
   }
 
   isChanged() {

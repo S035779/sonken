@@ -36,6 +36,7 @@ class RssNewDialog extends React.Component {
     if(this.isValidate() && this.isChanged()) {
       const { title } = this.state;
       this.props.onSubmit(title);
+      this.setState({ title: 'Untitled' })
       this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
@@ -43,11 +44,13 @@ class RssNewDialog extends React.Component {
   }
 
   isValidate() {
-    return true;
+    const { title } = this.state;
+    return title !=='';;
   }
 
   isChanged() {
-    return true;
+    const { title } = this.state;
+    return this.props.title !== title;
   }
 
   render() {

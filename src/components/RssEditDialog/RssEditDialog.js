@@ -106,6 +106,14 @@ class RssEditDialog extends React.Component {
     this.props.onClose();
   }
 
+  isValidate() {
+    return true;
+  }
+
+  isChanged() {
+    return true;
+  }
+
   render() {
     //std.logInfo(RssEditDialog.displayName, 'Props', this.props);
     //std.logInfo(RssEditDialog.displayName, 'State', this.state);

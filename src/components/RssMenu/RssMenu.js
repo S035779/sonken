@@ -23,10 +23,10 @@ class RssMenu extends React.Component {
   }
 
   componentDidMount() {
-    std.logInfo(RssMenu.displayName, 'fetch', 'Preference');
-    std.logInfo(RssMenu.displayName, 'fetch', 'Profile');
-    LoginAction.fetchPreference();
-    LoginAction.fetchProfile(this.props.user);
+    if(!this.props.user) return;
+    std.logInfo(RssMenu.displayName, 'fetch', 'RssMenu');
+    LoginAction.fetchPreference()
+      .then(() => LoginAction.fetchProfile(this.props.user));
   }
 
   handleLogin(event, checked) {
