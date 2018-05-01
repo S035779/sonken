@@ -654,7 +654,7 @@ export default class FeedParser {
     const newRelease = R.countBy(R.lt(0));
     // 4. Get favorite item of the same categoryId.
     const isStarred = R.filter(obj => !obj.starred);
-    const isStarred
+    const isStarreds
       = R.map(obj => obj.items ? R.length(isStarred(obj.items)) : 0);
     // 4. Merge.
     const setNotes
@@ -675,7 +675,7 @@ export default class FeedParser {
       = objs => R.map(category =>
         R.merge(category, {
           newRelease:
-            newRelease(isNotReads(isStarred(objs, category.category)))
+            newRelease(isNotReads(isStarreds(objs, category.category)))
         }), [
           { _id: '9998', category: 'marchant', subcategory: 'お気に入り' }
         , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り' }
