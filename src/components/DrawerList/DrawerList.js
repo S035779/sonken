@@ -23,8 +23,8 @@ class DrawerList extends React.Component {
     super(props);
     this.state = {
       openUser:         false
-    , openMarchant:     false
-    , openSellers:      false
+    , openMarchant:     true
+    , openSellers:      true
     , isProfile:        false
     , isPreference:     false
     , isEditMarchant:   false 
@@ -316,7 +316,7 @@ class DrawerList extends React.Component {
               <IconButton
                 onClick={
                   this.handleClickButton.bind(this, 'isEditMarchant')}>
-                <SettingsApplications className={classes.icon} />
+                <SettingsApplications className={classes.setting} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
@@ -350,7 +350,7 @@ class DrawerList extends React.Component {
               <IconButton
                 onClick={
                   this.handleClickButton.bind(this, 'isEditSellers')}>
-                <SettingsApplications className={classes.icon} />
+                <SettingsApplications className={classes.setting} />
               </IconButton>
             </ListItemSecondaryAction>
           : null
@@ -501,6 +501,10 @@ const styles = theme => ({
     fontSize: 24
   }
 , icon: {
+    color: theme.palette.common.white
+  , marginRight: theme.spacing.unit *2
+  }
+, setting: {
     color: theme.palette.common.white
   }
 , avatar: {

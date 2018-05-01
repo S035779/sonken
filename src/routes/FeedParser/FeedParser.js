@@ -619,14 +619,16 @@ export default class FeedParser {
   fetchCategorys({ user }) {
     const observables = Rx.Observable.forkJoin([
       this.getReaded(user)
+    , this.getStarred(user)
     , this.getCategorys(user)
     , this.getNotes(user)
     ]);
     const setAttribute = objs => R.compose(
-      this.setCategorys(objs[1])
+      this.setCategorys(objs[2])
+    , this.setStarred(objs[1])
     , this.setReaded(objs[0])
     , this.toObject
-    )(objs[2]);
+    )(objs[3]);
     return observables.map(setAttribute);
   }
 
@@ -638,7 +640,7 @@ export default class FeedParser {
     const isNote = R.curry(_isNote);
     const isNotes
       = (objs, categoryId) => R.filter(isNote(categoryId), objs);
-    // 2. Match of the non same categoryId.
+    // 2. Match of the not have categoryId.
     const _isNotNote
       = (category, obj) =>
         obj.category === category && R.length(obj.categoryIds) === 0;
@@ -650,6 +652,10 @@ export default class FeedParser {
     const isNotReads
       = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
     const newRelease = R.countBy(R.lt(0));
+    // 4. Get favorite item of the same categoryId.
+    const isStarred = R.filter(obj => !obj.starred);
+    const isStarred
+      = R.map(obj => obj.items ? R.length(isStarred(obj.items)) : 0);
     // 4. Merge.
     const setNotes
       = objs => R.map(category =>
@@ -665,10 +671,19 @@ export default class FeedParser {
           { _id: '9999', category: 'marchant', subcategory: '未分類' }
         , { _id: '9999', category: 'sellers',  subcategory: '未分類' }
         ]);
+    const setStarred
+      = objs => R.map(category =>
+        R.merge(category, {
+          newRelease:
+            newRelease(isNotReads(isStarred(objs, category.category)))
+        }), [
+          { _id: '9998', category: 'marchant', subcategory: 'お気に入り' }
+        , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り' }
+        ])
     const results
       = objs => R.isNil(objs)
         ? _categorys 
-        : R.concat(setNotes(objs), setNotNotes(objs));
+        : R.concat(setNotes(objs), setNotNotes(objs), setStarred(objs));
     return results;
   }
 
