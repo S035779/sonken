@@ -2,7 +2,8 @@ FROM buildpack-deps:stretch-curl
 
 # timezone
 ENV TZ=Asia/Tokyo
-RUN echo $TZ | tee /etc/timezone \
+#RUN echo $TZ | tee /etc/timezone \
+RUN ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # initialize

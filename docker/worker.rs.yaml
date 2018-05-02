@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: node-job
-        image: asia.gcr.io/feedparser-198104/feedparser/node_job
+        image: asia.gcr.io/feedparser-198104/feedparser/node_job:latest
         resources:
           requests:
             cpu: 100m
