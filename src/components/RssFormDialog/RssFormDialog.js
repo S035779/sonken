@@ -142,6 +142,7 @@ class RssFormDialog extends React.Component {
     const name = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
     const paperClass = { paper: classes.dialog };
+    const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
     return <LoginFormDialog
         open={open}
         title={'ノート編集'}
@@ -169,7 +170,7 @@ class RssFormDialog extends React.Component {
             onSubmit={this.handleCreate.bind(this)}
           />
           <List dense>
-          {categorys.map(obj => (
+          {categorys.filter(isCategory).map(obj => (
             <ListItem key={obj._id} dense button
               onClick={this.handleChangeToggle
                 .bind(this, 'checked', obj._id)}

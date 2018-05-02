@@ -619,72 +619,105 @@ export default class FeedParser {
   fetchCategorys({ user }) {
     const observables = Rx.Observable.forkJoin([
       this.getReaded(user)
-    , this.getStarred(user)
+    //, this.getStarred(user)
     , this.getCategorys(user)
     , this.getNotes(user)
     ]);
     const setAttribute = objs => R.compose(
-      this.setCategorys(objs[2])
-    , this.setStarred(objs[1])
+      this.setCategorys(objs[1])
+    //, this.setStarred(objs[1])
     , this.setReaded(objs[0])
     , this.toObject
-    )(objs[3]);
+    )(objs[2]);
     return observables.map(setAttribute);
   }
 
   setCategorys(categorys) {
     const _categorys = this.toObject(categorys);
+    const _hasCategorys = R.curry(this.hasCategorys)(_categorys);
+    const _hasNotCategorys = this.hasNotCategorys;
+    const _hasFavorites = this.hasFavorites;
+    const __categorys = objs => 
+      R.concat(_hasCategorys(objs), _hasNotCategorys(objs));
+    return objs => R.isNil(objs)
+      ? _categorys
+      : R.concat(__categorys(objs), _hasFavorites(objs))
+    ;
+  }
+
+  hasCategorys(categorys, notes) {
     // 1. Match of the same categoryId.
     const _isNote
       = (categoryId, obj) => R.contains(categoryId, obj.categoryIds);
     const isNote = R.curry(_isNote);
     const isNotes
       = (objs, categoryId) => R.filter(isNote(categoryId), objs);
-    // 2. Match of the not have categoryId.
+    // 2. Get not readed item.
+    const isNotRead = R.filter(obj => !obj.readed);
+    const isNotReads
+      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    // 3. Return.
+    const countNew = R.countBy(R.lt(0)); 
+    return R.map(category =>
+      R.merge(category, {
+        newRelease: countNew(
+          isNotReads(
+            isNotes(notes, category._id)))
+      })
+    , categorys);
+  }
+
+  hasNotCategorys(notes) {
+    // 1. Match of the not have categoryId.
     const _isNotNote
       = (category, obj) =>
         obj.category === category && R.length(obj.categoryIds) === 0;
     const isNotNote = R.curry(_isNotNote);
     const isNotNotes
       = (objs, category) => R.filter(isNotNote(category), objs);
-    // 3. Get readed item of the same categoryId.
+    // 2. Get not readed item.
     const isNotRead = R.filter(obj => !obj.readed);
     const isNotReads
       = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
-    const newRelease = R.countBy(R.lt(0));
-    // 4. Get favorite item of the same categoryId.
-    const isStarred = R.filter(obj => !obj.starred);
-    const isStarreds
-      = R.map(obj => obj.items ? R.length(isStarred(obj.items)) : 0);
-    // 4. Merge.
-    const setNotes
-      = objs => R.map(category =>
-        R.merge(category, {
-          newRelease: newRelease(isNotReads(isNotes(objs, category._id)))
-        }), _categorys);
-    const setNotNotes
-      = objs => R.map(category =>
-        R.merge(category, {
-          newRelease:
-            newRelease(isNotReads(isNotNotes(objs, category.category)))
-        }), [
-          { _id: '9999', category: 'marchant', subcategory: '未分類' }
-        , { _id: '9999', category: 'sellers',  subcategory: '未分類' }
-        ]);
-    const setStarred
-      = objs => R.map(category =>
-        R.merge(category, {
-          newRelease:
-            newRelease(isNotReads(isStarreds(objs, category.category)))
-        }), [
-          { _id: '9998', category: 'marchant', subcategory: 'お気に入り' }
-        , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り' }
-        ])
-    const results
-      = objs => R.isNil(objs)
-        ? _categorys 
-        : R.concat(setNotes(objs), setNotNotes(objs), setStarred(objs));
-    return results;
+    // 3. Return.
+    const countNew = R.countBy(R.lt(0)); 
+    return R.map(category =>
+      R.merge(category, {
+        newRelease: countNew(
+          isNotReads(
+            isNotNotes(notes, category.category)))
+      }), [
+        { _id: '9999', category: 'marchant', subcategory: '未分類' }
+      , { _id: '9999', category: 'sellers',  subcategory: '未分類' }
+      ]);
+  }
+
+  hasFavorites(notes) {
+    // 1. Match of the starred items.
+    const isStarred
+      = obj => obj.items
+        ? R.contains({ starred: true }, obj.items) : false;
+    const _isStarredNote
+      = (category, obj) =>
+        obj.category === category && isStarred(obj);
+    const isStarredNote = R.curry(_isStarredNote);
+    const isStarredNotes
+      = (objs, category) => R.filter(isStarredNote(category), objs);
+    // 2. Get not readed item.
+    const isNotRead = R.filter(obj => !obj.readed);
+    const isNotReads
+      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    // 3. Return.
+    const countNew = R.countBy(R.lt(0)); 
+    return R.map(category =>
+      R.merge(category, {
+        newRelease: countNew(
+          isNotReads(
+            isStarredNotes(notes, category.category)))
+      }), [
+        { _id: '9998', category: 'marchant', subcategory: 'お気に入り' }
+      , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り' }
+      ]);
   }
 
   fetchNotes({ user }) {

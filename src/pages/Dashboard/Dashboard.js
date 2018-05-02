@@ -52,12 +52,17 @@ class Dashboard extends React.Component {
     const isNonCategoryId
       = obj => obj.categoryIds
         ? obj.categoryIds.length === 0 : true;
+    const isFavorite
+      = obj => obj.items
+        ? obj.items.some(obj => obj.starred) : false;
     if(!notes) return [];
     switch(categoryId) {
       case 'all':
         return notes.filter(isCategory);
       case 'none':
         return notes.filter(isCategory).filter(isNonCategoryId);
+      case 'favorite':
+        return notes.filter(isCategory).filter(isFavorite);
       default:
         return notes.filter(isCategory).filter(isCategoryId);
     }

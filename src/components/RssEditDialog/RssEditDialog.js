@@ -123,6 +123,7 @@ class RssEditDialog extends React.Component {
     const title = category === 'marchant'
       ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
     const paperClass = { paper: classes.dialog }
+    const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
     return <LoginFormDialog 
         open={open} 
         title={'カテゴリー編集'}
@@ -143,7 +144,7 @@ class RssEditDialog extends React.Component {
             onSubmit={this.handleCreate.bind(this)}
           />
           <List dense>
-          {categorys.map(obj => (
+          {categorys.filter(isCategory).map(obj => (
             <ListItem key={obj._id}>
               <ListItemAvatar>
                 <Avatar><Folder className={classes.folderIcon}/></Avatar>

@@ -97,8 +97,8 @@ class DrawerList extends React.Component {
   }
 
   handleCategoryList(category, categoryId) {
-    std.logInfo(DrawerList.displayName, category, categoryId);
-    this.props.history.push(category, { categoryId })
+    //std.logInfo(DrawerList.displayName, category, categoryId);
+    this.props.history.push('/' + category, { categoryId })
   }
 
   handleCloseDialog(name, event) {
@@ -251,6 +251,37 @@ class DrawerList extends React.Component {
       </ListItem>;
   }
 
+  renderFavoriteList(index, category, subcategory, release) {
+    const { classes } = this.props;
+    const isRelease = release > 0;
+    const textClass = {
+      primary:        classes.textPrimary
+    , secondary:      classes.textSecondary
+    };
+    const badgeClass = {
+      colorPrimary:   classes.badgePrimary
+    , colorSecondary: classes.badgeSecondary
+    , colorError:     classes.badgeError
+    , badge:          classNames(!isRelease && classes.nonbadge)
+    };
+    return <ListItem dense button key={index}
+        onClick={this.handleCategoryList.bind(this, category, 'favorite')}
+      >
+        <ListItemIcon>
+          <Badge
+            badgeContent={release}
+            color="error"
+            classes={badgeClass}
+          >
+            <Avatar className={classes.avatar}>
+              {subcategory.substr(0,1)}
+            </Avatar>
+          </Badge>
+        </ListItemIcon>
+        <ListItemText primary={subcategory} classes={textClass} />
+      </ListItem>;
+  }
+
   renderListItems() {
     const { classes, open, profile } = this.props;
     const { isEditMarchant, isEditSellers, openMarchant, openSellers
@@ -261,6 +292,7 @@ class DrawerList extends React.Component {
     const _categorys
       = category => categorys
         .filter(obj => obj._id !== '9999')
+        .filter(obj => obj._id !== '9998')
         .filter(obj => category === obj.category)
         .sort((a, b) =>
           parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
@@ -271,6 +303,10 @@ class DrawerList extends React.Component {
     const _noncategorys
       = category => categorys
         .filter(obj => obj._id === '9999')
+        .filter(obj => category === obj.category);
+    const _favorites
+      = category => categorys
+        .filter(obj => obj._id === '9998')
         .filter(obj => category === obj.category);
     const categoryList
       = category => categorys ? _categorys(category) : null;
@@ -291,6 +327,18 @@ class DrawerList extends React.Component {
       ? _noncategorys(category)
         .map((obj, index) =>
           this.renderNonCategoryList(
+            index
+          , category
+          , obj.subcategory
+          , obj.newRelease && obj.newRelease.true
+            ? obj.newRelease.true : 0
+          )
+        )
+      : null;
+    const renderFavoriteList = category => categorys
+      ? _favorites(category)
+        .map((obj, index) =>
+          this.renderFavoriteList(
             index
           , category
           , obj.subcategory
@@ -331,6 +379,7 @@ class DrawerList extends React.Component {
       />
       <Collapse in={openMarchant} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
+          {renderFavoriteList('marchant')}
           {renderCategoryList('marchant')}
           {renderNonCategoryList('marchant')}
         </List>
@@ -365,6 +414,7 @@ class DrawerList extends React.Component {
       />
       <Collapse in={openSellers} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
+          {renderFavoriteList('sellers')}
           {renderCategoryList('sellers')}
           {renderNonCategoryList('sellers')}
         </List>
