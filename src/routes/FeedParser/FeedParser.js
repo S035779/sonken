@@ -715,8 +715,8 @@ export default class FeedParser {
           isNotReads(
             isStarredNotes(notes, obj.category)))
       }), [
-        { _id: '9998', category: 'marchant', subcategory: 'お気に入り' }
-      , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り' }
+        { _id: '9998', category: 'marchant', subcategory: 'お気に入り登録' }
+      , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り登録' }
       ]);
   }
 
