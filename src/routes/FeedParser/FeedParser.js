@@ -2,6 +2,7 @@ import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import mongoose         from 'mongoose';
+import { Iconv }        from 'iconv';
 import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred
   , Listed }
                         from 'Models/feed';
@@ -1199,16 +1200,15 @@ export default class FeedParser {
   }
 
   setNotesObj({ user, category, file }) {
+    const iconv = new Iconv('SHIFT-JIS', 'UTF-8//TRANSLIT//IGNORE');
+    const toMBConv = $str => iconv.convert($str).toString('utf8');
     const toRcords = R.split('\n');
     const toTailes = R.tail;
-    //const toColumn = R.map(R.split('",'));
     const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
-    //const toCutHed = R.map(R.map(R.slice(1, Infinity)));
-    //const toCutLst = R.map(R.map(R.replace(/"/g, '')))
-    const toCutDbl = R.map(R.map(c => R.match(/^"(.*?)"$/, c)[1]));
-    const toNonCut = R.map(R.map(c => R.match(/^(?!")(.*?)$/, c)[1]));
-    const toJoin   = (csv1, csv2) => R.isNil(csv1) ? csv1 : csv2;
-    const forkJoin = std.fork(toJoin, toCutDbl, toNonCut);
+    const toCutDbl = c => R.match(/^"(.*?)"$/, c)[1];
+    const toNonCut = c => R.match(/^(?!")(.*?)$/, c)[1];
+    const toJoin   = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
+    const forkJoin = R.map(R.map(std.fork(toJoin, toCutDbl, toNonCut)));
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setNotes = R.map(arr => ({
       user
@@ -1224,12 +1224,11 @@ export default class FeedParser {
     return R.compose(
       setNotes
     , toCutRec
-    //, toCutLst
-    //, toCutHed
     , forkJoin
     , toColumn
     , toTailes
     , toRcords
+    , toMBConv
     )(file.toString());
   }
 

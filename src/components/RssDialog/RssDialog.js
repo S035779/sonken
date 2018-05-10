@@ -17,7 +17,7 @@ class RssDialog extends React.Component {
   render() {
     const { open, fullScreen, children, title } = this.props;
     return <Dialog fullScreen={fullScreen}
-      transition={Transition} open={open}
+      TransitionComponent={Transition} open={open}
       onClose={this.handleClose.bind(this)}
       aria-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
