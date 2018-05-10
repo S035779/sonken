@@ -628,6 +628,7 @@ export default class FeedParser {
     , this.setStarred(objs[1])
     , this.setReaded(objs[0])
     , this.toObject
+    //, R.tap(log.console)
     )(objs[3]);
     return observables.map(setAttribute);
   }
@@ -648,7 +649,8 @@ export default class FeedParser {
   hasCategorys(categorys, notes) {
     // 1. Match of the same categoryId.
     const _isNote
-      = (categoryId, obj) => R.contains(categoryId, obj.categoryIds);
+      = (categoryId, obj) =>
+      obj.categoryIds ? R.contains(categoryId, obj.categoryIds) : false;
     const isNote = R.curry(_isNote);
     const isNotes
       = (objs, categoryId) => R.filter(isNote(categoryId), objs);
@@ -1197,11 +1199,16 @@ export default class FeedParser {
   }
 
   setNotesObj({ user, category, file }) {
-    const toRcords = R.split('"\n');
+    const toRcords = R.split('\n');
     const toTailes = R.tail;
-    const toColumn = R.map(R.split('",'));
-    const toCutHed = R.map(R.map(R.slice(1, Infinity)));
-    const toCutLst = R.map(R.map(R.replace(/"/g, '')))
+    //const toColumn = R.map(R.split('",'));
+    const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
+    //const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+    //const toCutLst = R.map(R.map(R.replace(/"/g, '')))
+    const toCutDbl = R.map(R.map(c => R.match(/^"(.*?)"$/, c)[1]));
+    const toNonCut = R.map(R.map(c => R.match(/^(?!")(.*?)$/, c)[1]));
+    const toJoin   = (csv1, csv2) => R.isNil(csv1) ? csv1 : csv2;
+    const forkJoin = std.fork(toJoin, toCutDbl, toNonCut);
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setNotes = R.map(arr => ({
       user
@@ -1217,11 +1224,11 @@ export default class FeedParser {
     return R.compose(
       setNotes
     , toCutRec
-    , toCutLst
-    , toCutHed
+    //, toCutLst
+    //, toCutHed
+    , forkJoin
     , toColumn
     , toTailes
-    //, R.tap(console.log)
     , toRcords
     )(file.toString());
   }

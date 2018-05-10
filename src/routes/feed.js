@@ -22,7 +22,7 @@ export default {
         , err => {
             res.status(500)
               .send({ name: err.name, message: err.message });
-            log.error(displayName, err.name, ':', err.message);
+            log.error(displayName, err.name, ':', err.message, ':', err.stack);
           }
         , () => { log.info('Complete to upload Note.'); }  
         );
@@ -496,7 +496,7 @@ export default {
         obj => { res.json(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message);
+          log.error(displayName, err.name, ':', err.message, ':', err.stack);
         }
       , () => { log.info('Complete to fetch Categorys.'); }  
       );
