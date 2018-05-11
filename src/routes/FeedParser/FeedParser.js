@@ -1200,15 +1200,19 @@ export default class FeedParser {
   }
 
   setNotesObj({ user, category, file }) {
-    const iconv = new Iconv('SHIFT-JIS', 'UTF-8//TRANSLIT//IGNORE');
-    const toMBConv = $str => iconv.convert($str).toString('utf8');
+    const iconv = new Iconv('CP932', 'UTF-8//TRANSLIT//IGNORE');
+    const iconvBuf = _str => Buffer.from(_str);
+    const iconvCnv = _buf => iconv.convert(_buf);
+    const iconvUtf = _str => iconvCnv(iconvBuf(_str)).toString('utf-8');
+    const convChar = str => str !== '' ? iconvUtf(str) : '';
+    const toMBConv = R.map(R.map(c => convChar(c)));
     const toRcords = R.split('\n');
     const toTailes = R.tail;
     const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
-    const toCutDbl = c => R.match(/^"(.*?)"$/, c)[1];
-    const toNonCut = c => R.match(/^(?!")(.*?)$/, c)[1];
-    const toJoin   = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
-    const forkJoin = R.map(R.map(std.fork(toJoin, toCutDbl, toNonCut)));
+    const toCutDbl = c => R.match(/^\s*"(.*?)"\s*$/, c)[1];
+    const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
+    const mergeCsv = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
+    const forkJoin = R.map(R.map(std.fork(mergeCsv,toCutDbl,toNonCut)));
     const toCutRec = R.filter(objs => R.length(objs) > 1);
     const setNotes = R.map(arr => ({
       user
@@ -1224,13 +1228,15 @@ export default class FeedParser {
     return R.compose(
       setNotes
     , toCutRec
+    , toMBConv
     , forkJoin
     , toColumn
     , toTailes
+    //, R.tap(console.log)
     , toRcords
-    , toMBConv
     )(file.toString());
   }
+
 
   setItemsObj({ user, category, file }) {
     const toRcords = R.split('"\n');

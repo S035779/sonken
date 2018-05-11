@@ -1,13 +1,17 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import { Redirect, withRouter }
+import { Redirect, withRouter, Link }
                         from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography, Button, Checkbox, FormControlLabel }
+import { TextField, Typography, Button, Checkbox }
                         from 'material-ui';
+import { InputLabel }   from 'material-ui/Input';
+import { FormLabel, FormControl, FormGroup, FormControlLabel
+  , FormHelperText } 
+                        from 'material-ui/Form';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
@@ -100,10 +104,18 @@ class LoginAuth extends React.Component {
         <FormControlLabel control={
             <RssCheckbox color="secondary"
               checked={checked}
-              onChange={this.handleChangeCheckbox.bind(this, 'checked')}/>
+              onChange={this.handleChangeCheckbox.bind(this, 'checked')}
+            />
           }
-          label="管理者ログイン"
+          label="ＩＤ・ＰＷを保存"
         />
+      </div>
+      <div className={classes.form}>
+        <RssButton color="flatDefault" id="confirmation"
+          classes={classes.confirm}
+          component={Link} to="/login/confirmation">
+          ログインＩＤ・ＰＷを忘れた場合は こちら
+        </RssButton>
       </div>
       <div className={classes.buttons}>
         <div className={classes.space}/>
@@ -144,6 +156,7 @@ const styles = theme => ({
               , height: rowHeight }
 , button:     { flex: 1 }
 , input:      { flex: 1 }
+, confirm:    { fontSize: 10 }
 });
 LoginAuth.displayName = 'LoginAuth';
 LoginAuth.defaultProps = {};

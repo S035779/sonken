@@ -206,12 +206,12 @@ process.on('warning', err => message(err));
 process.on('exit',    (code, signal) => message(null, code, signal));
 
 const message = (err, code, signal) => {
-  if(err) log.warn('[API]', err.name, ':',  err.message);
+  if(err) log.warn('[API]', err.name, ':',  err.message, ':', err.stack);
   else    log.info('[API]', `process exit. (s/c): ${signal || code}`);
 };
 
 const shutdown = (err, cbk) => {
-  if(err) log.error('[API]', err.name, ':', err.message);
+  if(err) log.error('[API]', err.name, ':', err.message, ':', err.stack);
   mongoose.disconnect(() => {
     log.info('[MDB]', 'session #2 terminated.');
     server.close(() => {

@@ -50,7 +50,7 @@ class DrawerList extends React.Component {
         break;
       case 'marchant':
         this.setState({
-          openMarchant: !this.state.openMarchant
+          openMarchant: true
         , openSellers:  false
         , openUser:     false
         });
@@ -59,7 +59,7 @@ class DrawerList extends React.Component {
       case 'sellers':
         this.setState({
           openMarchant: false
-        , openSellers:  !this.state.openSellers
+        , openSellers:  true
         , openUser:     false
         });
         this.props.history.push('/sellers');
@@ -84,7 +84,7 @@ class DrawerList extends React.Component {
         this.setState({
           openMarchant: false
         , openSellers:  false
-        , openUser: !this.state.openUser
+        , openUser:     true
         });
         break;
       case 'isPreference':

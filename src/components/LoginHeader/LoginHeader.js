@@ -26,16 +26,19 @@ class LoginHeader extends React.Component {
         </RssButton>
         </div>
         <div className={classes.link}>
+        {/*
         <RssButton color="flatWhite"
           component={Link} to="/marchant">
           <PieChartOutlined className={classes.icon} />
           Dashboard
         </RssButton>
+        */}
         <RssButton color="flatWhite"
           component={Link} to="/login/registration">
           <Fingerprint className={classes.icon} />
-          Register
+          新規利用登録
         </RssButton>
+        {/*
         <RssButton color="flatWhite"
           component={Link} to="/login/authenticate">
           <PhoneIphone className={classes.icon} />
@@ -46,6 +49,7 @@ class LoginHeader extends React.Component {
           <LockOpen className={classes.icon} />
           Unlock
         </RssButton>
+        */}
         </div>
       </Toolbar>
       </AppBar>
@@ -66,7 +70,7 @@ const styles = theme => ({
 , name:       { fontSize: 20 }
 , link:       { flex: 3
               , display: 'flex', flexDirection: 'row'
-              , justifyContent: 'center' }
+              , justifyContent: 'flex-end' }
 , icon:       { marginRight: theme.spacing.unit }
 });
 LoginHeader.displayName = 'LoginHeader';

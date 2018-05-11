@@ -119,7 +119,7 @@ class LoginRegist extends React.Component {
       <div className={classes.loginForms}>
       <div className={classes.space} />
       <Typography variant="display1" align="center"
-        className={classes.title}>RSS Reader !!</Typography>
+        className={classes.title}>新規ご利用申し込み</Typography>
       <Typography variant="headline" align="center"
         className={classes.title}>
       Register for free and experience the RSS reader today
@@ -128,6 +128,55 @@ class LoginRegist extends React.Component {
       <div className={classes.space} />
       <div className={classes.column}>
       <div className={classes.description}>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            氏名
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            氏名（カナ）
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            連絡先メールアドレス
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            連絡先電話番号
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            ログインＩＤ
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            ログインＰＷ
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            ログインＰＷ（確認）
+          </Typography>
+        </div>
+        <div className={classes.form}>
+          <Typography variant="subheading" align="center"
+            className={classes.title}>
+            申し込みプラン
+          </Typography>
+        </div>
+      {/*
         <div className={classes.media}>
           <PersonAdd className={classes.mediaLeft}/>
           <div className={classes.mediaBody}>
@@ -170,6 +219,7 @@ class LoginRegist extends React.Component {
           </Typography>
           </div>
         </div>
+      */}
       </div>
       <div className={classes.forms}>
         <div className={classes.form}>
