@@ -50,41 +50,25 @@ class DrawerList extends React.Component {
         break;
       case 'marchant':
         this.setState({
-          openMarchant: true
-        , openSellers:  false
-        , openUser:     false
+          openMarchant: !this.state.openMarchant
         });
         this.props.history.push('/marchant');
         break;
       case 'sellers':
         this.setState({
-          openMarchant: false
-        , openSellers:  true
-        , openUser:     false
+          openSellers:  !this.state.openSellers
         });
         this.props.history.push('/sellers');
         break;
       case 'bids':
-        this.setState({
-          openMarchant: false
-        , openSellers:  false
-        , openUser:     false
-        });
         this.props.history.push('/bids');
         break;
       case 'trade':
-        this.setState({
-          openMarchant: false
-        , openSellers:  false
-        , openUser:     false
-        });
         this.props.history.push('/trade');
         break;
       case 'user':
         this.setState({
-          openMarchant: false
-        , openSellers:  false
-        , openUser:     true
+          openUser:     !this.state.openUser
         });
         break;
       case 'isPreference':
