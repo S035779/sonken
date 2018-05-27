@@ -35,8 +35,9 @@ class LoginAuth extends React.Component {
     LoginAction.authenticate(username, password, checked)
       .then(() => {
         if(this.props.isAuthenticated) {
-          if(checked) return LoginAction.presetAdmin(username);
-          else        return LoginAction.presetUser(username);
+          //if(checked) return LoginAction.presetAdmin(username);
+          //else        return LoginAction.presetUser(username);
+          return LoginAction.presetUser(username);
         } else {
           this.setState({ isNotValid: true });
           return null;
@@ -44,8 +45,9 @@ class LoginAuth extends React.Component {
       })
       .then(() => {
         if(this.props.isAuthenticated) {
-          if(checked) this.setState({ redirectToManagement: true });
-          else        this.setState({ redirectToRefferer: true });
+          //if(checked) this.setState({ redirectToManagement: true });
+          //else        this.setState({ redirectToRefferer: true });
+          this.setState({ redirectToRefferer: true });
         }
       })
       .catch(err => {
