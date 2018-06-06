@@ -31,16 +31,18 @@ class LoginFormDialog extends React.Component {
       = this.props;
     const renderSubmitButton
       = isSubmit ? this.renderSubmitButton() : null;
-    return <Dialog fullScreen={fullScreen}
-      transition={Transition} open={open}
+    return <Dialog
+      fullScreen={fullScreen}
+      transitionComponent={Transition}
+      open={open}
       onClose={this.handleClose.bind(this)}
       classes={classes}
       aria-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
-      {title}
+        {title}
       </DialogTitle>
       <DialogContent>
-      {children}
+        {children}
       </DialogContent>
       <DialogActions>
         <Button onClick={this.handleClose.bind(this)} color="primary">

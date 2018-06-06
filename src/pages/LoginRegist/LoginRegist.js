@@ -19,6 +19,7 @@ import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import agrTxt           from 'Main/agreement';
+import prcImg           from 'Main/pricelist';
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -36,6 +37,7 @@ class LoginRegist extends React.Component {
     , agreed:             false
     , isNotValid:         false
     , openAgree:          false
+    , openPrice:          false
     };
   }
 
@@ -73,6 +75,9 @@ class LoginRegist extends React.Component {
       case 'agreement':
         this.setState({ openAgree: true });
         break;
+      case 'pricelist':
+        this.setState({ openPrice: true });
+        break;
     }
   }
 
@@ -109,7 +114,8 @@ class LoginRegist extends React.Component {
     const { classes, location, preference } = this.props;
     const { username, password, confirm_password
       , name, kana, email, phone, plan, agreed
-      , redirectToRefferer, isNotValid, openAgree } = this.state;
+      , redirectToRefferer, isNotValid, openAgree, openPrice
+    } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const renderItems = preference.menu ? preference.menu
@@ -175,6 +181,14 @@ class LoginRegist extends React.Component {
             className={classes.title}>
             申し込みプラン
           </Typography>
+        </div>
+        <div className={classes.form}>
+          <RssButton color="flatWhite"
+            onClick={this.handleClickButton.bind(this, 'pricelist')}
+          >プラン表を表示</RssButton>
+          <RssButton color="flatWhite"
+            onClick={this.handleClickButton.bind(this, 'agreement')}
+          >利用規約を表示</RssButton>
         </div>
       {/*
         <div className={classes.media}>
@@ -286,9 +300,6 @@ class LoginRegist extends React.Component {
               onChange={this.handleChangeCheckbox.bind(this, 'agreed')} />
             }
             label="規約に同意する" />
-          <RssButton color="flatWhite"
-            onClick={this.handleClickButton.bind(this, 'agreement')}
-          >利用規約を表示</RssButton>
         </div>
         <div className={classes.buttons}>
           <RssButton color="white"
@@ -298,12 +309,18 @@ class LoginRegist extends React.Component {
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssFullDialog open={openAgree} title={'Agreement'}
+          <RssFullDialog open={openAgree} title={'利用規約'}
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
             <iframe
               src={`data:text/html;charset=utf-8;base64,${agrTxt}`}
               //src={URL.createObjectURL(new Blob(
               //  [std.decode_base64(agrTxt)], { type: 'text/html' })) }
+              className={classes.iframe} />
+          </RssFullDialog>
+          <RssFullDialog open={openPrice} title={'プラン表'}
+            onClose={this.handleCloseDialog.bind(this, 'openPrice')}>
+            <img
+              src={`data:image/png;base64,${prcImg}`}
               className={classes.iframe} />
           </RssFullDialog>
         </div>

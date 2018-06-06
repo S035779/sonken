@@ -20,7 +20,7 @@ class RssFullDialog extends React.Component {
     const { classes, open, children, title } = this.props;
     return <Dialog
       fullScreen
-      transition={Transition}
+      TransitionComponent={Transition}
       open={open}
       onClose={this.handleClose.bind(this)}>
         <AppBar className={classes.appBar}>
