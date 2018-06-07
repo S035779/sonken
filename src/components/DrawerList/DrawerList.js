@@ -309,15 +309,16 @@ class DrawerList extends React.Component {
       : null;
     const renderNonCategoryList = category => categorys
       ? _noncategorys(category)
-        .map((obj, index) =>
-          this.renderNonCategoryList(
+        .map((obj, index) => {
+          const result =  this.renderNonCategoryList(
             index
           , category
           , obj.subcategory
           , obj.newRelease && obj.newRelease.true
             ? obj.newRelease.true : 0
           )
-        )
+          return result;
+        })
       : null;
     const renderFavoriteList = category => categorys
       ? _favorites(category)

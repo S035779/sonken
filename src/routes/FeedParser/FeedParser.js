@@ -672,9 +672,8 @@ export default class FeedParser {
 
   hasNotCategorys(notes) {
     // 1. Match of the not have categoryId.
-    const _isNotNote
-      = (category, obj) =>
-        obj.category === category && R.length(obj.categoryIds) === 0;
+    const _isNotNote = (category, obj) =>
+      (obj.category === category && R.isNil(obj.categoryIds));
     const isNotNote = R.curry(_isNotNote);
     const isNotNotes
       = (objs, category) => R.filter(isNotNote(category), objs);

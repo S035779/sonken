@@ -22,8 +22,8 @@ var web = {
     ],
     app: [
       'react-hot-loader/patch',
-      './main.js',
-    ],
+      './main.js'
+    ]
   },
   plugins: [
     new ManifestPlugin({ fileName: 'manifest.bundle.json' }),
@@ -31,19 +31,17 @@ var web = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       names: ["view", "icon"],
-      minChunks: Infinity,
+      minChunks: Infinity
     }),
     new CleanWebpackPlugin([
       'dist/*.bundle.*',
-      'dist/*.jpg',
-      'dist/*.txt',
-      'dist/*.pdf'
-    ], { verbose: false, }),
+      'dist/*.jpg'
+    ], { verbose: false })
   ],
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/',
-  },
+    publicPath: '/'
+  }
 };
 module.exports = merge(common, web);

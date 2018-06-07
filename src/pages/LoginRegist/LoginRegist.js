@@ -19,7 +19,7 @@ import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import agrTxt           from 'Main/agreement';
-import prcImg           from 'Main/pricelist';
+import plnImg           from 'Main/planlist';
 
 class LoginRegist extends React.Component {
   constructor(props) {
@@ -37,7 +37,7 @@ class LoginRegist extends React.Component {
     , agreed:             false
     , isNotValid:         false
     , openAgree:          false
-    , openPrice:          false
+    , openPlan:          false
     };
   }
 
@@ -75,8 +75,8 @@ class LoginRegist extends React.Component {
       case 'agreement':
         this.setState({ openAgree: true });
         break;
-      case 'pricelist':
-        this.setState({ openPrice: true });
+      case 'planlist':
+        this.setState({ openPlan: true });
         break;
     }
   }
@@ -114,7 +114,7 @@ class LoginRegist extends React.Component {
     const { classes, location, preference } = this.props;
     const { username, password, confirm_password
       , name, kana, email, phone, plan, agreed
-      , redirectToRefferer, isNotValid, openAgree, openPrice
+      , redirectToRefferer, isNotValid, openAgree, openPlan
     } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
@@ -184,7 +184,7 @@ class LoginRegist extends React.Component {
         </div>
         <div className={classes.form}>
           <RssButton color="flatWhite"
-            onClick={this.handleClickButton.bind(this, 'pricelist')}
+            onClick={this.handleClickButton.bind(this, 'planlist')}
           >プラン表を表示</RssButton>
           <RssButton color="flatWhite"
             onClick={this.handleClickButton.bind(this, 'agreement')}
@@ -313,15 +313,13 @@ class LoginRegist extends React.Component {
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
             <iframe
               src={`data:text/html;charset=utf-8;base64,${agrTxt}`}
-              //src={URL.createObjectURL(new Blob(
-              //  [std.decode_base64(agrTxt)], { type: 'text/html' })) }
-              className={classes.iframe} />
+              className={classes.agreement} />
           </RssFullDialog>
-          <RssFullDialog open={openPrice} title={'プラン表'}
-            onClose={this.handleCloseDialog.bind(this, 'openPrice')}>
+          <RssFullDialog open={openPlan} title={'プラン表'}
+            onClose={this.handleCloseDialog.bind(this, 'openPlan')}>
             <img
-              src={`data:image/png;base64,${prcImg}`}
-              className={classes.iframe} />
+              src={`data:image/png;base64,${plnImg}`}
+              className={classes.planlist} />
           </RssFullDialog>
         </div>
       </div>
@@ -374,7 +372,8 @@ const styles = theme => ({
               , fontSize: 32, color: theme.palette.common.white}
 , mediaBody:  { display: 'table-cell', verticalAlign: 'top', flex: 1
               , marginLeft: theme.spacing.unit *2 }
-, iframe:     { width: '100%', border: 0, height: '100%' }
+, agreement:  { width: '100%', border: 0, height: '100%' }
+, planlist:   { width: '100%', border: 0 }
 });
 LoginRegist.displayName = 'LoginRegist';
 LoginRegist.defaultProps = {};

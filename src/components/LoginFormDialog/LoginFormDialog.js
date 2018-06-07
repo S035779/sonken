@@ -33,7 +33,7 @@ class LoginFormDialog extends React.Component {
       = isSubmit ? this.renderSubmitButton() : null;
     return <Dialog
       fullScreen={fullScreen}
-      transitionComponent={Transition}
+      TransitionComponent={Transition}
       open={open}
       onClose={this.handleClose.bind(this)}
       classes={classes}
