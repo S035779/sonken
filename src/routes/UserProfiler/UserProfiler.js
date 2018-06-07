@@ -14,7 +14,6 @@ const app_name = process.env.APP_NAME;
 const admin_user = process.env.ADMIN_USER;
 const admin_pass = process.env.ADMIN_PASS;
 const mms_from = process.env.MMS_FROM || 'info@example.com';
-const mms_user = process.env.MMS_USER || 'info@example.com';
 const smtp_port = process.env.MMS_PORT || 2525;
 const ssmtp_port = process.env.MMS_SSL;
 const isSSL = ssmtp_port ? true : false;
@@ -686,7 +685,7 @@ export default class UserProfiler {
     return {
       name: '管理者'
     , kana: 'カンリシャ'
-    , email: mms_user
+    , email: mms_from
     , phone: '090-1234-5678'
     , plan: 'リスト500（月払）'
     };
