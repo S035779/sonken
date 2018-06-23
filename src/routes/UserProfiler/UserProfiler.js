@@ -34,12 +34,18 @@ const mail_keyset = {
  */
 export default class UserProfiler {
   constructor() {
+    this.updateMenu({ admin: admin_user })
+      .subscribe(
+        obj => { log.info(obj); }
+      , err => { log.warn('Failed to update the menu.'); }
+      , ( ) => { log.info('Complete to create Administrator!!'); }
+      );
     this.createAdmin({ admin: admin_user, password: admin_pass })
       .subscribe(
-      obj => { log.info(obj); }
-    , err => { log.warn('Adminitrator has already registered.'); }
-    , ( ) => { log.info('Complete to create Administrator!!'); }
-    );
+        obj => { log.info(obj); }
+      , err => { log.warn('Adminitrator has already registered.'); }
+      , ( ) => { log.info('Complete to create Administrator!!'); }
+      );
   }
 
   static of() {
@@ -310,13 +316,12 @@ export default class UserProfiler {
           const admin = new Admin({
             appname:        options.data.appname
           , from:           options.data.from
-          , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
           });
           admin.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
+            log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -325,7 +330,6 @@ export default class UserProfiler {
           const conditions = { _id: options.data._id };
           const update = {
             from:           options.data.from
-          , agreement:      options.data.agreement
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
           , updated:        new Date
@@ -669,11 +673,20 @@ export default class UserProfiler {
   }
 
   createAdmin({ admin, password }) {
-    const data = this.setAdmin();
+    const setAdmin = obj => ({
+      admin
+    , salt: obj.salt
+    , hash: obj.hash
+    , data: {
+        name: '管理者'
+      , kana: 'カンリシャ'
+      , email: mms_from
+      , phone: '090-1234-5678'
+      , plan: 1
+      }
+    });
     return this.createSaltAndHash(password)
-      .flatMap(obj => this._createAdmin({
-        admin, salt: obj.salt, hash: obj.hash, data
-      }));
+      .flatMap(obj => this._createAdmin(setAdmin(obj)));
   }
 
   _createAdmin({ admin, salt, hash, data }) {
@@ -681,14 +694,49 @@ export default class UserProfiler {
       .fromPromise(this.addAdmin(admin, salt, hash, data));
   }
 
-  setAdmin() {
-    return {
-      name: '管理者'
-    , kana: 'カンリシャ'
-    , email: mms_from
-    , phone: '090-1234-5678'
-    , plan: 'リスト500（月払）'
+  updateMenu({ admin }) {
+    const setPlans = objs => {
+      const isPlan  = obj => R.find(R.propEq('name', obj.plan))(objs[1].menu);
+      const setPlan = obj => isPlan(obj) ? isPlan(obj).id : obj.plan;
+      const setUser = obj => ({
+        user: obj.user
+      , data: { 
+          name: obj.name
+        , kana: obj.kana
+        , email: obj.email
+        , phone: obj.phone
+        , plan: setPlan(obj)
+        }
+      });
+      return R.map(obj => setUser(obj), objs[0])
     };
+
+    const new_plan = this.setPreference();
+    const setMenu  = obj => ({
+      _id:            obj._id
+    , menu:           new_plan.menu
+    , from:           new_plan.from
+    , advertisement:  new_plan.advertisement
+    });
+
+    const observable1 = Rx.Observable.forkJoin([
+      this.fetchUsers({ admin })
+    , this.fetchPreference({ admin })
+    ]);
+    const observable2 = objs => Rx.Observable.forkJoin([
+      this.updateUsers(objs[0])
+    , this.updatePreference({ admin, data: objs[1] })
+    ]);
+    return observable1
+      .map(objs => ([setPlans(objs), setMenu(objs[1])]))
+      .flatMap(objs => observable2(objs))
+      //.map(R.tap(log.debug.bind(this)))
+    ;
+  }
+
+  updateUsers(users) {
+    const promises = R.map(obj => this.updateUser({ user: obj.user, data: obj.data }));
+    return Rx.Observable.forkJoin(promises(users));
   }
 
   setPreference() {
@@ -696,31 +744,31 @@ export default class UserProfiler {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: 1, name: 'リスト500（月払）',     number: 500
+        { id: 1, name: 'リスト  500（月払  ：  980 円）',   number: 500
         , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
-      , { id: 2, name: 'リスト1000（月払）',    number: 1000
+      , { id: 2, name: 'リスト 1000（月払  ： 1580 円）',   number: 1000
         , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
-      , { id: 3, name: 'リスト2500（月払）',    number: 2500
+      , { id: 3, name: 'リスト 2500（月払  ： 1980 円）',   number: 2500
         , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
-      , { id: 4, name: 'リスト5000（月払）',    number: 5000
+      , { id: 4, name: 'リスト 5000（月払  ： 3980 円）',   number: 5000
         , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
-      , { id: 5, name: 'リスト7500（月払）',    number: 7500
+      , { id: 5, name: 'リスト 7500（月払  ： 4980 円）',   number: 7500
         , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
-      , { id: 6, name: 'リスト10000（月払）',   number: 10000
+      , { id: 6, name: 'リスト10000（月払  ： 5980 円）',   number: 10000
         , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
-      , { id: 7, name: 'リスト5000（半年払）',  number: 5000
+      , { id: 7, name: 'リスト 5000（半年払：19800 円）',   number: 5000
         , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
-      , { id: 8, name: 'リスト7500（半年払）',  number: 7500
+      , { id: 8, name: 'リスト 7500（半年払：24800 円）',   number: 7500
         , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
-      , { id: 9, name: 'リスト10000（半年払）', number: 10000
+      , { id: 9, name: 'リスト10000（半年払：29800 円）',   number: 10000
         , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
       ]
@@ -732,4 +780,46 @@ export default class UserProfiler {
       }
     };
   }
+
+  //oldPreference() {
+  //  return {
+  //    appname: app_name
+  //  , from: mms_from
+  //  , menu: [
+  //      { id: 1, name: 'リスト500（月払）',     number: 500
+  //      , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
+  //    , { id: 2, name: 'リスト1000（月払）',    number: 1000
+  //      , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
+  //    , { id: 3, name: 'リスト2500（月払）',    number: 2500
+  //      , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
+  //    , { id: 4, name: 'リスト5000（月払）',    number: 5000
+  //      , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
+  //    , { id: 5, name: 'リスト7500（月払）',    number: 7500
+  //      , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
+  //    , { id: 6, name: 'リスト10000（月払）',   number: 10000
+  //      , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
+  //    , { id: 7, name: 'リスト5000（半年払）',  number: 5000
+  //      , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
+  //    , { id: 8, name: 'リスト7500（半年払）',  number: 7500
+  //      , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
+  //    , { id: 9, name: 'リスト10000（半年払）', number: 10000
+  //      , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
+  //          + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
+  //    ]
+  //  , advertisement: {
+  //      url1: '/advertisement1.html'
+  //    , url2: '/advertisement2.html'
+  //    , url3: '/advertisement3.html'
+  //    , url4: '/advertisement4.html'
+  //    }
+  //  };
+  //}
 };

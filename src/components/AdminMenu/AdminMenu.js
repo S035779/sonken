@@ -239,7 +239,7 @@ class AdminMenu extends React.Component {
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
         要求を受け付けました。
         </RssDialog>
-        <LoginFormDialog open={isProfile} title={'プロファイル'}
+        <LoginFormDialog isSubmit open={isProfile} title={'プロファイル'}
           onClose={this.handleCloseDialog.bind(this, 'isProfile')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
           <Typography variant="title" noWrap
@@ -269,8 +269,8 @@ class AdminMenu extends React.Component {
             onChange={
               this.handleChangeProfile.bind(this,'confirm_password')}
             label="ユーザＰＷ（確認）" type="password" fullWidth/>
-        </LoginFormDialog>>
-        <LoginFormDialog open={isPreference} title={'設定内容変更'}
+        </LoginFormDialog>
+        <LoginFormDialog isSubmit open={isPreference} title={'設定内容変更'}
           onClose={this.handleCloseDialog.bind(this, 'isPreference')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
           <TextField autoFocus margin="dense"

@@ -86,9 +86,7 @@ class LoginPreference extends React.Component {
     const { isNotValid, isSuccess, plan } = this.state;
     const renderMenu = preference.menu ? preference.menu
       .map((obj, idx) => this.renderMenu(obj, idx)) : [];
-    return <LoginFormDialog
-        open={open}
-         title={'契約内容変更'}
+    return <LoginFormDialog isSubmit open={open} title={'契約内容変更'}
         onClose={this.handleCloseDialog.bind(this, 'isPreference')}
         onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
         <Typography variant="title" noWrap

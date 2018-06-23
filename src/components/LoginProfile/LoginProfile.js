@@ -102,9 +102,7 @@ class LoginProfile extends React.Component {
       isNotValid, isSuccess
     , name, user, kana, email, phone, password, confirm_password
     } = this.state;
-    return <LoginFormDialog 
-        open={open} 
-        title={'プロファイル'}
+    return <LoginFormDialog isSubmit open={open} title={'プロファイル'}
         onClose={this.handleCloseDialog.bind(this, 'isProfile')}
         onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
         <Typography variant="title" noWrap
