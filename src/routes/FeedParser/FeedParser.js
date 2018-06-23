@@ -1,7 +1,9 @@
 import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
+import { parseString }  from 'xml2js';
 import mongoose         from 'mongoose';
+import encoding         from 'encoding-japanese';
 import { Iconv }        from 'iconv';
 import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred
   , Listed }
@@ -1146,21 +1148,34 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, file }) {
-    return this.createNotes({ user, category, file })
+    return this.setContent(user, category, file)
+      .flatMap(objs => this.createNotes({ user, category, notes: objs}))
       .flatMap(() => this.fetchNotes({ user }))
       .flatMap(objs => this.updateNotes({ user, notes: objs }))
       //.map(R.tap(log.trace.bind(this)))
     ;
   }
   
-  createNotes({ user, category, file }) {
-    const notes = this.setNotesObj({ user, category, file });
+  setContent(user, category, file) {
+    switch(file.type) {
+      case 'application/vnd.ms-excel':
+      case 'text/csv':
+      case 'csv':
+        return Rx.Observable.fromPromise(this.setNotesObj(user, category, file.content));
+      case 'opml':
+        return Rx.Observable.fromPromise(this.setOpmlsObj(user, category, file.content));
+      default:
+        log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
+        return null;
+    }
+  }
+
+  createNotes({ user, category, notes }) {
+    //const notes = this.setContent({ user, category, file });
     const isNote = obj => R.find(note => note.url === obj.url, notes);
     const setNotes = R.map(obj => this.setNote({
-        user
-      , url: obj.url
-      , category
-      }, obj));
+        user, url: obj.url, category
+    }, obj));
     const setDatas = R.map(obj => setData(isNote(obj), obj));
     const setData = (note, obj)  => R.merge(obj, {
         title:      note.title
@@ -1172,14 +1187,14 @@ export default class FeedParser {
     const observable
       = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
     return Rx.Observable.forkJoin(observable(notes))
+      //.map(R.tap(log.trace.bind(this)))
       .map(objs => setNotes(objs))
       .map(objs => setDatas(objs))
-      .flatMap(objs => this._createNotes({ user, notes: objs }))
-      //.map(R.tap(log.trace.bind(this)))
+      .flatMap(objs => this._createNotes(user, objs))
     ;
   }
 
-  _createNotes({ user, notes }) {
+  _createNotes(user, notes) {
     const promises = R.map(obj => this.addNote(user, obj));
     return Rx.Observable.forkJoin(promises(notes));
   }
@@ -1192,117 +1207,153 @@ export default class FeedParser {
     , bidsprice:  obj.bidsprice
     , body:       obj.body
     });
-    const observables = R.map(obj =>
-      this.updateNote({ user, id: obj._id, data: setNote(obj) }));
+    const observables =
+      R.map(obj => this.updateNote({ user, id: obj._id, data: setNote(obj) }));
     return Rx.Observable.forkJoin(observables(notes))
+      //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
-  setNotesObj({ user, category, file }) {
-    const iconv = new Iconv('CP932', 'UTF-8//TRANSLIT//IGNORE');
-    const iconvBuf = _str => Buffer.from(_str);
-    const iconvCnv = _buf => iconv.convert(_buf);
-    const iconvUtf = _str => iconvCnv(iconvBuf(_str)).toString('utf-8');
-    const convChar = str => str !== '' ? iconvUtf(str) : '';
-    const toMBConv = R.map(R.map(c => convChar(c)));
-    const toRcords = R.split('\n');
-    const toTailes = R.tail;
-    const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
-    const toCutDbl = c => R.match(/^\s*"(.*?)"\s*$/, c)[1];
-    const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
-    const mergeCsv = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
-    const forkJoin = R.map(R.map(std.fork(mergeCsv,toCutDbl,toNonCut)));
-    const toCutRec = R.filter(objs => R.length(objs) > 1);
-    const setNotes = R.map(arr => ({
-      user
-    , url:          arr[1]
-    , category
-    , title:        arr[0]
-    , asin:         arr[2]
-    , price:        arr[3]
-    , bidsprice:    arr[4]
-    , body:         arr[5]
-    , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    }));
-    return R.compose(
-      setNotes
-    , toCutRec
-    , toMBConv
-    , forkJoin
-    , toColumn
-    , toTailes
-    //, R.tap(console.log)
-    , toRcords
-    )(file.toString());
-  }
-
-
-  setItemsObj({ user, category, file }) {
-    const toRcords = R.split('"\n');
-    const toTailes = R.tail;
-    const toColumn = R.map(R.split('",'));
-    const toCutHed = R.map(R.map(R.slice(1, Infinity)));
-    const toCutLst = R.map(R.map(R.replace(/"/g, '')))
-    const toCutRec = R.filter(objs => R.length(objs) > 1);
-    const setItems = R.map(arr => ({
-      title:            arr[0]
-    , link:             arr[1]
-    , description: { DIV: { A: {
-        attr: {
-          HREF:         arr[2]
-        }
-      , IMG: { attr: {
-          SRC:          arr[3]
-        , BORDER:       arr[4]
-        , WIDTH:        arr[5]
-        , HEIGHT:       arr[6]
-        , ALT:          arr[7]
-        }}
-      }}}
-    , attr_HREF:        arr[2]
-    , img_SRC:          arr[3]
-    , img_BORDER:       arr[4]
-    , img_WIDTH:        arr[5]
-    , img_HEIGHT:       arr[6]
-    , img_ALT:          arr[7]
-    , pubDate:          arr[8]
-    , guid: {
-        _:              arr[9]
-      , attr: {
-        isPermaLink:    arr[10]
-      }}
-    , guid__:           arr[9]
-    , guid_isPermaLink: arr[10]
-    , price:            arr[11]
-    , bids:             arr[12]
-    , bidStopTime:      arr[13]
-    }));
-    const setNote = objs => ({
-      url: ''
-    , category
-    , user
-    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , items: objs
-    , title: 'Untitled'
-    , asin: ''
-    , name: ''
-    , price: 0
-    , bidsprice: 0
-    , body: ''
-    , AmazonUrl: ''
-    , AmazonImg: ''
+  setOpmlsObj(user, category, file) {
+    return new Promise((resolve, reject) => {
+      parseString(file.toString()
+      , { trim: true, explicitArray: true, attrkey: 'attr', charkey: '_' }
+      , (err, res) => {
+        if(err) reject(err);
+        const logDatas = obj =>
+          console.dir(obj, {showHidden: false, depth: 10, colors: true});
+        const outlines = res.opml.body[0].outline;
+        const getDatas = R.map(obj => obj.outline);
+        const setDatas = R.map(obj => ({ title: obj.attr.title, url: obj.attr.htmlUrl }));
+        const setNotes = R.map(obj => ({
+          user
+        , url:          obj.url
+        , category
+        , title:        obj.title
+        , asin:         ''
+        , price:        0
+        , bidsprice:    0
+        , body:         ''
+        , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+        }));
+        resolve(R.compose(
+          setNotes
+        , setDatas
+        , R.flatten
+        , getDatas
+        )(outlines));
+      });
     });
-    return R.compose(
-      setNote
-    , setItems
-    , toCutRec
-    , toCutLst
-    , toCutHed
-    , toColumn
-    , toTailes
-    , toRcords
-    )(file.toString());
   }
+  
+  setNotesObj(user, category, file) {
+    return new Promise((resolve, reject) => {
+      const encode   = _str => encoding.detect(_str);
+      const isUtf    = _str => encode(_str) === 'UNICODE' || encode(_str) === 'ASCII';
+      const iconv    = new Iconv('CP932', 'UTF-8//TRANSLIT//IGNORE');
+      const iconvBuf = _str => Buffer.from(_str);
+      const iconvCnv = _buf => iconv.convert(_buf);
+      const iconvUtf = _str => iconvCnv(iconvBuf(_str)).toString('utf-8');
+      const convChar = str => str !== '' ? iconvUtf(str) : '';
+      const toMBConv = R.map(R.map(c => isUtf(c) ? c : convChar(c)));
+      const toRcords = R.split('\n');
+      const toTailes = R.tail;
+      const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
+      const toCutDbl = c => R.match(/^\s*"(.*?)"\s*$/, c)[1];
+      const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
+      const mergeCsv = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
+      const forkJoin = R.map(R.map(std.fork(mergeCsv,toCutDbl,toNonCut)));
+      const toCutRec = R.filter(objs => R.length(objs) > 1);
+      const setNotes = R.map(arr => ({
+        user
+      , url:          arr[1]
+      , category
+      , title:        arr[0]
+      , asin:         arr[2]
+      , price:        arr[3]
+      , bidsprice:    arr[4]
+      , body:         arr[5]
+      , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+      }));
+      resolve(R.compose(
+        setNotes
+      , toCutRec
+      , toMBConv
+      , forkJoin
+      , toColumn
+      , toTailes
+      , toRcords
+      )(file.toString())
+      );
+    });
+  }
+
+  //setItemsObj({ user, category, file }) {
+  //  const toRcords = R.split('"\n');
+  //  const toTailes = R.tail;
+  //  const toColumn = R.map(R.split('",'));
+  //  const toCutHed = R.map(R.map(R.slice(1, Infinity)));
+  //  const toCutLst = R.map(R.map(R.replace(/"/g, '')))
+  //  const toCutRec = R.filter(objs => R.length(objs) > 1);
+  //  const setItems = R.map(arr => ({
+  //    title:            arr[0]
+  //  , link:             arr[1]
+  //  , description: { DIV: { A: {
+  //      attr: {
+  //        HREF:         arr[2]
+  //      }
+  //    , IMG: { attr: {
+  //        SRC:          arr[3]
+  //      , BORDER:       arr[4]
+  //      , WIDTH:        arr[5]
+  //      , HEIGHT:       arr[6]
+  //      , ALT:          arr[7]
+  //      }}
+  //    }}}
+  //  , attr_HREF:        arr[2]
+  //  , img_SRC:          arr[3]
+  //  , img_BORDER:       arr[4]
+  //  , img_WIDTH:        arr[5]
+  //  , img_HEIGHT:       arr[6]
+  //  , img_ALT:          arr[7]
+  //  , pubDate:          arr[8]
+  //  , guid: {
+  //      _:              arr[9]
+  //    , attr: {
+  //      isPermaLink:    arr[10]
+  //    }}
+  //  , guid__:           arr[9]
+  //  , guid_isPermaLink: arr[10]
+  //  , price:            arr[11]
+  //  , bids:             arr[12]
+  //  , bidStopTime:      arr[13]
+  //  }));
+  //  const setNote = objs => ({
+  //    url: ''
+  //  , category
+  //  , user
+  //  , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+  //  , items: objs
+  //  , title: 'Untitled'
+  //  , asin: ''
+  //  , name: ''
+  //  , price: 0
+  //  , bidsprice: 0
+  //  , body: ''
+  //  , AmazonUrl: ''
+  //  , AmazonImg: ''
+  //  });
+  //  return R.compose(
+  //    setNote
+  //  , setItems
+  //  , toCutRec
+  //  , toCutLst
+  //  , toCutHed
+  //  , toColumn
+  //  , toTailes
+  //  , toRcords
+  //  )(file.toString());
+  //}
 
   downloadNotes({ user, category }) {
     const isCategory = obj => obj.category === category;

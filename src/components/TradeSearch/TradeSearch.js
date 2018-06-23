@@ -97,7 +97,7 @@ class TradeSearch extends React.Component {
         <div className={classes.space} />
         <RssButton color={'yellow'} 
           onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>CSV ダウンロード</RssButton>
+          classes={classes.button}>ダウンロード</RssButton>
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
         要求を受け付けました。

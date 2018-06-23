@@ -110,11 +110,11 @@ class RssSearch extends React.Component {
 
   handleChangeFile(event) {
     const { user, category } = this.props;
-    const blob = event.target.files.item(0);
-    std.logInfo(RssSearch.displayName, 'handleChangeFile', blob);
+    const file = event.target.files.item(0);
+    std.logInfo(RssSearch.displayName, 'handleChangeFile', file.type + ";" + file.name);
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.upload(user, category, blob)
+    NoteAction.upload(user, category, file)
       .then(()    => this.setState({ isSuccess:   true }) )
       .then(()    => spn.stop()                           )
       .catch(err  => {
@@ -206,13 +206,13 @@ class RssSearch extends React.Component {
         <div className={classes.space} />
         <RssButton color={color}
           onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>CSV ダウンロード</RssButton>
-        <input type="file" id="file" accept="text/csv"
+          classes={classes.button}>ダウンロード</RssButton>
+        <input type="file" id="file" accept=".csv,.opml,text/csv, text/opml"
           onChange={this.handleChangeFile.bind(this)}
           className={classes.input}/>
-        <label htmlFor="file">
-        <RssButton color={color} component="span"
-          classes={classes.button}>CSV アップロード</RssButton>
+        <label htmlFor="file" className={classes.uplabel}>
+          <RssButton color={color} component="span"
+            classes={classes.upbutton}>アップロード</RssButton>
         </label>
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
@@ -241,6 +241,11 @@ const styles = theme => ({
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:     { flex: 1, width: buttonWidth
+              , margin: theme.spacing.unit /2
+              , textAlign: 'center'
+              , wordBreak: 'keep-all', padding: 4 }
+, uplabel:     { flex: 1, width: buttonWidth + theme.spacing.unit }
+, upbutton:   { width: buttonWidth, height: buttonWidth /2
               , margin: theme.spacing.unit /2
               , textAlign: 'center'
               , wordBreak: 'keep-all', padding: 4 }

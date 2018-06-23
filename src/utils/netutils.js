@@ -7,6 +7,10 @@ const log = {
 , warn:  function(message) { console.warn(message);  }
 };
 
+const min = 2000;
+const max = 5000;
+const throttle = () => Math.floor(Math.random() * (max +1 - min) +min);
+
 /*
  * Simple HTTP GET request
  *
@@ -28,8 +32,8 @@ const get = function(url, options, callback) {
   const client = require('http');
   const req = client.get({
     host: hostname
-    , port: port
-    , path: path
+  , port: port
+  , path: path
   }, function(res) {
     const stat = res.statusCode;
     const head = res.headers;
@@ -39,7 +43,7 @@ const get = function(url, options, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -51,17 +55,18 @@ const get = function(url, options, callback) {
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          get(url, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          log.warn(body);
+          setTimeout(() => get(url, options, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
@@ -106,7 +111,7 @@ const getJSON = function(url, options, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -114,21 +119,21 @@ const getJSON = function(url, options, callback) {
           callback(null, head, JSON.parse(body));
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          get(url, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => getJSON(url, options, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break;
       }
@@ -173,7 +178,7 @@ const get2 = function(url, options, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -181,21 +186,21 @@ const get2 = function(url, options, callback) {
           callback(null, head, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          get2(url, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => get2(url, options, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
@@ -240,7 +245,7 @@ const getJSON2 = function(url, options, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -248,21 +253,21 @@ const getJSON2 = function(url, options, callback) {
           callback(null, head, JSON.parse(body));
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          get2(url, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => getJSON2(url, options, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: JSON.parse(body) }});
           break;
       }
@@ -328,7 +333,7 @@ const post2 = function(url, auth, body, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -336,21 +341,21 @@ const post2 = function(url, auth, body, callback) {
           callback(null, head, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           return; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          postData2(url, auth, body, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => post2(url, auth, body, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
@@ -405,7 +410,7 @@ const postData = function(url, body, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -413,21 +418,21 @@ const postData = function(url, body, callback) {
           callback(null, head, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           return; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          postData(url, body, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => postData(url, body, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
@@ -494,7 +499,7 @@ const postData2 = function(url, auth, body, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -502,21 +507,21 @@ const postData2 = function(url, auth, body, callback) {
           callback(null, head, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           return; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          postData2(url, auth, body, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => postData2(url, auth, body, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
@@ -583,7 +588,7 @@ const postJson2 = function(url, auth, body, callback) {
     res.on('end', function() {
       switch (stat) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 200: case 201: case 202: case 204:
@@ -591,21 +596,21 @@ const postJson2 = function(url, auth, body, callback) {
           callback(null, head, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           return; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
-          postJson2(url, auth, body, callback);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => postJson2(url, auth, body, callback), throttle());
           break;
         default:
           process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat}`);
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
           callback({ error: { name: stat, message: body }});
           break;
       }
