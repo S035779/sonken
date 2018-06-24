@@ -103,14 +103,14 @@ class LoginRegist extends React.Component {
   }
 
   renderItems(item, idx) {
-    return <MenuItem value={item.name} key={idx}>
+    return <MenuItem key={idx} value={item.id}>
       {item.name}（上限数：{item.number}）
     </MenuItem>;
   }
 
   render() {
-    //std.logInfo(LoginRegist.displayName, 'State', this.state);
-    std.logInfo(LoginRegist.displayName, 'Props', this.props);
+    std.logInfo(LoginRegist.displayName, 'State', this.state);
+    //std.logInfo(LoginRegist.displayName, 'Props', this.props);
     const { classes, location, preference } = this.props;
     const { username, password, confirm_password
       , name, kana, email, phone, plan, agreed

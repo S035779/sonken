@@ -28,7 +28,7 @@ const approvedSchema = new mongoose.Schema({
 approvedSchema.index({ approved: 1 }, { unique: true });
 
 const menuSchema = new mongoose.Schema({
-  id:               { type: Number, required: true }
+  id:               { type: String, required: true }
 , name:             { type: String, required: true }
 , link:             { type: String, required: true }
 , number:           { type: Number, required: true }

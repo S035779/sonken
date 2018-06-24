@@ -307,15 +307,15 @@ export default {
           , err => { reject(err); }
           );
         });
-      //case 'download/items':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.postFile(
-      //      api + '/file'
-      //    , options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
+      case 'download/items':
+        return new Promise((resolve, reject) => {
+          xhr.postFile(
+            api + '/file'
+          , options
+          , obj => { resolve(obj); }
+          , err => { reject(err); }
+          );
+        });
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -429,8 +429,8 @@ export default {
   downloadNotes(user, category) {
     return this.request('download/notes', { user, category });
   },
-  downloadItems(user, items) {
-    return this.request('download/items', { user, items });
+  downloadItems(user, id) {
+    return this.request('download/items', { user, id });
   },
 
 

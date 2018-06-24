@@ -156,6 +156,13 @@ export default {
       })
     ;
   },
+  downloadItems(user, id) {
+    return NoteApiClient.downloadItems(user, id)
+      .then(file => {
+        dispatch({ type: 'note/download/items', file });
+      })
+    ;
+  },
   createAdd(user, ids) {
     return NoteApiClient.createAdd(user, ids)
       .then(() => {

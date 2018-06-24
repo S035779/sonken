@@ -2,12 +2,14 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from 'material-ui/styles';
 import { Input, Button, Typography, TextField }
                         from 'material-ui';
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
+import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';
 
@@ -32,6 +34,21 @@ class RssForms extends React.Component {
     //std.logInfo(RssForms.displayName, 'Props', nextProps);
     const { note } = nextProps;
     this.setState({ note });
+  }
+
+  downloadFile(blob) {
+    std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
+    const a = document.createElement('a');
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      a.href = URL.createObjectURL(
+        new Blob([bom, this.result], { type: 'text/csv' }));
+      a.target = '_blank';
+      a.download = 'download.csv';
+      a.click();
+    }
+    fileReader.readAsArrayBuffer(blob);
   }
 
   handleSave() {
@@ -89,6 +106,23 @@ class RssForms extends React.Component {
     this.setState({ [name]: false });
   }
 
+  handleDownload(event) {
+    const { user, note } = this.props;
+    std.logInfo(RssForms.displayName, 'handleDownload', user);
+    const spn = Spinner.of('app');
+    spn.start();
+    NoteAction.downloadItems(user, note._id)
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.downloadFile(this.props.file))
+      .then(() => spn.stop())
+      .catch(err => {
+        std.logError(RssForms.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        spn.stop();
+      })
+    ;
+  }
+
   isValidate() {
     const { asin, price, bidsprice, body } = this.state.note;
     return (asin !== ''
@@ -105,7 +139,7 @@ class RssForms extends React.Component {
 
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
-    const { classes, user, note } = this.props;
+    const { classes, user, note, category } = this.props;
     const { isNotValid, isSuccess } = this.state;
     const { asin, price, bidsprice, body} = this.state.note;
     const isChanged = this.isChanged();
@@ -114,10 +148,16 @@ class RssForms extends React.Component {
     const link_amz = note.AmazonUrl;
     const name = note.name;
     const items = note.items ? note.items : [];
+    const color = category === 'marchant' ? 'skyblue' : 'orange';
     return <div className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
+        <div className={classes.buttons}>
+          <RssButton color={color}
+            onClick={this.handleDownload.bind(this)}
+            classes={classes.button}>ダウンロード</RssButton>
+        </div>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
@@ -150,7 +190,7 @@ class RssForms extends React.Component {
       </div>
       <div className={classes.edit}>
         <Typography variant="subheading" noWrap
-          className={classes.title}>Amazon商品名：</Typography>
+          className={classes.label}>Amazon商品名：</Typography>
         <Button color="primary" size="large" fullWidth
           href={link_amz} target="_blank"
           className={classes.name}>{name}</Button>
@@ -213,25 +253,25 @@ const listHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
 const listHeightSmUp    =
   `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const listWidth = 400;
 const columnHeight = 62;
-const editWidth = `calc(100% - ${listWidth}px)`;
 const styles = theme => ({
   forms:        { display: 'flex', flexDirection: 'column' }
 , noteList:     { width: '100%'
                 , height: listHeightSmDown
                 , [theme.breakpoints.up('sm')]: {
                   height: listHeightSmUp }}
-, header:       { height: columnHeight, minHeight: columnHeight
+, header:       { display: 'flex', flexDirection: 'row' 
+                , height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box'
                 , padding: '5px' }
-, title:        { margin: theme.spacing.unit * 1.75 }
+, title:        { width: 480, margin: theme.spacing.unit * 1.75 }
+, label:        { margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
                 , height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box'
                 , padding: '5px' }
-, buttons:      { display: 0, display: 'flex', flexDirection: 'row' }
+, buttons:      { display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 , link:         { flex: 1, margin: theme.spacing.unit /2

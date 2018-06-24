@@ -7,6 +7,7 @@ import Trade        from 'Pages/Trade/Trade';
 import Auth         from 'Pages/Auth/Auth';
 import Login        from 'Pages/Login/Login';
 import LoginAuth    from 'Pages/LoginAuth/LoginAuth';
+import LoginMgmt    from 'Pages/LoginMgmt/LoginMgmt';
 import LoginRegist  from 'Pages/LoginRegist/LoginRegist';
 import LoginConfirm from 'Pages/LoginConfirm/LoginConfirm';
 import Admin        from 'Pages/Admin/Admin';
@@ -63,6 +64,10 @@ export default function getRoutes() {
       , routes: [{
           path: '/login/authenticate'
         , component: LoginAuth
+        }
+      , {
+          path: '/login/management'
+        , component: LoginMgmt
         }
       , {
           path: '/login/registration'

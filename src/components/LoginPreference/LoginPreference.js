@@ -30,10 +30,9 @@ class LoginPreference extends React.Component {
     std.logInfo(LoginPreference.displayName, 'handleChangeSelect', name);
     const { profile } = this.state;
     switch(name) {
-      default:
+      case 'plan':
         this.setState({
-          profile: Object.assign({}
-          , profile, { [name]: event.target.value  })
+          profile: Object.assign({}, profile, { [name]: event.target.value  })
         , [name]: event.target.value 
         });
         break;
@@ -74,7 +73,7 @@ class LoginPreference extends React.Component {
   }
 
   renderMenu(obj, idx) {
-    return <MenuItem key={idx} value={obj.name}>
+    return <MenuItem key={idx} value={obj.id}>
       {obj.name}（上限数：{obj.number}）
     </MenuItem>;
   }

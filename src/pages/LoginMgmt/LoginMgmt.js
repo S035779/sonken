@@ -17,11 +17,11 @@ import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 
-class LoginAuth extends React.Component {
+class LoginMgmt extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      redirectToRefferer: false
+      redirectToManagement: false
     , username: ''
     , password: ''
     , checked: false
@@ -31,19 +31,14 @@ class LoginAuth extends React.Component {
 
   handleLogin() {
     const { username, password, checked } = this.state;
-    LoginAction.authenticate(username, password, false)
+    LoginAction.authenticate(username, password, true)
       .then(() => {
-        if(this.props.isAuthenticated) {
-          return LoginAction.presetUser(username);
-        } else {
-          this.setState({ isNotValid: true });
-          return null;
-        }
+        if(this.props.isAuthenticated) return LoginAction.presetAdmin(username);
+        this.setState({ isNotValid: true });
+        return null;
       })
       .then(() => {
-        if(this.props.isAuthenticated) {
-          this.setState({ redirectToRefferer: true });
-        }
+        if(this.props.isAuthenticated) this.setState({ redirectToManagement: true });
       })
       .catch(err => {
         this.setState({ isNotValid: true });
@@ -63,13 +58,13 @@ class LoginAuth extends React.Component {
   }
 
   render() {
-    //std.logInfo(LoginAuth.displayName, 'State', this.state);
-    //std.logInfo(LoginAuth.displayName, 'Props', this.props);
+    //std.logInfo(LoginMgmt.displayName, 'State', this.state);
+    //std.logInfo(LoginMgmt.displayName, 'Props', this.props);
     const { classes, location } = this.props;
-    const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
-    if(redirectToRefferer) {
-      const from = location.state || { pathname: '/marchant' };
-      return <Redirect to={from} />;
+    const { redirectToManagement, username, password, checked, isNotValid } = this.state;
+    if(redirectToManagement) {
+      const admin = { pathname: '/admin/users' };
+      return <Redirect to={admin} />;
     }
     return <div className={classes.container}>
      <div className={classes.loginForms}>
@@ -147,9 +142,9 @@ const styles = theme => ({
 , input:      { flex: 1 }
 , confirm:    { fontSize: 10 }
 });
-LoginAuth.displayName = 'LoginAuth';
-LoginAuth.defaultProps = {};
-LoginAuth.propTypes = {
+LoginMgmt.displayName = 'LoginMgmt';
+LoginMgmt.defaultProps = {};
+LoginMgmt.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(withRouter(LoginAuth));
+export default withStyles(styles)(withRouter(LoginMgmt));

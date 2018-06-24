@@ -114,7 +114,7 @@ class Dashboard extends React.Component {
             notePage={page}/>
         </div>
         <div className={classes.noteEdit}>
-        {route.routes ? renderRoutes(route.routes,{ user, note }) : null}
+        {route.routes ? renderRoutes(route.routes,{ user, note, category, file }) : null}
         </div>
       </div>
     </div>;

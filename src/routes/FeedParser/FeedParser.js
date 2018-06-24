@@ -139,10 +139,6 @@ export default class FeedParser {
             resolve(obj);
           });
         });
-      case 'fetch/items':
-        return new Promise((resolve, reject) => {
-          resolve(options.items);
-        });
       case 'create/note':
         return new Promise((resolve, reject) => {
           const note = new Note({
@@ -611,14 +607,6 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
 
-  getItems(user, items) {
-    return this.request('fetch/items', { user, items });
-  }
-
-  //fetchCategorys({ user }) {
-  //  return Rx.Observable.fromPromise(this.getCategorys(user));
-  //}
-
   fetchCategorys({ user }) {
     const observables = Rx.Observable.forkJoin([
       this.getReaded(user)
@@ -747,10 +735,6 @@ export default class FeedParser {
   fetchAllNotes({ users }) {
     const observables = R.map(user => this.getNotes(user));
     return Rx.Observable.forkJoin(observables(users));
-  }
-
-  fetchItems({ user, items }) {
-    return Rx.Observable.fromPromise(this.getItems(user, items));
   }
 
   fetchAddedNotes({ user }) {
@@ -1357,49 +1341,45 @@ export default class FeedParser {
 
   downloadNotes({ user, category }) {
     const isCategory = obj => obj.category === category;
+    const setNotes = objs => R.map(obj => ({
+      title:      obj.title
+    , url:        obj.url
+    , asin:       obj.asin
+    , price:      obj.price
+    , bidsprice:  obj.bidsprice
+    , memo:       obj.body
+    }), objs);
+    const keys = category === 'marchant'
+      ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo']
+      : ['title', 'url'];
+    const setNotesCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNotes({ user })
       .map(objs => R.filter(isCategory, objs))
-      .map(objs => this.setNotesCsv(category, objs))
-      .map(csv  => this.setOctetStream(csv));
+      .map(objs => setNotes(objs))
+      .map(objs => setNotesCsv(objs))
+      .map(csv  => Buffer.from(csv, 'utf8'))
+    ;
   }
   
-  downloadItems({ user, items }) {
-    return this.fetchItems({ user, items })
-      .map(objs => this.setItemsCsv(objs))
-      .map(csv  => this.setOctetStream(csv));
+  downloadItems({ user, id }) {
+    const setItems = objs => R.map(obj => ({
+      title:  obj.title
+    , seller: obj.seller
+    , auid:   obj.guid__
+    , link:   obj.link
+    , price:  obj.price
+    , date:   obj.pubDate
+    }), objs);
+    const keys = ['title', 'seller', 'auid', 'link', 'price', 'date'];
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
+    return this.fetchNote({ user, id })
+      .map(obj  => setItems(obj.items))
+      .map(objs => setItemsCsv(objs))
+      .map(csv  => Buffer.from(csv, 'utf8'))
+      //.map(R.tap(log.trace.bind(this)))
+    ;
   }
   
-  setOctetStream(str) {
-    return Buffer.from(str, 'utf8');
-  }
-
-  setNotesCsv(category, objs) {
-    const keys = category === 'marchant'
-      ? ['title', 'url', 'asin', 'price', 'bidsprice', 'body']
-      : ['title', 'url'];
-    return js2Csv.of({ csv: objs, keys }).parse();
-  };
-
-  setItemsCsv(objs) {
-    const keys = [
-      'title'
-    , 'link'
-    , 'attr_HREF'
-    , 'img_SRC'
-    , 'img_BORDER'
-    , 'img_WIDTH'
-    , 'img_HEIGHT'
-    , 'img_ALT'
-    , 'pubDate'
-    , 'guid__'
-    , 'guid_isPermaLink'
-    , 'price'
-    , 'bids'
-    , 'bidStopTime'
-    ];
-    return js2Csv.of({ csv: objs, keys }).parse();
-  };
-
   setNote({ user, url, category, categoryIds, title }, obj) {
     //log.debug(FeedParser.displayName, 'setNote'
     //  , { user, title, category, categoryIds, url });

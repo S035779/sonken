@@ -744,31 +744,31 @@ export default class UserProfiler {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: 1, name: 'リスト  500（月払  ：  980 円）',   number: 500
+        { id: '0001', name: 'リスト  500（月払  ：  980 円）',   number: 500
         , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
-      , { id: 2, name: 'リスト 1000（月払  ： 1580 円）',   number: 1000
+      , { id: '0002', name: 'リスト 1000（月払  ： 1580 円）',   number: 1000
         , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
-      , { id: 3, name: 'リスト 2500（月払  ： 1980 円）',   number: 2500
+      , { id: '0003', name: 'リスト 2500（月払  ： 1980 円）',   number: 2500
         , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
-      , { id: 4, name: 'リスト 5000（月払  ： 3980 円）',   number: 5000
+      , { id: '0004', name: 'リスト 5000（月払  ： 3980 円）',   number: 5000
         , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
-      , { id: 5, name: 'リスト 7500（月払  ： 4980 円）',   number: 7500
+      , { id: '0005', name: 'リスト 7500（月払  ： 4980 円）',   number: 7500
         , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
-      , { id: 6, name: 'リスト10000（月払  ： 5980 円）',   number: 10000
+      , { id: '0006', name: 'リスト10000（月払  ： 5980 円）',   number: 10000
         , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
-      , { id: 7, name: 'リスト 5000（半年払：19800 円）',   number: 5000
+      , { id: '0007', name: 'リスト 5000（半年払：19800 円）',   number: 5000
         , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
-      , { id: 8, name: 'リスト 7500（半年払：24800 円）',   number: 7500
+      , { id: '0008', name: 'リスト 7500（半年払：24800 円）',   number: 7500
         , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
-      , { id: 9, name: 'リスト10000（半年払：29800 円）',   number: 10000
+      , { id: '0009', name: 'リスト10000（半年払：29800 円）',   number: 10000
         , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
             + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
       ]

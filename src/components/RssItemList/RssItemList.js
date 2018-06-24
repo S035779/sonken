@@ -153,7 +153,8 @@ class RssItemList extends React.Component {
     + `入札終了時間：${
         std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm')
       }、`
-    + `AuctionID：${item.guid._}`
+    + `AuctionID：${item.guid._}、`
+    + `Seller：${item.seller}`
     ;
     const notice = '';
     const renderStar = starred.indexOf(item.guid._) !== -1

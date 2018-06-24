@@ -185,10 +185,9 @@ class Yahoo {
                   .follow('div.a1wrp h3 a')
                   .set({
                     title: 'h1.ProductTitle__text > text()'
-                  , bids: 'li.Count__count.Count__count > dl '
-                      + '> dd.Count__number > text()'
-                  , price: 'div.Price.Price--current '
-                      + '> dl.Price__body > dd.Price__value > text()'
+                  , bids: 'li.Count__count.Count__count > dl > dd.Count__number > text()'
+                  , price: 'div.Price.Price--current > dl.Price__body > dd.Price__value > text()'
+                  , seller: 'dd.Seller__card > span.Seller__name > a > text()'
                   , details: [ 'dd.ProductDetail__description > text()' ]
                   })
               ]
@@ -221,6 +220,9 @@ class Yahoo {
               const setPrice        = _obj => _obj.price
                 ? R.merge(_obj, { price: _setPrice(_obj.price) })
                 : R.merge(_obj, { price: '-' });
+              const setSeller       = _obj => _obj.seller
+                ? R.merge(_obj, { seller: _obj.seller })
+                : R.merge(_obj, { seller: '-' });
               const _setDate        =
                 R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
               const setBidStopTime  = _obj =>
@@ -232,6 +234,7 @@ class Yahoo {
               });
               return results = R.compose(
                 setItems
+              , R.map(setSeller)
               , R.map(setPrice)
               , R.map(setBidStopTime)
               , R.map(setPubDate)
@@ -245,7 +248,10 @@ class Yahoo {
             //.log(msg => log.trace(Yahoo.displayName, msg))
             //.debug(msg => log.debug(Yahoo.displayName, msg))
             .error(msg => log.warn(Yahoo.displayName, msg))
-            .done(()  => resolve(results));
+            .done(()  => {
+              //console.log(results);
+              return resolve(results);
+            });
         });
     }
   }

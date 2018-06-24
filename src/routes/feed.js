@@ -54,8 +54,8 @@ export default {
 
   downloadItems(options) {
     return (req, res, next) => {
-      const { user, items } = req.body;
-      feed.downloadItems({ user, items }).subscribe(
+      const { user, id } = req.body;
+      feed.downloadItems({ user, id }).subscribe(
         obj => { res.send(obj); }
       , err => {
           res.status(500)

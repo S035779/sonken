@@ -58,7 +58,7 @@ class Management extends React.Component {
           admin={admin}
           category={category}
           userNumber={number} userPage={page} />
-      <div className={classes.body}>
+        <div className={classes.body}>
         <div className={classes.userList}>
           <AdminButtons
             admin={admin}

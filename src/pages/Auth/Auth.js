@@ -8,6 +8,7 @@ import { CssBaseline }  from 'material-ui';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader      from 'Components/LoginHeader/LoginHeader';
 import authImg          from 'Assets/image/full-screen-image-2.jpg';
+import mgmtImg          from 'Assets/image/full-screen-image-1.jpg';
 import rgstImg          from 'Assets/image/bg5.jpg';
 import cnfmImg          from 'Assets/image/bg4.jpg';
 
@@ -54,6 +55,11 @@ const styles = theme => ({
   authenticate: Object.assign({}, root, {
     background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm})`
       + `, url(${image + authImg})`
+  , backgroundSize: 'cover'
+  })
+, management: Object.assign({}, root, {
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm})`
+      + `, url(${image + mgmtImg})`
   , backgroundSize: 'cover'
   })
 , registration: Object.assign({}, root, {

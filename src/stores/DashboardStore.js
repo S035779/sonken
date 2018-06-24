@@ -206,6 +206,10 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           file:  action.file
         });
+      case 'note/download/items':
+        return Object.assign({}, state, {
+          file:  action.file
+        });
       case 'add/create':
         return Object.assign({}, state, {
           notes: this.createAdd(state, action)

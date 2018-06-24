@@ -31,8 +31,8 @@ class AdminMenu extends React.Component {
   }
 
   componentDidMount() {
-    std.logInfo(AdminMenu.displayName, 'fetch', 'Preference');
-    std.logInfo(AdminMenu.displayName, 'fetch', 'Profile');
+    //std.logInfo(AdminMenu.displayName, 'fetch', 'Preference');
+    //std.logInfo(AdminMenu.displayName, 'fetch', 'Profile');
     LoginAction.fetchPreference();
     LoginAction.fetchProfile(this.props.admin);
   }
@@ -197,7 +197,7 @@ class AdminMenu extends React.Component {
   }
 
   render() {
-    std.logInfo(AdminMenu.displayName, 'State', this.state);
+    //std.logInfo(AdminMenu.displayName, 'State', this.state);
     const { auth, classes } = this.props;
     const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
       , password, confirm_password, preference, profile } = this.state;

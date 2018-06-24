@@ -6,13 +6,15 @@ import RssItems from 'Components/RssItems/RssItems';
 
 class SellersEdit extends React.Component {
   render() {
-    const { classes, user, note } = this.props
+    const { classes, user, note, category, file} = this.props
     if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
       <div className={classes.items}>
         <RssItems
           user={user}
-          note={note} />
+          note={note} 
+          category={category}
+          file={file} />
       </div>
     </div>;
   }

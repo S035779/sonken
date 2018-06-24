@@ -55,13 +55,15 @@ class ApprovalForms extends React.Component {
   }
 
   render() {
-    std.logInfo(ApprovalForms.displayName, 'State', this.state);
+    //std.logInfo(ApprovalForms.displayName, 'State', this.state);
     const { classes } = this.props;
     const { isNotValid, isSuccess } = this.state;
     const { user, name, kana, email, phone, plan } = this.state.user;
+    const { menu } = this.props.preference;
     const primary = 'skyblue';
     const secondary = 'orange';
     const title = `${name} (${user})`;
+    const planName = menu ? menu.find(obj => obj.id === plan).name : 'N/A';
     return <div className={classes.forms}>
       <div className={classes.edit}>
         <Typography variant="title" noWrap className={classes.title}>
@@ -123,7 +125,7 @@ class ApprovalForms extends React.Component {
         申し込みプラン
         </Typography>
         <Typography variant="subheading" noWrap className={classes.title}>
-        {plan}
+        {planName}
         </Typography>
       </div>
     </div>;

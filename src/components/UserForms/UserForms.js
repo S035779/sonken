@@ -28,7 +28,7 @@ class UserForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(UserForms.displayName, 'Props', nextProps);
+    //std.logInfo(UserForms.displayName, 'Props', nextProps);
     this.setState({ user: nextProps.user });
   }
 
@@ -94,7 +94,7 @@ class UserForms extends React.Component {
   }
 
   renderMenu(obj, idx) {
-    return <MenuItem key={idx} value={obj.name}>
+    return <MenuItem value={obj.id} key={idx}>
       {obj.name}（上限数：{obj.number}）
     </MenuItem>;
   }
