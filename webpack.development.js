@@ -8,12 +8,11 @@ var development = {
   devtool: 'inline-source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development')
-    , 'process.env.PLATFORM': JSON.stringify('web')
-    , 'process.env.API_URL':
-        JSON.stringify('http://localhost:8080/api')
-    , 'process.env.ASSET_URL':
-        JSON.stringify('http://localhost:8080')
+      'process.env.NODE_ENV':  JSON.stringify('development')
+    , 'process.env.PLATFORM':  JSON.stringify('web')
+    , 'process.env.API_URL':   JSON.stringify('http://localhost:8080/api')
+    , 'process.env.ASSET_URL': JSON.stringify('http://localhost:8080')
+    , 'process.env.APP_NAME':  JSON.stringify('アルファONE')
     }),
   ],
   devServer: {

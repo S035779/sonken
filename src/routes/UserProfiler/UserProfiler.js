@@ -10,6 +10,7 @@ import Sendmail           from 'Utilities/Sendmail';
 import { logs as log }    from 'Utilities/logutils';
 
 dotenv.config()
+const node_env = process.env.NODE_ENV;
 const app_name = process.env.APP_NAME;
 const admin_user = process.env.ADMIN_USER;
 const admin_pass = process.env.ADMIN_PASS;
@@ -695,12 +696,12 @@ export default class UserProfiler {
   }
 
   updateMenu({ admin }) {
-    const new_plan = this.setPreference();
-    const old_plan = this.oldPreference();
+    const new_plan = node_env === 'staging' ? this.freeMenu() : this.productionMenu();
+    //const old_plan = this.oldPreference();
     const setPlans = objs => {
       const isPlan  = obj =>
-        //R.find(R.propEq('name', obj.plan))(objs[1].menu);
-        R.find(R.propEq('name', obj.plan))(old_plan.menu);
+        R.find(R.propEq('name', obj.plan))(objs[1].menu);
+        //R.find(R.propEq('name', obj.plan))(old_plan.menu);
       const setPlan = obj => isPlan(obj) ? isPlan(obj).id : obj.plan;
       const setUser = obj => ({
         user: obj.user
@@ -741,7 +742,7 @@ export default class UserProfiler {
     return Rx.Observable.forkJoin(promises(users));
   }
 
-  setPreference() {
+  productionMenu() {
     return {
       appname: app_name
     , from: mms_from
@@ -792,38 +793,14 @@ export default class UserProfiler {
     };
   }
 
-  oldPreference() {
+  freeMenu() {
     return {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: '0001', name: 'リスト500（月払）',     number: 500
-        , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
-      , { id: '0002', name: 'リスト1000（月払）',    number: 1000
-        , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
-      , { id: '0003', name: 'リスト2500（月払）',    number: 2500
-        , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
-      , { id: '0004', name: 'リスト5000（月払）',    number: 5000
-        , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
-      , { id: '0005', name: 'リスト7500（月払）',    number: 7500
-        , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
-      , { id: '0006', name: 'リスト10000（月払）',   number: 10000
-        , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
-      , { id: '0007', name: 'リスト5000（半年払）',  number: 5000
-        , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
-      , { id: '0008', name: 'リスト7500（半年払）',  number: 7500
-        , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
-      , { id: '0009', name: 'リスト10000（半年払）', number: 10000
-        , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
+        { id: '0001', name: 'フリープラン（無料',     number: 500
+        , price: 0,   link: 'https://www.paypal.com/cgi-bin/webscr?'
+            + 'cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
       ]
     , advertisement: {
         url1: '/advertisement1.html'

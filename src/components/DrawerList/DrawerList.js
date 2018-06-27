@@ -18,6 +18,8 @@ import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
 
+const app_name = process.env.APP_NAME;
+
 class DrawerList extends React.Component {
   constructor(props) {
     super(props);
@@ -498,7 +500,7 @@ class DrawerList extends React.Component {
         <ListItemIcon>
           <BlurOn className={classes.icon} />
         </ListItemIcon>
-        <ListItemText primary="アルファOne" classes={textClass}/>
+        <ListItemText primary={app_name} classes={textClass}/>
       </ListItem>
     </div>;
   }

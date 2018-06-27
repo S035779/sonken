@@ -21,6 +21,8 @@ import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import agrTxt           from 'Main/agreement';
 import plnImg           from 'Main/planlist';
 
+const node_env = process.env.NODE_ENV;
+
 class LoginRegist extends React.Component {
   constructor(props) {
     super(props);
@@ -309,13 +311,13 @@ class LoginRegist extends React.Component {
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssFullDialog open={openAgree} title={'利用規約'}
+          <RssFullDialog open={node_env !== 'staging' && openAgree} title={'利用規約'}
             onClose={this.handleCloseDialog.bind(this, 'openAgree')}>
             <iframe
               src={`data:text/html;charset=utf-8;base64,${agrTxt}`}
               className={classes.agreement} />
           </RssFullDialog>
-          <RssFullDialog open={openPlan} title={'プラン表'}
+          <RssFullDialog open={node_env !== 'staging' && openPlan} title={'プラン表'}
             onClose={this.handleCloseDialog.bind(this, 'openPlan')}>
             <img
               src={`data:image/png;base64,${plnImg}`}

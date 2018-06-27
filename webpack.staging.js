@@ -7,11 +7,11 @@ var production = {
   devtool: 'source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV':  JSON.stringify('production')
+      'process.env.NODE_ENV':  JSON.stringify('staging')
     , 'process.env.PLATFORM':  JSON.stringify('web')
-    , 'process.env.API_URL':   JSON.stringify('https://feedparser.alpha-one-rss.jp/api')
-    , 'process.env.ASSET_URL': JSON.stringify('https://feedparser.alpha-one-rss.jp/assets')
-    , 'process.env.APP_NAME':  JSON.stringify('アルファOne')
+    , 'process.env.API_URL':   JSON.stringify('http://ik1-309-14667.vs.sakura.ne.jp/api')
+    , 'process.env.ASSET_URL': JSON.stringify('http://ik1-309-14667.vs.sakura.ne.jp/assets')
+    , 'process.env.APP_NAME':  JSON.stringify('RSS Reader!!')
     }),
     new UglifyJSPlugin({
       sourceMap: true

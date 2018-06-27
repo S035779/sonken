@@ -10,6 +10,8 @@ import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
                       from 'material-ui-icons';
 import RssButton      from 'Components/RssButton/RssButton';
 
+const app_name = process.env.APP_NAME;
+
 class LoginHeader extends React.Component {
   render() {
     //std.logInfo(LoginHeader.displayName, 'Props', this.props);
@@ -22,7 +24,7 @@ class LoginHeader extends React.Component {
           component={Link} to="/marchant"
           className={classes.name}>
           <BlurOn className={classes.icon} />
-          アルファOne
+          {app_name}
         </RssButton>
         </div>
         <div className={classes.link}>
