@@ -4,9 +4,7 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/node /home/app/work/sonken/dist/ssr.node.js
 ExecStart=/usr/bin/node /home/app/work/sonken/dist/api.node.js
-ExecStart=/usr/bin/node /home/app/work/sonken/dist/job.node.js
 WorkingDirectory=/home/app/work/sonken
 KillMode=process
 Restart=always

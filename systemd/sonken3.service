@@ -1,0 +1,15 @@
+[Unit]
+Description=sonken server
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /home/app/work/sonken/dist/job.node.js
+WorkingDirectory=/home/app/work/sonken
+KillMode=process
+Restart=always
+User=app
+Group=wheel
+
+[Install]
+WantedBy=multi-user.target
