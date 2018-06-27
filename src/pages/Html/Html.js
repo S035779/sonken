@@ -8,6 +8,7 @@ import Static from 'Pages/Static/Static';
 import Icon from 'Assets/image/favicon.ico';
 
 dotenv.config();
+const app_name = process.env.APP_NAME;
 const env = process.env.NODE_ENV || 'development';
 const host = process.env.TOP_URL || '';
 const assets = process.env.ASSET_PATH || '';
@@ -36,7 +37,7 @@ class Html extends React.Component {
     return <html>
       <head>
       <meta charSet="utf-8" />
-      <title>アルファOne</title>
+      <title>{app_name}</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
       <link rel="stylesheet"    href={ roboto_font }/>
       <link rel="stylesheet"    href={ noto_font }/>
