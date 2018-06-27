@@ -1,13 +1,19 @@
 #!/bin/sh
-ASSETS=/usr/share/nginx/html/assets
-TODAY=$(date "+%Y%m%d")
+ASSET=/usr/share/nginx/html/assets
+WORKDIR=/home/app/sonken
 
-mv $ASSETS/js/icon.bundle.js     $ASSETS/js/icon.bundle_${TODAY}.js
-mv $ASSETS/js/icon.bundle.js.map $ASSETS/js/icon.bundle_${TODAY}.js.map
-mv $ASSETS/js/view.bundle.js     $ASSETS/js/view.bundle_${TODAY}.js
-mv $ASSETS/js/view.bundle.js.map $ASSETS/js/view.bundle_${TODAY}.js.map
-mv $ASSETS/js/app.bundle.js      $ASSETS/js/app.bundle_${TODAY}.js
-mv $ASSETS/js/app.bundle.js.map  $ASSETS/js/app.bundle_${TODAY}.js.map
-cp dist/*.js                     $ASSETS/js/
-cp dist/*.ico                    $ASSETS/image/
-cp dist/*.jpg                    $ASSETS/image/
+if [ ! -d $ASSET/js ]; then
+    mkdir $ASSET/js
+fi
+cp $WORKDIR/dist/app.bundle.js      $ASSET/js/
+cp $WORKDIR/dist/app.bundle.js.map  $ASSET/js/
+cp $WORKDIR/dist/icon.bundle.js     $ASSET/js/
+cp $WORKDIR/dist/icon.bundle.js.map $ASSET/js/
+cp $WORKDIR/dist/view.bundle.js     $ASSET/js/
+cp $WORKDIR/dist/view.bundle.js.map $ASSET/js/
+
+if [ ! -d $ASSET/image ]; then
+    mkdir $ASSET/image
+fi
+cp $WORKDIR/dist/favicon.ico        $ASSET/image/
+cp $WORKDIR/dist/*.jpg              $ASSET/image/
