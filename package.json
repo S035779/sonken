@@ -22,7 +22,7 @@
     "watch:web":  "webpack --config webpack.development.js",
     "watch:node": "webpack --config webpack.node.js -w --colors",
     "release":    "docker/install.sh",
-    "stage:release":    "systemd/install.sh"
+    "stage:release":    "/bin/bash systemd/install.sh"
   },
   "license": "ISC",
   "dependencies": {
