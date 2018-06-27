@@ -1,6 +1,6 @@
 #!/bin/sh
 ASSET=/usr/share/nginx/html/assets
-WORKDIR=/home/app/sonken
+WORKDIR=/home/app/work/sonken
 
 if [ ! -d $ASSET/js ]; then
     mkdir $ASSET/js
