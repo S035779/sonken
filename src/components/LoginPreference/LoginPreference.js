@@ -79,7 +79,7 @@ class LoginPreference extends React.Component {
   }
 
   render() {
-    std.logInfo(LoginPreference.displayName, 'Props', this.props);
+    //std.logInfo(LoginPreference.displayName, 'Props', this.props);
     //std.logInfo(LoginPreference.displayName, 'State', this.state);
     const { classes, name, user, preference, open } = this.props;
     const { isNotValid, isSuccess, plan } = this.state;
