@@ -91,11 +91,11 @@ export default class UserProfiler {
         });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
+          log.debug(request, options);
           const isUser = options.user !=='';
           const isEmail = !!options.email;
           if(!isUser) return reject({
-            name: 'Error', message: 'Request error.'
+            name: 'Request error', message: 'The user name is not included in the request.'
           });
           const conditions = isEmail
             ? {
@@ -108,7 +108,7 @@ export default class UserProfiler {
           User.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
             if(obj === null) return reject({
-              name: 'Error', message: 'User not found.'
+              name: 'Request error', message: 'User not found for request.'
             });
             //log.trace(request, obj);
             resolve(obj);
@@ -661,8 +661,19 @@ export default class UserProfiler {
   }
 
   createPreference({ admin }) {
-    const data = this.setPreference();
-    return Rx.Observable.fromPromise(this.addPreference(admin, data));
+    let plan;
+    switch(node_env) {
+      case 'production':
+        plan = this.productionMenu();
+        break;
+      case 'staging':
+        plan = this.stagingMenu();
+        break;
+      default:
+        plan = this.productionMenu();
+        break;
+    }
+    return Rx.Observable.fromPromise(this.addPreference(admin, plan));
   }
 
   updatePreference({ admin, data }) {

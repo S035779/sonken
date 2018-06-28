@@ -1,9 +1,10 @@
 [Unit]
-Description=sonken server
+Description=sonken ssr server
 After=syslog.target network.target
 
 [Service]
 Type=simple
+Environment=API_URL=http://ik1-309-14667.vs.sakura.ne.jp/api
 ExecStart=/usr/bin/node /home/app/work/sonken/dist/ssr.node.js
 WorkingDirectory=/home/app/work/sonken
 KillMode=process

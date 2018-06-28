@@ -21,7 +21,9 @@
     "build:stage:node":   "cross-env NODE_ENV=staging webpack --config webpack.node.js",
     "build:dev:web":      "cross-env NODE_ENV=development webpack --config webpack.development.js",
     "build:dev:node":     "cross-env NODE_ENV=development webpack --config webpack.node.js",
-    "watch":              "webpack --config webpack.development.js",
+    "watch:all":          "npm-run-all -p watch:node watch:web",
+    "watch:web":          "webpack --config webpack.development.js",
+    "watch:node":         "webpack --config webpack.node.js -w --colors",
     "release":            "docker/install.sh",
     "release:staging":    "/bin/bash systemd/install.sh"
   },
