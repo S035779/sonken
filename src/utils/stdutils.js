@@ -582,7 +582,7 @@ export default {
    * @return {string}
    */
   decode_base64(string) {
-    const b = new Buffer(string, 'base64')
+    const b = Buffer.from(string, 'base64')
     return b.toString();
   },
 
@@ -593,7 +593,7 @@ export default {
    * @return {string}
    */
   encode_base64(string) {
-    const b = new Buffer(string);
+    const b = Buffer.from(string);
     return b.toString('base64');
   },
 
@@ -674,7 +674,7 @@ export default {
       const random = cbk => crypto.randomBytes(128, cbk);
       const pbkdf2 = (slt, cbk) =>
         crypto.pbkdf2(pass, slt, 7000, length, 'sha256', cbk);
-      const bin2str = bin => new Buffer(bin).toString('hex');
+      const bin2str = bin => Buffer.from(bin).toString('hex');
       if(salt) {
         pbkdf2(salt, (err, _hash) => {
           if(err) return reject(err);

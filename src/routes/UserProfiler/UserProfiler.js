@@ -330,7 +330,8 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.data._id };
           const update = {
-            from:           options.data.from
+            appname:        options.data.appname
+          , from:           options.data.from
           , menu:           options.data.menu
           , advertisement:  options.data.advertisement
           , updated:        new Date
@@ -725,8 +726,9 @@ export default class UserProfiler {
     };
     const setMenu  = obj => ({
       _id:            obj._id
-    , menu:           plan.menu
+    , appname:        plan.appname 
     , from:           plan.from
+    , menu:           plan.menu
     , advertisement:  plan.advertisement
     });
 
