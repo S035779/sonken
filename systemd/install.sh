@@ -17,11 +17,3 @@ if [ ! -d $ASSET/image ]; then
 fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
-
-cp $WORKDIR/systemd/nginx.conf      /etc/nginx/
-cp $WORKDIR/systemd/sonken1.service  /etc/systemd/system/
-cp $WORKDIR/systemd/sonken2.service  /etc/systemd/system/
-cp $WORKDIR/systemd/sonken3.service  /etc/systemd/system/
-chmod 664 /etc/systemd/system/sonken1.service
-chmod 664 /etc/systemd/system/sonken2.service
-chmod 664 /etc/systemd/system/sonken3.service
