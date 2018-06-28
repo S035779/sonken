@@ -35,7 +35,7 @@ const mail_keyset = {
  */
 export default class UserProfiler {
   constructor() {
-    this.updateMenu({ admin: admin_user })
+    this.createMenu({ admin: admin_user })
       .subscribe(
         obj => { log.info(obj); }
       , err => { log.warn('Failed to update the menu.'); }
@@ -695,13 +695,21 @@ export default class UserProfiler {
       .fromPromise(this.addAdmin(admin, salt, hash, data));
   }
 
-  updateMenu({ admin }) {
-    const new_plan = node_env === 'staging' ? this.freeMenu() : this.productionMenu();
-    //const old_plan = this.oldPreference();
+  createMenu({ admin }) {
+    let plan;
+    switch(node_env) {
+      case 'production':
+        plan = this.productionMenu();
+        break;
+      case 'staging':
+        plan = this.stagingMenu();
+        break;
+      default:
+        plan = this.productionMenu();
+        break;
+    }
     const setPlans = objs => {
-      const isPlan  = obj =>
-        R.find(R.propEq('name', obj.plan))(objs[1].menu);
-        //R.find(R.propEq('name', obj.plan))(old_plan.menu);
+      const isPlan  = obj => R.find(R.propEq('name', obj.plan))(objs[1].menu);
       const setPlan = obj => isPlan(obj) ? isPlan(obj).id : obj.plan;
       const setUser = obj => ({
         user: obj.user
@@ -717,9 +725,9 @@ export default class UserProfiler {
     };
     const setMenu  = obj => ({
       _id:            obj._id
-    , menu:           new_plan.menu
-    , from:           new_plan.from
-    , advertisement:  new_plan.advertisement
+    , menu:           plan.menu
+    , from:           plan.from
+    , advertisement:  plan.advertisement
     });
 
     const observable1 = Rx.Observable.forkJoin([
@@ -793,7 +801,7 @@ export default class UserProfiler {
     };
   }
 
-  freeMenu() {
+  stagingMenu() {
     return {
       appname: app_name
     , from: mms_from

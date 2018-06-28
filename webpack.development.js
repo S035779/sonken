@@ -12,7 +12,7 @@ var development = {
     , 'process.env.PLATFORM':  JSON.stringify('web')
     , 'process.env.API_URL':   JSON.stringify('http://localhost:8080/api')
     , 'process.env.ASSET_URL': JSON.stringify('http://localhost:8080')
-    , 'process.env.APP_NAME':  JSON.stringify('アルファONE')
+    , 'process.env.APP_NAME':  JSON.stringify('RSS Reader!!')
     }),
   ],
   devServer: {
