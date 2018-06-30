@@ -1134,10 +1134,7 @@ export default class FeedParser {
   uploadNotes({ user, category, file }) {
     return this.setContent(user, category, file)
       .flatMap(objs => this.createNotes({ user, category, notes: objs}))
-      .flatMap(() => this.fetchNotes({ user }))
-      //.flatMap(objs => this.updateNotes({ user, notes: objs }))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
+      .flatMap(() => this.fetchNotes({ user }));
   }
   
   setContent(user, category, file) {
@@ -1155,7 +1152,6 @@ export default class FeedParser {
   }
 
   createNotes({ user, category, notes }) {
-    //const notes = this.setContent({ user, category, file });
     const isNote = obj => R.find(note => note.url === obj.url, notes);
     const setNotes = R.map(obj => this.setNote({
         user, url: obj.url, category
@@ -1181,21 +1177,6 @@ export default class FeedParser {
   _createNotes(user, notes) {
     const promises = R.map(obj => this.addNote(user, obj));
     return Rx.Observable.forkJoin(promises(notes));
-  }
-
-  updateNotes({ user, notes }) {
-    const setNote = obj => ({
-      asin:       obj.asin
-    , title:      obj.title
-    , price:      obj.price
-    , bidsprice:  obj.bidsprice
-    , body:       obj.body
-    });
-    const observables =
-      R.map(obj => this.updateNote({ user, id: obj._id, data: setNote(obj) }));
-    return Rx.Observable.forkJoin(observables(notes))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
   }
 
   setOpmlsObj(user, category, file) {
