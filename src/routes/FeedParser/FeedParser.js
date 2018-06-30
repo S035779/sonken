@@ -1135,7 +1135,7 @@ export default class FeedParser {
     return this.setContent(user, category, file)
       .flatMap(objs => this.createNotes({ user, category, notes: objs}))
       .flatMap(() => this.fetchNotes({ user }))
-      .flatMap(objs => this.updateNotes({ user, notes: objs }))
+      //.flatMap(objs => this.updateNotes({ user, notes: objs }))
       //.map(R.tap(log.trace.bind(this)))
     ;
   }

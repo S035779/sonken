@@ -22,7 +22,7 @@ export default {
         feed.uploadNotes({ user: username, category: category
         , file: { type: filetype, content: filedata } })
         .subscribe(
-          obj => { res.send(obj); }
+          obj => { res.status(200).send(obj); }
         , err => {
             res.status(500)
               .send({ name: err.name, message: err.message });
@@ -40,7 +40,7 @@ export default {
       feed.downloadNotes({ user, category }).subscribe(
         obj => {
           res.set('Content-Type', 'application/octet-stream');
-          res.send(obj);
+          res.status(200).send(obj);
         }
       , err => {
           res.status(500)

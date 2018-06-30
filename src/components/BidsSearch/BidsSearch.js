@@ -76,9 +76,7 @@ class BidsSearch extends React.Component {
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{itemNumber}件中{
-            perPage > itemNumber ? itemNumber : perPage
-          }件表示
+          全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>

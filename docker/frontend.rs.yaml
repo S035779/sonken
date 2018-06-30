@@ -47,6 +47,8 @@ spec:
         env:
           - name: API_URL
             value: "https://feedparser.alpha-one-rss.jp/api"
+          - name: APP_NAME
+            value: "アルファOne"
       - name: node-api
         image: asia.gcr.io/feedparser-198104/feedparser/node_api:latest
         resources:
@@ -55,6 +57,3 @@ spec:
             memory: 100Mi
         ports:
           - containerPort: 8082
-        env:
-          - name: API_URL
-            value: "https://feedparser.alpha-one-rss.jp/api"

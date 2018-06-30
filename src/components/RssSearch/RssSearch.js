@@ -170,9 +170,7 @@ class RssSearch extends React.Component {
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{noteNumber}件中{
-            perPage > noteNumber ? noteNumber : perPage
-          }件表示
+          全{noteNumber}件中 {perPage > noteNumber ? noteNumber : perPage}件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>

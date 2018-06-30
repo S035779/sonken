@@ -11,7 +11,7 @@
     "start:job":  "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:mms":  "node -r ./src/hook/babel-register.js src/mms-server.js",
     "start:dev":  "node -r ./src/hook/babel-register.js src/dev-server.js",
-    "start:node": "cross-env API_URL=http://localhost:8080/api npm-run-all -p start:job start:api start:ssr watch:node",
+    "start:node": "cross-env API_URL=http://localhost:8080/api APP_NAME=\"RSS Reader!!\" npm-run-all -p start:job start:api start:ssr watch:node",
     "build:all":          "npm-run-all -p build:node build:web",
     "build:staging":      "npm-run-all -p build:stage:node build:stage:web",
     "build:development":  "npm-run-all -p build:dev:node build:dev:web",
