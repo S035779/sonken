@@ -1129,78 +1129,74 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, file }) {
-    return this.setContent(user, category, file)
-      .flatMap(objs => this.createNotes({ user, category, notes: objs}))
-      .flatMap(() => this.fetchNotes({ user }));
-  }
-  
-  setContent(user, category, file) {
     const observableCsv = Rx.Observable
-          .fromPromise(this.setCsvToObj(user, category, file.content));
+      .fromPromise(this.setCsvToObj(user, category, file.content));
     const observableOpml = Rx.Observable
-          .fromPromise(this.setOmplToObj(user, category, file.content));
+      .fromPromise(this.setOmplToObj(user, category, file.content));
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return observableCsv;
+        return observableCsv.flatMap(objs =>
+          this.createNotes({ user, category, notes: objs}))
       case 'opml':
-        return observableOpml;
+        return observableOpml.flatMap(objs =>
+          this.createNotes({ user, category, notes: objs}))
       default:
         log.error(FeedParser.displayName
           , 'setContent', `Unknown File Type: ${file.type}`);
         return null;
     }
   }
-
+  
   createNotes({ user, category, notes }) {
     const isNote = obj => R.find(note => note.url === obj.url, notes);
-    const setNotes = R.map(obj =>
-      this.setNote({ user, url: obj ? obj.url : '', category }, obj));
-    const setDatas = R.map(obj => setData(isNote(obj), obj));
-    const setData = (note, obj)  => R.merge(obj, {
-        title:      note.title
-      , asin:       note.asin
-      , price:      note.price
-      , bidsprice:  note.bidsprice
-      , body:       note.body
-      });
-    const observable
-      = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
-    return Rx.Observable.forkJoin(observable(notes))
-      //.map(R.tap(log.trace.bind(this)))
-      .map(objs => R.filter(obj => !R.isNil(obj), objs))
+    const setNote = obj => this.setNote({
+      user, url: obj ? obj.url : '', category }, obj);
+    const setData = obj => _setData(isNote(obj), obj);
+    const _setData = (note, obj)  => R.merge(obj, {
+      title:      note.title
+    , asin:       note.asin
+    , price:      note.price
+    , bidsprice:  note.bidsprice
+    , body:       note.body } );
+    const isNotNil = obj => !R.isNil(obj);
+    const setNotes
+      = R.compose(R.map(setData), R.map(setNote), R.filter(isNotNil));
+    const promises
+      = R.map(obj => this.addNote(user, obj));
+    const observables
+      = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }))
+    return Rx.Observable.forkJoin(observables(notes))
       .map(objs => setNotes(objs))
-      .map(objs => setDatas(objs))
-      .flatMap(objs => this._createNotes(user, objs))
+      .flatMap(objs => Rx.Observable.forkJoin(promises(objs)))
     ;
-  }
-
-  _createNotes(user, notes) {
-    const promises = R.map(obj => this.addNote(user, obj));
-    return Rx.Observable.forkJoin(promises(notes));
   }
 
   setOmplToObj(user, category, file) {
     return new Promise((resolve, reject) => {
-      parseString(file.toString()
-      , {
-          trim: true, explicitArray: true, attrkey: 'attr', charkey: '_'
-        }
+      parseString(file.toString(), {
+          trim: true
+        , explicitArray: true
+        , attrkey: 'attr'
+        , charkey: '_' }
       , (err, res) => {
         if(err) return reject(err);
-        const logDatas = obj =>
-          console.dir(obj, {showHidden: false, depth: 10, colors: true});
         const outlines = res.opml.body[0].outline;
-        const getOutline = obj => R.map(_obj => ({ attr: { type: 'rss'
-              , category: obj.attr.title
-              , title: _obj.attr.title, htmlUrl: _obj.attr.htmlUrl } } )
-            , obj.outline);
+        const getOutline = obj => R.map(_obj => ({ attr: {
+          type: 'rss'
+        , category: obj.attr.title
+        , title: _obj.attr.title
+        , htmlUrl: _obj.attr.htmlUrl
+        }}), obj.outline);
         const setOutline  = obj => obj.attr.type === 'rss'
-          ? [ { attr: { type: 'rss'
-            , category: obj.attr.category ? obj.attr.category : ''
-            , title: obj.attr.title, htmlUrl: obj.attr.htmlUrl } } ]
-          : getOutline(obj);
+        ? [{ attr: {
+            type: 'rss'
+          , category: obj.attr.category ? obj.attr.category : ''
+          , title: obj.attr.title
+          , htmlUrl: obj.attr.htmlUrl
+          }}]
+        : getOutline(obj);
         const setNote = obj => ({
           user
         , url: obj.attr.htmlUrl
@@ -1213,9 +1209,12 @@ export default class FeedParser {
         , body: ''
         , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
         });
+        const base_url = 'https://auctions.yahoo.co.jp';
+        const isYahoo = obj =>
+          std.parse_url(obj.attr.htmlUrl).origin === base_url;
         resolve(R.compose(
           R.map(setNote)
-        //, R.tap(logDatas)
+        , R.filter(isYahoo)
         , R.flatten
         , R.map(setOutline)
         , R.flatten
