@@ -1150,27 +1150,36 @@ export default class FeedParser {
   }
   
   createNotes({ user, category, notes }) {
-    const isNote = obj => R.find(note => note.url === obj.url, notes);
+    //const isNote = obj => R.find(note => note.url === obj.url, notes);
+    //const setNote = obj => this.setNote({
+    //  user, url: obj ? obj.url : '', category }, obj);
     const setNote = obj => this.setNote({
-      user, url: obj ? obj.url : '', category }, obj);
-    const setData = obj => _setData(isNote(obj), obj);
-    const _setData = (note, obj)  => R.merge(obj, {
-      title:      note.title
-    , asin:       note.asin
-    , price:      note.price
-    , bidsprice:  note.bidsprice
-    , body:       note.body } );
-    const isNotNil = obj => !R.isNil(obj);
-    const setNotes
-      = R.compose(R.map(setData), R.map(setNote), R.filter(isNotNil));
+      user
+    , category
+    , title: obj.title 
+    , url: obj.url
+    });
+    const setNotes = R.map(setNote);
+    //const setData = obj => _setData(isNote(obj), obj);
+    //const _setData = (note, obj)  => R.merge(obj, {
+    //  title:      note.title
+    //, asin:       note.asin
+    //, price:      note.price
+    //, bidsprice:  note.bidsprice
+    //, body:       note.body 
+    //} );
+    //const isNotNil = obj => !R.isNil(obj);
+    //const setNotes
+    //  = R.compose(R.map(setData), R.map(setNote), R.filter(isNotNil));
     const promises
       = R.map(obj => this.addNote(user, obj));
-    const observables
-      = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }))
-    return Rx.Observable.forkJoin(observables(notes))
-      .map(objs => setNotes(objs))
-      .flatMap(objs => Rx.Observable.forkJoin(promises(objs)))
-    ;
+    //const observables
+    //  = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }))
+    //return Rx.Observable.forkJoin(observables(notes))
+    //  .map(R.tap(log.trace.bind(this)))
+    //  .map(objs => setNotes(objs))
+    //  .flatMap(objs => Rx.Observable.forkJoin(promises(objs)))
+    return Rx.Observable.forkJoin(promises(setNotes(notes)));
   }
 
   setOmplToObj(user, category, file) {
@@ -1383,7 +1392,7 @@ export default class FeedParser {
     , categoryIds: categoryIds ? categoryIds : []
     , user: user
     , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , items: obj.item
+    , items: obj ? obj.item : []
     , title: title ? title : obj.title
     , asin: ''
     , name: ''
