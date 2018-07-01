@@ -559,8 +559,7 @@ export default class FeedParser {
   }
   
   addCategory(user, data) {
-    return this
-      .request('create/category', { user, data });
+    return this.request('create/category', { user, data });
   }
 
   getNotes(user) {
@@ -972,7 +971,6 @@ export default class FeedParser {
   }
 
   updateNote({ user, id, data }) {
-    //log.trace(user,id,data);
     const isAsin = data.asin !== '';
     const setAmazonData = obj => obj
       ? R.merge(data, {
@@ -1003,7 +1001,6 @@ export default class FeedParser {
   }
 
   createCategory({ user, category, subcategory }) {
-    //log.debug(user,category,subcategory);
     return Rx.Observable
       .fromPromise(this.addCategory(user, { category, subcategory }));
   }
@@ -1138,24 +1135,28 @@ export default class FeedParser {
   }
   
   setContent(user, category, file) {
+    const observableCsv = Rx.Observable
+          .fromPromise(this.setCsvToObj(user, category, file.content));
+    const observableOpml = Rx.Observable
+          .fromPromise(this.setOmplToObj(user, category, file.content));
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return Rx.Observable.fromPromise(this.setNotesObj(user, category, file.content));
+        return observableCsv;
       case 'opml':
-        return Rx.Observable.fromPromise(this.setOpmlsObj(user, category, file.content));
+        return observableOpml;
       default:
-        log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
+        log.error(FeedParser.displayName
+          , 'setContent', `Unknown File Type: ${file.type}`);
         return null;
     }
   }
 
   createNotes({ user, category, notes }) {
     const isNote = obj => R.find(note => note.url === obj.url, notes);
-    const setNotes = R.map(obj => this.setNote({
-        user, url: obj.url, category
-    }, obj));
+    const setNotes = R.map(obj =>
+      this.setNote({ user, url: obj ? obj.url : '', category }, obj));
     const setDatas = R.map(obj => setData(isNote(obj), obj));
     const setData = (note, obj)  => R.merge(obj, {
         title:      note.title
@@ -1168,6 +1169,7 @@ export default class FeedParser {
       = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }));
     return Rx.Observable.forkJoin(observable(notes))
       //.map(R.tap(log.trace.bind(this)))
+      .map(objs => R.filter(obj => !R.isNil(obj), objs))
       .map(objs => setNotes(objs))
       .map(objs => setDatas(objs))
       .flatMap(objs => this._createNotes(user, objs))
@@ -1179,39 +1181,51 @@ export default class FeedParser {
     return Rx.Observable.forkJoin(promises(notes));
   }
 
-  setOpmlsObj(user, category, file) {
+  setOmplToObj(user, category, file) {
     return new Promise((resolve, reject) => {
       parseString(file.toString()
-      , { trim: true, explicitArray: true, attrkey: 'attr', charkey: '_' }
+      , {
+          trim: true, explicitArray: true, attrkey: 'attr', charkey: '_'
+        }
       , (err, res) => {
-        if(err) reject(err);
+        if(err) return reject(err);
         const logDatas = obj =>
           console.dir(obj, {showHidden: false, depth: 10, colors: true});
         const outlines = res.opml.body[0].outline;
-        const getDatas = R.map(obj => obj.outline);
-        const setDatas = R.map(obj => ({ title: obj.attr.title, url: obj.attr.htmlUrl }));
-        const setNotes = R.map(obj => ({
+        const getOutline = obj => R.map(_obj => ({ attr: { type: 'rss'
+              , category: obj.attr.title
+              , title: _obj.attr.title, htmlUrl: _obj.attr.htmlUrl } } )
+            , obj.outline);
+        const setOutline  = obj => obj.attr.type === 'rss'
+          ? [ { attr: { type: 'rss'
+            , category: obj.attr.category ? obj.attr.category : ''
+            , title: obj.attr.title, htmlUrl: obj.attr.htmlUrl } } ]
+          : getOutline(obj);
+        const setNote = obj => ({
           user
-        , url:          obj.url
+        , url: obj.attr.htmlUrl
         , category
-        , title:        obj.title
-        , asin:         ''
-        , price:        0
-        , bidsprice:    0
-        , body:         ''
-        , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-        }));
+        , subcategory: obj.attr.category
+        , title: obj.attr.title
+        , asin: ''
+        , price: 0
+        , bidsprice: 0
+        , body: ''
+        , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+        });
         resolve(R.compose(
-          setNotes
-        , setDatas
+          R.map(setNote)
+        //, R.tap(logDatas)
         , R.flatten
-        , getDatas
+        , R.map(setOutline)
+        , R.flatten
+        , R.map(setOutline)
         )(outlines));
       });
     });
   }
   
-  setNotesObj(user, category, file) {
+  setCsvToObj(user, category, file) {
     return new Promise((resolve, reject) => {
       const encode   = _str => encoding.detect(_str);
       const isUtf    = _str => encode(_str) === 'UNICODE' || encode(_str) === 'ASCII';
