@@ -30,16 +30,20 @@ const request = (operation, { user, id, url }) => {
     case 'search':
     case 'seller':
       return yahoo.fetchHtml({ url })
-        //.map(R.tap(console.log))
         .map(obj => ({ updated: new Date(), items: obj.item }))
-        .flatMap(obj => feed.updateHtml({ user, id, html: obj }))
-      ;
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
+    case 'closedsearch':
+      return yahoo.fetchClosedMerchant({ url })
+        .map(obj => ({ updated: new Date(), items: obj.item }))
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
+    case 'closedsellers':
+      return yahoo.fetchClosedSellers({ url })
+        .map(obj => ({ updated: new Date(), items: obj.item }))
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
     case 'rss':
       return yahoo.fetchRss({ url })
-        //.map(R.tap(console.log))
         .map(obj => ({ updated: new Date() , items: obj.item }))
-        .flatMap(obj => feed.updateRss({ user, id, rss: obj }))
-      ;
+        .flatMap(obj => feed.updateRss({ user, id, rss: obj }));
     default:
       return null;
   }
@@ -47,16 +51,18 @@ const request = (operation, { user, id, url }) => {
 
 const worker = ({ user, id, api, options }, callback) => {
   api = std.parse_url(api);
-  api.search  = std.parse_query(
-      options ? R.merge(api.search, options) : api.search
-    ).toString();
-  const operation = R.split('/', api.pathname)[1];
+  const path = R.split('/', api.pathname);
+  const query = options ? R.merge(api.search, options) : api.search;
+  api.search  = std.parse_query(query).toString();
   const url = api.toString();
-  request(operation, { user, id, url }).subscribe(
-    obj => log.debug('[JOB]', 'data parse is proceeding...')
-  , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
-  , ()  => callback()
-  );
+  const operation = path === '/jp/show/rating' && query.has('userID') ? 'closedsellers' : path[1];
+  const observable = request(operation, { user, id, url });
+  if(observable) {
+    observable.subscribe(
+      obj => log.debug('[JOB]', 'data parse is proceeding...')
+    , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
+    , ()  => callback() );
+  }
 };
 
 const main = () => {

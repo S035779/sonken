@@ -68,25 +68,45 @@ class Dashboard extends React.Component {
     }
   }
 
+  getTitleName(location) {
+    let category = location.pathname.split('/')[1];
+    switch(category) {
+      case 'marchant':
+        category='商品RSS';
+        break;
+      case 'sellers':
+        category='出品者RSS';
+        break;
+      case 'closedmarchant':
+        category='落札相場';
+        break;
+      case 'closedsellers':
+        category='落札履歴';
+        break;
+      case 'bids':
+        category='入札リスト';
+        break;
+      case 'trade':
+        category='取引チェック';
+        break;
+      default:
+        category='商品RSS';
+        break;
+    }
+    return category;
+  }
+
   render() {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, file, categorys }
-      = this.state;
-    if(!isAuthenticated) {
-      const to = {
-        pathname: '/login/authenticate'
-      , state: { from: location }
-      };
-      return <Redirect to={to}/>;
-    }
+    const { isAuthenticated, user, notes, page, ids, file, categorys } = this.state;
+    if(!isAuthenticated) 
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
+    const title = this.getTitleName(location);
     const _id = match.params.id;
-    const category
-      = match.params.category ? match.params.category : 'marchant';
-    const categoryId
-      = location.state && location.state.categoryId
-        ? location.state.categoryId : 'all';
+    const category = match.params.category ? match.params.category : 'marchant';
+    const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
@@ -94,6 +114,7 @@ class Dashboard extends React.Component {
     return <div className={classes.root}>
         <RssSearch
           user={user}
+          title={title}
           category={category}
           categorys={categorys}
           note={note}

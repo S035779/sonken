@@ -24,7 +24,7 @@ class RssHeader extends React.Component {
     this.props.onClick();
   }
 
-  getCategory(location) {
+  getTitleName(location) {
     let category = location.pathname.split('/')[1];
     switch(category) {
       case 'marchant':
@@ -32,6 +32,12 @@ class RssHeader extends React.Component {
         break;
       case 'sellers':
         category='出品者RSS';
+        break;
+      case 'closedmarchant':
+        category='落札相場';
+        break;
+      case 'closedsellers':
+        category='落札履歴';
         break;
       case 'bids':
         category='入札リスト';
@@ -49,14 +55,10 @@ class RssHeader extends React.Component {
   render() {
     //std.logInfo(RssHeader.displayName, 'Props', this.props);
     //std.logInfo(RssHeader.displayName, 'State', this.state);
-    const {
-      classes, user, preference, profile, open, children, location
-    } = this.props;
+    const { classes, user, preference, profile, open, children, location } = this.props;
     const { auth } = this.state;
-    const category = this.getCategory(location);
-    return <div className={
-        classNames(classes.navHeader, open && classes.navHeaderShift)
-      }>
+    const title = this.getTitleName(location);
+    return <div className={classNames(classes.navHeader, open && classes.navHeaderShift)}>
       <AppBar
         color="default"
         position="static"
@@ -74,7 +76,7 @@ class RssHeader extends React.Component {
           variant="title"
           color="inherit"
           className={classes.title}>
-          {category}
+          {title}
         </Typography>
         <div className={classes.loginIcon}>
           <RssMenu

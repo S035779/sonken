@@ -27,7 +27,7 @@ class RssAddDialog extends React.Component {
     , openAdd:    false
     , openUpd:    []
     , checked:    []
-    , title:      'Untitled'
+    , name:      'Untitled'
     };
   }
 
@@ -114,8 +114,8 @@ class RssAddDialog extends React.Component {
 
   handleSubmitDialog() {
     if(this.isValidate() && this.isChanged()) {
-      const { title, checked } = this.state;
-      this.props.onSubmit(title, checked);
+      const { name, checked } = this.state;
+      this.props.onSubmit(name, checked);
       this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
@@ -123,8 +123,8 @@ class RssAddDialog extends React.Component {
   }
 
   isValidate() {
-    const { title } = this.state;
-    return title !== '';
+    const { name } = this.state;
+    return name !== '';
   }
 
   isChanged() {
@@ -134,11 +134,8 @@ class RssAddDialog extends React.Component {
   render() {
     //std.logInfo(RssAddDialog.displayName, 'Props', this.props);
     //std.logInfo(RssAddDialog.displayName, 'State', this.state);
-    const { classes, open, user, category, categorys } = this.props;
-    const { isNotValid, isSuccess, title, checked, openAdd, openUpd }
-      = this.state;
-    const name = category === 'marchant'
-      ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const { classes, open, user, category, categorys, title } = this.props;
+    const { isNotValid, isSuccess, name, checked, openAdd, openUpd } = this.state;
     const paperClass = { paper: classes.dialog }
     const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
     return <LoginFormDialog 
@@ -150,20 +147,21 @@ class RssAddDialog extends React.Component {
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
           <TextField autoFocus margin="dense"
-            value={title}
-            onChange={this.handleChangeText.bind(this, 'title')}
-            label={name + 'タイトル'} type="text" fullWidth />
+            value={name}
+            onChange={this.handleChangeText.bind(this, 'name')}
+            label={title + 'タイトル'} type="text" fullWidth />
         </FormControl>
         <FormControl component="fieldset" className={classes.column}>
-          <FormLabel component="legend">{name}カテゴリー</FormLabel>
+          <FormLabel component="legend">{title}カテゴリー</FormLabel>
           <RssButton color="success"
             onClick={this.handleClickButton.bind(this, 'openAdd')}
             classes={classes.button}>新規追加</RssButton>
           <RssNewDialog
+            title={title}
             open={openAdd}
             user={user}
             category={category}
-            title={'Untitled'}
+            name={'Untitled'}
             onClose={this.handleClose.bind(this, 'openAdd')}
             onSubmit={this.handleCreate.bind(this)}
           />
@@ -187,10 +185,11 @@ class RssAddDialog extends React.Component {
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
+                  title={title}
                   open={openUpd.indexOf(obj._id) !== -1}
                   user={user}
                   category={category}
-                  title={obj.subcategory}
+                  name={obj.subcategory}
                   onClose={this.handleChangeToggle
                     .bind(this, 'openUpd', obj._id)}
                   onSubmit={this.handleUpdate

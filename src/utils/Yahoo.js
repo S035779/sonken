@@ -158,6 +158,8 @@ class Yahoo {
             resolve(newItem(data)(options.xml.description));
           }); 
         });
+      case 'fetch/closedmerchant':
+      case 'fetch/closedsellers':
       case 'fetch/html':
         return new Promise((resolve, reject) => {
           log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
@@ -302,10 +304,26 @@ class Yahoo {
    * search auction items and parse html.
    *
    */
+  getClosedMerchant(url) {
+    return this.request('fetch/closedmerchant', { url });
+  }
+  
+  getClosedSellers(url) {
+    return this.request('fetch/closedsellers', { url });
+  }
+  
   getHtml(url) {
     return this.request('fetch/html', { url });
   }
   
+  fetchClosedMerchant({ url }) {
+    return Rx.Observable.fromPromise(this.getClosedMerchant(url));
+  }
+
+  fetchClosedSellers({ url }) {
+    return Rx.Observable.fromPromise(this.getClosedSellers(url));
+  }
+
   fetchHtml({ url }) {
     return Rx.Observable.fromPromise(this.getHtml(url));
   }

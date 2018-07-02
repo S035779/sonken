@@ -117,11 +117,8 @@ class RssEditDialog extends React.Component {
   render() {
     //std.logInfo(RssEditDialog.displayName, 'Props', this.props);
     //std.logInfo(RssEditDialog.displayName, 'State', this.state);
-    const { classes, open, user, category } = this.props;
-    const { isNotValid, isSuccess, openAdd, openUpd, categorys }
-      = this.state;
-    const title = category === 'marchant'
-      ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const { classes, open, user, category, title } = this.props;
+    const { isNotValid, isSuccess, openAdd, openUpd, categorys } = this.state;
     const paperClass = { paper: classes.dialog }
     const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
     return <LoginFormDialog 
@@ -139,7 +136,8 @@ class RssEditDialog extends React.Component {
             open={openAdd}
             user={user}
             category={category}
-            title={'Untitled'}
+            title={title}
+            name={'Untitled'}
             onClose={this.handleClose.bind(this, 'openAdd')}
             onSubmit={this.handleCreate.bind(this)}
           />
@@ -161,7 +159,8 @@ class RssEditDialog extends React.Component {
                   open={openUpd.indexOf(obj._id) !== -1}
                   user={user}
                   category={category}
-                  title={obj.subcategory}
+                  title={title}
+                  name={obj.subcategory}
                   onClose={this.handleChangeToggle
                     .bind(this, 'openUpd', obj._id)}
                   onSubmit={this.handleUpdate

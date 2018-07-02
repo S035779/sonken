@@ -73,24 +73,6 @@ class RssSearch extends React.Component {
     this.setState({ isAddNote: true });
   }
 
-  getCategory(url) {
-    const parser = new URL(url);
-    const api = parser.pathname.split('/')[1];
-    const query = parser.searchParams;
-    switch(api) {
-      case 'search':
-        return 'marchant';
-      case 'seller':
-        return 'sellers';
-      case 'rss':
-        return query.has('p')
-          ? 'marchant'
-          : query.has('sid')
-            ? 'sellers'
-            : null;
-    }
-  }
-
   handleDownload(event) {
     const { user, category } = this.props;
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
@@ -151,22 +133,55 @@ class RssSearch extends React.Component {
     this.setState({ [name]: false });
   }
 
+  getCategory(url) {
+    const parser = new URL(url);
+    const path = parser.pathname;
+    const api = path.split('/')[1];
+    const query = parser.searchParams;
+    switch(api) {
+      case 'search':
+        return 'marchant';
+      case 'seller':
+        return 'sellers';
+      case 'closedsearch':
+        return 'closedmarchant';
+      case 'jp':
+        return path === '/jp/show/rating' && query.has('userID')
+          ? 'closedsellers'
+          : null;
+      //case 'rss':
+      //  return query.has('p')
+      //    ? 'marchant'
+      //    : query.has('sid')
+      //      ? 'sellers'
+      //      : null;
+    }
+  }
+
+  getColor(category) {
+    switch(category) {
+      case 'marchant':
+        return 'skyblue';
+      case 'sellers':
+        return 'orange';
+      case 'closedmarchant':
+        return 'green';
+      case 'closedsellers':
+        return 'yellow';
+    }
+  }
+
   render() {
-    const { classes, noteNumber, user, category, categorys } = this.props;
-    const { isAddNote, isSuccess, isNotValid, url, perPage, filename }
-      = this.state;
-    const color = category === 'marchant' ? 'skyblue' : 'orange';
-    const _categorys
-      = category => categorys
-        .filter(obj => category === obj.category)
-        .sort((a, b) => 
-          parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
-            ? 1   :
-          parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
-            ? -1  : 0
-        );
-    const categoryList
-      = category => categorys ? _categorys(category) : null;
+    //std.logInfo(RssSearch.displayName, 'Props', this.props);
+    //std.logInfo(RssSearch.displayName, 'State', this.state);
+    const { classes, noteNumber, user, category, categorys, title } = this.props;
+    const { isAddNote, isSuccess, isNotValid, url, perPage, filename } = this.state;
+    const color = this.getColor(category);
+    const _categorys = category => categorys.filter(obj => category === obj.category)
+      .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
+        ? 1 : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
+          ? -1 : 0 );
+    const categoryList = category => categorys ? _categorys(category) : null;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -194,6 +209,7 @@ class RssSearch extends React.Component {
           onClick={this.handleClickButton.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録</Button>
         <RssAddDialog 
+          title={title}
           open={isAddNote}
           user={user}
           category={category}
@@ -205,7 +221,7 @@ class RssSearch extends React.Component {
         <RssButton color={color}
           onClick={this.handleDownload.bind(this)}
           classes={classes.button}>ダウンロード</RssButton>
-        <input type="file" id="file" accept=".csv,.opml,text/csv, text/opml"
+        <input type="file" id="file" accept=".csv,.opml,text/csv,text/opml"
           onChange={this.handleChangeFile.bind(this)}
           className={classes.input}/>
         <label htmlFor="file" className={classes.uplabel}>

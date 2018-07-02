@@ -12,25 +12,30 @@ import { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction }
                         from 'material-ui/List';
 import { Collapse }     from 'material-ui/transitions';
 import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
-, AccountBox, BlurOn, SettingsApplications }
+, AccountBox, BlurOn, SettingsApplications, PeopleOutline, NotificationsActive }
                         from 'material-ui-icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
 
 const app_name = process.env.APP_NAME;
+const isAlpha = process.env.NODE_ENV !== 'production';
 
 class DrawerList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       openUser:         false
-    , openMarchant:     true
-    , openSellers:      true
+    , openMarchant:     isAlpha ? false : true
+    , openSellers:      isAlpha ? false : true
+    , openClosedMarchant: false
+    , openClosedSellers:  false
     , isProfile:        false
     , isPreference:     false
     , isEditMarchant:   false 
     , isEditSellers:    false 
+    , isEditClosedMarchant:   false 
+    , isEditClosedSellers:    false 
     , dragged:          false
     , dropZoneEntered:  false
     , dragSrcEl:        null
@@ -51,16 +56,20 @@ class DrawerList extends React.Component {
         this.props.history.push('/');
         break;
       case 'marchant':
-        this.setState({
-          openMarchant: !this.state.openMarchant
-        });
+        this.setState({ openMarchant: !this.state.openMarchant });
         this.props.history.push('/marchant');
         break;
       case 'sellers':
-        this.setState({
-          openSellers:  !this.state.openSellers
-        });
+        this.setState({ openSellers:  !this.state.openSellers });
         this.props.history.push('/sellers');
+        break;
+      case 'closedmarchant':
+        this.setState({ openClosedMarchant: !this.state.openClosedMarchant });
+        this.props.history.push('/closedmarchant');
+        break;
+      case 'closedsellers':
+        this.setState({ openClosedSellers:  !this.state.openClosedSellers });
+        this.props.history.push('/closedsellers');
         break;
       case 'bids':
         this.props.history.push('/bids');
@@ -77,6 +86,8 @@ class DrawerList extends React.Component {
       case 'isProfile':
       case 'isEditMarchant':
       case 'isEditSellers':
+      case 'isEditClosedMarchant':
+      case 'isEditClosedSellers':
         this.setState({ [name]: true });
         break;
     }
@@ -271,99 +282,48 @@ class DrawerList extends React.Component {
   renderListItems() {
     const { classes, open, profile } = this.props;
     const { isEditMarchant, isEditSellers, openMarchant, openSellers
-      , categorys } = this.state;
-    const textClass
-      = { primary: classes.textPrimary
-        , secondary: classes.textSecondary };
-    const _categorys
-      = category => categorys
-        .filter(obj => obj._id !== '9999')
-        .filter(obj => obj._id !== '9998')
-        .filter(obj => category === obj.category)
-        .sort((a, b) =>
-          parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
-            ? 1  :
-          parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
-            ? -1 : 0
-        );
-    const _noncategorys
-      = category => categorys
-        .filter(obj => obj._id === '9999')
-        .filter(obj => category === obj.category);
-    const _favorites
-      = category => categorys
-        .filter(obj => obj._id === '9998')
-        .filter(obj => category === obj.category);
-    const categoryList
-      = category => categorys ? _categorys(category) : null;
-    const renderCategoryList = category => categorys
-      ? _categorys(category)
-        .map((obj, index) => 
-          this.renderCategoryList(
-            index
-          , category
-          , obj.subcategory
-          , obj._id
-          , obj.newRelease && obj.newRelease.true
-            ? obj.newRelease.true : 0
-          )
-        )
-      : null;
-    const renderNonCategoryList = category => categorys
-      ? _noncategorys(category)
-        .map((obj, index) => {
-          const result =  this.renderNonCategoryList(
-            index
-          , category
-          , obj.subcategory
-          , obj.newRelease && obj.newRelease.true
-            ? obj.newRelease.true : 0
-          )
-          return result;
-        })
-      : null;
-    const renderFavoriteList = category => categorys
-      ? _favorites(category)
-        .map((obj, index) =>
-          this.renderFavoriteList(
-            index
-          , category
-          , obj.subcategory
-          , obj.newRelease && obj.newRelease.true
-            ? obj.newRelease.true : 0
-          )
-        )
-      : null;
+    , isEditClosedMarchant, isEditClosedSellers, openClosedMarchant, openClosedSellers
+    , categorys } = this.state;
+    const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
+    const _categorys = category => categorys
+      .filter(obj => obj._id !== '9999')
+      .filter(obj => obj._id !== '9998')
+      .filter(obj => category === obj.category)
+      .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
+        ? 1 : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16) 
+          ? -1 : 0 );
+    const _noncategorys = category => categorys
+      .filter(obj => obj._id === '9999')
+      .filter(obj => category === obj.category);
+    const _favorites = category => categorys
+      .filter(obj => obj._id === '9998')
+      .filter(obj => category === obj.category);
+    const categoryList = category => categorys ? _categorys(category) : null;
+    const renderCategoryList = category => categorys ? _categorys(category)
+      .map((obj, index) => this.renderCategoryList(index, category, obj.subcategory, obj._id
+        , obj.newRelease && obj.newRelease.true ? obj.newRelease.true : 0 ) ) : null;
+    const renderNonCategoryList = category => categorys ? _noncategorys(category)
+      .map((obj, index) => this.renderNonCategoryList(index, category, obj.subcategory
+        , obj.newRelease && obj.newRelease.true ? obj.newRelease.true : 0 ) ) : null;
+    const renderFavoriteList = category => categorys ? _favorites(category)
+      .map((obj, index) => this.renderFavoriteList(index, category, obj.subcategory
+        , obj.newRelease && obj.newRelease.true ? obj.newRelease.true : 0 ) ) : null;
     return <div>
-      <ListItem button
-        onClick={this.handleClickButton.bind(this, 'marchant')}
-      >
-        <ListItemIcon>
-          <LocalMall className={classes.icon} />
-        </ListItemIcon>
+      <ListItem button onClick={this.handleClickButton.bind(this, 'marchant')}>
+        <ListItemIcon><LocalMall className={classes.icon} /></ListItemIcon>
         <ListItemText primary="商品RSS" classes={textClass} />
-        {openMarchant
-          ? <ArrowDropUp className={classes.icon} />
-          : <ArrowDropDown className={classes.icon} />
-        }
-        {open
-          ? <ListItemSecondaryAction>
-              <IconButton
-                onClick={
-                  this.handleClickButton.bind(this, 'isEditMarchant')}>
-                <SettingsApplications className={classes.setting} />
-              </IconButton>
-            </ListItemSecondaryAction>
-          : null
-        }
+        {openMarchant ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
+        {open ? <ListItemSecondaryAction>
+          <IconButton onClick={this.handleClickButton.bind(this, 'isEditMarchant')}>
+          <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
       </ListItem>
       <RssEditDialog
+        title={'商品RSS'}
         user={profile.user}
         category="marchant"
         categorys={categoryList('marchant')}
         open={isEditMarchant}
-        onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')}
-      />
+        onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')} />
       <Collapse in={openMarchant} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {renderFavoriteList('marchant')}
@@ -371,34 +331,21 @@ class DrawerList extends React.Component {
           {renderNonCategoryList('marchant')}
         </List>
       </Collapse>
-      <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'sellers')}>
-        <ListItemIcon>
-          <People className={classes.icon} />
-        </ListItemIcon>
+      <ListItem button onClick={this.handleClickButton.bind(this, 'sellers')}>
+        <ListItemIcon><People className={classes.icon} /></ListItemIcon>
         <ListItemText primary="出品者RSS" classes={textClass} />
-        {openSellers
-          ? <ArrowDropUp className={classes.icon} />
-          : <ArrowDropDown className={classes.icon} />
-        }
-        {open
-          ? <ListItemSecondaryAction>
-              <IconButton
-                onClick={
-                  this.handleClickButton.bind(this, 'isEditSellers')}>
-                <SettingsApplications className={classes.setting} />
-              </IconButton>
-            </ListItemSecondaryAction>
-          : null
-        }
+        {openSellers ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
+        {open ? <ListItemSecondaryAction>
+          <IconButton onClick={this.handleClickButton.bind(this, 'isEditSellers')}>
+          <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
       </ListItem>
       <RssEditDialog
+        title={'出品者RSS'}
         user={profile.user}
         category="sellers"
         categorys={categoryList('sellers')}
         open={isEditSellers}
-        onClose={this.handleCloseDialog.bind(this, 'isEditSellers')}
-      />
+        onClose={this.handleCloseDialog.bind(this, 'isEditSellers')} />
       <Collapse in={openSellers} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {renderFavoriteList('sellers')}
@@ -406,23 +353,79 @@ class DrawerList extends React.Component {
           {renderNonCategoryList('sellers')}
         </List>
       </Collapse>
-      <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'bids')}>
-        <ListItemIcon>
-          <Timeline className={classes.icon} />
-        </ListItemIcon>
+      {isAlpha
+        ? <ListItem button onClick={this.handleClickButton.bind(this, 'closedmarchant') }>
+          <ListItemIcon><NotificationsActive  className={classes.icon} /></ListItemIcon>
+          <ListItemText primary="落札相場" classes={textClass} />
+            {openClosedMarchant
+              ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
+            {open
+              ? <ListItemSecondaryAction>
+                <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedMarchant')}>
+                <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
+              : null}
+          </ListItem>
+        : null}
+      {isAlpha 
+        ? <RssEditDialog
+            title={'落札相場'}
+            user={profile.user}
+            category="closedmarchant"
+            categorys={categoryList('closedmarchant')}
+            open={isEditClosedMarchant}
+            onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} />
+        : null}
+      {isAlpha 
+        ? <Collapse in={openClosedMarchant} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {renderFavoriteList('closedmarchant')}
+              {renderCategoryList('closedmarchant')}
+              {renderNonCategoryList('closedmarchant')}
+            </List>
+          </Collapse>
+        : null}
+      {isAlpha 
+        ? <ListItem button onClick={this.handleClickButton.bind(this, 'closedsellers')  }>
+          <ListItemIcon><PeopleOutline className={classes.icon}/></ListItemIcon>
+          <ListItemText primary="落札履歴" classes={textClass}/>
+            {openClosedSellers
+              ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
+            {open
+              ? <ListItemSecondaryAction>
+                <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedSellers')}>
+                <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
+              : null}
+          </ListItem>
+        : null}
+      {isAlpha 
+        ? <RssEditDialog
+            title={'落札履歴'}
+            user={profile.user}
+            category="closedsellers"
+            categorys={categoryList('closedsellers')}
+            open={isEditClosedSellers}
+            onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} />
+        : null}
+      {isAlpha 
+        ? <Collapse in={openClosedSellers} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {renderFavoriteList('closedsellers')}
+              {renderCategoryList('closedsellers')}
+              {renderNonCategoryList('closedsellers')}
+            </List>
+          </Collapse>
+        : null}
+      <ListItem button onClick={this.handleClickButton.bind(this, 'bids')}>
+        <ListItemIcon><Timeline className={classes.icon} /></ListItemIcon>
         <ListItemText primary="入札リスト" classes={textClass} />
       </ListItem>
-      <ListItem button 
-        onClick={this.handleClickButton.bind(this, 'trade')}>
-        <ListItemIcon>
-          <Gavel className={classes.icon} />
-        </ListItemIcon>
+      <ListItem button onClick={this.handleClickButton.bind(this, 'trade')}>
+        <ListItemIcon><Gavel className={classes.icon} /></ListItemIcon>
         <ListItemText primary="取引チェック" classes={textClass} />
       </ListItem>
     </div>;
   }
-    
+
   renderUserListItems() {
     const { classes, profile, preference } = this.props;
     const { openUser, isProfile, isPreference } = this.state;

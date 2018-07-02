@@ -15,7 +15,7 @@ class RssNewDialog extends React.Component {
     this.state = {
       isSuccess:  false
     , isNotValid: false
-    , title:      props.title
+    , name:      props.name
     };
   }
 
@@ -34,9 +34,9 @@ class RssNewDialog extends React.Component {
 
   handleSubmitDialog() {
     if(this.isValidate() && this.isChanged()) {
-      const { title } = this.state;
-      this.props.onSubmit(title);
-      this.setState({ title: 'Untitled' })
+      const { name } = this.state;
+      this.props.onSubmit(name);
+      this.setState({ name: 'Untitled' })
       this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
@@ -44,22 +44,20 @@ class RssNewDialog extends React.Component {
   }
 
   isValidate() {
-    const { title } = this.state;
-    return title !=='';;
+    const { name } = this.state;
+    return name !=='';
   }
 
   isChanged() {
-    const { title } = this.state;
-    return this.props.title !== title;
+    const { name } = this.state;
+    return this.props.name !== name;
   }
 
   render() {
     //std.logInfo(RssNewDialog.displayName, 'Props', this.props);
     //std.logInfo(RssNewDialog.displayName, 'State', this.state);
-    const { classes, open, category } = this.props;
-    const { isNotValid, isSuccess, title } = this.state;
-    const name = category === 'marchant'
-      ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const { classes, open, category, title } = this.props;
+    const { isNotValid, isSuccess, name } = this.state;
     const paperClass = { paper: classes.dialog };
     return <LoginFormDialog 
         open={open} 
@@ -69,10 +67,9 @@ class RssNewDialog extends React.Component {
         isSubmit classes={paperClass}
         className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
-          <TextField autoFocus margin="dense"
-            value={title}
-            onChange={this.handleChangeText.bind(this, 'title')}
-            label={name + 'カテゴリー'} type="text" fullWidth />
+          <TextField autoFocus margin="dense" value={name}
+            onChange={this.handleChangeText.bind(this, 'name')}
+            label={title + 'カテゴリー'} type="text" fullWidth />
         </FormControl>
         <RssDialog open={isNotValid} title={'送信エラー'}
           onClose={this.handleClose.bind(this, 'isNotValid')}>

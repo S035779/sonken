@@ -678,8 +678,10 @@ export default class FeedParser {
           isNotReads(
             isNotNotes(notes, obj.category)))
       }), [
-        { _id: '9999', category: 'marchant', subcategory: '未分類' }
-      , { _id: '9999', category: 'sellers',  subcategory: '未分類' }
+        { _id: '9999', category: 'marchant',        subcategory: '未分類' }
+      , { _id: '9999', category: 'sellers',         subcategory: '未分類' }
+      , { _id: '9999', category: 'closedmarchant',  subcategory: '未分類' }
+      , { _id: '9999', category: 'closedsellers',   subcategory: '未分類' }
       ]);
   }
 
@@ -706,8 +708,10 @@ export default class FeedParser {
           isNotReads(
             isStarredNotes(notes, obj.category)))
       }), [
-        { _id: '9998', category: 'marchant', subcategory: 'お気に入り登録' }
-      , { _id: '9998', category: 'sellers',  subcategory: 'お気に入り登録' }
+        { _id: '9998', category: 'marchant',        subcategory: 'お気に入り登録' }
+      , { _id: '9998', category: 'sellers',         subcategory: 'お気に入り登録' }
+      , { _id: '9998', category: 'closedmarchant',  subcategory: 'お気に入り登録' }
+      , { _id: '9998', category: 'closedsellers',   subcategory: 'お気に入り登録' }
       ]);
   }
 
@@ -952,22 +956,27 @@ export default class FeedParser {
     return results;
   }
 
-  //createNote({ user, url, category }) {
-  //  const addNote =
-  //    obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-  //  return Yahoo.of().fetchRss({ url })
-  //    .map(obj => this.setNote({ user, url, category }, obj))
-  //    .flatMap(addNote);
-  //}
-
   createNote({ user, url, category, categoryIds, title }) {
-    const addNote =
-      obj => Rx.Observable.fromPromise(this.addNote(user, obj));
-    return Yahoo.of().fetchHtml({ url })
-      //.map(R.tap(log.trace.bind(this)))
-      .map(obj =>
-        this.setNote({ user, url, category, categoryIds, title }, obj))
-      .flatMap(addNote);
+    const addNote = obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+    let observable;
+    switch(category) {
+      case 'closedmarchant':
+        observable = Yahoo.of().fetchClosedMerchant({ url });
+        break;
+      case 'closedsellers':
+        observable = Yahoo.of().fetchClosedSellers({ url });
+        break;
+      case 'marchant':
+      case 'sellers':
+      default:
+        observable = Yahoo.of().fetchHtml({ url });
+        break;
+    }
+    return observable
+      .map(R.tap(log.trace.bind(this)))
+      .map(obj => this.setNote({ user, url, category, categoryIds, title }, obj))
+      .flatMap(addNote)
+    ;
   }
 
   updateNote({ user, id, data }) {

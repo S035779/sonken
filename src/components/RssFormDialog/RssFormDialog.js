@@ -135,12 +135,9 @@ class RssFormDialog extends React.Component {
   render() {
     //std.logInfo(RssFormDialog.displayName, 'Props', this.props);
     //std.logInfo(RssFormDialog.displayName, 'State', this.state);
-    const { classes, open, user, category, categorys, title }
-      = this.props;
-    const { isNotValid, isSuccess, checked, openAdd, openUpd }
-      = this.state;
-    const name = category === 'marchant'
-      ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
+    const { classes, open, user, category, categorys, title } = this.props;
+    const { isNotValid, isSuccess, checked, openAdd, openUpd } = this.state;
+    const _title = category === 'marchant' ? '商品RSS' : category === 'sellers' ? '出品者RSS' : null;
     const paperClass = { paper: classes.dialog };
     const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
     return <LoginFormDialog
@@ -154,18 +151,19 @@ class RssFormDialog extends React.Component {
           <TextField autoFocus margin="dense"
             value={this.state.title}
             onChange={this.handleChangeText.bind(this, 'title')}
-            label={name + 'タイトル'} type="text" fullWidth />
+            label={_title + 'タイトル'} type="text" fullWidth />
         </FormControl>
         <FormControl component="fieldset" className={classes.column}>
-          <FormLabel component="legend">{name}カテゴリー</FormLabel>
+          <FormLabel component="legend">{_title}カテゴリー</FormLabel>
           <RssButton color="success"
             onClick={this.handleClickButton.bind(this, 'openAdd')}
             classes={classes.button}>新規追加</RssButton>
           <RssNewDialog
+            title={_title}
             open={openAdd}
             user={user}
             category={category}
-            title={'Untitled'}
+            name={'Untitled'}
             onClose={this.handleClose.bind(this, 'openAdd')}
             onSubmit={this.handleCreate.bind(this)}
           />
@@ -189,10 +187,11 @@ class RssFormDialog extends React.Component {
                   <ContentPaste className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
+                  title={_title}
                   open={openUpd.indexOf(obj._id) !== -1}
                   user={user}
                   category={category}
-                  title={obj.subcategory}
+                  name={obj.subcategory}
                   onClose={this.handleChangeToggle
                     .bind(this, 'openUpd', obj._id)}
                   onSubmit={this.handleUpdate
