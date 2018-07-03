@@ -159,84 +159,159 @@ class Yahoo {
           }); 
         });
       case 'fetch/closedmerchant':
+        return new Promise((resolve, reject) => {
+          log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
+          let results;
+          osmosis.get(options.url)
+            .set({ title: 'title', item: [ osmosis
+              .find('div#list01 tr')
+              .filter('td.i, td.a1')
+              .set({
+                link: 'div.a1wrp a@href'
+              , attr_HREF : 'div.th a@href'
+              , img_SRC:    'div.th img@src' 
+              , img_ALT:    'div.th img@alt'
+              , description: {
+                  DIV: { A: {
+                    attr: { HREF: 'div.th a@href' }
+                , IMG: { attr: {
+                    SRC:  'div.th img@src'
+                  , ALT: 'div.th img@alt'
+                  }}
+                }}}
+              })
+              .follow('div.a1wrp h3 a')
+              .set({
+                title: 'div#modTitBar.highlightWordSearch h1 > text()'
+              , bids: 'td.decBg01 > b > text()'
+              , buynow: 'p.decTxtBuyPrice > text()'
+              , price: 'p.decTxtAucPrice > text()'
+              , seller: 'div#modSellInfo div.pts01 a > text()'
+              , details: [ 'div#modPdtInfo div.pts04  td > text()' ]
+              })
+            ]})
+            .data(obj   => { 
+              const setSize = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
+              const setImage = _obj => { 
+                _obj.description.DIV.A.IMG['attr'] = R.merge({
+                  BORDER: 0, WIDTH: 134, HEIGHT: 100
+                }, _obj.description.DIV.A.IMG.attr);
+                return _obj;
+              };
+              const setAuctionId    = _obj => R.merge(_obj, {
+                guid: { _:    _obj.details[22], attr: { isPermaLink: false } }
+              , guid__: _obj.details[22]
+              , guid_isPermaLink: false
+              });
+              const setPubDate      = _obj => R.merge(_obj, {
+                pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
+              });
+              const _setPrice = _obj => R.replace(/円|,/g, '', _obj);
+              const setBuyNow = _obj => _obj.buynow
+                ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
+              const setPrice = _obj => _obj.price
+                ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
+              const setSeller = _obj => _obj.seller
+                ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
+              const _setDate = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
+              const setBidStopTime  = _obj => {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const _date = _setDate(_obj.details[10]);
+                const next = Date.parse(yyyy     + '/' + _date);
+                const past = Date.parse(yyyy -1  + '/' + _date);
+                const date = Date.now() < next ? past : next;
+                //console.log(_date, next, past, date);
+                return R.merge(_obj, { bidStopTime: std.formatDate(new Date(date), 'YYYY/MM/DD hh:mm')});
+              };
+              const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
+              return results = R.compose(
+                setItems
+              //, R.tap(log.trace.bind(this))
+              , R.map(setSeller)
+              , R.map(setBuyNow)
+              , R.map(setPrice)
+              , R.map(setBidStopTime)
+              , R.map(setPubDate)
+              , R.filter(_obj => !!_obj.guid__)
+              , R.map(setAuctionId)
+              , R.map(setSize)
+              , R.map(setImage)
+              , R.filter(R.is(Object))
+              )(obj.item);
+            })
+            //.log(msg    => log.trace(Yahoo.displayName, msg))
+            //.debug(msg  => log.debug(Yahoo.displayName, msg))
+            .error(msg  => log.warn(Yahoo.displayName, msg))
+            .done(()    => {
+              console.log(results);
+              return resolve(results);
+            });
+        });
       case 'fetch/closedsellers':
       case 'fetch/html':
         return new Promise((resolve, reject) => {
           log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
           let results;
           osmosis.get(options.url)
-            .set({
-              title: 'title'
-            , item: [
-                osmosis.find('div#list01 tr')
-                  .filter('td.i, td.a1')
-                  .set({
-                    link: 'div.a1wrp a@href'
-                  , attr_HREF : 'div.th a@href'
-                  , img_SRC:    'div.th img@src' 
-                  , img_ALT:    'div.th img@alt'
-                  , description: {
-                      DIV: { A: {
-                        attr: { HREF: 'div.th a@href' }
-                    , IMG: { attr: {
-                        SRC:  'div.th img@src'
-                      , ALT: 'div.th img@alt'
-                      }}
-                    }}}
-                  })
-                  .follow('div.a1wrp h3 a')
-                  .set({
-                    title: 'h1.ProductTitle__text > text()'
-                  , bids: 'li.Count__count.Count__count > dl > dd.Count__number > text()'
-                  , price: 'div.Price.Price--current > dl.Price__body > dd.Price__value > text()'
-                  , seller: 'dd.Seller__card > span.Seller__name > a > text()'
-                  , details: [ 'dd.ProductDetail__description > text()' ]
-                  })
-              ]
-            })
+            .set({ title: 'title', item: [ osmosis
+              .find('div#list01 tr')
+              .filter('td.i, td.a1')
+              .set({
+                link: 'div.a1wrp a@href'
+              , attr_HREF : 'div.th a@href'
+              , img_SRC:    'div.th img@src' 
+              , img_ALT:    'div.th img@alt'
+              , description: {
+                  DIV: { A: {
+                    attr: { HREF: 'div.th a@href' }
+                , IMG: { attr: {
+                    SRC:  'div.th img@src'
+                  , ALT: 'div.th img@alt'
+                  }}
+                }}}
+              })
+              .follow('div.a1wrp h3 a')
+              .set({
+                title: 'h1.ProductTitle__text > text()'
+              , bids: 'li.Count__count.Count__count > dl > dd.Count__number > text()'
+              , buynow: 'div.Price.Price--buynow > dl.Price__body > dd.Price__value > text()'
+              , price: 'div.Price.Price--current > dl.Price__body > dd.Price__value > text()'
+              , seller: 'dd.Seller__card > span.Seller__name > a > text()'
+              , details: [ 'dd.ProductDetail__description > text()' ]
+              })
+            ]})
             .data(obj => {
-              const setSize         = _obj =>
-                R.merge(_obj
-                  , { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
+              const setSize = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
               const setImage        = _obj => {
                 _obj.description.DIV.A.IMG['attr'] = R.merge({
                   BORDER: 0, WIDTH: 134, HEIGHT: 100
                 }, _obj.description.DIV.A.IMG.attr);
                 return _obj;
-              }
-              const setAuctionId    = _obj =>
-                R.merge(_obj, {
-                  guid: {
-                    _:    _obj.details[10]
-                  , attr: { isPermaLink: false }
-                  }
-                , guid__: _obj.details[10]
-                , guid_isPermaLink: false
-                });
-              const setPubDate      = _obj => 
-                R.merge(_obj, {
-                  pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
-                });
-              const _setPrice       = _obj => 
-                R.replace(/円|,/g, '', _obj);
-              const setPrice        = _obj => _obj.price
-                ? R.merge(_obj, { price: _setPrice(_obj.price) })
-                : R.merge(_obj, { price: '-' });
-              const setSeller       = _obj => _obj.seller
-                ? R.merge(_obj, { seller: _obj.seller })
-                : R.merge(_obj, { seller: '-' });
-              const _setDate        =
-                R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
-              const setBidStopTime  = _obj =>
-                R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
-              const setItems = objs => ({
-                url: options.url
-              , title: obj.title
-              , item:  objs
+              };
+              const setAuctionId    = _obj => R.merge(_obj, {
+                guid: { _:    _obj.details[10], attr: { isPermaLink: false } }
+              , guid__: _obj.details[10]
+              , guid_isPermaLink: false
               });
+              const setPubDate = _obj => R.merge(_obj, {
+                pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
+              });
+              const _setPrice = _obj => R.replace(/円|,/g, '', _obj);
+              const setBuyNow = _obj => _obj.buynow
+                ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
+              const setPrice = _obj => _obj.price
+                ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
+              const setSeller = _obj => _obj.seller
+                ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
+              const _setDate = R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
+              const setBidStopTime = _obj => R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
+              const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
               return results = R.compose(
                 setItems
+              //, R.tap(log.trace.bind(this))
               , R.map(setSeller)
+              , R.map(setBuyNow)
               , R.map(setPrice)
               , R.map(setBidStopTime)
               , R.map(setPubDate)
