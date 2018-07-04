@@ -128,6 +128,7 @@ class Dashboard extends React.Component {
             selectedNoteId={ids} />
           <RssList
             user={user}
+            title={title}
             notes={_notes}
             categorys={categorys}
             categoryId={categoryId}

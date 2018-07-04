@@ -73,7 +73,7 @@ class RssList extends React.Component {
   }
 
   renderItem(note) {
-    const { classes, user, categorys, categoryId } = this.props;
+    const { classes, user, categorys, categoryId, title } = this.props;
     const { checked } = this.state;
     const textClass
       = { primary: classes.primary, secondary: classes.secondary };
@@ -85,7 +85,7 @@ class RssList extends React.Component {
     if (note.items) note.items
       .forEach(item => { if(!item.readed) newRelease++; });
     const notice = newRelease ? `${newRelease}件 NEW` : '';
-    const title = note.title;
+    const noteTitle = note.title;
     const updated
       = std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
     const _categorys
@@ -109,7 +109,7 @@ class RssList extends React.Component {
           onClick={this.handleReaded.bind(this, note)}
           component={Link} to={linkTo}>
             <ListItemText classes={textClass}
-              primary={title} secondary={updated}/>
+              primary={noteTitle} secondary={updated}/>
             <ListItemSecondaryAction>
               <Button className={classes.button}
                 onClick={this.handleChangeDialog.bind(this, note._id)}
@@ -117,7 +117,8 @@ class RssList extends React.Component {
               <RssFormDialog
                 user={user}
                 selectedNoteId={note._id}
-                title={note.title}
+                noteTitle={note.title}
+                title={title}
                 category={note.category}
                 categorys={categoryList(note.category)}
                 categoryIds={note.categoryIds}
