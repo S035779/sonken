@@ -973,7 +973,7 @@ export default class FeedParser {
         break;
     }
     return observable
-      .map(R.tap(log.trace.bind(this)))
+      //.map(R.tap(log.trace.bind(this)))
       .map(obj => this.setNote({ user, url, category, categoryIds, title }, obj))
       .flatMap(addNote)
     ;
