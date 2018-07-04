@@ -137,6 +137,19 @@ class RssForms extends React.Component {
       || note.bidsprice !== bidsprice  || note.body !== body);
   }
 
+  getColor(category) {
+    switch(category) {
+      case 'marchant':
+        return 'skyblue';
+      case 'sellers':
+        return 'orange';
+      case 'closedmarchant':
+        return 'green';
+      case 'closedsellers':
+        return 'yellow';
+    }
+  }
+
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note, category } = this.props;
@@ -148,7 +161,7 @@ class RssForms extends React.Component {
     const link_amz = note.AmazonUrl;
     const name = note.name;
     const items = note.items ? note.items : [];
-    const color = category === 'marchant' ? 'skyblue' : 'orange';
+    const color = this.getColor(category);
     return <div className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap

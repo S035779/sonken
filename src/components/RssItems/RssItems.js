@@ -54,11 +54,24 @@ class RssItems extends React.Component {
     ;
   }
 
+  getColor(category) {
+    switch(category) {
+      case 'marchant':
+        return 'skyblue';
+      case 'sellers':
+        return 'orange';
+      case 'closedmarchant':
+        return 'green';
+      case 'closedsellers':
+        return 'yellow';
+    }
+  }
+
   render() {
     const { classes, user, note, category } = this.props;
     const { isNotValid, isSuccess } = this.state;
     const items = note.items ? note.items : [];
-    const color = category === 'marchant' ? 'skyblue' : 'orange';
+    const color = this.getColor(category);
     return <div className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap
