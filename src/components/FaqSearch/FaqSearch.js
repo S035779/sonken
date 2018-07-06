@@ -20,7 +20,7 @@ class FaqSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(FaqSearch.displayName, 'Props', nextProps);
+    //std.logInfo(FaqSearch.displayName, 'Props', nextProps);
     const { faqPage } = nextProps;
     this.setState({ perPage: faqPage.perPage });
   }

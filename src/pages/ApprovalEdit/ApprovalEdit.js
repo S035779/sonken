@@ -7,7 +7,7 @@ import ApprovalForms  from 'Components/ApprovalForms/ApprovalForms';
 
 class ApprovalEdit extends React.Component {
   render() {
-    std.logInfo(ApprovalEdit.displayName, 'Props', this.props);
+    //std.logInfo(ApprovalEdit.displayName, 'Props', this.props);
     const { classes, admin, user, preference } = this.props
     if(!user || !user._id) return null;
     return <div className={classes.userEdit}>

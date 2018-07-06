@@ -22,7 +22,7 @@ class FaqList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(FaqList.displayName, 'Props', nextProps);
+    //std.logInfo(FaqList.displayName, 'Props', nextProps);
     const { selectedFaqId: checked, faqs } = nextProps;
     this.setState({ checked, faqs });
   }

@@ -98,9 +98,9 @@ class LoginRegist extends React.Component {
     );
   }
 
-  getRefferer(name) {
+  getRefferer(id) {
     const { menu } = this.props.preference;
-    const plan = menu.find(_menu => _menu.name === name);
+    const plan = menu.find(_menu => _menu.id === id);
     return plan ? plan.link : null;
   }
 
@@ -111,13 +111,11 @@ class LoginRegist extends React.Component {
   }
 
   render() {
-    std.logInfo(LoginRegist.displayName, 'State', this.state);
+    //std.logInfo(LoginRegist.displayName, 'State', this.state);
     //std.logInfo(LoginRegist.displayName, 'Props', this.props);
     const { classes, location, preference } = this.props;
-    const { username, password, confirm_password
-      , name, kana, email, phone, plan, agreed
-      , redirectToRefferer, isNotValid, openAgree, openPlan
-    } = this.state;
+    const { username, password, confirm_password, name, kana, email, phone, plan, agreed
+      , redirectToRefferer, isNotValid, openAgree, openPlan } = this.state;
     const inputText = { disableUnderline: true
       , classes: { root: classes.textRoot, input: classes.textInput } }
     const renderItems = preference.menu ? preference.menu
