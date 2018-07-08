@@ -23,7 +23,7 @@ class ApprovalForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(ApprovalForms.displayName, 'Props', nextProps);
+    //std.logInfo(ApprovalForms.displayName, 'Props', nextProps);
     this.setState({ user: nextProps.user });
   }
 
