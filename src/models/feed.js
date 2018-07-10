@@ -20,6 +20,10 @@ const itemSchema = new mongoose.Schema({
 , guid_isPermaLink: Boolean
 , bids:             String
 , price:            String
+, buynow:           String
+, item_condition:   String
+, item_categorys:   String
+, countdown:        String
 , seller:           String
 , details:          { type: Array, required: true }
 , bidStopTime:      Date

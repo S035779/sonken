@@ -1380,9 +1380,15 @@ export default class FeedParser {
     , auid:   obj.guid__
     , link:   obj.link
     , price:  obj.price
+    , buynow: obj.buynow
+    , condition: obj.item_condition
+    , categorys: obj.item_categorys
+    , bids:   obj.bids
+    , countdown: obj.countdown
     , date:   obj.pubDate
     }), objs);
-    const keys = ['title', 'seller', 'auid', 'link', 'price', 'date'];
+    const keys = ['auid', 'title', 'categorys', 'price', 'buynow', 'condition', 'bids', 'countdown'
+    , 'seller', 'link', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNote({ user, id })
       .map(obj  => setItems(obj.items))
