@@ -1,7 +1,6 @@
 import dotenv             from 'dotenv';
 import R                  from 'ramda';
 import Rx                 from 'rxjs/Rx';
-import mongoose           from 'mongoose';
 import { User, Approved, Admin }
                           from 'Models/profile';
 import { Mail, Selected } from 'Models/mail';
@@ -91,7 +90,7 @@ export default class UserProfiler {
         });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          log.debug(request, options);
+          //log.debug(request, options);
           const isUser = options.user !=='';
           const isEmail = !!options.email;
           if(!isUser) return reject({
@@ -241,12 +240,8 @@ export default class UserProfiler {
         });
       case 'create/approval':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            approved: options.id
-          };
-          const update = {
-            approved: options.id
-          };
+          const conditions  = { approved: options.id };
+          const update      = { approved: options.id };
           Approved.update(conditions, update, { upsert: true }
           , (err, obj) => {
             if(err) return reject(err);
@@ -256,9 +251,7 @@ export default class UserProfiler {
         });
       case 'delete/approval':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            approved: options.id
-          };
+          const conditions = { approved: options.id };
           Approved.remove(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -267,7 +260,8 @@ export default class UserProfiler {
         });
       case 'fetch/approval':
         return new Promise((resolve, reject) => {
-          const conditions = {};
+          const isId = !!options.id;
+          const conditions = isId ? { approved: options.id } : {};
           Approved.find(conditions, (err, obj) => {
             if(err) return reject(err);
             //log.trace(request, obj);
@@ -430,8 +424,8 @@ export default class UserProfiler {
     return this.request('delete/approval', { admin, id });
   }
 
-  getApproval(admin) {
-    return this.request('fetch/approval', { admin });
+  getApproval(id) {
+    return this.request('fetch/approval', { id });
   }
 
   signinAdmin(admin, salt, hash) {
@@ -454,7 +448,16 @@ export default class UserProfiler {
       .flatMap(obj => this.createSaltAndHash(password, obj.salt))
       .flatMap(obj => observable(obj))
       .flatMap(() => this.fetchUser(options))
-      .map(obj => obj.isAuthenticated);
+      .flatMap(obj => this.fetchApproved(obj))
+      //.map(R.tap(log.trace.bind(this)))
+    ;
+  }
+
+  fetchApproved(user) {
+    const id = user._id.toString();
+    const isId = obj => obj && obj.approved === id;
+    const observable = Rx.Observable.fromPromise(this.getApproval(id));
+    return observable.map(obj => isId(obj[0]) && user.isAuthenticated);
   }
 
   signout({ admin, user }) {
@@ -470,7 +473,7 @@ export default class UserProfiler {
 
   fetchUsers({ admin }) {
     const observables = Rx.Observable.forkJoin([
-      this.getApproval(admin)
+      this.getApproval()
     , this.getUsers(admin)
     ]);
     const setAttribute = objs => R.compose(
@@ -485,7 +488,6 @@ export default class UserProfiler {
   }
 
   setApproved(approved) {
-    //log.trace('setApproved', approved);
     const ids = 
       objs => R.isNil(objs) ? [] : R.map(obj => obj.approved, objs);
     const isId = id => R.contains(id, ids(approved));

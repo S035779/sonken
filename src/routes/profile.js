@@ -164,7 +164,7 @@ export default {
         obj => {
           if(obj && admin !== '') req.session.admin = admin;
           else if(obj && user !== '') req.session.user = user;
-          log.info('LOGIN', obj, req.session);
+          //log.info('Authenticate', obj, req.session);
           res.status(200).send(obj);
         }
       , err => {
@@ -172,7 +172,7 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to Logged in.');
+          log.info('Complete to Authenticate.');
       });
     };
   },
@@ -183,7 +183,7 @@ export default {
       profile.signout({ admin, user }).subscribe(
         obj => {
           if(!obj) req.session.destroy();
-          log.info('LOGOUT', obj, req.session);
+          //log.info('SignOut', obj, req.session);
           res.status(200).send(obj);
         }
       , err => {
@@ -191,7 +191,7 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => {
-          log.info('Complete to Logged out.');
+          log.info('Complete to Sign out.');
       });
     };
   },
