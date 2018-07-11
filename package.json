@@ -24,7 +24,6 @@
     "watch:all":          "npm-run-all -p watch:node watch:web",
     "watch:web":          "webpack --config webpack.development.js",
     "watch:node":         "webpack --config webpack.node.js -w --colors",
-    "release":            "docker/install.sh",
     "release:staging":    "/bin/bash systemd/install.sh"
   },
   "license": "ISC",

@@ -15,18 +15,23 @@ const itemSchema = new mongoose.Schema({
 , img_BORDER:       Number
 , img_WIDTH:        Number
 , img_HEIGHT:       Number
+, details:          { type: Array, required: true }
 , guid:             { type: Object, required: true }
 , guid__:           { type: String, required: true }
 , guid_isPermaLink: Boolean
+, bidStopTime:      Date
 , bids:             String
 , price:            String
 , buynow:           String
+, offers:           String
+, seller:           String
+, countdown:        String
 , item_condition:   String
 , item_categorys:   String
-, countdown:        String
-, seller:           String
-, details:          { type: Array, required: true }
-, bidStopTime:      Date
+, item_categoryid:  String
+, explanation:      String
+, payment:          String
+, shipping:         String
 , pubDate:          { type: Date, default: Date.now() }
 });
 

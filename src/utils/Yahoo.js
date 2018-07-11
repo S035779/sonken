@@ -178,14 +178,18 @@ class Yahoo {
               })
               .follow('div.a1wrp h3 a')
               .set({
-                title:      'div.decBg04 h1 > text()'
-              , categorys:  [ 'div#yjBreadcrumbs a > text()' ]
-              , bids:       'td.decBg01 > b > text()'
-              , buynow:     'p.decTxtBuyPrice > text()'
-              , price:      'p.decTxtAucPrice > text()'
-              , seller:     'div.untBody.decPwrBox div.pts01 a > text()'
-              , property:   [ 'div.untBody div.pts04 th' ]
-              , details:    [ 'div.untBody div.pts04 td[2] > text()[1]' ]
+                title:        'div.decBg04 h1 > text()'
+              , bids:         'td.decBg01 > b > text()'
+              , buynow:       'p.decTxtBuyPrice > text()'
+              , price:        'p.decTxtAucPrice > text()'
+              , seller:       'div.untBody.decPwrBox div.pts01 a > text()'
+              , categoryUrls: ['div#yjBreadcrumbs a@href'               ]
+              , categorys:    ['div#yjBreadcrumbs a > text()'           ]
+              , property:     ['div.untBody div.pts04 th'               ]
+              , details:      ['div.untBody div.pts04 td[2] > text()[1]']
+              , explanation:  'div#adoc'
+              , payment:      'div#itempayment'
+              , shipping:     'div#itemshipping'
               })
             ]})
             .data(obj   => { 
@@ -208,7 +212,7 @@ class Yahoo {
               const setPubDate      = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
-              const _setPrice = _obj => R.replace(/円|,/g, '', _obj);
+              const _setPrice = _obj => R.replace(/円|,|\s/g, '', _obj);
               const setBuyNow = _obj => _obj.buynow
                 ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) 
                 : R.merge(_obj, { buynow: '-' });
@@ -221,12 +225,19 @@ class Yahoo {
               const setBids = _obj => _obj.bids
                 ? R.merge(_obj, { bids: _obj.bids }) 
                 : R.merge(_obj, { bids: '-' });
-              const setCountdown = _obj => R.merge(_obj, { countdown: '終了' });
-              const setCondition = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
-              const setCategory = R.join(' > ');
-              const setCategorys = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-              const _setDate = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
-              const setBidStopTime  = _obj => {
+              const setCountdown   = _obj => R.merge(_obj, { countdown: '終了' });
+              const setCondition   = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
+              const setOffers      
+                = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
+              const setCategory    = R.join(' > ');
+              const setCategorys   = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
+              const _setCategoryId  = R.compose(
+                R.last, R.filter(c => c !== ''), R.split('/'), url => std.parse_url(url).pathname, R.last
+              );
+              const setCategoryId  
+                = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+              const _setDate       = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
+              const setBidStopTime = _obj => {
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const _date = _setDate(setDetail('終了日時', _obj));
@@ -239,6 +250,8 @@ class Yahoo {
               return results = R.compose(
                 setItems
               //, R.tap(log.trace.bind(this))
+              , R.map(setCategoryId)
+              , R.map(setOffers)
               , R.map(setCategorys)
               , R.map(setCountdown)
               , R.map(setBids)
@@ -258,10 +271,7 @@ class Yahoo {
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
             .error(msg  => log.warn(Yahoo.displayName, msg))
-            .done(()    => {
-              //console.log(results);
-              return resolve(results);
-            });
+            .done(()    => resolve(results));
         });
       case 'fetch/closedsellers':
         return new Promise((resolve, reject) => {
@@ -282,14 +292,18 @@ class Yahoo {
               , description: { DIV: { A: { 
                   IMG:  { attr: { SRC: 'img#acMdThumPhoto@src', ALT: 'img#acMdThumPhoto@alt' } }
                 } } }
-              , title:      'div.decBg04 h1 > text()'
-              , categorys:  [ 'div#yjBreadcrumbs a > text()' ]
-              , bids:       'td.decBg01 > b > text()'
-              , buynow:     'p.decTxtBuyPrice > text()'
-              , price:      'p.decTxtAucPrice > text()'
-              , seller:     'div.untBody.decPwrBox div.pts01 a > text()'
-              , property:   [ 'div.untBody div.pts04 th' ]
-              , details:    [ 'div.untBody div.pts04 td[2] > text()[1]' ]
+              , title:        'div.decBg04 h1 > text()'
+              , bids:         'td.decBg01 > b > text()'
+              , buynow:       'p.decTxtBuyPrice > text()'
+              , price:        'p.decTxtAucPrice > text()'
+              , seller:       'div.untBody.decPwrBox div.pts01 a > text()'
+              , categoryUrls: ['div#yjBreadcrumbs a@href'               ]
+              , categorys:    ['div#yjBreadcrumbs a > text()'           ]
+              , property:     ['div.untBody div.pts04 th'               ]
+              , details:      ['div.untBody div.pts04 td[2] > text()[1]']
+              , explanation:  'div#adoc'
+              , payment:      'div#itempayment'
+              , shipping:     'div#itemshipping'
               })
             ]})
             .data(obj => {
@@ -314,7 +328,7 @@ class Yahoo {
               const setPubDate      = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
-              const _setPrice = _obj => R.replace(/円|,/g, '', _obj);
+              const _setPrice = _obj => R.replace(/円|,|\s/g, '', _obj);
               const setBuyNow = _obj => _obj.buynow
                 ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) 
                 : R.merge(_obj, { buynow: '-' });
@@ -327,12 +341,19 @@ class Yahoo {
               const setBids = _obj => _obj.bids
                 ? R.merge(_obj, { bids: _obj.bids }) 
                 : R.merge(_obj, { bids: '-' });
-              const setCountdown = _obj => R.merge(_obj, { countdown: '終了' });
-              const setCondition = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
-              const setCategory = R.join(' > ');
-              const setCategorys = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-              const _setDate = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
-              const setBidStopTime  = _obj => {
+              const setCountdown   = _obj => R.merge(_obj, { countdown: '終了' });
+              const setCondition   = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
+              const setOffers      
+                = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
+              const setCategory    = R.join(' > ');
+              const setCategorys   = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
+              const _setCategoryId = R.compose(
+                R.last, R.filter(c => c !== ''), R.split('/'), url => std.parse_url(url).pathname, R.last
+              );
+              const setCategoryId  
+                = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+              const _setDate       = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
+              const setBidStopTime = _obj => {
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const _date = _setDate(setDetail('終了日時', _obj));
@@ -345,6 +366,8 @@ class Yahoo {
               return results = R.compose(
                 setItems
               //, R.tap(log.trace.bind(this))
+              , R.map(setCategoryId)
+              , R.map(setOffers)
               , R.map(setCategorys)
               , R.map(setCountdown)
               , R.map(setBids)
@@ -365,10 +388,7 @@ class Yahoo {
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
             .error(msg  => log.warn(Yahoo.displayName, msg))
-            .done(()    => {
-              //console.log(results);
-              return resolve(results);
-            });
+            .done(()    => resolve(results));
         });
       case 'fetch/html':
         return new Promise((resolve, reject) => {
@@ -390,15 +410,19 @@ class Yahoo {
               })
               .follow('div.a1wrp h3 a')
               .set({
-                title: 'h1.ProductTitle__text > text()'
-              , categorys: [ 'div#yjBreadcrumbs a > text()' ]
-              , bids: 'li.Count__count.Count__count > dl > dd.Count__number > text()'
-              , countdown: 'li.Count__count.Count__count--sideLine dd.Count__number > text()'
-              , countunit: 'li.Count__count.Count__count--sideLine span.Count__unit > text()'
-              , buynow: 'div.Price.Price--buynow > dl.Price__body > dd.Price__value > text()'
-              , price: 'div.Price.Price--current > dl.Price__body > dd.Price__value > text()'
-              , seller: 'dd.Seller__card > span.Seller__name > a > text()'
-              , details: [ 'dd.ProductDetail__description > text()' ]
+                title:        'h1.ProductTitle__text > text()'
+              , bids:         'li.Count__count.Count__count > dl > dd.Count__number > text()'
+              , countnumber:  'li.Count__count.Count__count--sideLine dd.Count__number > text()'
+              , countunit:    'li.Count__count.Count__count--sideLine span.Count__unit > text()'
+              , buynow:       'div.Price.Price--buynow > dl.Price__body > dd.Price__value > text()'
+              , price:        'div.Price.Price--current > dl.Price__body > dd.Price__value > text()'
+              , seller:       'dd.Seller__card > span.Seller__name > a > text()'
+              , categoryUrls: ['div#yjBreadcrumbs a@href'               ]
+              , categorys:    ['div#yjBreadcrumbs a > text()'           ]
+              , details:      ['dd.ProductDetail__description > text()' ]
+              , explanation:  'div#ProductExplanation.ProductExplanation'
+              , payment:      'div.ProductProcedure--payment'
+              , shipping:     'div.ProductProcedure--shipping'
               })
             ]})
             .data(obj => {
@@ -416,7 +440,7 @@ class Yahoo {
               const setPubDate = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
-              const _setPrice = _obj => R.replace(/円|,/g, '', _obj);
+              const _setPrice = _obj => R.replace(/円|,|\s/g, '', _obj);
               const setBuyNow = _obj => _obj.buynow
                 ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) 
                 : R.merge(_obj, { buynow: '-' });
@@ -429,18 +453,26 @@ class Yahoo {
               const setBids = _obj => _obj.bids
                 ? R.merge(_obj, { bids: _obj.bids }) 
                 : R.merge(_obj, { bids: '-' });
-              const setCountdown = _obj => _obj.countdown
-                ? R.merge(_obj, { countdown: _obj.countdown + _obj.countunit })
+              const setCountdown = _obj => _obj.countnumber
+                ? R.merge(_obj, { countdown: _obj.countnumber + _obj.countunit })
                 : R.merge(_obj, { countdown: '_' });
-              const setCondition = _obj => R.merge(_obj, { item_condition: _obj.details[0] });
-              const setCategory = R.join(' > ');
-              const setCategorys = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-              const _setDate = R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
-              const setBidStopTime = _obj => R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
-              const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
+              const setCondition    = _obj => R.merge(_obj, { item_condition: _obj.details[0] });
+              const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(_obj.details[9]) });
+              const setCategory     = R.join(' > ');
+              const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
+              const _setCategoryId  = R.compose(
+                R.last, R.filter(c => c !== ''), R.split('/'), url => std.parse_url(url).pathname, R.last
+              );
+              const setCategoryId   
+                = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+              const _setDate        = R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
+              const setBidStopTime  = _obj => R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
+              const setItems        = objs => ({ url: options.url, title: obj.title, item:  objs });
               return results = R.compose(
                 setItems
               //, R.tap(log.trace.bind(this))
+              , R.map(setCategoryId)
+              , R.map(setOffers)
               , R.map(setCategorys)
               , R.map(setCountdown)
               , R.map(setBids)
@@ -460,10 +492,7 @@ class Yahoo {
             //.log(msg => log.trace(Yahoo.displayName, msg))
             //.debug(msg => log.debug(Yahoo.displayName, msg))
             .error(msg => log.warn(Yahoo.displayName, msg))
-            .done(()  => {
-              //console.log(results);
-              return resolve(results);
-            });
+            .done(()  => resolve(results));
         });
     }
   }

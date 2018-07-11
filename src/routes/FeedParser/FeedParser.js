@@ -1354,12 +1354,12 @@ export default class FeedParser {
   downloadNotes({ user, category }) {
     const isCategory = obj => obj.category === category;
     const setNotes = objs => R.map(obj => ({
-      title:      obj.title
-    , url:        obj.url
-    , asin:       obj.asin
-    , price:      obj.price
-    , bidsprice:  obj.bidsprice
-    , memo:       obj.body
+      title:     obj.title
+    , url:       obj.url
+    , asin:      obj.asin
+    , price:     obj.price
+    , bidsprice: obj.bidsprice
+    , memo:      obj.body
     }), objs);
     const keys = category === 'marchant'
       ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo']
@@ -1375,20 +1375,26 @@ export default class FeedParser {
   
   downloadItems({ user, id }) {
     const setItems = objs => R.map(obj => ({
-      title:  obj.title
-    , seller: obj.seller
-    , auid:   obj.guid__
-    , link:   obj.link
-    , price:  obj.price
-    , buynow: obj.buynow
-    , condition: obj.item_condition
-    , categorys: obj.item_categorys
-    , bids:   obj.bids
-    , countdown: obj.countdown
-    , date:   obj.pubDate
+      title:        obj.title
+    , seller:       obj.seller
+    , auid:         obj.guid__
+    , link:         obj.link
+    , price:        obj.price
+    , buynow:       obj.buynow
+    , condition:    obj.item_condition
+    , categorys:    obj.item_categorys
+    , bids:         obj.bids
+    , countdown:    obj.countdown
+    , image:        obj.img_SRC
+    , offers:       obj.offers
+    , categoryid:   obj.item_categoryid
+    , explanation:  obj.explanation
+    , payment:      obj.payment
+    , shipping:     obj.shipping
+    , date:         obj.pubDate
     }), objs);
     const keys = ['auid', 'title', 'categorys', 'price', 'buynow', 'condition', 'bids', 'countdown'
-    , 'seller', 'link', 'date'];
+    , 'seller', 'link', 'image', 'offers', 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNote({ user, id })
       .map(obj  => setItems(obj.items))
