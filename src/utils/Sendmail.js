@@ -32,13 +32,16 @@ class Sendmail {
       case '/message':
         return new Promise((resolve, reject) => {
           this.transporter.sendMail(data, (err, info) => {
-            if(err) reject(err);
+            if(err) return reject(err);
             resolve(info);
           });
         });
       default:
         return new Promise((resolve, reject) => {
-          reject(new Error('UNKNOWN'));
+          reject({
+            name: 'Unknown request:'
+          , message: `Request did ${operation}.` 
+          });
         });
     }
   }
@@ -57,12 +60,12 @@ class Sendmail {
   }
 
   createMessage(message) {
-    log.trace(message);
+    //log.trace(message);
     return this.postMessage(message);
   }
 
   createMessages(messages) {
-    log.trace(messages);
+    //log.trace(messages);
     return this.forMessage(messages);
   }
 };

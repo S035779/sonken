@@ -2,6 +2,7 @@ import React          from 'react';
 import PropTypes      from 'prop-types';
 import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
+import Spinner        from 'Utilities/Spinner';
 
 import { withStyles } from 'material-ui/styles';
 import { Button, Checkbox }
@@ -36,10 +37,17 @@ class AdminButtons extends React.Component {
     const { admin, selectedUserId } = this.props;
     std.logInfo(AdminButtons.displayName
       , 'handleSendmail', selectedUserId);
+    const spn = Spinner.of('app');
     if(window.confirm('Are you sure?')) {
+      spn.start();
       UserAction.sendmail(admin, selectedUserId)
-        .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .then(()    => this.setState({ isSuccess: true }))
+        .then(()    => spn.stop())
+        .catch(err  => {
+          std.logError(AdminButtons.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          spn.stop();
+        });
       this.setState({ checked: false });
     }
   }

@@ -1,7 +1,7 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import std            from 'Utilities/stdutils';
-import MailAction      from 'Actions/MailAction';
+import MailAction     from 'Actions/MailAction';
 
 import { withStyles } from 'material-ui/styles';
 import EditBody       from 'Components/EditBody/EditBody';
@@ -20,13 +20,13 @@ class MailEdit extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(MailEdit.displayName, 'Props', nextProps);
+    //std.logInfo(MailEdit.displayName, 'Props', nextProps);
     const { mail } = nextProps;
     this.setState({ mail, isAttached: mail ? !!mail.file : false });
   }
 
   handleChangeTitle(title) {
-    std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
+    //std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
     const { mail } = this.state;
     this.setState({ mail: Object.assign({}, mail, { title }) });
   }
@@ -34,7 +34,7 @@ class MailEdit extends React.Component {
   handleChangeBody(event) {
     const { mail } = this.state;
     const body = event.target.value;
-    std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
+    //std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
     this.setState({ mail: Object.assign({}, mail, { body }) });
   }
 
