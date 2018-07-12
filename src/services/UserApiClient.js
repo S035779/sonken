@@ -281,10 +281,10 @@ export default {
           );
         });
       case 'pagenation/user':
-      case 'select/user':
       case 'pagenation/faq':
-      case 'select/faq':
       case 'pagenation/mail':
+      case 'select/user':
+      case 'select/faq':
       case 'select/mail':
         return new Promise((resolve, reject) => {
           setTimeout(() => resolve(options), 200);
@@ -340,8 +340,7 @@ export default {
       , { admin, data: Object.assign({}, data, { updated }) });
   },
   pageUser(admin, { maxNumber, number, perPage }) {
-    return this.request('pagenation/user'
-      , { admin, maxNumber, number, perPage });
+    return this.request('pagenation/user', { admin, maxNumber, number, perPage });
   },
   selectUser(admin, ids) {
     return this.request('select/user', { admin, ids });
@@ -388,8 +387,7 @@ export default {
     return this.request('update/faq', { admin, id, data });
   },
   pageFaq(admin, { maxNumber, number, perPage }) {
-    return this.request('pagenation/faq'
-      , { admin, maxNumber, number, perPage });
+    return this.request('pagenation/faq', { admin, maxNumber, number, perPage });
   },
   selectFaq(admin, ids) {
     return this.request('select/faq', { admin, ids });
@@ -431,8 +429,7 @@ export default {
     return this.request('update/mail', { admin, id, data });
   },
   pageMail(admin, { maxNumber, number, perPage }) {
-    return this.request('pagenation/mail'
-      , { admin, maxNumber, number, perPage });
+    return this.request('pagenation/mail', { admin, maxNumber, number, perPage });
   },
   selectMail(admin, ids) {
     return this.request('select/mail', { admin, ids });

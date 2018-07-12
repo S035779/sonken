@@ -1391,10 +1391,13 @@ export default class FeedParser {
     , explanation:  obj.explanation
     , payment:      obj.payment
     , shipping:     obj.shipping
+    , ship_price:   obj.ship_price
+    , ship_buynow:  obj.ship_buynow
     , date:         obj.pubDate
     }), objs);
-    const keys = ['auid', 'title', 'categorys', 'price', 'buynow', 'condition', 'bids', 'countdown'
-    , 'seller', 'link', 'image', 'offers', 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
+    const keys = ['auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
+      , 'bids', 'countdown', 'seller', 'link', 'image', 'offers', 'categoryid', 'explanation', 'payment'
+      , 'shipping', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNote({ user, id })
       .map(obj  => setItems(obj.items))

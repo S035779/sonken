@@ -32,6 +32,8 @@ const itemSchema = new mongoose.Schema({
 , explanation:      String
 , payment:          String
 , shipping:         String
+, ship_price:       String
+, ship_buynow:      String
 , pubDate:          { type: Date, default: Date.now() }
 });
 

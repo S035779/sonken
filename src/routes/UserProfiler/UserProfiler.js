@@ -549,8 +549,7 @@ export default class UserProfiler {
   deleteUser({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeUser.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => Rx.Observable.fromPromise(_promise(admin, id));
     const observables = R.map(observable, _ids);
     return Rx.Observable.forkJoin(observables);
   }
@@ -568,8 +567,11 @@ export default class UserProfiler {
   }
 
   inquiry({ user, data }) {
-    return Rx.Observable
-      .forkJoin([ this.getPreference(), this.getUser(user) ])
+    const observables = obj => Rx.Observable.forkJoin([ 
+      this.getPreference()
+    , this.getUser(obj) 
+    ]);
+    return observables(user)
       .map(objs => this.setInquiry(objs[0], objs[1], data))
       .flatMap(obj => this.postMessage(obj));
   }
@@ -578,7 +580,7 @@ export default class UserProfiler {
     return {
       from:     sender.from
     , to:       user.email
-    , subject:  '(ヤフオク！RSSリーダ)'
+    , subject:  `(${app_name})`
       + ` ${user.name} 様より問合せがありました。` 
     , text:
         `氏　　名： ${user.name}\n`
@@ -587,7 +589,7 @@ export default class UserProfiler {
       + `タイトル： ${message.title}\n`
       + `問い合せ： ${message.body}\n\n`
       + `-------------------------------\n`
-      + `ヤフオク！RSSリーダー\n`
+      + `${app_name}\n`
     };
   }
 

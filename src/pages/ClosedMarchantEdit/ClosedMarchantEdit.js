@@ -1,25 +1,60 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
+import std            from 'Utilities/stdutils';
 
 import { withStyles } from 'material-ui/styles';
-import RssForms       from 'Components/RssForms/RssForms';
-import RssView        from 'Components/RssView/RssView';
+import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedMarchantEdit extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filter: {
+        aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , aucStopTime:  std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , allAuction: true
+      , inAuction:  true
+      , endAuction: true
+      }
+    };
+  }
+
+  itemFilter(filter, item) {
+    const date      = new Date();
+    const now       = new Date(item.aucStopTime);
+    const start     = new Date(filter.aucStartTime);
+    const stop      = new Date(filter.aucStopTime);
+    const year      = date.getFullYear();
+    const month     = date.getMonth();
+    const day       = date.getDate();
+    const today     = new Date(year, month, day+1);
+    const yesterday = new Date(year, month, day);
+    const isDay = yesterday <= now && now < today;
+    const isAll = true;
+    const isNow = start <= now && now <= stop;
+    return filter.inAuction
+      ? isNow
+      : filter.endAuction && filter.allAuction
+        ? isAll
+        : filter.endAuction
+          ? isDay
+          : true;
+  }
+
   render() {
     const { classes, user, note, category, file } = this.props
+    const { filter } = this.state;
     if(!note || !note._id) return null;
+    const items = note.items ? note.items.filter(item => this.itemFilter(filter, item)) : [];
+    const _note = Object.assign(note, { items });
     return <div className={classes.noteEdit}>
-      <div className={classes.forms}>
-        <RssForms
+      <div classes={classes.forms}>
+        <ClosedForms
           user={user}
           note={note}
           category={category}
-          file={file}>
-          <div className={classes.view}>
-            <RssView note={note}/>
-          </div>
-        </RssForms>
+          itemFilter={filter} 
+          file={file} />
       </div>
     </div>;
   }
@@ -37,15 +72,6 @@ const styles = theme => ({
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , forms:    { overflow: 'scroll' }
-, view:     { position: 'relative', height: rowHeight * 4, overflow: 'auto'
-            , border: '1px solid #CCC', padding: '20px 10px 10px 10px'
-            , '&:before': { position: 'absolute', top: 0, left: 0
-              , display: 'inline-block'
-              , borderRight: '1px solid #CCC'
-              , borderBottom: '1px solid #CCC'
-              , padding: '5px 10px'
-              , content: '"Preview"', fontSize: '12px'
-              , backgroundColor: '#F5F5F5' }}
 });
 ClosedMarchantEdit.displayName= 'ClosedMarchantEdit';
 ClosedMarchantEdit.defaultProps = { note: null };

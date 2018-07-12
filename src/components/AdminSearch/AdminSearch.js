@@ -9,7 +9,6 @@ import { Select, Input, Button, Typography }
 import { InputLabel }   from 'material-ui/Input';
 import { FormControl }  from 'material-ui/Form';
 import { MenuItem }     from 'material-ui/Menu';
-import RssButton        from 'Components/RssButton/RssButton';
 
 class AdminSearch extends React.Component {
   constructor(props) {
@@ -30,32 +29,32 @@ class AdminSearch extends React.Component {
     const value = event.target.value;
     std.logInfo(AdminSearch.displayName, 'handleChangeSelect', value);
     switch(name) {
-      case 'page':
+      case 'perPage':
+        this.setState({ perPage: value });
         UserAction.pagenation(admin, {
           maxNumber: Math.ceil(userNumber / value)
-          , number: 1, perPage: value
+        , number: 1
+        , perPage: value
         });
-        this.setState({ perPage: value });
         break;
     }
   }
 
   render() {
+    //std.logInfo(AdminSearch.displayName, 'Props', this.props);
+    //std.logInfo(AdminSearch.displayName, 'State', this.state);
     const { classes, userNumber, category } = this.props;
-    const { url, perPage, filename } = this.state;
-    const color = category === 'users' ? 'skyblue' : 'orange';
+    const { perPage, filename } = this.state;
     return <div className={classes.userSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{userNumber}件中{
-            perPage > userNumber ? userNumber : perPage
-          }件表示
+          全{userNumber}件中 {perPage > userNumber ? userNumber : perPage}件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
         <Select value={perPage}
-          onChange={this.handleChangeSelect.bind(this, 'page')}>
+          onChange={this.handleChangeSelect.bind(this, 'perPage')}>
           <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>

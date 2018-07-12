@@ -17,7 +17,7 @@ export default class ManagementStore extends ReduceStore {
     , page: {
         maxNumer: 0
       , number:   0
-      , perPage:  20
+      , perPage:  9999
     }
     , selected: false
     , ids:      []
