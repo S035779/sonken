@@ -9,21 +9,21 @@ import Sendmail           from 'Utilities/Sendmail';
 import { logs as log }    from 'Utilities/logutils';
 
 dotenv.config()
-const node_env = process.env.NODE_ENV;
-const app_name = process.env.APP_NAME;
-const admin_user = process.env.ADMIN_USER;
-const admin_pass = process.env.ADMIN_PASS;
-const mms_from = process.env.MMS_FROM || 'info@example.com';
-const smtp_port = process.env.MMS_PORT || 2525;
-const ssmtp_port = process.env.MMS_SSL;
-const isSSL = ssmtp_port ? true : false;
+const node_env    = process.env.NODE_ENV;
+const app_name    = process.env.APP_NAME;
+const admin_user  = process.env.ADMIN_USER;
+const admin_pass  = process.env.ADMIN_PASS;
+const mms_from    = process.env.MMS_FROM;
+const smtp_port   = process.env.MMS_PORT;
+const ssmtp_port  = process.env.MMS_SSL;
+const isSSL       = ssmtp_port ? true : false;
 const mail_keyset = {
   host:   process.env.MMS_HOST
 , secure: isSSL
 , port:   isSSL ? ssmtp_port : smtp_port
 , auth: {
-    user:   process.env.MMS_USER
-    , pass: process.env.MMS_PASS
+    user: process.env.MMS_USER
+  , pass: process.env.MMS_PASS
   }
 };
 

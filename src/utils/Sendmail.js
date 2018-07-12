@@ -1,10 +1,12 @@
+import dotenv           from 'dotenv';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import nodemailer       from 'nodemailer';
 import nodemailerSmtp   from 'nodemailer-smtp-transport'
 import { logs as log }  from 'Utilities/logutils';
 
-const node_env = process.env.NODE_ENV;
+dotenv.config();
+const node_env    = process.env.NODE_ENV;
 const displayName = 'Sendmail';
 
 /**
