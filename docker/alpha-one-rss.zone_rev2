@@ -1,0 +1,9 @@
+alpha-one-rss.jp. 21600 IN NS ns-cloud-d1.googledomains.com.
+alpha-one-rss.jp. 21600 IN NS ns-cloud-d2.googledomains.com.
+alpha-one-rss.jp. 21600 IN NS ns-cloud-d3.googledomains.com.
+alpha-one-rss.jp. 21600 IN NS ns-cloud-d4.googledomains.com.
+alpha-one-rss.jp. 21600 IN SOA ns-cloud-d1.googledomains.com. cloud-dns-hostmaster.google.com. 7 21600 3600 259200 300
+alpha-one-rss.jp. 21600 IN TXT "v=spf1 include:spf.mailjet.com ?all"
+mailjet._domainkey.alpha-one-rss.jp. 21600 IN TXT "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDRZEyf0T7dZ16gdrwAXIqJ4Jt4Qwb8UnF6RMjOE+DlViM7hM6ex6tUt+YWmTwT3tr0MQoyM6KPfzIHFhcdicZPNu4t+HvS6sxNLH1oCoI9nErtVaJMHgYXhyDojx9cNWrEoFegI2WcKlQhMV4GvkKf3kuOsrNVacRbeGz1HwKQMQIDAQAB"
+mailjet._e88e849c.alpha-one-rss.jp. 21600 IN TXT "e88e849ce16f1a50abf8e2c94c18df51"
+feedparser.alpha-one-rss.jp. 300 IN A 130.211.29.166

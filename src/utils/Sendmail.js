@@ -1,8 +1,10 @@
-import R from 'ramda';
-import Rx from 'rxjs/Rx';
-import nodemailer from 'nodemailer';
-import { logs as log } from 'Utilities/logutils';
+import R                from 'ramda';
+import Rx               from 'rxjs/Rx';
+import nodemailer       from 'nodemailer';
+import nodemailerSmtp   from 'nodemailer-smtp-transport'
+import { logs as log }  from 'Utilities/logutils';
 
+const node_env = process.env.NODE_ENV;
 const displayName = 'Sendmail';
 
 /**
@@ -20,7 +22,9 @@ class Sendmail {
   constructor(host, secure, port, auth) {
     const options = Object.assign({}, { host, secure, port, auth }
       , { tls: { rejectUnauthorized: false } });
-    this.transporter = nodemailer.createTransport(options);
+    const _options = node_env === 'production' 
+      ? nodemailerSmtp(options) : options;
+    this.transporter = nodemailer.createTransport(_options);
   }
 
   static of({ host, secure, port, auth }) {
