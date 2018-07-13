@@ -1387,6 +1387,7 @@ export default class FeedParser {
     , countdown:    obj.countdown
     , image:        obj.img_SRC
     , offers:       obj.offers
+    , market:       obj.market
     , categoryid:   obj.item_categoryid
     , explanation:  obj.explanation
     , payment:      obj.payment
@@ -1396,7 +1397,7 @@ export default class FeedParser {
     , date:         obj.pubDate
     }), objs);
     const keys = ['auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
-      , 'bids', 'countdown', 'seller', 'link', 'image', 'offers', 'categoryid', 'explanation', 'payment'
+      , 'bids', 'countdown', 'seller', 'link', 'image', 'offers', 'market', 'categoryid', 'explanation', 'payment'
       , 'shipping', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNote({ user, id })

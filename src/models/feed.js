@@ -24,6 +24,7 @@ const itemSchema = new mongoose.Schema({
 , price:            String
 , buynow:           String
 , offers:           String
+, market:           String
 , seller:           String
 , countdown:        String
 , item_condition:   String

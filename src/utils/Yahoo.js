@@ -568,15 +568,43 @@ class Yahoo {
   }
   
   fetchClosedMerchant({ url }) {
-    return Rx.Observable.fromPromise(this.getClosedMerchant(url));
+    return Rx.Observable.fromPromise(this.getClosedMerchant(url))
+      .flatMap(obj => this.forHtml(obj))
+      //.map(R.tap(log.trace.bind(this)))
+    ;
   }
 
   fetchClosedSellers({ url }) {
-    return Rx.Observable.fromPromise(this.getClosedSellers(url));
+    return Rx.Observable.fromPromise(this.getClosedSellers(url))
+      //.map(R.tap(log.trace.bind(this)))
+      .flatMap(obj => this.forHtml(obj));
   }
 
   fetchHtml({ url }) {
     return Rx.Observable.fromPromise(this.getHtml(url));
+  }
+ 
+  forHtml(note) {
+    const items = note.item;
+    const baseurl     = 'https://auctions.yahoo.co.jp/search/search';
+    const setUrl      = str => {
+      const api = std.parse_url(baseurl);
+      api.searchParams.append('p', str);
+      return api.href;
+    };
+    const setUrls     = R.map(obj => setUrl(obj.title));
+    const promises    = R.map(url => this.getHtml(url));
+    const observable  = urls => Rx.Observable.forkJoin(promises(urls));
+    const isItem      = (item, objs) => R.find(obj => 
+      obj ? item.title === obj.item[0].title : false, objs);
+    const setItem     = (item, objs) => isItem(item, objs) 
+      ? R.merge(item, { market: isItem(item, objs).item[0].price })
+      : item;
+    const setMarket   = objs => R.map(item => setItem(item, objs), items);
+    const setMarkets  = objs => R.merge(note, { item: setMarket(objs) });
+    return observable(setUrls(items))
+      .map(objs => setMarkets(objs))
+    ;
   }
 
   /**
