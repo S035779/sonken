@@ -10,17 +10,15 @@ class MarchantEdit extends React.Component {
     const { classes, user, note, category, file } = this.props
     if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
-      <div className={classes.forms}>
-        <RssForms
-          user={user}
-          note={note}
-          category={category}
-          file={file}>
-          <div className={classes.view}>
-            <RssView note={note}/>
-          </div>
-        </RssForms>
-      </div>
+      <RssForms
+        user={user}
+        note={note}
+        category={category}
+        file={file}>
+        <div className={classes.view}>
+          <RssView note={note}/>
+        </div>
+      </RssForms>
     </div>;
   }
 };
@@ -30,14 +28,14 @@ const barHeightSmDown   = 56;//104;
 const rowHeight         = 62
 const editHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
+const editHeightSmUp    = 
   `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, forms:    { overflow: 'scroll' }
-, view:     { position: 'relative', height: rowHeight * 4, overflow: 'auto'
+, view:     { position: 'relative', height: rowHeight * 4
+            , overflow: 'auto'
             , border: '1px solid #CCC', padding: '20px 10px 10px 10px'
             , '&:before': { position: 'absolute', top: 0, left: 0
               , display: 'inline-block'

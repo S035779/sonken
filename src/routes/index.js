@@ -2,8 +2,7 @@ import App          from 'Pages/App/App';
 import Dashboard    from 'Pages/Dashboard/Dashboard';
 import MarchantEdit from 'Pages/MarchantEdit/MarchantEdit';
 import SellersEdit  from 'Pages/SellersEdit/SellersEdit';
-import ClosedMarchantEdit from 'Pages/ClosedMarchantEdit/ClosedMarchantEdit';
-import ClosedSellersEdit  from 'Pages/ClosedSellersEdit/ClosedSellersEdit';
+import ClosedEdit   from 'Pages/ClosedEdit/ClosedEdit';
 import Bids         from 'Pages/Bids/Bids';
 import Trade        from 'Pages/Trade/Trade';
 import Auth         from 'Pages/Auth/Auth';
@@ -69,8 +68,8 @@ export default function getRoutes() {
       { path: '/:category/:id',       component: Dashboard, loadData: getUserData, routes: [
         { path: '/marchant/:id/edit',       component: MarchantEdit       }
       , { path: '/sellers/:id/edit',        component: SellersEdit        }
-      , { path: '/closedmarchant/:id/edit', component: ClosedMarchantEdit }
-      , { path: '/closedsellers/:id/edit',  component: ClosedSellersEdit  }
+      , { path: '/closedmarchant/:id/edit', component: ClosedEdit         }
+      , { path: '/closedsellers/:id/edit',  component: ClosedEdit         }
       ] }
     , { path: '/bids',                component: Bids,      loadData: getUserData }
     , { path: '/trade',               component: Trade,     loadData: getUserData }

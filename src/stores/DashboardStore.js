@@ -5,18 +5,27 @@ const displayName = 'DashboardStore';
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
-      user:             ''
-    , isAuthenticated:  false
-    , notes:            []
+      user: ''
+    , isAuthenticated: false
+    , notes: []
     , page: {
-        maxNumer:       0
-      , number:         0
-      , perPage:        20
+        maxNumer: 0
+      , number:   0
+      , perPage:  20
       }
-    , selected:         false
-    , ids:              []
-    , file:             null
-    , categorys:        []
+    , selected:false
+    , ids:     []
+    , filter: {
+        lastWeekAuction:  true
+      , twoWeeksAuction:  true
+      , lastMonthAuction: true
+      , allAuction:       true
+      , inAuction:        false
+      , aucStartTime:     0
+      , aucStopTime:      0
+      }
+    , file: null
+    , categorys: []
     };
   }
   
@@ -185,6 +194,11 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  this.updateNote(state, action)
         });
+      case 'note/delete':
+        return Object.assign({}, state, {
+          notes:  this.deleteNote(state, action)
+        , ids:    []
+        });
       case 'note/pagenation':
         return Object.assign({}, state, {
           page:   action.page
@@ -193,10 +207,9 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           ids:    action.ids
         });
-      case 'note/delete':
+      case 'note/filter':
         return Object.assign({}, state, {
-          notes:  this.deleteNote(state, action)
-        , ids:    []
+          filter: action.filter
         });
       case 'note/upload/my':
         return Object.assign({}, state, {

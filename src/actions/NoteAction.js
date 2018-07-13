@@ -121,6 +121,13 @@ export default {
       })
     ;
   },
+  delete(user, ids) {
+    return NoteApiClient.deleteNote(user, ids)
+      .then(() => {
+        dispatch({ type: 'note/delete', ids });
+      })
+    ;
+  },
   pagenation(user, page) {
     return NoteApiClient.pageNote(user, page)
       .then(() => {
@@ -135,10 +142,10 @@ export default {
       })
     ;
   },
-  delete(user, ids) {
-    return NoteApiClient.deleteNote(user, ids)
+  filter(user, filter) {
+    return NoteApiClient.filterNote(user, filter)
       .then(() => {
-        dispatch({ type: 'note/delete', ids });
+        dispatch({ type: 'note/filter', filter });
       })
     ;
   },

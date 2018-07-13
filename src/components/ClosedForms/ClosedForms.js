@@ -17,16 +17,18 @@ class ClosedForms extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      note:           props.note
-    , itemFilter:     props.itemFilter
-    , checked:        false
-    , endAuction:     true
-    , allAuction:     true
-    , inAuction:      false
-    , aucStartTime:   std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , aucStopTime:    std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , isSuccess:      false
-    , isNotValid:     false
+      note:             props.note
+    , itemFilter:       props.itemFilter
+    , checked:          false
+    , lastWeekAuction:  true
+    , twoWeeksAuction:  true
+    , lastMonthAuction: true
+    , allAuction:       true
+    , inAuction:        false
+    , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , isSuccess:        false
+    , isNotValid:       false
     };
   }
 
@@ -37,7 +39,7 @@ class ClosedForms extends React.Component {
   }
 
   downloadFile(blob) {
-    std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
+    //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
     const a = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
@@ -52,42 +54,63 @@ class ClosedForms extends React.Component {
   }
 
   handleChangeCheckbox(name, event) {
-    std.logInfo(ClosedForms.displayName, 'handleChangeCheckbox', name);
+    //std.logInfo(ClosedForms.displayName, 'handleChangeCheckbox', name);
     const checked = event.target.checked;
     switch(name) {
       case 'inAuction':
         this.setState({
-          inAuction:  checked
-        , allAuction: !checked
-        , endAuction: !checked
+          inAuction:        checked
+        , allAuction:       !checked
+        , lastWeekAuction:  !checked
+        , twoWeeksAuction:  !checked
+        , lastMonthAuction: !checked
         });
         break;
       case 'allAuction':
         this.setState({
-          inAuction:  false
-        , allAuction: checked
-        , endAuction: true
+          inAuction:        false
+        , allAuction:       checked
+        , lastWeekAuction:  true
+        , twoWeeksAuction:  true
+        , lastMonthAuction: true
         });
         break;
-      case 'endAuction':
+      case 'lastWeekAuction':
         this.setState({
-          inAuction:  !checked
-        , allAuction: false
-        , endAuction: checked
+          inAuction:        !checked
+        , allAuction:       false
+        , lastWeekAuction:  checked
+        , twoWeeksAuction:  false
+        , lastMonthAuction: false
+        });
+        break;
+      case 'twoWeeksAuction':
+        this.setState({
+          inAuction:        false
+        , allAuction:       false
+        , lastWeekAuction:  true
+        , twoWeeksAuction:  checked
+        , lastMonthAuction: false
+        });
+        break;
+      case 'lastMonthAuction':
+        this.setState({
+          inAuction:        false
+        , allAuction:       false
+        , lastWeekAuction:  true
+        , twoWeeksAuction:  true
+        , lastMonthAuction: checked
         });
         break;
     }
   }
 
   handleFilter() {
-    const { endAuction, allAuction, inAuction, aucStartTime, aucStopTime } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction
+      , allAuction, inAuction, aucStartTime, aucStopTime } = this.state;
     const { user } = this.props;
-    std.logInfo(ClosedForms.displayName, 'handleFilter', {
-      endAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
-    NoteAction.filter(user, {
-      endAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
+    NoteAction.filter(user, {lastWeekAuction, twoWeeksAuction
+    , lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime});
   }
 
   handleChangeText(name, event) {
@@ -122,13 +145,6 @@ class ClosedForms extends React.Component {
     ;
   }
 
-  isValidate() {
-    const { asin, price, bidsprice, body } = this.state.note;
-    return (asin !== ''
-      && std.regexNumber(price) && std.regexNumber(bidsprice)
-    );
-  }
-
   getColor(category) {
     switch(category) {
       case 'marchant':
@@ -143,39 +159,67 @@ class ClosedForms extends React.Component {
   }
 
   render() {
-    std.logInfo(ClosedForms.displayName, 'State', this.state);
+    //std.logInfo(ClosedForms.displayName, 'State', this.state);
+    //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, user, note, category } = this.props;
-    const { aucStartTime, aucStopTime, endAuction, allAuction, inAuction, isNotValid, isSuccess } = this.state;
+    const { aucStartTime, aucStopTime
+      , lastWeekAuction, twoWeeksAuction, lastMonthAuction
+      , allAuction, inAuction, isNotValid, isSuccess } = this.state;
     const name = note.name;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
     return <div className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
+        <Typography variant="title" noWrap 
+          className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           <RssButton color={color}
             onClick={this.handleDownload.bind(this)} 
             classes={classes.button}>ダウンロード</RssButton>
+          <RssDialog open={isNotValid} title={'送信エラー'}
+            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
+          </RssDialog>
+          <RssDialog open={isSuccess} title={'送信完了'}
+            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+            要求を受け付けました。
+          </RssDialog>
         </div>
       </div>
       <div className={classes.edit}>
-        <div className={classes.space}/>
         <Typography variant="subheading" noWrap
-          className={classes.title}>絞込件数：</Typography>
+          className={classes.column}>絞込件数：</Typography>
         <Checkbox color="primary" 
           className={classes.checkbox}
-          checked={endAuction}
-          onChange={this.handleChangeCheckbox.bind(this, 'endAuction')}
+          checked={lastWeekAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'lastWeekAuction')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
-          className={classes.title}>本日入札終了</Typography>
+          className={classes.column}>終了後１週間</Typography>
+        <Checkbox color="primary"
+          className={classes.checkbox}
+          checked={twoWeeksAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'twoWeeksAuction')}
+          tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap
+          className={classes.column}>終了後２週間</Typography>
+        <Checkbox color="primary"
+          className={classes.checkbox}
+          checked={lastMonthAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'lastMonthAuction')}
+          tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap
+          className={classes.column}>終了後１ヶ月</Typography>
         <Checkbox color="primary"
           className={classes.checkbox}
           checked={allAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'allAuction')}
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
-          className={classes.title}>全て表示</Typography>
+          className={classes.column}>全て表示</Typography>
+      </div>
+      <div className={classes.edit}>
+        <div className={classes.column} />
         <div className={classes.datetimes}>
           <Checkbox color="primary"
             tabIndex={-1} disableRipple
@@ -183,7 +227,7 @@ class ClosedForms extends React.Component {
             onChange={this.handleChangeCheckbox.bind(this, 'inAuction')}
             className={classes.checkbox}/>
           <Typography variant="subheading" noWrap
-            className={classes.title}>入札終了時期：</Typography>
+            className={classes.column}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
             <TextField id="start-time" label="始め" type="datetime-local"
               InputLabelProps={{shrink: true}}
@@ -199,7 +243,6 @@ class ClosedForms extends React.Component {
         </div>
       </div>
       <div className={classes.edit}>
-        <div className={classes.space}/>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
             <Button variant="raised"
@@ -209,34 +252,51 @@ class ClosedForms extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList user={user} items={items} />
+        <RssItemList 
+          user={user} 
+          items={items} />
       </div>
     </div>;
   }
 };
 
-const columnHeight = 62;
-const checkboxWidth = 38;
-const datetimeWidth = 200;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
+const searchHeight      = 62;
+const filterHeight      = 62 * 4;
+const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${filterHeight}px - ${searchHeight}px)`;
+const columnHeight      = 62;
+const contentWidth      = 112;
+const checkboxWidth     = 38;
+const datetimeWidth     = 200;
 const styles = theme => ({
-  space:        { width: checkboxWidth }
-, datetimes:    { display: 'flex', flexDirection: 'row'
-                , marginLeft: theme.spacing.unit * 0.5 }
-, title:        { margin: theme.spacing.unit * 1.75 }
+  forms:        { display: 'flex', flexDirection: 'column'
+                , overflow: 'scroll' }
+, noteList:     { width: '100%'
+                , height: listHeightSmDown 
+                , [theme.breakpoints.up('sm')]: {
+                  height: listHeightSmUp }}
+, header:       { display: 'flex', flexDirection: 'row'
+                , alignItems: 'stretch', justifyContent: 'space-between'
+                , height: columnHeight, minHeight: columnHeight
+                , boxSizing: 'border-box', padding: '5px' }
+, title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
+, datetimes:    { display: 'flex', flexDirection: 'row' }
+, column:       { minWidth: contentWidth
+                , margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
                 , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box'
-                , padding: '5px' }
+                , boxSizing: 'border-box', padding: '5px' }
 , checkbox:     { flex: 0, minWidth: checkboxWidth }
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
-, inputText:    {}
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
 ClosedForms.displayName = 'ClosedForms';
-ClosedForms.defaultProps = { items: null };
+ClosedForms.defaultProps = { note: null };
 ClosedForms.propTypes = {
   classes: PropTypes.object.isRequired
 };

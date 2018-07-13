@@ -1,5 +1,7 @@
 import { ReduceStore } from 'flux/utils';
 
+const displayName = 'TradedNotesStore';
+
 export default class TradedNotesStore extends ReduceStore {
   getInitialState() {
     return { 

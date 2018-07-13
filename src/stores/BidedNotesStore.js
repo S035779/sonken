@@ -1,5 +1,7 @@
 import { ReduceStore } from 'flux/utils';
 
+const displayName = 'BidedNotesStore';
+
 export default class BidedNotesStore extends ReduceStore {
   getInitialState() {
     return { 

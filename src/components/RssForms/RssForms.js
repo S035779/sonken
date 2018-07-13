@@ -262,22 +262,21 @@ const barHeightSmUp     = 64;//112;
 const barHeightSmDown   = 56;//104;
 const searchHeight      = 62;
 const filterHeight      = 62 * 9;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const columnHeight = 62;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column' }
+  forms:        { display: 'flex', flexDirection: 'column'
+                , overflow: 'scroll' }
 , noteList:     { width: '100%'
                 , height: listHeightSmDown
                 , [theme.breakpoints.up('sm')]: {
                   height: listHeightSmUp }}
 , header:       { display: 'flex', flexDirection: 'row' 
+                , alignItems: 'stretch', justifyContent: 'space-between'
                 , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box'
-                , padding: '5px' }
-, title:        { width: 480, margin: theme.spacing.unit * 1.75 }
+                , boxSizing: 'border-box', padding: '5px' }
+, title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
 , label:        { margin: theme.spacing.unit * 1.75 }
 , edit:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'

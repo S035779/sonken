@@ -5,57 +5,52 @@ import std            from 'Utilities/stdutils';
 import { withStyles } from 'material-ui/styles';
 import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
-class ClosedMarchantEdit extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      filter: {
-        aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-      , aucStopTime:  std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-      , allAuction: true
-      , inAuction:  true
-      , endAuction: true
-      }
-    };
-  }
-
+class ClosedEdit extends React.Component {
   itemFilter(filter, item) {
     const date      = new Date();
-    const now       = new Date(item.aucStopTime);
+    const now       = new Date(item.bidStopTime);
     const start     = new Date(filter.aucStartTime);
     const stop      = new Date(filter.aucStopTime);
     const year      = date.getFullYear();
     const month     = date.getMonth();
     const day       = date.getDate();
-    const today     = new Date(year, month, day+1);
-    const yesterday = new Date(year, month, day);
-    const isDay = yesterday <= now && now < today;
+    const lastWeek  = new Date(year, month, day-7);
+    const twoWeeks  = new Date(year, month, day-14);
+    const lastMonth = new Date(year, month-1, day);
+    const today     = new Date(year, month, day);
+    const isLastWeek  = lastWeek  <= now && now < today;
+    const isTwoWeeks  = twoWeeks  <= now && now < today;
+    const isLastMonth = lastMonth <= now && now < today;
     const isAll = true;
     const isNow = start <= now && now <= stop;
     return filter.inAuction
       ? isNow
-      : filter.endAuction && filter.allAuction
+      : filter.allAuction
         ? isAll
-        : filter.endAuction
-          ? isDay
-          : true;
+        : filter.lastMonthAuction 
+          ? isLastMonth
+          : filter.twoWeeksAuction 
+            ? isTwoWeeks
+            : filter.lastWeekAuction 
+              ? isLastWeek
+              : true;
   }
 
   render() {
-    const { classes, user, note, category, file } = this.props
-    const { filter } = this.state;
+    //std.logInfo(ClosedEdit.displayName, 'State', this.state);
+    //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
+    const { classes, user, note, category, filter, file } = this.props
     if(!note || !note._id) return null;
-    const items = note.items ? note.items.filter(item => this.itemFilter(filter, item)) : [];
-    const _note = Object.assign(note, { items });
+    const items = note.items ? note.items : [];
+    const _items = items.filter(item => this.itemFilter(filter, item));
+    const _note = Object.assign({}, note, { items: _items });
     return <div className={classes.noteEdit}>
-      <div classes={classes.forms}>
         <ClosedForms
           user={user}
-          note={note}
+          note={_note}
           category={category}
           itemFilter={filter} 
           file={file} />
-      </div>
     </div>;
   }
 };
@@ -71,11 +66,10 @@ const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, forms:    { overflow: 'scroll' }
 });
-ClosedMarchantEdit.displayName= 'ClosedMarchantEdit';
-ClosedMarchantEdit.defaultProps = { note: null };
-ClosedMarchantEdit.propTypes = {
+ClosedEdit.displayName= 'ClosedEdit';
+ClosedEdit.defaultProps = { note: null };
+ClosedEdit.propTypes = {
   classes: PropTypes.object.isRequired
 };
-export default withStyles(styles)(ClosedMarchantEdit);
+export default withStyles(styles)(ClosedEdit);

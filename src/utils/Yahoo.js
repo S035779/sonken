@@ -284,8 +284,8 @@ class Yahoo {
           let results;
           osmosis.get(options.url)
             .set({ title: 'title', item: [ osmosis
-              .find('body > div.maincol')
-              .filter('table[10] > tbody > tr[2] > td > small')
+              .find('body > div.maincol > table')
+              . filter('tbody > tr[1] > td > small')
               .set({ 
                 link: 'a@href'
               , attr_HREF : 'a@href'
@@ -373,7 +373,7 @@ class Yahoo {
               const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
               return results = R.compose(
                 setItems
-              , R.tap(log.trace.bind(this))
+              //, R.tap(log.trace.bind(this))
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
               , R.map(setCategoryId)

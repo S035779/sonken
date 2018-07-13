@@ -9,13 +9,11 @@ class SellersEdit extends React.Component {
     const { classes, user, note, category, file} = this.props
     if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
-      <div className={classes.items}>
-        <RssItems
-          user={user}
-          note={note} 
-          category={category}
-          file={file} />
-      </div>
+      <RssItems
+        user={user}
+        note={note} 
+        category={category}
+        file={file} />
     </div>;
   }
 };
@@ -31,7 +29,6 @@ const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, items:     { overflow: 'scroll' }
 });
 SellersEdit.displayName= 'SellersEdit';
 SellersEdit.defaultProps = { note: null };

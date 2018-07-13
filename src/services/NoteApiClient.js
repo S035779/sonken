@@ -322,6 +322,7 @@ export default {
       case 'select/note':
       case 'select/traded':
       case 'select/bided':
+      case 'filter/note':
       case 'filter/traded':
       case 'filter/bided':
         return new Promise((resolve, reject) => {
@@ -408,6 +409,9 @@ export default {
     const data = { title, asin, price, bidsprice, body, categoryIds };
     return this.request('update/note', { user, id, data });
   },
+  deleteNote(user, ids) {
+    return this.request('delete/note', { user, ids });
+  },
   pageNote(user, { maxNumber, number, perPage }) {
     return this.request('pagenation/note', {
       user, maxNumber, number, perPage
@@ -416,8 +420,12 @@ export default {
   selectNote(user, ids) {
     return this.request('select/note', { user, ids });
   },
-  deleteNote(user, ids) {
-    return this.request('delete/note', { user, ids });
+  filterNote(user, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
+  , allAuction, inAuction, aucStartTime, aucStopTime }) {
+    const filter = { lastWeekAuction, twoWeeksAuction, lastMonthAuction
+    , allAuction, inAuction, aucStartTime, aucStopTime
+    };
+    return this.request('filter/note', { user, filter });
   },
   uploadNotes(user, category, file) {
     const name = user + '_' + category;

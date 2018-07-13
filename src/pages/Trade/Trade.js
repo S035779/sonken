@@ -69,6 +69,8 @@ class Trade extends React.Component {
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file }
       = this.state;
+    if(!isAuthenticated)
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}} />);
     let items = [];
     notes.forEach(note => {
       if(note.items) note.items.forEach(item => items.push(item))
@@ -77,10 +79,6 @@ class Trade extends React.Component {
       .filter(item => item.bided && this.itemFilter(filter, item));
     const number = _items.length;
     _items.length = this.itemPage(number, page);
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
     return <div className={classes.root}>
       <TradeSearch
         user={user}
