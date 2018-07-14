@@ -3,15 +3,9 @@ import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { List, IconButton, Avatar }
-                        from 'material-ui';
-import { FormLabel, FormControl, FormHelperText }
-                        from 'material-ui/Form';
-import { ListItem, ListItemSecondaryAction, ListItemText, ListItemAvatar }
-                        from 'material-ui/List';
-import { Clear, ContentPaste, Folder }
-                        from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { List, IconButton, Avatar, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText, ListItemAvatar } from '@material-ui/core';
+import { Clear, ContentPaste, Folder } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';

@@ -4,12 +4,8 @@ import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
-import { withStyles }   from 'material-ui/styles';
-import { Select, Input, Button, Typography }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+import { withStyles }   from '@material-ui/core/styles';
+import { Select, Input, Button, Typography, InputLabel, FormControl, MenuItem } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssAddDialog     from 'Components/RssAddDialog/RssAddDialog';

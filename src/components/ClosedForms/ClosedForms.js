@@ -4,11 +4,10 @@ import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
-import { withStyles }   from 'material-ui/styles';
-import { Input, Button, Checkbox, Typography, TextField }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
+import { withStyles }   from '@material-ui/core/styles';
+import { Input, Button, Checkbox, Typography, TextField, FormControl }
+                        from '@material-ui/core';
+import { InputLabel }   from '@material-ui/core/Input';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';

@@ -2,7 +2,7 @@ import React          from 'react';
 import PropTypes      from 'prop-types';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedEdit extends React.Component {

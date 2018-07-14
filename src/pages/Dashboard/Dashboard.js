@@ -8,7 +8,7 @@ import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import RssSearch        from 'Components/RssSearch/RssSearch';
 import RssButtons       from 'Components/RssButtons/RssButtons';
 import RssList          from 'Components/RssList/RssList';

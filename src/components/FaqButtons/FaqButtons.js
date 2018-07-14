@@ -3,9 +3,9 @@ import PropTypes      from 'prop-types';
 import FaqAction      from 'Actions/FaqAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { Button, Checkbox }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 
 class FaqButtons extends React.Component {

@@ -8,10 +8,10 @@ import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import AdminSearch        from 'Components/AdminSearch/AdminSearch';
-import AdminButtons       from 'Components/AdminButtons/AdminButtons';
-import AdminList          from 'Components/AdminList/AdminList';
+import { withStyles }   from '@material-ui/core/styles';
+import AdminSearch      from 'Components/AdminSearch/AdminSearch';
+import AdminButtons     from 'Components/AdminButtons/AdminButtons';
+import AdminList        from 'Components/AdminList/AdminList';
 
 class Management extends React.Component {
   static getStores() {

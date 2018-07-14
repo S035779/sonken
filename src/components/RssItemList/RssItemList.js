@@ -4,16 +4,9 @@ import { Link }             from 'react-router-dom';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
 
-import { withStyles }       from 'material-ui/styles';
-import {
-  List, Paper, Checkbox, Button, Typography, IconButton
-}                           from 'material-ui';
-import {
-  ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
-}                           from 'material-ui/List';
-import {
-  Star, StarBorder, Delete, FiberNew
-}                           from 'material-ui-icons';
+import { withStyles }       from '@material-ui/core/styles';
+import { List, Paper, Checkbox, Button, Typography, IconButton, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { Star, StarBorder, Delete, FiberNew } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
 class RssItemList extends React.Component {

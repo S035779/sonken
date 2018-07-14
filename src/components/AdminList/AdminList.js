@@ -4,13 +4,10 @@ import { Link }       from 'react-router-dom';
 import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar }
-                      from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
-import pink           from 'material-ui/colors/pink';
-import { Pageview }   from 'material-ui-icons';
+import { withStyles } from '@material-ui/core/styles';
+import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import pink           from '@material-ui/core/colors/pink';
+import { Pageview }   from '@material-ui/icons';
 
 class AdminList extends React.Component {
   constructor(props) {

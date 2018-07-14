@@ -3,12 +3,11 @@ import PropTypes        from 'prop-types';
 import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Input, Typography, Select }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+import { withStyles }   from '@material-ui/core/styles';
+import { Input, Typography, Select, FormControl }
+                        from '@material-ui/core';
+import { InputLabel }   from '@material-ui/core/Input';
+import { MenuItem }     from '@material-ui/core/Menu';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
 

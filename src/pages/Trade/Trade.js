@@ -7,7 +7,7 @@ import { getStores, getState }
                       from 'Stores';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import TradeSearch    from 'Components/TradeSearch/TradeSearch';
 import TradeFilter    from 'Components/TradeFilter/TradeFilter';
 import TradeItemList  from 'Components/TradeItemList/TradeItemList';

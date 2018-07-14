@@ -3,7 +3,7 @@ import PropTypes      from 'prop-types';
 import std            from 'Utilities/stdutils';
 import FaqAction      from 'Actions/FaqAction';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import EditBody       from 'Components/EditBody/EditBody';
 import EditButtons    from 'Components/EditButtons/EditButtons';
 import RssDialog      from 'Components/RssDialog/RssDialog';

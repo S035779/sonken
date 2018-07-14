@@ -4,11 +4,8 @@ import { Link }       from 'react-router-dom';
 import NoteAction     from 'Actions/NoteAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography }
-                      from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
+import { withStyles } from '@material-ui/core/styles';
+import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
 import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 

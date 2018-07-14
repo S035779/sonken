@@ -8,10 +8,10 @@ import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import MailSearch        from 'Components/MailSearch/MailSearch';
-import MailButtons       from 'Components/MailButtons/MailButtons';
-import MailList          from 'Components/MailList/MailList';
+import { withStyles }   from '@material-ui/core/styles';
+import MailSearch       from 'Components/MailSearch/MailSearch';
+import MailButtons      from 'Components/MailButtons/MailButtons';
+import MailList         from 'Components/MailList/MailList';
 
 class Mail extends React.Component {
   static getStores() {

@@ -4,11 +4,11 @@ import { Link }       from 'react-router-dom';
 import BidsAction     from 'Actions/BidsAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { List, Paper, Checkbox, Button, Typography }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
+                      from '@material-ui/core/List';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class BidsItemList extends React.Component {

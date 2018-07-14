@@ -8,7 +8,7 @@ import { getStores, getState }
                         from 'Stores';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import FaqSearch        from 'Components/FaqSearch/FaqSearch';
 import FaqButtons       from 'Components/FaqButtons/FaqButtons';
 import FaqList          from 'Components/FaqList/FaqList';

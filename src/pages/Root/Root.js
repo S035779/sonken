@@ -4,7 +4,8 @@ import { BrowserRouter, Switch }
 import { renderRoutes }   from 'react-router-config';
 import getRoutes          from 'Routes';
 
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme } 
+                          from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette:{

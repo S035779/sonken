@@ -3,8 +3,8 @@ import PropTypes          from 'prop-types'
 import classNames         from 'classnames';
 import std                from 'Utilities/stdutils';
 
-import { withStyles }     from 'material-ui/styles';
-import { Hidden, Drawer } from 'material-ui';
+import { withStyles }     from '@material-ui/core/styles';
+import { Hidden, Drawer } from '@material-ui/core';
 import DrawerList         from 'Components/DrawerList/DrawerList';
 import rgstImg            from 'Assets/image/sidebar-5.jpg';
 

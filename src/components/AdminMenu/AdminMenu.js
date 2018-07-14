@@ -3,14 +3,9 @@ import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { IconButton, Menu, TextField, Typography }
-                        from 'material-ui';
-import { MenuItem }     from 'material-ui/Menu';
-import { DialogContentText }
-                        from 'material-ui/Dialog';
-import { AccountCircle }
-                        from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { IconButton, Menu, TextField, Typography, DialogContentText, MenuItem } from '@material-ui/core';
+import { AccountCircle } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 

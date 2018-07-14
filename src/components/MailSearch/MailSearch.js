@@ -1,14 +1,10 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import MailAction        from 'Actions/MailAction';
+import MailAction       from 'Actions/MailAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Select, Input, Button, Typography }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+import { withStyles }   from '@material-ui/core/styles';
+import { Select, Input, Button, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 
 class MailSearch extends React.Component {

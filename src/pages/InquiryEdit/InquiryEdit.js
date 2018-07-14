@@ -5,12 +5,12 @@ import { Redirect, withRouter }
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import { TextField, Typography, Divider }
-                        from 'material-ui';
+                        from '@material-ui/core';
 import { FormControlLabel }
-                        from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+                        from '@material-ui/core/FormControlLabel';
+import { MenuItem }     from '@material-ui/core/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 

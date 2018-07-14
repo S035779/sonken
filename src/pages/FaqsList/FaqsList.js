@@ -3,9 +3,9 @@ import PropTypes          from 'prop-types';
 import { Link }           from 'react-router-dom';
 import std                from 'Utilities/stdutils';
 
-import { withStyles }     from 'material-ui/styles';
-import { Typography }     from 'material-ui';
-import { AccountCircle }  from 'material-ui-icons';
+import { withStyles }     from '@material-ui/core/styles';
+import { Typography }     from '@material-ui/core';
+import { AccountCircle }  from '@material-ui/icons';
 import EditBody           from 'Components/EditBody/EditBody';
 
 class FaqsList extends React.Component {

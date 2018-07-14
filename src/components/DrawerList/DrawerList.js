@@ -5,15 +5,9 @@ import classNames       from 'classnames';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Divider, List, Avatar, IconButton, Badge }
-                        from 'material-ui';
-import { ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction }
-                        from 'material-ui/List';
-import { Collapse }     from 'material-ui/transitions';
-import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown
-, AccountBox, BlurOn, SettingsApplications, PeopleOutline, NotificationsActive }
-                        from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { Divider, List, Avatar, IconButton, Badge, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Collapse } from '@material-ui/core';
+import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown, AccountBox, BlurOn, SettingsApplications, PeopleOutline, NotificationsActive } from '@material-ui/icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';

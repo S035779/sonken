@@ -2,10 +2,9 @@ import React            from 'react';
 import PropTypes        from 'prop-types'
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { TextField }    from 'material-ui';
-import { FormLabel, FormControl, FormHelperText }
-                        from 'material-ui/Form';
+import { withStyles }   from '@material-ui/core/styles';
+import { TextField, FormLabel, FormControl, FormHelperText }
+                        from '@material-ui/core';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 

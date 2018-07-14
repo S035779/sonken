@@ -1,8 +1,8 @@
-import React from 'react';
-import marked from 'marked';
-import PropTypes from 'prop-types';
+import React          from 'react';
+import marked         from 'marked';
+import PropTypes      from 'prop-types';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 class EditBody extends React.Component {
   render() {

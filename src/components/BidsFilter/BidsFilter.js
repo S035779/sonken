@@ -3,11 +3,10 @@ import PropTypes        from 'prop-types';
 import BidsAction       from 'Actions/BidsAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Input, Button, Checkbox, Typography, TextField }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
+import { withStyles }   from '@material-ui/core/styles';
+import { Input, Button, Checkbox, Typography, TextField, FormControl }
+                        from '@material-ui/core';
+import { InputLabel }   from '@material-ui/core/Input';
 
 class BidsFilter extends React.Component {
   constructor(props) {

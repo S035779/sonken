@@ -3,12 +3,8 @@ import PropTypes        from 'prop-types';
 import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Select, Input, Button, Typography }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+import { withStyles }   from '@material-ui/core/styles';
+import { Select, Input, Button, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
 
 class AdminSearch extends React.Component {
   constructor(props) {

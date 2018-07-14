@@ -4,8 +4,7 @@ import { renderRoutes }   from 'react-router-config';
 import getRoutes          from 'Routes';
 
 import { JssProvider }    from 'react-jss';
-import { createGenerateClassName, MuiThemeProvider, createMuiTheme }
-                          from 'material-ui/styles';
+import { createGenerateClassName, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette: {

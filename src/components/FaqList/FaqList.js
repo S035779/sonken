@@ -1,16 +1,13 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
-import FaqAction     from 'Actions/FaqAction';
+import FaqAction      from 'Actions/FaqAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar }
-                      from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
-import { green }      from 'material-ui/colors';
-import { Assignment } from 'material-ui-icons';
+import { withStyles } from '@material-ui/core/styles';
+import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { green }      from '@material-ui/core/colors';
+import { Assignment } from '@material-ui/icons';
 
 class FaqList extends React.Component {
   constructor(props) {

@@ -1,13 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import React      from 'react';
+import { Link }   from 'react-router-dom';
+import PropTypes  from 'prop-types';
 
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import { Button } from 'material-ui';
-import orange from 'material-ui/colors/orange';
-import green from 'material-ui/colors/green';
-import blue from 'material-ui/colors/blue';
-import yellow from 'material-ui/colors/yellow';
+import { MuiThemeProvider, createMuiTheme } 
+                  from '@material-ui/core/styles';
+import { Button } from '@material-ui/core';
+import orange     from '@material-ui/core/colors/orange';
+import green      from '@material-ui/core/colors/green';
+import blue       from '@material-ui/core/colors/blue';
+import yellow     from '@material-ui/core/colors/yellow';
 
 class AdminButtonNav extends React.Component {
   render() {

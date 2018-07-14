@@ -4,13 +4,9 @@ import { withRouter }   from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { IconButton, Menu, Divider }
-                        from 'material-ui';
-import { MenuItem }     from 'material-ui/Menu';
-import { ListItemIcon } from 'material-ui/List';
-import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew
-  , Settings }          from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { IconButton, Menu, Divider, ListItemIcon, MenuItem } from '@material-ui/core';
+import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew, Settings } from '@material-ui/icons';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 
 class RssMenu extends React.Component {

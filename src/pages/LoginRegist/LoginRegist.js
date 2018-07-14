@@ -5,14 +5,8 @@ import { Redirect, withRouter }
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography, Divider }
-                        from 'material-ui';
-import { FormControlLabel }
-                        from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
-import { PersonAdd, Public, NetworkCheck }
-                        from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { TextField, Typography, Divider, MenuItem, FormControlLabel, PersonAdd, Public, NetworkCheck } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';

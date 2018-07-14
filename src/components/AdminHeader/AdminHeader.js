@@ -3,14 +3,12 @@ import { withRouter } from 'react-router-dom';
 import PropTypes      from 'prop-types'
 import LoginAction    from 'Actions/LoginAction';
 
-import { withStyles } from 'material-ui/styles';
-import { IconButton } from 'material-ui';
-import {
-  Menu as MenuIcon
-}                     from 'material-ui-icons';
+import { withStyles } from '@material-ui/core/styles';
+import { IconButton } from '@material-ui/core';
+import { Menu as MenuIcon } from '@material-ui/icons';
 import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
 import AdminMenu      from 'Components/AdminMenu/AdminMenu';
-import AdminButtonNav   from 'Components/AdminButtonNav/AdminButtonNav';
+import AdminButtonNav from 'Components/AdminButtonNav/AdminButtonNav';
 
 class AdminHeader extends React.Component {
   constructor(props) {

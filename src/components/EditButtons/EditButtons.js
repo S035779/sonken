@@ -2,10 +2,8 @@ import React              from 'react';
 import PropTypes          from 'prop-types';
 import std                from 'Utilities/stdutils';
 
-import { withStyles }     from 'material-ui/styles';
-import { Input, Button }  from 'material-ui';
-import { InputLabel }     from 'material-ui/Input';
-import { FormControl }    from 'material-ui/Form';
+import { withStyles }     from '@material-ui/core/styles';
+import { Input, Button, FormControl, InputLabel }  from '@material-ui/core';
 import RssButton          from 'Components/RssButton/RssButton';
 
 class EditButtons extends React.Component {

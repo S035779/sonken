@@ -3,11 +3,11 @@ import PropTypes      from 'prop-types'
 import { Link }       from 'react-router-dom';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Button }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
-                      from 'material-ui-icons';
+                      from '@material-ui/icons';
 import RssButton      from 'Components/RssButton/RssButton';
 
 const app_name = process.env.APP_NAME;

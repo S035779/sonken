@@ -5,11 +5,11 @@ import classNames     from 'classnames';
 import LoginAction    from 'Actions/LoginAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Button }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import { Menu, MoreVert }
-                      from 'material-ui-icons';
+                      from '@material-ui/icons';
 import RssMenu        from 'Components/RssMenu/RssMenu';
 
 class RssHeader extends React.Component {

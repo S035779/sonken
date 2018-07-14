@@ -4,13 +4,10 @@ import { Link }       from 'react-router-dom';
 import MailAction     from 'Actions/MailAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar }
-                      from 'material-ui';
-import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
-import { yellow }      from 'material-ui/colors';
-import { Folder } from 'material-ui-icons';
+import { withStyles } from '@material-ui/core/styles';
+import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { yellow }     from '@material-ui/core/colors';
+import { Folder }     from '@material-ui/icons';
 
 class MailList extends React.Component {
   constructor(props) {

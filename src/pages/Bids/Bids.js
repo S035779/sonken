@@ -7,7 +7,7 @@ import { getStores, getState }
                       from 'Stores';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import BidsSearch     from 'Components/BidsSearch/BidsSearch';
 import BidsFilter     from 'Components/BidsFilter/BidsFilter';
 import BidsItemList   from 'Components/BidsItemList/BidsItemList';

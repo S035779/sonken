@@ -3,15 +3,9 @@ import PropTypes        from 'prop-types'
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { List, IconButton, TextField }
-                        from 'material-ui';
-import { FormLabel, FormControl, FormHelperText }
-                        from 'material-ui/Form';
-import { ListItem, ListItemSecondaryAction, ListItemText }
-                        from 'material-ui/List';
-import { Clear, ContentPaste }
-                        from 'material-ui-icons';
+import { withStyles }   from '@material-ui/core/styles';
+import { List, IconButton, TextField, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { Clear, ContentPaste } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';

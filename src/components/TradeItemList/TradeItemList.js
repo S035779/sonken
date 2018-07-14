@@ -1,14 +1,14 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
-import TradeAction     from 'Actions/TradeAction';
+import TradeAction    from 'Actions/TradeAction';
 import std            from 'Utilities/stdutils';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { List, Paper, Checkbox, Button, Typography }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from 'material-ui/List';
+                      from '@material-ui/core/List';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class TradeItemList extends React.Component {

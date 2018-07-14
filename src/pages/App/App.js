@@ -5,8 +5,8 @@ import { Container }    from 'flux/utils';
 import { getStores, getState }
                         from 'Stores';
 
-import { withStyles }   from 'material-ui/styles';
-import { CssBaseline }  from 'material-ui';
+import { withStyles }   from '@material-ui/core/styles';
+import { CssBaseline }  from '@material-ui/core';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 import RssDrawer        from 'Components/RssDrawer/RssDrawer';
 

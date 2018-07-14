@@ -3,8 +3,8 @@ import PropTypes        from 'prop-types'
 import { renderRoutes } from 'react-router-config';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { CssBaseline }  from 'material-ui';
+import { withStyles }   from '@material-ui/core/styles';
+import { CssBaseline }  from '@material-ui/core';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader      from 'Components/LoginHeader/LoginHeader';
 import authImg          from 'Assets/image/full-screen-image-2.jpg';

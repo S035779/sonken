@@ -7,7 +7,7 @@ import { getStores, getState }
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 
 class Login extends React.Component {
   static getStores() {

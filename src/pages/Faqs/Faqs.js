@@ -8,8 +8,8 @@ import { getStores, getState }
 import FaqAction        from 'Actions/FaqAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { CssBaseline }  from 'material-ui';
+import { withStyles }   from '@material-ui/core/styles';
+import { CssBaseline }  from '@material-ui/core';
 import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader      from 'Components/LoginHeader/LoginHeader';
 import faqsImg          from 'Assets/image/bg7.jpg';

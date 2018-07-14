@@ -284,8 +284,8 @@ class Yahoo {
           let results;
           osmosis.get(options.url)
             .set({ title: 'title', item: [ osmosis
-              .find('body > div.maincol > table')
-              . filter('tbody > tr[1] > td > small')
+              .find('div.maincol')
+              . filter('table[1] > tbody > tr > td > table > tbody > tr[1] > td > small')
               .set({ 
                 link: 'a@href'
               , attr_HREF : 'a@href'
@@ -576,8 +576,9 @@ class Yahoo {
 
   fetchClosedSellers({ url }) {
     return Rx.Observable.fromPromise(this.getClosedSellers(url))
+      .flatMap(obj => this.forHtml(obj))
       //.map(R.tap(log.trace.bind(this)))
-      .flatMap(obj => this.forHtml(obj));
+    ;
   }
 
   fetchHtml({ url }) {
@@ -596,7 +597,7 @@ class Yahoo {
     const promises    = R.map(url => this.getHtml(url));
     const observable  = urls => Rx.Observable.forkJoin(promises(urls));
     const isItem      = (item, objs) => R.find(obj => 
-      obj ? item.title === obj.item[0].title : false, objs);
+      R.length(obj.item) ? item.title === obj.item[0].title : false, objs);
     const setItem     = (item, objs) => isItem(item, objs) 
       ? R.merge(item, { market: isItem(item, objs).item[0].price })
       : item;

@@ -5,13 +5,8 @@ import UserAction       from 'Actions/UserAction';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { Input, Typography, Select, Checkbox }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl, FormControlLabel }
-                        from 'material-ui/Form';
-import { MenuItem }     from 'material-ui/Menu';
+import { withStyles }   from '@material-ui/core/styles';
+import { Input, Typography, Select, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem } from '@material-ui/core';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
 

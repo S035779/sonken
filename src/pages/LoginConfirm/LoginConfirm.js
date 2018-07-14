@@ -4,12 +4,12 @@ import { withRouter }   from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import { TextField, Typography, Dialog, Button }
-                        from 'material-ui';
+                        from '@material-ui/core';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle,
   withMobileDialog }
-                        from 'material-ui/Dialog';
+                        from '@material-ui/core/Dialog';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssInput         from 'Components/RssInput/RssInput';
 

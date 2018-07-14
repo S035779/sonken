@@ -15,10 +15,10 @@ var web = {
       'react-router-dom',
       'react-router-config',
       'flux',
-      'material-ui'
+      '@material-ui/core'
     ],
     icon: [
-      'material-ui-icons'
+      '@material-ui/icons'
     ],
     app: [
       'react-hot-loader/patch',

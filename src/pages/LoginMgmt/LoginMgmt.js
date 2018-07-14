@@ -5,13 +5,8 @@ import { Redirect, withRouter, Link }
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
-import { TextField, Typography, Button, Checkbox }
-                        from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormLabel, FormControl, FormGroup, FormControlLabel
-  , FormHelperText } 
-                        from 'material-ui/Form';
+import { withStyles }   from '@material-ui/core/styles';
+import { TextField, Typography, Button, Checkbox, FormLabel, FormControl, FormGroup, FormControlLabel, FormHelperText, InputLabel } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';

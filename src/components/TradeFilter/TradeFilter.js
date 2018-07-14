@@ -3,12 +3,12 @@ import PropTypes        from 'prop-types';
 import TradeAction      from 'Actions/TradeAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import {
   Input, Button, Checkbox, Typography, TextField
-}                       from 'material-ui';
-import { InputLabel }   from 'material-ui/Input';
-import { FormControl }  from 'material-ui/Form';
+}                       from '@material-ui/core';
+import { InputLabel }   from '@material-ui/core/Input';
+import { FormControl }  from '@material-ui/core/FormControlLabel';
 
 class TradeFilter extends React.Component {
   constructor(props) {

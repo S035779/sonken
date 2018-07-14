@@ -3,11 +3,11 @@ import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
-import { withStyles }   from 'material-ui/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import { Typography, TextField, MenuItem }
-                        from 'material-ui';
+                        from '@material-ui/core';
 import { DialogContentText }
-                        from 'material-ui/Dialog';
+                        from '@material-ui/core/Dialog';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 

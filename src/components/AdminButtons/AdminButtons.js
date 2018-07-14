@@ -4,9 +4,9 @@ import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
 import Spinner        from 'Utilities/Spinner';
 
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { Button, Checkbox }
-                      from 'material-ui';
+                      from '@material-ui/core';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 
 class AdminButtons extends React.Component {

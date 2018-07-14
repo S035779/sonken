@@ -77,7 +77,6 @@ const get = function(url, options, callback) {
     callback({ error: { name: err.code, message: err.message }});
   });
 };
-module.exports.get = get;
 
 /*
  * Simple HTTP GET request
@@ -144,7 +143,6 @@ const getJSON = function(url, options, callback) {
     callback({ error: { name: err.code, message: err.message }});
   });
 };
-module.exports.getJSON = getJSON;
 
 /*
  * HTTPS GET request
@@ -211,7 +209,6 @@ const get2 = function(url, options, callback) {
     callback({ error: { name: err.code, message: err.message }});
   });
 };
-module.exports.get2 = get2;
 
 /*
  * HTTPS GET request
@@ -278,7 +275,6 @@ const getJSON2 = function(url, options, callback) {
     callback({ error: { name: err.code, message: err.message }});
   });
 };
-module.exports.getJSON2 = getJSON2;
 
 /*
  * HTTPS POST request with NV data as the request body
@@ -368,7 +364,7 @@ const post2 = function(url, auth, body, callback) {
   req.write(body);
   req.end();
 };
-module.exports.post2 = post2;
+
 /*
  * Simple HTTP POST request with data as the request body
  *
@@ -445,7 +441,6 @@ const postData = function(url, body, callback) {
   req.write(body);
   req.end();
 };
-module.exports.postData = postData;
 
 /*
  * HTTPS POST request with urlencoded data as the request body
@@ -534,7 +529,6 @@ const postData2 = function(url, auth, body, callback) {
   req.write(body);
   req.end();
 };
-module.exports.postData2 = postData2;
 
 /*
  * HTTPS POST request with json as the request body
@@ -623,4 +617,5 @@ const postJson2 = function(url, auth, body, callback) {
   req.write(body);
   req.end();
 };
-module.exports.postJson2 = postJson2;
+
+export default { get, getJSON, get2, getJSON2, post2, postData, postData2, postJson2 };
