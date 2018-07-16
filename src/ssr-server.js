@@ -9,22 +9,26 @@ import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import { logs as log }  from 'Utilities/logutils';
 
-dotenv.config()
-const env = process.env.NODE_ENV || 'development';
-const http_port = process.env.SSR_PORT || 8081;
-const http_host = process.env.SSR_HOST || '127.0.0.1';
-const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
-const app = express();
-const db = mongoose.createConnection();
-const SessionStore = connect(session);
+const config = dotenv.config();
+if(config.error) throw config.error;
 
+const displayName   = 'ssr-server';
+const env           = process.env.NODE_ENV  || 'development';
+const http_port     = process.env.SSR_PORT  || 8081;
+const http_host     = process.env.SSR_HOST  || '127.0.0.1';
+const mdb_url       = process.env.MDB_URL   || 'mongodb://localhost:27017';
 if (env === 'development') {
-  log.config('console', 'color', 'ssr-server', 'TRACE');
+  log.config('console', 'color', displayName, 'TRACE');
 } else if (env === 'staging') {
-  log.config('file', 'basic', 'ssr-server', 'DEBUG');
+  log.config('file', 'basic', displayName, 'DEBUG');
 } else if (env === 'production') {
-  log.config('file', 'json', 'ssr-server', 'INFO');
+  log.config('file', 'json', displayName, 'INFO');
 }
+
+const app           = express();
+const db            = mongoose.createConnection();
+const SessionStore  = connect(session);
+
 db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #1 connection error.'));

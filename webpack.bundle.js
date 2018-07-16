@@ -6,42 +6,41 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const common = require('./webpack.common.js');
 
 var bundle = {
-  target: "web",
-  entry: {
-    view: [
-      'react',
-      'react-dom',
-      'react-router',
-      'react-router-dom',
-      'react-router-config',
-      'flux',
-      '@material-ui/core'
-    ],
-    icon: [
-      '@material-ui/icons'
-    ],
-    app: [
-      'react-hot-loader/patch',
-      './main.js'
-    ]
-  },
-  plugins: [
-    new ManifestPlugin({ fileName: 'manifest.bundle.json' }),
-    new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      names: ["view", "icon"],
-      minChunks: Infinity
-    }),
-    new CleanWebpackPlugin([
-      'dist/*.bundle.*',
-      'dist/*.jpg'
+  target: "web"
+, entry: {
+    app: [ 'react-hot-loader/patch', './main.js' ]
+  }
+, optimization: {
+    splitChunks: {
+      cacheGroups: {
+        view: {
+          name: 'view'
+        , test: /react|react-dom|react-router|react-router-dom|react-router-config|flux|@material-ui[\\/]core/
+        , chunks: 'initial'
+        , enforce: true
+        },
+        icon: {
+          name: 'icon'
+        , test: /@material-ui[\\/]icons/
+        , chunks: 'initial'
+        , enforce: true
+        }
+      }
+    }
+  }
+, plugins: [
+    new ManifestPlugin({ fileName: 'manifest.bundle.json' })
+  , new webpack.NamedModulesPlugin()
+  , new webpack.HotModuleReplacementPlugin()
+  , new CleanWebpackPlugin([
+      'dist/*.bundle.*'
+    , 'dist/*.jpg'
     ], { verbose: false })
-  ],
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/'
+  ]
+, output: {
+    filename: '[name].bundle.js'
+  , path: path.resolve(__dirname, 'dist')
+  , publicPath: '/'
   }
 };
 module.exports = merge(common, bundle);

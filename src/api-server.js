@@ -12,23 +12,27 @@ import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 
-dotenv.config();
-const env = process.env.NODE_ENV || 'development';
-const http_port = process.env.API_PORT || 8082;
-const http_host = process.env.API_HOST || '127.0.0.1';
-const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
-const app = express();
-const router = express.Router();
-const db = mongoose.createConnection();
-const SessionStore = connect(session);
+const config = dotenv.config();
+if(config.error) throw config.error;
 
+const env           = process.env.NODE_ENV  || 'development';
+const http_port     = process.env.API_PORT  || 8082;
+const http_host     = process.env.API_HOST  || '127.0.0.1';
+const mdb_url       = process.env.MDB_URL   || 'mongodb://localhost:27017';
+const displayName   = 'api-server';
 if (env === 'development') {
-  log.config('console', 'color', 'api-server', 'TRACE');
+  log.config('console', 'color', displayName, 'TRACE');
 } else if (env === 'staging') {
-  log.config('file', 'basic', 'api-server', 'DEBUG');
+  log.config('file', 'basic', displayName, 'DEBUG');
 } else if (env === 'production') {
-  log.config('file', 'json', 'api-server', 'INFO');
+  log.config('file', 'json', displayName, 'INFO');
 }
+
+const app           = express();
+const router        = express.Router();
+const db            = mongoose.createConnection();
+const SessionStore  = connect(session);
+
 db.on('open',  () => log.info( '[MDB]', 'session #2 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #2 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #2 connection error.'));

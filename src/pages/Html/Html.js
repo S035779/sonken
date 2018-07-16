@@ -1,21 +1,21 @@
-import dotenv from 'dotenv';
-import React from 'react';
-import ReactDOMServer from 'react-dom/server';
-
+import dotenv             from 'dotenv';
+import React              from 'react';
+import ReactDOMServer     from 'react-dom/server';
 import { SheetsRegistry } from 'react-jss';
 
-import Static from 'Pages/Static/Static';
-import Icon from 'Assets/image/favicon.ico';
+import Static             from 'Pages/Static/Static';
+import Icon               from 'Assets/image/favicon.ico';
 
-dotenv.config();
-const app_name = process.env.APP_NAME;
-const env = process.env.NODE_ENV || 'development';
-const host = process.env.TOP_URL || '';
-const assets = process.env.ASSET_PATH || '';
-const roboto_font
-  = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
-const noto_font
-  = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
+const config = dotenv.config();
+if(config.error) throw config.error;
+
+const app_name    = process.env.APP_NAME   || 'RSS Reader!!';
+const env         = process.env.NODE_ENV   || 'development';
+const host        = process.env.TOP_URL    || 'http://localhost:8080';
+const assets      = process.env.ASSET_PATH || '/assets';
+const roboto_font = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+const noto_font   = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
+
 let path_to_js; 
 let path_to_img;
 if (env === 'development') {
