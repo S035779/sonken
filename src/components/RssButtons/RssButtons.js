@@ -8,6 +8,7 @@ import { withStyles }   from '@material-ui/core/styles';
 import { Button, Checkbox }
                         from '@material-ui/core';
 import RssDialog        from 'Components/RssDialog/RssDialog';
+import RssButton        from 'Components/RssButton/RssButton';
 
 class RssButtons extends React.Component {
   constructor(props) {
@@ -21,6 +22,20 @@ class RssButtons extends React.Component {
 
   componentDidMount() {
     NoteAction.select(this.props.user, []);
+  }
+
+  downloadFile(blob) {
+    std.logInfo(RssButtons.displayName, 'downloadFile', blob);
+    const anchor = document.createElement('a');
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
+    };
+    fileReader.readAsArrayBuffer(blob);
   }
 
   handleChangeCheckbox(event) {
@@ -59,13 +74,45 @@ class RssButtons extends React.Component {
     }
   }
 
+  handleDownload(event) {
+    const { user, selectedNoteId } = this.props;
+    std.logInfo(RssButtons.displayName, 'handleDownload', user);
+    const spn = Spinner.of('app');
+    if(selectedNoteId.length) {
+      spn.start();
+      NoteAction.downloadItems(user, selectedNoteId)
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.downloadFile(this.props.file))
+        .then(() => spn.stop())
+        .catch(err => {
+          std.logError(RssButtons.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          spn.stop();
+        });
+    }
+  }
+
   handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
 
+  getColor(category) {
+    switch(category) {
+      case 'marchant':
+        return 'skyblue';
+      case 'sellers':
+        return 'orange';
+      case 'closedmarchant':
+        return 'green';
+      case 'closedsellers':
+        return 'yellow';
+    }
+  }
+
   render() {
-    const { classes } = this.props;
+    const { classes, category } = this.props;
     const { isSuccess, isNotValid, checked } = this.state;
+    const color = this.getColor(category);
     return <div className={classes.noteButtons}>
       <Checkbox checked={checked}
         className={classes.checkbox}
@@ -78,6 +125,9 @@ class RssButtons extends React.Component {
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleDelete.bind(this)}>削除</Button>
+        <RssButton color={color}
+          className={classes.button}
+          onClick={this.handleDownload.bind(this)}>ダウンロード</RssButton>
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。

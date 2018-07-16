@@ -163,8 +163,8 @@ export default {
       })
     ;
   },
-  downloadItems(user, id) {
-    return NoteApiClient.downloadItems(user, id)
+  downloadItems(user, ids, filter) {
+    return NoteApiClient.downloadItems(user, ids, filter)
       .then(file => {
         dispatch({ type: 'note/download/items', file });
       })

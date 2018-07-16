@@ -11,7 +11,7 @@
     "start:job": "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:mms": "node -r ./src/hook/babel-register src/mms-server.js",
     "start:dev": "node -r ./src/hook/babel-register src/dev-server.js",
-    "start:node": "cross-env API_URL=http://localhost:8080/api APP_NAME=\"RSS Reader!!\" npm-run-all -p start:job start:api start:ssr watch:node",
+    "start:node": "cross-env API_URL=http://localhost:8080/api APP_NAME=\"RSS Reader!!\" npm-run-all -p start:job start:api start:ssr build:dev:node",
     "build:all": "npm-run-all -p build:node build:web",
     "build:staging": "npm-run-all -p build:stage:node build:stage:web",
     "build:development": "npm-run-all -p build:dev:node build:dev:web",
@@ -21,10 +21,8 @@
     "build:stage:node": "cross-env NODE_ENV=staging webpack --config webpack.node.js",
     "build:dev:web": "cross-env NODE_ENV=development webpack --config webpack.development.js",
     "build:dev:node": "cross-env NODE_ENV=development webpack --config webpack.node.js",
-    "watch:all": "npm-run-all -p watch:node watch:web",
-    "watch:web": "webpack --config webpack.development.js",
-    "watch:node": "webpack --config webpack.node.js -w --colors",
-    "release:staging": "/bin/bash systemd/install.sh"
+    "release:staging": "/bin/bash systemd/install.sh",
+    "restart:staging": "/bin/bash systemd/restart.sh"
   },
   "license": "ISC",
   "dependencies": {

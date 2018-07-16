@@ -437,8 +437,9 @@ export default {
   downloadNotes(user, category) {
     return this.request('download/notes', { user, category });
   },
-  downloadItems(user, id) {
-    return this.request('download/items', { user, id });
+  downloadItems(user, ids, filter) {
+    ids = Array.isArray(ids) ? ids : [ids];
+    return this.request('download/items', { user, ids, filter });
   },
 
 

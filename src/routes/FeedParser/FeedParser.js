@@ -1373,8 +1373,11 @@ export default class FeedParser {
     ;
   }
   
-  downloadItems({ user, id }) {
-    const setItems = objs => R.map(obj => ({
+  downloadItems({ user, ids, filter }) {
+    const setArray = R.join('|');
+    const _getItems = R.curry(this.filterItems)(filter);
+    const getItems = R.filter(_getItems);
+    const setItems = R.map(obj => ({
       title:        obj.title
     , seller:       obj.seller
     , auid:         obj.guid__
@@ -1385,7 +1388,7 @@ export default class FeedParser {
     , categorys:    obj.item_categorys
     , bids:         obj.bids
     , countdown:    obj.countdown
-    , image:        obj.img_SRC
+    , images:       setArray(obj.images)
     , offers:       obj.offers
     , market:       obj.market
     , categoryid:   obj.item_categoryid
@@ -1395,19 +1398,55 @@ export default class FeedParser {
     , ship_price:   obj.ship_price
     , ship_buynow:  obj.ship_buynow
     , date:         obj.pubDate
-    }), objs);
+    }));
     const keys = ['auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
-      , 'bids', 'countdown', 'seller', 'link', 'image', 'offers', 'market', 'categoryid', 'explanation', 'payment'
-      , 'shipping', 'date'];
+      , 'bids', 'countdown', 'seller', 'link', 'images', 'offers', 'market', 'categoryid', 'explanation'
+      , 'payment', 'shipping', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    return this.fetchNote({ user, id })
-      .map(obj  => setItems(obj.items))
-      .map(objs => setItemsCsv(objs))
-      .map(csv  => Buffer.from(csv, 'utf8'))
+    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const observables = R.map(id => this.fetchNote({ user, id }));
+    return Rx.Observable.forkJoin(observables(ids))
+      .map(R.map(obj => obj.items))
+      .map(R.map(getItems))
+      .map(R.map(setItems))
+      .map(R.flatten)
+      .map(setItemsCsv)
+      .map(setBuffer)
       //.map(R.tap(log.trace.bind(this)))
     ;
   }
   
+  filterItems(filter, item) {
+    if(!filter) return true;
+    const date      = new Date();
+    const now       = new Date(item.bidStopTime);
+    const start     = new Date(filter.aucStartTime);
+    const stop      = new Date(filter.aucStopTime);
+    const year      = date.getFullYear();
+    const month     = date.getMonth();
+    const day       = date.getDate();
+    const lastWeek  = new Date(year, month, day-7);
+    const twoWeeks  = new Date(year, month, day-14);
+    const lastMonth = new Date(year, month-1, day);
+    const today     = new Date(year, month, day);
+    const isLastWeek  = lastWeek  <= now && now < today;
+    const isTwoWeeks  = twoWeeks  <= now && now < today;
+    const isLastMonth = lastMonth <= now && now < today;
+    const isAll = true;
+    const isNow = start <= now && now <= stop;
+    return filter.inAuction
+      ? isNow
+      : filter.allAuction
+        ? isAll
+        : filter.lastMonthAuction 
+          ? isLastMonth
+          : filter.twoWeeksAuction 
+            ? isTwoWeeks
+            : filter.lastWeekAuction 
+              ? isLastWeek
+              : true;
+  }
+
   setNote({ user, url, category, categoryIds, title }, obj) {
     //log.debug(FeedParser.displayName, 'setNote'
     //  , { user, title, category, categoryIds, url });

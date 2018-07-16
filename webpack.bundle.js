@@ -5,7 +5,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const common = require('./webpack.common.js');
 
-var web = {
+var bundle = {
   target: "web",
   entry: {
     view: [
@@ -44,4 +44,4 @@ var web = {
     publicPath: '/'
   }
 };
-module.exports = merge(common, web);
+module.exports = merge(common, bundle);

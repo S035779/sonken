@@ -35,15 +35,14 @@ class RssForms extends React.Component {
 
   downloadFile(blob) {
     std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
-    const a = document.createElement('a');
+    const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      a.href = URL.createObjectURL(
-        new Blob([bom, this.result], { type: 'text/csv' }));
-      a.target = '_blank';
-      a.download = 'download.csv';
-      a.click();
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
     }
     fileReader.readAsArrayBuffer(blob);
   }

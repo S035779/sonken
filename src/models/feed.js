@@ -35,6 +35,7 @@ const itemSchema = new mongoose.Schema({
 , shipping:         String
 , ship_price:       String
 , ship_buynow:      String
+, images:           Array
 , pubDate:          { type: Date, default: Date.now() }
 });
 
