@@ -1,4 +1,5 @@
-import { ReduceStore } from 'flux/utils';
+import { ReduceStore }  from 'flux/utils';
+import std              from 'Utilities/stdutils';
 
 const displayName = 'DashboardStore';
 
@@ -21,8 +22,8 @@ export default class DashboardStore extends ReduceStore {
       , lastMonthAuction: true
       , allAuction:       true
       , inAuction:        false
-      , aucStartTime:     0
-      , aucStopTime:      0
+      , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       }
     , file: null
     , categorys: []

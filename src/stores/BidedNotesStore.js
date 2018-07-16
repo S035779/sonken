@@ -1,4 +1,5 @@
-import { ReduceStore } from 'flux/utils';
+import { ReduceStore }  from 'flux/utils';
+import std              from 'Utilities/stdutils';
 
 const displayName = 'BidedNotesStore';
 
@@ -19,8 +20,8 @@ export default class BidedNotesStore extends ReduceStore {
         endBidding:   true
       , allBidding:   true
       , inBidding:    false
-      , bidStartTime: 0
-      , bidStopTime:  0
+      , bidStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , bidStopTime:  std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       }
     , file: null
     };

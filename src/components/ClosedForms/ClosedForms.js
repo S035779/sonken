@@ -39,15 +39,14 @@ class ClosedForms extends React.Component {
 
   downloadFile(blob) {
     //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
-    const a = document.createElement('a');
+    const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      a.href = URL.createObjectURL(
-        new Blob([bom, this.result], { type: 'text/csv' }));
-      a.target = '_blank';
-      a.download = 'download.csv';
-      a.click();
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
     }
     fileReader.readAsArrayBuffer(blob);
   }
@@ -129,10 +128,11 @@ class ClosedForms extends React.Component {
 
   handleDownload(event) {
     const { user, note } = this.props;
+    const { itemFilter } = this.state;
     std.logInfo(ClosedForms.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.downloadItems(user, note._id)
+    NoteAction.downloadItems(user, note._id, itemFilter)
       .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
       .then(() => spn.stop())
