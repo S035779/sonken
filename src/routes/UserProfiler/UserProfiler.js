@@ -635,7 +635,7 @@ export default class UserProfiler {
         , text:     obj.body
       };
       const attachments = obj.file
-        ? [{ filename: 'content.zip', content: new Buffer(obj.file) }]
+        ? [{ filename: 'content.zip', content: Buffer.from(obj.file) }]
         : null;
       return attachments
         ? Object.assign({}, message, { attachments }) : message;
