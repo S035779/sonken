@@ -25,6 +25,7 @@ var production = {
       return assetFilename.endsWith('.css')
         || assetFilename.endsWith('.js');
     }
-  }
+  },
+  mode: 'none'
 };
 module.exports = merge(bundle, production);

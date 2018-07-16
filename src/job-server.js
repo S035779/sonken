@@ -9,21 +9,14 @@ import { logs as log }  from 'Utilities/logutils';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
 
+const config = dotenv.config();
+if(config.error) throw config.error;
+
 const displayName = 'job-server';
-
-const feed = FeedParser.of();
-const profile = UserProfiler.of();
-let pids = [];
-let idx = 0;
-
-dotenv.config();
-const env = process.env.NODE_ENV || 'development';
+const env             = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
-const cpu_num = os.cpus().length;
-const job = path.join(__dirname, 'dist', 'wrk.node.js');
-
 if(env === 'development') {
   log.config('console', 'color', displayName, 'TRACE' );
 } else
@@ -33,6 +26,14 @@ if(env === 'staging') {
 if(env === 'production') {
   log.config('file',    'json',  displayName, 'INFO'  );
 }
+
+const feed        = FeedParser.of();
+const profile     = UserProfiler.of();
+const cpu_num     = os.cpus().length;
+const job         = path.join(__dirname, 'dist', 'wrk.node.js');
+
+let pids = [];
+let idx  = 0;
 
 const fork = () => {
   const cps = child_process.fork(job);

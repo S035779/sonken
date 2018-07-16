@@ -1,15 +1,14 @@
 const webpack = require('webpack');
-const merge = require('webpack-merge');
-const fs = require('fs');
-const path = require('path');
-const bundle = require('./webpack.bundle.js');
+const merge   = require('webpack-merge');
+const fs      = require('fs');
+const path    = require('path');
+const bundle  = require('./webpack.bundle.js');
 
 var development = {
   devtool: 'inline-source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV':  JSON.stringify('development')
-    , 'process.env.PLATFORM':  JSON.stringify('web')
+      'process.env.PLATFORM':  JSON.stringify('web')
     , 'process.env.API_URL':   JSON.stringify('http://localhost:8080/api')
     , 'process.env.ASSET_URL': JSON.stringify('http://localhost:8080')
     , 'process.env.APP_NAME':  JSON.stringify('RSS Reader!!')
@@ -31,6 +30,7 @@ var development = {
       key: fs.readFileSync(path.join(__dirname, 'ssl/server.key')),
       cert: fs.readFileSync(path.join(__dirname, 'ssl/server.crt'))
     }
-  }
+  },
+  mode: 'development'
 };
 module.exports = merge(bundle, development);
