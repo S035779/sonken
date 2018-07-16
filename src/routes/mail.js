@@ -8,21 +8,21 @@ export default {
   uploadFile(options) {
     return (req, res, next) => {
       const filename = req.headers['x-uploadedfilename'];
-      const filedata = new Buffer(+req.headers['content-length']);
+      const filedata = Buffer.alloc(+req.headers['content-length']);
+
+      const admin    = filename.split('_')[0];
+      const id       = filename.split('_')[1];
+
       let bufferOffset = 0;
       req.on('data', chunk => {
         chunk.copy(filedata, bufferOffset);
         bufferOffset += chunk.length;
       }).on('end', () => {
-        const admin = filename.split('_')[0];
-        const id = filename.split('_')[1];
-        const file = filedata;
-        mail.uploadFile({ admin, id, file }).subscribe(
-          obj => { res.send(obj); }
-        , err => {
-            res.status(500)
-              .send({ name: err.name, message: err.message });
-            log.error(displayName, err.name, ':', err.message);
+        mail.uploadFile({ admin, id, file: filedata }).subscribe(
+          obj => { res.status(200).send(obj); }
+        , err => { 
+            res.status(500).send({ name: err.name, message: err.message });
+            log.error(displayName, err.name, ':', err.message, ':', err.stack); 
           }
         , () => { log.info('Complete to upload Attach.'); }  
         );

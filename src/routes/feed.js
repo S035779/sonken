@@ -20,12 +20,10 @@ export default {
         bufferOffset += chunk.length;
       }).on('end', () => {
         feed.uploadNotes({ user: username, category: category
-        , file: { type: filetype, content: filedata } })
-        .subscribe(
+        , file: { type: filetype, content: filedata } }).subscribe(
           obj => { res.status(200).send(obj); }
         , err => {
-            res.status(500)
-              .send({ name: err.name, message: err.message });
+            res.status(500).send({ name: err.name, message: err.message });
             log.error(displayName, err.name, ':', err.message, ':', err.stack);
           }
         , () => { log.info('Complete to upload Note.'); }  
