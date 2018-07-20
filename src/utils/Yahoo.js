@@ -284,10 +284,10 @@ class Yahoo {
       case 'fetch/closedsellers':
         return new Promise((resolve, reject) => {
           log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
-          let results = [];
+          let results;
           let count = 0;
           osmosis.get(options.url, { apg: 1 })
-            .paginate({ apg: +1 }, 2)
+            .paginate({ apg: +1 }, options.pages - 1)
             .set({ title: 'title', item: [ osmosis
               .find('div.maincol')
               .filter('table[1] > tbody > tr > td > table > tbody > tr[1] > td > small')
@@ -332,11 +332,11 @@ class Yahoo {
               const getDetail     = (str, _objs) => R.find(_obj => isDetail(str, _obj), _objs)[1];
               const _getDetail    = R.curry(getDetail);
               const setDetail     = (str, _obj) => R.compose(_getDetail(str), zipDetail)(_obj);
-              const setAuctionId  = _obj => R.merge(_obj, {
-                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-              , guid__: setDetail('オークションID', _obj)
-              , guid_isPermaLink: false
-              });
+              const setAuctionId  = _obj => !!_obj.property || !!_obj.details
+                ? R.merge(_obj, {
+                    guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+                  , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+                : _obj;
               const setPubDate    = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
@@ -379,10 +379,8 @@ class Yahoo {
               const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
               const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
               const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
-              return R.compose(
-                R.mergeWith(R.concat, results)
-              , setItems
-              , R.tap(log.trace.bind(this))
+              const result = R.compose(
+                setItems
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
               , R.map(setCategoryId)
@@ -402,14 +400,16 @@ class Yahoo {
               , R.map(setImage)
               , R.filter(_obj => !!_obj.description)
               , R.filter(R.is(Object))
+              //, R.tap(log.trace.bind(this))
               )(obj.item);
+              const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
+              results = R.mergeWithKey(concatValues, results, result);
             })
-            .then((context, data) => {
-              const params = context.request.params;
-              const apg = (params && params.apg) || 1;
-              console.log(apg, data.apg);
-              console.log(apg, ++count);
-            })
+            //.then((context, data) => {
+            //  const params = context.request.params;
+            //  const apg = (params && params.apg) || 1;
+            //  log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
+            //})
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
             .error(msg  => log.warn(Yahoo.displayName, msg))
@@ -581,8 +581,8 @@ class Yahoo {
     return this.request('fetch/closedmerchant', { url });
   }
   
-  getClosedSellers(url) {
-    return this.request('fetch/closedsellers', { url });
+  getClosedSellers(url, pages) {
+    return this.request('fetch/closedsellers', { url, pages });
   }
   
   getHtml(url) {
@@ -596,8 +596,9 @@ class Yahoo {
     ;
   }
 
-  fetchClosedSellers({ url }) {
-    return Rx.Observable.fromPromise(this.getClosedSellers(url))
+  fetchClosedSellers({ url, pages }) {
+    if(!pages) pages = 2;
+    return Rx.Observable.fromPromise(this.getClosedSellers(url, pages))
       .flatMap(obj => this.fetchMarchant(obj))
       //.map(R.tap(log.trace.bind(this)))
     ;
@@ -608,12 +609,13 @@ class Yahoo {
   }
  
   fetchMarchant(note) {
-    const setUrl     = str => {
+    const setUrl     = obj => {
       const api = std.parse_url('https://auctions.yahoo.co.jp/search/search');
-      api.searchParams.append('p', str);
+      api.searchParams.append('p', obj.title);
       return api.href;
     };
-    const setUrls    = R.map(obj => setUrl(obj.title));
+    const isItem = obj => !!obj.title;
+    const setUrls    = R.compose(R.map(setUrl), R.filter(isItem));
     const setMarket  = (item, objs) => {
       const isTitle  
         = _obj  => _obj && _obj.item && _obj.item.length > 0 ? item.title === _obj.item[0].title : false;
