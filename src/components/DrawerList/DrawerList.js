@@ -347,8 +347,8 @@ class DrawerList extends React.Component {
           {renderNonCategoryList('sellers')}
         </List>
       </Collapse>
-      {isAlpha
-        ? <ListItem button onClick={this.handleClickButton.bind(this, 'closedmarchant') }>
+      { isAlpha
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedmarchant') }>
           <ListItemIcon><NotificationsActive  className={classes.icon} /></ListItemIcon>
           <ListItemText primary="落札相場" classes={textClass} />
             {openClosedMarchant
@@ -358,28 +358,31 @@ class DrawerList extends React.Component {
                 <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedMarchant')}>
                 <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
               : null}
-          </ListItem>
-        : null}
-      {isAlpha 
-        ? <RssEditDialog
+          </ListItem>)
+        : null
+      }
+      { isAlpha 
+        ? (<RssEditDialog
             title={'落札相場'}
             user={profile.user}
             category="closedmarchant"
             categorys={categoryList('closedmarchant')}
             open={isEditClosedMarchant}
-            onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} />
-        : null}
-      {isAlpha 
-        ? <Collapse in={openClosedMarchant} timeout="auto" unmountOnExit>
+            onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} />)
+        : null
+      }
+      { isAlpha 
+        ? (<Collapse in={openClosedMarchant} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {renderFavoriteList('closedmarchant')}
               {renderCategoryList('closedmarchant')}
               {renderNonCategoryList('closedmarchant')}
             </List>
-          </Collapse>
-        : null}
-      {isAlpha 
-        ? <ListItem button onClick={this.handleClickButton.bind(this, 'closedsellers')  }>
+          </Collapse>)
+        : null
+      }
+      { isAlpha 
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedsellers')  }>
           <ListItemIcon><PeopleOutline className={classes.icon}/></ListItemIcon>
           <ListItemText primary="落札履歴" classes={textClass}/>
             {openClosedSellers
@@ -389,26 +392,29 @@ class DrawerList extends React.Component {
                 <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedSellers')}>
                 <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
               : null}
-          </ListItem>
-        : null}
-      {isAlpha 
-        ? <RssEditDialog
+          </ListItem>)
+        : null
+      }
+      { isAlpha 
+        ? (<RssEditDialog
             title={'落札履歴'}
             user={profile.user}
             category="closedsellers"
             categorys={categoryList('closedsellers')}
             open={isEditClosedSellers}
-            onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} />
-        : null}
-      {isAlpha 
-        ? <Collapse in={openClosedSellers} timeout="auto" unmountOnExit>
+            onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} />)
+        : null
+      }
+      { isAlpha 
+        ? (<Collapse in={openClosedSellers} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {renderFavoriteList('closedsellers')}
               {renderCategoryList('closedsellers')}
               {renderNonCategoryList('closedsellers')}
             </List>
-          </Collapse>
-        : null}
+          </Collapse>)
+        : null
+      }
       <ListItem button onClick={this.handleClickButton.bind(this, 'bids')}>
         <ListItemIcon><Timeline className={classes.icon} /></ListItemIcon>
         <ListItemText primary="入札リスト" classes={textClass} />

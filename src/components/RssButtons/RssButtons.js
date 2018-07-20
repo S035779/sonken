@@ -10,6 +10,8 @@ import { Button, Checkbox }
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
 
+const isAlpha = process.env.NODE_ENV !== 'production';
+
 class RssButtons extends React.Component {
   constructor(props) {
     super(props);
@@ -125,9 +127,12 @@ class RssButtons extends React.Component {
         <Button variant="raised"
           className={classes.button}
           onClick={this.handleDelete.bind(this)}>削除</Button>
-        <RssButton color={color}
+      { isAlpha 
+        ? <RssButton color={color}
           className={classes.button}
           onClick={this.handleDownload.bind(this)}>ダウンロード</RssButton>
+        : null
+      }
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。

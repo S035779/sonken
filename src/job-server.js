@@ -37,16 +37,11 @@ let idx  = 0;
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message', mes =>
-    log.info('[JOB]', 'got message.', mes));
-  cps.on('error',   err =>
-    log.error('[JOB]', err.name, ':', err.message));
-  cps.on('disconnect', () =>
-    log.info('[JOB]', 'worker disconnected.'));
-  cps.on('exit', (code, signal) =>
-    log.warn('[JOB]', `worker terminated. (s/c): ${signal || code}`));
-  cps.on('close', (code, signal) =>
-    log.warn('[JOB]', `worker exit. (s/c): ${signal || code}`));
+  cps.on('message',           mes => log.info('[JOB]', 'got message.', mes));
+  cps.on('error',             err => log.error('[JOB]', err.name, ':', err.message));
+  cps.on('disconnect',         () => log.info('[JOB]', 'worker disconnected.'));
+  cps.on('exit',   (code, signal) => log.warn('[JOB]', `worker terminated. (s/c): ${signal || code}`));
+  cps.on('close',  (code, signal) => log.warn('[JOB]', `worker exit. (s/c): ${signal || code}`));
   log.info('[JOB]', 'forked worker pid', ':', cps.pid);
   return cps;
 };
@@ -54,19 +49,18 @@ const fork = () => {
 const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => {
-      if(err) 
-        log.error('[JOB]', err.name,':', err.message,':', err.stack);
+      if(err) log.error('[JOB]', err.name,':', err.message,':', err.stack);
     });
   }; 
   const isOldItem = obj => {
     const now = Date.now();
     const upd = new Date(obj.updated).getTime();
     const int = updatedInterval * 1000 * 60;
-    //console.log(now, upd, int, now - upd > int);
+    log.debug(displayName, now, upd, int, now - upd > int);
     return now - upd > int;
   };
-  const setQueue = obj =>
-    obj ? { user: obj.user, id: obj._id, api: obj.url } : null;
+  const setQueue = obj => obj ? { user: obj.user, id: obj._id, api: obj.url } : null;
+  const exe = 1000 * executeInterval;
   return profile.fetchUsers({ adimn: 'Administrator' })
     .map(R.filter(obj => obj.approved))
     .map(R.map(obj => obj.user))
@@ -75,7 +69,7 @@ const request = queue => {
     .map(R.filter(obj => obj.url !== ''))
     .map(R.filter(isOldItem))
     .map(R.map(setQueue))
-    .map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
+    .map(std.invokeMap(queuePush, 0, exe, null))
   ;
 };
 
@@ -106,8 +100,8 @@ process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
 process.on('uncaughtException', err => shutdown(err, process.exit));
-process.on('warning', err => message(err));
-process.on('exit',    (code, signal) => message(null, code, signal));
+process.on('warning',           err => message(err));
+process.on('exit',   (code, signal) => message(null, code, signal));
 
 const message = (err, code, signal) => {
   if(err) log.warn('[JOB]', err.name,':',  err.message,':', err.stack);
@@ -118,7 +112,5 @@ const shutdown = (err, cbk) => {
   if(err) log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
   log.info('[JOB]', 'scheduler terminated.');
   log.info('[LOG]', 'log4js #3 terminated.');
-  log.close(() => {
-    cbk()
-  });
+  log.close(() => cbk());
 };

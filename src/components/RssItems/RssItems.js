@@ -10,6 +10,8 @@ import RssButton      from 'Components/RssButton/RssButton';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 import RssItemList    from 'Components/RssItemList/RssItemList';
 
+const isAlpha = process.env.NODE_ENV !== 'production';
+
 class RssItems extends React.Component {
   constructor(props) {
     super(props);
@@ -77,9 +79,12 @@ class RssItems extends React.Component {
         <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color}
+      { isAlpha
+        ? (<RssButton color={color}
             onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>
+            classes={classes.button}>ダウンロード</RssButton>)
+        : null
+      }
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。

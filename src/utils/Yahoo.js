@@ -187,9 +187,9 @@ class Yahoo {
               , categorys:    ['div#yjBreadcrumbs a > text()'           ]
               , property:     ['div.untBody div.pts04 th'               ]
               , details:      ['div.untBody div.pts04 td[2] > text()[1]']
-              , explanation:  'div#adoc'
-              , payment:      'div#itempayment'
-              , shipping:     'div#itemshipping'
+              , explanation:  'div#adoc div#acMdUsrPrv'
+              , payment:      'div#itempayment table'
+              , shipping:     'div#itemshipping table'
               , ship_details: ['div#itemshipping td'    ]
               , images:       ['div#imageinfo img@src'  ]
               })
@@ -202,15 +202,15 @@ class Yahoo {
                 return _obj;
               };
               const zipDetail     = _obj => R.zip(_obj.property, _obj.details);
-              const isDetail      = (str, _obj) => _obj[0] === str
+              const isDetail      = (str, _obj) => _obj[0] === str;
               const getDetail     = (str, _objs) => R.find(_obj => isDetail(str, _obj), _objs)[1];
               const _getDetail    = R.curry(getDetail);
               const setDetail     = (str, _obj) => R.compose(_getDetail(str), zipDetail)(_obj);
-              const setAuctionId  = _obj => R.merge(_obj, {
-                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-              , guid__: setDetail('オークションID', _obj)
-              , guid_isPermaLink: false
-              });
+              const setAuctionId  = _obj =>  !!_obj.property || !!_obj.details 
+                ? R.merge(_obj, {
+                    guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+                  , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+                : _obj;
               const setPubDate    = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
@@ -255,7 +255,6 @@ class Yahoo {
               const setItems      = objs => ({ url: options.url, title: obj.title, item:  objs });
               return results      = R.compose(
                 setItems
-              //, R.tap(log.trace.bind(this))
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
               , R.map(setCategoryId)
@@ -274,6 +273,7 @@ class Yahoo {
               , R.map(setSize)
               , R.map(setImage)
               , R.filter(R.is(Object))
+              //, R.tap(log.trace.bind(this))
               )(obj.item);
             })
             //.log(msg    => log.trace(Yahoo.displayName, msg))
@@ -285,7 +285,9 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
           let results;
-          osmosis.get(options.url)
+          let count = 0;
+          osmosis.get(options.url, { apg: 1 })
+            .paginate({ apg: +1 }, options.pages - 1)
             .set({ title: 'title', item: [ osmosis
               .find('div.maincol')
               .filter('table[1] > tbody > tr > td > table > tbody > tr[1] > td > small')
@@ -309,9 +311,9 @@ class Yahoo {
               , categorys:    ['div#yjBreadcrumbs a > text()'           ]
               , property:     ['div.untBody div.pts04 th'               ]
               , details:      ['div.untBody div.pts04 td[2] > text()[1]']
-              , explanation:  'div#adoc'
-              , payment:      'div#itempayment'
-              , shipping:     'div#itemshipping'
+              , explanation:  'div#adoc div#acMdUsrPrv'
+              , payment:      'div#itempayment table'
+              , shipping:     'div#itemshipping table'
               , ship_details: ['div#itemshipping td'   ]
               , images:       ['div#imageinfo img@src' ]
               })
@@ -330,11 +332,11 @@ class Yahoo {
               const getDetail     = (str, _objs) => R.find(_obj => isDetail(str, _obj), _objs)[1];
               const _getDetail    = R.curry(getDetail);
               const setDetail     = (str, _obj) => R.compose(_getDetail(str), zipDetail)(_obj);
-              const setAuctionId  = _obj => R.merge(_obj, {
-                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-              , guid__: setDetail('オークションID', _obj)
-              , guid_isPermaLink: false
-              });
+              const setAuctionId  = _obj => !!_obj.property || !!_obj.details
+                ? R.merge(_obj, {
+                    guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+                  , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+                : _obj;
               const setPubDate    = _obj => R.merge(_obj, {
                 pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
               });
@@ -377,9 +379,8 @@ class Yahoo {
               const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
               const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
               const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
-              return results = R.compose(
+              const result = R.compose(
                 setItems
-              //, R.tap(log.trace.bind(this))
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
               , R.map(setCategoryId)
@@ -399,8 +400,16 @@ class Yahoo {
               , R.map(setImage)
               , R.filter(_obj => !!_obj.description)
               , R.filter(R.is(Object))
+              //, R.tap(log.trace.bind(this))
               )(obj.item);
+              const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
+              results = R.mergeWithKey(concatValues, results, result);
             })
+            //.then((context, data) => {
+            //  const params = context.request.params;
+            //  const apg = (params && params.apg) || 1;
+            //  log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
+            //})
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
             .error(msg  => log.warn(Yahoo.displayName, msg))
@@ -438,9 +447,9 @@ class Yahoo {
               , categoryUrls: ['div#yjBreadcrumbs a@href'               ]
               , categorys:    ['div#yjBreadcrumbs a > text()'           ]
               , details:      ['dd.ProductDetail__description > text()' ]
-              , explanation:  'div#ProductExplanation.ProductExplanation'
-              , payment:      'div.ProductProcedure--payment'
-              , shipping:     'div.ProductProcedure--shipping'
+              , explanation:  'div#ProductExplanation div.ProductExplanation__body'
+              , payment:      'div.ProductProcedure--payment div.ProductProcedure__body'
+              , shipping:     'div.ProductProcedure--shipping div.ProductProcedure__body'
               , images:       ['ul.ProductImage__thumbnails img@src'   ]
               })
             ]})
@@ -493,7 +502,6 @@ class Yahoo {
               const setItems        = objs => ({ url: options.url, title: obj.title, item:  objs });
               return results        = R.compose(
                 setItems
-              //, R.tap(log.trace.bind(this))
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
               , R.map(setCategoryId)
@@ -512,6 +520,7 @@ class Yahoo {
               , R.map(setSize)
               , R.map(setImage)
               , R.filter(R.is(Object))
+              //, R.tap(log.trace.bind(this))
               )(obj.item);
             })
             //.log(msg => log.trace(Yahoo.displayName, msg))
@@ -558,9 +567,9 @@ class Yahoo {
     return this._fetchRss(url)
       .flatMap(obj => this._fetchXmlNote(obj))
       .map(obj => _note = obj)
-      //.map(R.tap(log.trace.bind(this)))
       .flatMap(obj => this.forXmlItem(obj))
       .map(objs => setItems(_note,objs))
+      //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
@@ -572,8 +581,8 @@ class Yahoo {
     return this.request('fetch/closedmerchant', { url });
   }
   
-  getClosedSellers(url) {
-    return this.request('fetch/closedsellers', { url });
+  getClosedSellers(url, pages) {
+    return this.request('fetch/closedsellers', { url, pages });
   }
   
   getHtml(url) {
@@ -582,14 +591,15 @@ class Yahoo {
   
   fetchClosedMerchant({ url }) {
     return Rx.Observable.fromPromise(this.getClosedMerchant(url))
-      .flatMap(obj => this.forHtml(obj))
+      .flatMap(obj => this.fetchMarchant(obj))
       //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
-  fetchClosedSellers({ url }) {
-    return Rx.Observable.fromPromise(this.getClosedSellers(url))
-      .flatMap(obj => this.forHtml(obj))
+  fetchClosedSellers({ url, pages }) {
+    if(!pages) pages = 2;
+    return Rx.Observable.fromPromise(this.getClosedSellers(url, pages))
+      .flatMap(obj => this.fetchMarchant(obj))
       //.map(R.tap(log.trace.bind(this)))
     ;
   }
@@ -598,25 +608,35 @@ class Yahoo {
     return Rx.Observable.fromPromise(this.getHtml(url));
   }
  
-  forHtml(note) {
-    const items = note.item;
-    const baseurl     = 'https://auctions.yahoo.co.jp/search/search';
-    const setUrl      = str => {
-      const api = std.parse_url(baseurl);
-      api.searchParams.append('p', str);
+  fetchMarchant(note) {
+    const setUrl     = obj => {
+      const api = std.parse_url('https://auctions.yahoo.co.jp/search/search');
+      api.searchParams.append('p', obj.title);
       return api.href;
     };
-    const setUrls     = R.map(obj => setUrl(obj.title));
-    const isTitle     = (item, obj ) => R.length(obj.item) ? item.title === obj.item[0].title : false;
-    const isMarket    = (item, objs) => R.find(obj => isTitle(item, obj), objs);
-    const _setMarket  = obj => obj && obj.item[0].price ? obj.item[0].price : '-';
-    const setMarket   = (item, objs) => R.merge(item, { market: _setMarket(isMarket(item, objs)) });
-    const setItem     = objs => R.map(item => setMarket(item, objs), items);
-    const setItems    = objs => R.merge(note, { item: setItem(objs) });
-    const promises    = R.map(url => this.getHtml(url));
-    const observable  = urls => Rx.Observable.forkJoin(promises(urls));
-    return observable(setUrls(items))
-      .map(objs => setItems(objs))
+    const isItem = obj => !!obj.title;
+    const setUrls    = R.compose(R.map(setUrl), R.filter(isItem));
+    const setMarket  = (item, objs) => {
+      const isTitle  
+        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? item.title === _obj.item[0].title : false;
+      const isPrice  = _objs => R.find(_obj => isTitle(item, _obj))(_objs);
+      const getPrice 
+        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _obj.item[0].price : '-';
+      const setPrice = _obj  => R.merge(item, { market: _obj });
+      return R.compose(
+        setPrice
+      , getPrice
+      , isPrice
+      )(objs);
+    };
+    const setMarkets = (items, objs) => R.map(item => setMarket(item, objs), items);
+    const setItems   = (_note, objs) => R.merge(_note, { item: objs });
+    const promises   = R.map(url => this.getHtml(url));
+    const observable = urls => Rx.Observable.forkJoin(promises(urls));
+    return observable(setUrls(note.item))
+      .map(objs => setMarkets(note.item, objs))
+      .map(objs => setItems(note, objs))
+      //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
