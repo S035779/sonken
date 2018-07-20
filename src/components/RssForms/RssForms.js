@@ -10,6 +10,7 @@ import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';
 
+const isAlpha = process.env.NODE_ENV !== 'production';
 const mon = '//www.mnrate.com/item/aid/';
 const fba = '//sellercentral.amazon.co.jp/hz/fba/profitabilitycalculator/index?lang=ja_JP';
 
@@ -163,9 +164,12 @@ class RssForms extends React.Component {
         <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color}
+      { isAlpha
+        ? (<RssButton color={color}
             onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>
+            classes={classes.button}>ダウンロード</RssButton>)
+        : null
+      }
         </div>
       </div>
       <div className={classes.edit}>
