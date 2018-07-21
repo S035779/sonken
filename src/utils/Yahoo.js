@@ -617,26 +617,32 @@ class Yahoo {
     const isItem = obj => !!obj.title;
     const setUrls    = R.compose(R.map(setUrl), R.filter(isItem));
     const setMarket  = (item, objs) => {
-      const isTitle  
-        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? item.title === _obj.item[0].title : false;
-      const isPrice  = _objs => R.find(_obj => isTitle(item, _obj))(_objs);
-      const getPrice 
-        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _obj.item[0].price : '-';
-      const setPrice = _obj  => R.merge(item, { market: _obj });
+      const _isSeller  
+        = _obj  => R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+      const isSeller = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
+      const isSales  = _objs => R.filter(_obj => isSeller(_obj), _objs);
+      const getSales = _objs => _objs.length > 0
+        ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+      const setSale  = _obj  => R.merge(item, _obj);
       return R.compose(
-        setPrice
-      , getPrice
-      , isPrice
+        setSale
+      , getSales
+      , isSales
       )(objs);
     };
+    const setSold    = (items, obj) => {
+
+    };
     const setMarkets = (items, objs) => R.map(item => setMarket(item, objs), items);
+    const setSolds   = (items, objs) => R.map(obj => setSold(items, obj), objs);
     const setItems   = (_note, objs) => R.merge(_note, { item: objs });
     const promises   = R.map(url => this.getHtml(url));
     const observable = urls => Rx.Observable.forkJoin(promises(urls));
     return observable(setUrls(note.item))
       .map(objs => setMarkets(note.item, objs))
+      //.map(objs => setSolds(note.item, objs))
       .map(objs => setItems(note, objs))
-      //.map(R.tap(log.trace.bind(this)))
+      .map(R.tap(log.trace.bind(this)))
     ;
   }
 
