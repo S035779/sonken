@@ -7,6 +7,7 @@ import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedEdit extends React.Component {
   itemFilter(filter, item) {
+    //std.logInfo(ClosedEdit.displayName, 'Item', item)
     const date      = new Date();
     const now       = new Date(item.bidStopTime);
     const start     = new Date(filter.aucStartTime);
@@ -18,9 +19,9 @@ class ClosedEdit extends React.Component {
     const twoWeeks  = new Date(year, month, day-14);
     const lastMonth = new Date(year, month-1, day);
     const today     = new Date(year, month, day);
-    const isLastWeek  = lastWeek  <= now && now < today;
-    const isTwoWeeks  = twoWeeks  <= now && now < today;
-    const isLastMonth = lastMonth <= now && now < today;
+    const isLastWeek  = lastWeek  <= now && now < today && item.sold >= 1;
+    const isTwoWeeks  = twoWeeks  <= now && now < today && item.sold >= 2;
+    const isLastMonth = lastMonth <= now && now < today && item.sold >= 3;
     const isAll = true;
     const isNow = start <= now && now <= stop;
     return filter.inAuction

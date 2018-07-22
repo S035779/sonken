@@ -43,7 +43,6 @@
     "log4js": "2.11.0",
     "marked": "0.3.12",
     "mongoose": "5.0.8",
-    "node-libs-browser": "2.1.0",
     "nodemailer": "4.6.7",
     "nodemailer-smtp-transport": "2.7.4",
     "osmosis": "1.1.7",

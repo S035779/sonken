@@ -43,14 +43,13 @@ class RssSearch extends React.Component {
   }
 
   handleSubmit(title, categoryIds) {
-    std.logInfo(RssSearch.displayName, 'handleSubmit', title);
-    const { url } = this.state;
     const { user } = this.props;
-    const category = url ? this.getCategory(url) : null;
-    if(category) {
+    const request = this.getCategory(this.state.url);
+    std.logInfo(RssSearch.displayName, 'Request:', request);
+    if(request) {
       const spn = Spinner.of('app');
       spn.start();
-      NoteAction.create(user, { url, category, title, categoryIds })
+      NoteAction.create(user, { url: request.url, category: request.category, title, categoryIds })
         .then(()    => this.setState({ isSuccess:   true, url: '' }))
         .then(()    => spn.stop())
         .catch(err  => {
@@ -104,7 +103,7 @@ class RssSearch extends React.Component {
 
   handleChangeText(name, event) {
     const value = event.target.value;
-    std.logInfo(RssSearch.displayName, 'handleChangeText', value);
+    //std.logInfo(RssSearch.displayName, 'handleChangeText', value);
     this.setState({ [name]: value });
   }
 
@@ -129,27 +128,53 @@ class RssSearch extends React.Component {
   }
 
   getCategory(url) {
-    const parser = new URL(url);
-    const path = parser.pathname;
-    const api = path.split('/')[1];
-    const query = parser.searchParams;
-    switch(api) {
+    const { category } = this.props;
+    let operation = '';
+    let path = '';
+    let query = '';
+    try {
+      const parser = new URL(url);
+      query = parser.searchParams;
+      path = parser.pathname;
+      operation = path.split('/')[1];
+    } catch (err) {
+      std.logError(RssSearch.displayName, err.name, err.message);
+      switch(category) {
+        case 'closedmarchant':
+          url = 'https://auctions.yahoo.co.jp/closedsearch/closedsearch?' 
+            + std.urlencode({ p: url });
+          break;
+        case 'closedsellers':
+          url = 'https://auctions.yahoo.co.jp/jp/show/rating?' 
+            + std.urlencode({ userID: url, role: 'seller' });
+          break;
+        case 'sellers':
+          url = 'https://auctions.yahoo.co.jp/seller/' 
+            + url;
+          break;
+        default:
+          url = 'https://auctions.yahoo.co.jp/search/search?' 
+            + std.urlencode({ p: url });
+          break;
+      }
+    }
+    switch(operation) {
       case 'search':
-        return 'marchant';
+        return { category: 'marchant',        url };
       case 'seller':
-        return 'sellers';
+        return { category: 'sellers',         url };
       case 'closedsearch':
-        return 'closedmarchant';
+        return { category: 'closedmarchant',  url };
       case 'jp':
-        return path === '/jp/show/rating' && query.has('userID')
-          ? 'closedsellers'
+        return path === '/jp/show/rating' && query.has('userID') 
+          ? { category: 'closedsellers', url } 
           : null;
-      //case 'rss':
-      //  return query.has('p')
-      //    ? 'marchant'
-      //    : query.has('sid')
-      //      ? 'sellers'
-      //      : null;
+      case 'rss':
+        return query.has('p') 
+          ? { category: 'marchant', url } : query.has('sid') 
+          ? { category: 'sellers',  url } : null;
+      default:
+        return { category,                    url };
     }
   }
 
