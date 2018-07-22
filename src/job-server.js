@@ -56,7 +56,7 @@ const request = queue => {
     const now = Date.now();
     const upd = new Date(obj.updated).getTime();
     const int = updatedInterval * 1000 * 60;
-    log.debug(displayName, now, upd, int, now - upd > int);
+    //log.debug(displayName, now, upd, int, now - upd > int);
     return now - upd > int;
   };
   const setQueue = obj => obj ? { user: obj.user, id: obj._id, api: obj.url } : null;
@@ -75,7 +75,7 @@ const request = queue => {
 
 const worker = (task, callback) => {
   idx = idx < cpu_num ? idx : 0;
-  log.debug('[JOB]', 'task(id/idx#/cpu#)', task.id, idx, cpu_num);
+  //log.debug('[JOB]', 'task(id/idx#/cpu#)', task.id, idx, cpu_num);
   if(pids[idx] === undefined || !pids[idx].connected) pids[idx] = fork();
   pids[idx].send(task, err => {
     if(err) log.error('[JOB]', err.name,':', err.message,':', err.stack);
@@ -89,7 +89,7 @@ const main = () => {
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info('[JOB]', 'send to request work.');
   std.invoke(() => request(queue).subscribe(
-    obj => log.debug('[JOB]', 'fetch notes is proceeding...')
+    obj => log.info('[JOB]', 'fetch notes is proceeding...')
   , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
   , ()  => log.info('[JOB]', 'Completed to fetch notes.')
   ), 0, 1000 * 60 * monitorInterval);

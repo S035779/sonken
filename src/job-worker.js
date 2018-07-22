@@ -12,15 +12,16 @@ const yahoo = Yahoo.of();
 const feed = FeedParser.of();
 
 dotenv.config();
-const env = process.env.NODE_ENV || 'development';
+const node_env = process.env.NODE_ENV || 'development';
+const pages = process.env.JOB_UPD_PAGES || 2;
 
-if (env === 'development') {
+if (node_env === 'development') {
   log.config('console', 'color', displayName, 'TRACE');
 } else
-if (env === 'staging') {
+if (node_env === 'staging') {
   log.config('file', 'basic', displayName, 'DEBUG');
 } else
-if (env === 'production') {
+if (node_env === 'production') {
   log.config('file', 'json', displayName, 'INFO');
 }
 
@@ -28,7 +29,7 @@ const request = (api, { user, id }) => {
   const url = api.toString();
   const path = R.split('/', api.pathname);
   const operation = api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
-  log.debug(displayName, operation, user, id, url);
+  //log.debug(displayName, operation, user, id, url);
   switch(operation) {
     case 'search':
     case 'seller':
@@ -36,11 +37,11 @@ const request = (api, { user, id }) => {
         .map(     obj => ({ updated: new Date(), items: obj.item }))
         .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
     case 'closedsearch':
-      return yahoo.fetchClosedMerchant({ url })
+      return yahoo.fetchClosedMerchant({ url, pages })
         .map(     obj => ({ updated: new Date(), items: obj.item }))
         .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
     case 'closedsellers':
-      return yahoo.fetchClosedSellers({ url, pages: 10 })
+      return yahoo.fetchClosedSellers({ url, pages })
         .map(     obj => ({ updated: new Date(), items: obj.item }))
         .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
     case 'rss':
@@ -58,7 +59,7 @@ const worker = ({ user, id, api, options }, callback) => {
   _api.search  = std.parse_query(search).toString();
   const observable = request(_api, { user, id });
   if(observable) observable.subscribe(
-      obj => log.debug('[JOB]', 'data parse is proceeding...')
+      obj => log.info('[JOB]', 'data parse is proceeding...')
     , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
     , ()  => callback());
 };
@@ -68,7 +69,7 @@ const main = () => {
   queue.drain = () => log.info('[JOB]', 'Completed to work.');
 
   process.on('message', task => {
-    log.debug('[JOB]', 'got message. pid:', process.pid);
+    //log.debug('[JOB]', 'got message. pid:', process.pid);
     if(task) queue.push(task, err => {
       if(err) log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
       log.info('[JOB]', 'finished work. pid:', process.pid);

@@ -1400,6 +1400,8 @@ export default class FeedParser {
     , image10:      setImage(obj.images, 10)
     , offers:       obj.offers
     , market:       obj.market
+    , sale:         obj.sale
+    , sold:         obj.sold
     , categoryid:   obj.item_categoryid
     , explanation:  obj.explanation
     , payment:      obj.payment
@@ -1408,10 +1410,12 @@ export default class FeedParser {
     , ship_buynow:  obj.ship_buynow
     , date:         obj.pubDate
     }));
-    const keys = ['auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
-      , 'bids', 'countdown', 'seller', 'link'
-      , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
-      , 'offers', 'market', 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
+    const keys = [
+      'auid', 'title', 'categorys'
+    , 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown', 'seller', 'link'
+    , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
+    , 'offers', 'market', 'sale', 'sold'
+    , 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const observables = R.map(id => this.fetchNote({ user, id }));
@@ -1439,9 +1443,9 @@ export default class FeedParser {
     const twoWeeks  = new Date(year, month, day-14);
     const lastMonth = new Date(year, month-1, day);
     const today     = new Date(year, month, day);
-    const isLastWeek  = lastWeek  <= now && now < today;
-    const isTwoWeeks  = twoWeeks  <= now && now < today;
-    const isLastMonth = lastMonth <= now && now < today;
+    const isLastWeek  = lastWeek  <= now && now < today && item.sold >= 1;
+    const isTwoWeeks  = twoWeeks  <= now && now < today && item.sold >= 2;
+    const isLastMonth = lastMonth <= now && now < today && item.sold >= 3;
     const isAll = true;
     const isNow = start <= now && now <= stop;
     return filter.inAuction

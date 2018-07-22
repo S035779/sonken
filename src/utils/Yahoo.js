@@ -160,9 +160,11 @@ class Yahoo {
         });
       case 'fetch/closedmerchant':
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
+          log.info(Yahoo.displayName, '[ClosedMerchant]', options.url);
           let results;
-          osmosis.get(options.url)
+          let count = 0;
+          osmosis.get(options.url, { n: 100, b: 1 })
+            .paginate({ b: +100 }, options.pages - 1)
             .set({ title: 'title', item: [ osmosis
               .find('div#list01 tr')
               .filter('td.i, td.a1')
@@ -253,7 +255,7 @@ class Yahoo {
               const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
               const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
               const setItems      = objs => ({ url: options.url, title: obj.title, item:  objs });
-              return results      = R.compose(
+              const result = R.compose(
                 setItems
               , R.map(setShipBuyNow)
               , R.map(setShipPrice)
@@ -275,6 +277,13 @@ class Yahoo {
               , R.filter(R.is(Object))
               //, R.tap(log.trace.bind(this))
               )(obj.item);
+              const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
+              results = R.mergeWithKey(concatValues, results, result);
+            })
+            .then((context, data) => {
+              const params = context.request.params;
+              const b = (params && params.b) || 1;
+              log.info(Yahoo.displayName, 'Title:', data.title, 'Items:', b, 'Pages:', options.pages);
             })
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
@@ -283,7 +292,7 @@ class Yahoo {
         });
       case 'fetch/closedsellers':
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
+          log.info(Yahoo.displayName, '[ClosedSellers]', options.url);
           let results;
           let count = 0;
           osmosis.get(options.url, { apg: 1 })
@@ -405,11 +414,11 @@ class Yahoo {
               const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
               results = R.mergeWithKey(concatValues, results, result);
             })
-            //.then((context, data) => {
-            //  const params = context.request.params;
-            //  const apg = (params && params.apg) || 1;
-            //  log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
-            //})
+            .then((context, data) => {
+              const params = context.request.params;
+              const apg = (params && params.apg) || 1;
+              log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
+            })
             //.log(msg    => log.trace(Yahoo.displayName, msg))
             //.debug(msg  => log.debug(Yahoo.displayName, msg))
             .error(msg  => log.warn(Yahoo.displayName, msg))
@@ -417,7 +426,7 @@ class Yahoo {
         });
       case 'fetch/html':
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, 'Request', '[' + options.url + ']');
+          log.info(Yahoo.displayName, '[Auctoins]', options.url);
           let results;
           osmosis.get(options.url)
             .set({ title: 'title', item: [ osmosis
@@ -577,8 +586,8 @@ class Yahoo {
    * search auction items and parse html.
    *
    */
-  getClosedMerchant(url) {
-    return this.request('fetch/closedmerchant', { url });
+  getClosedMerchant(url, pages) {
+    return this.request('fetch/closedmerchant', { url, pages });
   }
   
   getClosedSellers(url, pages) {
@@ -589,15 +598,16 @@ class Yahoo {
     return this.request('fetch/html', { url });
   }
   
-  fetchClosedMerchant({ url }) {
-    return Rx.Observable.fromPromise(this.getClosedMerchant(url))
+  fetchClosedMerchant({ url, pages }) {
+    if(!pages) pages = 1;
+    return Rx.Observable.fromPromise(this.getClosedMerchant(url, pages))
       .flatMap(obj => this.fetchMarchant(obj))
       //.map(R.tap(log.trace.bind(this)))
     ;
   }
 
   fetchClosedSellers({ url, pages }) {
-    if(!pages) pages = 2;
+    if(!pages) pages = 1;
     return Rx.Observable.fromPromise(this.getClosedSellers(url, pages))
       .flatMap(obj => this.fetchMarchant(obj))
       //.map(R.tap(log.trace.bind(this)))
@@ -615,26 +625,32 @@ class Yahoo {
       return api.href;
     };
     const isItem = obj => !!obj.title;
-    const setUrls    = R.compose(R.map(setUrl), R.filter(isItem));
-    const setMarket  = (item, objs) => {
-      const isTitle  
-        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? item.title === _obj.item[0].title : false;
-      const isPrice  = _objs => R.find(_obj => isTitle(item, _obj))(_objs);
-      const getPrice 
-        = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _obj.item[0].price : '-';
-      const setPrice = _obj  => R.merge(item, { market: _obj });
-      return R.compose(
-        setPrice
-      , getPrice
-      , isPrice
-      )(objs);
+    const setUrls     = R.compose(R.map(setUrl), R.filter(isItem));
+    const setMarket   = (item, objs) => {
+      const _isSeller = _obj  => 
+        R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+      const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
+      const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+      const getSales  = _objs => _objs.length > 0
+        ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+      const setSale   = _obj  => R.merge(item, _obj);
+      return R.compose(setSale, getSales, isSales)(objs);
     };
-    const setMarkets = (items, objs) => R.map(item => setMarket(item, objs), items);
-    const setItems   = (_note, objs) => R.merge(_note, { item: objs });
-    const promises   = R.map(url => this.getHtml(url));
-    const observable = urls => Rx.Observable.forkJoin(promises(urls));
+    const setPerformance = (items, obj) => {
+      const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
+      const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+      const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
+      const setSold   = item  => R.merge(obj, item);
+      return R.compose(setSold, getSolds, isSolds)(items);
+    };
+    const setMarkets      = (items, objs) => R.map(item => setMarket(item, objs), items);
+    const setPerformances = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
+    const setItems        = (_note, objs) => R.merge(_note, { item: objs });
+    const promises        = R.map(url => this.getHtml(url));
+    const observable      = urls => Rx.Observable.forkJoin(promises(urls));
     return observable(setUrls(note.item))
       .map(objs => setMarkets(note.item, objs))
+      .map(objs => setPerformances(note.item, objs))
       .map(objs => setItems(note, objs))
       //.map(R.tap(log.trace.bind(this)))
     ;
