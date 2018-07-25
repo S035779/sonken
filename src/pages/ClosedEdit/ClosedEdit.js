@@ -45,12 +45,16 @@ class ClosedEdit extends React.Component {
     const items = note.items ? note.items : [];
     const _items = items.filter(item => this.itemFilter(filter, item));
     const _note = Object.assign({}, note, { items: _items });
+    const itemNumber = items.length;
+    const perPage = _items.length;
     return <div className={classes.noteEdit}>
         <ClosedForms
           user={user}
           note={_note}
           category={category}
           itemFilter={filter} 
+          itemNumber={itemNumber}
+          perPage={perPage}
           file={file} />
     </div>;
   }
