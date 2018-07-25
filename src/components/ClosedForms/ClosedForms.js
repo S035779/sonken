@@ -1,5 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import classNames       from 'classnames';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
@@ -160,7 +161,7 @@ class ClosedForms extends React.Component {
   render() {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
-    const { classes, user, note, category } = this.props;
+    const { classes, itemNumber, perPage, user, note, category } = this.props;
     const { aucStartTime, aucStopTime
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction
       , allAuction, inAuction, isNotValid, isSuccess } = this.state;
@@ -185,7 +186,8 @@ class ClosedForms extends React.Component {
           </RssDialog>
         </div>
       </div>
-      <div className={classes.edit}>
+    {category === 'closedsellers' 
+      ? (<div className={classes.edit}>
         <Typography variant="subheading" noWrap
           className={classes.column}>絞込件数：</Typography>
         <Checkbox color="primary" 
@@ -216,9 +218,15 @@ class ClosedForms extends React.Component {
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.column}>全て表示</Typography>
-      </div>
-      <div className={classes.edit}>
-        <div className={classes.column} />
+      </div>)
+      : null }
+    {category === 'closedsellers' 
+      ? (<div className={classes.edit}>
+        <div className={classes.column}>
+          <Typography className={classes.title}>
+            全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示
+          </Typography>
+        </div>
         <div className={classes.datetimes}>
           <Checkbox color="primary"
             tabIndex={-1} disableRipple
@@ -240,8 +248,10 @@ class ClosedForms extends React.Component {
               className={classes.text}/>
           </form>
         </div>
-      </div>
-      <div className={classes.edit}>
+      </div>)
+      : null }
+    {category === 'closedsellers' 
+      ? (<div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
             <Button variant="raised"
@@ -249,8 +259,12 @@ class ClosedForms extends React.Component {
               className={classes.button}>絞り込み</Button>
           </div>
         </div>
-      </div>
-      <div className={classes.noteList}>
+      </div>)
+      : null }
+      <div className={classNames(
+        category === 'closedsellers' && classes.sellersList
+      , category === 'closedmarchant' && classes.marchantList
+      )}>
         <RssItemList 
           user={user} 
           items={items} />
@@ -262,20 +276,22 @@ class ClosedForms extends React.Component {
 const barHeightSmUp     = 64;
 const barHeightSmDown   = 56;
 const searchHeight      = 62;
-const filterHeight      = 62 * 4;
-const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${filterHeight}px - ${searchHeight}px)`;
+const marchantHeight    = 62 * 1;
+const sellersHeight      = 62 * 4;
+const marchantHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${marchantHeight}px - ${searchHeight}px)`;
+const marchantHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${marchantHeight}px - ${searchHeight}px)`;
+const sellersHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${sellersHeight}px - ${searchHeight}px)`;
+const sellersHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${sellersHeight}px - ${searchHeight}px)`;
 const columnHeight      = 62;
 const contentWidth      = 112;
 const checkboxWidth     = 38;
 const datetimeWidth     = 200;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column'
-                , overflow: 'scroll' }
-, noteList:     { width: '100%'
-                , height: listHeightSmDown 
-                , [theme.breakpoints.up('sm')]: {
-                  height: listHeightSmUp }}
+  forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
+, marchantList: { width: '100%', height: marchantHeightSmDown 
+                , [theme.breakpoints.up('sm')]: { height: marchantHeightSmUp }}
+, sellersList:   { width: '100%', height: sellersHeightSmDown 
+                , [theme.breakpoints.up('sm')]: { height: sellersHeightSmUp }}
 , header:       { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch', justifyContent: 'space-between'
                 , height: columnHeight, minHeight: columnHeight
