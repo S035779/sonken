@@ -539,7 +539,7 @@ export default {
    * $length: number of characters to be generated.
    * added [ /*-+.,!#$%&()~|_  ] to makeRandStr.
    */
-  makeRandPassword(length) {
+  rndPassword(length) {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789/*-+.,!#$%&()~|_';
     let str = '';
     for (let i = 0; i < length; ++i) {
@@ -552,7 +552,7 @@ export default {
    * Generated a randam characters, using 'Math.random()' method.
    * $length: number of characters to be generated.
    */
-  makeRandStr(length) {
+  rndString(length) {
     const chars =
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789';
     let str = '';
