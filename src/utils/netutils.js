@@ -1,4 +1,6 @@
-import std from 'Utilities/stdutils';
+import http   from 'http';
+import https  from 'https';
+import std    from 'Utilities/stdutils';
 
 const log = {
   error: function(message) { console.error(message); }
@@ -167,6 +169,76 @@ const get2 = function(url, options, callback) {
     host: hostname
     , port: port
     , path: path
+  }, function(res) {
+    const stat = res.statusCode;
+    const head = res.headers;
+    res.setEncoding('utf8');
+    let body = '';
+    res.on('data', function(chunk) { body += chunk; });
+    res.on('end', function() {
+      switch (stat) {
+        case 101: case 102: case 103: case 104: case 105: case 106:
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          callback({ error: { name: stat, message: body }});
+          break; 
+        case 200: case 201: case 202: case 204:
+          process.stdout.write('-');
+          callback(null, head, body);
+          break;
+        case 301: case 302:
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          callback({ error: { name: stat, message: body }});
+          break; 
+        case 400: case 401: case 402: case 403: case 404:
+          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          callback({ error: { name: stat, message: body }});
+          break; 
+        case 500: case 501: case 502: case 503: case 504: case 505:
+          process.stdout.write('x');
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          setTimeout(() => get2(url, options, callback), throttle());
+          break;
+        default:
+          process.stdout.write('?');
+          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
+          callback({ error: { name: stat, message: body }});
+          break;
+      }
+    });
+  });
+  req.on('error', function(err) {
+    log.error(`Problem with HTTP Request: ${err.code}`);
+    callback({ error: { name: err.code, message: err.message }});
+  });
+};
+
+/*
+ * HTTPS GET File request
+ *
+ * @param {string} url - 
+ * @param {object} options -
+ * @param {function} callback -
+ */
+const fetch = function(url, { method, headers, search }, callback) {  
+  url = std.parse_url(url);
+  let hostname  = url.hostname
+    , protocol  = url.protocol
+    , port      = url.port
+    , path      = url.pathname
+    , query     = url.query;
+  if(query) {
+    path += '?' + query;
+  } else 
+  if(search) {
+    path += '?' + std.urlencode_rfc3986(search);
+  }
+  const client = protocol === 'http:' ? http : https;
+  const req = client.request({
+    host: hostname
+  , port: port
+  , path: path
+  , method
+  , headers
   }, function(res) {
     const stat = res.statusCode;
     const head = res.headers;
@@ -618,4 +690,4 @@ const postJson2 = function(url, auth, body, callback) {
   req.end();
 };
 
-export default { get, getJSON, get2, getJSON2, post2, postData, postData2, postJson2 };
+export default { fetch, get, getJSON, get2, getJSON2, post2, postData, postData2, postJson2 };

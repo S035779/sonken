@@ -1,3 +1,5 @@
+import path             from 'path';
+import fs               from 'fs';
 import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import osmosis          from 'osmosis';
@@ -39,87 +41,72 @@ class Yahoo {
     switch(request) {
       case 'fetch/auth/support':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + '.well-known/openid-configuration';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
+          net.get2(baseurl + '.well-known/openid-configuration', null, (status, header, body) => {
+            const result = JSON.parse(body)
             if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
+              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
+              return reject(new Error('Response Error!!'));
             }
-            const authApi = obj.body.authorization_endpoint;
-            const toknApi = obj.body.token_endpoint;
-            const userApi = obj.body.userinfo_endpoint;
-            const jwksApi = obj.body.jwks_uri;
-            const support = obj.body.response_types_supported;
-            resolve({authApi, toknApi, userApi, jwksApi, support});
+            const response = {
+              authApi: result.authorization_endpoint
+            , toknApi: result.token_endpoint
+            , userApi: result.userinfo_endpoint
+            , jwksApi: result.jwks_uri
+            , support: result.response_types_supported
+            };
+            resolve(response);
           });
         });
       case 'fetch/auth/jwks':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'jwks';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
+          net.get2(baseurl + 'jwks', null, (status, header, body) => {
+            const result = JSON.parse(body);
             if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
+              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
+              return reject(new Error('Response Error!!'));
             }
-            const set = obj.body.keys;
-            const kids = set.map(o => ({
-              keyid:       o.kid
-              , modulus:   o.n
-              , exponent:  o.e
-            }));
+            const kids = result.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
             resolve(kids);
           });
         });
       case 'fetch/auth/publickeys':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'public-keys';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
+          net.get2(baseurl + 'public-keys', null, (status, header, body) => {
+            const result = JSON.parse(body);
             if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
+              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
+              return reject(new Error('Response Error!!'));
             }
-            const set = obj.body;
-            resolve(set);
+            resolve(result);
           });
         });
       case 'fetch/accesstoken':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'token'
-            + '?' + std.encodeFormData(options.query);
-          const Authorization = 'Basic '
-            + std.atob(options.auth['client_id']
-            + ':' + request['client_secret']);
-          net.post2(uri, { Authorization }, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
+          net.post2(baseurl + 'token' + '?' + std.encodeFormData(options.query)
+          , { Authorization: 'Basic ' + std.atob(options.auth['client_id'] + ':' + request['client_secret']) }
+          , null, (status, header, body) => {
+            const result = JSON.parse(body);
             if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
+              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
+              return reject(new Error('Response Error!!'));
             }
-            const set = obj.body;
-            resolve(set);
+            resolve(result);
           });
         });
-      case 'fetch/rss':
+      case 'fetch/file':
         return new Promise((resolve, reject) => {
-          net.get2(options.url, null, (err, head, body) => {
-            if(err) reject(err);
-            //log.trace(Yahoo.displayName, body);
-            resolve(body);
+          const { url, headers, id } = options;
+          net.fetch(url, { headers, method: 'GET' }, (err, head, body) => {
+            if(err) return reject(err);
+            resolve({ name: id + '-' + std.rndString(8), body });
+          });
+        });
+      case 'write/file':
+        return new Promise((resolve, reject) => {
+          const filename = path.join(__dirname, '../storage', options.name + '.bin');
+          fs.writeFile(filename, options.buffer, 'binary', err => {
+            if(err) return reject(err);
+            resolve(filename);
           });
         });
       case 'parse/xml/note':
@@ -540,12 +527,8 @@ class Yahoo {
     }
   }
   
-  /**
-   * get rss feed and parse xml.
-   *
-   */
   getRss(url) {
-    return this.request('fetch/rss', { url });
+    return this.request('fetch/file', { url });
   }
 
   getXmlNote(xml) {
@@ -556,36 +539,6 @@ class Yahoo {
     return this.request('parse/xml/item', { xml });
   }
 
-  _fetchRss(url) {
-    return Rx.Observable.fromPromise(this.getRss(url));
-  }
-
-  _fetchXmlNote(xml) {
-    return Rx.Observable.fromPromise(this.getXmlNote(xml));
-  }
-
-  forXmlItem(xml) {
-    const promises =
-      R.map(this.getXmlItem.bind(this), xml.rss.channel.item);
-    return Rx.Observable.forkJoin(promises);
-  }
-
-  fetchRss({ url }) {
-    let _note;
-    const setItems = (note, item) => R.merge(note.rss.channel, { item });
-    return this._fetchRss(url)
-      .flatMap(obj => this._fetchXmlNote(obj))
-      .map(obj => _note = obj)
-      .flatMap(obj => this.forXmlItem(obj))
-      .map(objs => setItems(_note,objs))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
-  }
-
-  /**
-   * search auction items and parse html.
-   *
-   */
   getClosedMerchant(url, pages) {
     return this.request('fetch/closedmerchant', { url, pages });
   }
@@ -598,33 +551,70 @@ class Yahoo {
     return this.request('fetch/html', { url });
   }
   
+  getImage(id, url) {
+    return this.request('fetch/file', { url, id, headers: { encoding: null } });
+  }
+
+  putImage(name, buffer) {
+    return this.request('write/file', { name, buffer });
+  }
+
+  writeImages(images) {
+    const promises    = R.map(this.putImage.bind(this));
+    const observables = objs => Rx.Observable.forkJoin(promises(objs));
+    return observables(images);
+  }
+
+  fetchImages(note) {
+    const promises    = obj => R.map(url => this.getImage(obj.guid, url), obj.images.length = 1);
+    const observables = obj => Rx.Observable.forkJoin(promises(obj));
+    const fromItems   = Rx.Observable.from(note.item);
+    const toFiles     = R.map(obj => this.putImage(obj.name, obj.body));
+    return fromItems
+      .flatMap(observables)
+      .map(toFiles)
+      .map(R.tap(log.info.bind(this)))
+    ;
+  }
+
   fetchClosedMerchant({ url, pages }) {
     if(!pages) pages = 1;
-    return Rx.Observable.fromPromise(this.getClosedMerchant(url, pages))
-      .flatMap(obj => this.fetchMarchant(obj))
-      //.map(R.tap(log.trace.bind(this)))
+    const fetchClosed = Rx.Observable.fromPromise(this.getClosedMerchant(url, pages));
+    const observables = obj => Rx.Observable.forkJoin([ 
+      this.fetchMarchant(obj)
+    //, this.fetchImages(obj) 
+    ]);
+    return fetchClosed
+      .flatMap(observables)
+      .map(objs => objs[0])
     ;
   }
 
   fetchClosedSellers({ url, pages }) {
     if(!pages) pages = 1;
-    return Rx.Observable.fromPromise(this.getClosedSellers(url, pages))
-      .flatMap(obj => this.fetchMarchant(obj))
-      //.map(R.tap(log.trace.bind(this)))
+    const fetchClosed = Rx.Observable.fromPromise(this.getClosedSellers(url, pages));
+    const observables = obj => Rx.Observable.forkJoin([ 
+      this.fetchMarchant(obj)
+    //, this.fetchImages(obj) 
+    ]);
+    return fetchClosed
+      .flatMap(observables)
+      .map(objs => objs[0])
     ;
   }
 
   fetchHtml({ url }) {
-    return Rx.Observable.fromPromise(this.getHtml(url));
+    const observable = Rx.Observable.fromPromise(this.getHtml(url));
+    return observable;
   }
- 
+
   fetchMarchant(note) {
     const setUrl     = obj => {
       const api = std.parse_url('https://auctions.yahoo.co.jp/search/search');
       api.searchParams.append('p', obj.title);
       return api.href;
     };
-    const isItem = obj => !!obj.title;
+    const isItem      = obj => !!obj.title;
     const setUrls     = R.compose(R.map(setUrl), R.filter(isItem));
     const setMarket   = (item, objs) => {
       const _isSeller = _obj  => 
@@ -652,8 +642,21 @@ class Yahoo {
       .map(objs => setMarkets(note.item, objs))
       .map(objs => setPerformances(note.item, objs))
       .map(objs => setItems(note, objs))
-      //.map(R.tap(log.trace.bind(this)))
     ;
+  }
+
+  fetchRss({ url }) {
+    let _note;
+    const setItems = (note, item) => R.merge(note.rss.channel, { item });
+    const fetchRss = obj => Rx.Observable.fromPromise(this.getRss(obj));
+    const fetchXml = obj => Rx.Observable.fromPromise(this.getXmlNote(obj.body));
+    const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
+    const fetchItm = obj => Rx.Observable.forkJoin(promises(obj));
+    return fetchRss(url)
+      .flatMap(fetchXml)
+      .map(obj => _note = obj)
+      .flatMap(fetchXmlItm)
+      .map(objs => setItems(_note,objs));
   }
 
   /**
@@ -679,7 +682,6 @@ class Yahoo {
   fetchAuthJwks() {
     return Rx.Observable.fromPromise(this.getAuthJwks());
   }
-
 
   /**
    * get result of the 'Yahoo! Public Keys.'.
