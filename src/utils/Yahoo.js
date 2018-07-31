@@ -1,7 +1,10 @@
 import path             from 'path';
 import fs               from 'fs';
 import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
+import { fromPromise }  from 'rxjs/observable/fromPromise';
+import { forkJoin }     from 'rxjs/observable/forkJoin';
+import { map }          from 'rxjs/operators/map';
+import { flatMap }      from 'rxjs/operators/flatMap';
 import osmosis          from 'osmosis';
 import { parseString }  from 'xml2js';
 import std              from 'Utilities/stdutils';
@@ -561,50 +564,45 @@ class Yahoo {
 
   writeImages(images) {
     const promises    = R.map(this.putImage.bind(this));
-    const observables = objs => Rx.Observable.forkJoin(promises(objs));
+    const observables = objs => forkJoin(promises(objs));
     return observables(images);
   }
 
-  fetchImages(note) {
-    const promises    = obj => R.map(url => this.getImage(obj.guid, url), obj.images.length = 1);
-    const observables = obj => Rx.Observable.forkJoin(promises(obj));
-    const fromItems   = Rx.Observable.from(note.item);
+  fetchImages({ items }) {
+    //log.info(Yahoo.displayName, 'fetchImages', items);
+    const fromItems   = from(items);
+    const getImage    = (id, url) => this.getImage(id, url);
+    const fetchImage  = 
+      obj => R.map(url => getImage(obj.guid, url), obj.images);
+    const fetchImages = obj => forkJoin(promises(obj));
     const toFiles     = R.map(obj => this.putImage(obj.name, obj.body));
     return fromItems
-      .flatMap(observables)
-      .map(toFiles)
-      .map(R.tap(log.info.bind(this)))
+      .do(log.trace)
+      //.flatMap(fetchImages)
+      //.map(toFiles)
     ;
   }
 
   fetchClosedMerchant({ url, pages }) {
     if(!pages) pages = 1;
-    const fetchClosed = Rx.Observable.fromPromise(this.getClosedMerchant(url, pages));
-    const observables = obj => Rx.Observable.forkJoin([ 
-      this.fetchMarchant(obj)
-    //, this.fetchImages(obj) 
-    ]);
+    const fetchClosed = 
+      fromPromise(this.getClosedMerchant(url, pages));
     return fetchClosed
-      .flatMap(observables)
-      .map(objs => objs[0])
+      .flatMap(this.fetchMarchant.bind(this))
     ;
   }
 
   fetchClosedSellers({ url, pages }) {
     if(!pages) pages = 1;
-    const fetchClosed = Rx.Observable.fromPromise(this.getClosedSellers(url, pages));
-    const observables = obj => Rx.Observable.forkJoin([ 
-      this.fetchMarchant(obj)
-    //, this.fetchImages(obj) 
-    ]);
+    const fetchClosed = 
+      fromPromise(this.getClosedSellers(url, pages));
     return fetchClosed
-      .flatMap(observables)
-      .map(objs => objs[0])
+      .flatMap(this.fetchMarchant.bind(this))
     ;
   }
 
   fetchHtml({ url }) {
-    const observable = Rx.Observable.fromPromise(this.getHtml(url));
+    const observable = fromPromise(this.getHtml(url));
     return observable;
   }
 
@@ -637,7 +635,7 @@ class Yahoo {
     const setPerformances = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
     const setItems        = (_note, objs) => R.merge(_note, { item: objs });
     const promises        = R.map(url => this.getHtml(url));
-    const observable      = urls => Rx.Observable.forkJoin(promises(urls));
+    const observable      = urls => forkJoin(promises(urls));
     return observable(setUrls(note.item))
       .map(objs => setMarkets(note.item, objs))
       .map(objs => setPerformances(note.item, objs))
@@ -648,10 +646,10 @@ class Yahoo {
   fetchRss({ url }) {
     let _note;
     const setItems = (note, item) => R.merge(note.rss.channel, { item });
-    const fetchRss = obj => Rx.Observable.fromPromise(this.getRss(obj));
-    const fetchXml = obj => Rx.Observable.fromPromise(this.getXmlNote(obj.body));
+    const fetchRss = obj => fromPromise(this.getRss(obj));
+    const fetchXml = obj => fromPromise(this.getXmlNote(obj.body));
     const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
-    const fetchItm = obj => Rx.Observable.forkJoin(promises(obj));
+    const fetchItm = obj => forkJoin(promises(obj));
     return fetchRss(url)
       .flatMap(fetchXml)
       .map(obj => _note = obj)
@@ -668,7 +666,7 @@ class Yahoo {
   }
 
   fetchAuthSupport() {
-    return Rx.Observable.fromPromise(this.getAuthSupport());
+    return fromPromise(this.getAuthSupport());
   }
 
   /**
@@ -680,7 +678,7 @@ class Yahoo {
   }
 
   fetchAuthJwks() {
-    return Rx.Observable.fromPromise(this.getAuthJwks());
+    return fromPromise(this.getAuthJwks());
   }
 
   /**
@@ -692,7 +690,7 @@ class Yahoo {
   }
 
   fetchAuthPublicKeys() {
-    return Rx.Observable.fromPromise(this.getAuthPublickeys())
+    return fromPromise(this.getAuthPublickeys())
       .map(obj => obj[client.keyid]);
   }
 
@@ -714,7 +712,7 @@ class Yahoo {
     query['code'] = code;
     auth['client_id'] = this.access_key;
     auth['client_secret'] = this.secret_key;
-    return Rx.Observable.fromPromise(this.getAccessToken(query, auth))
+    return fromPromise(this.getAccessToken(query, auth))
       .map(obj => {
         const newToken = {
           code:             code
@@ -739,7 +737,7 @@ class Yahoo {
     query['refresh_token'] = code;
     auth['client_id'] = this.access_key;
     auth['client_secret'] = this.secret_key;
-    return Rx.Observable.fromPromise(this.getAccessToken(query, auth))
+    return fromPromise(this.getAccessToken(query, auth))
       .map(obj => {
         const newToken = {
           code:             code

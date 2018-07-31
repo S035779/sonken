@@ -25,53 +25,58 @@ if (node_env === 'production') {
   log.config('file', 'json', displayName, 'INFO');
 }
 
-const request = (api, { user, id }) => {
-  const url = api.toString();
-  const path = R.split('/', api.pathname);
-  const operation = api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
-  //log.debug(displayName, operation, user, id, url);
+const request = (operation, { url, user, id, items }) => {
+  //log.debug(displayName, operation, user, id, url, items);
   switch(operation) {
     case 'search':
     case 'seller':
       return yahoo.fetchHtml({ url })
-        .map(     obj => ({ updated: new Date(), items: obj.item }))
-        .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
+        .map(obj => ({ updated: new Date(), items: obj.item }))
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
     case 'closedsearch':
       return yahoo.fetchClosedMerchant({ url, pages })
-        .map(     obj => ({ updated: new Date(), items: obj.item }))
-        .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
+        .map(obj => ({ updated: new Date(), items: obj.item }))
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
     case 'closedsellers':
       return yahoo.fetchClosedSellers({ url, pages })
-        .map(     obj => ({ updated: new Date(), items: obj.item }))
-        .flatMap( obj => feed.updateHtml({ user, id, html: obj }));
+        .map(obj => ({ updated: new Date(), items: obj.item }))
+        .flatMap(obj => feed.updateHtml({ user, id, html: obj }));
     case 'rss':
       return yahoo.fetchRss({ url })
-        .map(     obj => ({ updated: new Date() , items: obj.item }))
-        .flatMap( obj => feed.updateRss({ user, id, rss: obj }));
+        .map(obj => ({ updated: new Date() , items: obj.item }))
+        .flatMap(obj => feed.updateRss({ user, id, rss: obj }));
+    case 'images':
+      return yahoo.fetchImages({ items });
     default:
       return null;
   }
 };
 
-const worker = ({ user, id, api, options }, callback) => {
-  const _api = std.parse_url(api);
-  const search = options ? R.merge(_api.search, options) : _api.search;
-  _api.search  = std.parse_query(search).toString();
-  const observable = request(_api, { user, id });
-  if(observable) observable.subscribe(
-      obj => log.info('[JOB]', 'data parse is proceeding...')
-    , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
-    , ()  => callback());
+const worker = ({ user, id, url, items }, callback) => {
+  const api = std.parse_url(url);
+  const path = R.split('/', api.pathname);
+  const isClosedSellers = api.pathname === '/jp/show/rating';
+  const operation = isClosedSellers ? 'closedsellers' : path[1];
+  const fetchAuction = request(operation, { url, user, id });
+  const fetchImages  = request('images', { items });
+  if(fetchAuction) {
+    fetchAuction
+      .flatMap(fetchImages)
+      .subscribe(
+        obj => log.info('[JOB]', 'data parse is proceeding...')
+      , err => log.error('[JOB]', err.name, ':', err.message, ':', err.stack)
+      , ()  => callback()
+      );
+  } 
 };
 
 const main = () => {
   const queue = async.queue(worker, 1);
   queue.drain = () => log.info('[JOB]', 'Completed to work.');
-
   process.on('message', task => {
     //log.debug('[JOB]', 'got message. pid:', process.pid);
     if(task) queue.push(task, err => {
-      if(err) log.error('[JOB]', err.name, ':', err.message, ':', err.stack);
+      if(err) log.error('[JOB]', err.name, ':', err.message);
       log.info('[JOB]', 'finished work. pid:', process.pid);
     });
   });
