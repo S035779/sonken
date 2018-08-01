@@ -24,7 +24,7 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','mail connected.'));
 db.on('close', () => log.info( '[MDB]','mail disconnected.'));
 db.on('error', () => log.error('[MDB]','mail connection error.'));
-db.openUri(mdb_url + '/mail');
+db.openUri(mdb_url + '/mail', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'mail terminated.')));

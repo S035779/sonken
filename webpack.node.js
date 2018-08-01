@@ -33,6 +33,7 @@ var node = {
   , __filename: true
   }
 , externals: [ nodeExternals() ]
+, devtool: 'inline-source-map'
 , mode: 'none'
 };
 module.exports = merge(common, node);

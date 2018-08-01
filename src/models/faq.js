@@ -22,7 +22,7 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','faq connected.'));
 db.on('close', () => log.info( '[MDB]','faq disconnected.'));
 db.on('error', () => log.error('[MDB]','faq connection error.'));
-db.openUri(mdb_url + '/faq');
+db.openUri(mdb_url + '/faq', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'faq terminated.')));

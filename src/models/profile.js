@@ -48,7 +48,7 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','profile connected.'));
 db.on('close', () => log.info( '[MDB]','profile disconnected.'));
 db.on('error', () => log.error('[MDB]','profile connection error.'));
-db.openUri(mdb_url + '/profile');
+db.openUri(mdb_url + '/profile', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'profile terminated.')));

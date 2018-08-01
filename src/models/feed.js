@@ -119,7 +119,7 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( '[MDB]','feed connected.'));
 db.on('close', () => log.info( '[MDB]','feed disconnected.'));
 db.on('error', () => log.error('[MDB]','feed connection error.'));
-db.openUri(mdb_url + '/feed');
+db.openUri(mdb_url + '/feed', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info('[MDB]', 'feed terminated.')));
