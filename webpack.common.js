@@ -18,9 +18,9 @@ var common = {
   },
   resolve: {
     alias: {
-      Main:       path.resolve(__dirname, 'src/'          ),
-      Assets:     path.resolve(__dirname, 'src/assets/'   ),
-      Utilities:  path.resolve(__dirname, 'src/utils/'    ),
+      Main:       path.resolve(__dirname, 'src'           ),
+      Assets:     path.resolve(__dirname, 'src/assets'    ),
+      Utilities:  path.resolve(__dirname, 'src/utils'     ),
       Stores:     path.resolve(__dirname, 'src/stores'    ),
       Actions:    path.resolve(__dirname, 'src/actions'   ),
       Components: path.resolve(__dirname, 'src/components'),

@@ -44,14 +44,15 @@ const adminSchema = new mongoose.Schema({
 }, { collection: 'admin' });
 adminSchema.index({ appname: 1 }, { unique: true });
 
+const displayName = '[MDB]';
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','profile connected.'));
-db.on('close', () => log.info( '[MDB]','profile disconnected.'));
-db.on('error', () => log.error('[MDB]','profile connection error.'));
+db.on('open',  () => log.info( displayName,'profile connected.'));
+db.on('close', () => log.info( displayName,'profile disconnected.'));
+db.on('error', () => log.error(displayName,'profile connection error.'));
 db.openUri(mdb_url + '/profile', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info('[MDB]', 'profile terminated.')));
+  mongoose.disconnect(() => log.info(displayName, 'profile terminated.')));
 export const User = db.model('User', userSchema);
 export const Approved = db.model('Approved', approvedSchema);
 export const Admin = db.model('Admin', adminSchema);

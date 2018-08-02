@@ -115,14 +115,15 @@ const listedSchema = new mongoose.Schema({
 }, { collection: 'listed' });
 listedSchema.index({ listed: 1 }, { unique: true });
 
+const displayName = '[MDB]';
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','feed connected.'));
-db.on('close', () => log.info( '[MDB]','feed disconnected.'));
-db.on('error', () => log.error('[MDB]','feed connection error.'));
+db.on('open',  () => log.info( displayName,'feed connected.'));
+db.on('close', () => log.info( displayName,'feed disconnected.'));
+db.on('error', () => log.error(displayName,'feed connection error.'));
 db.openUri(mdb_url + '/feed', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info('[MDB]', 'feed terminated.')));
+  mongoose.disconnect(() => log.info(displayName, 'feed terminated.')));
 export const Note     = db.model('Note',      noteSchema);
 export const Category = db.model('Category',  categorySchema);
 export const Added    = db.model('Added',     addedSchema);

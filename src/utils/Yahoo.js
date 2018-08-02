@@ -1,3 +1,4 @@
+import dotenv                 from 'dotenv';
 import path                   from 'path';
 import fs                     from 'fs';
 import * as R                 from 'ramda';
@@ -8,6 +9,11 @@ import { parseString }        from 'xml2js';
 import std                    from 'Utilities/stdutils';
 import net                    from 'Utilities/netutils';
 import { logs as log }        from 'Utilities/logutils';
+
+const config = dotenv.config();
+if(config.error) throw config.error();
+
+const STORAGE   = process.env.STORAGE || 'storage';
 
 //Yahoo! API
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
@@ -48,83 +54,56 @@ class Yahoo {
     switch(request) {
       case 'fetch/auth/support':
         return new Promise((resolve, reject) => {
-          net.get2(authurl, null, (status, header, body) => {
-            const result = JSON.parse(body)
-            if(head.status !== 200) {
-              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
-              return reject(new Error('Response Error!!'));
-            }
+          net.fetch(authurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+            if(err) return reject(err);
             const response = {
-              authApi: result.authorization_endpoint
-            , toknApi: result.token_endpoint
-            , userApi: result.userinfo_endpoint
-            , jwksApi: result.jwks_uri
-            , support: result.response_types_supported
+              authApi: body.authorization_endpoint
+            , toknApi: body.token_endpoint
+            , userApi: body.userinfo_endpoint
+            , jwksApi: body.jwks_uri
+            , support: body.response_types_supported
             };
             resolve(response);
           });
         });
       case 'fetch/auth/jwks':
         return new Promise((resolve, reject) => {
-          net.get2(jwksurl, null, (status, header, body) => {
-            const result = JSON.parse(body);
-            if(head.status !== 200) {
-              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
-              return reject(new Error('Response Error!!'));
-            }
-            const kids = result.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
-            resolve(kids);
+          net.fetch(jwksurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+            if(err) return reject(err);
+            const response = body.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
+            resolve(response);
           });
         });
       case 'fetch/auth/publickeys':
         return new Promise((resolve, reject) => {
-          net.get2(keyurl, null, (status, header, body) => {
-            const result = JSON.parse(body);
-            if(head.status !== 200) {
-              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
-              return reject(new Error('Response Error!!'));
-            }
-            resolve(result);
+          net.fetch(keyurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+            if(err) return reject(err);
+            resolve(body);
           });
         });
       case 'fetch/accesstoken':
         return new Promise((resolve, reject) => {
-          net.post2(tokenurl + '?' + std.encodeFormData(options.query)
-          , { Authorization: 'Basic ' + std.atob(options.auth['client_id'] + ':' + request['client_secret']) }
-          , null, (status, header, body) => {
-            const result = JSON.parse(body);
-            if(head.status !== 200) {
-              this.errorAuth(std.merge({ request: uri, status, header }, { body: result }));
-              return reject(new Error('Response Error!!'));
-            }
-            resolve(result);
+          const search = options.query;
+          const auth = { user: options.auth['client_id'], pass: options.auth['client_secret'] };
+          net.fetch(tokenurl, { method: 'POST', type: 'NV', auth, search }, (err, head, body) => {
+            if(err) return reject(err);
+            resolve(body);
           });
         });
       case 'fetch/file':
-        //log.info(Yahoo.displayName, '[GET]', options.id, options.url);
+        //log.info(Yahoo.displayName, '[GET]', options.url);
         return new Promise((resolve, reject) => {
-          const { url, headers, id } = options;
-          net.fetch(url, { headers, method: 'GET' }, (err, head, body) => {
+          const { url, operator, filename } = options;
+          net.get(url, { operator, filename }, (err, head, body) => {
             if(err) return reject(err);
-            resolve({ name: id + '-' + Date.now(), body });
-          });
-        });
-      case 'write/file':
-        log.info(Yahoo.displayName, '[PUT]', options.name);
-        return new Promise((resolve, reject) => {
-          const { name, buffer } = options;
-          const filename = 
-            path.join(__dirname, '../storage', name + '.bin');
-          fs.writeFile(filename, buffer, 'binary', err => {
-            if(err) return reject(err);
-            resolve(filename);
+            console.log(body);
+            resolve(body);
           });
         });
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
-          parseString(options.xml, {
-            trim: true, explicitArray: false
-          , attrkey: 'attr', charkey: '_'
+          parseString(options.xml, { 
+            trim: true, explicitArray: false, attrkey: 'attr', charkey: '_' 
           }, (err, data) => {
             if(err) reject(err);
             resolve(data);
@@ -148,9 +127,8 @@ class Yahoo {
           const setItem = R.curry(_setItem);
           const newItem = obj =>
             R.compose( setItem(obj), R.last, R.split('>') );
-          parseString(options.xml.description, {
-            trim: true, explicitArray: false, strict: false
-          , attrkey: 'attr', charkey: '_'
+          parseString(options.xml.description, { 
+            trim: true, explicitArray: false, strict: false, attrkey: 'attr', charkey: '_' 
           }, (err, data) => {
             if(err) reject(err);
             resolve(newItem(data)(options.xml.description));
@@ -562,44 +540,29 @@ class Yahoo {
     return this.request('fetch/html', { url });
   }
   
-  getImage(id, url) {
-    return this.request('fetch/file', { url, id, headers: { encoding: null } });
-  }
-
-  putImage(name, buffer) {
-    return this.request('write/file', { name, buffer });
-  }
-
-  writeImages(images) {
-    const promises    = R.map(this.putImage.bind(this));
-    const observables = objs => forkJoin(promises(objs));
-    return observables(images);
+  getImage(auid,  url) {
+    const filename    = std.crypto_sha256(url, auid) + '.img';
+    const operator    = fs.createWriteStream(path.resolve(STORAGE, filename));
+    return this.request('fetch/file', { url, operator, filename });
   }
 
   fetchImage({ guid__, images }) {
     const getImage    = R.curry(this.getImage.bind(this))(guid__);
-    const promises    = R.map(obj => getImage(obj));
-    const observable  = forkJoin(promises(images));
-    return observable;
+    const promises    = R.map(getImage);
+    return forkJoin(promises(images));
   }
 
   fetchImages({ items }) {
-    const toFile    = obj => this.putImage(obj.name, obj.body);
-    const toFiles   = R.map(toFile);
-    const putFiles  = forkJoin(toFiles);
-    const getImage  = R.map(obj => this.fetchImage(obj));
-    const getImages = objs => forkJoin(getImage(objs));
-    const fromItems = of(items);
-    return fromItems.pipe(
-      flatMap(getImages)
+    const observable  = R.map(this.fetchImage.bind(this));
+    const observables = objs => forkJoin(observable(objs));
+    return of(items).pipe(
+      flatMap(observables)
     , tap(log.trace)
-    //, map(R.flatten)
-    //, flatMap(putFiles)
     );
   }
 
   fetchClosedMerchant({ url, pages }) {
-    if(!pages) pages = 1;
+    if(!pages) pages  = 1;
     const fetchClosed = from(this.getClosedMerchant(url, pages));
     return fetchClosed.pipe(
       flatMap(this.fetchMarchant.bind(this))
@@ -607,7 +570,7 @@ class Yahoo {
   }
 
   fetchClosedSellers({ url, pages }) {
-    if(!pages) pages = 1;
+    if(!pages) pages  = 1;
     const fetchClosed = from(this.getClosedSellers(url, pages));
     return fetchClosed.pipe(
       flatMap(this.fetchMarchant.bind(this))
@@ -615,12 +578,12 @@ class Yahoo {
   }
 
   fetchHtml({ url }) {
-    const observable = from(this.getHtml(url));
+    const observable  = from(this.getHtml(url));
     return observable;
   }
 
   fetchMarchant(note) {
-    const setUrl     = obj => {
+    const setUrl      = obj => {
       const api = std.parse_url(searchurl);
       api.searchParams.append('p', obj.title);
       return api.href;

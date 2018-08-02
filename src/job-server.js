@@ -36,7 +36,7 @@ if(node_env === 'production') {
 const feed        = FeedParser.of();
 const profile     = UserProfiler.of();
 const cpu_num     = os.cpus().length;
-const job         = path.join(__dirname, 'dist', 'wrk.node.js');
+const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
 
 let pids = [];
 let idx  = 0;
@@ -125,17 +125,17 @@ const main = () => {
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'send to request work.');
 
-  //std.invoke(() => fetchAunction(queue).subscribe(
-  //  obj => log.info(displayName, 'fetch notes is proceeding...')
-  //, err => log.error(displayName, err.name, err.message, err.stack)
-  //, ()  => log.info(displayName, 'Completed to fetch notes.')
-  //), 0, 1000 * 60 * monitorInterval);
+  std.invoke(() => fetchAuction(queue).subscribe(
+    obj => log.info(displayName, 'fetch notes is proceeding...')
+  , err => log.error(displayName, err.name, err.message, err.stack)
+  , ()  => log.info(displayName, 'Completed to fetch notes.')
+  ), 0, 1000 * 60 * monitorInterval);
 
   std.invoke(() => fetchImages(queue).subscribe(
     obj => log.info(displayName, 'fetch notes is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => log.info(displayName, 'Completed to fetch notes.')
-  ), 0, 1000 * 60 * monitorInterval);
+  ), 1000 * 60 * (monitorInterval / 2), 1000 * 60 * monitorInterval);
 };
 main();
 

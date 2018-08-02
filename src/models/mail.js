@@ -20,13 +20,14 @@ const selectedSchema = new mongoose.Schema({
 }, { collection: 'selected' });
 selectedSchema.index({ selected: 1 }, { unique: true });
 
+const displayName = '[MDB]';
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','mail connected.'));
-db.on('close', () => log.info( '[MDB]','mail disconnected.'));
-db.on('error', () => log.error('[MDB]','mail connection error.'));
+db.on('open',  () => log.info( displayName,'mail connected.'));
+db.on('close', () => log.info( displayName,'mail disconnected.'));
+db.on('error', () => log.error(displayName,'mail connection error.'));
 db.openUri(mdb_url + '/mail', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info('[MDB]', 'mail terminated.')));
+  mongoose.disconnect(() => log.info(displayName, 'mail terminated.')));
 export const Mail = db.model('Mail', mailSchema);
 export const Selected = db.model('Selected', selectedSchema);

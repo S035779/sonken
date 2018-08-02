@@ -1,16 +1,15 @@
 import AWS from 'aws-sdk';
 
-class AWS {
+class aws {
   constructor(props) {
-    this.props = { 
-      config: { 
-        apiVersion: '2016-06-27' 
-      , accessKeyId: ''
-      , secretAccessKeyId: ''
-      , region: 'ap-northeast-1'
-      , logger: console
-      }
-    };
+    this.props = ;
+    const config = new AWS.Config({ 
+      apiVersion: { rekognition: '2016-06-27', s3: '2006-03-01' } 
+    , accessKeyId: ''
+    , secretAccessKey: ''
+    , region: 'ap-northeast-1'
+    , logger: console
+    });
   }
 
   static of(props) {
@@ -62,5 +61,10 @@ class AWS {
   fetchLabel({ name }) {
     return this.getLabel(name);
   }
+
+  uploadStream() {
+    const pass = new stream.PassThrough();
+    const params = {  }
+  }
 };
-export default AWS;
+export default aws;

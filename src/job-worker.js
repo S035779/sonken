@@ -57,26 +57,25 @@ const request = (operation, { url, user, id, items }) => {
   }
 };
 
-const worker = ({ user, id, url, items }, callback) => {
-  if(items) {
-    const fetchImages = request('images', { items });
-    fetchImages.subscribe(
-        obj => log.info(displayName, 'image download is proceeding...')
-      , err => log.error(displayName, err.name, err.message, err.stack)
-      , ()  => callback()
-      );
-  } else {
+const worker = ({ url, user, id, items }, callback) => {
+  let operation = '';
+  let observable = null;
+  if(url) {
     const api = std.parse_url(url);
     const path = R.split('/', api.pathname);
     const isClosedSellers = api.pathname === '/jp/show/rating';
-    const operation = isClosedSellers ? 'closedsellers' : path[1];
-    const fetchAuction = request(operation, { url, user, id });
-    fetchAuction.subscribe(
-        obj => log.info(displayName, 'data parse is proceeding...')
-      , err => log.error(displayName, err.name, err.message, err.stack)
-      , ()  => callback()
-      );
+    operation  = isClosedSellers ? 'closedsellers' : path[1];
+    observable = request(operation, { url, user, id });
+  } else
+  if(items) {
+    operation  = 'images';
+    observable = request(operation, { items });
   }
+  if(observable) observable.subscribe(
+    obj => log.info(displayName, 'feed parse is proceeding...')
+  , err => log.error(displayName, err.name, err.message, err.stack)
+  , ()  => callback()
+  );
 };
 
 const main = () => {

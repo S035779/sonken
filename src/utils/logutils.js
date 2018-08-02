@@ -1,5 +1,5 @@
 import log4js from 'log4js';
-import std from './stdutils';
+import std    from './stdutils';
 
 /**
  * Log4js functions Object.
