@@ -1,11 +1,9 @@
-import React              from 'react';
-import { BrowserRouter, Switch }
-                          from 'react-router-dom';
-import { renderRoutes }   from 'react-router-config';
-import getRoutes          from 'Routes';
+import React                      from 'react';
+import { BrowserRouter, Switch }  from 'react-router-dom';
+import { renderRoutes }           from 'react-router-config';
+import getRoutes                  from 'Routes';
 
-import { MuiThemeProvider, createMuiTheme } 
-                          from '@material-ui/core/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette:{

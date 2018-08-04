@@ -1,18 +1,17 @@
-import dotenv           from 'dotenv';
-import * as R           from 'ramda';
+import dotenv                   from 'dotenv';
+import * as R                   from 'ramda';
 import { from, forkJoin, pipe } from 'rxjs';
-import { map, flatMap } from 'rxjs/operators';
-import { parseString }  from 'xml2js';
-import mongoose         from 'mongoose';
-import encoding         from 'encoding-japanese';
-import { Iconv }        from 'iconv';
-import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred
-  , Listed }            from 'Models/feed';
-import std              from 'Utilities/stdutils';
-import Amazon           from 'Utilities/Amazon';
-import Yahoo            from 'Utilities/Yahoo';
-import { logs as log }  from 'Utilities/logutils';
-import js2Csv           from 'Utilities/js2Csv';
+import { map, flatMap }         from 'rxjs/operators';
+import { parseString }          from 'xml2js';
+import mongoose                 from 'mongoose';
+import encoding                 from 'encoding-japanese';
+import { Iconv }                from 'iconv';
+import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } from 'Models/feed';
+import std                      from 'Utilities/stdutils';
+import Amazon                   from 'Utilities/Amazon';
+import Yahoo                    from 'Utilities/Yahoo';
+import log                      from 'Utilities/logutils';
+import js2Csv                   from 'Utilities/js2Csv';
 
 dotenv.config();
 const keyset = {

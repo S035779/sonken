@@ -9,7 +9,7 @@ import http                 from 'http';
 import express              from 'express';
 import proxy                from 'http-proxy-middleware';
 import serveStatic          from 'serve-static';
-import { logs as log }      from './utils/logutils';
+import log                  from './utils/logutils';
 
 const displayName = 'dev-server';
 const port = config.devServer.port || 8080;

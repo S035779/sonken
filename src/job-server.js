@@ -6,10 +6,10 @@ import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
 import async            from 'async';
-import std              from 'Utilities/stdutils';
-import { logs as log }  from 'Utilities/logutils';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
+import std              from 'Utilities/stdutils';
+import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();

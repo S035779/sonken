@@ -8,7 +8,7 @@ import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
-import { logs as log }  from 'Utilities/logutils';
+import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();

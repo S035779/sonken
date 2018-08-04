@@ -1,13 +1,12 @@
-import dotenv             from 'dotenv';
-import * as R             from 'ramda';
-import { from, forkJoin } from 'rxjs';
-import { map, flatMap }   from 'rxjs/operators';
-import { User, Approved, Admin }
-                          from 'Models/profile';
-import { Mail, Selected } from 'Models/mail';
-import std                from 'Utilities/stdutils';
-import Sendmail           from 'Utilities/Sendmail';
-import { logs as log }    from 'Utilities/logutils';
+import dotenv                     from 'dotenv';
+import * as R                     from 'ramda';
+import { from, forkJoin }         from 'rxjs';
+import { map, flatMap }           from 'rxjs/operators';
+import { User, Approved, Admin }  from 'Models/profile';
+import { Mail, Selected }         from 'Models/mail';
+import std                        from 'Utilities/stdutils';
+import Sendmail                   from 'Utilities/Sendmail';
+import log                        from 'Utilities/logutils';
 
 dotenv.config()
 const node_env    = process.env.NODE_ENV;

@@ -3,18 +3,21 @@ import path                   from 'path';
 import fs                     from 'fs';
 import * as R                 from 'ramda';
 import { from, forkJoin, of } from 'rxjs';
-import { map, flatMap, tap }  from 'rxjs/operators';
+import { map, flatMap, tap, toArray }  from 'rxjs/operators';
 import osmosis                from 'osmosis';
 import { parseString }        from 'xml2js';
 import std                    from 'Utilities/stdutils';
 import net                    from 'Utilities/netutils';
-import { logs as log }        from 'Utilities/logutils';
+import aws                    from 'Utilities/awsutils';
+import log                    from 'Utilities/logutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const STORAGE   = process.env.STORAGE || 'storage';
-
+const STORAGE         = process.env.STORAGE || 'storage';
+const AWS_ACCESS_KEY  = process.env.ACCESS_KEY;
+const AWS_SECRET_KEY  = process.env.SECRET_KEY;
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY };
 //Yahoo! API
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
@@ -40,12 +43,9 @@ class Yahoo {
   }
 
   static of(options) {
-    const access_key =
-      options && options.access_key ? options.access_key : '';
-    const secret_key =
-      options && options.secret_key ? options.secret_key : '';
-    const redirect_url =
-      options && options.redirect_url ? options.redirect_url : '';
+    const access_key = options && options.access_key ? options.access_key : '';
+    const secret_key = options && options.secret_key ? options.secret_key : '';
+    const redirect_url = options && options.redirect_url ? options.redirect_url : '';
     return new Yahoo(access_key, secret_key, redirect_url);
   }
 
@@ -54,7 +54,7 @@ class Yahoo {
     switch(request) {
       case 'fetch/auth/support':
         return new Promise((resolve, reject) => {
-          net.fetch(authurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+          net.fetch(authurl, { method: 'GET', type: 'NV' }, (err, body) => {
             if(err) return reject(err);
             const response = {
               authApi: body.authorization_endpoint
@@ -68,7 +68,7 @@ class Yahoo {
         });
       case 'fetch/auth/jwks':
         return new Promise((resolve, reject) => {
-          net.fetch(jwksurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+          net.fetch(jwksurl, { method: 'GET', type: 'NV' }, (err, body) => {
             if(err) return reject(err);
             const response = body.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
             resolve(response);
@@ -76,7 +76,7 @@ class Yahoo {
         });
       case 'fetch/auth/publickeys':
         return new Promise((resolve, reject) => {
-          net.fetch(keyurl, { method: 'GET', type: 'NV' }, (err, head, body) => {
+          net.fetch(keyurl, { method: 'GET', type: 'NV' }, (err, body) => {
             if(err) return reject(err);
             resolve(body);
           });
@@ -85,18 +85,17 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           const search = options.query;
           const auth = { user: options.auth['client_id'], pass: options.auth['client_secret'] };
-          net.fetch(tokenurl, { method: 'POST', type: 'NV', auth, search }, (err, head, body) => {
+          net.fetch(tokenurl, { method: 'POST', type: 'NV', auth, search }, (err, body) => {
             if(err) return reject(err);
             resolve(body);
           });
         });
       case 'fetch/file':
-        //log.info(Yahoo.displayName, '[GET]', options.url);
+        //log.info(Yahoo.displayName, '[File]', options.url);
         return new Promise((resolve, reject) => {
           const { url, operator, filename } = options;
-          net.get(url, { operator, filename }, (err, head, body) => {
+          net.get(url, { operator, filename }, (err, body) => {
             if(err) return reject(err);
-            console.log(body);
             resolve(body);
           });
         });
@@ -542,22 +541,20 @@ class Yahoo {
   
   getImage(auid,  url) {
     const filename    = std.crypto_sha256(url, auid) + '.img';
-    const operator    = fs.createWriteStream(path.resolve(STORAGE, filename));
+    //const operator    = fs.createWriteStream(path.resolve('storage', filename)); 
+    const operator    = aws.of(aws_keyset).createWriteStream(STORAGE, filename);
     return this.request('fetch/file', { url, operator, filename });
   }
 
   fetchImage({ guid__, images }) {
-    const getImage    = R.curry(this.getImage.bind(this))(guid__);
-    const promises    = R.map(getImage);
+    const promises    = R.map(obj => this.getImage(guid__, obj));
     return forkJoin(promises(images));
   }
 
   fetchImages({ items }) {
-    const observable  = R.map(this.fetchImage.bind(this));
-    const observables = objs => forkJoin(observable(objs));
-    return of(items).pipe(
-      flatMap(observables)
-    , tap(log.trace)
+    return from(items).pipe(
+      flatMap(this.fetchImage.bind(this))
+    , tap(log.trace.bind(this))
     );
   }
 

@@ -1,6 +1,6 @@
-import dotenv           from 'dotenv';
-import mongoose         from 'mongoose';
-import { logs as log }  from 'Utilities/logutils';
+import dotenv   from 'dotenv';
+import mongoose from 'mongoose';
+import log      from 'Utilities/logutils';
 
 dotenv.config();
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';

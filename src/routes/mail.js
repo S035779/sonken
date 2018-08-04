@@ -1,5 +1,5 @@
-import MailEditor     from 'Routes/MailEditor/MailEditor';
-import { logs as log }  from 'Utilities/logutils';
+import MailEditor from 'Routes/MailEditor/MailEditor';
+import log        from 'Utilities/logutils';
 
 const displayName = 'mail';
 const mail = MailEditor.of();

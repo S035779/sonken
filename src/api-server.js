@@ -7,11 +7,11 @@ import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import bodyParser       from 'body-parser';
-import { logs as log }  from 'Utilities/logutils';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
+import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();

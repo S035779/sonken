@@ -1,8 +1,8 @@
-import dotenv from 'dotenv';
+import dotenv         from 'dotenv';
 import { SMTPServer } from 'smtp-server';
-import fs from 'fs';
-import path from 'path';
-import { logs as log } from './utils/logutils';
+import fs             from 'fs';
+import path           from 'path';
+import log            from './utils/logutils';
 
 dotenv.config();
 const env = process.env.NODE_ENV || 'development';

@@ -1,10 +1,10 @@
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
-import { map }   from 'rxjs/operators';
+import { map }            from 'rxjs/operators';
 import mongoose           from 'mongoose';
 import { Faq, Posted }    from 'Models/faq';
 import std                from 'Utilities/stdutils';
-import { logs as log }    from 'Utilities/logutils';
+import log                from 'Utilities/logutils';
 
 /**
  * FaqEditor class.

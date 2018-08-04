@@ -1,6 +1,7 @@
-import net from 'Utilities/netutils';
-import xhr from 'Utilities/xhrutils';
-import std from 'Utilities/stdutils';
+import * as R from 'ramda';
+import net    from 'Utilities/netutils';
+import xhr    from 'Utilities/xhrutils';
+import std    from 'Utilities/stdutils';
 
 const api = process.env.API_URL;
 
@@ -17,301 +18,235 @@ export default {
         });
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
-          net.getJSON(
-            api + '/notes'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/notes', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
           });
         });
       case 'prefetch/categorys':
         return new Promise((resolve, reject) => {
-          net.getJSON(
-            api + '/categorys'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/categorys', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
           });
         });
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
-          net.getJSON(
-            api + '/traded'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/traded', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
           });
         });
       case 'prefetch/bided':
         return new Promise((resolve, reject) => {
-          net.getJSON(
-            api + '/bided'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch( api + '/bided', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
           });
         });
       case 'fetch/categorys':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/categorys'
-          , options
+          xhr.getJSON( api + '/categorys' , options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/notes'
-          , options
+          xhr.getJSON(api + '/notes', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/traded'
-          , options
+          xhr.getJSON(api + '/traded', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/bided'
-          , options
+          xhr.getJSON(api + '/bided', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'fetch/category':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/category'
-          , options
+          xhr.getJSON(api + '/category', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/category':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/category'
-          , options
+          xhr.putJSON(api + '/category', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/category':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/category'
-          , options
+          xhr.postJSON(api + '/category', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/category':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/category'
-          , options
+          xhr.deleteJSON(api + '/category', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       //case 'fetch/note':
       //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(
-      //      api + '/note'
-      //    , options
+      //    xhr.getJSON(api + '/note', options
       //    , obj => { resolve(obj); }
       //    , err => { reject(err); }
       //    );
       //  });
       case 'create/note':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/note'
-          , options
+          xhr.putJSON(api + '/note', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/note':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/note'
-          , options
+          xhr.postJSON(api + '/note', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/note'
-          , options
+          xhr.deleteJSON(api + '/note', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/added':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/added'
-          , options
+          xhr.putJSON(api + '/added', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/added':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/added'
-          , options
+          xhr.deleteJSON(api + '/added', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/deleted':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/deleted'
-          , options
+          xhr.putJSON(api + '/deleted', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/deleted':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/deleted'
-          , options
+          xhr.deleteJSON(api + '/deleted', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/readed':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/readed'
-          , options
+          xhr.putJSON(api + '/readed', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/readed':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/readed'
-          , options
+          xhr.deleteJSON(api + '/readed', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/traded':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/traded'
-          , options
+          xhr.putJSON(api + '/traded', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/traded':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/traded'
-          , options
+          xhr.deleteJSON(api + '/traded', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/bided':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/bided'
-          , options
+          xhr.putJSON(api + '/bided', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/bided':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/bided'
-          , options
+          xhr.deleteJSON(api + '/bided', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/starred':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/starred'
-          , options
+          xhr.putJSON(api + '/starred', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/starred':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/starred'
-          , options
+          xhr.deleteJSON(api + '/starred', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/listed':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/listed'
-          , options
+          xhr.putJSON(api + '/listed', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/listed':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/listed'
-          , options
+          xhr.deleteJSON(api + '/listed', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'upload/notes':
         return new Promise((resolve, reject) => {
-          xhr.putFile(
-            api + '/file'
-          , options
+          xhr.putFile(api + '/file', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'download/notes':
         return new Promise((resolve, reject) => {
-          xhr.getFile(
-            api + '/file'
-          , options
+          xhr.getFile(api + '/file', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'download/items':
         return new Promise((resolve, reject) => {
-          xhr.postFile(
-            api + '/file'
-          , options
+          xhr.postFile(api + '/file', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );

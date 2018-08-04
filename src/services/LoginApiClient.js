@@ -12,99 +12,77 @@ export default {
     switch(request) {
       case 'signin/authenticate':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/authenticate'
-          , options
+          xhr.postJSON(api + '/authenticate', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'signout/authenticate':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/authenticate'
-          , options
+          xhr.deleteJSON(api + '/authenticate', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'preference/fetch':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/preference'
-          , options
+          xhr.getJSON(api + '/preference', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'preference/update':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/preference'
-          , options
+          xhr.postJSON(api + '/preference', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'preference/create':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/preference'
-          , options
+          xhr.putJSON(api + '/preference', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       //case 'preference/delete':
       //  return new Promise((resolve, reject) => {
-      //    xhr.deleteJSON(
-      //      api + '/preference'
-      //    , options
+      //    xhr.deleteJSON(api + '/preference', options
       //    , obj => { resolve(obj); }
       //    , err => { reject(err); }
       //    );
       //  });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/login'
-          , options
+          xhr.getJSON(api + '/login', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/user':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/login'
-          , options
+          xhr.postJSON(api + '/login', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/user':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/login'
-          , options
+          xhr.putJSON(api + '/login', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/user':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/login'
-          , options
+          xhr.deleteJSON(api + '/login', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'inquiry/create':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/inquiry'
-          , options
+          xhr.putJSON(api + '/inquiry', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );

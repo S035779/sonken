@@ -3,10 +3,10 @@ import dotenv           from 'dotenv';
 import * as R           from 'ramda';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
+import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
 import std              from 'Utilities/stdutils';
-import { logs as log }  from 'Utilities/logutils';
-import FeedParser       from 'Routes/FeedParser/FeedParser';
+import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();

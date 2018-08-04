@@ -5,7 +5,7 @@ import std    from './stdutils';
  * Log4js functions Object.
  *
  */
-export const logs = {
+const logs = {
   app: '',
   cache: {},
   config: function(apd, lyt, nam, flv) {
@@ -74,6 +74,7 @@ export const logs = {
     log(this.app, 'DEBUG', cpu + ', ' + mem);
   }
 };
+export default logs;
 
 const lvls = { 
   'ALL':      'all'

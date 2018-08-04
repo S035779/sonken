@@ -4,7 +4,7 @@ import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
-import { logs as log }    from 'Utilities/logutils';
+import log                from 'Utilities/logutils';
 
 const baseurl = 'http://ecs.amazonaws.jp/onca/xml';
 const params = { Service: 'AWSECommerceService', Version: '2011-07-27' };
@@ -53,7 +53,7 @@ class Amazon {
         const signature = this.signature(query);
         const url = this.url(query, signature);
         return new Promise((resolve, reject) => {
-          net.get(url, null, (err, head, body) => {
+          net.get(url, null, (err, body) => {
             if(err) return reject(err.message);
             resolve(body);
           });

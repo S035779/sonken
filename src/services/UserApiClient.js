@@ -1,6 +1,7 @@
-import net from 'Utilities/netutils';
-import xhr from 'Utilities/xhrutils';
-import std from 'Utilities/stdutils';
+import * as R from 'ramda';
+import net    from 'Utilities/netutils';
+import xhr    from 'Utilities/xhrutils';
+import std    from 'Utilities/stdutils';
 
 const api = process.env.API_URL;
 
@@ -17,91 +18,87 @@ export default {
         });
       case 'prefetch/users':
         return new Promise((resolve, reject) => {
-          net.getJSON(
-            api + '/users'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/users', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
+          });
+        });
+      case 'prefetch/faqs/posted':
+        return new Promise((resolve, reject) => {
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/posted', params, (err, res) => {
+            if(err) return reject(err);
+            resolve(res);
+          });
+        });
+      case 'prefetch/mails':
+        return new Promise((resolve, reject) => {
+          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          net.fetch(api + '/mails', params, (err, res) => {
+            if(err) return reject(err);
             resolve(obj);
           });
         });
       case 'fetch/users':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/users'
-          , options
+          xhr.getJSON(api + '/users', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/user'
-          , options
+          xhr.getJSON(api + '/user', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/user':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/user'
-          , options
+          xhr.putJSON(api + '/user', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/user':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/user'
-          , options
+          xhr.postJSON(api + '/user', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/user':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/user'
-          , options
+          xhr.deleteJSON(api + '/user', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'sendmail/users':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/users'
-          , options
+          xhr.putJSON(api + '/users', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/approval':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/users'
-          , options
+          xhr.postJSON(api + '/users', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/approval':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/users'
-          , options
+          xhr.deleteJSON(api + '/users', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'prefetch/faqs':
         return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/faqs'
-          , options
+          net.getJSON2(api + '/faqs', options
           , (err, head, obj) => {
             if(err) reject(err);
             resolve(obj);
@@ -109,173 +106,119 @@ export default {
         });
       case 'fetch/faqs':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/faqs'
-          , options
+          xhr.getJSON(api + '/faqs', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
-      case 'prefetch/faqs/posted':
-        return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/posted'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
-          });
-        });
       case 'fetch/faqs/posted':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/posted'
-          , options
+          xhr.getJSON(api + '/posted', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       //case 'fetch/faq':
       //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(
-      //      api + '/faq'
-      //    , options
+      //    xhr.getJSON(api + '/faq', options
       //    , obj => { resolve(obj); }
       //    , err => { reject(err); }
       //    );
       //  });
       case 'create/faq':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/faq'
-          , options
+          xhr.putJSON(api + '/faq', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/faq':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/faq'
-          , options
+          xhr.postJSON(api + '/faq', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/faq':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/faq'
-          , options
+          xhr.deleteJSON(api + '/faq', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/posted':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/posted'
-          , options
+          xhr.putJSON(api + '/posted', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/posted':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/posted'
-          , options
+          xhr.deleteJSON(api + '/posted', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
-      case 'prefetch/mails':
-        return new Promise((resolve, reject) => {
-          net.getJSON2(
-            api + '/mails'
-          , options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
-          });
-        });
       case 'fetch/mails':
         return new Promise((resolve, reject) => {
-          xhr.getJSON(
-            api + '/mails'
-          , options
+          xhr.getJSON(api + '/mails', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       //case 'fetch/mail':
       //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(
-      //      api + '/mail'
-      //    , options
+      //    xhr.getJSON(api + '/mail', options
       //    , obj => { resolve(obj); }
       //    , err => { reject(err); }
       //    );
       //  });
       case 'create/mail':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/mail'
-          , options
+          xhr.putJSON(api + '/mail', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'update/mail':
         return new Promise((resolve, reject) => {
-          xhr.postJSON(
-            api + '/mail'
-          , options
+          xhr.postJSON(api + '/mail', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/mail':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/mail'
-          , options
+          xhr.deleteJSON(api + '/mail', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'create/selected':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(
-            api + '/selected'
-          , options
+          xhr.putJSON(api + '/selected', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'delete/selected':
         return new Promise((resolve, reject) => {
-          xhr.deleteJSON(
-            api + '/selected'
-          , options
+          xhr.deleteJSON(api + '/selected', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'upload/mail':
         return new Promise((resolve, reject) => {
-          xhr.putFile(
-            api + '/mails'
-          , options
+          xhr.putFile(api + '/mails', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
         });
       case 'upload/faq':
         return new Promise((resolve, reject) => {
-          xhr.putFile(
-            api + '/faqs'
-          , options
+          xhr.putFile(api + '/faqs', options
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
