@@ -17,13 +17,15 @@ if(config.error) throw config.error();
 const STORAGE         = process.env.STORAGE || 'storage';
 const AWS_ACCESS_KEY  = process.env.ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.SECRET_KEY;
-const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY };
-//Yahoo! API
+const AWS_REGION_NAME = process.env.REGION_NAME;
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+//Yahoo! Authenticate API
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
 const jwksurl   = baseurl + 'jwks';
 const keyurl    = baseurl + 'public-keys';
 const tokenurl  = baseurl + 'token';
+//Yahoo! Auction Search URL
 const searchurl = 'https://auctions.yahoo.co.jp/search/search';
 
 /**

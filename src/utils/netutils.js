@@ -37,7 +37,6 @@ const get = function(url, { search, operator, filename }, callback) {
       res.on('data', chunk => body += chunk);
     }
     res.on('end', () => {
-      if(operator) operator.close();
       const status = { name: `Status Code: ${res.statusCode}`, message: body, stack: res.headers };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
