@@ -14,11 +14,10 @@ import log                      from 'Utilities/logutils';
 import js2Csv                   from 'Utilities/js2Csv';
 
 dotenv.config();
-const keyset = {
-  access_key: process.env.ACCESS_KEY
-, secret_key: process.env.SECRET_KEY
-, associ_tag: process.env.ASSOCI_TAG
-};
+const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 
 /**
  * FeedPaser class.
@@ -1010,7 +1009,7 @@ export default class FeedParser {
     const setNote = obj => this._updateNote({ user, id, data: obj });
     const getNote = () => this.fetchNote({ user, id });
     return isAsin
-      ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN').pipe(
+      ? Amazon.of(amz_keyset).fetchItemLookup(data.asin, 'ASIN').pipe(
           map(setAmazonData)
         , flatMap(setNote)
         , flatMap(getNote)

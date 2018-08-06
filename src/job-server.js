@@ -66,9 +66,7 @@ const fetchAuction = queue => {
     const int = updatedInterval * 1000 * 60;
     return now - upd > int;
   };
-  const setQueue = obj => obj 
-    ? { user: obj.user, id: obj._id, url: obj.url } : null;
-  const exe = 1000 * executeInterval;
+  const setQueue = obj => obj ? { user: obj.user, id: obj._id, url: obj.url } : null;
   const setNote = objs => feed.fetchAllNotes({ users: objs });
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(R.filter(obj => obj.approved))
@@ -78,7 +76,7 @@ const fetchAuction = queue => {
     , map(R.filter(obj => obj.url !== ''))
     , map(R.filter(isOldItem))
     , map(R.map(setQueue))
-    , map(std.invokeMap(queuePush, 0, exe, null))
+    , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
 
@@ -95,7 +93,6 @@ const fetchImages = queue => {
     return now - upd > int;
   };
   const setQueue = obj => obj ? { items: obj.items } : null;
-  const exe = 1000 * executeInterval;
   const setNote = objs => feed.fetchAllNotes({ users: objs });
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(R.filter(obj => obj.approved))
@@ -105,7 +102,7 @@ const fetchImages = queue => {
     , map(R.filter(obj => obj.url !== ''))
     , map(R.filter(isOldItem))
     , map(R.map(setQueue))
-    , map(std.invokeMap(queuePush, 0, exe, null))
+    , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
 
@@ -126,16 +123,16 @@ const main = () => {
   queue.drain = () => log.info(displayName, 'send to request work.');
 
   std.invoke(() => fetchAuction(queue).subscribe(
-    obj => log.info(displayName, 'fetch notes is proceeding...')
+    obj => log.info(displayName, 'fetch auction is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'Completed to fetch notes.')
+  , ()  => log.info(displayName, 'Completed to fetch auction.')
   ), 0, 1000 * 60 * monitorInterval);
 
   std.invoke(() => fetchImages(queue).subscribe(
-    obj => log.info(displayName, 'fetch notes is proceeding...')
+    obj => log.info(displayName, 'fetch images is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'Completed to fetch notes.')
-  ), 1000 * 60 * (monitorInterval / 2), 1000 * 60 * monitorInterval);
+  , ()  => log.info(displayName, 'Completed to fetch images.')
+  ), 0, 1000 * 60 * monitorInterval);
 };
 main();
 

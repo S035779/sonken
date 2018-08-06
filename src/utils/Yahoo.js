@@ -1,23 +1,23 @@
-import dotenv                 from 'dotenv';
-import path                   from 'path';
-import fs                     from 'fs';
-import * as R                 from 'ramda';
-import { from, forkJoin, of } from 'rxjs';
-import { map, flatMap, tap, toArray }  from 'rxjs/operators';
-import osmosis                from 'osmosis';
-import { parseString }        from 'xml2js';
-import std                    from 'Utilities/stdutils';
-import net                    from 'Utilities/netutils';
-import aws                    from 'Utilities/awsutils';
-import log                    from 'Utilities/logutils';
+import dotenv             from 'dotenv';
+import path               from 'path';
+import fs                 from 'fs';
+import * as R             from 'ramda';
+import { from, forkJoin } from 'rxjs';
+import { map, flatMap }   from 'rxjs/operators';
+import osmosis            from 'osmosis';
+import { parseString }    from 'xml2js';
+import std                from 'Utilities/stdutils';
+import net                from 'Utilities/netutils';
+import aws                from 'Utilities/awsutils';
+import log                from 'Utilities/logutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
 
 const STORAGE         = process.env.STORAGE || 'storage';
-const AWS_ACCESS_KEY  = process.env.ACCESS_KEY;
-const AWS_SECRET_KEY  = process.env.SECRET_KEY;
-const AWS_REGION_NAME = process.env.REGION_NAME;
+const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
+const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
+const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 //Yahoo! Authenticate API
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
@@ -517,6 +517,22 @@ class Yahoo {
     }
   }
   
+  getAuthSupport() {
+    return request('fetch/auth/support', {});
+  }
+
+  getAuthJwks() {
+    return request('fetch/auth/jwls', {});
+  }
+
+  getAuthPublickeys() {
+    return request('fetch/auth/publickeys', {});
+  }
+
+  getAccessToken(query, auth) {
+    return request('fetch/accesstoken', { query, auth });
+  }
+
   getRss(url) {
     return this.request('fetch/file', { url });
   }
@@ -543,7 +559,7 @@ class Yahoo {
   
   getImage(auid,  url) {
     const filename    = std.crypto_sha256(url, auid) + '.img';
-    //const operator    = fs.createWriteStream(path.resolve('storage', filename)); 
+    //const operator    = fs.createWriteStream(path.resolve(STORAGE, filename)); 
     const operator    = aws.of(aws_keyset).createWriteStream(STORAGE, filename);
     return this.request('fetch/file', { url, operator, filename });
   }
@@ -556,7 +572,6 @@ class Yahoo {
   fetchImages({ items }) {
     return from(items).pipe(
       flatMap(this.fetchImage.bind(this))
-    , tap(log.trace.bind(this))
     );
   }
 
@@ -636,52 +651,18 @@ class Yahoo {
     );
   }
 
-  /**
-   * get result of the 'Yahoo! Auth Endpoints & support types.'.
-   *
-   */
-  getAuthSupport() {
-    return request('fetch/auth/support', {});
-  }
-
   fetchAuthSupport() {
     return from(this.getAuthSupport());
-  }
-
-  /**
-   * get result of the 'Yahoo! JWKs.'.
-   *
-   */
-  getAuthJwks() {
-    return request('fetch/auth/jwls', {});
   }
 
   fetchAuthJwks() {
     return from(this.getAuthJwks());
   }
 
-  /**
-   * get result of the 'Yahoo! Public Keys.'.
-   *
-   */
-  getAuthPublickeys() {
-    return request('fetch/auth/publickeys', {});
-  }
-
   fetchAuthPublicKeys() {
     return from(this.getAuthPublickeys()).pipe(
       map(obj => obj[client.keyid])
     );
-  }
-
-  /**
-   * get result of the 'Yahoo! Authorization.'.
-   *
-   * @param query {object} - http request query strings.
-   * @param auth {object} - http request auth strings.
-   */
-  getAccessToken(query, auth) {
-    return request('fetch/accesstoken', { query, auth });
   }
 
   createAuthToken({ code }) {
