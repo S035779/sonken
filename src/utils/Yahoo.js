@@ -10,6 +10,7 @@ import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import aws                from 'Utilities/awsutils';
 import log                from 'Utilities/logutils';
+import Amazon             from 'Utilities/Amazon';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
@@ -19,6 +20,10 @@ const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset      = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 //Yahoo! Authenticate API
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
@@ -575,11 +580,35 @@ class Yahoo {
     );
   }
 
+  fetchItemSearch(note) {
+    const setAsin   = (item, objs) => {
+      const _isId   = _obj  => R.find(_item => item.guid__ === _item.guid__)(_obj.item);
+      const isId    = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isId(_obj) : false;
+      const isIds   = R.filter(isId);
+      const getIds  = _objs => _objs.length > 0 ? { asins: _objs[0].item[0].asins } : { asins: [] };
+      const setIds  = _obj  => R.merge(item, _obj);
+      return R.compose(setId, getIds, isIds)(objs);
+    };
+    const setAsins  = (items, objs) => R.map(item => setAsin(item, objs), items);
+    const setItems  = (_note, objs) => R.map(_note, { item: objs });
+    const _setAsins = R.curry(setAsins)(note.item);
+    const _setItems = R.curry(setItems)(note);
+    const observables = R.map(obj => Amazon.of(amz_keyset).fetchItemSearch(obj.guid__, obj.categorys, 1));
+    const observable  = forkJoin(observables(note.item));
+    return observable.pipe(
+      map(R.tap(log.trace.bind(this)))
+    , map(_setAsins)
+    , map(_setItems)
+    , map(R.tap(log.trace.bind(this)))
+    );
+  }
+
   fetchClosedMerchant({ url, pages }) {
     if(!pages) pages  = 1;
     const fetchClosed = from(this.getClosedMerchant(url, pages));
     return fetchClosed.pipe(
       flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
@@ -588,6 +617,7 @@ class Yahoo {
     const fetchClosed = from(this.getClosedSellers(url, pages));
     return fetchClosed.pipe(
       flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 

@@ -213,11 +213,14 @@ const fetch = function(url, { method, header, search, auth, body, type }, callba
   } else if (body && typeof body === 'object' && type === 'JSON') {
     postType = 'application/json';
     postBody = JSON.stringify(body);
+  } else {
+    postType = 'text/plain; charset="UTF-8"';
+    postData = '';
   }
   const headers = R.merge({
     'Accept':           'application/json'
   , 'Accept-Language':  'ja_JP'
-  , 'Content-Length':   postBody ? 0 :  Buffer.byteLength(postBody) 
+  , 'Content-Length':   postBody ? Buffer.byteLength(postBody) : 0
   , 'Content-Type':     postType
   }, header);
   if(auth && auth.bearer) {

@@ -43,13 +43,11 @@ let idx  = 0;
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message', mes => log.info(displayName, 'got message.', mes));
-  cps.on('error', err => log.error(displayName, err.name, err.message));
-  cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
-  cps.on('exit', (code, signal) => 
-    log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
-  cps.on('close',  (code, signal) => 
-    log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
+  cps.on('message',            mes => log.info(displayName, 'got message.', mes));
+  cps.on('error',              err => log.error(displayName, err.name, err.message));
+  cps.on('disconnect',          () => log.info(displayName, 'worker disconnected.'));
+  cps.on('exit',    (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
+  cps.on('close',   (code, signal) => log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
   log.info(displayName, 'forked worker pid', ':', cps.pid);
   return cps;
 };
@@ -123,15 +121,15 @@ const main = () => {
   queue.drain = () => log.info(displayName, 'send to request work.');
 
   std.invoke(() => fetchAuction(queue).subscribe(
-    obj => log.info(displayName, 'fetch auction is proceeding...')
+    obj => log.trace(displayName, 'fetch auction request is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'Completed to fetch auction.')
+  , ()  => log.info(displayName, 'fetch auction request completed.')
   ), 0, 1000 * 60 * monitorInterval);
 
   std.invoke(() => fetchImages(queue).subscribe(
-    obj => log.info(displayName, 'fetch images is proceeding...')
+    obj => log.trace(displayName, 'fetch images request is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'Completed to fetch images.')
+  , ()  => log.info(displayName, 'fetch images request completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();

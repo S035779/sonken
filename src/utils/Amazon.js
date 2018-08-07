@@ -31,30 +31,19 @@ class Amazon {
   request(operation, options) {
     switch(operation) {
       case 'parse/xml':
-        const option = {
-          attrkey:          'root'
-          , charkey:        'sub'
-          , trim:           true
-          , explicitArray:  false
-        };
         return new Promise((resolve, reject) => {
-          xml2js.parseString(options.xml, option, (error, result) => {
+          xml2js.parseString(options.xml, { attrkey: 'root', charkey: 'sub', trim: true, explicitArray: false }
+          , (error, result) => {
             if(error) return reject(error);
             resolve(result);
           });
         });
       default:
-        options = Object.assign({}, params, options);
-        options['AssociateTag']   = this.associ_tag;
-        options['AWSAccessKeyId'] = this.access_key;
-        options['Operation']      = operation;
-        options['Timestamp']      = std.getTimeStamp();
-        const query = this.query(options);
-        const signature = this.signature(query);
-        const url = this.url(query, signature);
+        log.info(Amazon.displayName, 'Request', operation);
         return new Promise((resolve, reject) => {
-          net.get(url, null, (err, body) => {
-            if(err) return reject(err.message);
+          net.fetch(this.url(operation, options), { method: 'GET', type: 'NV' }, (err, body) => {
+            if(err) return reject(err);
+            log.trace(Amazon.displayName, 'Response', body);
             resolve(body);
           });
         });
@@ -107,8 +96,8 @@ class Amazon {
     );
   }
 
-  fetchItemList(keyword, page) {
-    return from(this.getItemList(keyword, page)).pipe(
+  fetchItemSearch(keyword, page) {
+    return from(this.getItemSearch(keyword, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
     );
@@ -242,11 +231,11 @@ class Amazon {
     return this.request('ItemSearch', options);
   }
 
-  getItemList(keyword, page) {
+  getItemSearch(keyword, page) {
     const options = {};
-    options['Keywords']       = keyword;
+    options['Keywords']       = this.setKeywords(keyword);
     options['ItemPage']       = page;
-    options['SearchIndex']    = 'All';
+    options['SearchIndex']    = this.searchIndex(keyword);
     options['ResponseGroup']  = 'Large';
     return this.request('ItemSearch', options);
   }
@@ -259,25 +248,173 @@ class Amazon {
     return this.request('ItemLookup', options);
   }
 
-  query(object) {
-    return std.urlencode_rfc3986(std.ksort(object));
+  query(operation, options) {
+    options = R.merge(params, options);
+    options['AssociateTag']   = this.associ_tag;
+    options['AWSAccessKeyId'] = this.access_key;
+    options['Operation']      = operation;
+    options['Timestamp']      = std.getTimeStamp();
+    return std.urlencode_rfc3986(std.ksort(options));
+  }
+
+  searchIndex(keyword) {
+    const searchIndex = {
+      All:                [
+        'オークション > アクセサリー、時計'
+      , 'オークション > ペット、生き物'
+      , 'オークション > チケット、金券、宿泊予約'
+      , 'オークション > コミック、アニメグッズ'
+      , 'オークション > 不動産'
+      , 'オークション > チャリティー'
+      , 'オークション > その他'
+      ]
+    , Apparel:            [
+        'オークション > ファッション > ブランド別'
+      , 'オークション > ファッション > レディースファッション'
+      , 'オークション > ファッション > レディースバッグ'
+      , 'オークション > ファッション > 女性和服、着物'
+      , 'オークション > ファッション > ファッション小物'
+      , 'オークション > ファッション > メンズファッション'
+      , 'オークション > ファッション > メンズバッグ'
+      , 'オークション > ファッション > 男性和服、着物'
+      , 'オークション > ファッション > 男女兼用バッグ'
+      , 'オークション > ファッション > ハンドメイド'
+      ]
+    , Automotive:         [
+        'オークション > 自動車、オートバイ'
+      ]
+    , Baby:               [
+        'オークション > ファッション > キッズ、ベビーファッション'
+      , 'オークション > ベビー用品'
+      ]
+    , Beauty:             [
+        'オークション > ビューティー、ヘルスケア > 香水、フレグランス'
+      , 'オークション > ビューティー、ヘルスケア > ネイルケア'
+      , 'オークション > ビューティー、ヘルスケア > リラクゼーショングッズ'
+      ]
+    , Blended:            ['']
+    , Books:              [
+        'オークション > 本、雑誌'
+      ]
+    , Classical:          [
+        'オークション > アンティーク、コレクション'
+      , 'オークション > タレントグッズ'
+      ]
+    , DVD:                [
+        'オークション > 映画、ビデオ > DVD'
+      , 'オークション > 映画、ビデオ > ブルーレイ'
+      , 'オークション > 映画、ビデオ > VCD'
+      , 'オークション > 映画、ビデオ > レーザーディスク'
+      ]
+    , Electronics:        [
+        'オークション > コンピュータ'
+      , 'オークション > 家電、AV、カメラ'
+      ]
+    , ForeignBooks:       ['']
+    , Grocery:            [
+        'オークション > 食品、飲料'
+      ]
+    , HealthPersonalCare: [
+        'オークション > ビューティー、ヘルスケア > コスメ、スキンケア'
+      , 'オークション > ビューティー、ヘルスケア > ヘアケア'
+      , 'オークション > ビューティー、ヘルスケア > ボディケア'
+      , 'オークション > ビューティー、ヘルスケア > オーラルケア'
+      , 'オークション > ビューティー、ヘルスケア > めがね、コンタクト'
+      , 'オークション > ビューティー、ヘルスケア > 看護、介護用品'
+      , 'オークション > ビューティー、ヘルスケア > 救急、衛生用品'
+      , 'オークション > ビューティー、ヘルスケア > 健康用品、健康器具'
+      , 'オークション > ビューティー、ヘルスケア > その他'
+      ]
+    , Hobbies:            [
+        'オークション > ホビー、カルチャー'
+      , 'オークション > 花、園芸'
+      ]
+    , HomeImprovement:    [
+        'オークション > 住まい、インテリア'
+      ]
+    , Jewelry:            [
+        'オークション > アクセサリー、時計 > ブランドアクセサリー'
+      , 'オークション > アクセサリー、時計 > 子ども用アクセサリー'
+      ]
+    , Kitchen:            [
+        'オークション > 住まい、インテリア > キッチン'
+      ]
+    , Music:              [
+        'オークション > 音楽 > 記念品、思い出の品'
+      ]
+    , MusicTracks:        [
+        'オークション > 音楽 > CD'
+      , 'オークション > 音楽 > レコード'
+      , 'オークション > 音楽 > カセットテープ'
+      , 'オークション > 音楽 > DVD'
+      , 'オークション > 音楽 > ブルーレイ'
+      , 'オークション > 音楽 > ビデオ'
+      , 'オークション > 音楽 > レーザーディスク'
+      ]
+    , OfficeProducts:     [
+        'オークション > 事務、店舗用品'
+      ]
+    , Shoes:              [
+        'オークション > ファッション > レディースシューズ'
+      , 'オークション > ファッション > メンズシューズ'
+      ]
+    , Software:           [
+        'オークション > コンピュータ > ソフトウエア'
+      ]
+    , SportingGoods:      [
+        'オークション > スポーツ、レジャー'
+      ]
+    , Toys:               [
+        'オークション > おもちゃ、ゲーム'
+      ]
+    , VHS:                [
+        'オークション > 映画、ビデオ > ビデオテープ'
+      ]
+    , Video:              [
+        'オークション > 映画、ビデオ > 映画関連グッズ'
+      ]
+    , VideoGames:         [
+        'オークション > おもちゃ、ゲーム > ゲーム > テレビゲーム'
+      , 'オークション > おもちゃ、ゲーム > ゲーム > アーケードゲーム'
+      ]
+    , Watches:            [
+        'オークション > アクセサリー、時計 > ブランド腕時計'
+      , 'オークション > アクセサリー、時計 > メンズ腕時計'
+      , 'オークション > アクセサリー、時計 > レディース腕時計'
+      , 'オークション > アクセサリー、時計 > ユニセックス腕時計'
+      , 'オークション > アクセサリー、時計 > キャラクター腕時計'
+      , 'オークション > アクセサリー、時計 > 懐中時計'
+      ]
+    };
+    const props     = obj => R.prop(obj, searchIndex);
+    const isCat     = obj => R.test(RegExp(obj), keyword);
+    const isCats    = obj => R.filter(isCat, props(obj))
+    const isIndex   = R.filter(isCats);
+    const setIndex  = R.compose(R.last, isIndex);
+    const keys      = R.keys(searchIndex);
+    return setIndex(keys);
+  }
+
+  setKeywords(keyword) {
+    return R.compose(
+      std.urlencode
+    , R.join(' ')
+    , R.slice(3, Infinity)
+    , R.split(' > ')
+    )(keyword);
   }
 
   signature(query) {
     const parsed_url = std.parse_url(baseurl);
-    const string = "GET\n"
-      + parsed_url.host + "\n"
-      + parsed_url.pathname + "\n"
-      + query;
+    const string = "GET\n" + parsed_url.host + "\n" + parsed_url.pathname + "\n" + query;
     return std.crypto_sha256(string, this.secret_key);
   }
 
-  url(query, signature) {
-    return baseurl
-      + '?' + query
-      + '&' + std.urlencode_rfc3986({ Signature: signature });
+  url(operation, request) {
+    const query = this.query(operation, request);
+    return baseurl + '?' + query + '&' + std.urlencode_rfc3986({ Signature: this.signature(query) });
   }
 
 };
-Amazon.displayName = 'amazon-api';
+Amazon.displayName = '[AMZ]';
 export default Amazon;

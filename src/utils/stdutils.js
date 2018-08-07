@@ -498,25 +498,6 @@ export default {
   },
 
   /**
-   * Encode the properties of an object as if they were name/value 
-   * pairs from an HTML form, 
-   * using application/x-www-form-urlencoded format
-   */
-  encodeFormData(data) {
-    if (!data) return "";
-    let pairs = [];
-    for(let name in data) {
-      if (!data.hasOwnProperty(name)) continue;
-      if (typeof data[name] === "function") continue;
-      let value = data[name].toString();
-      name = encodeURIComponent(name.replace(" ", "+"));
-      value = encodeURIComponent(value.replace(" ", "+"));
-      pairs.push(name + "=" + value);
-    }
-    return pairs.join('&');
-  },
-
-  /**
    * Decode an HTML form as if they were name/value pairs from 
    * the properties of an object, 
    * using application/x-www-form-urlencoded format↲
@@ -566,7 +547,7 @@ export default {
    * Generated a randam characters, using 'Math.random()' method.
    * $length: number of characters to be generated.
    */
-  makeRandInt(length) {
+  rndInteger(length) {
     const chars = '123456789';
     let str = '';
     for (let i = 0; i < length; ++i) {
@@ -635,12 +616,38 @@ export default {
    * @param {objct} obj - query parameter object.
    * @return {string}
    */
-  urlencode(obj) {
+  urlencode(data) {
+    let results = '';
+    if (data && typeof data === 'string') {
+      results = encodeURIComponent(data);
+    } else if(data && typeof data === 'object') {
+      let pairs = [];
+      for(let name in data) {
+        if (!data.hasOwnProperty(name)) continue;
+        if (typeof data[name] === "function") continue;
+        let value = data[name].toString();
+        name = encodeURIComponent(name);
+        value = encodeURIComponent(value);
+        pairs.push(name + "=" + value);
+      }
+      results = pairs.join('&');
+    } 
+    return results;
+  },
+
+  /**
+   * Function that return a character string encode 
+   * from Associative array object.
+   * 
+   * @param {objct} obj - query parameter object.
+   * @return {string}
+   */
+  urlencode_fake(data) {
     const keys = [];
-    for(let key in obj) {
-      if(obj.hasOwnProperty(key)) keys.push(key);
+    for(let key in data) {
+      if(data.hasOwnProperty(key)) keys.push(key);
     }
-    return keys.map((key, idx) => `${key}=${obj[key]}`)
+    return keys.map((key, idx) => `${key}=${data[key]}`)
       .map(pair => pair.replace(" ", "+"))
       .join('&');
   },
@@ -652,8 +659,8 @@ export default {
    * @param {objct} obj - query parameter object.
    * @return {string}
    */
-  urlencode_rfc3986(obj) {
-    return querystring.stringify(obj);
+  urlencode_rfc3986(data) {
+    return querystring.stringify(data);
   },
 
   /**

@@ -38,6 +38,7 @@ const itemSchema = new mongoose.Schema({
 , images:           Array
 , sale:             Number
 , sold:             Number
+, asins:            Array
 , pubDate:          { type: Date, default: Date.now() }
 });
 

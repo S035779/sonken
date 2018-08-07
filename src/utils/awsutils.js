@@ -2,7 +2,7 @@ import AWS              from 'aws-sdk';
 import stream           from 'stream';
 import log              from 'Utilities/logutils';
 
-class aws {
+class awsutils {
   constructor({ access_key, secret_key, region }) {
     const s3          = { 
       apiVersion: '2006-03-01' 
@@ -22,7 +22,7 @@ class aws {
   }
 
   static of(props) {
-    return new aws(props);
+    return new awsutils(props);
   }
 
   fetchText(bucket, filename) {
@@ -42,8 +42,8 @@ class aws {
     const params = { Bucket: bucket, Key: filename, Body: pass };
     const promise = this.s3.upload(params).promise();
     promise
-      .then(data => log.info(aws.displayName, '[UPLOAD]', data))
-      .catch(err => log.error(aws.displayName, err.name, err.message, err.stack));
+      //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
+      .catch(err => log.error(awsutils.displayName, err.name, err.message, err.stack));
     return pass;
   }
 
@@ -82,5 +82,5 @@ class aws {
     return promise;
   }
 };
-aws.displayName = 'aws';
-export default aws;
+awsutils.displayName = 'awsutils';
+export default awsutils;

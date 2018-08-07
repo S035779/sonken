@@ -32,7 +32,6 @@ const yahoo = Yahoo.of();
 const feed = FeedParser.of();
 
 const request = (operation, { url, user, id, items }) => {
-  //log.debug(displayName, operation, user, id, url, !!items);
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
@@ -72,25 +71,25 @@ const worker = ({ url, user, id, items }, callback) => {
     observable = request(operation, { items });
   }
   if(observable) observable.subscribe(
-    obj => log.info(displayName, 'feed parse is proceeding...')
-  , err => log.error(displayName, err.name, err.message, err.stack)
+    obj => log.trace(displayName, operation, 'is proceeding... pid:', process.pid)
+  , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
   , ()  => callback()
   );
 };
 
 const main = () => {
   const queue = async.queue(worker, 1);
-  queue.drain = () => log.info(displayName, 'Completed to work.');
+  queue.drain = () => log.info(displayName, 'completed to work.');
   process.on('message', task => {
-    //log.debug(displayName, 'got message. pid:', process.pid);
+    log.info(displayName, 'got message. pid:', process.pid);
     if(task) queue.push(task, err => {
-      if(err) log.error(displayName, err.name, err.message);
+      if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
       log.info(displayName, 'finished work. pid:', process.pid);
     });
   });
 
   process.on('disconnect', () => {
-    log.error(displayName, 'worker disconnected.')
+    log.error(displayName, 'worker disconnected. pid:', process.pid)
     shutdown(null, process.exit);
   });
 };
@@ -108,12 +107,12 @@ const shrink = promise => {
 };
 
 const message = (err, code, signal) => {
-  if(err) log.error(displayName, err.name, err.message, err.stack);
+  if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
   else    log.info(displayName, `worker exit. (s/c): ${signal || code}`);
 };
 
 const shutdown = (err, cbk) => {
-  if(err) log.error(displayName, err.name, err.message, err.stack);
+  if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
   log.info(displayName, 'worker terminated.');
   log.info(displayName, 'log4js #4 terminated.');
   log.close(() => cbk());
