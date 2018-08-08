@@ -18,7 +18,7 @@ export default {
         });
       case 'prefetch/notes':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/notes', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);
@@ -26,7 +26,7 @@ export default {
         });
       case 'prefetch/categorys':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/categorys', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);
@@ -34,7 +34,7 @@ export default {
         });
       case 'prefetch/traded':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/traded', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);
@@ -42,7 +42,7 @@ export default {
         });
       case 'prefetch/bided':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch( api + '/bided', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);

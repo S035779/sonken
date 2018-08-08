@@ -18,7 +18,7 @@ export default {
         });
       case 'prefetch/users':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/users', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);
@@ -26,7 +26,7 @@ export default {
         });
       case 'prefetch/faqs/posted':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/posted', params, (err, res) => {
             if(err) return reject(err);
             resolve(res);
@@ -34,7 +34,7 @@ export default {
         });
       case 'prefetch/mails':
         return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON' }, options);
+          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
           net.fetch(api + '/mails', params, (err, res) => {
             if(err) return reject(err);
             resolve(obj);

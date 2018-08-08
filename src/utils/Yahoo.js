@@ -61,7 +61,7 @@ class Yahoo {
     switch(request) {
       case 'fetch/auth/support':
         return new Promise((resolve, reject) => {
-          net.fetch(authurl, { method: 'GET', type: 'NV' }, (err, body) => {
+          net.fetch(authurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
             if(err) return reject(err);
             const response = {
               authApi: body.authorization_endpoint
@@ -75,7 +75,7 @@ class Yahoo {
         });
       case 'fetch/auth/jwks':
         return new Promise((resolve, reject) => {
-          net.fetch(jwksurl, { method: 'GET', type: 'NV' }, (err, body) => {
+          net.fetch(jwksurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
             if(err) return reject(err);
             const response = body.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
             resolve(response);
@@ -83,7 +83,7 @@ class Yahoo {
         });
       case 'fetch/auth/publickeys':
         return new Promise((resolve, reject) => {
-          net.fetch(keyurl, { method: 'GET', type: 'NV' }, (err, body) => {
+          net.fetch(keyurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
             if(err) return reject(err);
             resolve(body);
           });
@@ -92,7 +92,7 @@ class Yahoo {
         return new Promise((resolve, reject) => {
           const search = options.query;
           const auth = { user: options.auth['client_id'], pass: options.auth['client_secret'] };
-          net.fetch(tokenurl, { method: 'POST', type: 'NV', auth, search }, (err, body) => {
+          net.fetch(tokenurl, { method: 'POST', type: 'NV', accept: 'JSON', auth, search }, (err, body) => {
             if(err) return reject(err);
             resolve(body);
           });
@@ -593,7 +593,9 @@ class Yahoo {
     const setItems  = (_note, objs) => R.map(_note, { item: objs });
     const _setAsins = R.curry(setAsins)(note.item);
     const _setItems = R.curry(setItems)(note);
-    const observables = R.map(obj => Amazon.of(amz_keyset).fetchItemSearch(obj.guid__, obj.categorys, 1));
+    const amazon      = Amazon.of(amz_keyset);
+    const setKeywords = obj => R.compose(R.slice(3, Infinity), R.split(' > '))(obj.item_categorys);
+    const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categorys, 1));
     const observable  = forkJoin(observables(note.item));
     return observable.pipe(
       map(R.tap(log.trace.bind(this)))

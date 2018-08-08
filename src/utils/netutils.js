@@ -184,15 +184,18 @@ const get = function(url, { search, operator, filename }, callback) {
  * @param {object} options -
  * @param {function} callback -
  */
-const fetch = function(url, { method, header, search, auth, body, type }, callback) {  
-  const api = std.parse_url(url);
-  const hostname  = api.hostname;
-  const protocol  = api.protocol;
-  const port      = api.port || (protocol === 'https:' ? 443 : 80);
-  const query     = api.query;
-  let   path      = api.pathname;
-  let   postType  = null;
-  let   postBody  = null;
+const fetch = function(url, { method, header, search, auth, body, type, accept, parser }, callback) {  
+  const api           = std.parse_url(url);
+  const hostname      = api.hostname;
+  const protocol      = api.protocol;
+  const port          = api.port || (protocol === 'https:' ? 443 : 80);
+  const query         = api.query;
+  let   path          = api.pathname;
+  let   postType      = null;
+  let   postData      = null;
+  let   postLen       = null;
+  let   acceptType    = null;
+  let   acceptParser  = null;
   if(query) {
     path += '?' + query 
   } else if(search) {
@@ -200,27 +203,41 @@ const fetch = function(url, { method, header, search, auth, body, type }, callba
   }
   if (body && body instanceof Buffer) {
     postType = 'application/octet-stream';
-    postBody = body;
-  } else if (body && typeof body === 'string') {
-    postType = 'text/plain; charset="UTF-8"';
-    postBody = body;
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'string' && type === 'XML') {
     postType = 'Content-Type: application/xml; charset="UTF-8"';
-    postBody = body;
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
+  } else if (body && typeof body === 'string') {
+    postType = 'text/plain; charset="UTF-8"';
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'object' && type === 'NV') {
     postType = 'application/x-www-form-urlencoded';
-    postBody = std.urlencode_rfc3986(body);
+    postData = std.urlencode_rfc3986(body);
+    postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'object' && type === 'JSON') {
     postType = 'application/json';
-    postBody = JSON.stringify(body);
+    postData = JSON.stringify(body);
+    postLen  = Buffer.byteLength(postData);
   } else {
     postType = 'text/plain; charset="UTF-8"';
     postData = '';
+    postLen  = 0;
+  }
+  if(accept && accept === 'JSON') {
+    acceptType = 'application/json';
+    parser = JSON.parser;
+  } else if(accept && accept === 'XML') {
+    acceptType = 'application/xml; charset="UTF-8"';
+  } else {
+    acceptType = 'text/plain; charset="UTF-8"';
   }
   const headers = R.merge({
-    'Accept':           'application/json'
+    'Accept':           acceptType
   , 'Accept-Language':  'ja_JP'
-  , 'Content-Length':   postBody ? Buffer.byteLength(postBody) : 0
+  , 'Content-Length':   postLen
   , 'Content-Type':     postType
   }, header);
   if(auth && auth.bearer) {
@@ -234,7 +251,7 @@ const fetch = function(url, { method, header, search, auth, body, type }, callba
     res.setEncoding('utf8');
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
-      const response = JSON.parse(body);
+      const response = parser ? parser(body) : body;
       const status = { name: `Status Code: ${res.statusCode}`, message: response, stack: res.headers };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
@@ -250,7 +267,8 @@ const fetch = function(url, { method, header, search, auth, body, type }, callba
           callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          setTimeout(() =>  fetch(url, { method, header, search, auth, body, type }, callback), throttle());
+          setTimeout(() => 
+            fetch(url, { method, header, search, auth, body, type, accept }, callback), throttle());
           break;
         default:
           callback(status);
@@ -259,7 +277,7 @@ const fetch = function(url, { method, header, search, auth, body, type }, callba
     });
   });
   req.on('error', err => callback({ name: err.code, message: err.message }));
-  req.write(postBody);
+  req.write(postData);
   req.end();
 };
 
