@@ -5,7 +5,7 @@ import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
-import searchIndex        from 'Utilities/amztable';
+import searchIndex        from 'Utilities/amzindex';
 
 const baseurl = 'http://ecs.amazonaws.jp/onca/xml';
 const params = { Service: 'AWSECommerceService', Version: '2011-07-27' };
