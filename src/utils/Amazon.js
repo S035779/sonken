@@ -237,11 +237,11 @@ class Amazon {
     return this.request('ItemSearch', options);
   }
 
-  getItemSearch(keywords, category, page) {
+  getItemSearch(keywords, categoryid, page) {
     const options = {};
-    options['Keywords']       = this.setKeyword(keywords);
+    options['Keywords']       = this.setKeywords(keywords);
     options['ItemPage']       = page;
-    options['SearchIndex']    = this.setIndex(category);
+    options['SearchIndex']    = this.setSearchIndex(categoryid);
     options['ResponseGroup']  = 'Large';
     return this.request('ItemSearch', options);
   }
@@ -254,16 +254,17 @@ class Amazon {
     return this.request('ItemLookup', options);
   }
 
-  setIndex(category) {
-    const props     = obj => R.prop(obj, searchIndex);
-    const isCats    = key => R.contains(category, props(key))
-    const isIndex   = R.filter(isCats);
-    const setIndex  = R.compose(R.top, isIndex);
-    const keys      = R.keys(searchIndex);
+  setSearchIndex(categoryid) {
+    log.trace(Amazon.displayName, 'Index', categoryid);
+    const keys       = R.keys(searchIndex);
+    const values     = obj => R.prop(obj, searchIndex);
+    const isCategory = key => R.contains(categoryid, values(key))
+    const isIndex    = R.filter(isCategory);
+    const setIndex   = R.compose(R.top, isIndex); 
     return setIndex(keys);
   }
 
-  setKeyword(keywords) {
+  setKeywords(keywords) {
     let results = '';
     if(keywords && typeof keywords === 'string') {
       results = keywords;

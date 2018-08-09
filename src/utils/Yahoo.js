@@ -1,6 +1,5 @@
 import dotenv             from 'dotenv';
 import path               from 'path';
-import fs                 from 'fs';
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
@@ -8,7 +7,6 @@ import osmosis            from 'osmosis';
 import { parseString }    from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
-import aws                from 'Utilities/awsutils';
 import log                from 'Utilities/logutils';
 import Amazon             from 'Utilities/Amazon';
 
@@ -16,10 +14,6 @@ const config = dotenv.config();
 if(config.error) throw config.error();
 
 const STORAGE         = process.env.STORAGE || 'storage';
-const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
-const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
-const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
-const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
 const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
 const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
@@ -562,21 +556,21 @@ class Yahoo {
     return this.request('fetch/html', { url });
   }
   
-  getImage(auid,  url) {
-    const filename    = std.crypto_sha256(url, auid) + '.img';
-    //const operator    = fs.createWriteStream(path.resolve(STORAGE, filename)); 
-    const operator    = aws.of(aws_keyset).createWriteStream(STORAGE, filename);
+  getImage(operator, aid,  url) {
+    const filename    = std.crypto_sha256(url, aid) + '.img';
+    operator = operator(STORAGE, filename);
     return this.request('fetch/file', { url, operator, filename });
   }
 
-  fetchImage({ guid__, images }) {
-    const promises    = R.map(obj => this.getImage(guid__, obj));
+  fetchImage(operator, { guid__, images }) {
+    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
     return forkJoin(promises(images));
   }
 
-  fetchImages({ items }) {
+  fetchImages({ operator, items }) {
+    const getImage = obj => this.fetchImage(operator, obj);
     return from(items).pipe(
-      flatMap(this.fetchImage.bind(this))
+      flatMap(getImage)
     );
   }
 
@@ -593,9 +587,7 @@ class Yahoo {
     const setItems  = (_note, objs) => R.map(_note, { item: objs });
     const _setAsins = R.curry(setAsins)(note.item);
     const _setItems = R.curry(setItems)(note);
-    const amazon      = Amazon.of(amz_keyset);
-    const setKeywords = obj => R.compose(R.slice(3, Infinity), R.split(' > '))(obj.item_categorys);
-    const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categorys, 1));
+    const observables = R.map(obj => Amazon.of(amz_keyset).fetchItemSearch(obj.title, obj.item_categoryid, 1));
     const observable  = forkJoin(observables(note.item));
     return observable.pipe(
       map(R.tap(log.trace.bind(this)))

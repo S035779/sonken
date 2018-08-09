@@ -7,6 +7,8 @@ import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
 import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
+//import fs             from 'fs';
+import aws              from 'Utilities/awsutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -14,6 +16,10 @@ if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV      || 'development';
 const pages     = process.env.JOB_UPD_PAGES || 2;
+const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
+const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
+const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 process.env.NODE_PENDING_DEPRECATION=0;
 
 const displayName = '[JOB]';
@@ -31,10 +37,17 @@ if (node_env === 'production') {
 const yahoo = Yahoo.of();
 const feed = FeedParser.of();
 
+const createWriteStream = (storage, filename) => {
+  const operator = aws.of(aws_keyset).createWriteStream(storage, filename);
+  //const operator = fs.createWriteStream(path.resolve(storage, filename)); 
+  return operator;
+}
+
 const request = (operation, { url, user, id, items }) => {
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+  const operator = createWriteStream;
   switch(operation) {
     case 'search':
     case 'seller':
@@ -50,7 +63,7 @@ const request = (operation, { url, user, id, items }) => {
       return yahoo.fetchRss({ url })
         .pipe(map(setNote), flatMap(putRss));
     case 'images':
-      return yahoo.fetchImages({ items });
+      return yahoo.fetchImages({ items, operator });
     default:
       return null;
   }
