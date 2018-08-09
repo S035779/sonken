@@ -7,8 +7,8 @@ import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
 
-const baseurl = 'http://ecs.amazonaws.jp/onca/xml';
-const params = { Service: 'AWSECommerceService', Version: '2011-07-27' };
+const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
+const params = { Service: 'AWSECommerceService', Version: '2010-09-01' };
 
 /**
  * Amazon Api Client class.
@@ -255,12 +255,11 @@ class Amazon {
   }
 
   setSearchIndex(categoryid) {
-    log.trace(Amazon.displayName, 'Index', categoryid);
     const keys       = R.keys(searchIndex);
-    const values     = obj => R.prop(obj, searchIndex);
-    const isCategory = key => R.contains(categoryid, values(key))
+    const values     = key => R.prop(key, searchIndex);
+    const isCategory = key => R.contains(Number(categoryid), values(key));
     const isIndex    = R.filter(isCategory);
-    const setIndex   = R.compose(R.top, isIndex); 
+    const setIndex   = R.compose(R.head, isIndex);
     return setIndex(keys);
   }
 
@@ -286,14 +285,15 @@ class Amazon {
 
   url(operation, options) {
     options = R.merge(params, options);
-    options['AssociateTag']   = this.associ_tag;
     options['AWSAccessKeyId'] = this.access_key;
+    options['AssociateTag']   = this.associ_tag;
     options['Operation']      = operation;
     options['Timestamp']      = std.getTimeStamp();
-    log.trace(Amazon.displayName, 'Options', options);
     const query     = this.query(options);
     const signature = this.signature(query);
-    return baseurl + '?' + query + '&' + std.urlencode_rfc3986({ Signature: signature });
+    const url = baseurl + '?' + query + '&' + std.urlencode_rfc3986({ Signature: signature });
+    log.trace(Amazon.displayName, 'Url', url);
+    return url;
   }
 
 };
