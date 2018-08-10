@@ -5,7 +5,7 @@ import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, TextField, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
-import { Clear, ContentPaste } from '@material-ui/icons';
+import { Clear, Edit } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
