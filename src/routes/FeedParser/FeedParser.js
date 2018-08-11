@@ -1375,6 +1375,7 @@ export default class FeedParser {
   
   downloadItems({ user, ids, filter }) {
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
+    const setAsins = R.join(':', obj.asins);
     const _getItems = R.curry(this.filterItems)(filter);
     const getItems = R.filter(_getItems);
     const setItems = R.map(obj => ({
@@ -1408,6 +1409,7 @@ export default class FeedParser {
     , shipping:     obj.shipping
     , ship_price:   obj.ship_price
     , ship_buynow:  obj.ship_buynow
+    , asins:        setAsins(obj.asins)
     , date:         obj.pubDate
     }));
     const keys = [
@@ -1415,7 +1417,7 @@ export default class FeedParser {
     , 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown', 'seller', 'link'
     , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
     , 'offers', 'market', 'sale', 'sold'
-    , 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
+    , 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const observables = R.map(id => this.fetchNote({ user, id }));

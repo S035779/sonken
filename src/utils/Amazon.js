@@ -8,7 +8,7 @@ import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
-const params = { Service: 'AWSECommerceService', Version: '2010-09-01' };
+const params = { Service: 'AWSECommerceService', Version: '2013-08-01' };
 
 /**
  * Amazon Api Client class.
@@ -42,9 +42,9 @@ class Amazon {
       default:
         return new Promise((resolve, reject) => {
           net.fetch(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' }
-          , (err, body) => {
-            if(err) return reject(err);
-            resolve(body);
+          , (error, result) => {
+            if(error) return reject(error);
+            resolve(result);
           });
         });
     }
@@ -179,7 +179,7 @@ class Amazon {
   setItems(obj) {
     const items = obj.ItemSearchResponse.Items
     //log.trace('pages:', items.TotalPages, 'items:', items.TotalResults);
-    return items.Item;
+    return items;
   }
 
   setItem(obj) {
@@ -242,7 +242,7 @@ class Amazon {
     options['Keywords']       = this.setKeywords(keywords);
     options['ItemPage']       = page;
     options['SearchIndex']    = this.setSearchIndex(categoryid);
-    options['ResponseGroup']  = 'Large';
+    options['ResponseGroup']  = 'ItemAttributes,ItemIds';
     return this.request('ItemSearch', options);
   }
 
