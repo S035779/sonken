@@ -669,8 +669,9 @@ export default {
    * @param {string} string - string to be converted.
    * @param {string} secret_key - secret key string required for conversion.
    */
-  crypto_sha256(string, secret_key) {
-    return crypto.createHmac('sha256', secret_key).update(string).digest('hex');
+  crypto_sha256(string, secret_key, digest) {
+    if(!digest) digest = 'base64';
+    return crypto.createHmac('sha256', secret_key).update(string).digest(digest);
   },
 
   crypto_pbkdf2(pass, salt, length) {

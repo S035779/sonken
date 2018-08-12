@@ -13,19 +13,18 @@ import Amazon             from 'Utilities/Amazon';
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const STORAGE         = process.env.STORAGE || 'storage';
-const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
-const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
-const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
-const amz_keyset      = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
-//Yahoo! Authenticate API
+const STORAGE   = process.env.STORAGE || 'storage';
+const amazon    = Amazon.of({ 
+  access_key: process.env.AMZ_ACCESS_KEY
+, secret_key: process.env.AMZ_SECRET_KEY
+, associ_tag: process.env.AMZ_ASSOCI_TAG 
+});
+const searchurl = 'https://auctions.yahoo.co.jp/search/search';
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
 const jwksurl   = baseurl + 'jwks';
 const keyurl    = baseurl + 'public-keys';
 const tokenurl  = baseurl + 'token';
-//Yahoo! Auction Search URL
-const searchurl = 'https://auctions.yahoo.co.jp/search/search';
 
 /**
  * Yahoo Api Client class.
@@ -557,7 +556,7 @@ class Yahoo {
   }
   
   getImage(operator, aid,  url) {
-    const filename    = std.crypto_sha256(url, aid) + '.img';
+    const filename    = std.crypto_sha256(url, aid, 'hex') + '.img';
     operator = operator(STORAGE, filename);
     return this.request('fetch/file', { url, operator, filename });
   }
@@ -575,27 +574,28 @@ class Yahoo {
   }
 
   fetchItemSearch(note) {
-    const setAsin   = (item, objs) => {
-      const _isId   = _obj  => item.title === _obj.items.Request.ItemSearchRequest.Keywords 
+    const setAsin     = (item, objs) => {
+      const _isId     = _obj  => item.title === _obj.items.Request.ItemSearchRequest.Keywords 
         ? _obj.items.item : false;
-      const isId    = _obj  => _obj && _obj.items.Request.IsValid === 'True' ? _isId(_obj) : false;
-      const isIds   = R.filter(isId);
-      const setId   = _obj => R.map(_item => _item.ASIN, _obj.item);
-      const isTitle = _obj => _obj.title === item.title;
-      const filterId= _obj => R.filter(isTitle, _obj.item);
-      const getId   = R.compose(R.map(setId), R.map(filterId));
-      const getIds  = _objs => _objs.length > 0 ? { asins: getId(_objs) } : { asins: [] };
-      const setIds  = _obj  => R.merge(item, _obj);
+      const isId      = _obj  => _obj && _obj.items.Request.IsValid === 'True' ? _isId(_obj) : false;
+      const isIds     = R.filter(isId);
+      const setId     = _obj => R.map(_item => _item.ASIN, _obj.item);
+      const isTitle   = _obj => _obj.title === item.title;
+      const filterId  = _obj => R.filter(isTitle, _obj.item);
+      const getId     = R.compose(R.map(setId), R.map(filterId));
+      const getIds    = _objs => _objs.length > 0 ? { asins: getId(_objs) } : { asins: [] };
+      const setIds    = _obj  => R.merge(item, _obj);
       return R.compose(setId, getIds, isIds)(objs);
     };
-    const setAsins  = (items, objs) => R.map(item => setAsin(item, objs), items);
-    const _setAsins = R.curry(setAsins)(note.item);
-    const setItems  = (_note, objs) => R.merge(_note, { item: objs });
-    const _setItems = R.curry(setItems)(note);
-    const observables = R.map(obj => Amazon.of(amz_keyset).fetchItemSearch(obj.title, obj.item_categoryid, 1));
+    const setAsins    = (items, objs) => R.map(item => setAsin(item, objs), items);
+    const _setAsins   = R.curry(setAsins)(note.item);
+    const setItems    = (_note, objs) => R.merge(_note, { item: objs });
+    const _setItems   = R.curry(setItems)(note);
+    const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categoryid, 1));
     const observable  = forkJoin(observables(note.item));
     return observable.pipe(
-      map(_setAsins)
+      map(R.tap(log.trace.bind(this)))
+    , map(_setAsins)
     , map(_setItems)
     );
   }

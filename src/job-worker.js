@@ -22,7 +22,7 @@ const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 process.env.NODE_PENDING_DEPRECATION=0;
 
-const displayName = '[JOB]';
+const displayName = '[WRK]';
 
 if (node_env === 'development') {
   log.config('console', 'color', 'job-worker', 'TRACE');
@@ -51,17 +51,13 @@ const request = (operation, { url, user, id, items }) => {
   switch(operation) {
     case 'search':
     case 'seller':
-      return yahoo.fetchHtml({ url })
-        .pipe(map(setNote), flatMap(putHtml));
+      return yahoo.fetchHtml({ url }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsearch':
-      return yahoo.fetchClosedMerchant({ url, pages })
-        .pipe(map(setNote), flatMap(putHtml));
+      return yahoo.fetchClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsellers':
-      return yahoo.fetchClosedSellers({ url, pages })
-        .pipe(map(setNote), flatMap(putHtml));
+      return yahoo.fetchClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'rss':
-      return yahoo.fetchRss({ url })
-        .pipe(map(setNote), flatMap(putRss));
+      return yahoo.fetchRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':
       return yahoo.fetchImages({ items, operator });
     default:
@@ -78,8 +74,7 @@ const worker = ({ url, user, id, items }, callback) => {
     const isClosedSellers = api.pathname === '/jp/show/rating';
     operation  = isClosedSellers ? 'closedsellers' : path[1];
     observable = request(operation, { url, user, id });
-  } else
-  if(items) {
+  } else if(items) {
     operation  = 'images';
     observable = request(operation, { items });
   }

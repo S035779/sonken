@@ -12,6 +12,7 @@ var node = {
   , api: ['./api-server.js']
   , job: ['./job-server.js']
   , wrk: ['./job-worker.js']
+  , img: ['./img-server.js']
   }
 , optimization: {
     nodeEnv: false

@@ -26,6 +26,7 @@ class Amazon {
   }
 
   static of({ access_key, secret_key, associ_tag }) {
+    //log.debug(Amazon.displayName, 'Props', access_key, secret_key, associ_tag)
     return new Amazon(access_key, secret_key, associ_tag);
   }
 
@@ -273,14 +274,12 @@ class Amazon {
     return results;
   }
 
-  query(object) {
-    return std.urlencode_rfc3986(std.ksort(object));
-  }
-
   signature(query) {
     const parsed_url = std.parse_url(baseurl);
     const string = "GET\n" + parsed_url.host + "\n" + parsed_url.pathname + "\n" + query;
-    return std.crypto_sha256(string, this.secret_key);
+    log.trace(Amazon.displayName, 'String to Sign:', string);
+    //log.trace(Amazon.displayName, 'SecretKey:', this.secret_key);
+    return std.crypto_sha256(string, this.secret_key, 'base64');
   }
 
   url(operation, options) {
@@ -289,10 +288,13 @@ class Amazon {
     options['AssociateTag']   = this.associ_tag;
     options['Operation']      = operation;
     options['Timestamp']      = std.getTimeStamp();
-    const query     = this.query(options);
-    const signature = this.signature(query);
-    const url = baseurl + '?' + query + '&' + std.urlencode_rfc3986({ Signature: signature });
-    log.trace(Amazon.displayName, 'Url', url);
+    const canonical_query_string  = std.urlencode_rfc3986(std.ksort(options));
+    const signature = { Signature: this.signature(canonical_query_string) };
+    const url = baseurl 
+      + '?' + canonical_query_string 
+      + '&' + std.urlencode_rfc3986(signature);
+    log.trace(Amazon.displayName, 'Signed URL:', url, signature);
+    //log.trace(Amazon.displayName, 'AccessKey:', this.access_key, this.associ_tag);
     return url;
   }
 

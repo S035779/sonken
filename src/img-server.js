@@ -21,16 +21,16 @@ const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
 process.env.NODE_PENDING_DEPRECATION=0;
 
-const displayName = '[JOB]';
+const displayName = '[IMG]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'job-server', 'TRACE' );
+  log.config('console', 'color', 'img-server', 'TRACE' );
 } else
 if(node_env === 'staging') {
-  log.config('file',    'basic', 'job-server', 'DEBUG' );
+  log.config('file',    'basic', 'img-server', 'DEBUG' );
 } else
 if(node_env === 'production') {
-  log.config('file',    'json',  'job-server', 'INFO'  );
+  log.config('file',    'json',  'img-server', 'INFO'  );
 }
 
 const feed        = FeedParser.of();
@@ -64,7 +64,7 @@ const request = queue => {
     const int = updatedInterval * 1000 * 60;
     return now - upd > int;
   };
-  const setQueue = obj => obj ? { user: obj.user, id: obj._id, url: obj.url } : null;
+  const setQueue = obj => obj ? { items: obj.items } : null;
   const setNote = objs => feed.fetchAllNotes({ users: objs });
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(R.filter(obj => obj.approved))
@@ -90,14 +90,14 @@ const worker = (task, callback) => {
 };
 
 const main = () => {
-  log.info(displayName, 'start fetch auctions server.')
+  log.info(displayName, 'start fetch images server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'send to request fetch auctions.');
+  queue.drain = () => log.info(displayName, 'send to request fetch images.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.trace(displayName, 'fetch auctions is proceeding...')
+    obj => log.trace(displayName, 'fetch images request is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'fetch auctions completed.')
+  , ()  => log.info(displayName, 'fetch images request completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();

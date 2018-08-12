@@ -5,7 +5,7 @@ import std    from 'Utilities/stdutils';
 
 const min = 2000;
 const max = 5000;
-const throttle = () => Math.floor(Math.random() * (max +1 - min) +min);
+const throttle = () => Math.floor(Math.random() * (max + 1 - min) + min);
 
 /*
  * Simple HTTP GET request
@@ -19,25 +19,27 @@ const get = function(url, { search, operator, filename }, callback) {
   const hostname  = api.hostname;
   const protocol  = api.protocol;
   const port      = api.port || (protocol === 'https:' ? 443 : 80);
-  const query     = api.query;
+  const query     = api.search;
   let   path      = api.pathname;
   if (query) {
-    path += '?' + query;
+    path += query;
   } else if(search) {
     path += '?' + std.urlencode_rfc3986(search);
   }
-  const client    = protocol === 'https:' ? https : http;
-  const req = client.get({ hostname, port, path }, res => {
-    let body = '';
+  const client = protocol === 'https:' ? https : http;
+  const params = { hostname, port, path };
+  const req = client.get(params, res => {
+    let response = '';
     if(operator) {
       res.pipe(operator);
-      body = filename;
+      response = filename;
     } else {
       res.setEncoding('utf8');
-      res.on('data', chunk => body += chunk);
+      res.on('data', chunk => response += chunk);
     }
     res.on('end', () => {
-      const status = { name: `Status Code: ${res.statusCode}`, message: body, stack: res.headers };
+      const status 
+        = { name: `Status Code: ${res.statusCode}:[${url}]`, message: response, stack: res.headers };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
           callback(status);
@@ -52,7 +54,7 @@ const get = function(url, { search, operator, filename }, callback) {
           callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          setTimeout(() => get(url, { search, operator }, callback), throttle());
+          setTimeout(() => get(url, { search, operator, filename }, callback), throttle());
           break;
         default:
           callback(status);
@@ -189,7 +191,7 @@ const fetch = function(url, { method, header, search, auth, body, type, accept, 
   const hostname      = api.hostname;
   const protocol      = api.protocol;
   const port          = api.port || (protocol === 'https:' ? 443 : 80);
-  const query         = api.query;
+  const query         = api.search;
   let   path          = api.pathname;
   let   postType      = null;
   let   postData      = null;
@@ -197,7 +199,7 @@ const fetch = function(url, { method, header, search, auth, body, type, accept, 
   let   acceptType    = null;
   let   acceptParser  = null;
   if(query) {
-    path += '?' + query 
+    path += query 
   } else if(search) {
     path += '?' + std.urlencode_rfc3986(search);
   }
@@ -246,13 +248,15 @@ const fetch = function(url, { method, header, search, auth, body, type, accept, 
     headers['Authorization'] = 'Basic ' + std.encode_base64(auth.user + ':' + auth.pass);
   }
   const client = protocol === 'https:' ? https : http;
-  const req = client.request({ hostname, port, path, method, headers, auth }, res => {
-    let body = '';
+  const params = { hostname, port, path, method, headers, auth };
+  const req = client.request(params, res => {
+    let response = '';
     res.setEncoding('utf8');
-    res.on('data', chunk => body += chunk);
+    res.on('data', chunk => response += chunk);
     res.on('end', () => {
-      const response = parser ? parser(body) : body;
-      const status = { name: `Status Code: ${res.statusCode}`, message: response, stack: res.headers };
+      response = parser ? parser(response) : response;
+      const status 
+        = { name: `Status Code: ${res.statusCode}:[${url}]`, message: response, stack: params };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
           callback(status);
@@ -268,7 +272,7 @@ const fetch = function(url, { method, header, search, auth, body, type, accept, 
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           setTimeout(() => 
-            fetch(url, { method, header, search, auth, body, type, accept }, callback), throttle());
+            fetch(url, { method, header, search, auth, body, type, accept, parser }, callback), throttle());
           break;
         default:
           callback(status);
