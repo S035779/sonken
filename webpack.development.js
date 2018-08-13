@@ -12,7 +12,6 @@ var development = {
     , 'process.env.APP_NAME':  JSON.stringify('RSS Reader!!')
     })
   ]
-, devtool: 'inline-source-map'
 , devServer: {
     contentBase: './dist'
   , hot:  true

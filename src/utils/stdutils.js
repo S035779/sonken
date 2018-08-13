@@ -80,6 +80,24 @@ export default {
     console.info(date, '[INFO]', caller, '-', head, ':', message);
   },
 
+  logTime(caller, name, message) {
+    const date = color_code['FgMagenta']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset']
+      + name;
+    switch(name) {
+      case 'start':
+        console.time(caller);
+        break;
+      case 'stop':
+        console.timeEnd(caller);
+        break;
+      case 'log':
+        console.timeLog(caller, date, '[TIME]', caller, '-', head, ':', message);
+        break;
+    }
+  },
+
   is(type, obj) {
     const clas = Object.prototype.toString.call(obj).slice(8, -1);
     return obj !== undefined && obj !== null && clas === type;

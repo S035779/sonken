@@ -68,8 +68,8 @@
     to-fast-properties "^2.0.0"
 
 "@material-ui/core@^1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-1.4.3.tgz#e6bc29b441c07932cc64fffb02670792b119fb8e"
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-1.5.0.tgz#00884bb4139d98786d05a97803d19426d4afa55d"
   dependencies:
     "@babel/runtime" "7.0.0-beta.42"
     "@types/jss" "^9.5.3"
@@ -100,8 +100,8 @@
     warning "^4.0.1"
 
 "@material-ui/icons@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-2.0.1.tgz#1151cc66a3d41099de3ddaac33488e399d3425f0"
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-2.0.2.tgz#0150c38cda089ef284e9b4a730dfe6e88a0b5de6"
   dependencies:
     "@babel/runtime" "7.0.0-beta.42"
     recompose "^0.28.0"
@@ -4762,6 +4762,10 @@ progress@^2.0.0:
 promise-inflight@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
+
+promise-throttle@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/promise-throttle/-/promise-throttle-1.0.0.tgz#6ab608b743b20f6db2c8f8050108ac9d33bbb25c"
 
 promise@^7.1.1:
   version "7.3.1"

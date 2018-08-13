@@ -8,8 +8,6 @@ import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
-const params = { Service: 'AWSECommerceService', Version: '2013-08-01' };
-
 /**
  * Amazon Api Client class.
  *
@@ -41,13 +39,7 @@ class Amazon {
           });
         });
       default:
-        return new Promise((resolve, reject) => {
-          net.fetch(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' }
-          , (error, result) => {
-            if(error) return reject(error);
-            resolve(result);
-          });
-        });
+        return net.tfetch(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' });
     }
   }
 
@@ -275,26 +267,30 @@ class Amazon {
   }
 
   signature(query) {
-    const parsed_url = std.parse_url(baseurl);
-    const string = "GET\n" + parsed_url.host + "\n" + parsed_url.pathname + "\n" + query;
-    log.trace(Amazon.displayName, 'String to Sign:', string);
-    //log.trace(Amazon.displayName, 'SecretKey:', this.secret_key);
-    return std.crypto_sha256(string, this.secret_key, 'base64');
+    const url     = std.parse_url(baseurl);
+    const string  = "GET\n"
+      + url.host + "\n" + url.pathname + "\n"
+      + std.urlencode_rfc3986(query);
+    const result  = std.crypto_sha256(string, this.secret_key, 'base64');
+    //log.trace(Amazon.displayName, 'Query object:', query);
+    //log.trace(Amazon.displayName, 'Query string:', string);
+    //log.trace(Amazon.displayName, 'String to Sign:', result);
+    return result;
   }
 
   url(operation, options) {
-    options = R.merge(params, options);
+    options['Service']        = 'AWSECommerceService';
+    options['Version']        = '2013-08-01';
     options['AWSAccessKeyId'] = this.access_key;
     options['AssociateTag']   = this.associ_tag;
     options['Operation']      = operation;
     options['Timestamp']      = std.getTimeStamp();
-    const canonical_query_string  = std.urlencode_rfc3986(std.ksort(options));
-    const signature = { Signature: this.signature(canonical_query_string) };
-    const url = baseurl 
-      + '?' + canonical_query_string 
-      + '&' + std.urlencode_rfc3986(signature);
-    log.trace(Amazon.displayName, 'Signed URL:', url, signature);
-    //log.trace(Amazon.displayName, 'AccessKey:', this.access_key, this.associ_tag);
+    const params = std.ksort(options);
+    const signature = { Signature: this.signature(params) };
+    const url = baseurl + '?'
+      + std.urlencode_rfc3986(params)
+      + std.urlencode_rfc3986(signature);
+    //log.trace(Amazon.displayName, 'Signed URL:', url);
     return url;
   }
 
