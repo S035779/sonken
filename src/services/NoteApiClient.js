@@ -17,37 +17,17 @@ export default {
           setTimeout(() => resolve(isAuthenticated), 200);
         });
       case 'prefetch/notes':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/notes', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise(api + '/notes'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'prefetch/categorys':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/categorys', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise(api + '/categorys'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'prefetch/traded':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/traded', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise(api + '/traded'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'prefetch/bided':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch( api + '/bided', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise( api + '/bided'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'fetch/categorys':
         return new Promise((resolve, reject) => {
           xhr.getJSON( api + '/categorys' , options
@@ -104,13 +84,6 @@ export default {
           , err => { reject(err); }
           );
         });
-      //case 'fetch/note':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(api + '/note', options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
       case 'create/note':
         return new Promise((resolve, reject) => {
           xhr.putJSON(api + '/note', options
@@ -330,9 +303,6 @@ export default {
   /*
    * Note
    */
-  //fetchNote(user, id) {
-  //  return this.request('fetch/note', { user, id });
-  //},
   createNote(user, { url, category, categoryIds, title }) {
     if(!url) return this.request('not/url'
         , { name: 'Warning', message: 'Not Url Registory.' });

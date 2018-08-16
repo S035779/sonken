@@ -16,10 +16,6 @@ if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV      || 'development';
 const pages     = process.env.JOB_UPD_PAGES || 2;
-const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
-const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
-const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
-const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 process.env.NODE_PENDING_DEPRECATION=0;
 
 const displayName = '[WRK]';
@@ -36,9 +32,14 @@ if (node_env === 'production') {
 
 const yahoo = Yahoo.of();
 const feed = FeedParser.of();
+const Aws   = aws.of({ 
+  access_key: process.env.AWS_ACCESS_KEY
+, secret_key: process.env.AWS_SECRET_KEY
+, region:     process.env.AWS_REGION_NAME
+});
 
 const createWriteStream = (storage, filename) => {
-  const operator = aws.of(aws_keyset).createWriteStream(storage, filename);
+  const operator = Aws.createWriteStream(storage, filename);
   //const operator = fs.createWriteStream(path.resolve(storage, filename)); 
   return operator;
 }

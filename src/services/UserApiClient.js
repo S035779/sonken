@@ -17,29 +17,17 @@ export default {
           setTimeout(() => resolve(isAuthenticated), 200);
         });
       case 'prefetch/users':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/users', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise(api + '/users'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'prefetch/faqs/posted':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/posted', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(res);
-          });
-        });
+        return net.promise(api + '/posted'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'prefetch/mails':
-        return new Promise((resolve, reject) => {
-          const params = R.merge({ method: 'GET', type: 'JSON', accept: 'JSON' }, options);
-          net.fetch(api + '/mails', params, (err, res) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        return net.promise(api + '/mails'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
+      case 'prefetch/faqs':
+        return net.promise(api + '/faqs'
+        , R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
       case 'fetch/users':
         return new Promise((resolve, reject) => {
           xhr.getJSON(api + '/users', options
@@ -96,14 +84,6 @@ export default {
           , err => { reject(err); }
           );
         });
-      case 'prefetch/faqs':
-        return new Promise((resolve, reject) => {
-          net.getJSON2(api + '/faqs', options
-          , (err, head, obj) => {
-            if(err) reject(err);
-            resolve(obj);
-          });
-        });
       case 'fetch/faqs':
         return new Promise((resolve, reject) => {
           xhr.getJSON(api + '/faqs', options
@@ -118,13 +98,6 @@ export default {
           , err => { reject(err); }
           );
         });
-      //case 'fetch/faq':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(api + '/faq', options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
       case 'create/faq':
         return new Promise((resolve, reject) => {
           xhr.putJSON(api + '/faq', options
@@ -167,13 +140,6 @@ export default {
           , err => { reject(err); }
           );
         });
-      //case 'fetch/mail':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.getJSON(api + '/mail', options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
       case 'create/mail':
         return new Promise((resolve, reject) => {
           xhr.putJSON(api + '/mail', options
@@ -318,9 +284,6 @@ export default {
   /*
    *  Faq
    */
-  //fetchFaq(admin, id) {
-  //  return this.request('fetch/faq', { admin, id });
-  //},
   createFaq(admin) {
     return this.request('create/faq', { admin });
   },
@@ -360,9 +323,6 @@ export default {
   /*
    *  Mail
    */
-  //fetchMail(admin, id) {
-  //  return this.request('fetch/mail', { admin, id });
-  //},
   createMail(admin) {
     return this.request('create/mail', { admin });
   },

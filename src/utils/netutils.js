@@ -11,17 +11,7 @@ const promiseThrottle = new PromiseThrottle({
 , promiseImplementation: Promise 
 });
 
-const pget = (url, options) => {
-  return new Promise((resolve, reject) => {
-    get(url, options, (error, result) => {
-      if(error) return reject(error);
-      std.logDebug(displayName, 'GET', 'promise done.');
-      resolve(result);
-    });
-  });
-};
-
-const pfetch = (url, options) => {
+const promise = (url, options) => {
   return new Promise((resolve, reject) => {
     fetch(url, options, (error, result) => {
       if(error) return reject(error);
@@ -31,12 +21,8 @@ const pfetch = (url, options) => {
   });
 };
 
-const tget = (url, options) => {
-  return promiseThrottle.add(pget.bind(this, url, options));
-};
-
-const tfetch = (url, options) => {
-  return promiseThrottle.add(pfetch.bind(this, url, options));
+const throttle = (url, options) => {
+  return promiseThrottle.add(promise.bind(this, url, options));
 };
 
 const get = (url, { search, operator, filename }, callback) => {  
@@ -133,7 +119,6 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
   }
   if(accept && accept === 'JSON') {
     acceptType = 'application/json';
-    parser = JSON.parser;
   } else if(accept && accept === 'XML') {
     acceptType = 'application/xml; charset="UTF-8"';
   } else {
@@ -157,7 +142,11 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
     res.setEncoding('utf8');
     res.on('data', chunk => response += chunk);
     res.on('end', () => {
-      response = parser ? parser(response) : response;
+      response = accept === 'JSON' 
+        ? JSON.parser(response) 
+        : parser ? parser(response) : response;
+      console.log(postType, acceptType);
+      console.dir(response);
       const status 
         = { name: `Status Code: ${res.statusCode} / Request URL: ${url}`, message: response, stack: res.headers };
       switch (res.statusCode) {
@@ -187,4 +176,4 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
   req.end();
 };
 
-export default { pget, pfetch, tget, tfetch, fetch, get };
+export default { throttle, promise, fetch, get };

@@ -1,4 +1,3 @@
-import net from 'Utilities/netutils';
 import xhr from 'Utilities/xhrutils';
 import std from 'Utilities/stdutils';
 
@@ -45,13 +44,6 @@ export default {
           , err => { reject(err); }
           );
         });
-      //case 'preference/delete':
-      //  return new Promise((resolve, reject) => {
-      //    xhr.deleteJSON(api + '/preference', options
-      //    , obj => { resolve(obj); }
-      //    , err => { reject(err); }
-      //    );
-      //  });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
           xhr.getJSON(api + '/login', options

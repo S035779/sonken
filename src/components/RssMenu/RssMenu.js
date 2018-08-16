@@ -94,7 +94,7 @@ class RssMenu extends React.Component {
         </MenuItem>
         <MenuItem
           onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
-          <ListItemIcon><Settings /></ListItemIcon>
+          <ListItemIcon><SettingsEthernet /></ListItemIcon>
           Setting
         </MenuItem>
         <Divider />

@@ -24,11 +24,11 @@ class Amazon {
   }
 
   static of({ access_key, secret_key, associ_tag }) {
-    //log.debug(Amazon.displayName, 'Props', access_key, secret_key, associ_tag)
     return new Amazon(access_key, secret_key, associ_tag);
   }
 
   request(operation, options) {
+    //log.debug(Amazon.displayName, 'Props', options);
     switch(operation) {
       case 'parse/xml':
         return new Promise((resolve, reject) => {
@@ -38,8 +38,17 @@ class Amazon {
             resolve(result);
           });
         });
+      case 'BrowseNodeLookup':
+      case 'ItemSearch':
+      case 'ItemLookup':
+        return net.throttle(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' });
       default:
-        return net.tfetch(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' });
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            log.debug(this.url(operation, options));
+            resolve(options);
+          }, 200);
+        });
     }
   }
 
@@ -258,10 +267,11 @@ class Amazon {
 
   setKeywords(keywords) {
     let results = '';
+    const setSpace = R.replace(/\(|\)/g, ' ');
     if(keywords && typeof keywords === 'string') {
-      results = keywords;
+      results = setSpace(keywords);
     } else if(keywords && Array.isArray(keywords)) {
-      results = R.join(' ', keywords);
+      results = R.compose(R.join(' '), R.map(setSpace))(keywords);
     }
     return results;
   }
@@ -287,9 +297,9 @@ class Amazon {
     options['Timestamp']      = std.getTimeStamp();
     const params = std.ksort(options);
     const signature = { Signature: this.signature(params) };
-    const url = baseurl + '?'
-      + std.urlencode_rfc3986(params)
-      + std.urlencode_rfc3986(signature);
+    const url = baseurl
+      + '?' + std.urlencode_rfc3986(params)
+      + '&' + std.urlencode_rfc3986(signature);
     //log.trace(Amazon.displayName, 'Signed URL:', url);
     return url;
   }
