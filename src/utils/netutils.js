@@ -49,8 +49,11 @@ const get = (url, { search, operator, filename }, callback) => {
       res.on('data', chunk => response += chunk);
     }
     res.on('end', () => {
-      const status 
-        = { name: `Status Code: ${res.statusCode} / Request URL: ${url}`, message: response, stack: res.headers };
+      const status = {
+        name: `Status Code: ${res.statusCode} / Request URL: ${url}`
+      , message: response
+      , stack: res.headers 
+      };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
           callback(status);
@@ -142,13 +145,12 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
     res.setEncoding('utf8');
     res.on('data', chunk => response += chunk);
     res.on('end', () => {
-      response = accept === 'JSON' 
-        ? JSON.parser(response) 
-        : parser ? parser(response) : response;
-      console.log(postType, acceptType);
-      console.dir(response);
-      const status 
-        = { name: `Status Code: ${res.statusCode} / Request URL: ${url}`, message: response, stack: res.headers };
+      response = accept === 'JSON' ? JSON.parser(response) : parser ? parser(response) : response;
+      const status = { 
+        name: `Status Code: ${res.statusCode} / Request URL: ${url}`
+      , message: response
+      , stack: res.headers
+      };
       switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
           callback(status);

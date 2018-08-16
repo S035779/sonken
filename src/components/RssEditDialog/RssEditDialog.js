@@ -143,11 +143,8 @@ class RssEditDialog extends React.Component {
               </ListItemAvatar>
               <ListItemText primary={obj.subcategory}/>
               <ListItemSecondaryAction>
-                <IconButton
-                  onClick={this.handleChangeToggle
-                    .bind(this, 'openUpd', obj._id)}
-                >
-                  <ContentPaste className={classes.editIcon}/>
+                <IconButton onClick={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}>
+                  <Edit className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
                   open={openUpd.indexOf(obj._id) !== -1}

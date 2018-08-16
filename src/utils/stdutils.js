@@ -678,7 +678,7 @@ export default {
    * @return {string}
    */
   urlencode_rfc3986(data) {
-    return querystring.stringify(data);
+    return querystring.stringify(data).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16));
   },
 
   /**

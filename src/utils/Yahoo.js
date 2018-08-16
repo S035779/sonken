@@ -575,17 +575,23 @@ class Yahoo {
 
   fetchItemSearch(note) {
     const setAsin     = (item, objs) => {
-      const _isId     = _obj  => item.title === _obj.items.Request.ItemSearchRequest.Keywords 
-        ? _obj.items.item : false;
-      const isId      = _obj  => _obj && _obj.items.Request.IsValid === 'True' ? _isId(_obj) : false;
-      const isIds     = R.filter(isId);
-      const setId     = _obj => R.map(_item => _item.ASIN, _obj.item);
-      const isTitle   = _obj => _obj.title === item.title;
+      const setId     = _obj  => R.map(_item => _item.ASIN, _obj.item);
+      const isTitle   = _obj => _obj.itemAttributeis.title === item.title;
       const filterId  = _obj => R.filter(isTitle, _obj.item);
-      const getId     = R.compose(R.map(setId), R.map(filterId));
-      const getIds    = _objs => _objs.length > 0 ? { asins: getId(_objs) } : { asins: [] };
+      const getId     = R.compose(
+        R.map(setId)
+      , R.map(filterId)
+      );
       const setIds    = _obj  => R.merge(item, _obj);
-      return R.compose(setId, getIds, isIds)(objs);
+      const _isId     = _obj  => item.title === _obj.Request.ItemSearchRequest.Keywords ? _obj.item : false;
+      const isId      = _obj  => _obj && _obj.Request.IsValid === 'True' ? _isId(_obj) : false;
+      const getIds    = _objs => _objs.length > 0 ? { asins: getId(_objs) } : { asins: [] };
+      const isIds     = R.filter(isId);
+      return R.compose(
+        setIds
+      , getIds
+      , isIds
+      )(objs);
     };
     const setAsins    = (items, objs) => R.map(item => setAsin(item, objs), items);
     const _setAsins   = R.curry(setAsins)(note.item);
@@ -594,9 +600,9 @@ class Yahoo {
     const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categoryid, 1));
     const observable  = forkJoin(observables(note.item));
     return observable.pipe(
-      map(R.tap(log.trace.bind(this)))
-    , map(_setAsins)
+      map(_setAsins)
     , map(_setItems)
+    , map(R.tap(log.trace.bind(this)))
     );
   }
 

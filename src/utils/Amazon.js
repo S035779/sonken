@@ -267,11 +267,10 @@ class Amazon {
 
   setKeywords(keywords) {
     let results = '';
-    const setSpace = R.replace(/\(|\)/g, ' ');
     if(keywords && typeof keywords === 'string') {
-      results = setSpace(keywords);
+      results = keywords;
     } else if(keywords && Array.isArray(keywords)) {
-      results = R.compose(R.join(' '), R.map(setSpace))(keywords);
+      results = R.join(' ', keywords);
     }
     return results;
   }
