@@ -39,13 +39,6 @@ const tfetch = (url, options) => {
   return promiseThrottle.add(pfetch.bind(this, url, options));
 };
 
-/*
- * Simple HTTP GET request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
 const get = (url, { search, operator, filename }, callback) => {  
   const api       = std.parse_url(url);
   const hostname  = api.hostname;
@@ -97,13 +90,6 @@ const get = (url, { search, operator, filename }, callback) => {
   req.on('error', err => callback({ name: err.code, message: err.message }));
 };
 
-/*
- * HTTP/HTTPS request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
 const fetch = (url, { method, header, search, auth, body, type, accept, parser }, callback) => {  
   const api           = std.parse_url(url);
   const hostname      = api.hostname;
@@ -115,7 +101,6 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
   let   postData      = null;
   let   postLen       = null;
   let   acceptType    = null;
-  let   acceptParser  = null;
   if(query) {
     path += query 
   } else if(search) {
@@ -166,7 +151,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser }
     headers['Authorization'] = 'Basic ' + std.encode_base64(auth.user + ':' + auth.pass);
   }
   const client = protocol === 'https:' ? https : http;
-  const params = { hostname, port, path, method, headers, auth };
+  const params = { hostname, port, path, method, headers };
   const req = client.request(params, res => {
     let response = '';
     res.setEncoding('utf8');
