@@ -575,34 +575,30 @@ class Yahoo {
 
   fetchItemSearch(note) {
     const setAsin     = (item, objs) => {
-      const setId     = _obj  => R.map(_item => _item.ASIN, _obj.item);
-      const isTitle   = _obj => _obj.itemAttributeis.title === item.title;
-      const filterId  = _obj => R.filter(isTitle, _obj.item);
-      const getId     = R.compose(
-        R.map(setId)
-      , R.map(filterId)
-      );
-      const setIds    = _obj  => R.merge(item, _obj);
-      const _isId     = _obj  => item.title === _obj.Request.ItemSearchRequest.Keywords ? _obj.item : false;
-      const isId      = _obj  => _obj && _obj.Request.IsValid === 'True' ? _isId(_obj) : false;
-      const getIds    = _objs => _objs.length > 0 ? { asins: getId(_objs) } : { asins: [] };
-      const isIds     = R.filter(isId);
+      //log.trace(Yahoo.displayName, 'item', item);
+      const setASINs  = _objs => R.merge(item, { asins: _objs });
+      const getASIN   = _obj  => _obj.Item && Array.isArray(_obj.Item) 
+        ? R.map(_Item => _Item.ASIN, _obj.Item) : _obj.Item.ASIN;
+      const isValid   = _obj  => _obj
+        && _obj.Request.IsValid === 'True'
+        && _obj.Request.ItemSearchRequest.Keywords === item.title
+        && Number(_obj.TotalResults) > 0;
       return R.compose(
-        setIds
-      , getIds
-      , isIds
+        setASINs 
+      , R.map(getASIN)
+      , R.tap(console.log)
+      , R.filter(isValid)
       )(objs);
     };
     const setAsins    = (items, objs) => R.map(item => setAsin(item, objs), items);
-    const _setAsins   = R.curry(setAsins)(note.item);
     const setItems    = (_note, objs) => R.merge(_note, { item: objs });
+    const _setAsins   = R.curry(setAsins)(note.item);
     const _setItems   = R.curry(setItems)(note);
     const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categoryid, 1));
-    const observable  = forkJoin(observables(note.item));
-    return observable.pipe(
-      map(_setAsins)
+    return forkJoin(observables(note.item)).pipe(
+      map(R.tap(log.trace.bind(this)))
+    , map(_setAsins)
     , map(_setItems)
-    , map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -645,14 +641,22 @@ class Yahoo {
       const getSales  = _objs => _objs.length > 0
         ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
       const setSale   = _obj  => R.merge(item, _obj);
-      return R.compose(setSale, getSales, isSales)(objs);
+      return R.compose(
+        setSale
+      , getSales
+      , isSales
+      )(objs);
     };
     const setPerformance = (items, obj) => {
       const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
       const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
       const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
       const setSold   = item  => R.merge(obj, item);
-      return R.compose(setSold, getSolds, isSolds)(items);
+      return R.compose(
+        setSold
+      , getSolds
+      , isSolds
+      )(items);
     };
     const setMarkets      = (items, objs) => R.map(item => setMarket(item, objs), items);
     const setPerformances = (items, objs) => R.map(obj => setPerformance(items, obj), objs);

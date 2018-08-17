@@ -1,4 +1,3 @@
-import querystring from 'querystring';
 import crypto from 'crypto';
 import { URL, URLSearchParams } from 'url';
 
@@ -678,7 +677,24 @@ export default {
    * @return {string}
    */
   urlencode_rfc3986(data) {
-    return querystring.stringify(data).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16));
+    const encode = obj => encodeURIComponent(obj)
+      .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16));
+    let results = '';
+    if (data && typeof data === 'string') {
+      results = encode(data);
+    } else if(data && typeof data === 'object') {
+      let pairs = [];
+      for(let name in data) {
+        if (!data.hasOwnProperty(name)) continue;
+        if (typeof data[name] === "function") continue;
+        let value = data[name].toString();
+        name = encode(name);
+        value = encode(value);
+        pairs.push(name + "=" + value);
+      }
+      results = pairs.join('&');
+    } 
+    return results;
   },
 
   /**
@@ -688,8 +704,8 @@ export default {
    * @param {string} secret_key - secret key string required for conversion.
    */
   crypto_sha256(string, secret_key, digest) {
-    if(!digest) digest = 'base64';
-    return crypto.createHmac('sha256', secret_key).update(string).digest(digest);
+    const encode = digest || 'base64';
+    return crypto.createHmac('sha256', secret_key).update(string).digest(encode);
   },
 
   crypto_pbkdf2(pass, salt, length) {
