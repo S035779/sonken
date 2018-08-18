@@ -574,31 +574,34 @@ class Yahoo {
   }
 
   fetchItemSearch(note) {
+    const delMark   = R.replace(/[\u25CE\u25CF\u25B3\u25BD\u25B2\u25BC\u22BF\u25B6\u25C0\u25A1\u25A0\u25C7\u25C6\uFF01\u2661\u2665\u2664\u2660\u2667\u2663\u2662\u2666\u3010\u3011\u2605\u2606\u203B\uFF0A\u266A]|/g, '');
+    const delString = R.replace(/\u7F8E\u54C1|\u826F\u54C1|\u6975|\u512A|\u4E2D\u53E4|\u7D14\u6B63|\u8A33\u3042\u308A|\u73FE\u72B6\u54C1|\u307B\u307C\u672A\u4F7F\u7528|\u9AD8\u901F\u7248|\u9001\u6599\u7121\u6599|\u8D85/g, '');
+    const setTitle  = R.compose(delMark, delString);
     const setAsin     = (item, objs) => {
       //log.trace(Yahoo.displayName, 'item', item);
       const setASINs  = _objs => R.merge(item, { asins: _objs });
-      const getASIN   = _obj  => _obj.Item && Array.isArray(_obj.Item) 
-        ? R.map(_Item => _Item.ASIN, _obj.Item) : _obj.Item.ASIN;
+      const getASIN 
+        = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
       const isValid   = _obj  => _obj
         && _obj.Request.IsValid === 'True'
-        && _obj.Request.ItemSearchRequest.Keywords === item.title
+        && _obj.Request.ItemSearchRequest.Keywords === setTitle(item.title)
         && Number(_obj.TotalResults) > 0;
       return R.compose(
         setASINs 
+      , R.head
       , R.map(getASIN)
-      , R.tap(console.log)
       , R.filter(isValid)
       )(objs);
     };
-    const setAsins    = (items, objs) => R.map(item => setAsin(item, objs), items);
-    const setItems    = (_note, objs) => R.merge(_note, { item: objs });
-    const _setAsins   = R.curry(setAsins)(note.item);
-    const _setItems   = R.curry(setItems)(note);
-    const observables = R.map(obj => amazon.fetchItemSearch(obj.title, obj.item_categoryid, 1));
+    const _setAsins   = (items, objs) => R.map(item => setAsin(item, objs), items);
+    const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
+    const setAsins    = R.curry(_setAsins)(note.item);
+    const setItems    = R.curry(_setItems)(note);
+    const observables = R.map(obj => amazon.fetchItemSearch(setTitle(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(note.item)).pipe(
-      map(R.tap(log.trace.bind(this)))
-    , map(_setAsins)
-    , map(_setItems)
+      map(setAsins)
+    //, map(R.tap(log.trace.bind(this)))
+    , map(setItems)
     );
   }
 
@@ -658,18 +661,17 @@ class Yahoo {
       , isSolds
       )(items);
     };
-    const setMarkets      = (items, objs) => R.map(item => setMarket(item, objs), items);
-    const setPerformances = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
-    const setItems        = (_note, objs) => R.merge(_note, { item: objs });
-    const promises        = R.map(url => this.getHtml(url));
-    const observable      = urls => forkJoin(promises(urls));
-    const _setMarkets     = R.curry(setMarkets)(note.item);
-    const _setPerformances= R.curry(setPerformances)(note.item);
-    const _setItems       = R.curry(setItems)(note);
-    return observable(setUrls(note.item)).pipe(
-      map(_setMarkets)
-    , map(_setPerformances)
-    , map(_setItems)
+    const _setMarkets       = (items, objs) => R.map(item => setMarket(item, objs), items);
+    const _setPerformances  = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
+    const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
+    const setMarkets        = R.curry(_setMarkets)(note.item);
+    const setPerformances   = R.curry(_setPerformances)(note.item);
+    const setItems          = R.curry(_setItems)(note);
+    const promises          = R.map(url => this.getHtml(url));
+    return forkJoin(promises(setUrls(note.item))).pipe(
+      map(setMarkets)
+    , map(setPerformances)
+    , map(setItems)
     );
   }
 

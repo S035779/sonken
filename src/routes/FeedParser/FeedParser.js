@@ -1375,7 +1375,7 @@ export default class FeedParser {
   
   downloadItems({ user, ids, filter }) {
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
-    const setAsins = R.join(':', obj.asins);
+    const setAsins = R.join(':');
     const _getItems = R.curry(this.filterItems)(filter);
     const getItems = R.filter(_getItems);
     const setItems = R.map(obj => ({
