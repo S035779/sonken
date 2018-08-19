@@ -574,41 +574,54 @@ class Yahoo {
   }
 
   fetchItemSearch(note) {
-    const delMark   = R.replace(/[\u25CE\u25CF\u25B3\u25BD\u25B2\u25BC\u22BF\u25B6\u25C0\u25A1\u25A0\u25C7\u25C6\uFF01\u2661\u2665\u2664\u2660\u2667\u2663\u2662\u2666\u3010\u3011\u2605\u2606\u203B\uFF0A\u266A]|/g, '');
-    const delString = R.replace(/\u7F8E\u54C1|\u826F\u54C1|\u6975|\u512A|\u4E2D\u53E4|\u7D14\u6B63|\u8A33\u3042\u308A|\u73FE\u72B6\u54C1|\u307B\u307C\u672A\u4F7F\u7528|\u9AD8\u901F\u7248|\u9001\u6599\u7121\u6599|\u8D85/g, '');
-    const setTitle  = R.compose(delMark, delString);
-    const setAsin     = (item, objs) => {
-      //log.trace(Yahoo.displayName, 'item', item);
-      const setASINs  = _objs => R.merge(item, { asins: _objs });
-      const getASIN 
-        = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
-      const isValid   = _obj  => _obj
-        && _obj.Request.IsValid === 'True'
-        && _obj.Request.ItemSearchRequest.Keywords === setTitle(item.title)
-        && Number(_obj.TotalResults) > 0;
-      return R.compose(
-        setASINs 
-      , R.head
-      , R.map(getASIN)
-      , R.filter(isValid)
-      )(objs);
-    };
-    const _setAsins   = (items, objs) => R.map(item => setAsin(item, objs), items);
+    const _setAsins   = (items, objs) => R.map(item => this.setAsin(item, objs), items);
     const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
     const setAsins    = R.curry(_setAsins)(note.item);
     const setItems    = R.curry(_setItems)(note);
-    const observables = R.map(obj => amazon.fetchItemSearch(setTitle(obj.title), obj.item_categoryid, 1));
+    const observables = R.map(obj => amazon.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(note.item)).pipe(
       map(setAsins)
-    //, map(R.tap(log.trace.bind(this)))
     , map(setItems)
     );
   }
 
+  setAsin (item, objs) {
+    const setASINs  = _objs => R.merge(item, { asins: _objs });
+    const getASIN   = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) 
+      : [ _obj.Item.ASIN ];
+    const isValid   = _obj  => _obj
+      && _obj.Request.IsValid === 'True'
+      && _obj.Request.ItemSearchRequest.Keywords === this.repSpace(item.title)
+      && Number(_obj.TotalResults) > 0;
+    return R.compose(
+      setASINs 
+    , R.head
+    , R.map(getASIN)
+    , R.filter(isValid)
+    )(objs);
+  }
+
+  repSpace(keywords)  {
+    const delMark1   = R.replace(/[\u25CE\u25CF\u25B3\u25BD\u25B2\u25BC\u22BF\u25B6\u25C0\u25A1\u25A0]/g, ' ');
+    const delMark2   = R.replace(/[\u25C7\u25C6\uFF01\u2661\u2665\u2664\u2660\u2667\u2663\u2662\u2666]/g, ' ');
+    const delMark3   = R.replace(/[\u3010\u3011\u2605\u2606\u203B\uFF0A\u266A]/g                        , ' ');
+    const delString1 = R.replace(/\u7F8E\u54C1|\u826F\u54C1|\u6975|\u512A|\u4E2D\u53E4|\u7D14\u6B63/g   , ' ');
+    const delString2 = R.replace(/\u8A33\u3042\u308A|\u73FE\u72B6\u54C1|\u307B\u307C\u672A\u4F7F\u7528/g, ' ');
+    const delString3 = R.replace(/\u9AD8\u901F\u7248|\u9001\u6599\u7121\u6599|\u8D85/g                  , ' ');
+    const repString  = R.compose(
+      delMark1
+    , delMark2
+    , delMark3
+    , delString1
+    , delString2
+    , delString3
+    );
+    return repString(keywords);
+  }
+
   fetchClosedMerchant({ url, pages }) {
     if(!pages) pages  = 1;
-    const fetchClosed = from(this.getClosedMerchant(url, pages));
-    return fetchClosed.pipe(
+    return from(this.getClosedMerchant(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
     , flatMap(this.fetchItemSearch.bind(this))
     );
@@ -616,63 +629,64 @@ class Yahoo {
 
   fetchClosedSellers({ url, pages }) {
     if(!pages) pages  = 1;
-    const fetchClosed = from(this.getClosedSellers(url, pages));
-    return fetchClosed.pipe(
+    return from(this.getClosedSellers(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
     , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
   fetchHtml({ url }) {
-    const observable  = from(this.getHtml(url));
-    return observable;
+    return from(this.getHtml(url));
   }
 
   fetchMarchant(note) {
-    const setUrl      = obj => {
-      const api = std.parse_url(searchurl);
-      api.searchParams.append('p', obj.title);
-      return api.href;
-    };
-    const isItem      = obj => !!obj.title;
-    const setUrls     = R.compose(R.map(setUrl), R.filter(isItem));
-    const setMarket   = (item, objs) => {
-      const _isSeller = _obj  => 
-        R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
-      const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
-      const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-      const getSales  = _objs => _objs.length > 0
-        ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
-      const setSale   = _obj  => R.merge(item, _obj);
-      return R.compose(
-        setSale
-      , getSales
-      , isSales
-      )(objs);
-    };
-    const setPerformance = (items, obj) => {
-      const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
-      const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-      const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
-      const setSold   = item  => R.merge(obj, item);
-      return R.compose(
-        setSold
-      , getSolds
-      , isSolds
-      )(items);
-    };
-    const _setMarkets       = (items, objs) => R.map(item => setMarket(item, objs), items);
-    const _setPerformances  = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
+    const isItem            = obj => !!obj.title;
+    const urls              = R.compose(R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item);
+    const _setMarkets       = (items, objs) => R.map(item => this.setMarket(item, objs), items);
+    const _setPerformances  = (items, objs) => R.map(obj => this.setPerformance(items, obj), objs);
     const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
     const setMarkets        = R.curry(_setMarkets)(note.item);
     const setPerformances   = R.curry(_setPerformances)(note.item);
     const setItems          = R.curry(_setItems)(note);
-    const promises          = R.map(url => this.getHtml(url));
-    return forkJoin(promises(setUrls(note.item))).pipe(
+    const promises          = R.map(this.getHtml.bind(this));
+    return forkJoin(promises(urls)).pipe(
       map(setMarkets)
     , map(setPerformances)
     , map(setItems)
     );
+  }
+
+  setUrl(obj) {
+    const api = std.parse_url(searchurl);
+    api.searchParams.append('p', obj.title);
+    return api.href;
+  }
+
+  setMarket(item, objs) {
+    const _isSeller = _obj  => 
+      R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+    const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
+    const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+    const getSales  = _objs => _objs.length > 0
+      ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+    const setSale   = _obj  => R.merge(item, _obj);
+    return R.compose(
+      setSale
+    , getSales
+    , isSales
+    )(objs);
+  }
+
+  setPerformance(items, obj) {
+    const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
+    const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+    const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
+    const setSold   = item  => R.merge(obj, item);
+    return R.compose(
+      setSold
+    , getSolds
+    , isSolds
+    )(items);
   }
 
   fetchRss({ url }) {

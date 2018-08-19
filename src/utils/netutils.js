@@ -18,13 +18,13 @@ const min = 20000;
 const max = 50000;
 const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
-const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.1, promiseImplementation: Promise });
+const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
 
 const promise = (url, options) => {
   return new Promise((resolve, reject) => {
     fetch(url, options, (error, result) => {
       if(error) return reject(error);
-      std.logDebug(displayName, 'FETCH', 'promise done.');
+      //std.logDebug(displayName, 'FETCH', 'promise done.');
       resolve(result);
     });
   });
@@ -100,7 +100,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
     res.setEncoding('utf8');
     res.on('data', chunk => response += chunk);
     res.on('end', () => {
-      response = accept === 'JSON' ? JSON.parser(response) : parser ? parser(response) : response;
+      response = accept === 'JSON' ? JSON.parse(response) : parser ? parser(response) : response;
       const status = { 
         name: `Status Code: ${res.statusCode} / Request URL: ${url}`
       , message: response
