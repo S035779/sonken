@@ -186,7 +186,7 @@ class ClosedForms extends React.Component {
           </RssDialog>
         </div>
       </div>
-    {category === 'closedsellers' 
+    {category === 'closedsellers' || category === 'closedmarchant'
       ? (<div className={classes.edit}>
         <Typography variant="subheading" noWrap
           className={classes.column}>絞込件数：</Typography>
@@ -220,7 +220,7 @@ class ClosedForms extends React.Component {
           className={classes.column}>全て表示</Typography>
       </div>)
       : null }
-    {category === 'closedsellers' 
+    {category === 'closedsellers'  || category === 'closedmarchant'
       ? (<div className={classes.edit}>
         <div className={classes.column}>
           <Typography className={classes.title}>
@@ -250,7 +250,7 @@ class ClosedForms extends React.Component {
         </div>
       </div>)
       : null }
-    {category === 'closedsellers' 
+    {category === 'closedsellers'  || category === 'closedmarchant'
       ? (<div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
@@ -262,8 +262,8 @@ class ClosedForms extends React.Component {
       </div>)
       : null }
       <div className={classNames(
-        category === 'closedsellers' && classes.sellersList
-      , category === 'closedmarchant' && classes.marchantList
+        category === 'closedsellers' && classes.filterList
+      , category === 'closedmarchant' && classes.filterList
       )}>
         <RssItemList 
           user={user} 
@@ -273,25 +273,25 @@ class ClosedForms extends React.Component {
   }
 };
 
-const barHeightSmUp     = 64;
-const barHeightSmDown   = 56;
-const searchHeight      = 62;
-const marchantHeight    = 62 * 1;
-const sellersHeight      = 62 * 4;
-const marchantHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${marchantHeight}px - ${searchHeight}px)`;
-const marchantHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${marchantHeight}px - ${searchHeight}px)`;
-const sellersHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${sellersHeight}px - ${searchHeight}px)`;
-const sellersHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${sellersHeight}px - ${searchHeight}px)`;
-const columnHeight      = 62;
-const contentWidth      = 112;
-const checkboxWidth     = 38;
-const datetimeWidth     = 200;
+const barHeightSmUp       = 64;
+const barHeightSmDown     = 56;
+const searchHeight        = 62;
+const normalHeight        = 62 * 1;
+const filterHeight        = 62 * 4;
+const normalHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${normalHeight}px - ${searchHeight}px)`;
+const normalHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${normalHeight}px - ${searchHeight}px)`;
+const filterHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;
+const filterHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${filterHeight}px - ${searchHeight}px)`;
+const columnHeight        = 62;
+const contentWidth        = 112;
+const checkboxWidth       = 38;
+const datetimeWidth       = 200;
 const styles = theme => ({
   forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
-, marchantList: { width: '100%', height: marchantHeightSmDown 
-                , [theme.breakpoints.up('sm')]: { height: marchantHeightSmUp }}
-, sellersList:   { width: '100%', height: sellersHeightSmDown 
-                , [theme.breakpoints.up('sm')]: { height: sellersHeightSmUp }}
+, normalList:   { width: '100%', height: normalHeightSmDown 
+                , [theme.breakpoints.up('sm')]: { height: normalHeightSmUp }}
+, filterList:   { width: '100%', height: filterHeightSmDown 
+                , [theme.breakpoints.up('sm')]: { height: filterHeightSmUp }}
 , header:       { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch', justifyContent: 'space-between'
                 , height: columnHeight, minHeight: columnHeight
