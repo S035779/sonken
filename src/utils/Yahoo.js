@@ -41,7 +41,7 @@ class Yahoo {
     this.secret_key = secret_key;
     this.redirect_url = redirect_url;
     this.tokens = [];
-    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 1, promiseImplementation: Promise });
+    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
   }
 
   static of(options) {
@@ -52,7 +52,7 @@ class Yahoo {
   }
 
   request(request, options) {
-    //log.info(Yahoo.displayName, 'Request', request);
+    log.info(Yahoo.displayName, 'Request', request);
     switch(request) {
       case 'fetch/auth/support':
         return net.promise(authurl,   { method: 'GET',  type: 'NV', accept: 'JSON' });
@@ -62,8 +62,9 @@ class Yahoo {
         return net.promise(keyurl,    { method: 'GET',  type: 'NV', accept: 'JSON' });
       case 'fetch/accesstoken':
         return net.promise(tokenurl,  { method: 'POST', type: 'NV', accept: 'JSON'
-        , auth: { user: options.auth.client_id, pass: options.auth.client_secret }
-        , search: options.query });
+          , auth: { user: options.auth.client_id, pass: options.auth.client_secret }
+          , search: options.query
+          });
       case 'fetch/file':
         return net.get(options.url,   { operator: options.operator, filename: options.filename });
       case 'parse/xml/note':
@@ -105,6 +106,12 @@ class Yahoo {
 
   getXmlItem(xml) {
     return this.request('parse/xml/item', { xml });
+  }
+
+  getImage(operator, aid,  url) {
+    const filename    = std.crypto_sha256(url, aid, 'hex') + '.img';
+    operator = operator(STORAGE, filename);
+    return this.request('fetch/file', { url, operator, filename });
   }
 
   getClosedMerchant(url, pages) {
@@ -542,10 +549,34 @@ class Yahoo {
     });
   }
 
-  getImage(operator, aid,  url) {
-    const filename    = std.crypto_sha256(url, aid, 'hex') + '.img';
-    operator = operator(STORAGE, filename);
-    return this.request('fetch/file', { url, operator, filename });
+  fetchItemMerchant({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedMerchant(url, pages)).pipe(
+      flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
+    );
+  }
+
+  fetchItemSellers({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedSellers(url, pages)).pipe(
+      flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
+    );
+  }
+
+  fetchClosedMerchant({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedMerchant(url, pages));
+  }
+
+  fetchClosedSellers({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedSellers(url, pages));
+  }
+
+  fetchHtml({ url }) {
+    return from(this.getHtml(url));
   }
 
   fetchImage(operator, { guid__, images }) {
@@ -604,26 +635,6 @@ class Yahoo {
     , delString3
     );
     return repString(keywords);
-  }
-
-  fetchClosedMerchant({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedMerchant(url, pages)).pipe(
-      flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
-    );
-  }
-
-  fetchClosedSellers({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedSellers(url, pages)).pipe(
-      flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
-    );
-  }
-
-  fetchHtml({ url }) {
-    return from(this.getHtml(url));
   }
 
   fetchMarchant(note) {

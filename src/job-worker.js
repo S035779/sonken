@@ -54,9 +54,9 @@ const request = (operation, { url, user, id, items }) => {
     case 'seller':
       return yahoo.fetchHtml({ url }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsearch':
-      return yahoo.fetchClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.fetchItemMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsellers':
-      return yahoo.fetchClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.fetchItemSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'rss':
       return yahoo.fetchRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':

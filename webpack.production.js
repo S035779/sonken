@@ -4,6 +4,8 @@ const bundle  = require('./webpack.bundle.js');
 
 var production = {
   mode: 'production'
+, devtool: 'source-map'
+, cache: true
 , plugins: [
     new webpack.DefinePlugin({
       'process.env.PLATFORM':  JSON.stringify('web')
@@ -12,7 +14,6 @@ var production = {
     , 'process.env.APP_NAME':  JSON.stringify('アルファOne')
     })
   ]
-, devtool: 'source-map'
 , performance: {
     hints: "warning"
   , maxAssetSize: 2560000

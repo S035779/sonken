@@ -634,17 +634,18 @@ export default {
    * @return {string}
    */
   urlencode(data) {
+    const encode = obj => encodeURIComponent(obj);
     let results = '';
     if (data && typeof data === 'string') {
-      results = encodeURIComponent(data);
+      results = encode(data);
     } else if(data && typeof data === 'object') {
       let pairs = [];
       for(let name in data) {
         if (!data.hasOwnProperty(name)) continue;
         if (typeof data[name] === "function") continue;
         let value = data[name].toString();
-        name = encodeURIComponent(name);
-        value = encodeURIComponent(value);
+        name = encode(name);
+        value = encode(value);
         pairs.push(name + "=" + value);
       }
       results = pairs.join('&');

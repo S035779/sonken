@@ -45,7 +45,7 @@ class RssSearch extends React.Component {
   handleSubmit(title, categoryIds) {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
-    std.logInfo(RssSearch.displayName, 'Request:', request);
+    std.logInfo(RssSearch.displayName, 'Request', this.state.url);
     if(request) {
       const spn = Spinner.of('app');
       spn.start();
@@ -129,6 +129,7 @@ class RssSearch extends React.Component {
 
   getCategory(url) {
     const { category } = this.props;
+    const baseurl = 'https://auctions.yahoo.co.jp';
     let operation = '';
     let path = '';
     let query = '';
@@ -138,43 +139,38 @@ class RssSearch extends React.Component {
       path = parser.pathname;
       operation = path.split('/')[1];
     } catch (err) {
-      std.logError(RssSearch.displayName, err.name, err.message);
+      std.logWarn(RssSearch.displayName, err.name, err.message);
       switch(category) {
         case 'closedmarchant':
-          url = 'https://auctions.yahoo.co.jp/closedsearch/closedsearch?' 
-            + std.urlencode({ p: url });
+          url = baseurl + '/closedsearch/closedsearch?' + std.urlencode({ p: url });
           break;
         case 'closedsellers':
-          url = 'https://auctions.yahoo.co.jp/jp/show/rating?' 
-            + std.urlencode({ userID: url, role: 'seller' });
+          url = baseurl + '/jp/show/rating?' + std.urlencode({ userID: url, role: 'seller' });
           break;
         case 'sellers':
-          url = 'https://auctions.yahoo.co.jp/seller/' 
-            + url;
+          url = baseurl + '/seller/' + url;
           break;
         default:
-          url = 'https://auctions.yahoo.co.jp/search/search?' 
-            + std.urlencode({ p: url });
+          url = baseurl + '/search/search?' + std.urlencode({ p: url });
           break;
       }
     }
     switch(operation) {
       case 'search':
-        return { category: 'marchant',        url };
+        return ({ category: 'marchant', url });
       case 'seller':
-        return { category: 'sellers',         url };
+        return ({ category: 'sellers', url });
       case 'closedsearch':
-        return { category: 'closedmarchant',  url };
+        return ({ category: 'closedmarchant', url });
       case 'jp':
         return path === '/jp/show/rating' && query.has('userID') 
-          ? { category: 'closedsellers', url } 
-          : null;
+          ? ({ category: 'closedsellers', url }) : null;
       case 'rss':
         return query.has('p') 
-          ? { category: 'marchant', url } : query.has('sid') 
-          ? { category: 'sellers',  url } : null;
+          ? ({ category: 'marchant', url }) : query.has('sid') 
+            ? ({ category: 'sellers',  url }) : null;
       default:
-        return { category,                    url };
+        return ({ category, url });
     }
   }
 
@@ -220,8 +216,7 @@ class RssSearch extends React.Component {
       </FormControl>
       <FormControl className={classes.inputText}>
         <InputLabel htmlFor="url">URL</InputLabel>
-        <Input id="url" value={url}
-          onChange={this.handleChangeText.bind(this, 'url')}/>
+        <Input id="url" value={url} onChange={this.handleChangeText.bind(this, 'url')}/>
       </FormControl>
       <div className={classes.buttons}>
         <Button variant="raised"

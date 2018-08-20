@@ -4,6 +4,8 @@ const bundle  = require('./webpack.bundle.js');
 
 var development = {
   mode: 'development'
+, devtool: 'inline-source-map'
+, cache: true
 , plugins: [
     new webpack.DefinePlugin({
       'process.env.PLATFORM':  JSON.stringify('web')

@@ -974,7 +974,6 @@ export default class FeedParser {
   }
 
   createNote({ user, url, category, categoryIds, title }) {
-    const addNote = obj => from(this.addNote(user, obj));
     let observable;
     switch(category) {
       case 'closedmarchant':
@@ -989,8 +988,8 @@ export default class FeedParser {
         observable = Yahoo.of().fetchHtml({ url });
         break;
     }
-    const setNote = obj => 
-      this.setNote({ user, url, category, categoryIds, title }, obj);
+    const setNote = obj => this.setNote({ user, url, category, categoryIds, title }, obj);
+    const addNote = obj => from(this.addNote(user, obj));
     return observable.pipe(
       map(setNote)
     , flatMap(addNote)
