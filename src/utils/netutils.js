@@ -24,7 +24,6 @@ const promise = (url, options) => {
   return new Promise((resolve, reject) => {
     fetch(url, options, (error, result) => {
       if(error) return reject(error);
-      //std.logDebug(displayName, 'FETCH', 'promise done.');
       resolve(result);
     });
   });
@@ -134,7 +133,16 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
   req.end();
 };
 
-const get = (url, { search, operator, filename }, callback) => {  
+const get = (url, options) => {
+  return new Promise((resolve, reject) => {
+    _get(url, options, (error, result) => {
+      if(error) return reject(error);
+      resolve(result);
+    });
+  });
+};
+
+const _get = (url, { search, operator, filename }, callback) => {  
   const api       = std.parse_url(url);
   const hostname  = api.hostname;
   const protocol  = api.protocol;

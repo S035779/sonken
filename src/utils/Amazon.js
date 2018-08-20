@@ -28,7 +28,6 @@ class Amazon {
   }
 
   request(operation, options) {
-    //log.debug(Amazon.displayName, 'Props', options);
     switch(operation) {
       case 'parse/xml':
         return new Promise((resolve, reject) => {
@@ -42,13 +41,6 @@ class Amazon {
       case 'ItemSearch':
       case 'ItemLookup':
         return net.throttle(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' });
-      default:
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            log.debug(this.url(operation, options));
-            resolve(options);
-          }, 200);
-        });
     }
   }
 
@@ -302,7 +294,6 @@ class Amazon {
     //log.trace(Amazon.displayName, 'Signed URL:', url);
     return url;
   }
-
 };
 Amazon.displayName = '[AMZ]';
 export default Amazon;
