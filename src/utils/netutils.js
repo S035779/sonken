@@ -18,7 +18,9 @@ const min = 20000;
 const max = 50000;
 const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
-const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 1, promiseImplementation: Promise });
+const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.1, promiseImplementation: Promise });
+
+const throttle = (url, options) => promiseThrottle.add(promise.bind(this, url, options));
 
 const promise = (url, options) => {
   return new Promise((resolve, reject) => {
@@ -29,11 +31,7 @@ const promise = (url, options) => {
   });
 };
 
-const throttle = (url, options) => {
-  return promiseThrottle.add(promise.bind(this, url, options));
-};
-
-const fetch = (url, { method, header, search, auth, body, type, accept, parser, lang }, callback) => {  
+const fetch = (url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback) => {  
   const api           = std.parse_url(url);
   const hostname      = api.hostname;
   const protocol      = api.protocol;
@@ -45,7 +43,9 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
   let   postLen       = null;
   let   acceptType    = null;
   if(query) {
-    path += query 
+    path += query; 
+  } else if(search && operator) {
+    path += '?' + std.urlencode_rfc3986(operator(search));
   } else if(search) {
     path += '?' + std.urlencode_rfc3986(search);
   }
@@ -120,7 +120,8 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
           setTimeout(() => 
-            fetch(url, { method, header, search, auth, body, type, accept, parser, lang }, callback), retry());
+            fetch(url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback)
+              , retry());
           break;
         default:
           callback(status);
