@@ -31,7 +31,7 @@ var common = {
       Tasks:      path.resolve(__dirname, 'src/tasks'     )
     }
   },
-  stats: 'normal',
+  stats: 'normal'
 };
 
 module.exports = common;
