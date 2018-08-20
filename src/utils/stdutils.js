@@ -678,7 +678,7 @@ export default {
    */
   urlencode_rfc3986(data) {
     const encode = obj => encodeURIComponent(obj)
-      .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16));
+      .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
     let results = '';
     if (data && typeof data === 'string') {
       results = encode(data);
