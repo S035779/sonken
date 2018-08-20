@@ -18,7 +18,7 @@ const min = 20000;
 const max = 50000;
 const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
-const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
+const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.5, promiseImplementation: Promise });
 
 const promise = (url, options) => {
   return new Promise((resolve, reject) => {
