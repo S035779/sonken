@@ -1,5 +1,5 @@
-import FeedParser       from 'Routes/FeedParser/FeedParser';
-import { logs as log }  from 'Utilities/logutils';
+import FeedParser from 'Routes/FeedParser/FeedParser';
+import log        from 'Utilities/logutils';
 
 const displayName = 'feed';
 const feed = FeedParser.of();

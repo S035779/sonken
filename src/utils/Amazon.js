@@ -1,16 +1,13 @@
-import R from 'ramda';
-import Rx from 'rxjs/Rx';
-import xml2js from 'xml2js';
-import std from './stdutils';
-import net from './netutils';
-import { logs as log } from './logutils';
+import * as R             from 'ramda';
+import { from, forkJoin } from 'rxjs';
+import { map, flatMap }   from 'rxjs/operators';
+import xml2js             from 'xml2js';
+import std                from 'Utilities/stdutils';
+import net                from 'Utilities/netutils';
+import log                from 'Utilities/logutils';
+import searchIndex        from 'Utilities/amzindex';
 
-const baseurl = 'http://ecs.amazonaws.jp/onca/xml';
-const params = {
-  Service:   'AWSECommerceService'
-  , Version: '2011-07-27'
-}
-
+const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 /**
  * Amazon Api Client class.
  *
@@ -31,122 +28,114 @@ class Amazon {
   }
 
   request(operation, options) {
+    //log.debug(Amazon.displayName, 'Props', options);
     switch(operation) {
       case 'parse/xml':
-        const option = {
-          attrkey:          'root'
-          , charkey:        'sub'
-          , trim:           true
-          , explicitArray:  false
-        };
         return new Promise((resolve, reject) => {
-          xml2js.parseString(options.xml, option, (error, result) => {
+          xml2js.parseString(options.xml, { attrkey: 'root', charkey: 'sub', trim: true, explicitArray: false }
+          , (error, result) => {
             if(error) return reject(error);
             resolve(result);
           });
         });
+      case 'BrowseNodeLookup':
+      case 'ItemSearch':
+      case 'ItemLookup':
+        return net.throttle(this.url(operation, options), { method: 'GET', type: 'NV', accept: 'XML' });
       default:
-        options = Object.assign({}, params, options);
-        options['AssociateTag']   = this.associ_tag;
-        options['AWSAccessKeyId'] = this.access_key;
-        options['Operation']      = operation;
-        options['Timestamp']      = std.getTimeStamp();
-        const query = this.query(options);
-        const signature = this.signature(query);
-        const url = this.url(query, signature);
         return new Promise((resolve, reject) => {
-          net.get(url, null, (err, head, body) => {
-            if(err) return reject(err.message);
-            resolve(body);
-          });
+          setTimeout(() => {
+            log.debug(this.url(operation, options));
+            resolve(options);
+          }, 200);
         });
     }
   }
 
   fetchNewReleases(node_id) {
-    return Rx.Observable.fromPromise(this.getNewReleases(node_id))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setTopItems)
-      .flatMap(this.forItemLookup.bind(this))
-      .flatMap(this.forParseXml.bind(this))
-      .map(this.forItem.bind(this))
-    ;
+    const observable = from(this.getNewReleases(node_id));
+    return observable.pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setTopItems)
+    , flatMap(this.forItemLookup.bind(this))
+    , flatMap(this.forParseXml.bind(this))
+    , map(this.forItem.bind(this))
+    );
   }
 
   fetchBestSellers(node_id) {
-    return Rx.Observable.fromPromise(this.getBestSellers(node_id))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setTopItems)
-      .flatMap(this.forItemLookup.bind(this))
-      .flatMap(this.forParseXml.bind(this))
-      .map(this.forItem.bind(this))
-    ;
+    const observable = from(this.getBestSellers(node_id));
+    return observable.pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setTopItems)
+    , flatMap(this.forItemLookup.bind(this))
+    , flatMap(this.forParseXml.bind(this))
+    , map(this.forItem.bind(this))
+    );
   }
 
   fetchReleaseDate(node_id, category, page) {
-    return Rx.Observable
-      .fromPromise(this.getReleaseDate(node_id, category, page))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setItems)
-    ;
+    const observable = from(this.getReleaseDate(node_id, category, page));
+    return observable.pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setItems)
+    );
   }
 
   fetchSalesRanking(node_id, category, rate, patern) {
     const curriedCheckRate = R.curry(this.checkRate.bind(this))(rate);
     const curriedDiffRate = R.curry(this.diffRate.bind(this))(patern);
-    return this.forSalesRanking(node_id, category, 10)
-      .flatMap(this.forParseXml.bind(this))
-      .map(this.forItems.bind(this))
-      .map(R.flatten)
-      .map(R.filter(curriedCheckRate))
-      .map(R.sort(curriedDiffRate))
-    ;
+    const observable = this.forSalesRanking(node_id, category, 10);
+    return observable.pipe(
+      flatMap(this.forParseXml.bind(this))
+    , map(this.forItems.bind(this))
+    , map(R.flatten)
+    , map(R.filter(curriedCheckRate))
+    , map(R.sort(curriedDiffRate))
+    );
   }
 
   fetchItemLookup(item_id, id_type) {
-    return Rx.Observable.fromPromise(this.getItemLookup(item_id, id_type))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setItem)
-    ;
+    const observable = from(this.getItemLookup(item_id, id_type));
+    return observable.pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setItem)
+    );
   }
 
-  fetchItemList(keyword, page) {
-    return Rx.Observable.fromPromise(this.getItemList(keyword, page))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setItems)
-    ;
+  fetchItemSearch(keywords, category, page) {
+    const observable = from(this.getItemSearch(keywords, category, page));
+    return observable.pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setItems)
+    );
   }
 
   fetchNodeList(node_id) {
-    return Rx.Observable.fromPromise(this.getNodeList(node_id))
-      .flatMap(this.parseXml.bind(this))
-      .map(this.setNodes)
-    ;
+    return from(this.getNodeList(node_id)).pipe(
+      flatMap(this.parseXml.bind(this))
+    , map(this.setNodes)
+    );
   }
 
   parseXml(xml) {
-    return Rx.Observable.fromPromise(this.getXml(xml));
-  }
-
-  forkJoin(promises) {
-    return Rx.Observable.forkJoin(promises);
+    return from(this.getXml(xml));
   }
 
   forSalesRanking(node_id, category, pages) {
     const range = R.range(1, pages+1);
-    return this.forkJoin(
-        R.map(page => this.getSalesRanking(node_id, category, page), range)
-    );
+    const promises = R.map(page => this.getSalesRanking(node_id, category, page));
+    return forkJoin(promises(range));
   }
 
   forItemLookup(objs) {
-    return this.forkJoin(
-      R.map(obj => this.getItemLookup(obj.ASIN, 'ASIN'), objs)
-    );
+    const promises = R.map(obj => this.getItemLookup(obj.ASIN, 'ASIN'));
+    return forkJoin(promises(objs));
   }
 
   forParseXml(objs) {
-    return this.forkJoin(R.map(obj => this.parseXml(obj), objs));
+    const promises = R.map(obj => this.parseXml(obj));
+    return forkJoin(promises(objs));
   }
 
   forItems(objs) {
@@ -192,7 +181,7 @@ class Amazon {
   setItems(obj) {
     const items = obj.ItemSearchResponse.Items
     //log.trace('pages:', items.TotalPages, 'items:', items.TotalResults);
-    return items.Item;
+    return items;
   }
 
   setItem(obj) {
@@ -250,12 +239,12 @@ class Amazon {
     return this.request('ItemSearch', options);
   }
 
-  getItemList(keyword, page) {
+  getItemSearch(keywords, categoryid, page) {
     const options = {};
-    options['Keywords']       = keyword;
+    options['Keywords']       = this.setKeywords(keywords);
     options['ItemPage']       = page;
-    options['SearchIndex']    = 'All';
-    options['ResponseGroup']  = 'Large';
+    options['SearchIndex']    = this.setSearchIndex(categoryid);
+    options['ResponseGroup']  = 'ItemAttributes,ItemIds';
     return this.request('ItemSearch', options);
   }
 
@@ -267,25 +256,53 @@ class Amazon {
     return this.request('ItemLookup', options);
   }
 
-  query(object) {
-    return std.urlencode_rfc3986(std.ksort(object));
+  setSearchIndex(categoryid) {
+    const keys       = R.keys(searchIndex);
+    const values     = key => R.prop(key, searchIndex);
+    const isCategory = key => R.contains(Number(categoryid), values(key));
+    const isIndex    = R.filter(isCategory);
+    const setIndex   = R.compose(R.head, isIndex);
+    return setIndex(keys);
+  }
+
+  setKeywords(keywords) {
+    let results = '';
+    if(keywords && typeof keywords === 'string') {
+      results = keywords;
+    } else if(keywords && Array.isArray(keywords)) {
+      results = R.join(' ', keywords);
+    }
+    return results;
   }
 
   signature(query) {
-    const parsed_url = std.parse_url(baseurl);
-    const string = "GET\n"
-      + parsed_url.host + "\n"
-      + parsed_url.pathname + "\n"
-      + query;
-    return std.crypto_sha256(string, this.secret_key);
+    const url     = std.parse_url(baseurl);
+    const string  = "GET\n"
+      + url.host + "\n" + url.pathname + "\n"
+      + std.urlencode_rfc3986(query);
+    const result  = std.crypto_sha256(string, this.secret_key, 'base64');
+    //log.trace(Amazon.displayName, 'Query object:', query);
+    //log.trace(Amazon.displayName, 'Query string:', string);
+    //log.trace(Amazon.displayName, 'String to Sign:', result);
+    return result;
   }
 
-  url(query, signature) {
-    return baseurl
-      + '?' + query
-      + '&' + std.urlencode_rfc3986({ Signature: signature });
+  url(operation, options) {
+    options['Service']        = 'AWSECommerceService';
+    options['Version']        = '2013-08-01';
+    options['AWSAccessKeyId'] = this.access_key;
+    options['AssociateTag']   = this.associ_tag;
+    options['Operation']      = operation;
+    options['Timestamp']      = std.getTimeStamp();
+    const params = std.ksort(options);
+    const signature = { Signature: this.signature(params) };
+    const url = baseurl
+      + '?' + std.urlencode_rfc3986(params)
+      + '&' + std.urlencode_rfc3986(signature);
+    //log.trace(Amazon.displayName, 'Signed URL:', url);
+    return url;
   }
 
 };
-Amazon.displayName = 'amazon-api';
+Amazon.displayName = '[AMZ]';
 export default Amazon;

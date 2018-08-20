@@ -1,9 +1,10 @@
-import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
-import mongoose         from 'mongoose';
-import { Mail, Selected }  from 'Models/mail';
-import std              from 'Utilities/stdutils';
-import { logs as log }  from 'Utilities/logutils';
+import * as R             from 'ramda';
+import { from, forkJoin } from 'rxjs';
+import { map, flatMap }   from 'rxjs/operators';
+import mongoose           from 'mongoose';
+import { Mail, Selected } from 'Models/mail';
+import std                from 'Utilities/stdutils';
+import log                from 'Utilities/logutils';
 
 
 /**
@@ -195,63 +196,60 @@ export default class MailEditor {
   }
 
   fetchMails({ admin }) {
-    const observables = Rx.Observable
-      .forkJoin([ this.getSelect(admin), this.getMails(admin) ]);
-    return observables
-    .map(objs => {
+    const observables = forkJoin([ this.getSelect(admin), this.getMails(admin) ]);
+    const setSelect = objs => {
       const selected = R.map(obj => obj.selected, objs[0]); 
       return R.map(obj => {
           const mail = obj.toObject();
           const isSelected = R.contains(mail._id.toString(), selected);
           return R.merge(mail, { selected: isSelected });
         }, objs[1]);
-    });
+    };
+    return observables.pipe(
+      map(setSelect)
+    );
   }
 
   fetchMail({ admin, ids }) {
     const _promise = R.curry(this.getMail.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   createMail({ admin }) {
     const data = { title: 'Untitled', body: '' };
-    return Rx.Observable.fromPromise(this.addMail(admin, data));
+    return from(this.addMail(admin, data));
   }
 
   updateMail({ admin, id, data }) {
-    return Rx.Observable.fromPromise(this.replaceMail(admin, id, data));
+    return from(this.replaceMail(admin, id, data));
   }
 
   deleteMail({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeMail.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   createSelect({ admin, ids }) {
     const _promise = R.curry(this.addSelect.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   deleteSelect({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeSelect.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   uploadFile({ admin, id, file }) {
-    return Rx.Observable.fromPromise(this.upFile(admin, id, file));
+    return from(this.upFile(admin, id, file));
   }
 };

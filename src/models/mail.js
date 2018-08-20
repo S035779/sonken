@@ -1,6 +1,6 @@
-import dotenv           from 'dotenv';
-import mongoose         from 'mongoose';
-import { logs as log }  from 'Utilities/logutils';
+import dotenv   from 'dotenv';
+import mongoose from 'mongoose';
+import log      from 'Utilities/logutils';
 
 dotenv.config();
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
@@ -20,13 +20,14 @@ const selectedSchema = new mongoose.Schema({
 }, { collection: 'selected' });
 selectedSchema.index({ selected: 1 }, { unique: true });
 
+const displayName = '[MDB]';
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','mail connected.'));
-db.on('close', () => log.info( '[MDB]','mail disconnected.'));
-db.on('error', () => log.error('[MDB]','mail connection error.'));
-db.openUri(mdb_url + '/mail');
+db.on('open',  () => log.info( displayName,'mail connected.'));
+db.on('close', () => log.info( displayName,'mail disconnected.'));
+db.on('error', () => log.error(displayName,'mail connection error.'));
+db.openUri(mdb_url + '/mail', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info('[MDB]', 'mail terminated.')));
+  mongoose.disconnect(() => log.info(displayName, 'mail terminated.')));
 export const Mail = db.model('Mail', mailSchema);
 export const Selected = db.model('Selected', selectedSchema);

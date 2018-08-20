@@ -44,17 +44,10 @@ class Dashboard extends React.Component {
   }
 
   filterNotes(notes, category, categoryId) {
-    const isCategory
-      = obj => obj.category === category;
-    const isCategoryId
-      = obj => obj.categoryIds
-        ? obj.categoryIds.some(id => id === categoryId) : false;
-    const isNonCategoryId
-      = obj => obj.categoryIds
-        ? obj.categoryIds.length === 0 : true;
-    const isFavorite
-      = obj => obj.items
-        ? obj.items.some(obj => obj.starred) : false;
+    const isCategory = obj => obj.category === category;
+    const isCategoryId = obj => obj.categoryIds ? obj.categoryIds.some(id => id === categoryId) : false;
+    const isNonCategoryId = obj => obj.categoryIds ? obj.categoryIds.length === 0 : true;
+    const isFavorite = obj => obj.items ? obj.items.some(obj => obj.starred) : false;
     if(!notes) return [];
     switch(categoryId) {
       case 'all':
@@ -100,8 +93,7 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file
-      , categorys } = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file , categorys } = this.state;
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const title = this.getTitleName(location);

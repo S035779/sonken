@@ -5,7 +5,7 @@ import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, Avatar, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText, ListItemAvatar } from '@material-ui/core';
-import { Clear, ContentPaste, Folder } from '@material-ui/icons';
+import { Clear, Edit, Folder } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
@@ -143,11 +143,8 @@ class RssEditDialog extends React.Component {
               </ListItemAvatar>
               <ListItemText primary={obj.subcategory}/>
               <ListItemSecondaryAction>
-                <IconButton
-                  onClick={this.handleChangeToggle
-                    .bind(this, 'openUpd', obj._id)}
-                >
-                  <ContentPaste className={classes.editIcon}/>
+                <IconButton onClick={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}>
+                  <Edit className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
                   open={openUpd.indexOf(obj._id) !== -1}

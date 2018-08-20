@@ -1,25 +1,23 @@
-import dotenv           from 'dotenv';
-import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
-import { parseString }  from 'xml2js';
-import mongoose         from 'mongoose';
-import encoding         from 'encoding-japanese';
-import { Iconv }        from 'iconv';
-import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred
-  , Listed }
-                        from 'Models/feed';
-import std              from 'Utilities/stdutils';
-import Amazon           from 'Utilities/Amazon';
-import Yahoo            from 'Utilities/Yahoo';
-import { logs as log }  from 'Utilities/logutils';
-import js2Csv           from 'Utilities/js2Csv';
+import dotenv                   from 'dotenv';
+import * as R                   from 'ramda';
+import { from, forkJoin, pipe } from 'rxjs';
+import { map, flatMap }         from 'rxjs/operators';
+import { parseString }          from 'xml2js';
+import mongoose                 from 'mongoose';
+import encoding                 from 'encoding-japanese';
+import { Iconv }                from 'iconv';
+import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } from 'Models/feed';
+import std                      from 'Utilities/stdutils';
+import Amazon                   from 'Utilities/Amazon';
+import Yahoo                    from 'Utilities/Yahoo';
+import log                      from 'Utilities/logutils';
+import js2Csv                   from 'Utilities/js2Csv';
 
 dotenv.config();
-const keyset = {
-  access_key: process.env.ACCESS_KEY
-, secret_key: process.env.SECRET_KEY
-, associ_tag: process.env.ASSOCI_TAG
-};
+const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 
 /**
  * FeedPaser class.
@@ -607,7 +605,7 @@ export default class FeedParser {
   }
 
   fetchCategorys({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getReaded(user)
     , this.getStarred(user)
     , this.getCategorys(user)
@@ -620,7 +618,9 @@ export default class FeedParser {
     , this.toObject
     //, R.tap(log.console)
     )(objs[3]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   setCategorys(categorys) {
@@ -716,7 +716,7 @@ export default class FeedParser {
   }
 
   fetchNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
@@ -732,16 +732,18 @@ export default class FeedParser {
     , this.setStarred(objs[0])
     , this.toObject
     )(objs[5]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchAllNotes({ users }) {
     const observables = R.map(user => this.getNotes(user));
-    return Rx.Observable.forkJoin(observables(users));
+    return forkJoin(observables(users));
   }
 
   fetchAddedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getAdded(user)
     , this.getNotes(user)
     ]);
@@ -749,11 +751,13 @@ export default class FeedParser {
       this.setAdded(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchDeletedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getDeleted(user)
     , this.getNotes(user)
     ]);
@@ -761,11 +765,13 @@ export default class FeedParser {
       this.setDeleted(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchReadedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getReaded(user)
     , this.getNotes(user)
     ]);
@@ -773,11 +779,13 @@ export default class FeedParser {
       this.setReaded(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchTradedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getTraded(user)
     , this.getBided(user)
     , this.getNotes(user)
@@ -787,11 +795,13 @@ export default class FeedParser {
     , this.setTraded(objs[0])
     , this.toObject
     )(objs[2]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchBidedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getBided(user)
     , this.getListed(user)
     , this.getNotes(user)
@@ -801,11 +811,13 @@ export default class FeedParser {
     , this.setBided(objs[0])
     , this.toObject
     )(objs[2]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchStarredNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getStarred(user)
     , this.getNotes(user)
     ]);
@@ -813,11 +825,13 @@ export default class FeedParser {
       this.setStarred(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchListedNotes({ user }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getListed(user)
     , this.getNotes(user)
     ]);
@@ -825,11 +839,13 @@ export default class FeedParser {
       this.setListed(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchNote({ user, id }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
@@ -845,13 +861,14 @@ export default class FeedParser {
     , this.setStarred(objs[0])
     , this.toObject
     )([objs[5]]);
-    return observables
-      .map(setAttribute)
-      .map(R.head);
+    return observables.pipe(
+      map(setAttribute)
+    , map(R.head)
+    );
   }
 
   fetchCategory({ user, id }) {
-    return Rx.Observable.fromPromise(this.getCategory(user, id));
+    return from(this.getCategory(user, id));
   }
 
   toObject(objs) {
@@ -957,7 +974,7 @@ export default class FeedParser {
   }
 
   createNote({ user, url, category, categoryIds, title }) {
-    const addNote = obj => Rx.Observable.fromPromise(this.addNote(user, obj));
+    const addNote = obj => from(this.addNote(user, obj));
     let observable;
     switch(category) {
       case 'closedmarchant':
@@ -972,11 +989,12 @@ export default class FeedParser {
         observable = Yahoo.of().fetchHtml({ url });
         break;
     }
-    return observable
-      //.map(R.tap(log.trace.bind(this)))
-      .map(obj => this.setNote({ user, url, category, categoryIds, title }, obj))
-      .flatMap(addNote)
-    ;
+    const setNote = obj => 
+      this.setNote({ user, url, category, categoryIds, title }, obj);
+    return observable.pipe(
+      map(setNote)
+    , flatMap(addNote)
+    );
   }
 
   updateNote({ user, id, data }) {
@@ -988,47 +1006,49 @@ export default class FeedParser {
         , AmazonImg:  obj.MediumImage ? obj.MediumImage.URL : ''
       })
       : R.merge(data, { name: '', AmazonUrl: '', AmazonImg: '' });
+    const setNote = obj => this._updateNote({ user, id, data: obj });
+    const getNote = () => this.fetchNote({ user, id });
     return isAsin
-      ? Amazon.of(keyset).fetchItemLookup(data.asin, 'ASIN')
-        //.map(R.tap(log.trace.bind(this)))
-        .map(setAmazonData)
-        .flatMap(obj => this._updateNote({ user, id, data: obj }))
-        .flatMap(() => this.fetchNote({ user, id }))
-      : this._updateNote({ user, id, data })
-        .flatMap(() => this.fetchNote({ user, id }))
+      ? Amazon.of(amz_keyset).fetchItemLookup(data.asin, 'ASIN').pipe(
+          map(setAmazonData)
+        , flatMap(setNote)
+        , flatMap(getNote)
+        )
+      : this._updateNote({ user, id, data }).pipe(
+          flatMap(getNote)
+        )
     ;
   }
 
   _updateNote({ user, id, data }) {
-    return Rx.Observable.fromPromise(this.replaceNote(user, id, data));
+    return from(this.replaceNote(user, id, data));
   }
   
   deleteNote({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeNote(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createCategory({ user, category, subcategory }) {
-    return Rx.Observable
-      .fromPromise(this.addCategory(user, { category, subcategory }));
+    return from(this.addCategory(user, { category, subcategory }));
   }
 
   updateCategory({ user, id, data }) {
-    return this._updateCategory({ user, id, data })
-      .flatMap(() => this.fetchCategory({ user, id }))
-    ;
+    const getCategory = () => this.fetchCategory({ user, id });
+    return this._updateCategory({ user, id, data }).pipe(
+        flatMap(getCategory)
+      );
   }
 
   _updateCategory({ user, id, data }) {
-    return Rx.Observable
-      .fromPromise(this.replaceCategory(user, id, data));
+    return from(this.replaceCategory(user, id, data));
   }
 
   deleteCategory({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeCategory(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   updateHtml({ user, id, html }) {
@@ -1049,108 +1069,109 @@ export default class FeedParser {
 
   createAdd({ user, ids }) {
     const promises = R.map(id => this.addAdd(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteAdd({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeAdd(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createDelete({ user, ids }) {
     const promises = R.map(id => this.addDelete(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteDelete({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeDelete(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createRead({ user, ids }) {
     const promises = R.map(id => this.getNote(user, id));
-    const observables = Rx.Observable.forkJoin(promises(ids));
-    return observables
-      //.map(R.tap(log.trace.bind(this)))
-      .map(R.map(obj => obj.items))
-      .map(R.flatten)
-      .map(R.map(obj => obj.guid._))
-      .flatMap(objs => this._createRead({ user, ids: objs }))
-    ;
+    const observables = forkJoin(promises(ids));
+    const setRead = objs => this._createRead({ user, ids: objs });
+    return observables.pipe(
+      map(R.map(obj => obj.items))
+    , map(R.flatten)
+    , map(R.map(obj => obj.guid._))
+    , flatMap(setRead)
+    );
   }
 
   _createRead({ user, ids }) {
     //log.debug(user, ids);
     const promises = R.map(id => this.addRead(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteRead({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeRead(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createTrade({ user, ids }) {
     const promises = R.map(id => this.addTrade(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteTrade({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeTrade(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createBids({ user, ids }) {
     const promises = R.map(id => this.addBids(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteBids({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeBids(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createStar({ user, ids }) {
     const promises = R.map(id => this.addStar(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteStar({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeStar(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   createList({ user, ids }) {
     const promises = R.map(id => this.addList(user, id));
-    return Rx.Observable.forkJoin(promises(ids));
+    return forkJoin(promises(ids));
   }
 
   deleteList({ user, ids }) {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeList(user, id));
-    return Rx.Observable.forkJoin(promises(_ids));
+    return forkJoin(promises(_ids));
   }
 
   uploadNotes({ user, category, file }) {
-    const observableCsv = Rx.Observable
-      .fromPromise(this.setCsvToObj(user, category, file.content));
-    const observableOpml = Rx.Observable
-      .fromPromise(this.setOmplToObj(user, category, file.content));
+    const observableCsv = from(this.setCsvToObj(user, category, file.content));
+    const observableOpml = from(this.setOmplToObj(user, category, file.content));
+    const setNote = objs => this.createNotes({ user, category, notes: objs});
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return observableCsv.flatMap(objs =>
-          this.createNotes({ user, category, notes: objs}))
+        return observableCsv.pipe(
+          flatMap(setNote)
+        );
       case 'opml':
-        return observableOpml.flatMap(objs =>
-          this.createNotes({ user, category, notes: objs}))
+        return observableOpml.pipe(
+          flatMap(setNote)
+        );
       default:
         log.error(FeedParser.displayName
           , 'setContent', `Unknown File Type: ${file.type}`);
@@ -1159,9 +1180,6 @@ export default class FeedParser {
   }
   
   createNotes({ user, category, notes }) {
-    //const isNote = obj => R.find(note => note.url === obj.url, notes);
-    //const setNote = obj => this.setNote({
-    //  user, url: obj ? obj.url : '', category }, obj);
     const setNote = obj => this.setNote({
       user
     , category
@@ -1169,26 +1187,8 @@ export default class FeedParser {
     , url: obj.url
     });
     const setNotes = R.map(setNote);
-    //const setData = obj => _setData(isNote(obj), obj);
-    //const _setData = (note, obj)  => R.merge(obj, {
-    //  title:      note.title
-    //, asin:       note.asin
-    //, price:      note.price
-    //, bidsprice:  note.bidsprice
-    //, body:       note.body 
-    //} );
-    //const isNotNil = obj => !R.isNil(obj);
-    //const setNotes
-    //  = R.compose(R.map(setData), R.map(setNote), R.filter(isNotNil));
-    const promises
-      = R.map(obj => this.addNote(user, obj));
-    //const observables
-    //  = R.map(obj => Yahoo.of().fetchHtml({ url: obj.url }))
-    //return Rx.Observable.forkJoin(observables(notes))
-    //  .map(R.tap(log.trace.bind(this)))
-    //  .map(objs => setNotes(objs))
-    //  .flatMap(objs => Rx.Observable.forkJoin(promises(objs)))
-    return Rx.Observable.forkJoin(promises(setNotes(notes)));
+    const promises = R.map(obj => this.addNote(user, obj));
+    return forkJoin(promises(setNotes(notes)));
   }
 
   setOmplToObj(user, category, file) {
@@ -1365,16 +1365,17 @@ export default class FeedParser {
       ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo']
       : ['title', 'url'];
     const setNotesCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    return this.fetchNotes({ user })
-      .map(objs => R.filter(isCategory, objs))
-      .map(objs => setNotes(objs))
-      .map(objs => setNotesCsv(objs))
-      .map(csv  => Buffer.from(csv, 'utf8'))
-    ;
+    return this.fetchNotes({ user }).pipe(
+      map(objs => R.filter(isCategory, objs))
+    , map(objs => setNotes(objs))
+    , map(objs => setNotesCsv(objs))
+    , map(csv  => Buffer.from(csv, 'utf8'))
+    );
   }
   
   downloadItems({ user, ids, filter }) {
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
+    const setAsins = R.join(':');
     const _getItems = R.curry(this.filterItems)(filter);
     const getItems = R.filter(_getItems);
     const setItems = R.map(obj => ({
@@ -1408,6 +1409,7 @@ export default class FeedParser {
     , shipping:     obj.shipping
     , ship_price:   obj.ship_price
     , ship_buynow:  obj.ship_buynow
+    , asins:        setAsins(obj.asins)
     , date:         obj.pubDate
     }));
     const keys = [
@@ -1415,19 +1417,18 @@ export default class FeedParser {
     , 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown', 'seller', 'link'
     , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
     , 'offers', 'market', 'sale', 'sold'
-    , 'categoryid', 'explanation', 'payment', 'shipping', 'date'];
+    , 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const observables = R.map(id => this.fetchNote({ user, id }));
-    return Rx.Observable.forkJoin(observables(ids))
-      .map(R.map(obj => obj.items))
-      .map(R.map(getItems))
-      .map(R.map(setItems))
-      .map(R.flatten)
-      .map(setItemsCsv)
-      .map(setBuffer)
-      //.map(R.tap(log.trace.bind(this)))
-    ;
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(obj => obj.items))
+    , map(R.map(getItems))
+    , map(R.map(setItems))
+    , map(R.flatten)
+    , map(setItemsCsv)
+    , map(setBuffer)
+    );
   }
   
   filterItems(filter, item) {

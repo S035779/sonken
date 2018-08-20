@@ -1,13 +1,30 @@
-import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
-import osmosis          from 'osmosis';
-import { parseString }  from 'xml2js';
-import std              from 'Utilities/stdutils';
-import net              from 'Utilities/netutils';
-import { logs as log }  from 'Utilities/logutils';
+import dotenv             from 'dotenv';
+import path               from 'path';
+import * as R             from 'ramda';
+import { from, forkJoin } from 'rxjs';
+import { map, flatMap }   from 'rxjs/operators';
+import osmosis            from 'osmosis';
+import { parseString }    from 'xml2js';
+import std                from 'Utilities/stdutils';
+import net                from 'Utilities/netutils';
+import log                from 'Utilities/logutils';
+import Amazon             from 'Utilities/Amazon';
 
-//Yahoo! OpenID API
-const baseurl = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
+const config = dotenv.config();
+if(config.error) throw config.error();
+
+const STORAGE   = process.env.STORAGE || 'storage';
+const amazon    = Amazon.of({ 
+  access_key: process.env.AMZ_ACCESS_KEY
+, secret_key: process.env.AMZ_SECRET_KEY
+, associ_tag: process.env.AMZ_ASSOCI_TAG 
+});
+const searchurl = 'https://auctions.yahoo.co.jp/search/search';
+const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
+const authurl   = baseurl + '.well-known/openid-configuration';
+const jwksurl   = baseurl + 'jwks';
+const keyurl    = baseurl + 'public-keys';
+const tokenurl  = baseurl + 'token';
 
 /**
  * Yahoo Api Client class.
@@ -26,107 +43,66 @@ class Yahoo {
   }
 
   static of(options) {
-    const access_key =
-      options && options.access_key ? options.access_key : '';
-    const secret_key =
-      options && options.secret_key ? options.secret_key : '';
-    const redirect_url =
-      options && options.redirect_url ? options.redirect_url : '';
+    const access_key = options && options.access_key ? options.access_key : '';
+    const secret_key = options && options.secret_key ? options.secret_key : '';
+    const redirect_url = options && options.redirect_url ? options.redirect_url : '';
     return new Yahoo(access_key, secret_key, redirect_url);
   }
 
   request(request, options) {
+    //log.info(Yahoo.displayName, 'Request', request);
     switch(request) {
       case 'fetch/auth/support':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + '.well-known/openid-configuration';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
-            if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
-            }
-            const authApi = obj.body.authorization_endpoint;
-            const toknApi = obj.body.token_endpoint;
-            const userApi = obj.body.userinfo_endpoint;
-            const jwksApi = obj.body.jwks_uri;
-            const support = obj.body.response_types_supported;
-            resolve({authApi, toknApi, userApi, jwksApi, support});
+          net.fetch(authurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
+            if(err) return reject(err);
+            const response = {
+              authApi: body.authorization_endpoint
+            , toknApi: body.token_endpoint
+            , userApi: body.userinfo_endpoint
+            , jwksApi: body.jwks_uri
+            , support: body.response_types_supported
+            };
+            resolve(response);
           });
         });
       case 'fetch/auth/jwks':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'jwks';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
-            if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
-            }
-            const set = obj.body.keys;
-            const kids = set.map(o => ({
-              keyid:       o.kid
-              , modulus:   o.n
-              , exponent:  o.e
-            }));
-            resolve(kids);
+          net.fetch(jwksurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
+            if(err) return reject(err);
+            const response = body.keys.map(o => ({ keyid: o.kid, modulus: o.n, exponent: o.e }));
+            resolve(response);
           });
         });
       case 'fetch/auth/publickeys':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'public-keys';
-          net.get2(uri, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
-            if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
-            }
-            const set = obj.body;
-            resolve(set);
+          net.fetch(keyurl, { method: 'GET', type: 'NV', accept: 'JSON' }, (err, body) => {
+            if(err) return reject(err);
+            resolve(body);
           });
         });
       case 'fetch/accesstoken':
         return new Promise((resolve, reject) => {
-          const uri = baseurl + 'token'
-            + '?' + std.encodeFormData(options.query);
-          const Authorization = 'Basic '
-            + std.atob(options.auth['client_id']
-            + ':' + request['client_secret']);
-          net.post2(uri, { Authorization }, null
-          , (status, header, body) => {
-            const head = { request: uri, status, header };
-            const res = JSON.parse(body);
-            const obj = std.merge(head, { body: res });
-            if(head.status !== 200) {
-              this.errorAuth(obj);
-              reject(new Error('Response Error!!'));
-            }
-            const set = obj.body;
-            resolve(set);
+          const search = options.query;
+          const auth = { user: options.auth['client_id'], pass: options.auth['client_secret'] };
+          net.fetch(tokenurl, { method: 'POST', type: 'NV', accept: 'JSON', auth, search }, (err, body) => {
+            if(err) return reject(err);
+            resolve(body);
           });
         });
-      case 'fetch/rss':
+      case 'fetch/file':
+        //log.info(Yahoo.displayName, '[File]', options.url);
         return new Promise((resolve, reject) => {
-          net.get2(options.url, null, (err, head, body) => {
-            if(err) reject(err);
-            //log.trace(Yahoo.displayName, body);
+          const { url, operator, filename } = options;
+          net.get(url, { operator, filename }, (err, body) => {
+            if(err) return reject(err);
             resolve(body);
           });
         });
       case 'parse/xml/note':
         return new Promise((resolve, reject) => {
-          parseString(options.xml, {
-            trim: true, explicitArray: false
-          , attrkey: 'attr', charkey: '_'
+          parseString(options.xml, { 
+            trim: true, explicitArray: false, attrkey: 'attr', charkey: '_' 
           }, (err, data) => {
             if(err) reject(err);
             resolve(data);
@@ -150,17 +126,16 @@ class Yahoo {
           const setItem = R.curry(_setItem);
           const newItem = obj =>
             R.compose( setItem(obj), R.last, R.split('>') );
-          parseString(options.xml.description, {
-            trim: true, explicitArray: false, strict: false
-          , attrkey: 'attr', charkey: '_'
+          parseString(options.xml.description, { 
+            trim: true, explicitArray: false, strict: false, attrkey: 'attr', charkey: '_' 
           }, (err, data) => {
             if(err) reject(err);
             resolve(newItem(data)(options.xml.description));
           }); 
         });
       case 'fetch/closedmerchant':
+        //log.info(Yahoo.displayName, '[ClosedMerchant]', options.url);
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, '[ClosedMerchant]', options.url);
           let results;
           let count = 0;
           osmosis.get(options.url, { n: 100, b: 1 })
@@ -291,8 +266,8 @@ class Yahoo {
             .done(()    => resolve(results));
         });
       case 'fetch/closedsellers':
+        //log.info(Yahoo.displayName, '[ClosedSellers]', options.url);
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, '[ClosedSellers]', options.url);
           let results;
           let count = 0;
           osmosis.get(options.url, { apg: 1 })
@@ -425,8 +400,8 @@ class Yahoo {
             .done(()    => resolve(results));
         });
       case 'fetch/html':
+        //log.info(Yahoo.displayName, '[Auctions]', options.url);
         return new Promise((resolve, reject) => {
-          log.info(Yahoo.displayName, '[Auctoins]', options.url);
           let results;
           osmosis.get(options.url)
             .set({ title: 'title', item: [ osmosis
@@ -540,12 +515,24 @@ class Yahoo {
     }
   }
   
-  /**
-   * get rss feed and parse xml.
-   *
-   */
+  getAuthSupport() {
+    return request('fetch/auth/support', {});
+  }
+
+  getAuthJwks() {
+    return request('fetch/auth/jwls', {});
+  }
+
+  getAuthPublickeys() {
+    return request('fetch/auth/publickeys', {});
+  }
+
+  getAccessToken(query, auth) {
+    return request('fetch/accesstoken', { query, auth });
+  }
+
   getRss(url) {
-    return this.request('fetch/rss', { url });
+    return this.request('fetch/file', { url });
   }
 
   getXmlNote(xml) {
@@ -556,36 +543,6 @@ class Yahoo {
     return this.request('parse/xml/item', { xml });
   }
 
-  _fetchRss(url) {
-    return Rx.Observable.fromPromise(this.getRss(url));
-  }
-
-  _fetchXmlNote(xml) {
-    return Rx.Observable.fromPromise(this.getXmlNote(xml));
-  }
-
-  forXmlItem(xml) {
-    const promises =
-      R.map(this.getXmlItem.bind(this), xml.rss.channel.item);
-    return Rx.Observable.forkJoin(promises);
-  }
-
-  fetchRss({ url }) {
-    let _note;
-    const setItems = (note, item) => R.merge(note.rss.channel, { item });
-    return this._fetchRss(url)
-      .flatMap(obj => this._fetchXmlNote(obj))
-      .map(obj => _note = obj)
-      .flatMap(obj => this.forXmlItem(obj))
-      .map(objs => setItems(_note,objs))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
-  }
-
-  /**
-   * search auction items and parse html.
-   *
-   */
   getClosedMerchant(url, pages) {
     return this.request('fetch/closedmerchant', { url, pages });
   }
@@ -598,110 +555,167 @@ class Yahoo {
     return this.request('fetch/html', { url });
   }
   
+  getImage(operator, aid,  url) {
+    const filename    = std.crypto_sha256(url, aid, 'hex') + '.img';
+    operator = operator(STORAGE, filename);
+    return this.request('fetch/file', { url, operator, filename });
+  }
+
+  fetchImage(operator, { guid__, images }) {
+    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
+    return forkJoin(promises(images));
+  }
+
+  fetchImages({ operator, items }) {
+    const getImage = obj => this.fetchImage(operator, obj);
+    return from(items).pipe(
+      flatMap(getImage)
+    );
+  }
+
+  fetchItemSearch(note) {
+    const _setAsins   = (items, objs) => R.map(item => this.setAsin(item, objs), items);
+    const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
+    const setAsins    = R.curry(_setAsins)(note.item);
+    const setItems    = R.curry(_setItems)(note);
+    const observables = R.map(obj => amazon.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
+    return forkJoin(observables(note.item)).pipe(
+      map(setAsins)
+    , map(setItems)
+    );
+  }
+
+  setAsin (item, objs) {
+    const setASINs  = _objs => R.merge(item, { asins: _objs });
+    const getASIN   = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) 
+      : [ _obj.Item.ASIN ];
+    const isValid   = _obj  => _obj
+      && _obj.Request.IsValid === 'True'
+      && _obj.Request.ItemSearchRequest.Keywords === this.repSpace(item.title)
+      && Number(_obj.TotalResults) > 0;
+    return R.compose(
+      setASINs 
+    , R.head
+    , R.map(getASIN)
+    , R.filter(isValid)
+    )(objs);
+  }
+
+  repSpace(keywords)  {
+    const delMark1   = R.replace(/[\u25CE\u25CF\u25B3\u25BD\u25B2\u25BC\u22BF\u25B6\u25C0\u25A1\u25A0]/g, ' ');
+    const delMark2   = R.replace(/[\u25C7\u25C6\uFF01\u2661\u2665\u2664\u2660\u2667\u2663\u2662\u2666]/g, ' ');
+    const delMark3   = R.replace(/[\u3010\u3011\u2605\u2606\u203B\uFF0A\u266A]/g                        , ' ');
+    const delString1 = R.replace(/\u7F8E\u54C1|\u826F\u54C1|\u6975|\u512A|\u4E2D\u53E4|\u7D14\u6B63/g   , ' ');
+    const delString2 = R.replace(/\u8A33\u3042\u308A|\u73FE\u72B6\u54C1|\u307B\u307C\u672A\u4F7F\u7528/g, ' ');
+    const delString3 = R.replace(/\u9AD8\u901F\u7248|\u9001\u6599\u7121\u6599|\u8D85/g                  , ' ');
+    const repString  = R.compose(
+      delMark1
+    , delMark2
+    , delMark3
+    , delString1
+    , delString2
+    , delString3
+    );
+    return repString(keywords);
+  }
+
   fetchClosedMerchant({ url, pages }) {
-    if(!pages) pages = 1;
-    return Rx.Observable.fromPromise(this.getClosedMerchant(url, pages))
-      .flatMap(obj => this.fetchMarchant(obj))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
+    if(!pages) pages  = 1;
+    return from(this.getClosedMerchant(url, pages)).pipe(
+      flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
+    );
   }
 
   fetchClosedSellers({ url, pages }) {
-    if(!pages) pages = 1;
-    return Rx.Observable.fromPromise(this.getClosedSellers(url, pages))
-      .flatMap(obj => this.fetchMarchant(obj))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
+    if(!pages) pages  = 1;
+    return from(this.getClosedSellers(url, pages)).pipe(
+      flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
+    );
   }
 
   fetchHtml({ url }) {
-    return Rx.Observable.fromPromise(this.getHtml(url));
-  }
- 
-  fetchMarchant(note) {
-    const setUrl     = obj => {
-      const api = std.parse_url('https://auctions.yahoo.co.jp/search/search');
-      api.searchParams.append('p', obj.title);
-      return api.href;
-    };
-    const isItem = obj => !!obj.title;
-    const setUrls     = R.compose(R.map(setUrl), R.filter(isItem));
-    const setMarket   = (item, objs) => {
-      const _isSeller = _obj  => 
-        R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
-      const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
-      const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-      const getSales  = _objs => _objs.length > 0
-        ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
-      const setSale   = _obj  => R.merge(item, _obj);
-      return R.compose(setSale, getSales, isSales)(objs);
-    };
-    const setPerformance = (items, obj) => {
-      const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
-      const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-      const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
-      const setSold   = item  => R.merge(obj, item);
-      return R.compose(setSold, getSolds, isSolds)(items);
-    };
-    const setMarkets      = (items, objs) => R.map(item => setMarket(item, objs), items);
-    const setPerformances = (items, objs) => R.map(obj => setPerformance(items, obj), objs);
-    const setItems        = (_note, objs) => R.merge(_note, { item: objs });
-    const promises        = R.map(url => this.getHtml(url));
-    const observable      = urls => Rx.Observable.forkJoin(promises(urls));
-    return observable(setUrls(note.item))
-      .map(objs => setMarkets(note.item, objs))
-      .map(objs => setPerformances(note.item, objs))
-      .map(objs => setItems(note, objs))
-      //.map(R.tap(log.trace.bind(this)))
-    ;
+    return from(this.getHtml(url));
   }
 
-  /**
-   * get result of the 'Yahoo! Auth Endpoints & support types.'.
-   *
-   */
-  getAuthSupport() {
-    return request('fetch/auth/support', {});
+  fetchMarchant(note) {
+    const isItem            = obj => !!obj.title;
+    const urls              = R.compose(R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item);
+    const _setMarkets       = (items, objs) => R.map(item => this.setMarket(item, objs), items);
+    const _setPerformances  = (items, objs) => R.map(obj => this.setPerformance(items, obj), objs);
+    const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
+    const setMarkets        = R.curry(_setMarkets)(note.item);
+    const setPerformances   = R.curry(_setPerformances)(note.item);
+    const setItems          = R.curry(_setItems)(note);
+    const promises          = R.map(this.getHtml.bind(this));
+    return forkJoin(promises(urls)).pipe(
+      map(setMarkets)
+    , map(setPerformances)
+    , map(setItems)
+    );
+  }
+
+  setUrl(obj) {
+    const api = std.parse_url(searchurl);
+    api.searchParams.append('p', obj.title);
+    return api.href;
+  }
+
+  setMarket(item, objs) {
+    const _isSeller = _obj  => 
+      R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+    const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
+    const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+    const getSales  = _objs => _objs.length > 0
+      ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+    const setSale   = _obj  => R.merge(item, _obj);
+    return R.compose(
+      setSale
+    , getSales
+    , isSales
+    )(objs);
+  }
+
+  setPerformance(items, obj) {
+    const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
+    const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
+    const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
+    const setSold   = item  => R.merge(obj, item);
+    return R.compose(
+      setSold
+    , getSolds
+    , isSolds
+    )(items);
+  }
+
+  fetchRss({ url }) {
+    let _note;
+    const setItems = (note, item) => R.merge(note.rss.channel, { item });
+    const fetchRss = obj => from(this.getRss(obj));
+    const fetchXml = obj => from(this.getXmlNote(obj.body));
+    const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
+    const fetchXmlItems = obj => forkJoin(promises(obj));
+    return fetchRss(url).pipe(
+      flatMap(fetchXml)
+    , map(obj => _note = obj)
+    , flatMap(fetchXmlItems)
+    , map(objs => setItems(_note, objs))
+    );
   }
 
   fetchAuthSupport() {
-    return Rx.Observable.fromPromise(this.getAuthSupport());
-  }
-
-  /**
-   * get result of the 'Yahoo! JWKs.'.
-   *
-   */
-  getAuthJwks() {
-    return request('fetch/auth/jwls', {});
+    return from(this.getAuthSupport());
   }
 
   fetchAuthJwks() {
-    return Rx.Observable.fromPromise(this.getAuthJwks());
-  }
-
-
-  /**
-   * get result of the 'Yahoo! Public Keys.'.
-   *
-   */
-  getAuthPublickeys() {
-    return request('fetch/auth/publickeys', {});
+    return from(this.getAuthJwks());
   }
 
   fetchAuthPublicKeys() {
-    return Rx.Observable.fromPromise(this.getAuthPublickeys())
-      .map(obj => obj[client.keyid]);
-  }
-
-  /**
-   * get result of the 'Yahoo! Authorization.'.
-   *
-   * @param query {object} - http request query strings.
-   * @param auth {object} - http request auth strings.
-   */
-  getAccessToken(query, auth) {
-    return request('fetch/accesstoken', { query, auth });
+    return from(this.getAuthPublickeys()).pipe(
+      map(obj => obj[client.keyid])
+    );
   }
 
   createAuthToken({ code }) {
@@ -712,22 +726,24 @@ class Yahoo {
     query['code'] = code;
     auth['client_id'] = this.access_key;
     auth['client_secret'] = this.secret_key;
-    return Rx.Observable.fromPromise(this.getAccessToken(query, auth))
-      .map(obj => {
-        const newToken = {
-          code:             code
-          , access_token:   obj.access_token
-          , refresh_token:  obj.refresh_token
-          , expires_in:     obj.expires_in
-          , id_token:       obj.id_token
-        };
-        const isSuccess =
-          this.hasToken(code) ? false : this.addToken(newToken);
-        if(!isSuccess) throw new Error({
-            name: 'Error', message: 'Create Token Error!!'
-          });
-        return newToken;
-      });
+    const setToken = obj => {
+      const newToken = {
+        code:             code
+        , access_token:   obj.access_token
+        , refresh_token:  obj.refresh_token
+        , expires_in:     obj.expires_in
+        , id_token:       obj.id_token
+      };
+      const isSuccess =
+        this.hasToken(code) ? false : this.addToken(newToken);
+      if(!isSuccess) throw new Error({
+          name: 'Error', message: 'Create Token Error!!'
+        });
+      return newToken;
+    };
+    return from(this.getAccessToken(query, auth)).pipe(
+      map(setToken)
+    );
   }
 
   refreshAuthToken({ code }) {
@@ -737,22 +753,24 @@ class Yahoo {
     query['refresh_token'] = code;
     auth['client_id'] = this.access_key;
     auth['client_secret'] = this.secret_key;
-    return Rx.Observable.fromPromise(this.getAccessToken(query, auth))
-      .map(obj => {
-        const newToken = {
-          code:             code
-          , access_token:   obj.access_token
-          , refresh_token:  obj.refresh_token
-          , expires_in:     obj.expires_in
-          , id_token:       obj.id_token
-        };
-        const isSuccess =
-          this.hasToken(code) ? this.updToken(code, newToken) : false;
-        if(!isSuccess) throw new Error({
-          name: 'Error', message: 'Update Token Error!!'
-        });
-        return newToken;
+    const setToken = obj => {
+      const newToken = {
+        code:             code
+        , access_token:   obj.access_token
+        , refresh_token:  obj.refresh_token
+        , expires_in:     obj.expires_in
+        , id_token:       obj.id_token
+      };
+      const isSuccess =
+        this.hasToken(code) ? this.updToken(code, newToken) : false;
+      if(!isSuccess) throw new Error({
+        name: 'Error', message: 'Update Token Error!!'
       });
+      return newToken;
+    };
+    return from(this.getAccessToken(query, auth)).pipe(
+      map(setToken)
+    );
   }
 
   deleteAuthToken({ code }) {
@@ -842,5 +860,5 @@ class Yahoo {
     ;
   }
 };
-Yahoo.displayName = 'yahoo-api';
+Yahoo.displayName = '[YHA]';
 export default Yahoo;

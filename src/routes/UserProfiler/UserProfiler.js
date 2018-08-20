@@ -1,12 +1,12 @@
-import dotenv             from 'dotenv';
-import R                  from 'ramda';
-import Rx                 from 'rxjs/Rx';
-import { User, Approved, Admin }
-                          from 'Models/profile';
-import { Mail, Selected } from 'Models/mail';
-import std                from 'Utilities/stdutils';
-import Sendmail           from 'Utilities/Sendmail';
-import { logs as log }    from 'Utilities/logutils';
+import dotenv                     from 'dotenv';
+import * as R                     from 'ramda';
+import { from, forkJoin }         from 'rxjs';
+import { map, flatMap }           from 'rxjs/operators';
+import { User, Approved, Admin }  from 'Models/profile';
+import { Mail, Selected }         from 'Models/mail';
+import std                        from 'Utilities/stdutils';
+import Sendmail                   from 'Utilities/Sendmail';
+import log                        from 'Utilities/logutils';
 
 dotenv.config()
 const node_env    = process.env.NODE_ENV;
@@ -439,40 +439,42 @@ export default class UserProfiler {
   authenticate({ admin, user, password }) {
     const isAdmin = admin !== '';
     const observable = obj => isAdmin
-      ? Rx.Observable
-        .fromPromise(this.signinAdmin(admin, obj.salt, obj.hash))
-      : Rx.Observable
-        .fromPromise(this.signinUser(user, obj.salt, obj.hash));
+      ? from(this.signinAdmin(admin, obj.salt, obj.hash))
+      : from(this.signinUser(user, obj.salt, obj.hash));
     const options = isAdmin ? { user: admin } : { user: user };
-    return this.fetchUser(options)
-      .flatMap(obj => this.createSaltAndHash(password, obj.salt))
-      .flatMap(obj => observable(obj))
-      .flatMap(() => this.fetchUser(options))
-      .flatMap(obj => this.fetchApproved(obj))
-      //.map(R.tap(log.trace.bind(this)))
+    return this.fetchUser(options).pipe(
+      flatMap(obj => this.createSaltAndHash(password, obj.salt))
+    , flatMap(obj => observable(obj))
+    , flatMap(() => this.fetchUser(options))
+    , flatMap(obj => this.fetchApproved(obj))
+    //, map(R.tap(log.trace.bind(this)))
+    )
     ;
   }
 
   fetchApproved(user) {
     const id = user._id.toString();
     const isId = obj => obj && obj.approved === id;
-    const observable = Rx.Observable.fromPromise(this.getApproval(id));
-    return observable.map(obj => isId(obj[0]) && user.isAuthenticated);
+    const observable = from(this.getApproval(id));
+    return observable.pipe(
+      map(obj => isId(obj[0]) && user.isAuthenticated)
+    );
   }
 
   signout({ admin, user }) {
     const isAdmin = admin !== '';
     const observable = isAdmin 
-      ? Rx.Observable.fromPromise(this.signoutAdmin(admin))
-      : Rx.Observable.fromPromise(this.signoutUser(user));
+      ? from(this.signoutAdmin(admin))
+      : from(this.signoutUser(user));
     const options = isAdmin ? { user: admin } : { user: user };
-    return observable
-      .flatMap(() => this.fetchUser(options))
-      .map(obj => obj.isAuthenticated);
+    return observable.pipe(
+      flatMap(() => this.fetchUser(options))
+    , map(obj => obj.isAuthenticated)
+    );
   }
 
   fetchUsers({ admin }) {
-    const observables = Rx.Observable.forkJoin([
+    const observables = forkJoin([
       this.getApproval()
     , this.getUsers(admin)
     ]);
@@ -480,7 +482,9 @@ export default class UserProfiler {
       this.setApproved(objs[0])
     , this.toObject
     )(objs[1]);
-    return observables.map(setAttribute);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   toObject(objs) {
@@ -499,20 +503,19 @@ export default class UserProfiler {
   }
 
   fetchUser({ user, email, phone }) {
-    return Rx.Observable
-      .fromPromise(this.getUser(user, email, phone));
+    return from(this.getUser(user, email, phone));
   }
 
   createUser({ user, password, data }) {
-    return this.createSaltAndHash(password)
-      .flatMap(obj => this._createUser({
-        user, salt: obj.salt, hash: obj.hash, data
-      }));
+    const setUser = obj => 
+      this._createUser({ user, salt: obj.salt, hash: obj.hash, data })
+    return this.createSaltAndHash(password).pipe(
+      flatMap(setUser)
+    );
   }
 
   _createUser({ user, salt, hash, data }) {
-    return Rx.Observable
-      .fromPromise(this.addUser(user, salt, hash, data));
+    return from(this.addUser(user, salt, hash, data));
   }
 
   updateUser({ admin, user, password, data }) {
@@ -520,60 +523,65 @@ export default class UserProfiler {
     const isAdmin = !!admin;
     const isData = !!data;
     //log.debug(isAdmin, isData, isPass);
-    if(isPass && isData) return this.createSaltAndHash(password)
-      .flatMap(obj => 
-        this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
-      .flatMap(() => this.fetchUser({ user }))
+    if(isPass && isData) return this.createSaltAndHash(password).pipe(
+        flatMap(obj => 
+          this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
+      , flatMap(() => this.fetchUser({ user }))
+      );
 
-    if(isAdmin && isData) return this._updateUser({ admin, data })
-      .flatMap(() => this.fetchUser({ user: data.user }));
+    if(isAdmin && isData) return this._updateUser({ admin, data }).pipt(
+        flatMap(() => this.fetchUser({ user: data.user }))
+      );
     
-    if(isData) return this._updateUser({ user, data })
-      .flatMap(() => this.fetchUser({ user }));
+    if(isData) return this._updateUser({ user, data }).pipe(
+        flatMap(() => this.fetchUser({ user }))
+      );
     
-    if(isPass) return this.createSaltAndHash(password)
-      .flatMap(obj => 
-        this._updateUser({ user, salt: obj.salt, hash: obj.hash}))
-      .flatMap(() => this.fetchUser({ user }))
+    if(isPass) return this.createSaltAndHash(password).pipe(
+        flatMap(obj => 
+          this._updateUser({ user, salt: obj.salt, hash: obj.hash}))
+      , flatMap(() => this.fetchUser({ user }))
+      );
   }
 
   _updateUser({ admin, user, salt, hash, data }) {
-    return Rx.Observable
-      .fromPromise(this.replaceUser(admin, user, salt, hash, data));
+    return from(this.replaceUser(admin, user, salt, hash, data));
   }
 
   createSaltAndHash(password, salt) {
-    return Rx.Observable.fromPromise(this.getSaltAndHash(password, salt));
+    return from(this.getSaltAndHash(password, salt));
   }
 
   deleteUser({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeUser.bind(this));
-    const observable = id => Rx.Observable.fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   sendmail({ admin, ids }) {
-    const observables = objs => Rx.Observable.forkJoin([
+    const observables = objs => forkJoin([
       this.fetchPreference()
     , this.forAddress(admin, ids)
     , this.forMessage(admin, objs)
     ]);
-    return this.fetchSelected(admin)
-      .flatMap(objs => observables(objs))
-      .map(objs => this.setMessage(objs[0], objs[1], objs[2]))
-      .flatMap(objs => this.postMessages(objs));
+    return this.fetchSelected(admin).pipe(
+      flatMap(objs => observables(objs))
+    , map(objs => this.setMessage(objs[0], objs[1], objs[2]))
+    , flatMap(objs => this.postMessages(objs))
+    );
   }
 
   inquiry({ user, data }) {
-    const observables = obj => Rx.Observable.forkJoin([ 
+    const observables = obj => forkJoin([ 
       this.getPreference()
     , this.getUser(obj) 
     ]);
-    return observables(user)
-      .map(objs => this.setInquiry(objs[0], objs[1], data))
-      .flatMap(obj => this.postMessage(obj));
+    return observables(user).pipe(
+      map(objs => this.setInquiry(objs[0], objs[1], data))
+    , flatMap(obj => this.postMessage(obj))
+    );
   }
   
   setInquiry(sender, user, message) {
@@ -595,26 +603,26 @@ export default class UserProfiler {
 
   forAddress(admin, ids) {
     const observables = R.map(id => this.fetchAddress(admin, id), ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   forMessage(admin, objs) {
     const observables =
       R.map(obj => this.fetchMessage(admin, obj.selected), objs);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   fetchAddress(admin, id) {
-    return Rx.Observable.fromPromise(this.getAddress(admin, id));
+    return from(this.getAddress(admin, id));
   }
 
   fetchMessage(admin, id) {
     //log.trace(admin, id);
-    return Rx.Observable.fromPromise(this.getMessage(admin, id));
+    return from(this.getMessage(admin, id));
   }
 
   fetchSelected(admin) {
-    return Rx.Observable.fromPromise(this.getSelected(admin));
+    return from(this.getSelected(admin));
   }
 
   postMessages(objs) {
@@ -645,23 +653,21 @@ export default class UserProfiler {
 
   createApproval({ admin, ids }) {
     const _promise = R.curry(this.addApproval.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   deleteApproval({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeApproval.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   fetchPreference() {
-    return Rx.Observable.fromPromise(this.getPreference());
+    return from(this.getPreference());
   }
 
   createPreference({ admin }) {
@@ -677,16 +683,17 @@ export default class UserProfiler {
         plan = this.productionMenu();
         break;
     }
-    return Rx.Observable.fromPromise(this.addPreference(admin, plan));
+    return from(this.addPreference(admin, plan));
   }
 
   updatePreference({ admin, data }) {
-    return Rx.Observable.fromPromise(this.replacePreference(admin, data))
-    .flatMap(() => this.fetchPreference({ admin }));
+    return from(this.replacePreference(admin, data)).pipe(
+      flatMap(() => this.fetchPreference({ admin }))
+    );
   }
 
   deletePreference({ admin, id }) {
-    return Rx.Observable.fromPromise(this.removePreference(admin, id));
+    return from(this.removePreference(admin, id));
   }
 
   createAdmin({ admin, password }) {
@@ -702,13 +709,13 @@ export default class UserProfiler {
       , plan: 1
       }
     });
-    return this.createSaltAndHash(password)
-      .flatMap(obj => this._createAdmin(setAdmin(obj)));
+    return this.createSaltAndHash(password).pipe(
+      flatMap(obj => this._createAdmin(setAdmin(obj)))
+    );
   }
 
   _createAdmin({ admin, salt, hash, data }) {
-    return Rx.Observable
-      .fromPromise(this.addAdmin(admin, salt, hash, data));
+    return from(this.addAdmin(admin, salt, hash, data));
   }
 
   createMenu({ admin }) {
@@ -747,24 +754,24 @@ export default class UserProfiler {
     , advertisement:  plan.advertisement
     });
 
-    const observable1 = Rx.Observable.forkJoin([
+    const observable1 = forkJoin([
       this.fetchUsers({ admin })
     , this.fetchPreference({ admin })
     ]);
-    const observable2 = objs => Rx.Observable.forkJoin([
+    const observable2 = objs => forkJoin([
       this.updateUsers(objs[0])
     , this.updatePreference({ admin, data: objs[1] })
     ]);
-    return observable1
-      .map(objs => ([setPlans(objs), setMenu(objs[1])]))
-      .flatMap(objs => observable2(objs))
-      //.map(R.tap(log.debug.bind(this)))
-    ;
+    return observable1.pipe(
+      map(objs => ([setPlans(objs), setMenu(objs[1])]))
+    , flatMap(objs => observable2(objs))
+    //, map(R.tap(log.debug.bind(this)))
+    );
   }
 
   updateUsers(users) {
     const promises = R.map(obj => this.updateUser({ user: obj.user, data: obj.data }));
-    return Rx.Observable.forkJoin(promises(users));
+    return forkJoin(promises(users));
   }
 
   productionMenu() {

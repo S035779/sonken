@@ -1,9 +1,10 @@
-import R                from 'ramda';
-import Rx               from 'rxjs/Rx';
-import mongoose         from 'mongoose';
-import { Faq, Posted }  from 'Models/faq';
-import std              from 'Utilities/stdutils';
-import { logs as log }  from 'Utilities/logutils';
+import * as R             from 'ramda';
+import { from, forkJoin } from 'rxjs';
+import { map }            from 'rxjs/operators';
+import mongoose           from 'mongoose';
+import { Faq, Posted }    from 'Models/faq';
+import std                from 'Utilities/stdutils';
+import log                from 'Utilities/logutils';
 
 /**
  * FaqEditor class.
@@ -177,63 +178,60 @@ export default class FaqEditor {
   }
 
   fetchFaqs({ admin }) {
-    const observables = Rx.Observable
-      .forkJoin([ this.getPost(admin), this.getFaqs(admin) ]);
-    return observables
-    .map(objs => {
+    const observables = forkJoin([ this.getPost(admin), this.getFaqs(admin) ]);
+    const setPost = objs => {
       const posted = R.map(obj => obj.posted, objs[0]); 
       return R.map(obj => {
           const faq = obj.toObject();
           const isPosted = R.contains(faq._id.toString(), posted);
           return R.merge(faq, { posted: isPosted });
         }, objs[1]);
-    });
+    };
+    return observables.pipe(
+      map(setPost)
+    );
   }
 
   fetchFaq({ admin, ids }) {
     const _promise = R.curry(this.getFaq.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   createFaq({ admin }) {
     const data = { title: 'Untitled', body: '' };
-    return Rx.Observable.fromPromise(this.addFaq(admin, data));
+    return from(this.addFaq(admin, data));
   }
 
   updateFaq({ admin, id, data }) {
-    return Rx.Observable.fromPromise(this.replaceFaq(admin, id, data));
+    return from(this.replaceFaq(admin, id, data));
   }
 
   deleteFaq({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removeFaq.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   createPost({ admin, ids }) {
     const _promise = R.curry(this.addPost.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   deletePost({ admin, ids }) {
     const _ids = R.split(',', ids);
     const _promise = R.curry(this.removePost.bind(this));
-    const observable = id => Rx.Observable
-      .fromPromise(_promise(admin, id));
+    const observable = id => from(_promise(admin, id));
     const observables = R.map(observable, _ids);
-    return Rx.Observable.forkJoin(observables);
+    return forkJoin(observables);
   }
 
   uploadFile({ admin, id, file }) {
-    return Rx.Observable.fromPromise(this.upFile(admin, id, file));
+    return from(this.upFile(admin, id, file));
   }
 };

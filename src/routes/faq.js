@@ -1,5 +1,5 @@
-import FaqEditor     from 'Routes/FaqEditor/FaqEditor';
-import { logs as log }  from 'Utilities/logutils';
+import FaqEditor  from 'Routes/FaqEditor/FaqEditor';
+import log        from 'Utilities/logutils';
 
 const displayName = 'faq';
 const faq = FaqEditor.of();

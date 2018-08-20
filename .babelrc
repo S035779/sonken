@@ -1,12 +1,11 @@
 {
-  "plugins": [
-    "react-hot-loader/babel",
-    "babel-plugin-transform-es3-member-expression-literals",
-    "babel-plugin-transform-es3-property-literals",
-  ],
-  "presets": [
-    "react", [ "env", { "modules": false }], "stage-0", "stage-1"
-  ],
-  "compact": true
+  "presets": [ "react", [ "env", { "modules": false } ] ]
+, "plugins": [
+    "react-hot-loader/babel"
+  , "transform-object-rest-spread"
+  , "transform-es3-member-expression-literals"
+  , "transform-es3-property-literals"
+  ]
+, "compact": "true"
 }
 

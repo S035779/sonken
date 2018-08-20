@@ -12,6 +12,7 @@ var node = {
   , api: ['./api-server.js']
   , job: ['./job-server.js']
   , wrk: ['./job-worker.js']
+  , img: ['./img-server.js']
   }
 , optimization: {
     nodeEnv: false
@@ -33,6 +34,7 @@ var node = {
   , __filename: true
   }
 , externals: [ nodeExternals() ]
+, devtool: 'inline-source-map'
 , mode: 'none'
 };
 module.exports = merge(common, node);

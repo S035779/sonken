@@ -6,7 +6,7 @@ import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { IconButton, Menu, Divider, ListItemIcon, MenuItem } from '@material-ui/core';
-import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew, Settings } from '@material-ui/icons';
+import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew, SettingsEthernet } from '@material-ui/icons';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 
 class RssMenu extends React.Component {
@@ -94,7 +94,7 @@ class RssMenu extends React.Component {
         </MenuItem>
         <MenuItem
           onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
-          <ListItemIcon><Settings /></ListItemIcon>
+          <ListItemIcon><SettingsEthernet /></ListItemIcon>
           Setting
         </MenuItem>
         <Divider />

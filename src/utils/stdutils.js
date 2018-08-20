@@ -1,4 +1,3 @@
-import querystring from 'querystring';
 import crypto from 'crypto';
 import { URL, URLSearchParams } from 'url';
 
@@ -78,6 +77,24 @@ export default {
     const head = color_code['Reset']
       + name;
     console.info(date, '[INFO]', caller, '-', head, ':', message);
+  },
+
+  logTime(caller, name, message) {
+    const date = color_code['FgMagenta']
+      + `[${this.getLocalISOTimeStamp(new Date)}]`;
+    const head = color_code['Reset']
+      + name;
+    switch(name) {
+      case 'start':
+        console.time(caller);
+        break;
+      case 'stop':
+        console.timeEnd(caller);
+        break;
+      case 'log':
+        console.timeLog(caller, date, '[TIME]', caller, '-', head, ':', message);
+        break;
+    }
   },
 
   is(type, obj) {
@@ -498,25 +515,6 @@ export default {
   },
 
   /**
-   * Encode the properties of an object as if they were name/value 
-   * pairs from an HTML form, 
-   * using application/x-www-form-urlencoded format
-   */
-  encodeFormData(data) {
-    if (!data) return "";
-    let pairs = [];
-    for(let name in data) {
-      if (!data.hasOwnProperty(name)) continue;
-      if (typeof data[name] === "function") continue;
-      let value = data[name].toString();
-      name = encodeURIComponent(name.replace(" ", "+"));
-      value = encodeURIComponent(value.replace(" ", "+"));
-      pairs.push(name + "=" + value);
-    }
-    return pairs.join('&');
-  },
-
-  /**
    * Decode an HTML form as if they were name/value pairs from 
    * the properties of an object, 
    * using application/x-www-form-urlencoded format↲
@@ -539,7 +537,7 @@ export default {
    * $length: number of characters to be generated.
    * added [ /*-+.,!#$%&()~|_  ] to makeRandStr.
    */
-  makeRandPassword(length) {
+  rndPassword(length) {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789/*-+.,!#$%&()~|_';
     let str = '';
     for (let i = 0; i < length; ++i) {
@@ -552,7 +550,7 @@ export default {
    * Generated a randam characters, using 'Math.random()' method.
    * $length: number of characters to be generated.
    */
-  makeRandStr(length) {
+  rndString(length) {
     const chars =
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789';
     let str = '';
@@ -566,7 +564,7 @@ export default {
    * Generated a randam characters, using 'Math.random()' method.
    * $length: number of characters to be generated.
    */
-  makeRandInt(length) {
+  rndInteger(length) {
     const chars = '123456789';
     let str = '';
     for (let i = 0; i < length; ++i) {
@@ -635,12 +633,38 @@ export default {
    * @param {objct} obj - query parameter object.
    * @return {string}
    */
-  urlencode(obj) {
+  urlencode(data) {
+    let results = '';
+    if (data && typeof data === 'string') {
+      results = encodeURIComponent(data);
+    } else if(data && typeof data === 'object') {
+      let pairs = [];
+      for(let name in data) {
+        if (!data.hasOwnProperty(name)) continue;
+        if (typeof data[name] === "function") continue;
+        let value = data[name].toString();
+        name = encodeURIComponent(name);
+        value = encodeURIComponent(value);
+        pairs.push(name + "=" + value);
+      }
+      results = pairs.join('&');
+    } 
+    return results;
+  },
+
+  /**
+   * Function that return a character string encode 
+   * from Associative array object.
+   * 
+   * @param {objct} obj - query parameter object.
+   * @return {string}
+   */
+  urlencode_fake(data) {
     const keys = [];
-    for(let key in obj) {
-      if(obj.hasOwnProperty(key)) keys.push(key);
+    for(let key in data) {
+      if(data.hasOwnProperty(key)) keys.push(key);
     }
-    return keys.map((key, idx) => `${key}=${obj[key]}`)
+    return keys.map((key, idx) => `${key}=${data[key]}`)
       .map(pair => pair.replace(" ", "+"))
       .join('&');
   },
@@ -652,8 +676,25 @@ export default {
    * @param {objct} obj - query parameter object.
    * @return {string}
    */
-  urlencode_rfc3986(obj) {
-    return querystring.stringify(obj);
+  urlencode_rfc3986(data) {
+    const encode = obj => encodeURIComponent(obj)
+      .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    let results = '';
+    if (data && typeof data === 'string') {
+      results = encode(data);
+    } else if(data && typeof data === 'object') {
+      let pairs = [];
+      for(let name in data) {
+        if (!data.hasOwnProperty(name)) continue;
+        if (typeof data[name] === "function") continue;
+        let value = data[name].toString();
+        name = encode(name);
+        value = encode(value);
+        pairs.push(name + "=" + value);
+      }
+      results = pairs.join('&');
+    } 
+    return results;
   },
 
   /**
@@ -662,11 +703,9 @@ export default {
    * @param {string} string - string to be converted.
    * @param {string} secret_key - secret key string required for conversion.
    */
-  crypto_sha256(string, secret_key) {
-    return crypto
-      .createHmac('sha256', secret_key)
-      .update(string)
-      .digest('base64');
+  crypto_sha256(string, secret_key, digest) {
+    const encode = digest || 'base64';
+    return crypto.createHmac('sha256', secret_key).update(string).digest(encode);
   },
 
   crypto_pbkdf2(pass, salt, length) {

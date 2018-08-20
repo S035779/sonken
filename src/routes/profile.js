@@ -1,5 +1,5 @@
-import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
-import { logs as log }  from 'Utilities/logutils';
+import UserProfiler from 'Routes/UserProfiler/UserProfiler';
+import log          from 'Utilities/logutils';
 
 const displayName = 'profile';
 const profile = UserProfiler.of();

@@ -1,3 +1,4 @@
+import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import path             from 'path';
 import http             from 'http';
@@ -6,26 +7,30 @@ import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import bodyParser       from 'body-parser';
-import { logs as log }  from 'Utilities/logutils';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
+import log              from 'Utilities/logutils';
 
+sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error;
 
-const env           = process.env.NODE_ENV  || 'development';
-const http_port     = process.env.API_PORT  || 8082;
-const http_host     = process.env.API_HOST  || '127.0.0.1';
-const mdb_url       = process.env.MDB_URL   || 'mongodb://localhost:27017';
-const displayName   = 'api-server';
+const env           = process.env.NODE_ENV || 'development';
+const http_port     = process.env.API_PORT || 8082;
+const http_host     = process.env.API_HOST || '127.0.0.1';
+const mdb_url       = process.env.MDB_URL  || 'mongodb://localhost:27017';
+process.env.NODE_PENDING_DEPRECATION=0;
+
+const displayName   = '[API]';
+
 if (env === 'development') {
-  log.config('console', 'color', displayName, 'TRACE');
+  log.config('console', 'color', 'api-server', 'TRACE');
 } else if (env === 'staging') {
-  log.config('file', 'basic', displayName, 'DEBUG');
+  log.config('file', 'basic', 'api-server', 'DEBUG');
 } else if (env === 'production') {
-  log.config('file', 'json', displayName, 'INFO');
+  log.config('file', 'json', 'api-server', 'INFO');
 }
 
 const app           = express();
@@ -36,7 +41,7 @@ const SessionStore  = connect(session);
 db.on('open',  () => log.info( '[MDB]', 'session #2 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #2 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #2 connection error.'));
-db.openUri(mdb_url + '/session');
+db.openUri(mdb_url + '/session', { useNewUrlParser: true });
 
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -199,31 +204,42 @@ router.route('/category')
 app.use('/api', router);
 const server = http.createServer(app);
 server.listen(http_port, http_host, () => {
-  log.info('[API]', `listening on ${http_host}:${http_port}`);
+  log.info(displayName, `listening on ${http_host}:${http_port}`);
 });
+
+const rejections = new Map();
+const reject = (err, promise) => {
+  const { name, message, stack } = err;
+  log.error(displayName, 'unhandledRejection', name, message, stack || promise);
+  rejections.set(promise, err);
+};
+const shrink = promise => {
+  log.warn(displayName, 'rejectionHandled', rejections);
+  rejections.delete(promise);
+};
+
+const message = (err, code, signal) => {
+  if(err) log.warn(displayName, err.name,  err.message, err.stack);
+  else    log.info(displayName, `process exit. (s/c): ${signal || code}`);
+};
+
+const shutdown = (err, cbk) => {
+  if(err) log.error(displayName, err.name, err.message, err.stack);
+  mongoose.disconnect(() => {
+    log.info(displayName, 'session #2 terminated.');
+    server.close(() => {
+      log.info(displayName, 'express #2 terminated.');
+      log.info(displayName, 'log4js #2 terminated.');
+      log.close(() => cbk());
+    });
+  });
+};
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
 process.on('uncaughtException', err => shutdown(err, process.exit));
+process.on('unhandledRejection', (err, promise) => reject(err, promise));
+process.on('rejectionHandled', promise => shrink(promise));
 process.on('warning', err => message(err));
-process.on('exit',    (code, signal) => message(null, code, signal));
-
-const message = (err, code, signal) => {
-  if(err) log.warn('[API]', err.name, ':',  err.message, ':', err.stack);
-  else    log.info('[API]', `process exit. (s/c): ${signal || code}`);
-};
-
-const shutdown = (err, cbk) => {
-  if(err) log.error('[API]', err.name, ':', err.message, ':', err.stack);
-  mongoose.disconnect(() => {
-    log.info('[MDB]', 'session #2 terminated.');
-    server.close(() => {
-      log.info('[WWW]', 'express #2 terminated.');
-      log.info('[LOG]', 'log4js #2 terminated.');
-      log.close(() => {
-        cbk()
-      });
-    });
-  });
-};
+process.on('exit', (code, signal) => message(null, code, signal));

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { logs as log } from 'Utilities/logutils';
+import log      from 'Utilities/logutils';
 
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
@@ -18,13 +18,14 @@ const postedSchema = new mongoose.Schema({
 }, { collection: 'posted' });
 postedSchema.index({ posted: 1 }, { unique: true });
 
+const displayName = '[MDB]';
 const db = mongoose.createConnection();
-db.on('open',  () => log.info( '[MDB]','faq connected.'));
-db.on('close', () => log.info( '[MDB]','faq disconnected.'));
-db.on('error', () => log.error('[MDB]','faq connection error.'));
-db.openUri(mdb_url + '/faq');
+db.on('open',  () => log.info( displayName,'faq connected.'));
+db.on('close', () => log.info( displayName,'faq disconnected.'));
+db.on('error', () => log.error(displayName,'faq connection error.'));
+db.openUri(mdb_url + '/faq', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info('[MDB]', 'faq terminated.')));
+  mongoose.disconnect(() => log.info(displayName, 'faq terminated.')));
 export const Faq = db.model('Faq', faqSchema);
 export const Posted = db.model('Posted', postedSchema);

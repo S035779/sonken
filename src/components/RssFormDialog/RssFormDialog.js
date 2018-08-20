@@ -5,7 +5,7 @@ import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, TextField, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
-import { Clear, ContentPaste } from '@material-ui/icons';
+import { Clear, Edit } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
@@ -149,7 +149,7 @@ class RssFormDialog extends React.Component {
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{title}カテゴリー</FormLabel>
           <RssButton color="success"
-            onClick={this.handleClickButton.bind(this, 'openAdd')}
+            onClick={this.handleClickButton.bind(this, 'openAdd')} 
             classes={classes.button}>新規追加</RssButton>
           <RssNewDialog
             title={title}
@@ -162,22 +162,14 @@ class RssFormDialog extends React.Component {
           />
           <List dense>
           {categorys.filter(isCategory).map(obj => (
-            <ListItem key={obj._id} dense button
-              onClick={this.handleChangeToggle
-                .bind(this, 'checked', obj._id)}
-            >
-              <RssCheckbox color="secondary"
-                checked={checked.indexOf(obj._id) !== -1}
-                tabIndex={-1}
-                disableRipple
-              />
+            <ListItem 
+              key={obj._id} dense button onClick={this.handleChangeToggle.bind(this, 'checked', obj._id)}>
+              <RssCheckbox 
+                color="secondary" checked={checked.indexOf(obj._id) !== -1} tabIndex={-1} disableRipple />
               <ListItemText primary={obj.subcategory}/>
               <ListItemSecondaryAction>
-                <IconButton
-                  onClick={this.handleChangeToggle
-                    .bind(this, 'openUpd', obj._id)}
-                >
-                  <ContentPaste className={classes.editIcon}/>
+                <IconButton onClick={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}>
+                  <Edit className={classes.editIcon}/>
                 </IconButton>
                 <RssNewDialog
                   title={title}
@@ -185,30 +177,21 @@ class RssFormDialog extends React.Component {
                   user={user}
                   category={category}
                   name={obj.subcategory}
-                  onClose={this.handleChangeToggle
-                    .bind(this, 'openUpd', obj._id)}
-                  onSubmit={this.handleUpdate
-                    .bind(this, obj._id, obj.subcategoryId)}
-                />
-                <IconButton
-                  onClick={this.handleDelete.bind(this, obj._id)}
-                >
+                  onClose={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}
+                  onSubmit={this.handleUpdate.bind(this, obj._id, obj.subcategoryId)} />
+                <IconButton onClick={this.handleDelete.bind(this, obj._id)} >
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
           ))}
           </List>
-          <FormHelperText>
-            該当するカテゴリーを追加・選択することが出来ます。
-          </FormHelperText>
+          <FormHelperText>該当するカテゴリーを追加・選択することが出来ます。</FormHelperText>
         </FormControl>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleClose.bind(this, 'isNotValid')}>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleClose.bind(this, 'isSuccess')}>
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
       </LoginFormDialog>

@@ -47,7 +47,7 @@ class LoginConfirm extends React.Component {
   handleSubmit() {
     std.logInfo(LoginConfirm.displayName, 'handleSubmit', this.state);
     const { email, phone } = this.state;
-    const newPassword = std.makeRandPassword(16);
+    const newPassword = std.rndPassword(16);
     LoginAction.confirmation(email, phone)
     .then(() => {
       if(this.props.user) {

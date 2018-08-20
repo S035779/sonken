@@ -1,621 +1,191 @@
-import std from 'Utilities/stdutils';
+import * as R           from 'ramda';
+import PromiseThrottle  from 'promise-throttle';
+import http             from 'http';
+import https            from 'https';
+import std              from 'Utilities/stdutils';
 
-const log = {
-  error: function(message) { console.error(message); }
-, trace: function(message) { console.trace(message); }
-, info:  function(message) { console.info(message);  }
-, warn:  function(message) { console.warn(message);  }
+const displayName = 'netutils';
+
+const mimes = {
+  NAV:  'application/x-www-form-urlencoded'
+, JSN:  'application/json'
+, XML:  'Content-Type: application/xml; charset="UTF-8"'
+, OCT:  'application/octet-stream'
+, TXT:  'text/plain; charset="UTF-8"'
 };
 
-const min = 2000;
-const max = 5000;
-const throttle = () => Math.floor(Math.random() * (max +1 - min) +min);
+const min = 20000;
+const max = 50000;
+const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
-/*
- * Simple HTTP GET request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
-const get = function(url, options, callback) {  
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 80
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) {
-    path += '?' + query;
-  } else if(options) {
-    path += '?' + require('querystring').stringify(options);
+const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
+
+const promise = (url, options) => {
+  return new Promise((resolve, reject) => {
+    fetch(url, options, (error, result) => {
+      if(error) return reject(error);
+      //std.logDebug(displayName, 'FETCH', 'promise done.');
+      resolve(result);
+    });
+  });
+};
+
+const throttle = (url, options) => {
+  return promiseThrottle.add(promise.bind(this, url, options));
+};
+
+const fetch = (url, { method, header, search, auth, body, type, accept, parser, lang }, callback) => {  
+  const api           = std.parse_url(url);
+  const hostname      = api.hostname;
+  const protocol      = api.protocol;
+  const port          = api.port || (protocol === 'https:' ? 443 : 80);
+  const query         = api.search;
+  let   path          = api.pathname;
+  let   postType      = null;
+  let   postData      = null;
+  let   postLen       = null;
+  let   acceptType    = null;
+  if(query) {
+    path += query 
+  } else if(search) {
+    path += '?' + std.urlencode_rfc3986(search);
   }
-  const client = require('http');
-  const req = client.get({
-    host: hostname
-  , port: port
-  , path: path
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
+  if (body && body instanceof Buffer) {
+    postType = mimes['OCT'];
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
+  } else if (body && typeof body === 'string' && type === 'XML') {
+    postType = mimes['XML'];
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
+  } else if (body && typeof body === 'string') {
+    postType = mimes['TXT'];
+    postData = body;
+    postLen  = Buffer.byteLength(postData);
+  } else if (body && typeof body === 'object' && type === 'NV') {
+    postType = mimes['NAV'];
+    postData = std.urlencode_rfc3986(body);
+    postLen  = Buffer.byteLength(postData);
+  } else if (body && typeof body === 'object' && type === 'JSON') {
+    postType = mimes['JSN'];
+    postData = JSON.stringify(body);
+    postLen  = Buffer.byteLength(postData);
+  } else {
+    postType = mimes['TXT'];
+    postData = '';
+    postLen  = 0;
+  }
+  if(accept && accept === 'JSON') {
+    acceptType = mimes['JSN'];
+  } else if(accept && accept === 'XML') {
+    acceptType = mimes['XML'];
+  } else {
+    acceptType = mimes['TXT'];
+  }
+  const headers = R.merge({
+    'Accept':           acceptType
+  , 'Accept-Language':  lang || 'ja_JP'
+  , 'Content-Length':   postLen
+  , 'Content-Type':     postType
+  }, header);
+  if(auth && auth.bearer) {
+    headers['Authorization'] = 'Bearer ' + auth.bearer;
+  } else if(auth && auth.user && auth.pass) {
+    headers['Authorization'] = 'Basic ' + std.encode_base64(auth.user + ':' + auth.pass);
+  }
+  const client = protocol === 'https:' ? https : http;
+  const params = { hostname, port, path, method, headers };
+  const req = client.request(params, res => {
+    let response = '';
     res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
+    res.on('data', chunk => response += chunk);
+    res.on('end', () => {
+      response = accept === 'JSON' ? JSON.parse(response) : parser ? parser(response) : response;
+      const status = { 
+        name: `Status Code: ${res.statusCode} / Request URL: ${url}`
+      , message: response
+      , stack: res.headers
+      };
+      switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break; 
         case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
+          callback(null, response);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          log.warn(body);
-          setTimeout(() => get(url, options, callback), throttle());
+          setTimeout(() => 
+            fetch(url, { method, header, search, auth, body, type, accept, parser, lang }, callback), retry());
           break;
         default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break;
       }
     });
   });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-};
-
-/*
- * Simple HTTP GET request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
-const getJSON = function(url, options, callback) {  
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 80
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) {
-    path += '?' + query;
-  } else if(options) {
-    path += '?' + require('querystring').stringify(options);
-  }
-  const client = require('http');
-  const req = client.get({
-    host: hostname
-    , port: port
-    , path: path
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, JSON.parse(body));
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => getJSON(url, options, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-};
-
-/*
- * HTTPS GET request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
-const get2 = function(url, options, callback) {  
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 443
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) {
-    path += '?' + query;
-  } else if(options) {
-    path += '?' + require('querystring').stringify(options);
-  }
-  const client = require('https');
-  const req = client.get({
-    host: hostname
-    , port: port
-    , path: path
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => get2(url, options, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-};
-
-/*
- * HTTPS GET request
- *
- * @param {string} url - 
- * @param {object} options -
- * @param {function} callback -
- */
-const getJSON2 = function(url, options, callback) {  
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 443
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) {
-    path += '?' + query;
-  } else if(options) {
-    path += '?' + require('querystring').stringify(options);
-  }
-  const client = require('https');
-  const req = client.get({
-    host: hostname
-    , port: port
-    , path: path
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, JSON.parse(body));
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => getJSON2(url, options, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: JSON.parse(body) }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-};
-
-/*
- * HTTPS POST request with NV data as the request body
- *
- * @param {string} url - 
- * @param {object} auth -
- * @param {object} body -
- * @param {function} callback -
- */
-const post2 = function(url, auth, body, callback) {
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 443
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) path += '?' + query;
-  let type = '';
-  if (body == null) body = '';
-  if (body instanceof Buffer)         type = 'application/octet-stream';
-  else if (typeof body === 'string')  type = 'text/plain; charset=UTF-8';
-  else if (typeof body === 'object') {
-    body = std.urlencode(body);
-    type = 'application/x-www-form-urlencoded';
-  }
-  const headers = {
-    'Accept':             'application/json'
-    , 'Accept-Language':  'ja_JP'
-    , 'Content-Length':   Buffer.byteLength(body)
-    , 'Content-Type':     type
-    , 'User-Agent':       'Node-Script/1.0'
-  };
-  if(auth && auth.hasOwnProperty('user') && auth.hasOwnProperty('pass')) {
-    headers['Authorization'] = 'Basic ' 
-      + std.encode_base64(auth.user + ':' : auth.pass);
-  } else if (auth && auth.hasOwnProperty('bearer')) {
-    headers['Authorization'] =' Bearer ' 
-      + auth.bearer;
-  }
-  const client = require('https');
-  const req = client.request({
-    hostname: hostname,
-    port: port,
-    path: path,
-    method: 'POST',
-    headers: headers
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          return; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => post2(url, auth, body, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-  req.write(body);
+  req.on('error', err => callback({ name: err.code, message: err.message }));
+  req.write(postData);
   req.end();
 };
 
-/*
- * Simple HTTP POST request with data as the request body
- *
- * @param {string} url - 
- * @param {object} body -
- * @param {function} callback -
- */
-const postData = function(url, body, callback) {
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 80
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) path += '?' + query;
-  let type = '';
-  if (body == null) body = '';
-  if (body instanceof Buffer)          type = 'application/octet-stream';
-  else if (typeof body === 'string')   type = 'text/plain; charset=UTF-8';
-  else if (typeof body === 'object') {
-    body = require('querystring').stringify(body);
-    type = 'application/x-www-form-urlencoded';
+const get = (url, { search, operator, filename }, callback) => {  
+  const api       = std.parse_url(url);
+  const hostname  = api.hostname;
+  const protocol  = api.protocol;
+  const port      = api.port || (protocol === 'https:' ? 443 : 80);
+  const query     = api.search;
+  let   path      = api.pathname;
+  if (query) {
+    path += query;
+  } else if(search) {
+    path += '?' + std.urlencode_rfc3986(search);
   }
-  const client = require('http');
-  const req = client.request({
-    hostname: hostname,
-    port: port,
-    path: path,
-    method: 'POST',
-    headers: {
-      'Content-Type': type,
-      'Content-Length': Buffer.byteLength(body)
+  const client = protocol === 'https:' ? https : http;
+  const params = { hostname, port, path };
+  const req = client.get(params, res => {
+    let response = '';
+    if(operator) {
+      res.pipe(operator);
+      response = filename;
+    } else {
+      res.setEncoding('utf8');
+      res.on('data', chunk => response += chunk);
     }
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
+    res.on('end', () => {
+      const status = {
+        name: `Status Code: ${res.statusCode} / Request URL: ${url}`
+      , message: response
+      , stack: res.headers 
+      };
+      switch (res.statusCode) {
         case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break; 
         case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
+          callback(null, body);
           break;
         case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break; 
         case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          return; 
+          callback(status);
+          break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => postData(url, body, callback), throttle());
+          setTimeout(() => get(url, { search, operator, filename }, callback), retry());
           break;
         default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
+          callback(status);
           break;
       }
     });
   });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-  req.write(body);
-  req.end();
+  req.on('error', err => callback({ name: err.code, message: err.message }));
 };
 
-/*
- * HTTPS POST request with urlencoded data as the request body
- *
- * @param {string} url - 
- * @param {object} auth -
- * @param {object} body -
- * @param {function} callback -
- */
-const postData2 = function(url, auth, body, callback) {
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 443
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) path += '?' + query;
-  let type = '';
-  if (body == null) body = '';
-  if (body instanceof Buffer)         type = 'application/octet-stream';
-  else if (typeof body === 'string')  type = 'text/plain; charset=UTF-8';
-  else if (typeof body === 'object') {
-    body = require('querystring').stringify(body);
-    type = 'application/x-www-form-urlencoded';
-  }
-  const headers = {
-    'Accept':             'application/json'
-    , 'Accept-Language':  'ja_JP'
-    , 'Content-Length':   Buffer.byteLength(body)
-    , 'Content-Type':     type
-  };
-  if(auth && auth.hasOwnProperty('user') && auth.hasOwnProperty('pass')) {
-    headers['Authorization'] = 'Basic ' 
-      + std.encode_base64(auth.user + ':' : auth.pass);
-  } else if (auth && auth.hasOwnProperty('bearer')) {
-    headers['Authorization'] =' Bearer ' 
-      + auth.bearer;
-  }
-  const client = require('https');
-  const req = client.request({
-    hostname: hostname,
-    port: port,
-    path: path,
-    method: 'POST',
-    headers: headers
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          return; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => postData2(url, auth, body, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-  req.write(body);
-  req.end();
-};
-
-/*
- * HTTPS POST request with json as the request body
- *
- * @param {string} url - 
- * @param {object} auth -
- * @param {object} body -
- * @param {function} callback -
- */
-const postJson2 = function(url, auth, body, callback) {
-  url = require('url').parse(url);
-  let hostname  = url.hostname
-    , port      = url.port || 443
-    , path      = url.pathname
-    , query     = url.query;
-  if (query) path += '?' + query;
-  let type = '';
-  if (body == null) body = '';
-  if (body instanceof Buffer)          type = 'application/octet-stream';
-  else if (typeof body === 'string')   type = 'text/plain; charset=UTF-8';
-  else if (typeof body === 'object') {
-    body = JSON.stringify(body);
-    type = 'application/json';
-  }
-  const headers = {
-    'Accept':             'application/json'
-    , 'Accept-Language':  'ja_JP'
-    , 'Content-Length':   Buffer.byteLength(body)
-    , 'Content-Type':     type
-  };
-  if(auth && auth.hasOwnProperty('user') && auth.hasOwnProperty('pass')) {
-    headers['Authorization'] =
-      'Basic ' +  std.encode_base64(auth.user + ':' : auth.pass);
-  } else if (auth && auth.hasOwnProperty('bearer')) {
-    headers['Authorization'] =
-      'Bearer ' + auth.bearer;
-  }
-  const client = require('https');
-  const req = client.request({
-    hostname: hostname,
-    port: port,
-    path: path,
-    method: 'POST',
-    headers: headers 
-  }, function(res) {
-    const stat = res.statusCode;
-    const head = res.headers;
-    res.setEncoding('utf8');
-    let body = '';
-    res.on('data', function(chunk) { body += chunk; });
-    res.on('end', function() {
-      switch (stat) {
-        case 101: case 102: case 103: case 104: case 105: case 106:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 200: case 201: case 202: case 204:
-          process.stdout.write('-');
-          callback(null, head, body);
-          break;
-        case 301: case 302:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break; 
-        case 400: case 401: case 402: case 403: case 404:
-          log.error(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          return; 
-        case 500: case 501: case 502: case 503: case 504: case 505:
-          process.stdout.write('x');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          setTimeout(() => postJson2(url, auth, body, callback), throttle());
-          break;
-        default:
-          process.stdout.write('?');
-          log.warn(`HTTP Request Failed. Status Code: ${stat} at ${hostname}`);
-          callback({ error: { name: stat, message: body }});
-          break;
-      }
-    });
-  });
-  req.on('error', function(err) {
-    log.error(`Problem with HTTP Request: ${err.code}`);
-    callback({ error: { name: err.code, message: err.message }});
-  });
-  req.write(body);
-  req.end();
-};
-
-export default { get, getJSON, get2, getJSON2, post2, postData, postData2, postJson2 };
+export default { throttle, promise, fetch, get };
