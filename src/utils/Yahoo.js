@@ -549,7 +549,7 @@ class Yahoo {
     });
   }
 
-  fetchItemMerchant({ url, pages }) {
+  jobClosedMerchant({ url, pages }) {
     if(!pages) pages  = 1;
     return from(this.getClosedMerchant(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
@@ -557,12 +557,28 @@ class Yahoo {
     );
   }
 
-  fetchItemSellers({ url, pages }) {
+  jobClosedSellers({ url, pages }) {
     if(!pages) pages  = 1;
     return from(this.getClosedSellers(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
     , flatMap(this.fetchItemSearch.bind(this))
     );
+  }
+
+  jobHtml({ url }) {
+    return from(this.getHtml(url));
+  }
+
+  jobImages({ operator, items }) {
+    const getImage = obj => this.jobImage(operator, obj);
+    return from(items).pipe(
+      flatMap(getImage)
+    );
+  }
+
+  jobImage(operator, { guid__, images }) {
+    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
+    return forkJoin(promises(images));
   }
 
   fetchClosedMerchant({ url, pages }) {
@@ -577,18 +593,6 @@ class Yahoo {
 
   fetchHtml({ url }) {
     return from(this.getHtml(url));
-  }
-
-  fetchImage(operator, { guid__, images }) {
-    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
-    return forkJoin(promises(images));
-  }
-
-  fetchImages({ operator, items }) {
-    const getImage = obj => this.fetchImage(operator, obj);
-    return from(items).pipe(
-      flatMap(getImage)
-    );
   }
 
   fetchItemSearch(note) {

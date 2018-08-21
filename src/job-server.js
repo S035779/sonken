@@ -58,22 +58,23 @@ const request = queue => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const isOldItem = obj => {
-    const now = Date.now();
-    const upd = new Date(obj.updated).getTime();
-    const int = updatedInterval * 1000 * 60;
-    return now - upd > int;
-  };
-  const setQueue = obj => obj ? { user: obj.user, id: obj._id, url: obj.url } : null;
-  const setNote = objs => feed.fetchAllNotes({ users: objs });
+  const setQueue    = obj => obj ? { user: obj.user, id: obj._id, url: obj.url } : null;
+  const setQueues   = R.map(setQueue);
+  const setNote     = objs => feed.fetchAllNotes({ users: objs });
+  const hasApproved = R.filter(obj => obj.approved);
+  const setUsers    = R.map(obj => obj.user);
+  const hasUrl      = R.filter(obj => obj.url !== '');
+  const interval    = updatedInterval * 1000 * 60;
+  const isOldItem   = obj => interval < Date.now() - new Date(obj.updated).getTime();
+  const hasOldItem  = R.filter(isOldItem);
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
-      map(R.filter(obj => obj.approved))
-    , map(R.map(obj => obj.user))
+      map(hasApproved)
+    , map(setUsers)
     , flatMap(setNote)
     , map(R.flatten)
-    , map(R.filter(obj => obj.url !== ''))
-    , map(R.filter(isOldItem))
-    , map(R.map(setQueue))
+    , map(hasUrl)
+    , map(hasOldItem)
+    , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };

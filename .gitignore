@@ -2,6 +2,7 @@
 *.log
 *.lock
 /node_modules/*
+/.cache-loader/*
 /.git/*
 /tmp/*
 /logs/*

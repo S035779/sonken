@@ -7,6 +7,7 @@ const common = require('./webpack.common.js');
 
 var node = {
   target: "node"
+, devtool: 'inline-source-map'
 , entry: {
     ssr: ['./ssr-server.js']
   , api: ['./api-server.js']
@@ -34,7 +35,6 @@ var node = {
   , __filename: true
   }
 , externals: [ nodeExternals() ]
-, devtool: 'inline-source-map'
 , mode: 'none'
 };
 module.exports = merge(common, node);

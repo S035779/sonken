@@ -2,15 +2,16 @@ const path = require('path');
 
 var common = {
   context: path.resolve(__dirname, 'src'),
+  cache: true,
   module: {
     rules: [{
         enforce: "pre",
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "eslint-loader",
+        loader: [ "eslint-loader" ],
       },{ 
         test: /\.js$/,
-        loader: [ 'babel-loader' ]
+        loader: [ 'cache-loader', 'babel-loader' ]
       },{
         test: /\.(gif|jpg|png|svg|ico)$/,
         use: [ 'file-loader?name=[name].[ext]' ]

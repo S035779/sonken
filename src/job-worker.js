@@ -47,20 +47,20 @@ const createWriteStream = (storage, filename) => {
 const request = (operation, { url, user, id, items }) => {
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
-  const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+  //const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   const operator = createWriteStream;
   switch(operation) {
     case 'search':
     case 'seller':
-      return yahoo.fetchHtml({ url }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobHtml({ url }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsearch':
-      return yahoo.fetchItemMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsellers':
-      return yahoo.fetchItemSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
-    case 'rss':
-      return yahoo.fetchRss({ url }).pipe(map(setNote), flatMap(putRss));
+      return yahoo.jobClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+    //case 'rss':
+    //  return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':
-      return yahoo.fetchImages({ items, operator });
+      return yahoo.jobImages({ items, operator });
     default:
       return null;
   }
@@ -80,7 +80,7 @@ const worker = ({ url, user, id, items }, callback) => {
     observable = request(operation, { items });
   }
   if(observable) observable.subscribe(
-    obj => log.trace(displayName, operation, 'is proceeding... pid:', process.pid)
+    obj => log.info(displayName, operation, 'is proceeding... pid:', process.pid)
   , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
   , ()  => callback()
   );
@@ -90,7 +90,7 @@ const main = () => {
   const queue = async.queue(worker, 1);
   queue.drain = () => log.info(displayName, 'completed to work.');
   process.on('message', task => {
-    log.info(displayName, 'got message. pid:', process.pid);
+    log.info(displayName, 'got message. pid:', process.pid, task);
     if(task) queue.push(task, err => {
       if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
       log.info(displayName, 'finished work. pid:', process.pid);

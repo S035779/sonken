@@ -6,7 +6,6 @@ const bundle         = require('./webpack.bundle.js');
 var production = {
   mode: 'none'
 , devtool: 'source-map'
-, cache: true
 , optimization: { nodeEnv: false }
 , plugins: [
     new webpack.DefinePlugin({
