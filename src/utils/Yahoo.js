@@ -52,7 +52,7 @@ class Yahoo {
   }
 
   request(request, options) {
-    log.info(Yahoo.displayName, 'Request', request);
+    //log.info(Yahoo.displayName, 'Request', request);
     switch(request) {
       case 'fetch/auth/support':
         return net.promise(authurl,   { method: 'GET',  type: 'NV', accept: 'JSON' });
@@ -553,7 +553,6 @@ class Yahoo {
     if(!pages) pages  = 1;
     return from(this.getClosedMerchant(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
@@ -561,7 +560,20 @@ class Yahoo {
     if(!pages) pages  = 1;
     return from(this.getClosedSellers(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
+    );
+  }
+
+  searchClosedMerchant({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedMerchant(url, pages)).pipe(
+      flatMap(this.fetchItemSearch.bind(this))
+    );
+  }
+
+  searchClosedSellers({ url, pages }) {
+    if(!pages) pages  = 1;
+    return from(this.getClosedSellers(url, pages)).pipe(
+      flatMap(this.fetchItemSearch.bind(this))
     );
   }
 

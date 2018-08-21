@@ -52,13 +52,21 @@ const fork = () => {
   return cps;
 };
 
+const operation = url => {
+  const api       = std.parse_url(url);
+  const path      = R.split('/', api.pathname);
+  const isSellers = api.pathname === '/jp/show/rating';
+  return isSellers ? 'closedsellers' : 'closedsearch';
+};
+
 const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => obj ? { user: obj.user, id: obj._id, url: obj.url } : null;
+  const setQueue    
+    = obj => obj ? { user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url) } : null;
   const setQueues   = R.map(setQueue);
   const setNote     = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);

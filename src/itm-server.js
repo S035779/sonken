@@ -21,16 +21,16 @@ const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
 process.env.NODE_PENDING_DEPRECATION=0;
 
-const displayName = '[IMG]';
+const displayName = '[ITM]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'img-server', 'TRACE' );
+  log.config('console', 'color', 'itm-server', 'TRACE' );
 } else
 if(node_env === 'staging') {
-  log.config('file',    'basic', 'img-server', 'DEBUG' );
+  log.config('file',    'basic', 'itm-server', 'DEBUG' );
 } else
 if(node_env === 'production') {
-  log.config('file',    'json',  'img-server', 'INFO'  );
+  log.config('file',    'json',  'itm-server', 'INFO'  );
 }
 
 const feed        = FeedParser.of();
@@ -52,13 +52,21 @@ const fork = () => {
   return cps;
 };
 
+const operation = url => {
+  const api       = std.parse_url(url);
+  const path      = R.split('/', api.pathname);
+  const isSellers = api.pathname === '/jp/show/rating';
+  return isSellers ? 'itemsellers' : 'itemsearch';
+};
+
 const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => obj ? { items: obj.items, operation: 'images' } : null;
+  const setQueue    
+    = obj => obj ? { user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url) } : null;
   const setQueues   = R.map(setQueue);
   const setNote     = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);
@@ -91,14 +99,14 @@ const worker = (task, callback) => {
 };
 
 const main = () => {
-  log.info(displayName, 'start fetch images server.')
+  log.info(displayName, 'start fetch auctions server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'send to request fetch images.');
+  queue.drain = () => log.info(displayName, 'send to request fetch auctions.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.trace(displayName, 'fetch images request is proceeding...')
+    obj => log.trace(displayName, 'fetch auctions is proceeding...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'fetch images request completed.')
+  , ()  => log.info(displayName, 'fetch auctions completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();

@@ -61,25 +61,17 @@ const request = (operation, { url, user, id, items }) => {
     //  return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':
       return yahoo.jobImages({ items, operator });
+    case 'itemsearch':
+      return yahoo.searchClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+    case 'itemsellers':
+      return yahoo.searchClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     default:
       return null;
   }
 };
 
-const worker = ({ url, user, id, items }, callback) => {
-  let operation = '';
-  let observable = null;
-  if(url) {
-    const api = std.parse_url(url);
-    const path = R.split('/', api.pathname);
-    const isClosedSellers = api.pathname === '/jp/show/rating';
-    operation  = isClosedSellers ? 'closedsellers' : path[1];
-    observable = request(operation, { url, user, id });
-  } else if(items) {
-    operation  = 'images';
-    observable = request(operation, { items });
-  }
-  if(observable) observable.subscribe(
+const worker = ({ url, user, id, items, operation }, callback) => {
+  request(operation, { url, user, id, items }).subscribe(
     obj => log.info(displayName, operation, 'is proceeding... pid:', process.pid)
   , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
   , ()  => callback()
