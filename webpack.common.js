@@ -11,7 +11,7 @@ var common = {
         loader: [ "eslint-loader" ],
       },{ 
         test: /\.js$/,
-        loader: [ 'cache-loader', 'babel-loader' ]
+        loader: [ 'babel-loader?cacheDirectory' ]
       },{
         test: /\.(gif|jpg|png|svg|ico)$/,
         use: [ 'file-loader?name=[name].[ext]' ]
