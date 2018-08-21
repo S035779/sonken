@@ -56,7 +56,7 @@ const operation = url => {
   const api       = std.parse_url(url);
   const path      = R.split('/', api.pathname);
   const isSellers = api.pathname === '/jp/show/rating';
-  return isSellers ? 'closedsellers' : 'closedsearch';
+  return isSellers ? 'closedsellers' : path[1];
 };
 
 const request = queue => {
