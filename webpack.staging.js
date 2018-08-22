@@ -15,7 +15,7 @@ var production = {
     , 'process.env.ASSET_URL': JSON.stringify('http://ik1-309-14667.vs.sakura.ne.jp/assets')
     , 'process.env.APP_NAME':  JSON.stringify('SellerSearch!')
     }),
-    new UglifyJSPlugin({ cache: true, parallel: true, sourceMap: true })
+    new UglifyJSPlugin({ cache: true, parallel: true })
   ]
 , performance: {
     hints: "warning"
