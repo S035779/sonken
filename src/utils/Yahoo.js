@@ -288,7 +288,7 @@ class Yahoo {
         })
         .then((context, data) => {
           const params = context.request.params;
-          const b = (params && params.b) || 1;
+          const b = params && params.b ? params.b : 1;
           log.info(Yahoo.displayName, 'Title:', data.title, 'Items:', b, 'Pages:', options.pages);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
@@ -425,7 +425,7 @@ class Yahoo {
         })
         .then((context, data) => {
           const params = context.request.params;
-          const apg = (params && params.apg) || 1;
+          const apg = params && params.apg ? params.apg : 1;
           log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
