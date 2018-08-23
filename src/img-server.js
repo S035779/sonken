@@ -19,6 +19,7 @@ const node_env        = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
+const numsOfChildProc = process.env.JOB_NUM_MAX || 1;
 process.env.NODE_PENDING_DEPRECATION=0;
 
 const displayName = '[IMG]';
@@ -36,6 +37,7 @@ if(node_env === 'production') {
 const feed        = FeedParser.of();
 const profile     = UserProfiler.of();
 const cpu_num     = os.cpus().length;
+const job_num     = numsOfChildProc < cpu_num ? numsOfChildProc : cpu_num;
 const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
 
 let pids = [];
@@ -80,7 +82,7 @@ const request = queue => {
 };
 
 const worker = (task, callback) => {
-  idx = idx < cpu_num ? idx : 0;
+  idx = idx < job_num ? idx : 0;
   //log.debug(displayName, 'task(id/idx#/cpu#)', task.id, idx, cpu_num);
   if(pids[idx] === undefined || !pids[idx].connected) pids[idx] = fork();
   pids[idx].send(task, err => {

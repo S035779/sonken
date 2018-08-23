@@ -536,10 +536,10 @@ class Yahoo {
           , R.map(setPubDate)
           , R.filter(_obj => !!_obj.guid__)
           , R.map(setAuctionId)
+          //, R.tap(log.trace.bind(this))
           , R.map(setSize)
           , R.map(setImage)
           , R.filter(R.is(Object))
-          //, R.tap(log.trace.bind(this))
           )(obj.item);
         })
         //.log(msg => log.trace(Yahoo.displayName, msg))
