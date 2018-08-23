@@ -24,8 +24,8 @@
     "build:stg:node": "cross-env NODE_ENV=staging webpack --config webpack.node.js",
     "build:dev:node": "cross-env NODE_ENV=development webpack --config webpack.node.js",
     "watch:node": "webpack --config webpack.node.js --watch --colors",
-    "release:staging": "/bin/bash systemd/install.sh",
-    "restart:staging": "/bin/bash systemd/start.sh"
+    "release": "/bin/bash systemd/install.sh",
+    "restart": "/bin/bash systemd/restart.sh"
   },
   "license": "ISC",
   "dependencies": {
