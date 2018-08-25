@@ -72,12 +72,15 @@ const request = (operation, { url, user, id, items }) => {
 
 const worker = ({ url, user, id, items, operation }, callback) => {
   log.info(displayName, '== Start worker. _id/ope:', id, operation);
+  const start_time = Date.now();
   request(operation, { url, user, id, items }).subscribe(
     obj => log.debug(displayName, operation, 'is proceeding... pid:', process.pid)
   , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
   , ()  => {
-      log.info(displayName, '== End worker. _id/ope:', id, operation);
-      callback();
+    const end_time = Date.now();
+    const time_lap = (end_time - start_time) / 1000;
+    log.info(displayName, `== End worker. _id: ${id}, time: ${time_lap} sec.`);
+    callback();
   }
   );
 };
