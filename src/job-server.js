@@ -103,7 +103,7 @@ const worker = (task, callback) => {
 const main = () => {
   log.info(displayName, 'Start JOB Server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'send to request fetch auctions.');
+  queue.drain = () => log.info(displayName, 'all jobs have been processed.');
 
   std.invoke(() => request(queue).subscribe(
     obj => log.debug(displayName, 'finished proceeding job...')
