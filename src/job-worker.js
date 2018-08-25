@@ -71,22 +71,28 @@ const request = (operation, { url, user, id, items }) => {
 };
 
 const worker = ({ url, user, id, items, operation }, callback) => {
+  log.info(displayName, '== Start worker. _id/ope:', id, operation);
   request(operation, { url, user, id, items }).subscribe(
-    obj => log.info(displayName, operation, 'is proceeding... pid:', process.pid)
+    obj => log.debug(displayName, operation, 'is proceeding... pid:', process.pid)
   , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
-  , ()  => callback()
+  , ()  => {
+      log.info(displayName, '== End worker. _id/ope:', id, operation);
+      callback();
+  }
   );
 };
 
 const main = () => {
   const queue = async.queue(worker, 1);
-  queue.drain = () => log.info(displayName, 'completed to work.');
+  queue.drain = () => log.info(displayName, 'all jobs/items/images have been processed. pid:', process.pid);
   process.on('message', task => {
-    log.info(displayName, 'got message. pid:', process.pid, task);
-    if(task) queue.push(task, err => {
-      if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
-      log.info(displayName, 'finished work. pid:', process.pid);
-    });
+    if(task) {
+      log.info(displayName, 'got request. pid/ope:', process.pid, task.operation);
+      queue.push(task, err => {
+        if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
+        log.info(displayName, 'finished job/item/image. pid:', process.pid);
+      });
+    }
   });
 
   process.on('disconnect', () => {

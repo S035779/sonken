@@ -106,14 +106,14 @@ const worker = (task, callback) => {
 };
 
 const main = () => {
-  log.info(displayName, 'start fetch auctions server.')
+  log.info(displayName, 'Start ITEM Server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'send to request fetch auctions.');
+  queue.drain = () => log.info(displayName, 'all items have been processed.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.trace(displayName, 'fetch auctions is proceeding...')
+    obj => log.debug(displayName, 'finished proceeding item...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'fetch auctions completed.')
+  , ()  => log.info(displayName, 'post items completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();

@@ -95,12 +95,12 @@ const worker = (task, callback) => {
 const main = () => {
   log.info(displayName, 'start fetch images server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'send to request fetch images.');
+  queue.drain = () => log.info(displayName, 'all images have been processed.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.trace(displayName, 'fetch images request is proceeding...')
+    obj => log.debug(displayName, 'finished proceeding image...')
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'fetch images request completed.')
+  , ()  => log.info(displayName, 'post images completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();
