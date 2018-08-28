@@ -5,14 +5,19 @@ var common = {
   cache: true,
   module: {
     rules: [{
-        enforce: "pre",
+        enforce: 'pre',
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: [ "eslint-loader" ],
-      },{ 
-        test: /\.js$/,
-        loader: [ 'babel-loader?cacheDirectory' ]
-      },{
+        loader: [ 'eslint-loader' ],
+      }
+    , { 
+        test: /\.js$/
+      , exclude: /(node_modules|bower_components)/
+      , use: {
+          loader: 'babel-loader'
+        }
+      }
+    , {
         test: /\.(gif|jpg|png|svg|ico)$/,
         use: [ 'file-loader?name=[name].[ext]' ]
       }]
