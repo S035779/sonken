@@ -7,15 +7,15 @@ import std              from 'Utilities/stdutils';
 const displayName = 'netutils';
 
 const mimes = {
-  NAV:  'application/x-www-form-urlencoded'
-, JSN:  'application/json'
-, XML:  'Content-Type: application/xml; charset="UTF-8"'
-, OCT:  'application/octet-stream'
+  NV:  'application/x-www-form-urlencoded'
+, JSON:  'application/json'
+, XML:  'application/xml; charset="UTF-8"'
+, BIN:  'application/octet-stream'
 , TXT:  'text/plain; charset="UTF-8"'
 };
 
-const min = 20000;
-const max = 50000;
+const min = 2000;
+const max = 5000;
 const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
 const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
@@ -50,7 +50,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
     path += '?' + std.urlencode_rfc3986(search);
   }
   if (body && body instanceof Buffer) {
-    postType = mimes['OCT'];
+    postType = mimes['BIN'];
     postData = body;
     postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'string' && type === 'XML') {
@@ -62,11 +62,11 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
     postData = body;
     postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'object' && type === 'NV') {
-    postType = mimes['NAV'];
+    postType = mimes['NV'];
     postData = std.urlencode_rfc3986(body);
     postLen  = Buffer.byteLength(postData);
   } else if (body && typeof body === 'object' && type === 'JSON') {
-    postType = mimes['JSN'];
+    postType = mimes['JSON'];
     postData = JSON.stringify(body);
     postLen  = Buffer.byteLength(postData);
   } else {
@@ -75,7 +75,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
     postLen  = 0;
   }
   if(accept && accept === 'JSON') {
-    acceptType = mimes['JSN'];
+    acceptType = mimes['JSON'];
   } else if(accept && accept === 'XML') {
     acceptType = mimes['XML'];
   } else {

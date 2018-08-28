@@ -44,7 +44,7 @@
     "iconv": "2.3.0",
     "log4js": "3.0.2",
     "marked": "0.3.12",
-    "mongoose": "^5.2.10",
+    "mongoose": "5.2.8",
     "nodemailer": "4.6.7",
     "nodemailer-smtp-transport": "2.7.4",
     "osmosis": "^1.1.8",

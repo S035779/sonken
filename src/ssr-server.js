@@ -30,8 +30,6 @@ if (env === 'development') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
 
-mongoose.set('useCreateIndex', true);
-mongoose.set('debug', true);
 const db            = mongoose.createConnection();
 const app           = express();
 const SessionStore  = connect(session);

@@ -1,11 +1,9 @@
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
-import mongoose           from 'mongoose';
 import { Mail, Selected } from 'Models/mail';
 import std                from 'Utilities/stdutils';
 import log                from 'Utilities/logutils';
-
 
 /**
  * MailEditor class.

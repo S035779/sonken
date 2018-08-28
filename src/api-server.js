@@ -38,7 +38,6 @@ const app           = express();
 const router        = express.Router();
 const SessionStore  = connect(session);
 
-mongoose.set('useCreateIndex', true);
 db.on('open',  () => log.info( '[MDB]', 'session #2 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #2 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #2 connection error.'));

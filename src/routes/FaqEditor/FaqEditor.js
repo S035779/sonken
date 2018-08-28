@@ -1,7 +1,6 @@
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map }            from 'rxjs/operators';
-import mongoose           from 'mongoose';
 import { Faq, Posted }    from 'Models/faq';
 import std                from 'Utilities/stdutils';
 import log                from 'Utilities/logutils';

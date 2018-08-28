@@ -6,8 +6,6 @@ const config = dotenv.config();
 if(config.error) throw config.error;
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
-mongoose.set('useCreateIndex', true);
-
 const itemSchema = new mongoose.Schema({
   title:            { type: String, required: true }
 , link:             { type: String, required: true }
