@@ -15,6 +15,18 @@ var common = {
       , exclude: /(node_modules|bower_components)/
       , use: {
           loader: 'babel-loader'
+        , options: {
+            presets: [
+              '@babel/react'
+            , [ '@babel/env', { 'modules': false } ] ]
+          , plugins: [
+              'react-hot-loader/babel'
+            , '@babel/proposal-object-rest-spread'
+            , '@babel/transform-member-expression-literals'
+            , '@babel/transform-property-literals'
+            ]
+          , compact: true
+          } 
         }
       }
     , {

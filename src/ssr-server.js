@@ -30,8 +30,10 @@ if (env === 'development') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
 
-const app           = express();
+mongoose.set('useCreateIndex', true);
+mongoose.set('debug', true);
 const db            = mongoose.createConnection();
+const app           = express();
 const SessionStore  = connect(session);
 
 db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));

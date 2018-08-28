@@ -2,8 +2,11 @@ import dotenv   from 'dotenv';
 import mongoose from 'mongoose';
 import log      from 'Utilities/logutils';
 
-dotenv.config();
+const config = dotenv.config();
+if(config.error) throw config.error;
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
+
+mongoose.set('useCreateIndex', true);
 
 const userSchema = new mongoose.Schema({
   user:             { type: String, required: true } 

@@ -3855,7 +3855,7 @@ mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"
 
-mongoose@^5.2.6:
+mongoose@^5.2.10:
   version "5.2.10"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.2.10.tgz#01a652e68050ae9145b082a588e30b00589add7e"
   dependencies:
