@@ -5,10 +5,9 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { TextField, Typography, Dialog, Button }
+import { Typography, Dialog, Button }
                         from '@material-ui/core';
-import { DialogActions, DialogContent, DialogContentText, DialogTitle,
-  withMobileDialog }
+import { DialogActions, DialogContent, DialogContentText, DialogTitle }
                         from '@material-ui/core/Dialog';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssInput         from 'Components/RssInput/RssInput';
@@ -32,14 +31,15 @@ class LoginConfirm extends React.Component {
 
   handleClose(name) {
     std.logInfo(LoginConfirm.displayName, 'handleClose', name);
+    const { history } = this.props;
     switch(name) {
       case 'authenticate':
         this.setState({ openedCorrect: false });
-        this.props.history.push('/login/authenticate');
+        history.push('/login/authenticate');
         break;
       case 'confirmation':
         this.setState({ openedIncorrect: false });
-        this.props.history.push('/login/authenticate');
+        history.push('/login/authenticate');
         break;
     }
   }
@@ -57,7 +57,10 @@ class LoginConfirm extends React.Component {
         this.setState({ openedIncorrect: true });
       }
     })
-    .catch(err => this.setState({ openedIncorrect: true }));
+    .catch(err => {
+      std.logError(LoginConfirm.displayName, err.name, err.message);
+      this.setState({ openedIncorrect: true });
+    });
   }
 
   handleChangeText(name, event) {
@@ -154,6 +157,15 @@ class LoginConfirm extends React.Component {
       </div>
     </div>;
   }
+}
+LoginConfirm.displayName = 'LoginConfirm';
+LoginConfirm.defaultProps = {};
+LoginConfirm.propTypes = {
+  classes: PropTypes.object.isRequired
+, history: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, fullScreen: PropTypes.bool.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const loginWidth = 320;
@@ -179,9 +191,4 @@ const styles = theme => ({
 , button:     { flex: 1 }
 , input:      { flex: 1 }
 });
-LoginConfirm.displayName = 'LoginConfirm';
-LoginConfirm.defaultProps = {};
-LoginConfirm.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(LoginConfirm));

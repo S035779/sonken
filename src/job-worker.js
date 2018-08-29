@@ -1,11 +1,9 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
-import * as R           from 'ramda';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
-import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
 //import fs             from 'fs';
 import aws              from 'Utilities/awsutils';
@@ -47,7 +45,7 @@ const createWriteStream = (storage, filename) => {
 const request = (operation, { url, user, id, items }) => {
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
-  //const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+  const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   const operator = createWriteStream;
   switch(operation) {
     case 'search':
@@ -57,16 +55,10 @@ const request = (operation, { url, user, id, items }) => {
       return yahoo.jobClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsellers':
       return yahoo.jobClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
-    //case 'rss':
-    //  return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
+    case 'rss':
+      return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':
       return yahoo.jobImages({ items, operator });
-    case 'itemsearch':
-      return yahoo.searchClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
-    case 'itemsellers':
-      return yahoo.searchClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
-    default:
-      return null;
   }
 };
 
@@ -74,15 +66,14 @@ const worker = ({ url, user, id, items, operation }, callback) => {
   log.info(displayName, '== Start worker. _id/ope:', id, operation);
   const start_time = Date.now();
   request(operation, { url, user, id, items }).subscribe(
-    obj => log.debug(displayName, operation, 'is proceeding... pid:', process.pid)
+    obj => log.debug(displayName, operation, 'is proceeding... pid:', process.pid, obj)
   , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
   , ()  => {
-    const end_time = Date.now();
-    const time_lap = (end_time - start_time) / 1000;
-    log.info(displayName, `== End worker. _id: ${id}, time: ${time_lap} sec.`);
-    callback();
-  }
-  );
+      const end_time = Date.now();
+      const time_lap = (end_time - start_time) / 1000;
+      log.info(displayName, `== End worker. _id: ${id}, time: ${time_lap} sec.`);
+      callback();
+  });
 };
 
 const main = () => {

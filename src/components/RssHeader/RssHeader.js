@@ -2,8 +2,7 @@ import React          from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes      from 'prop-types'
 import classNames     from 'classnames';
-import LoginAction    from 'Actions/LoginAction';
-import std            from 'Utilities/stdutils';
+//import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Button }
@@ -20,7 +19,7 @@ class RssHeader extends React.Component {
     };
   }
 
-  handleToggle(event) {
+  handleToggle() {
     this.props.onClick();
   }
 
@@ -93,6 +92,19 @@ class RssHeader extends React.Component {
       </div>
     </div>;
   }
+}
+RssHeader.displayName = 'RssHeader';
+RssHeader.defaultProps = {};
+RssHeader.propTypes = {
+  classes:  PropTypes.object.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
+, onClick: PropTypes.func.isRequired
+, user: PropTypes.string.isRequired
+, preference: PropTypes.object.isRequired
+, profile: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
+, children: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const drawerMinWidthMdUp    = 72;
@@ -148,9 +160,4 @@ const styles = theme => ({
     }
   }
 });
-RssHeader.displayName = 'RssHeader';
-RssHeader.defaultProps = {};
-RssHeader.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(RssHeader));

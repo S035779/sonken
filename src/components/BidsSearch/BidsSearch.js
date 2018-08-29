@@ -4,7 +4,7 @@ import BidsAction       from 'Actions/BidsAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Select, Input, Button, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
+import { Select, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 
@@ -42,7 +42,10 @@ class BidsSearch extends React.Component {
         if(this.props.file) this.downloadFile(this.props.file);
         this.setState({ isSuccess: true });
       })
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(BidsSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleChangeSelect(name, event) {
@@ -68,7 +71,7 @@ class BidsSearch extends React.Component {
   render() {
     //std.logInfo(BidsSearch.displayName, 'State', this.state);
     const { classes, itemNumber } = this.props;
-    const { isSuccess, isNotValid, perPage, filename } = this.state;
+    const { isSuccess, isNotValid, perPage } = this.state;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -104,6 +107,16 @@ class BidsSearch extends React.Component {
       </div>
     </div>;
   }
+}
+BidsSearch.displayName = 'BidsSearch';
+BidsSearch.defaultProps = {};
+BidsSearch.propTypes = {
+  classes: PropTypes.object.isRequired
+, itemNumber: PropTypes.number.isRequired
+, user: PropTypes.string.isRequired
+, items: PropTypes.array.isRequired
+, file: PropTypes.object
+, itemPage: PropTypes.object.isRequired
 };
 
 const titleHeight = 62;
@@ -128,9 +141,4 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-BidsSearch.displayName = 'BidsSearch';
-BidsSearch.defaultProps = {};
-BidsSearch.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(BidsSearch);

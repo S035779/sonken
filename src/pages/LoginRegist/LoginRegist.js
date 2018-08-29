@@ -1,16 +1,15 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import { Redirect, withRouter }
-                        from 'react-router-dom';
+import { withRouter }   from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { TextField, Typography, Divider, MenuItem, FormControlLabel, PersonAdd, Public, NetworkCheck } from '@material-ui/core';
+import { TextField, Typography, Divider, MenuItem, FormControlLabel } from '@material-ui/core';
+//import { TextField, Typography, Divider, MenuItem, FormControlLabel, PersonAdd, Public, NetworkCheck } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
-import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import agrTxt           from 'Main/agreement';
 import plnImg           from 'Main/planlist';
@@ -50,9 +49,8 @@ class LoginRegist extends React.Component {
     this.setState({ [name]: event.target.checked });
   }
 
-  handleClickButton(request, event) {
-    const { username, password, name, kana, email, phone, plan }
-      = this.state;
+  handleClickButton(request) {
+    const { username, password, name, kana, email, phone, plan } = this.state;
     switch(request) {
       case 'registration':
         if(this.isValidate()) {
@@ -63,7 +61,10 @@ class LoginRegist extends React.Component {
               if(this.props.isAuthenticated)
                 this.setState({ redirectToRefferer: true });
             })
-            .catch(err => this.setState({ isNotValid: true }));
+            .catch(err => {
+              std.logError(LoginRegist.displayName, err.name, err.message);
+              this.setState({ isNotValid: true });
+            });
         } else {
           this.setState({ isNotValid: true });
         }
@@ -77,7 +78,7 @@ class LoginRegist extends React.Component {
     }
   }
 
-  handleCloseDialog(name, event) {
+  handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
 
@@ -93,8 +94,8 @@ class LoginRegist extends React.Component {
   }
 
   getRefferer(id) {
-    const { menu } = this.props.preference;
-    const plan = menu.find(_menu => _menu.id === id);
+    const { preference } = this.props;
+    const plan = preference.menu.find(_menu => _menu.id === id);
     return plan ? plan.link : null;
   }
 
@@ -107,7 +108,7 @@ class LoginRegist extends React.Component {
   render() {
     //std.logInfo(LoginRegist.displayName, 'State', this.state);
     //std.logInfo(LoginRegist.displayName, 'Props', this.props);
-    const { classes, location, preference } = this.props;
+    const { classes, preference } = this.props;
     const { username, password, confirm_password, name, kana, email, phone, plan, agreed
       , redirectToRefferer, isNotValid, openAgree, openPlan } = this.state;
     const inputText = { disableUnderline: true
@@ -322,6 +323,13 @@ class LoginRegist extends React.Component {
       </div>
     </div>;
   }
+}
+LoginRegist.displayName = 'LoginRegist';
+LoginRegist.defaultProps = {};
+LoginRegist.propTypes = {
+  classes: PropTypes.object.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const loginWidth = 640;
@@ -369,9 +377,4 @@ const styles = theme => ({
 , agreement:  { width: '100%', border: 0, height: '100%' }
 , planlist:   { width: '100%', border: 0 }
 });
-LoginRegist.displayName = 'LoginRegist';
-LoginRegist.defaultProps = {};
-LoginRegist.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(LoginRegist));

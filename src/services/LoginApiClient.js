@@ -1,13 +1,9 @@
 import xhr from 'Utilities/xhrutils';
-import std from 'Utilities/stdutils';
 
 const api = process.env.API_URL;
 
-const displayName = 'LoginApiClient';
-
 export default {
   request(request, options) {
-    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'signin/authenticate':
         return new Promise((resolve, reject) => {
@@ -78,10 +74,6 @@ export default {
           , obj => { resolve(obj); }
           , err => { reject(err); }
           );
-        });
-      default:
-        return new Promise((resolve, reject) => {
-          reject(options);
         });
     }
   },

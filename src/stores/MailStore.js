@@ -1,7 +1,5 @@
 import { ReduceStore } from 'flux/utils';
 
-const displayName = 'MailStore';
-
 export default class MailStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -100,4 +98,6 @@ export default class MailStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+MailStore.displayName = 'MailStore';
+

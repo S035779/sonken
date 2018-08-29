@@ -4,8 +4,7 @@ import FaqAction        from 'Actions/FaqAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Select, Input, Button, Typography, FormControl, MenuItem, InputLabel } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
+import { Select, Typography, FormControl, MenuItem, InputLabel } from '@material-ui/core';
 
 class FaqSearch extends React.Component {
   constructor(props) {
@@ -37,9 +36,8 @@ class FaqSearch extends React.Component {
   }
 
   render() {
-    const { classes, faqNumber, category } = this.props;
-    const { url, perPage, filename } = this.state;
-    const color = 'green';
+    const { classes, faqNumber } = this.props;
+    const { perPage } = this.state;
     return <div className={classes.faqSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -67,6 +65,14 @@ class FaqSearch extends React.Component {
       </div>
     </div>;
   }
+}
+FaqSearch.displayName = 'FaqSearch';
+FaqSearch.defaultProps = {};
+FaqSearch.propTypes = {
+  classes: PropTypes.object.isRequired
+, faqNumber: PropTypes.number.isRequired
+, faqPage: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const titleHeight = 62;
@@ -91,9 +97,4 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-FaqSearch.displayName = 'FaqSearch';
-FaqSearch.defaultProps = {};
-FaqSearch.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(FaqSearch);

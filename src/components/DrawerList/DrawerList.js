@@ -92,7 +92,7 @@ class DrawerList extends React.Component {
     this.props.history.push('/' + category, { categoryId })
   }
 
-  handleCloseDialog(name, event) {
+  handleCloseDialog(name) {
     std.logInfo(DrawerList.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
@@ -112,14 +112,14 @@ class DrawerList extends React.Component {
     event.dataTransfer.dropEffect = 'move';
   }
 
-  handleDragEnter(name, event) {
+  handleDragEnter(name) {
     std.logInfo(DrawerList.displayName, 'handleDragEnter', name)
     const dragDstEl
       = this.state.categorys.find(obj => obj.subcategory === name);
     this.setState({ dropZoneEntered: true, dragDstEl });
   }
 
-  handleDragLeave(name, event) {
+  handleDragLeave(name) {
     std.logInfo(DrawerList.displayName, 'handleDragLeave', name)
     this.setState({ dropZoneEntered: false });
   }
@@ -129,8 +129,7 @@ class DrawerList extends React.Component {
     event.stopPropagation();
     const { profile } = this.props;
     const { dragSrcEl, categorys } = this.state;
-    const dragDstEl
-      = this.state.categorys.find(obj => obj.subcategory === name);
+    const dragDstEl = categorys.find(obj => obj.subcategory === name);
     if(dragSrcEl.subcategoryId !== dragDstEl.subcategoryId) {
       dragSrcEl.subcategoryId = dragDstEl.subcategoryId;
       dragDstEl.subcategoryId = event.dataTransfer.getData('text/plain');
@@ -158,7 +157,7 @@ class DrawerList extends React.Component {
     }
   }
 
-  handleDragEnd(name, event) {
+  handleDragEnd(name) {
     std.logInfo(DrawerList.displayName, 'handleDragEnd', name)
     this.setState({ dropZoneEntered: false, dragged: false });
   }
@@ -523,22 +522,29 @@ class DrawerList extends React.Component {
       <List>{renderUserListItems}</List>
     </div>;
   }
+}
+DrawerList.displayName = 'DrawerList';
+DrawerList.defaultProps = {};
+DrawerList.propTypes = {
+  classes:  PropTypes.object.isRequired
+, categorys: PropTypes.array.isRequired
+, history: PropTypes.object.isRequired
+, profile: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const barHeightSmUp   = 64;//112;
 const barHeightSmDown = 56;//104;
 const primary_color   = '#477AF7';
 const secondary_color = '#29CBEF';
-const warning_color   = '#FEA634';
-const success_color   = '#87CC16';
+//const warning_color   = '#FEA634';
+//const success_color   = '#87CC16';
 const danger_color    = '#FA404B';
 const styles = theme => ({
   header: {
     height: barHeightSmDown
   , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
-  }
-, title: {
-    fontSize: 24
   }
 , icon: {
     color: theme.palette.common.white
@@ -582,9 +588,4 @@ const styles = theme => ({
 , dragged:    { opacity: 0.4 }
 , dragOver:   { border: '1px dashed #FFF' }
 });
-DrawerList.displayName = 'DrawerList';
-DrawerList.defaultProps = {};
-DrawerList.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(DrawerList));

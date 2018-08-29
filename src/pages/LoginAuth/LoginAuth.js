@@ -6,7 +6,8 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { TextField, Typography, Button, Checkbox, FormLabel, FormControl, FormGroup, FormControlLabel, FormHelperText, InputLabel } from '@material-ui/core';
+import { Typography, FormControlLabel } 
+                        from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
@@ -25,7 +26,7 @@ class LoginAuth extends React.Component {
   }
 
   handleLogin() {
-    const { username, password, checked } = this.state;
+    const { username, password } = this.state;
     LoginAction.authenticate(username, password, false)
       .then(() => {
         if(this.props.isAuthenticated) {
@@ -41,6 +42,7 @@ class LoginAuth extends React.Component {
         }
       })
       .catch(err => {
+        std.logError(LoginAuth.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
       });
   }
@@ -85,12 +87,9 @@ class LoginAuth extends React.Component {
           className={classes.input}/>
       </div>
       <div className={classes.form}>
-        <FormControlLabel control={
-            <RssCheckbox color="secondary"
-              checked={checked}
-              onChange={this.handleChangeCheckbox.bind(this, 'checked')}
-            />
-          }
+        <FormControlLabel 
+          control={<RssCheckbox color="secondary" 
+            checked={checked} onChange={this.handleChangeCheckbox.bind(this, 'checked')} />}
           label="ＩＤ・ＰＷを保存"
         />
       </div>
@@ -116,6 +115,13 @@ class LoginAuth extends React.Component {
       </div>
     </div>;
   }
+}
+LoginAuth.displayName = 'LoginAuth';
+LoginAuth.defaultProps = {};
+LoginAuth.propTypes = {
+  classes: PropTypes.object.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const loginWidth  = 320;
@@ -142,9 +148,4 @@ const styles = theme => ({
 , input:      { flex: 1 }
 , confirm:    { fontSize: 10 }
 });
-LoginAuth.displayName = 'LoginAuth';
-LoginAuth.defaultProps = {};
-LoginAuth.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(LoginAuth));

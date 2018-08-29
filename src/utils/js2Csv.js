@@ -71,7 +71,7 @@ class js2Csv {
     a.click();
   }
 
-  extractKeys(data) {
+  extractKeys() {
     return new Set([].concat(...this.data.map((record) =>
       Object.keys(record)
     )));
@@ -95,6 +95,6 @@ class js2Csv {
   static isArray(obj) {
     return '[object Array]' === Object.prototype.toString.call(obj)
   }
-};
+}
 js2Csv.displayName = 'js2csv';
 export default js2Csv;

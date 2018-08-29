@@ -4,7 +4,6 @@ import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
-import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
@@ -37,10 +36,11 @@ class Amazon {
         });
       case 'BrowseNodeLookup':
       case 'ItemSearch':
-      case 'ItemLookup':
+      case 'ItemLookup': {
         const search    = this.setSearch(this.keyset, operation, options);
         const operator  = R.curry(this.setSignature)(this.keyset, baseurl);
         return net.throttle(baseurl, { method: 'GET', type: 'NV', accept: 'XML', search, operator });
+      }
     }
   }
 
@@ -152,7 +152,7 @@ class Amazon {
       default :
         break;
     }
-  };
+  }
 
   discountRate(obj) {
     const lst = obj.ItemAttributes.ListPrice.Amount;
@@ -160,8 +160,6 @@ class Amazon {
       ? obj.Offers.Offer.OfferListing.Price.Amount
       : lst;
     const scr = Math.ceil((1 - (ofr / lst))*100);
-    //log.trace('ASIN:', obj.ASIN, 'lst, ofr, scr:', lst, ofr, scr);
-    //log.trace('ASIN:', obj.ASIN, 'scr:', scr);
     return scr;
   }
 
@@ -172,7 +170,6 @@ class Amazon {
 
   setItems(obj) {
     const items = obj.ItemSearchResponse.Items
-    //log.trace('pages:', items.TotalPages, 'items:', items.TotalResults);
     return items;
   }
 
@@ -284,9 +281,8 @@ class Amazon {
     const hshString = str => std.crypto_sha256(str, keyset.secret_key, 'base64');
     const sgnString = R.compose(hshString, setString);
     params['Signature'] = sgnString(params);
-    //log.trace(Amazon.displayName, 'Options:', params)
     return params;
   }
-};
+}
 Amazon.displayName = '[AMZ]';
 export default Amazon;

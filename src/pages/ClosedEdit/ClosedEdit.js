@@ -1,6 +1,6 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import std            from 'Utilities/stdutils';
+//import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
 import ClosedForms    from 'Components/ClosedForms/ClosedForms';
@@ -58,6 +58,16 @@ class ClosedEdit extends React.Component {
           file={file} />
     </div>;
   }
+}
+ClosedEdit.displayName= 'ClosedEdit';
+ClosedEdit.defaultProps = { note: null };
+ClosedEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, note: PropTypes.object.isRequired
+, category: PropTypes.string.isRequired
+, filter: PropTypes.object.isRequired
+, file: PropTypes.object
 };
 
 const barHeightSmUp     = 64;//112;
@@ -72,9 +82,4 @@ const styles = theme => ({
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 });
-ClosedEdit.displayName= 'ClosedEdit';
-ClosedEdit.defaultProps = { note: null };
-ClosedEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(ClosedEdit);

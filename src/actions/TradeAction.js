@@ -1,14 +1,7 @@
 import { dispatch } from 'Main/dispatcher';
 import NoteApiClient from 'Services/NoteApiClient';
 
-const displayName = 'TradeAction';
-
 export default {
-  //deleteItem(user, ids) {
-  //  return NoteApiClient.deleteItem(user, ids).then(() => {
-  //    dispatch({ type: 'item/delete/traded', ids });
-  //  });
-  //},
   deleteBids(user, ids) {
     return NoteApiClient.deleteBids(user, ids)
       .then(() => {

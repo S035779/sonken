@@ -1,4 +1,5 @@
 import React              from 'react';
+import PropTypes          from 'prop-types';
 import { StaticRouter }   from 'react-router-dom';
 import { renderRoutes }   from 'react-router-config';
 import getRoutes          from 'Routes';
@@ -37,4 +38,10 @@ export default class Static extends React.Component {
       </MuiThemeProvider>
     </JssProvider>;
   }
+}
+Static.displayName = 'Static';
+Static.defaultProps = {};
+Static.propTypes = {
+  sheets: PropTypes.object.isRequired
+, location: PropTypes.string.isRequired
 };

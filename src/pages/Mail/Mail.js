@@ -46,10 +46,8 @@ class Mail extends React.Component {
     const mail = mails.find(obj => obj._id === _id);
     const number = mails.length;
     mails.length = this.mailPage(number, page);
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
+    if(!isAuthenticated) 
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} />);
     return <div className={classes.root}>
         <MailSearch
           admin={admin}
@@ -72,6 +70,14 @@ class Mail extends React.Component {
       </div>
     </div>;
   }
+}
+Mail.displayName = 'Mail';
+Mail.defaultProps = {};
+Mail.propTypes = {
+  classes: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 112;
@@ -90,9 +96,4 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: mailHeightSmUp }}
 , mailEdit: { flex: 1 }
 });
-Mail.displayName = 'Mail';
-Mail.defaultProps = {};
-Mail.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Mail));

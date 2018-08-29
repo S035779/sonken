@@ -1,6 +1,6 @@
 import React      from 'react';
 import PropTypes  from 'prop-types';
-import { Button, Dialog, TextField, DialogActions, DialogContent, DialogContentText, DialogTitle, withMobileDialog, Slide } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, withMobileDialog, Slide } from '@material-ui/core';
 
 const Transition =  props => <Slide direction="up" {...props} />;
 
@@ -35,5 +35,9 @@ RssDialog.displayName = 'RssDialog';
 RssDialog.defaultProps = {};
 RssDialog.propTypes = {
   fullScreen: PropTypes.bool.isRequired
+, onClose: PropTypes.func.isRequired
+, open: PropTypes.bool.isRequired
+, children: PropTypes.string.isRequired
+, title: PropTypes.string.isRequired
 };
 export default withMobileDialog()(RssDialog);

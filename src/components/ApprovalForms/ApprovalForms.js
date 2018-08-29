@@ -4,10 +4,7 @@ import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Input, Typography, Select, FormControl }
-                        from '@material-ui/core';
-import { InputLabel }   from '@material-ui/core/Input';
-import { MenuItem }     from '@material-ui/core/Menu';
+import { Typography }   from '@material-ui/core';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssButton        from 'Components/RssButton/RssButton';
 
@@ -38,7 +35,10 @@ class ApprovalForms extends React.Component {
     const { user } = this.state;
     UserAction.createApproval(admin, [user._id])
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(ApprovalForms.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleNotApproval() {
@@ -46,7 +46,10 @@ class ApprovalForms extends React.Component {
     const { user } = this.state;
     UserAction.deleteApproval(admin, [user._id])
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(ApprovalForms.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleCloseDialog(name) {
@@ -129,19 +132,17 @@ class ApprovalForms extends React.Component {
       </div>
     </div>;
   }
+}
+ApprovalForms.displayName = 'ApprovalForms';
+ApprovalForms.defaultProps = { user: null };
+ApprovalForms.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, preference: PropTypes.object.isRequired
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
-const searchHeight      = 62;
-const filterHeight      = 62 * 9;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const listWidth = 400;
 const columnHeight = 62;
-const editWidth = `calc(100% - ${listWidth}px)`;
 const styles = theme => ({
   forms:        { display: 'flex', flexDirection: 'column' }
 , title:        { flex: 1, margin: theme.spacing.unit * 1.75 }
@@ -150,13 +151,8 @@ const styles = theme => ({
                 , height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box'
                 , padding: '5px' }
-, buttons:      { display: 0, display: 'flex', flexDirection: 'row' }
+, buttons:      { display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 });
-ApprovalForms.displayName = 'ApprovalForms';
-ApprovalForms.defaultProps = { user: null };
-ApprovalForms.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(ApprovalForms);

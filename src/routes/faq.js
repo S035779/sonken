@@ -5,8 +5,8 @@ const displayName = 'faq';
 const faq = FaqEditor.of();
 
 export default {
-  uploadFile(options) {
-    return (req, res, next) => {
+  uploadFile() {
+    return (req, res) => {
       const filename = req.headers['x-uploadedfilename'];
       const filedata = Buffer.alloc(+req.headers['content-length']);
 
@@ -30,8 +30,8 @@ export default {
     };
   },
 
-  fetchFaqs(options) {
-    return (req, res, next) => {
+  fetchFaqs() {
+    return (req, res) => {
       const { admin } = req.body;
       faq.fetchFaqs({ admin }).subscribe(
         obj => {
@@ -47,8 +47,8 @@ export default {
     };
   },
 
-  fetchPostedFaqs(options) {
-    return (req, res, next) => {
+  fetchPostedFaqs() {
+    return (req, res) => {
       const { admin } = req.body;
       faq.fetchFaqs({ admin }).subscribe(
         obj => {
@@ -64,8 +64,8 @@ export default {
     };
   },
 
-  fetchFaq(options) {
-    return (req, res, next) => {
+  fetchFaq() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       faq.fetchFaq({ admin, ids }).subscribe(
         obj => {
@@ -81,8 +81,8 @@ export default {
     };
   },
 
-  createFaq(options) {
-    return (req, res, next) => {
+  createFaq() {
+    return (req, res) => {
       const { admin } = req.body;
       faq.createFaq({ admin }).subscribe(
         obj => {
@@ -98,8 +98,8 @@ export default {
     };
   },
 
-  updateFaq(options) {
-    return (req, res, next) => {
+  updateFaq() {
+    return (req, res) => {
       const { admin, id, data } = req.body;
       console.log(id);
       faq.updateFaq({ admin, id, data }).subscribe(
@@ -116,8 +116,8 @@ export default {
     };
   },
 
-  deleteFaq(options) {
-    return (req, res, next) => {
+  deleteFaq() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       faq.deleteFaq({ admin, ids }).subscribe(
         obj => {
@@ -133,8 +133,8 @@ export default {
     };
   },
 
-  createPost(options) {
-    return (req, res, next) => {
+  createPost() {
+    return (req, res) => {
       const { admin, ids } = req.body;
       faq.createPost({ admin, ids }).subscribe(
         obj => {
@@ -150,8 +150,8 @@ export default {
     };
   },
 
-  deletePost(options) {
-    return (req, res, next) => {
+  deletePost() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       faq.deletePost({ admin, ids }).subscribe(
         obj => {
@@ -167,7 +167,7 @@ export default {
     };
   },
 
-  notImplemented(options) {
+  notImplemented() {
     return (req, res, next) => {
       next(new Error('not implemented'));
     };

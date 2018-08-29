@@ -1,7 +1,4 @@
 import { ReduceStore } from 'flux/utils';
-import std              from 'Utilities/stdutils';
-
-const displayName = 'LoginStore';
 
 export default class LoginStore extends ReduceStore {
   getInitialState() {
@@ -38,7 +35,6 @@ export default class LoginStore extends ReduceStore {
   }
 
   reduce(state, action) {
-    //std.logDebug(displayName, 'Store', action);
     switch (action.type) { 
       case 'admin/preset':
         return Object.assign({}, state, {
@@ -112,4 +108,6 @@ export default class LoginStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+LoginStore.displayName = 'LoginStore';
+

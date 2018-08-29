@@ -4,11 +4,8 @@ import TradeAction      from 'Actions/TradeAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import {
-  Input, Button, Checkbox, Typography, TextField
-}                       from '@material-ui/core';
-import { InputLabel }   from '@material-ui/core/Input';
-import { FormControl }  from '@material-ui/core/FormControlLabel';
+import { Button, Checkbox, Typography, TextField }
+                        from '@material-ui/core';
 
 class TradeFilter extends React.Component {
   constructor(props) {
@@ -60,11 +57,12 @@ class TradeFilter extends React.Component {
         , endTrading: checked
         });
         break;
-      case 'checked':
-        this.setState({ checked: checked });
-        const { user, items } = this.props;
-        const ids = checked ? items.map(item => item.guid._) : [];
-        TradeAction.select(user, ids);
+      case 'checked': {
+          this.setState({ checked: checked });
+          const { user, items } = this.props;
+          const ids = checked ? items.map(item => item.guid._) : [];
+          TradeAction.select(user, ids);
+        }
         break;
     }
   }
@@ -184,6 +182,15 @@ class TradeFilter extends React.Component {
       </div>
     </div>;
   }
+}
+TradeFilter.displayName = 'TradeFilter';
+TradeFilter.defaultProps = { note: null };
+TradeFilter.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedItemId: PropTypes.array.isRequired
+, itemFilter: PropTypes.object
+, user: PropTypes.string.isRequired
+, items: PropTypes.array.isRequired
 };
 
 const columnHeight = 62;
@@ -206,9 +213,4 @@ const styles = theme => ({
 , inputText:    {}
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
-TradeFilter.displayName = 'TradeFilter';
-TradeFilter.defaultProps = { note: null };
-TradeFilter.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(TradeFilter);

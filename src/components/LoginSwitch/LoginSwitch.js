@@ -24,9 +24,14 @@ class LoginSwitch extends React.Component {
         label={auth ? 'Logout' : 'Login'} />
     </FormGroup>;
   }
-};
-const styles = theme => ({});
+}
+LoginSwitch.displayName = 'LoginSwitch';
+LoginSwitch.defaultProps = {};
 LoginSwitch.propTypes = {
   classes:  PropTypes.object.isRequired
+, onChange: PropTypes.func.isRequired
+, auth: PropTypes.bool.isRequired
 };
+
+const styles = {};
 export default withStyles(styles)(LoginSwitch);

@@ -4,7 +4,7 @@ import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Select, Input, Button, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
+import { Select, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
 
 class AdminSearch extends React.Component {
   constructor(props) {
@@ -39,8 +39,8 @@ class AdminSearch extends React.Component {
   render() {
     //std.logInfo(AdminSearch.displayName, 'Props', this.props);
     //std.logInfo(AdminSearch.displayName, 'State', this.state);
-    const { classes, userNumber, category } = this.props;
-    const { perPage, filename } = this.state;
+    const { classes, userNumber } = this.props;
+    const { perPage } = this.state;
     return <div className={classes.userSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -66,6 +66,14 @@ class AdminSearch extends React.Component {
       </div>
     </div>;
   }
+}
+AdminSearch.displayName = 'AdminSearch';
+AdminSearch.defaultProps = {};
+AdminSearch.propTypes = {
+  classes: PropTypes.object.isRequired
+, userNumber: PropTypes.number.isRequired
+, userPage: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const titleHeight = 62;
@@ -90,9 +98,4 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-AdminSearch.displayName = 'AdminSearch';
-AdminSearch.defaultProps = {};
-AdminSearch.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(AdminSearch);

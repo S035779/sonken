@@ -54,7 +54,10 @@ class UserForms extends React.Component {
     if(this.isValidate() && this.isChanged()) {
       UserAction.update(admin, user)
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(UserForms.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -65,7 +68,10 @@ class UserForms extends React.Component {
     const { user } = this.state;
     if(window.confirm('Are you sure?')) {
       UserAction.delete(admin, [user._id])
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(UserForms.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     }
   }
 
@@ -183,19 +189,17 @@ class UserForms extends React.Component {
       </div>
     </div>;
   }
+}
+UserForms.displayName = 'UserForms';
+UserForms.defaultProps = { user: null };
+UserForms.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, preference: PropTypes.object.isRequired
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
-const searchHeight      = 62;
-const filterHeight      = 62 * 9;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const listWidth = 400;
 const columnHeight = 62;
-const editWidth = `calc(100% - ${listWidth}px)`;
 const styles = theme => ({
   forms:        { display: 'flex', flexDirection: 'column' }
 , title:        { flex: 1, margin: theme.spacing.unit * 1.75 }
@@ -210,9 +214,4 @@ const styles = theme => ({
 , text:         { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
 , checkbox:     { flex: 1, marginLeft: theme.spacing.unit * 1.75 }
 });
-UserForms.displayName = 'UserForms';
-UserForms.defaultProps = { user: null };
-UserForms.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(UserForms);

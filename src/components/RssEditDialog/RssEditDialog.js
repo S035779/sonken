@@ -7,7 +7,6 @@ import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, Avatar, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText, ListItemAvatar } from '@material-ui/core';
 import { Clear, Edit, Folder } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssNewDialog     from 'Components/RssNewDialog/RssNewDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
@@ -30,7 +29,7 @@ class RssEditDialog extends React.Component {
     this.setState({ categorys });
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -181,7 +180,19 @@ class RssEditDialog extends React.Component {
       </LoginFormDialog>
     ;
   }
+}
+RssEditDialog.displayName = 'RssEditDialog';
+RssEditDialog.defaultProps = { open: false };
+RssEditDialog.propTypes = {
+  classes: PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, open: PropTypes.bool.isRequired
+, categorys: PropTypes.array.isRequired
+, user: PropTypes.string
+, category: PropTypes.string.isRequired
+, title: PropTypes.string.isRequired
 };
+
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
 , dialog:     { width: 512 }
@@ -191,13 +202,4 @@ const styles = theme => ({
 , clearIcon:  { fontSize: 16, color: '#FA404B' }
 , editIcon:   { fontSize: 16, color: '#FEA634' }
 });
-RssEditDialog.displayName = 'RssEditDialog';
-RssEditDialog.defaultProps = {
-  open: false
-};
-RssEditDialog.propTypes = {
-  classes:            PropTypes.object.isRequired
-, onClose:            PropTypes.func.isRequired
-, open:               PropTypes.bool.isRequired
-};
 export default withStyles(styles)(RssEditDialog);

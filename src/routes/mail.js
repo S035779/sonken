@@ -5,8 +5,8 @@ const displayName = 'mail';
 const mail = MailEditor.of();
 
 export default {
-  uploadFile(options) {
-    return (req, res, next) => {
+  uploadFile() {
+    return (req, res) => {
       const filename = req.headers['x-uploadedfilename'];
       const filedata = Buffer.alloc(+req.headers['content-length']);
 
@@ -30,8 +30,8 @@ export default {
     };
   },
 
-  fetchMails(options) {
-    return (req, res, next) => {
+  fetchMails() {
+    return (req, res) => {
       const { admin } = req.body;
       mail.fetchMails({ admin }).subscribe(
         obj => {
@@ -47,8 +47,8 @@ export default {
     };
   },
 
-  fetchSelectedMails(options) {
-    return (req, res, next) => {
+  fetchSelectedMails() {
+    return (req, res) => {
       const { admin } = req.body;
       mail.fetchMails({ admin }).subscribe(
         obj => {
@@ -64,8 +64,8 @@ export default {
     };
   },
 
-  fetchMail(options) {
-    return (req, res, next) => {
+  fetchMail() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       mail.fetchMail({ admin, ids }).subscribe(
         obj => {
@@ -81,8 +81,8 @@ export default {
     };
   },
 
-  createMail(options) {
-    return (req, res, next) => {
+  createMail() {
+    return (req, res) => {
       const { admin } = req.body;
       mail.createMail({ admin }).subscribe(
         obj => {
@@ -98,10 +98,9 @@ export default {
     };
   },
 
-  updateMail(options) {
-    return (req, res, next) => {
+  updateMail() {
+    return (req, res) => {
       const { admin, id, data } = req.body;
-      console.log(id);
       mail.updateMail({ admin, id, data }).subscribe(
         obj => {
           res.status(200).send(obj);
@@ -116,8 +115,8 @@ export default {
     };
   },
 
-  deleteMail(options) {
-    return (req, res, next) => {
+  deleteMail() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       mail.deleteMail({ admin, ids }).subscribe(
         obj => {
@@ -133,8 +132,8 @@ export default {
     };
   },
 
-  createSelect(options) {
-    return (req, res, next) => {
+  createSelect() {
+    return (req, res) => {
       const { admin, ids } = req.body;
       mail.createSelect({ admin, ids }).subscribe(
         obj => {
@@ -150,8 +149,8 @@ export default {
     };
   },
 
-  deleteSelect(options) {
-    return (req, res, next) => {
+  deleteSelect() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       mail.deleteSelect({ admin, ids }).subscribe(
         obj => {
@@ -167,7 +166,7 @@ export default {
     };
   },
 
-  notImplemented(options) {
+  notImplemented() {
     return (req, res, next) => {
       next(new Error('not implemented'));
     };

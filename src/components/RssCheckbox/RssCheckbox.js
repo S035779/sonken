@@ -8,13 +8,11 @@ import { CheckBoxOutlineBlank, CheckBox }
 
 class RssCheckbox extends React.Component {
   render() {
-    const { classes, color, onChange, type, value
-      , checked, ...other } = this.props;
-    return <Checkbox type={type}
-        classes={{
-          root: classes[color]
-        , checked: classes.checked
-        }}
+    const { classes, color, onChange, value, checked, ...other } = this.props;
+    const type = 'checkbox';
+    return <Checkbox
+        type={type}
+        classes={{ root: classes[color], checked: classes.checked }}
         value={value}
         checked={checked}
         icon={<CheckBoxOutlineBlank className={classes.sizeIcon} />}
@@ -23,6 +21,11 @@ class RssCheckbox extends React.Component {
         {...other }
       />;
   }
+}
+RssCheckbox.displayName = 'RssCheckbox';
+RssCheckbox.defaultProps = {};
+RssCheckbox.propTypes = {
+  classes: PropTypes.object.isRequired
 };
 
 const default_color   = '#888888';
@@ -31,9 +34,7 @@ const secondary_color = '#29CBEF';
 const warning_color   = '#FEA634';
 const success_color   = '#87CC16';
 const danger_color    = '#FA404B';
-const theme = {
-};
-const styles = theme => ({
+const styles = {
   sizeIcon: { fontSize: 16 }
 , checked: {}
 , default: {
@@ -72,10 +73,5 @@ const styles = theme => ({
       color: danger_color
     }
   }
-});
-RssCheckbox.displayName = 'RssCheckbox';
-RssCheckbox.defaultProps = {};
-RssCheckbox.propTypes = {
-  classes: PropTypes.object.isRequired
 };
 export default withStyles(styles)(RssCheckbox);

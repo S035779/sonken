@@ -59,6 +59,6 @@ class ReactSSRenderer {
         : Promise.resolve(null));
     return Promise.all(promises);
   }
-};
+}
 ReactSSRenderer.displayName = 'ReactSSRenderer';
 export default ReactSSRenderer;

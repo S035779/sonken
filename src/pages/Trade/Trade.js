@@ -37,16 +37,9 @@ class Trade extends React.Component {
   }
 
   itemFilter(filter, item) {
-    const date      = new Date();
     const now       = new Date(item.bidStopTime);
     const start     = new Date(filter.bidStartTime);
     const stop      = new Date(filter.bidStopTime);
-    const year      = date.getFullYear();
-    const month     = date.getMonth();
-    const day       = date.getDate();
-    const today     = new Date(year, month, day+1);
-    const yesterday = new Date(year, month, day);
-    //const isDay = yesterday <= now && now < today; 
     const isTrade = item.traded;
     const isAll = true;
     const isNow = start <= now && now <= stop;
@@ -69,7 +62,7 @@ class Trade extends React.Component {
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file }
       = this.state;
-    if(!isAuthenticated)
+    if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}} />);
     let items = [];
     notes.forEach(note => {
@@ -98,6 +91,12 @@ class Trade extends React.Component {
       </div>
     </div>;
   }
+}
+Trade.displayName = 'Trade';
+Trade.defaultProps = { notes: null };
+Trade.propTypes = {
+  classes: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
@@ -114,9 +113,4 @@ const styles = theme => ({
             , height: listHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
 });
-Trade.displayName = 'Trade';
-Trade.defaultProps = { notes: null };
-Trade.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Trade));

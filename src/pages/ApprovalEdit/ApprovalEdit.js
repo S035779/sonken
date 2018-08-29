@@ -1,6 +1,6 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import std            from 'Utilities/stdutils';
+//import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
 import ApprovalForms  from 'Components/ApprovalForms/ApprovalForms';
@@ -16,6 +16,14 @@ class ApprovalEdit extends React.Component {
       </div>
     </div>;
   }
+}
+ApprovalEdit.displayName= 'ApprovalEdit';
+ApprovalEdit.defaultProps = { user: null };
+ApprovalEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, user: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -31,9 +39,4 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , forms:    { overflow: 'scroll' }
 });
-ApprovalEdit.displayName= 'ApprovalEdit';
-ApprovalEdit.defaultProps = { user: null };
-ApprovalEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(ApprovalEdit);

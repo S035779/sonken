@@ -3,7 +3,7 @@ import PropTypes        from 'prop-types'
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { TextField, FormLabel, FormControl, FormHelperText }
+import { TextField, FormControl }
                         from '@material-ui/core';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
@@ -18,7 +18,7 @@ class RssNewDialog extends React.Component {
     };
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -55,7 +55,7 @@ class RssNewDialog extends React.Component {
   render() {
     //std.logInfo(RssNewDialog.displayName, 'Props', this.props);
     //std.logInfo(RssNewDialog.displayName, 'State', this.state);
-    const { classes, open, category, title } = this.props;
+    const { classes, open, title } = this.props;
     const { isNotValid, isSuccess, name } = this.state;
     const paperClass = { paper: classes.dialog };
     return <LoginFormDialog 
@@ -81,20 +81,21 @@ class RssNewDialog extends React.Component {
       </LoginFormDialog>
     ;
   }
+}
+RssNewDialog.displayName = 'RssNewDialog';
+RssNewDialog.defaultProps = { open: false };
+RssNewDialog.propTypes = {
+  classes:  PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
+, name: PropTypes.string.isRequired
+, title: PropTypes.string.isRequired
+, onClose: PropTypes.func.isRequired
+, onSubmit: PropTypes.func.isRequired
 };
+
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
 , dialog:     { width: 256 }
 , column:     { flex: 1, width: '100%', marginTop: theme.spacing.unit *2 }
 });
-RssNewDialog.displayName = 'RssNewDialog';
-RssNewDialog.defaultProps = {
-  open: false
-};
-RssNewDialog.propTypes = {
-  classes:  PropTypes.object.isRequired
-, onClose:  PropTypes.func.isRequired
-, onSubmit: PropTypes.func.isRequired
-, open:     PropTypes.bool.isRequired
-};
 export default withStyles(styles)(RssNewDialog);

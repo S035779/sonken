@@ -4,8 +4,6 @@ import http             from 'http';
 import https            from 'https';
 import std              from 'Utilities/stdutils';
 
-const displayName = 'netutils';
-
 const mimes = {
   NV:  'application/x-www-form-urlencoded'
 , JSON:  'application/json'
@@ -177,7 +175,7 @@ const _get = (url, { search, operator, filename }, callback) => {
           callback(status);
           break; 
         case 200: case 201: case 202: case 204:
-          callback(null, body);
+          callback(null, response);
           break;
         case 301: case 302:
           callback(status);

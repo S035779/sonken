@@ -5,7 +5,7 @@ import UserAction     from 'Actions/UserAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, Checkbox, Typography, Avatar, ListItem, ListItemText } from '@material-ui/core';
 import pink           from '@material-ui/core/colors/pink';
 import { Pageview }   from '@material-ui/icons';
 
@@ -25,7 +25,7 @@ class AdminList extends React.Component {
     this.setState({ checked, users });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(AdminList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { admin } = this.props;
@@ -39,8 +39,7 @@ class AdminList extends React.Component {
   renderItem(user, index) {
     const { classes, category } = this.props;
     const { checked } = this.state;
-    const textClass =
-      { primary:    classes.primary, secondary:  classes.secondary };
+    const textClass = { primary:    classes.primary, secondary:  classes.secondary };
     const linkTo = `/admin/${category}/${user._id}/edit`;
     const notice = user.approved ? '承認済み' : '';
     const name = user.name;
@@ -77,6 +76,15 @@ class AdminList extends React.Component {
       {renderItems}
     </List>;
   }
+}
+AdminList.displayName = 'AdminList';
+AdminList.defaultProps = { users: null }
+AdminList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedUserId: PropTypes.array.isRequired
+, users: PropTypes.array.isRequired
+, admin: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -112,9 +120,4 @@ const styles = theme => ({
 , pinkAvatar: { marginLeft: theme.spacing.unit
               , color: '#fff', backgroundColor: pink[500] }
 });
-AdminList.displayName = 'AdminList';
-AdminList.defaultProps = { users: null }
-AdminList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(AdminList);

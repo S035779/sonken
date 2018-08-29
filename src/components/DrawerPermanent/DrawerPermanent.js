@@ -42,6 +42,16 @@ class DrawerPermanent extends React.Component {
       </Drawer>
     </Hidden>
   }
+}
+DrawerPermanent.displayName = 'DrawerPermanent';
+DrawerPermanent.defaultProps = {};
+DrawerPermanent.propTypes = {
+  classes:  PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
+, categorys: PropTypes.array.isRequired
 };
 
 const drawerWidthMdUp = 240;
@@ -74,9 +84,4 @@ const styles = theme => ({
     }
   }
 });
-DrawerPermanent.displayName = 'DrawerPermanent';
-DrawerPermanent.defaultProps = {};
-DrawerPermanent.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(DrawerPermanent);

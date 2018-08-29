@@ -31,7 +31,7 @@ class RssAddDialog extends React.Component {
     this.setState({ categorys });
   }
   
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -196,7 +196,20 @@ class RssAddDialog extends React.Component {
       </LoginFormDialog>
     ;
   }
+}
+RssAddDialog.displayName = 'RssAddDialog';
+RssAddDialog.defaultProps = { open: false };
+RssAddDialog.propTypes = {
+  classes: PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, open: PropTypes.bool.isRequired
+, categorys: PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
+, onSubmit: PropTypes.func.isRequired
+, title: PropTypes.string.isRequired
 };
+
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
 , dialog:     { width: 512 }
@@ -205,13 +218,4 @@ const styles = theme => ({
 , clearIcon:  { fontSize: 16, color: '#FA404B' }
 , editIcon:   { fontSize: 16, color: '#FEA634' }
 });
-RssAddDialog.displayName = 'RssAddDialog';
-RssAddDialog.defaultProps = {
-  open: false
-};
-RssAddDialog.propTypes = {
-  classes:            PropTypes.object.isRequired
-, onClose:            PropTypes.func.isRequired
-, open:               PropTypes.bool.isRequired
-};
 export default withStyles(styles)(RssAddDialog);

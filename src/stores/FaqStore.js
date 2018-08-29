@@ -1,7 +1,5 @@
 import { ReduceStore } from 'flux/utils';
 
-const displayName = 'FaqStore';
-
 export default class FaqStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -100,4 +98,6 @@ export default class FaqStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+FaqStore.displayName = 'FaqStore';
+

@@ -27,7 +27,7 @@ class RssList extends React.Component {
     this.setState({ checked, notes });
   }
 
-  handleChangeDialog(id, event) {
+  handleChangeDialog(id) {
     std.logInfo(RssList.displayName, 'handleChangeDialog', id);
     const { opened } = this.state;
     const currentIndex = opened.indexOf(id);
@@ -37,7 +37,7 @@ class RssList extends React.Component {
     this.setState({ opened: newOpened });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(RssList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { user } = this.props;
@@ -56,7 +56,10 @@ class RssList extends React.Component {
     const newNote = Object.assign({}, curNote, { title, categoryIds });
     NoteAction.update(user, id, newNote)
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(RssList.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleReaded(note) {
@@ -155,6 +158,17 @@ class RssList extends React.Component {
       </RssDialog>
     </List>;
   }
+}
+RssList.displayName = 'RssList';
+RssList.defaultProps = { notes: null }
+RssList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedNoteId: PropTypes.array.isRequired
+, notes: PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
+, categorys: PropTypes.array.isRequired
+, categoryId: PropTypes.string.isRequired
+, title: PropTypes.string.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
@@ -188,9 +202,4 @@ const styles = theme => ({
   , notice:     { flex:1, padding: theme.spacing.unit /2
                 , minWidth: noticeWidth }
 });
-RssList.displayName = 'RssList';
-RssList.defaultProps = { notes: null }
-RssList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssList);

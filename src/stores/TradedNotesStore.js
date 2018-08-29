@@ -1,8 +1,6 @@
 import { ReduceStore }  from 'flux/utils';
 import std              from 'Utilities/stdutils';
 
-const displayName = 'TradedNotesStore';
-
 export default class TradedNotesStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -45,13 +43,6 @@ export default class TradedNotesStore extends ReduceStore {
     , { items: setItems(note.items) }) : note );
   }
 
-  //deleteItem(state, action) {
-  //  const isItem = obj => action.ids.some(id => id === obj.guid._);
-  //  const delItems = objs => objs.filter(item => !isItem(item));
-  //  return state.notes.map(note => note.items ? Object.assign({}, note
-  //  , { items: delItems(note.items) }) : note );
-  //}
-
   deleteBids(state, action) {
     const isItem = obj => action.ids.some(id => id === obj.guid._);
     const setItem = obj => isItem(obj) ? Object.assign({}, obj
@@ -80,11 +71,6 @@ export default class TradedNotesStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  action.notes
         });
-      //case 'item/delete/traded':
-      //  return Object.assign({}, state, {
-      //    notes:  this.deleteItem(state, action)
-      //  , ids:    []
-      //  });
       case 'bids/delete':
         return Object.assign({}, state, {
           notes: this.deleteBids(state, action)
@@ -122,4 +108,6 @@ export default class TradedNotesStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+TradedNotesStore.displayName = 'TradedNotesStore';
+

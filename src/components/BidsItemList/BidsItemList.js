@@ -1,11 +1,10 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import { Link }       from 'react-router-dom';
 import BidsAction     from 'Actions/BidsAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography }
+import { List, Paper, Checkbox }
                       from '@material-ui/core';
 import { ListItem, ListItemText, ListItemSecondaryAction }
                       from '@material-ui/core/List';
@@ -30,7 +29,7 @@ class BidsItemList extends React.Component {
     this.setState({ selectedItemId, bided });
   }
 
-  handleChangeBided(id, event) {
+  handleChangeBided(id) {
     std.logInfo(BidsItemList.displayName, 'handleChangeBided', id);
     const { bided } = this.state;
     const { user } = this.props;
@@ -46,7 +45,7 @@ class BidsItemList extends React.Component {
     this.setState({ bided: newBided });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(BidsItemList.displayName, 'handleChangeCheckbox', id);
     const { selectedItemId } = this.state;
     const { user } = this.props;
@@ -60,26 +59,15 @@ class BidsItemList extends React.Component {
   renderItem(index, item) {
     const { classes } = this.props;
     const { bided, selectedItemId } = this.state;
-    const textClass = {
-      primary: classes.primary
-    , secondary: classes.secondary
-    };
-    const buttonColor = bided.indexOf(item.guid._) !== -1
-      ? 'green' : 'yellow';
-    const buttonText = bided.indexOf(item.guid._) !== -1
-      ? '取引チェック 登録済み' : '取引チェック 登録';
+    const textClass = { primary: classes.primary, secondary: classes.secondary };
+    const buttonColor = bided.indexOf(item.guid._) !== -1 ? 'green' : 'yellow';
+    const buttonText = bided.indexOf(item.guid._) !== -1 ? '取引チェック 登録済み' : '取引チェック 登録';
     const title = `出品件名：${item.title}`;
-    const description =
-      `配信時間：${
-        std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm')
-      }、`
+    const description = `配信時間：${ std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
     + `現在価格：${item.price}円、`
     + `入札数：${item.bids}、`
-    + `入札終了時間：${
-        std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm')
-      }、`
-    + `AuctionID：${item.guid._}`
-    ;
+    + `入札終了時間：${ std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm') }、`
+    + `AuctionID：${item.guid._}`;
     return <div key={index} className={classes.noteItem}>
       <Checkbox
         onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
@@ -89,8 +77,7 @@ class BidsItemList extends React.Component {
         <ListItem disableGutters
           className={classes.listItem}>
           <div className={classes.description}>
-            <a href={item.description.DIV.A.attr.HREF}
-              target="_blank">
+            <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
             <img src={item.description.DIV.A.IMG.attr.SRC}
               border={item.description.DIV.A.IMG.attr.BORDER}
               width={item.description.DIV.A.IMG.attr.WIDTH}
@@ -114,7 +101,7 @@ class BidsItemList extends React.Component {
   }
 
   render() {
-    const { classes, items } = this.props;
+    const { items } = this.props;
     const compareId = ((a, b) => {
       if(a._id < b._id) return -1;
       if(a._id > b._id) return 1;
@@ -125,6 +112,14 @@ class BidsItemList extends React.Component {
       .map((item, index) => this.renderItem(index, item));
     return <List>{_items}</List>;
   }
+}
+BidsItemList.displayName = 'BidsItemList';
+BidsItemList.defaultProps = { items: null }
+BidsItemList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedItemId: PropTypes.array.isRequired
+, items: PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
 };
 
 const itemHeight        = 142 * 1.5;
@@ -155,9 +150,4 @@ const styles = theme => ({
 , image:        { width: '100%', height: '100%' }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });
-BidsItemList.displayName = 'BidsItemList';
-BidsItemList.defaultProps = { items: null }
-BidsItemList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(BidsItemList);

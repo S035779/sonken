@@ -37,14 +37,14 @@ export default class UserProfiler {
     this.createMenu({ admin: admin_user })
       .subscribe(
         obj => { log.info(obj); }
-      , err => { log.warn('Failed to update the menu.'); }
-      , ( ) => { log.info('Complete to create Administrator!!'); }
+      , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
+      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Menu!!'); }
       );
     this.createAdmin({ admin: admin_user, password: admin_pass })
       .subscribe(
         obj => { log.info(obj); }
-      , err => { log.warn('Adminitrator has already registered.'); }
-      , ( ) => { log.info('Complete to create Administrator!!'); }
+      , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
+      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Administrator!!'); }
       );
   }
 
@@ -53,14 +53,12 @@ export default class UserProfiler {
   }
 
   request(request, options) {
-    //log.debug(request, options);
     switch(request) {
       case 'fetch/users':
         return new Promise((resolve, reject) => {
           const conditions = {};
           User.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -74,7 +72,6 @@ export default class UserProfiler {
           const update = { isAuthenticated: true };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           })
         });
@@ -84,13 +81,11 @@ export default class UserProfiler {
           const update = { isAuthenticated: false };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/user':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
           const isUser = options.user !=='';
           const isEmail = !!options.email;
           if(!isUser) return reject({
@@ -109,13 +104,11 @@ export default class UserProfiler {
             if(obj === null) return reject({
               name: 'Request error', message: 'User not found for request.'
             });
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/user':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
           const isAdmin = !!options.admin;
           const create = isAdmin 
             ? {
@@ -140,21 +133,17 @@ export default class UserProfiler {
             , phone:  options.data.phone
             , plan:   options.data.plan
             };
-          //log.debug(isAdmin, create);
           const user = new User(create);
           user.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'update/user':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
           const isAdmin = !!options.admin;
           const isData = !!options.data;
           const isPass = !!options.hash && !!options.salt;
-          //log.debug(isAdmin, isData, isPass, isAdmin && isData);
           let conditions = isAdmin
             ? { user: options.data.user }
             : { user: options.user };
@@ -193,10 +182,8 @@ export default class UserProfiler {
                 , hash:   options.hash
                 , updated: new Date
                 };
-          //log.debug(conditions, update);
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -205,7 +192,6 @@ export default class UserProfiler {
           const conditions = { _id: options.id };
           User.remove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -216,7 +202,6 @@ export default class UserProfiler {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'User not found.' });
-            //log.trace(request, obj);
             resolve(obj.email);
           });
         });
@@ -225,7 +210,6 @@ export default class UserProfiler {
           const conditions = {};
           Selected.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -234,7 +218,6 @@ export default class UserProfiler {
           const conditions = { _id: options.id };
           Mail.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -245,7 +228,6 @@ export default class UserProfiler {
           Approved.update(conditions, update, { upsert: true }
           , (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -254,7 +236,6 @@ export default class UserProfiler {
           const conditions = { approved: options.id };
           Approved.remove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -264,7 +245,6 @@ export default class UserProfiler {
           const conditions = isId ? { approved: options.id } : {};
           Approved.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -279,7 +259,6 @@ export default class UserProfiler {
           const update = { isAuthenticated: true };
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           })
         });
@@ -290,10 +269,8 @@ export default class UserProfiler {
           , isAdmin: true
           };
           const update = { isAuthenticated: false };
-          const isAuthenticated = false;
           User.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -302,7 +279,6 @@ export default class UserProfiler {
           const conditions = {};
           Admin.findOne(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -332,19 +308,9 @@ export default class UserProfiler {
           };
           Admin.update(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-      //case 'delete/preference':
-      //  return new Promise((resolve, reject) => {
-      //    const conditions = { _id: options.id };
-      //    User.findOneAndRemove(conditions, (err, obj) => {
-      //      if(err) return reject(err);
-      //      log.trace(request, obj);
-      //      resolve(obj);
-      //    });
-      //  });
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
@@ -590,8 +556,7 @@ export default class UserProfiler {
     , to:       user.email
     , subject:  `(${app_name})`
       + ` ${user.name} 様より問合せがありました。` 
-    , text:
-        `氏　　名： ${user.name}\n`
+    , text:     `氏    名： ${user.name}\n`
       + `アドレス： ${user.email}\n`
       + `ユーザID： ${user.user}\n`
       + `タイトル： ${message.title}\n`
@@ -617,7 +582,6 @@ export default class UserProfiler {
   }
 
   fetchMessage(admin, id) {
-    //log.trace(admin, id);
     return from(this.getMessage(admin, id));
   }
 
@@ -842,4 +806,5 @@ export default class UserProfiler {
       }
     };
   }
-};
+}
+UserProfiler.displayName = 'UserProfiler';

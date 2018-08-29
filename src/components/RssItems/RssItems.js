@@ -39,7 +39,7 @@ class RssItems extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleDownload(event) {
+  handleDownload() {
     const { user, note } = this.props;
     std.logInfo(RssItems.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
@@ -102,6 +102,15 @@ class RssItems extends React.Component {
       </div>
     </div>;
   }
+}
+RssItems.displayName = 'RssItems';
+RssItems.defaultProps = { note: null };
+RssItems.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, note: PropTypes.object.isRequired
+, file: PropTypes.object
+, category: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -127,9 +136,4 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all'  }
 });
-RssItems.displayName = 'RssItems';
-RssItems.defaultProps = { note: null };
-RssItems.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssItems);

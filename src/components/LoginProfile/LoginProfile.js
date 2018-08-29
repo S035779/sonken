@@ -6,8 +6,6 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { Typography, TextField }
                         from '@material-ui/core';
-import { DialogContentText }
-                        from '@material-ui/core/Dialog';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
@@ -28,7 +26,7 @@ class LoginProfile extends React.Component {
     };
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -54,7 +52,7 @@ class LoginProfile extends React.Component {
     this.props.onClose(name, event);
   }
 
-  handleSubmitDialog(name, event) {
+  handleSubmitDialog(name) {
     std.logInfo(LoginProfile.displayName, 'handleSubmitDialog', name);
     const { profile, password } = this.state;
     const { user } = this.props;
@@ -63,7 +61,10 @@ class LoginProfile extends React.Component {
         if(this.isValidate() && this.isChanged()) {
           LoginAction.updateProfile(user, password, profile)
             .then(() => this.setState({ isSuccess: true }))
-            .catch(err => this.setState({ isNotValid: true }));
+            .catch(err => {
+              std.logError(LoginProfile.displayName, err.name, err.message);
+              this.setState({ isNotValid: true });
+            });
         } else {
           this.setState({ isNotValid: true });
         }
@@ -143,9 +144,7 @@ class LoginProfile extends React.Component {
       </LoginFormDialog>
     ;
   }
-};
-const styles = theme => ({
-});
+}
 LoginProfile.displayName = 'LoginProfile';
 LoginProfile.defaultProps = {
   name: ''
@@ -157,15 +156,17 @@ LoginProfile.defaultProps = {
 , open: false
 };
 LoginProfile.propTypes = {
-  classes:            PropTypes.object.isRequired
-, onClose:            PropTypes.func.isRequired
-, name:               PropTypes.string.isRequired
-, user:               PropTypes.string.isRequired
-, kana:               PropTypes.string.isRequired
-, email:              PropTypes.string.isRequired
-, phone:              PropTypes.string.isRequired
-, profile:            PropTypes.object.isRequired
-, open:               PropTypes.bool.isRequired
+  classes: PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, name: PropTypes.string.isRequired
+, user: PropTypes.string.isRequired
+, kana: PropTypes.string.isRequired
+, email: PropTypes.string.isRequired
+, phone: PropTypes.string.isRequired
+, profile: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
 };
+
+const styles = {};
 export default withStyles(styles)(LoginProfile);
 

@@ -21,6 +21,15 @@ class MarchantEdit extends React.Component {
       </RssForms>
     </div>;
   }
+}
+MarchantEdit.displayName= 'MarchantEdit';
+MarchantEdit.defaultProps = { note: null };
+MarchantEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, note: PropTypes.object.isRequired
+, category: PropTypes.string.isRequired
+, file: PropTypes.object
 };
 
 const barHeightSmUp     = 64;//112;
@@ -45,9 +54,4 @@ const styles = theme => ({
               , content: '"Preview"', fontSize: '12px'
               , backgroundColor: '#F5F5F5' }}
 });
-MarchantEdit.displayName= 'MarchantEdit';
-MarchantEdit.defaultProps = { note: null };
-MarchantEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(MarchantEdit);

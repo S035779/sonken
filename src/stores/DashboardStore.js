@@ -1,8 +1,6 @@
 import { ReduceStore }  from 'flux/utils';
 import std              from 'Utilities/stdutils';
 
-const displayName = 'DashboardStore';
-
 export default class DashboardStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -280,4 +278,6 @@ export default class DashboardStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+DashboardStore.displayName = 'DashboardStore';
+

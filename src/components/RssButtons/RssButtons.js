@@ -76,7 +76,7 @@ class RssButtons extends React.Component {
     }
   }
 
-  handleDownload(event) {
+  handleDownload() {
     const { user, selectedNoteId } = this.props;
     std.logInfo(RssButtons.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
@@ -144,6 +144,16 @@ class RssButtons extends React.Component {
       </div>
     </div>;
   }
+}
+RssButtons.displayName = 'RssButtons';
+RssButtons.defaultProps = {};
+RssButtons.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, notes: PropTypes.array.isRequired
+, selectedNoteId: PropTypes.array.isRequired
+, file: PropTypes.object
+, category: PropTypes.string.isRequired
 };
 
 const titleHeight   = 62;
@@ -159,9 +169,4 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 });
-RssButtons.displayName = 'RssButtons';
-RssButtons.defaultProps = {};
-RssButtons.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssButtons);

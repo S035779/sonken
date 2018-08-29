@@ -5,8 +5,8 @@ const displayName = 'feed';
 const feed = FeedParser.of();
 
 export default {
-  uploadNotes(options) {
-    return (req, res, next) => {
+  uploadNotes() {
+    return (req, res) => {
       const filename = req.headers['x-uploadedfilename'];
       const filetype = req.headers['x-uploadedfiletype'];
       const filedata = Buffer.alloc(+req.headers['content-length']);
@@ -32,8 +32,8 @@ export default {
     };
   },
 
-  downloadNotes(options) {
-    return (req, res, next) => {
+  downloadNotes() {
+    return (req, res) => {
       const { user, category } = req.query;
       feed.downloadNotes({ user, category }).subscribe(
         obj => {
@@ -50,8 +50,8 @@ export default {
     };
   },
 
-  downloadItems(options) {
-    return (req, res, next) => {
+  downloadItems() {
+    return (req, res) => {
       const { user, ids, filter } = req.body;
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.send(obj); }
@@ -65,8 +65,8 @@ export default {
     };
   },
 
-  deleteList(options) {
-    return (req, res, next) => {
+  deleteList() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteList({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -79,8 +79,8 @@ export default {
     };
   },
 
-  createList(options) {
-    return (req, res, next) => {
+  createList() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createList({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -93,8 +93,8 @@ export default {
     };
   },
 
-  deleteStar(options) {
-    return (req, res, next) => {
+  deleteStar() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteStar({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -107,8 +107,8 @@ export default {
     };
   },
 
-  createStar(options) {
-    return (req, res, next) => {
+  createStar() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createStar({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -121,8 +121,8 @@ export default {
     };
   },
 
-  deleteBids(options) {
-    return (req, res, next) => {
+  deleteBids() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteBids({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -135,8 +135,8 @@ export default {
     };
   },
 
-  createBids(options) {
-    return (req, res, next) => {
+  createBids() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createBids({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -149,8 +149,8 @@ export default {
     };
   },
 
-  deleteTrade(options) {
-    return (req, res, next) => {
+  deleteTrade() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteTrade({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -163,8 +163,8 @@ export default {
     };
   },
 
-  createTrade(options) {
-    return (req, res, next) => {
+  createTrade() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createTrade({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -177,8 +177,8 @@ export default {
     };
   },
 
-  deleteRead(options) {
-    return (req, res, next) => {
+  deleteRead() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteRead({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -191,8 +191,8 @@ export default {
     };
   },
 
-  createRead(options) {
-    return (req, res, next) => {
+  createRead() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createRead({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -205,8 +205,8 @@ export default {
     };
   },
 
-  deleteAdd(options) {
-    return (req, res, next) => {
+  deleteAdd() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteAdd({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -219,8 +219,8 @@ export default {
     };
   },
 
-  createAdd(options) {
-    return (req, res, next) => {
+  createAdd() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createAdd({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -233,8 +233,8 @@ export default {
     };
   },
 
-  deleteDelete(options) {
-    return (req, res, next) => {
+  deleteDelete() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteDelete({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -247,8 +247,8 @@ export default {
     };
   },
 
-  createDelete(options) {
-    return (req, res, next) => {
+  createDelete() {
+    return (req, res) => {
       const { user, ids } = req.body;
       feed.createDelete({ user, ids }).subscribe(
         obj => { res.status(200).send(obj); }
@@ -261,8 +261,8 @@ export default {
     };
   },
 
-  createNote(options) {
-    return (req, res, next) => {
+  createNote() {
+    return (req, res) => {
       const { user, url, category, categoryIds, title } = req.body;
       feed.createNote({ user, url, category, categoryIds, title }).subscribe(
         obj => { res.json(obj); }
@@ -275,8 +275,8 @@ export default {
     };
   },
 
-  deleteNote(options) {
-    return (req, res, next) => {
+  deleteNote() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteNote({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -289,10 +289,9 @@ export default {
     };
   },
 
-  updateNote(options) {
-    return (req, res, next) => {
+  updateNote() {
+    return (req, res) => {
       const { user, id, data } = req.body;
-      //log.trace(user,id,data);
       feed.updateNote({ user, id, data }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -304,12 +303,11 @@ export default {
     };
   },
 
-  createCategory(options) {
-    return (req, res, next) => {
+  createCategory() {
+    return (req, res) => {
       const { user, category, subcategory } = req.body;
       feed.createCategory({ user, category, subcategory }).subscribe(
         obj => {
-          //log.trace(displayName, 'createCategory', obj);
           res.status(200).send(obj);
         }
       , err => {
@@ -321,8 +319,8 @@ export default {
     };
   },
 
-  deleteCategory(options) {
-    return (req, res, next) => {
+  deleteCategory() {
+    return (req, res) => {
       const { user, ids } = req.query;
       feed.deleteCategory({ user, ids }).subscribe(
         obj => {  res.status(200).send(obj); }
@@ -335,10 +333,9 @@ export default {
     };
   },
 
-  updateCategory(options) {
-    return (req, res, next) => {
+  updateCategory() {
+    return (req, res) => {
       const { user, id, data } = req.body;
-      //log.trace(user,id,data);
       feed.updateCategory({ user, id, data }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -350,8 +347,8 @@ export default {
     };
   },
 
-  fetchAddedNotes(options) {
-    return (req, res, next) => {
+  fetchAddedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchAddedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -364,8 +361,8 @@ export default {
     };
   },
 
-  fetchDeletedNotes(options) {
-    return (req, res, next) => {
+  fetchDeletedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchDeletedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -378,8 +375,8 @@ export default {
     };
   },
 
-  fetchReadedNotes(options) {
-    return (req, res, next) => {
+  fetchReadedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchReadedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -392,8 +389,8 @@ export default {
     };
   },
 
-  fetchTradedNotes(options) {
-    return (req, res, next) => {
+  fetchTradedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchTradedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -406,8 +403,8 @@ export default {
     };
   },
 
-  fetchBidedNotes(options) {
-    return (req, res, next) => {
+  fetchBidedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchBidedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -420,8 +417,8 @@ export default {
     };
   },
 
-  fetchStarredNotes(options) {
-    return (req, res, next) => {
+  fetchStarredNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchStarredNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -434,8 +431,8 @@ export default {
     };
   },
 
-  fetchListedNotes(options) {
-    return (req, res, next) => {
+  fetchListedNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchListedNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -448,22 +445,8 @@ export default {
     };
   },
 
-  //fetchNote(options) {
-  //  return (req, res, next) => {
-  //    const { user, id } = req.query;
-  //    feed.fetchNote({ user, id }).subscribe(
-  //      obj => { res.json(obj); }
-  //    , err => {
-  //        res.status(500).send({ name: err.name, message: err.message });
-  //        log.error(displayName, err.name, ':', err.message, ':', err.stack);
-  //      }
-  //    , () => { log.info('Complete to fetch Note.'); }  
-  //    );
-  //  };
-  //},
-
-  fetchCategory(options) {
-    return (req, res, next) => {
+  fetchCategory() {
+    return (req, res) => {
       const { user, id } = req.query;
       feed.fetchCategory({ user, id }).subscribe(
         obj => { res.json(obj); }
@@ -476,8 +459,8 @@ export default {
     };
   },
 
-  fetchNotes(options) {
-    return (req, res, next) => {
+  fetchNotes() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchNotes({ user }).subscribe(
         obj => { res.json(obj); }
@@ -490,8 +473,8 @@ export default {
     };
   },
 
-  fetchCategorys(options) {
-    return (req, res, next) => {
+  fetchCategorys() {
+    return (req, res) => {
       const { user } = req.query;
       feed.fetchCategorys({ user }).subscribe(
         obj => { res.json(obj); }
@@ -504,7 +487,7 @@ export default {
     };
   },
 
-  notImplemented(options) {
+  notImplemented() {
     return (req, res, next) => {
       next(new Error('not implemented'));
     };

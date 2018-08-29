@@ -2,8 +2,6 @@ import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map }            from 'rxjs/operators';
 import { Faq, Posted }    from 'Models/faq';
-import std                from 'Utilities/stdutils';
-import log                from 'Utilities/logutils';
 
 /**
  * FaqEditor class.
@@ -19,18 +17,15 @@ export default class FaqEditor {
   }
 
   request(request, options) {
-    //log.debug(request, options);
     switch(request) {
       case 'fetch/faqs':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Faq.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'fetch/faq':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
@@ -38,11 +33,9 @@ export default class FaqEditor {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'Faq not found.' });
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/faq':
         return new Promise((resolve, reject) => {
           const faq = new Faq({
@@ -52,11 +45,9 @@ export default class FaqEditor {
           });
           faq.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'update/faq':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
@@ -68,21 +59,17 @@ export default class FaqEditor {
             };
           Faq.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'delete/faq':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           Faq.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/post':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -94,7 +81,6 @@ export default class FaqEditor {
           Posted.update(conditions, update, { upsert: true }
           , (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -105,7 +91,6 @@ export default class FaqEditor {
           };
           Posted.remove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -114,7 +99,6 @@ export default class FaqEditor {
           const conditions = {};
           Posted.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -131,12 +115,10 @@ export default class FaqEditor {
             resolve(obj);
           });
         });
-        break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
         });
-        break;
     }
   }
 
@@ -233,4 +215,5 @@ export default class FaqEditor {
   uploadFile({ admin, id, file }) {
     return from(this.upFile(admin, id, file));
   }
-};
+}
+FaqEditor.displayName = 'FaqEditor';

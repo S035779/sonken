@@ -16,6 +16,15 @@ class SellersEdit extends React.Component {
         file={file} />
     </div>;
   }
+}
+SellersEdit.displayName= 'SellersEdit';
+SellersEdit.defaultProps = { note: null };
+SellersEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, note: PropTypes.object.isRequired
+, category: PropTypes.string.isRequired
+, file: PropTypes.object
 };
 
 const barHeightSmUp     = 64;//112;
@@ -30,9 +39,4 @@ const styles = theme => ({
             , height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 });
-SellersEdit.displayName= 'SellersEdit';
-SellersEdit.defaultProps = { note: null };
-SellersEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(SellersEdit);

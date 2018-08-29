@@ -1,8 +1,6 @@
 import { dispatch } from 'Main/dispatcher';
 import UserApiClient from 'Services/UserApiClient';
 
-const displayName = 'MailAction';
-
 export default {
   presetAdmin(admin) {
     return UserApiClient.presetAdmin(admin).then(isAuthenticated => {
@@ -19,12 +17,6 @@ export default {
       dispatch({ type: 'mail/fetch', mails });
     });
   },
-  //fetch(admin, id) {
-  //  dispatch({ type: 'mail/fetch/before' });
-  //  return UserApiClient.fetchMail(admin, id).then(mail => {
-  //    dispatch({ type: 'mail/fetch', mail });
-  //  });
-  //},
   create(admin) {
     return UserApiClient.createMail(admin).then(mail => {
       dispatch({ type: 'mail/create', mail });

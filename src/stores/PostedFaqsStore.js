@@ -1,7 +1,5 @@
 import { ReduceStore } from 'flux/utils';
 
-const displayName = 'PostedFaqsStore';
-
 export default class PostedFaqsStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -36,4 +34,6 @@ export default class PostedFaqsStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+PostedFaqsStore.displayName = 'PostedFaqsStore';
+

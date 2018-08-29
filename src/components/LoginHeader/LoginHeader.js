@@ -1,14 +1,13 @@
-import React          from 'react';
-import PropTypes      from 'prop-types'
-import { Link }       from 'react-router-dom';
-import std            from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types'
+import { Link }                 from 'react-router-dom';
+//import std                      from 'Utilities/stdutils';
 
-import { withStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, Button }
-                      from '@material-ui/core';
-import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen }
-                      from '@material-ui/icons';
-import RssButton      from 'Components/RssButton/RssButton';
+import { withStyles }           from '@material-ui/core/styles';
+import { AppBar, Toolbar }      from '@material-ui/core';
+import { BlurOn, Fingerprint }  from '@material-ui/icons';
+//import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen } from '@material-ui/icons';
+import RssButton                from 'Components/RssButton/RssButton';
 
 const app_name = process.env.APP_NAME;
 
@@ -57,6 +56,11 @@ class LoginHeader extends React.Component {
       </AppBar>
     </div>;
   }
+}
+LoginHeader.displayName = 'LoginHeader';
+LoginHeader.defaultProps = {};
+LoginHeader.propTypes = {
+  classes:  PropTypes.object.isRequired
 };
 
 const navHeightSmDown = 56;
@@ -75,9 +79,4 @@ const styles = theme => ({
               , justifyContent: 'flex-end' }
 , icon:       { marginRight: theme.spacing.unit }
 });
-LoginHeader.displayName = 'LoginHeader';
-LoginHeader.defaultProps = {};
-LoginHeader.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(LoginHeader);

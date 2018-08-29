@@ -1,6 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-import std              from 'Utilities/stdutils';
+//import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import RssHeader        from 'Components/RssHeader/RssHeader';
@@ -52,14 +52,20 @@ class RssDrawer extends React.Component {
       />
     </div>;
   }
-};
-
-const styles = theme => ({
-  root: {position: 'relative'}
-});
+}
 RssDrawer.displayName = 'RssDrawer';
 RssDrawer.defaultProps = {};
 RssDrawer.propTypes = {
   classes:  PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, categorys: PropTypes.array.isRequired
+, children: PropTypes.object.isRequired
+};
+
+const styles = {
+  root: {position: 'relative'}
 };
 export default withStyles(styles)(RssDrawer);

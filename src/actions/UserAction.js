@@ -1,8 +1,6 @@
 import { dispatch } from 'Main/dispatcher';
 import UserApiClient from 'Services/UserApiClient';
 
-const displayName = 'UserAction';
-
 export default {
   presetAdmin(admin) {
     return UserApiClient.presetAdmin(admin)
@@ -25,15 +23,7 @@ export default {
       })
     ;
   },
-  //fetch(admin, id) {
-  //  dispatch({ type: 'user/fetch/before' });
-  //  return UserApiClient.fetchUser(admin, id)
-  //    .then(user => {
-  //      dispatch({ type: 'user/fetch', user });
-  //    })
-  //  ;
-  //},
-  create(admin, {}) {
+  create(admin) {
     return UserApiClient.createUser(admin, {})
       .then(user => {
         dispatch({ type: 'user/create', user });

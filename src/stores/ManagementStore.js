@@ -1,7 +1,5 @@
 import { ReduceStore } from 'flux/utils';
 
-const displayName = 'ManagementStore';
-
 export default class ManagementStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -118,4 +116,6 @@ export default class ManagementStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+ManagementStore.displayName = 'ManagementStore';
+

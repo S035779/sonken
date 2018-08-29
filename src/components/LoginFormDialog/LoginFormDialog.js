@@ -1,6 +1,7 @@
 import React      from 'react';
 import PropTypes  from 'prop-types';
-import { Button, Dialog, TextField, DialogActions, DialogContent, DialogTitle, withMobileDialog, Slide } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, withMobileDialog, Slide } 
+                  from '@material-ui/core';
 
 const Transition =  props => <Slide direction="up" {...props} />;
 
@@ -53,5 +54,12 @@ LoginFormDialog.displayName = 'LoginFormDialog';
 LoginFormDialog.defaultProps = {};
 LoginFormDialog.propTypes = {
   fullScreen: PropTypes.bool.isRequired
+, onClose: PropTypes.func.isRequired
+, onSubmit: PropTypes.func
+, open: PropTypes.bool.isRequired
+, children: PropTypes.array.isRequired
+, title: PropTypes.string.isRequired
+, isSubmit: PropTypes.bool
+, classes: PropTypes.object
 };
 export default withMobileDialog()(LoginFormDialog);

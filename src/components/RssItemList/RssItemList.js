@@ -1,11 +1,10 @@
 import React                from 'react';
 import PropTypes            from 'prop-types';
-import { Link }             from 'react-router-dom';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
 
 import { withStyles }       from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, IconButton, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
 import { Star, StarBorder, Delete, FiberNew } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
@@ -36,7 +35,7 @@ class RssItemList extends React.Component {
     this.setState({ listed, starred, deleted, added });
   }
 
-  handleChangeListed(id, event) {
+  handleChangeListed(id) {
     //std.logInfo(RssItemList.displayName, 'handleChangeListed', id);
     const { listed } = this.state;
     const { user } = this.props;
@@ -52,7 +51,7 @@ class RssItemList extends React.Component {
     this.setState({ listed: newListed });
   }
 
-  handleChangeStarred(id, event) {
+  handleChangeStarred(id) {
     //std.logInfo(RssItemList.displayName, 'handleChangeStarred', id);
     const { starred } = this.state;
     const { user } = this.props;
@@ -68,7 +67,7 @@ class RssItemList extends React.Component {
     this.setState({ starred: newStarred });
   }
 
-  handleChangeDeleted(id, event) {
+  handleChangeDeleted(id) {
     //std.logInfo(RssItemList.displayName, 'handleChangeDeleted', id);
     const { deleted } = this.state;
     const { user } = this.props;
@@ -84,7 +83,7 @@ class RssItemList extends React.Component {
     this.setState({ deleted: newDeleted });
   }
 
-  handleChangeAdded(id, event) {
+  handleChangeAdded(id) {
     //std.logInfo(RssItemList.displayName, 'handleChangeAdded', id);
     const { added } = this.state;
     const { user } = this.props;
@@ -100,7 +99,7 @@ class RssItemList extends React.Component {
     this.setState({ added: newAdded });
   }
 
-  handleMouseLeaveAdded(id, event) {
+  handleMouseLeaveAdded(id) {
     //std.logInfo(RssItemList.displayName, 'handleMouseLeaveAdded', id);
     const { added } = this.state;
     const { user } = this.props;
@@ -132,28 +131,18 @@ class RssItemList extends React.Component {
     const { listed, starred, added, deleted } = this.state;
     const textClass =
       { primary: classes.primary, secondary: classes.secondary };
-    const buttonColor = listed.indexOf(item.guid._) !== -1
-      ? 'green' : 'yellow';
-    const buttonText = listed.indexOf(item.guid._) !== -1
-      ? '入札リスト 登録済み' : '入札リスト 登録';
+    const buttonColor = listed.indexOf(item.guid._) !== -1 ? 'green' : 'yellow';
+    const buttonText = listed.indexOf(item.guid._) !== -1 ? '入札リスト 登録済み' : '入札リスト 登録';
     const title = `出品件名：${item.title}`;
     const description = 
-      `配信時間：${
-        std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm')
-      }、`
+      `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
     + `入札数：${item.bids}、`
-    + `入札終了時間：${
-        std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm')
-      }、`
+    + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid._}、`
-    + `Seller：${item.seller}`
-    ;
-    const notice = '';
-    const renderStar = starred.indexOf(item.guid._) !== -1
-      ? this.renderStar() : this.renderUnStar();
-    const renderFiberNew = added.indexOf(item.guid._) !== -1
-      ? null : this.renderFiberNew();
+    + `Seller：${item.seller}`;
+    const renderStar = starred.indexOf(item.guid._) !== -1 ? this.renderStar() : this.renderUnStar();
+    const renderFiberNew = added.indexOf(item.guid._) !== -1 ? null : this.renderFiberNew();
     if(deleted.indexOf(item.guid._) !== -1) return;
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
@@ -170,8 +159,7 @@ class RssItemList extends React.Component {
               {renderFiberNew}
             </IconButton>
             <div className={classes.description}>
-              <a href={item.description.DIV.A.attr.HREF}
-                target="_blank">
+              <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
               <img src={item.description.DIV.A.IMG.attr.SRC}
                 border={item.description.DIV.A.IMG.attr.BORDER}
                 width={item.description.DIV.A.IMG.attr.WIDTH}
@@ -201,7 +189,7 @@ class RssItemList extends React.Component {
   }
 
   render() {
-    const { classes, items } = this.props;
+    const { items } = this.props;
     const compareFavorite = (a, b) => {
       if(a.starred === true  && b.starred === false) return -1;
       if(a.starred === false && b.starred === true ) return 1;
@@ -218,7 +206,15 @@ class RssItemList extends React.Component {
       .map((item, index) => this.renderItem(index, item));
     return <List>{renderItems}</List>;
   }
+}
+RssItemList.displayName = 'RssItemList';
+RssItemList.defaultProps = { items: null }
+RssItemList.propTypes = {
+  classes: PropTypes.object.isRequired
+, items: PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
 };
+
 const itemHeight        = 142 * 1.5;
 const itemMinWidth      = 800;
 const descMinWidth      = 133 * 1.5;
@@ -250,9 +246,4 @@ noteItem:       { display: 'flex', flexDirection: 'row'
                 , fontSize: 12 }
 , image:        { height: '100%', width: '100%' }
 });
-RssItemList.displayName = 'RssItemList';
-RssItemList.defaultProps = { items: null }
-RssItemList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssItemList);

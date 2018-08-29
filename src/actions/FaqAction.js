@@ -2,8 +2,6 @@ import { dispatch } from 'Main/dispatcher';
 import UserApiClient from 'Services/UserApiClient';
 import NoteApiClient from 'Services/NoteApiClient';
 
-const displayName = 'FaqAction';
-
 export default {
   presetAdmin(admin) {
     return UserApiClient.presetAdmin(admin)
@@ -47,14 +45,6 @@ export default {
       })
     ;
   },
-  //fetch(admin, id) {
-  //  dispatch({ type: 'faq/fetch/before' });
-  //  return UserApiClient.fetchFaq(admin, id)
-  //    .then(faq => {
-  //      dispatch({ type: 'faq/fetch', faq });
-  //    })
-  //  ;
-  //},
   create(admin) {
     return UserApiClient.createFaq(admin)
       .then(faq => {

@@ -1,6 +1,6 @@
 import dotenv                   from 'dotenv';
 import * as R                   from 'ramda';
-import { from, forkJoin, pipe } from 'rxjs';
+import { from, forkJoin }       from 'rxjs';
 import { map, flatMap }         from 'rxjs/operators';
 import { parseString }          from 'xml2js';
 import mongoose                 from 'mongoose';
@@ -522,19 +522,19 @@ export default class FeedParser {
 
   addAdd(user, id) {
     return this.request('create/added', { user, id });
-  };
+  }
 
   removeAdd(user, id) {
     return this.request('delete/added', { user, id });
-  };
+  }
 
   addDelete(user, id) {
     return this.request('create/deleted', { user, id });
-  };
+  }
 
   removeDelete(user, id) {
     return this.request('delete/deleted', { user, id });
-  };
+  }
 
   removeNote(user, id) {
     return this.request('delete/note', { user, id });
@@ -590,11 +590,11 @@ export default class FeedParser {
 
   getAdded(user) {
     return this.request('fetch/added', { user });
-  };
+  }
 
   getDeleted(user) {
     return this.request('fetch/deleted', { user });
-  };
+  }
 
   getNote(user, id) {
     return this.request('fetch/note', { user, id });
@@ -1242,7 +1242,7 @@ export default class FeedParser {
   }
   
   setCsvToObj(user, category, file) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const encode   = _str => encoding.detect(_str);
       const isUtf    = _str => encode(_str) === 'UNICODE' || encode(_str) === 'ASCII';
       const iconv    = new Iconv('CP932', 'UTF-8//TRANSLIT//IGNORE');
@@ -1253,7 +1253,7 @@ export default class FeedParser {
       const toMBConv = R.map(R.map(c => isUtf(c) ? c : convChar(c)));
       const toRcords = R.split('\n');
       const toTailes = R.tail;
-      const toColumn = R.map(R.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/));
+      const toColumn = R.map(R.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/));
       const toCutDbl = c => R.match(/^\s*"(.*?)"\s*$/, c)[1];
       const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
       const mergeCsv = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
@@ -1481,5 +1481,5 @@ export default class FeedParser {
     , AmazonImg: ''
     });
   }
-};
+}
 FeedParser.displayName = 'FeedParser';

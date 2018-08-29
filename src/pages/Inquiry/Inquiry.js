@@ -59,13 +59,19 @@ class Inquiry extends React.Component {
       </ErrorBoundary>
     </div>;
   }
+}
+Inquiry.displayName = 'Inquiry';
+Inquiry.defaultProps = {};
+Inquiry.propTypes = {
+  classes: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const iqry_top = std.toRGBa('#8f2785', 0.8);
 const iqry_btm = std.toRGBa('#e4b1db', 0.8);
 const barHeightSmUp   = 64;
 const barHeightSmDown = 56;
-const rowHeight       = 62;
 const styles = theme => ({
   root:         { width: '100vw', zIndex: 1, overflow: 'hidden'
                 , height: '100vh'
@@ -82,9 +88,4 @@ const styles = theme => ({
                     height: `calc(100vh - ${barHeightSmUp}px)`
                 }}
 });
-Inquiry.displayName = 'Inquiry';
-Inquiry.defaultProps = {};
-Inquiry.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Inquiry));

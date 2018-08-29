@@ -1,8 +1,5 @@
 import { dispatch }   from 'Main/dispatcher';
 import NoteApiClient  from 'Services/NoteApiClient';
-import std            from 'Utilities/stdutils';
-
-const displayName = 'NoteAction';
 
 export default {
   presetUser(user) {
@@ -71,7 +68,6 @@ export default {
   fetchCategory(user, id) {
     return NoteApiClient.fetchCategory(user, id)
       .then(category => {
-        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/fetch', category });
       })
     ;
@@ -79,7 +75,6 @@ export default {
   createCategory(user, data) {
     return NoteApiClient.createCategory(user, data)
       .then(category => {
-        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/create', category });
       })
     ;
@@ -87,7 +82,6 @@ export default {
   updateCategory(user, id, data) {
     return NoteApiClient.updateCategory(user, id, data)
       .then(category => {
-        //std.logDebug(displayName, 'Action', category);
         dispatch({ type: 'category/update', id, category });
       })
     ;
@@ -99,14 +93,6 @@ export default {
       })
     ;
   },
-  //fetch(user, id) {
-  //  dispatch({ type: 'note/fetch/before' });
-  //  return NoteApiClient.fetchNote(user, id)
-  //    .then(note => {
-  //      dispatch({ type: 'note/fetch', note });
-  //    })
-  //  ;
-  //},
   create(user, data) {
     return NoteApiClient.createNote(user, data)
       .then(note => {

@@ -20,7 +20,7 @@ const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
 const numsOfChildProc = process.env.JOB_NUM_MAX || 1;
-process.env.NODE_PENDING_DEPRECATION=0;
+//process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[JOB]';
 
@@ -57,8 +57,7 @@ const fork = () => {
 const operation = url => {
   const api       = std.parse_url(url);
   const path      = R.split('/', api.pathname);
-  const isSellers = api.pathname === '/jp/show/rating';
-  return isSellers ? 'closedsellers' : path[1];
+  return api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
 };
 
 const request = queue => {
@@ -67,8 +66,7 @@ const request = queue => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    
-    = obj => obj ? { user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url) } : null;
+  const setQueue    = obj => ({ user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url) });
   const setQueues   = R.map(setQueue);
   const setNote     = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);
@@ -77,6 +75,8 @@ const request = queue => {
   const interval    = updatedInterval * 1000 * 60;
   const isOldItem   = obj => interval < Date.now() - new Date(obj.updated).getTime();
   const hasOldItem  = R.filter(isOldItem);
+  const isOpened    = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search';
+  const hasOpened   = R.filter(isOpened);
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(hasApproved)
     , map(setUsers)
@@ -84,6 +84,7 @@ const request = queue => {
     , map(R.flatten)
     , map(hasUrl)
     , map(hasOldItem)
+    , map(hasOpened)
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
@@ -106,7 +107,7 @@ const main = () => {
   queue.drain = () => log.info(displayName, 'all jobs have been processed.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding job...')
+    obj => log.debug(displayName, 'finished proceeding job...', obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => log.info(displayName, 'post jobs completed.')
   ), 0, 1000 * 60 * monitorInterval);

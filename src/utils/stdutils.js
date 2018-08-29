@@ -180,7 +180,7 @@ export default {
    * @returns {object}
    */
   union(o,p) {
-    return extend(extend({},o), p);
+    return this.extend(this.extend.bind(this, {}, o), p);
   },
 
   /**
@@ -193,7 +193,7 @@ export default {
    * @returns {object}
    */
   intersection(o,p) { 
-    return restrict(extend({}, o), p); 
+    return this.restrict(this.extend.bind(this, {}, o), p); 
   },
 
   /**
@@ -245,8 +245,7 @@ export default {
     if (!Array.isArray(o) || !Array.isArray(p)) throw TypeError();
     const _o = o.filter(function(x){ return x });
     const _p = p.filter(function(x){ return x });
-    const result =
-     _o.filter(function(x, i, y) { return _p.indexOf(x) === -1; });
+    const result = _o.filter(function(x) { return _p.indexOf(x) === -1; });
     return result;
   },
 
@@ -261,8 +260,7 @@ export default {
     if (!Array.isArray(o) || !Array.isArray(p)) throw TypeError();
     const _o = o.filter(function(x){ return x });
     const _p = p.filter(function(x){ return x });
-    const result =
-     _p.filter(function(x, i, y) { return _o.indexOf(x) === -1; });
+    const result = _p.filter(function(x) { return _o.indexOf(x) === -1; });
     return result;
   },
 
@@ -277,12 +275,8 @@ export default {
     if (!Array.isArray(o) || !Array.isArray(p)) throw TypeError();
     const _o = o.filter(function(x){ return x });
     const _p = p.filter(function(x){ return x });
-    const result =
-      _o.filter(function(x, i, y) { return _p.indexOf(x) === -1; })
-     .concat(
-        _p.filter(function(x, i, y) { 
-          return _o.indexOf(x) === -1; })
-      );
+    const result = _o.filter(function(x) { return _p.indexOf(x) === -1; })
+     .concat(_p.filter(function(x) { return _o.indexOf(x) === -1; }));
     return result;
   },
 
@@ -461,12 +455,10 @@ export default {
     }
   },
 
-  invokeMap(fn, s, i, e) {
+  invokeMap(fn, s, i) {
     const argLen = arguments.length;
     if(!s) s = 0;
-    let idx = 0;
     return arr => {
-      const arrLen = arr.length;
       const setTime = (obj, idx) => setTimeout(fn.bind(this, obj), i*idx);
       setTimeout(fn.bind(this, arr.shift()), s);
       if (argLen >= 3) {
@@ -665,9 +657,7 @@ export default {
     for(let key in data) {
       if(data.hasOwnProperty(key)) keys.push(key);
     }
-    return keys.map((key, idx) => `${key}=${data[key]}`)
-      .map(pair => pair.replace(" ", "+"))
-      .join('&');
+    return keys.map((key) => `${key}=${data[key]}`).map(pair => pair.replace(" ", "+")).join('&');
   },
 
   /**
@@ -818,7 +808,7 @@ export default {
   },
 
   regexEmail(address) {
-    return /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i.test(address);
+    return /^[-a-z0-9~!$%^&*_=+}{\\'?]+(\.[-a-z0-9~!$%^&*_=+}{\\'?]+)*@([a-z0-9_][a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i.test(address);
   }
 
 };
@@ -829,8 +819,7 @@ const numFormat = {
     dddd: function(num) { return ('000' + num).slice(-4); },
     ddd: function(num) { return ('00' + num).slice(-3); },
     dd: function(num) { return ('0' + num).slice(-2); },
-    t: function(num) { return num
-        .toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"); }
+    t: function(num) { return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"); }
   },
   format: function numFormat (num, format) {
     let result = format;
@@ -884,7 +873,7 @@ const dateFormat = {
       return ('0' + (date.getMonth() + 1)).slice(-2);
     },
     M: function(date) { return date.getMonth() + 1; },
-    $: function(date) { return 'M'; }
+    $: function() { return 'M'; }
   },
   format:function dateFormat (date, format) {
     let result = format;

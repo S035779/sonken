@@ -1,5 +1,6 @@
 import dotenv             from 'dotenv';
 import React              from 'react';
+import PropTypes          from 'prop-types';
 import ReactDOMServer     from 'react-dom/server';
 import { SheetsRegistry } from 'react-jss';
 
@@ -51,6 +52,12 @@ class Html extends React.Component {
       </body>
       </html>;
   }
+}
+Html.displayName = 'Html';
+Html.defaultProps = {};
+Html.propTypes = {
+  initialData: PropTypes.string.isRequired
+, location: PropTypes.string.isRequired
 };
 
 const styles = {

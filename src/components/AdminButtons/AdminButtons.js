@@ -35,8 +35,7 @@ class AdminButtons extends React.Component {
 
   handleSendmail() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName
-      , 'handleSendmail', selectedUserId);
+    std.logInfo(AdminButtons.displayName, 'handleSendmail', selectedUserId);
     const spn = Spinner.of('app');
     if(window.confirm('Are you sure?')) {
       spn.start();
@@ -54,12 +53,17 @@ class AdminButtons extends React.Component {
 
   handleApproval() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName
-      , 'handleApproval', selectedUserId);
+    std.logInfo(AdminButtons.displayName, 'handleApproval', selectedUserId);
+    const spn = Spinner.of('app');
     if(window.confirm('Are you sure?')) {
+      spn.start();
       UserAction.createApproval(admin, selectedUserId)
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(AdminButtons.displayName, err.name, err.message);
+          this.setState({ isNotValid: true })
+          spn.stop();
+        });
       this.setState({ checked: false });
     }
   }
@@ -94,6 +98,14 @@ class AdminButtons extends React.Component {
       </div>
     </div>;
   }
+}
+AdminButtons.displayName = 'AdminButtons';
+AdminButtons.defaultProps = {};
+AdminButtons.propTypes = {
+  classes: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, users: PropTypes.array.isRequired
+, selectedUserId: PropTypes.array.isRequired
 };
 
 const titleHeight   = 62;
@@ -109,9 +121,4 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 });
-AdminButtons.displayName = 'AdminButtons';
-AdminButtons.defaultProps = {};
-AdminButtons.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(AdminButtons);

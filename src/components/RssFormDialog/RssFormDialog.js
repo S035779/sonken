@@ -31,7 +31,7 @@ class RssFormDialog extends React.Component {
     this.setState({ categorys, checked: categoryIds ? categoryIds : [] });
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -197,7 +197,23 @@ class RssFormDialog extends React.Component {
       </LoginFormDialog>
     ;
   }
+}
+RssFormDialog.displayName = 'RssFormDialog';
+RssFormDialog.defaultProps = { open: false };
+RssFormDialog.propTypes = {
+  classes:      PropTypes.object.isRequired
+, onClose:      PropTypes.func.isRequired
+, open:         PropTypes.bool.isRequired
+, categoryIds:  PropTypes.array.isRequired
+, noteTitle:    PropTypes.string.isRequired
+, categorys:    PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
+, selectedNoteId: PropTypes.string.isRequired
+, onSubmit: PropTypes.func.isRequired
+, title: PropTypes.string.isRequired
 };
+
 const styles = theme => ({
   fieldset:   { display: 'flex', flexDirection: 'column' }
 , dialog:     { width: 512 }
@@ -206,13 +222,4 @@ const styles = theme => ({
 , clearIcon:  { fontSize: 16, color: '#FA404B' }
 , editIcon:   { fontSize: 16, color: '#FEA634' }
 });
-RssFormDialog.displayName = 'RssFormDialog';
-RssFormDialog.defaultProps = { 
-  open:         false
-};
-RssFormDialog.propTypes = {
-  classes:      PropTypes.object.isRequired
-, onClose:      PropTypes.func.isRequired
-, open:         PropTypes.bool.isRequired
-};
 export default withStyles(styles)(RssFormDialog);

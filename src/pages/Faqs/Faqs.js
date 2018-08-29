@@ -48,7 +48,7 @@ class Faqs extends React.Component {
     //std.logInfo(Faqs.displayName, 'State', this.state);
     //std.logInfo(Faqs.displayName, 'Props', this.props);
     const { classes, route, location } = this.props;
-    const { isAuthenticated, user, faqs } = this.state;
+    const { isAuthenticated, faqs } = this.state;
     let _faqs = [];
     faqs.forEach(faq => { if(faq.posted) _faqs.push(faq); });
     const to =
@@ -67,6 +67,11 @@ class Faqs extends React.Component {
       </ErrorBoundary>
     </div>;
   }
+}
+Faqs.propTypes = {
+  classes: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const faqs_top = std.toRGBa('#1dc7ea', 0.8);
@@ -91,7 +96,4 @@ const styles = theme => ({
 });
 Faqs.displayName = 'Faqs';
 Faqs.defaultProps = {};
-Faqs.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Faqs));

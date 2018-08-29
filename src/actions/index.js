@@ -14,4 +14,4 @@ export function rehydrateState(state) {
   UserAction.rehydrate(state);
   FaqAction.rehydrate(state);
   MailAction.rehydrate(state);
-};
+}

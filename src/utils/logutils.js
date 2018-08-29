@@ -22,31 +22,31 @@ const logs = {
   close: function(cb) {
     close(cb);
   },
-  fatal: function(msg) {
+  fatal: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'FATAL', args);
   },
-  error: function(msg) {
+  error: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'ERROR', args);
   },
-  warn: function(msg) {
+  warn: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'WARN', args);
   },
-  info: function(msg) {
+  info: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'INFO', args);
   },
-  debug: function(msg) {
+  debug: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'DEBUG', args);
   },
-  trace: function(msg) {
+  trace: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'TRACE', args); 
   },
-  mark: function(msg) {
+  mark: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'MARK', args);
   },
@@ -148,7 +148,7 @@ const connect = function(nam, mlv) {
   const logger = log4js.getLogger(nam);
   const level = lvls[mlv];
   const format = ':method :url';
-  const nolog = '\\.(gif\|jpe?g\|png)$';
+  const nolog = '\\.(gif|jpe?g|png)$';
   return log4js.connectLogger(logger, { level, format, nolog });
 }
 
@@ -201,9 +201,7 @@ const _appender = function(apd, lyt, nam)  {
       appenders[nam] = apds[apd];
       break;
     default:
-      throw new Error(
-        'Appender not found in "utils/logutils.js".');
-      break;
+      throw new Error('Appender not found in "utils/logutils.js".');
   }
   return appenders;
 };
@@ -399,7 +397,7 @@ const cpuusage = function() {
       _e[s] = process.cpuUsage(_b[s]);
       _r[s].push(size(_e[s].user, Date.now()-_t[s], 2));
     },
-    del: function(s) {
+    del: function() {
       delete _b[_s], _e[_s], _r[_s], _t[_s];
     },
     count: function(s) {

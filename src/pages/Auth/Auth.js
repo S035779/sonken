@@ -39,6 +39,13 @@ class Auth extends React.Component {
       </ErrorBoundary>
     </div>;
   }
+}
+Auth.displayName = 'Auth';
+Auth.defaultProps = {};
+Auth.propTypes = {
+  classes:  PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
 };
 
 const auth_top = std.toRGBa('#797979', 0.8);
@@ -81,9 +88,4 @@ const styles = theme => ({
                   height: `calc(100vh - ${barHeightSmUp}px)`
               }}
 });
-Auth.displayName = 'Auth';
-Auth.defaultProps = {};
-Auth.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(Auth);

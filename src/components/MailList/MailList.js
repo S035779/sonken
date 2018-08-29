@@ -5,7 +5,7 @@ import MailAction     from 'Actions/MailAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, Checkbox, Typography, Avatar, ListItem, ListItemText } from '@material-ui/core';
 import { yellow }     from '@material-ui/core/colors';
 import { Folder }     from '@material-ui/icons';
 
@@ -24,7 +24,7 @@ class MailList extends React.Component {
     this.setState({ checked, mails });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(MailList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { admin } = this.props;
@@ -78,6 +78,14 @@ class MailList extends React.Component {
       {renderItems}
     </List>;
   }
+}
+MailList.displayName = 'MailList';
+MailList.defaultProps = { mails: null }
+MailList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedMailId: PropTypes.array.isRequired
+, mails: PropTypes.array.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -113,9 +121,4 @@ const styles = theme => ({
 , yellowAvatar: { marginLeft: theme.spacing.unit
               , color: '#fff', backgroundColor: yellow[500] }
 });
-MailList.displayName = 'MailList';
-MailList.defaultProps = { mails: null }
-MailList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(MailList);

@@ -23,10 +23,10 @@ const encodeFormData = function(data) {
  *
  * @param {string} url
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const get = function(url, data, success, error) {
+const get = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("GET", url + "?" + encodeFormData(data));
   request.onreadystatechange = function() {
@@ -34,19 +34,19 @@ const get = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type.indexOf("xml") !== -1 && request.responseXML) {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.send(null);
 };
@@ -57,10 +57,10 @@ module.exports.get = get;
  *
  * @param {string} url
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const getJSON = function(url, data, success, error) {
+const getJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("GET", url + "?" + encodeFormData(data));
   request.onreadystatechange = function() {
@@ -68,19 +68,19 @@ const getJSON = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type.indexOf("xml") !== -1 && request.responseXML) {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.send(null);
 };
@@ -91,10 +91,10 @@ module.exports.getJSON = getJSON;
  *
  * @param {string} url
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const deleteJSON = function(url, data, success, error) {
+const deleteJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("DELETE", url + "?" + encodeFormData(data));
   request.onreadystatechange = function() {
@@ -102,19 +102,19 @@ const deleteJSON = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type.indexOf("xml") !== -1 && request.responseXML) {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(JSON.parse(request.statusText));
+  request.onerror = function() {
+    reject(JSON.parse(request.statusText));
   };
   request.send(null);
 };
@@ -125,10 +125,10 @@ module.exports.deleteJSON = deleteJSON;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
 */
-const post = function(url, data, success, error) {
+const post = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("POST", url);
   request.onreadystatechange = function() {
@@ -136,19 +136,19 @@ const post = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type.indexOf("xml") !== -1 && request.responseXML) {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(request.responseText);
+        reject(request.responseText);
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type"
     , "application/x-www-form-urlencoded");
@@ -161,10 +161,10 @@ module.exports.post = post;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const getData = function(url, data, success, error) {
+const getData = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("GET", url + "?" + encodeFormData(data));
   request.onreadystatechange = function() {
@@ -172,19 +172,19 @@ const getData = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(request.responseText);
+        reject(request.responseText);
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.send(null);
 };
@@ -195,10 +195,10 @@ module.exports.getData = getData;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
 */
-const postData = function(url, data, success, error) {
+const postData = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("POST", url);
   request.onreadystatechange = function() {
@@ -206,19 +206,19 @@ const postData = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(request.responseText);
+        reject(request.responseText);
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type"
     , "application/x-www-form-urlencoded");
@@ -231,10 +231,10 @@ module.exports.postData = postData;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const postXML = function(url, data, success, error) {
+const postXML = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("POST", url);
   request.onreadystatechange = function() {
@@ -242,19 +242,19 @@ const postXML = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(request.responseText);
+        reject(request.responseText);
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type", "text/xml; charset=UTF-8");
   for(let key in data.head) {
@@ -269,10 +269,10 @@ module.exports.postXML = postXML;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const postJSON = function(url, data, success, error) {
+const postJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("POST", url);
   request.onreadystatechange = function() {
@@ -280,19 +280,19 @@ const postJSON = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
@@ -304,10 +304,10 @@ module.exports.postJSON = postJSON;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const putJSON = function(url, data, success, error) {
+const putJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("PUT", url);
   request.onreadystatechange = function() {
@@ -315,19 +315,19 @@ const putJSON = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
@@ -339,10 +339,10 @@ module.exports.putJSON = putJSON;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const putFile = function(url, file, success, error) {
+const putFile = function(url, file, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("PUT", url);
   request.onreadystatechange = function() {
@@ -350,19 +350,19 @@ const putFile = function(url, file, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("x-uploadedfilename", file.name);
   request.setRequestHeader("x-uploadedfiletype", file.type)
@@ -375,10 +375,10 @@ module.exports.putFile = putFile;
  *
  * @param {string} url
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const getFile = function(url, data, success, error) {
+const getFile = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("GET", url + "?" + encodeFormData(data));
   request.onreadystatechange = function() {
@@ -386,21 +386,21 @@ const getFile = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type.indexOf("xml") !== -1 && request.responseXML) {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else if (type === "application/octet-stream") {
-          success(new Blob([request.response]));
+          resolve(new Blob([request.response]));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.send(null);
 };
@@ -411,10 +411,10 @@ module.exports.getFile = getFile;
  *
  * @param {string} url 
  * @param {object} data 
- * @param {function} success 
- * @param {function} error 
+ * @param {function} resolve 
+ * @param {function} reject 
  */
-const postFile = function(url, data, success, error) {
+const postFile = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
   request.open("POST", url);
   request.onreadystatechange = function() {
@@ -422,21 +422,21 @@ const postFile = function(url, data, success, error) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
-          success(request.responseXML);
+          resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
-          success(JSON.parse(request.responseText));
+          resolve(JSON.parse(request.responseText));
         } else if (type === "application/octet-stream") {
-          success(new Blob([request.response]));
+          resolve(new Blob([request.response]));
         } else {
-          success(request.responseText);
+          resolve(request.responseText);
         }
       } else {
-        error(JSON.parse(request.responseText));
+        reject(JSON.parse(request.responseText));
       }
     }
   };
-  request.onerror = function(e) {
-    error(request.statusText);
+  request.onerror = function() {
+    reject(request.statusText);
   };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));

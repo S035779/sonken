@@ -8,9 +8,6 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { TextField, Typography, Divider }
                         from '@material-ui/core';
-import { FormControlLabel }
-                        from '@material-ui/core/FormControlLabel';
-import { MenuItem }     from '@material-ui/core/Menu';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 
@@ -46,7 +43,10 @@ class InquiryEdit extends React.Component {
       LoginAction.inquiry(user, { title, body })
         .then(() =>
           this.setState({ isSuccess: true , redirectToReferer: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(InquiryEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -64,7 +64,7 @@ class InquiryEdit extends React.Component {
   render() {
     //std.logInfo(InquiryEdit.displayName, 'State', this.state);
     //std.logInfo(InquiryEdit.displayName, 'Props', this.props);
-    const { classes, location, preference } = this.props;
+    const { classes, preference } = this.props;
     const {
       redirectToReferer, title, body, isNotValid
     } = this.state;
@@ -117,6 +117,13 @@ class InquiryEdit extends React.Component {
       </div>
     </div>;
   }
+}
+InquiryEdit.displayName = 'InquiryEdit';
+InquiryEdit.defaultProps = {};
+InquiryEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const inquiryWidth = 640;
@@ -161,9 +168,4 @@ const styles = theme => ({
 , notes:        { flex: 1
                 , color: theme.palette.common.white }
 });
-InquiryEdit.displayName = 'InquiryEdit';
-InquiryEdit.defaultProps = {};
-InquiryEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(InquiryEdit));

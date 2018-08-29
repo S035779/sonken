@@ -98,7 +98,7 @@ const main = () => {
   queue.drain = () => log.info(displayName, 'all images have been processed.');
 
   std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding image...')
+    obj => log.debug(displayName, 'finished proceeding image...', obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => log.info(displayName, 'post images completed.')
   ), 0, 1000 * 60 * monitorInterval);

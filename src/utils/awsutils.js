@@ -81,6 +81,6 @@ class awsutils {
     const promise = this.s3.getBucketWebsite(params).promise();
     return promise;
   }
-};
+}
 awsutils.displayName = 'awsutils';
 export default awsutils;

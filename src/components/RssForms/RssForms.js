@@ -54,7 +54,10 @@ class RssForms extends React.Component {
     if(this.isValidate() && this.isChanged()) {
       NoteAction.update(user, note._id, note)
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(RssForms.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -103,7 +106,7 @@ class RssForms extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleDownload(event) {
+  handleDownload() {
     const { user, note } = this.props;
     std.logInfo(RssForms.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
@@ -116,22 +119,27 @@ class RssForms extends React.Component {
         std.logError(RssForms.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
         spn.stop();
-      })
-    ;
+      });
   }
 
   isValidate() {
-    const { asin, price, bidsprice, body } = this.state.note;
-    return (asin !== ''
-      && std.regexNumber(price) && std.regexNumber(bidsprice)
+    const { asin, price, bidsprice } = this.state.note;
+    return (
+      asin !== ''
+      && std.regexNumber(price) 
+      && std.regexNumber(bidsprice)
     );
   }
 
   isChanged() {
     const { asin, price, bidsprice, body } = this.state.note;
     const { note } = this.props;
-    return (note.asin !== asin  || note.price !== price
-      || note.bidsprice !== bidsprice  || note.body !== body);
+    return (
+      note.asin !== asin 
+      || note.price !== price
+      || note.bidsprice !== bidsprice 
+      || note.body !== body
+    );
   }
 
   getColor(category) {
@@ -256,6 +264,16 @@ class RssForms extends React.Component {
       </div>
     </div>;
   }
+}
+RssForms.displayName = 'RssForms';
+RssForms.defaultProps = { note: null };
+RssForms.propTypes = {
+  classes: PropTypes.object.isRequired
+, note: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, file: PropTypes.object
+, category: PropTypes.string.isRequired
+, children: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
@@ -299,9 +317,4 @@ const styles = theme => ({
 , field:        { paddingTop: 5 }
 , textarea:     { width: '100%', padding: 5 }
 });
-RssForms.displayName = 'RssForms';
-RssForms.defaultProps = { note: null };
-RssForms.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssForms);

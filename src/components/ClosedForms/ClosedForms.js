@@ -6,9 +6,8 @@ import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Input, Button, Checkbox, Typography, TextField, FormControl }
+import { Button, Checkbox, Typography, TextField }
                         from '@material-ui/core';
-import { InputLabel }   from '@material-ui/core/Input';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';
@@ -127,7 +126,7 @@ class ClosedForms extends React.Component {
     this.setState({ [name]: false });
   }
 
-  handleDownload(event) {
+  handleDownload() {
     const { user, note } = this.props;
     const { itemFilter } = this.state;
     std.logInfo(ClosedForms.displayName, 'handleDownload', user);
@@ -165,7 +164,6 @@ class ClosedForms extends React.Component {
     const { aucStartTime, aucStopTime
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction
       , allAuction, inAuction, isNotValid, isSuccess } = this.state;
-    const name = note.name;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
     return <div className={classes.forms}>
@@ -271,6 +269,18 @@ class ClosedForms extends React.Component {
       </div>
     </div>;
   }
+}
+ClosedForms.displayName = 'ClosedForms';
+ClosedForms.defaultProps = { note: null };
+ClosedForms.propTypes = {
+  classes: PropTypes.object.isRequired
+, note: PropTypes.object.isRequired
+, itemFilter: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, file: PropTypes.object
+, itemNumber: PropTypes.number.isRequired
+, perPage: PropTypes.number.isRequired
+, category: PropTypes.string.isRequired
 };
 
 const barHeightSmUp       = 64;
@@ -310,9 +320,4 @@ const styles = theme => ({
                 , wordBreak: 'keep-all' }
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 });
-ClosedForms.displayName = 'ClosedForms';
-ClosedForms.defaultProps = { note: null };
-ClosedForms.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(ClosedForms);

@@ -1,11 +1,10 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-import { Link }       from 'react-router-dom';
 import TradeAction    from 'Actions/TradeAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography }
+import { List, Paper, Checkbox }
                       from '@material-ui/core';
 import { ListItem, ListItemText, ListItemSecondaryAction }
                       from '@material-ui/core/List';
@@ -30,7 +29,7 @@ class TradeItemList extends React.Component {
     this.setState({ selectedItemId, traded });
   }
 
-  handleChangeTraded(id, event) {
+  handleChangeTraded(id) {
     std.logInfo(TradeItemList.displayName, 'handleChangeTraded', id);
     const { traded } = this.state;
     const { user } = this.props;
@@ -46,7 +45,7 @@ class TradeItemList extends React.Component {
     this.setState({ traded: newTraded });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(TradeItemList.displayName, 'handleChangeCheckbox', id);
     const { selectedItemId } = this.state;
     const { user } = this.props;
@@ -89,8 +88,7 @@ class TradeItemList extends React.Component {
         <ListItem disableGutters
           className={classes.listItem}>
           <div className={classes.description}>
-            <a href={item.description.DIV.A.attr.HREF}
-              target="_blank">
+            <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noreferrer noopener">
             <img src={item.description.DIV.A.IMG.attr.SRC}
               border={item.description.DIV.A.IMG.attr.BORDER}
               width={item.description.DIV.A.IMG.attr.WIDTH}
@@ -114,7 +112,7 @@ class TradeItemList extends React.Component {
   }
 
   render() {
-    const { classes, items } = this.props;
+    const { items } = this.props;
     const compareId = ((a, b) => {
       if(a._id < b._id) return -1;
       if(a._id > b._id) return 1;
@@ -125,6 +123,14 @@ class TradeItemList extends React.Component {
       .map((item, index) => this.renderItem(index, item));
     return <List>{_items}</List>;
   }
+}
+TradeItemList.displayName = 'TradeItemList';
+TradeItemList.defaultProps = { items: null }
+TradeItemList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedItemId: PropTypes.array.isRequired
+, items: PropTypes.array.isRequired
+, user: PropTypes.string.isRequired
 };
 
 const itemHeight        = 142 * 1.5;
@@ -155,9 +161,4 @@ const styles = theme => ({
 , image:        { width: '100%', height: '100%' }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });
-TradeItemList.displayName = 'TradeItemList';
-TradeItemList.defaultProps = { items: null }
-TradeItemList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(TradeItemList);

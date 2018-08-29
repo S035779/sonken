@@ -7,12 +7,17 @@ import { withStyles } from '@material-ui/core/styles';
 class EditBody extends React.Component {
   render() {
     const { classes, body } = this.props;
-    return <div className={classes.root}
-      dangerouslySetInnerHTML={{ __html: marked(body) }}/>;
+    return (<div className={classes.root} dangerouslySetInnerHTML={{ __html: marked(body) }}/>);
   }
+}
+EditBody.displayName = 'EditBody';
+EditBody.defaultProps = {};
+EditBody.propTypes = {
+  classes: PropTypes.object.isRequired
+, body: PropTypes.string.isRequired
 };
 
-const styles = theme => ({
+const styles = {
   root: {
     '& pre': {
       border: '1px solid #CCC', padding: '10px'
@@ -25,10 +30,5 @@ const styles = theme => ({
       , '& > *:last-child': { matginBottom: 0 }
     }
   }
-});
-EditBody.displayName = 'EditBody';
-EditBody.defaultProps = {};
-EditBody.propTypes = {
-  classes: PropTypes.object.isRequired
 };
 export default withStyles(styles)(EditBody);

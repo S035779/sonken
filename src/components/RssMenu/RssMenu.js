@@ -33,13 +33,14 @@ class RssMenu extends React.Component {
       .then(() => history.push('/login/authenticate'));
   }
 
-  handleClickButton(name, event) {
+  handleClickButton(name) {
+    const { history } = this.props;
     switch(name) {
       case 'faq':
-        this.props.history.push('/faqs');
+        history.push('/faqs');
         break;
       case 'inquiry':
-        this.props.history.push('/inquiry');
+        history.push('/inquiry');
         break;
     }
   }
@@ -49,26 +50,26 @@ class RssMenu extends React.Component {
     this.setState({ anchorEl: event.currentTarget });
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     std.logInfo(RssMenu.displayName, 'handleClose', name);
     this.setState({ anchorEl: null});
   }
 
-  handleOpenDialog(name, event) {
+  handleOpenDialog(name) {
     std.logInfo(RssMenu.displayName, 'handleOpenDialog', name);
     this.setState({ [name]: true });
   }
 
-  handleCloseDialog(name, event) {
+  handleCloseDialog(name) {
     std.logInfo(RssMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
   render() {
     //std.logInfo(RssMenu.displayName, 'State', this.state);
-    const { classes, auth, profile, preference } = this.props;
+    const { auth, profile, preference } = this.props;
     const { anchorEl, isPreference } = this.state;
-    const { name, user, kana, email, phone, plan } = profile;
+    const { name, user, plan } = profile;
     const open = Boolean(anchorEl);
     return auth && (<div>
       <IconButton
@@ -115,13 +116,19 @@ class RssMenu extends React.Component {
       </Menu>
     </div>);
   }
-};
-const styles = theme => ({
-  title: { margin: theme.spacing.unit * 1.75 }
-});
+}
 RssMenu.displayName = 'RssMenu';
 RssMenu.defaultProps = {};
 RssMenu.propTypes = {
   classes:  PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, history: PropTypes.object.isRequired
+, auth: PropTypes.bool.isRequired
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
 };
+
+const styles = theme => ({
+  title: { margin: theme.spacing.unit * 1.75 }
+});
 export default withStyles(styles)(withRouter(RssMenu));

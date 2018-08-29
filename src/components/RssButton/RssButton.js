@@ -1,5 +1,4 @@
 import React          from 'react';
-import PropTypes      from 'prop-types';
 
 import { MuiThemeProvider, createMuiTheme }
                       from '@material-ui/core/styles';
@@ -22,7 +21,7 @@ class RssButton extends React.Component {
         { ...other }>{children}</Button>
     </MuiThemeProvider>;
   }
-};
+}
 
 const borderRadius = 4;
 const margin = '0 8px';
@@ -332,5 +331,4 @@ const theme = {
       , '&:hover':  { color: 'black' }
     }}}})
 };
-
 export default RssButton;

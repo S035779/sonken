@@ -20,19 +20,19 @@ export function createStores(dispatcher) {
   , mailStore:          new MailStore(dispatcher)
   , postedFaqsStore:    new PostedFaqsStore(dispatcher)
   };
-};
+}
 
 export function getStore(name) {
   return stores[name];
-};
+}
 
 export function getStores(names) {
   return names.map(name => getStore(name));
-};
+}
 
 export function getState(name) {
   return getStore(name).getState();
-};
+}
 
 export function dehydrateState() {
   return {
@@ -45,4 +45,4 @@ export function dehydrateState() {
   , mailStore:          getState('mailStore')
   , postedFaqsStore:    getState('postedFaqsStore')
   };
-};
+}

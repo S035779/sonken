@@ -3,11 +3,9 @@ import R                from 'ramda';
 import Rx               from 'rxjs/Rx';
 import nodemailer       from 'nodemailer';
 import nodemailerSmtp   from 'nodemailer-smtp-transport'
-import { logs as log }  from 'Utilities/logutils';
 
 dotenv.config();
 const node_env    = process.env.NODE_ENV;
-const displayName = 'Sendmail';
 
 /**
  * Sendmail class.
@@ -66,13 +64,12 @@ class Sendmail {
   }
 
   createMessage(message) {
-    //log.trace(message);
     return this.postMessage(message);
   }
 
   createMessages(messages) {
-    //log.trace(messages);
     return this.forMessage(messages);
   }
-};
+}
+Sendmail.displayName = 'Sendmail';
 export default Sendmail;

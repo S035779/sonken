@@ -1,7 +1,6 @@
 import React            from 'react';
-import marked           from 'marked';
 import PropTypes        from 'prop-types';
-import std              from 'Utilities/stdutils';
+//import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import noImg            from 'Main/noimage';
@@ -21,19 +20,20 @@ class RssView extends React.Component {
       <img className={classes.graph} src={link_kpa} />
     </div>;
   }
+}
+RssView.displayName = 'RssView';
+RssView.defaultProps = { note: null };
+RssView.propTypes = {
+  classes: PropTypes.object.isRequired
+, note: PropTypes.object.isRequired
 };
 
 const rowHeight = 62;
-const styles = theme => ({
+const styles = {
   noteView: { display: 'flex', flexDirection: 'row'
             , alignItems: 'center', height: rowHeight * 4 - 30
             , justifyContent: 'space-around' }
 , image:    { width: '15%', border: '1px solid #CCC' }
 , graph:    { width: '80%', height: '100%', border: '1px solid #CCC' }
-});
-RssView.displayName = 'RssView';
-RssView.defaultProps = { note: null };
-RssView.propTypes = {
-  classes: PropTypes.object.isRequired
 };
 export default withStyles(styles)(RssView);

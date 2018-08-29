@@ -5,14 +5,11 @@ import std    from 'Utilities/stdutils';
 
 const api = process.env.API_URL;
 
-const displayName = 'UserApiClient';
-
 export default {
   request(request, options) {
-    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'preset/admin':
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           const isAuthenticated = options.admin !== '';
           setTimeout(() => resolve(isAuthenticated), 200);
         });
@@ -195,13 +192,8 @@ export default {
       case 'select/user':
       case 'select/faq':
       case 'select/mail':
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           setTimeout(() => resolve(options), 200);
-        });
-        break;
-      default:
-        return new Promise((resolve, reject) => {
-          reject(options);
         });
     }
   },
@@ -219,7 +211,7 @@ export default {
     return this.request('prefetch/faqs', { admin });
   },
   prefetchPostedFaqs(admin) {
-    return this.request('prefetch/faqs/posted', {});
+    return this.request('prefetch/faqs/posted', { admin });
   },
   prefetchMails(admin) {
     return this.request('prefetch/mails', { admin });
@@ -238,15 +230,12 @@ export default {
   fetchUser(admin, id) {
     return this.request('fetch/user', { admin, id });
   },
-  createUser(user, data) {
-    if(!data) return this.request('not/data'
-      , { name: 'Warning', message: 'Not Data Registory.' });
+  createUser(admin, data) {
     return this.request('create/user', { admin, data });
   },
   updateUser(admin, data) {
     const updated = std.getLocalTimeStamp(Date.now());
-    return this.request('update/user'
-      , { admin, data: Object.assign({}, data, { updated }) });
+    return this.request('update/user', { admin, data: Object.assign({}, data, { updated }) });
   },
   pageUser(admin, { maxNumber, number, perPage }) {
     return this.request('pagenation/user', { admin, maxNumber, number, perPage });
@@ -277,7 +266,7 @@ export default {
   fetchFaqs(admin) {
     return this.request('fetch/faqs', { admin });
   },
-  fetchPostedFaqs(admin) {
+  fetchPostedFaqs() {
     return this.request('fetch/faqs/posted', {});
   },
 

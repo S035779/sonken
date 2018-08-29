@@ -41,18 +41,14 @@ class Management extends React.Component {
     //std.logInfo(Management.displayName, 'State', this.state);
     //std.logInfo(Management.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, admin, users, page, ids, preference }
-     = this.state;
+    const { isAuthenticated, admin, users, page, ids, preference } = this.state;
     const _id = match.params.id;
-    const category =
-      match.params.category ? match.params.category : 'users';
+    const category = match.params.category ? match.params.category : 'users';
     const user = users.find(obj => obj._id === _id);
     const number = users.length;
     users.length = this.userPage(number, page);
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
+    if(!isAuthenticated) 
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} />);
     return <div className={classes.root}>
         <AdminSearch
           admin={admin}
@@ -81,6 +77,14 @@ class Management extends React.Component {
       </div>
     </div>;
   }
+}
+Management.displayName = 'Management';
+Management.defaultProps = {};
+Management.propTypes = {
+  classes: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 112;
@@ -99,9 +103,4 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: userHeightSmUp }}
 , userEdit: { flex: 1 }
 });
-Management.displayName = 'Management';
-Management.defaultProps = {};
-Management.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Management));

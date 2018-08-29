@@ -6,8 +6,6 @@ import { rehydrateState } from './actions';
 import { createStores } from './stores';
 import Root from './pages/Root/Root';
 
-const pspid = 'main';
-
 const dispatcher = createDispatcher();
 createStores(dispatcher);
 rehydrateState(JSON.parse(
@@ -30,6 +28,6 @@ if (module.hot) {
       renderRoot();
     });
   });
-};
+}
 
-renderRoot();
+renderRoot()

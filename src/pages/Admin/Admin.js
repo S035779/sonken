@@ -2,7 +2,6 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 import { renderRoutes } from 'react-router-config';
 import { Container }    from 'flux/utils';
-import LoginAction      from 'Actions/LoginAction';
 import { getStores, getState }
                         from 'Stores';
 
@@ -38,6 +37,12 @@ class Admin extends React.Component {
       </ErrorBoundary>
     </div>;
   }
+}
+Admin.displayName = 'Admin';
+Admin.defaultProps = {};
+Admin.propTypes = {
+  classes:  PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
 };
 
 const barHeightSmUp = 112;
@@ -56,9 +61,4 @@ const styles = theme => ({
               height: `calc(100vh - ${barHeightSmUp}px)`
             , marginTop: barHeightSmUp }}
 });
-Admin.displayName = 'Admin';
-Admin.defaultProps = {};
-Admin.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Admin));

@@ -137,6 +137,14 @@ class Dashboard extends React.Component {
       </div>
     </div>;
   }
+}
+Dashboard.displayName = 'Dashboard';
+Dashboard.defaultProps = {};
+Dashboard.propTypes = {
+  classes: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
@@ -155,9 +163,4 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
 , noteEdit: { flex: 1 }
 });
-Dashboard.displayName = 'Dashboard';
-Dashboard.defaultProps = {};
-Dashboard.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Dashboard));

@@ -1,5 +1,4 @@
 import dotenv             from 'dotenv';
-import path               from 'path';
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
@@ -166,7 +165,7 @@ class Yahoo {
   promiseClosedMerchant(options) {
     return new Promise((resolve, reject) => {
       let results;
-      let count = 0;
+      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
       osmosis.get(options.url, { n: 100, b: 1 })
         .paginate({ b: +100 }, options.pages - 1)
         .set({ title: 'title', item: [ osmosis
@@ -300,8 +299,8 @@ class Yahoo {
   
   promiseClosedSellers(options) {
     return new Promise((resolve, reject) => {
+      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
       let results;
-      let count = 0;
       osmosis.get(options.url, { apg: 1 })
         .paginate({ apg: +1 }, options.pages - 1)
         .set({ title: 'title', item: [ osmosis
@@ -437,6 +436,7 @@ class Yahoo {
   
   promiseHtml(options) {
     return new Promise((resolve, reject) => {
+      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
       let results;
       osmosis.get(options.url)
         .set({ title: 'title', item: [ osmosis
@@ -553,6 +553,7 @@ class Yahoo {
     if(!pages) pages  = 1;
     return from(this.getClosedMerchant(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
@@ -560,20 +561,7 @@ class Yahoo {
     if(!pages) pages  = 1;
     return from(this.getClosedSellers(url, pages)).pipe(
       flatMap(this.fetchMarchant.bind(this))
-    );
-  }
-
-  searchClosedMerchant({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedMerchant(url, pages)).pipe(
-      flatMap(this.fetchItemSearch.bind(this))
-    );
-  }
-
-  searchClosedSellers({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedSellers(url, pages)).pipe(
-      flatMap(this.fetchItemSearch.bind(this))
+    , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
@@ -820,7 +808,7 @@ class Yahoo {
   }
 
   fetchAuthTokens() {
-    return allToken();
+    return this.allToken();
   }
 
   hasToken(code) {
@@ -834,7 +822,7 @@ class Yahoo {
   addToken(token) {
     this.tokens.push(token);
     return true;
-  };
+  }
 
   updToken(code, token) {
     this.tokens = this.tokens.map(obj => obj.code === code ? token : obj);
@@ -889,6 +877,6 @@ class Yahoo {
       + `, status: ${obj.state}`
     ;
   }
-};
+}
 Yahoo.displayName = '[YHA]';
 export default Yahoo;

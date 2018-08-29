@@ -47,6 +47,17 @@ class DrawerTemporary extends React.Component {
       </Drawer>
     </Hidden>;
   }
+}
+DrawerTemporary.displayName = 'DrawerTemporary';
+DrawerTemporary.defaultProps = {};
+DrawerTemporary.propTypes = {
+  classes:  PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, user: PropTypes.string.isRequired
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
+, categorys: PropTypes.array.isRequired
 };
 
 const drawerWidthMdUp = 240;
@@ -63,9 +74,4 @@ const styles = theme => ({
     }
   }
 });
-DrawerTemporary.displayName = 'DrawerTemporary';
-DrawerTemporary.defaultProps = {};
-DrawerTemporary.propTypes = {
-  classes:  PropTypes.object.isRequired
-};
 export default withStyles(styles)(DrawerTemporary);

@@ -11,9 +11,10 @@ import RssDialog      from 'Components/RssDialog/RssDialog';
 class MailEdit extends React.Component {
   constructor(props) {
     super(props);
+    const isFile = !!props.mail.file;
     this.state = {
       mail:        props.mail
-    , isAttached: !!props.mail.file
+    , isAttached: isFile
     , isSuccess:  false
     , isNotValid: false
     };
@@ -44,7 +45,10 @@ class MailEdit extends React.Component {
     std.logInfo(MailEdit.displayName, 'handleDraft', _id);
     MailAction.deleteSelect(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(MailEdit.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleSave() {
@@ -54,7 +58,10 @@ class MailEdit extends React.Component {
     if(this.isValidate() && this.isChanged()) {
       MailAction.update(admin, _id, { title, body })
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(MailEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -66,7 +73,10 @@ class MailEdit extends React.Component {
     const { _id } = this.state.mail;
     if(window.confirm('Are you sure?')) {
       MailAction.delete(admin, [_id])
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(MailEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     }
   }
 
@@ -79,7 +89,10 @@ class MailEdit extends React.Component {
       MailAction.update(admin, _id, { title, body })
         .then(() => MailAction.upload(admin, _id, file))
         .then(() => this.setState({ isSuccess: true, isAttached: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(MailEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -103,7 +116,7 @@ class MailEdit extends React.Component {
 
   render() {
     //std.logInfo(MailEdit.displayName, 'State', this.state);
-    const { classes, admin } = this.props;
+    const { classes } = this.props;
     const { mail, isAttached, isNotValid, isSuccess } = this.state;
     if(!mail || !mail._id) return null;
     const isChanged = this.isChanged();
@@ -133,6 +146,13 @@ class MailEdit extends React.Component {
       </div>
     </div>;
   }
+}
+MailEdit.displayName= 'MailEdit';
+MailEdit.defaultProps = { mail: null };
+MailEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, mail: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -155,7 +175,7 @@ const styles = theme => ({
               , height: '260px'
               , width: '100%',    boxSizing: 'border-box'
               , border: 'none',   padding: '10px'
-              , fontSize: '16px', outline: 'none', resize: 'vertical'
+              , fontSize: '16px', outline: 'none'
               , maxHeight: editHeightSmDown
               , [theme.breakpoints.up('sm')]: {
                 maxHeight: editHeightSmUp }}
@@ -174,9 +194,4 @@ const styles = theme => ({
                 , borderBottom: '1px solid #CCC'
               }}
 });
-MailEdit.displayName= 'MailEdit';
-MailEdit.defaultProps = { mail: null };
-MailEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(MailEdit);

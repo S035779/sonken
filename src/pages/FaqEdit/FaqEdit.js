@@ -11,22 +11,23 @@ import RssDialog      from 'Components/RssDialog/RssDialog';
 class FaqEdit extends React.Component {
   constructor(props) {
     super(props);
+    const isFile = !!props.faq.file;
     this.state = {
       faq:        props.faq
-    , isAttached: !!props.faq.file
+    , isAttached: isFile
     , isSuccess:  false
     , isNotValid: false
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    std.logInfo(FaqEdit.displayName, 'Props', nextProps);
+    //std.logInfo(FaqEdit.displayName, 'Props', nextProps);
     const { faq } = nextProps;
     this.setState({ faq, isAttached: faq ? !!faq.file : false });
   }
 
   handleChangeTitle(title) {
-    std.logInfo(FaqEdit.displayName, 'handleChangeTitle', title);
+    //std.logInfo(FaqEdit.displayName, 'handleChangeTitle', title);
     const { faq } = this.state;
     this.setState({ faq: Object.assign({}, faq, { title }) });
   }
@@ -34,7 +35,7 @@ class FaqEdit extends React.Component {
   handleChangeBody(event) {
     const { faq } = this.state;
     const body = event.target.value;
-    std.logInfo(FaqEdit.displayName, 'handleChangeBody', body);
+    //std.logInfo(FaqEdit.displayName, 'handleChangeBody', body);
     this.setState({ faq: Object.assign({}, faq, { body }) });
   }
 
@@ -44,7 +45,10 @@ class FaqEdit extends React.Component {
     std.logInfo(FaqEdit.displayName, 'handleDraft', _id);
     FaqAction.deletePost(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(FaqEdit.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
   }
 
   handleSave() {
@@ -54,7 +58,10 @@ class FaqEdit extends React.Component {
     if(this.isValidate() && this.isChanged()) {
       FaqAction.update(admin, _id, { title, body })
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(FaqEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -66,7 +73,10 @@ class FaqEdit extends React.Component {
     const { _id } = this.state.faq;
     if(window.confirm('Are you sure?')) {
       FaqAction.delete(admin, [_id])
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(FaqEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     }
   }
 
@@ -79,7 +89,10 @@ class FaqEdit extends React.Component {
       FaqAction.update(admin, _id, { title, body })
         .then(() => FaqAction.upload(admin, _id, file))
         .then(() => this.setState({ isSuccess: true, isAttached: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(FaqEdit.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -103,7 +116,7 @@ class FaqEdit extends React.Component {
 
   render() {
     //std.logInfo(FaqEdit.displayName, 'State', this.state);
-    const { classes, admin } = this.props;
+    const { classes } = this.props;
     const { faq, isAttached, isNotValid, isSuccess } = this.state;
     if(!faq || !faq._id) return null;
     const isChanged = this.isChanged();
@@ -133,6 +146,13 @@ class FaqEdit extends React.Component {
       </div>
     </div>;
   }
+}
+FaqEdit.displayName= 'FaqEdit';
+FaqEdit.defaultProps = { faq: null };
+FaqEdit.propTypes = {
+  classes: PropTypes.object.isRequired
+, faq: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -155,7 +175,7 @@ const styles = theme => ({
               , height: '260px'
               , width: '100%',    boxSizing: 'border-box'
               , border: 'none',   padding: '10px'
-              , fontSize: '16px', outline: 'none', resize: 'vertical'
+              , fontSize: '16px', outline: 'none'
               , maxHeight: editHeightSmDown
               , [theme.breakpoints.up('sm')]: {
                 maxHeight: editHeightSmUp }}
@@ -174,9 +194,4 @@ const styles = theme => ({
                 , borderBottom: '1px solid #CCC'
               }}
 });
-FaqEdit.displayName= 'FaqEdit';
-FaqEdit.defaultProps = { faq: null };
-FaqEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(FaqEdit);

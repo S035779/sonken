@@ -35,7 +35,14 @@ class FaqsList extends React.Component {
       <ul className={classes.list}>{renderList}</ul>
     </div>;
   }
+}
+FaqsList.displayName = 'FaqsList';
+FaqsList.defaultProps = { faqs: null };
+FaqsList.propTypes = {
+  classes: PropTypes.object.isRequired
+, faqs: PropTypes.array.isRequired
 };
+
 const faqsWidth = '80%';
 const faqsHeight = '95%';
 const styles = theme => ({
@@ -56,9 +63,4 @@ const styles = theme => ({
 , icon:       { margin: theme.spacing.unit, verticalAlign: 'middle' }
 , updated:    { color: '#666' }
 });
-FaqsList.displayName = 'FaqsList';
-FaqsList.defaultProps = { faqs: null };
-FaqsList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(FaqsList);

@@ -98,6 +98,12 @@ class Bids extends React.Component {
       </div>
     </div>;
   }
+}
+Bids.displayName = 'Bids';
+Bids.defaultProps = { notes: null };
+Bids.propTypes = {
+  classes: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
@@ -114,9 +120,4 @@ const styles = theme => ({
             , height: listHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
 });
-Bids.displayName = 'Bids';
-Bids.defaultProps = { notes: null };
-Bids.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Bids));

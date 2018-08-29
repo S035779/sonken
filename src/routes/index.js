@@ -24,8 +24,8 @@ import FaqsList     from 'Pages/FaqsList/FaqsList';
 import Inquiry      from 'Pages/Inquiry/Inquiry';
 import InquiryEdit  from 'Pages/InquiryEdit/InquiryEdit';
 
-const getUserData = (options, match) => {
-  return new Promise((resolve, reject) => {
+const getUserData = options => {
+  return new Promise(resolve => {
     resolve(options);
   });
 };
@@ -76,4 +76,4 @@ export default function getRoutes() {
     , { path: '/:category',           component: Dashboard, loadData: getUserData }
     ] }
   ];
-};
+}

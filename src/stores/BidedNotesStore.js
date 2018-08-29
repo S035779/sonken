@@ -1,8 +1,6 @@
 import { ReduceStore }  from 'flux/utils';
 import std              from 'Utilities/stdutils';
 
-const displayName = 'BidedNotesStore';
-
 export default class BidedNotesStore extends ReduceStore {
   getInitialState() {
     return { 
@@ -123,4 +121,6 @@ export default class BidedNotesStore extends ReduceStore {
         return state; 
     } 
   } 
-};
+}
+BidedNotesStore.displayName = 'BidedNotesStore';
+

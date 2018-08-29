@@ -1,18 +1,14 @@
 import * as R from 'ramda';
 import net    from 'Utilities/netutils';
 import xhr    from 'Utilities/xhrutils';
-import std    from 'Utilities/stdutils';
 
 const api = process.env.API_URL;
 
-const displayName = 'NoteApiClient';
-
 export default {
   request(request, options) {
-    //std.logInfo(displayName, request, options);
     switch(request) {
       case 'preset/user':
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           const isAuthenticated = options.user !== '';
           setTimeout(() => resolve(isAuthenticated), 200);
         });
@@ -233,12 +229,8 @@ export default {
       case 'filter/note':
       case 'filter/traded':
       case 'filter/bided':
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           setTimeout(() => resolve(options), 200);
-        });
-      default:
-        return new Promise((resolve, reject) => {
-          reject(options);
         });
     }
   },
@@ -289,8 +281,7 @@ export default {
     return this.request('fetch/category', { user, id });
   },
   createCategory(user, { category, subcategory }) {
-    return this
-      .request('create/category', { user, category, subcategory });
+    return this.request('create/category', { user, category, subcategory });
   },
   updateCategory(user, id, { category, subcategory, subcategoryId }) {
     const data = { category, subcategory, subcategoryId };
@@ -304,13 +295,9 @@ export default {
    * Note
    */
   createNote(user, { url, category, categoryIds, title }) {
-    if(!url) return this.request('not/url'
-        , { name: 'Warning', message: 'Not Url Registory.' });
-    return this.request('create/note'
-      , { user, url, category, categoryIds, title });
+    return this.request('create/note', { user, url, category, categoryIds, title });
   },
-  updateNote(user, id
-  , { title, asin, price, bidsprice, body, categoryIds }) {
+  updateNote(user, id, { title, asin, price, bidsprice, body, categoryIds }) {
     const data = { title, asin, price, bidsprice, body, categoryIds };
     return this.request('update/note', { user, id, data });
   },
@@ -318,17 +305,16 @@ export default {
     return this.request('delete/note', { user, ids });
   },
   pageNote(user, { maxNumber, number, perPage }) {
-    return this.request('pagenation/note', {
-      user, maxNumber, number, perPage
-    });
+    return this.request('pagenation/note', { user, maxNumber, number, perPage });
   },
   selectNote(user, ids) {
     return this.request('select/note', { user, ids });
   },
-  filterNote(user, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
-  , allAuction, inAuction, aucStartTime, aucStopTime }) {
-    const filter = { lastWeekAuction, twoWeeksAuction, lastMonthAuction
-    , allAuction, inAuction, aucStartTime, aucStopTime
+  filterNote(user, { 
+    lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime 
+  }) {
+    const filter = { 
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime 
     };
     return this.request('filter/note', { user, filter });
   },
@@ -365,11 +351,8 @@ export default {
   selectTrade(user, ids) {
     return this.request('select/traded', { user, ids });
   },
-  filterTrade(user, {
-    endTrading, allTrading, inBidding, bidStartTime, bidStopTime}) {
-    const filter = {
-      endTrading, allTrading, inBidding, bidStartTime, bidStopTime
-    };
+  filterTrade(user, { endTrading, allTrading, inBidding, bidStartTime, bidStopTime }) {
+    const filter = { endTrading, allTrading, inBidding, bidStartTime, bidStopTime };
     return this.request('filter/traded', { user, filter });
   },
 
@@ -383,18 +366,13 @@ export default {
     return this.request('delete/bided', { user, ids });
   },
   pageBids(user, { maxNumber, number, perPage }) {
-    return this.request('pagenation/bided', {
-      user, maxNumber, number, perPage
-    });
+    return this.request('pagenation/bided', { user, maxNumber, number, perPage });
   },
   selectBids(user, ids) {
     return this.request('select/bided', { user, ids });
   },
-  filterBids(user, {
-    endBidding, allBidding, inBidding, bidStartTime, bidStopTime}) {
-    const filter = {
-      endBidding, allBidding, inBidding, bidStartTime, bidStopTime
-    };
+  filterBids(user, { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }) {
+    const filter = { endBidding, allBidding, inBidding, bidStartTime, bidStopTime };
     return this.request('filter/bided', { user, filter });
   },
 

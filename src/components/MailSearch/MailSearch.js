@@ -1,11 +1,10 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import MailAction       from 'Actions/MailAction';
-import std              from 'Utilities/stdutils';
+//import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Select, Input, Button, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
+import { Select, Typography, FormControl, InputLabel, MenuItem } from '@material-ui/core';
 
 class MailSearch extends React.Component {
   constructor(props) {
@@ -37,9 +36,8 @@ class MailSearch extends React.Component {
   }
 
   render() {
-    const { classes, mailNumber, category } = this.props;
-    const { url, perPage, filename } = this.state;
-    const color = 'green';
+    const { classes, mailNumber } = this.props;
+    const { perPage } = this.state;
     return <div className={classes.mailSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
@@ -67,6 +65,14 @@ class MailSearch extends React.Component {
       </div>
     </div>;
   }
+}
+MailSearch.displayName = 'MailSearch';
+MailSearch.defaultProps = {};
+MailSearch.propTypes = {
+  classes: PropTypes.object.isRequired
+, mailNumber: PropTypes.number.isRequired
+, mailPage: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const titleHeight = 62;
@@ -91,9 +97,4 @@ const styles = theme => ({
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
-MailSearch.displayName = 'MailSearch';
-MailSearch.defaultProps = {};
-MailSearch.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(MailSearch);

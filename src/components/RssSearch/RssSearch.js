@@ -67,7 +67,7 @@ class RssSearch extends React.Component {
     this.setState({ isAddNote: true });
   }
 
-  handleDownload(event) {
+  handleDownload() {
     const { user, category } = this.props;
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
@@ -191,7 +191,7 @@ class RssSearch extends React.Component {
     //std.logInfo(RssSearch.displayName, 'Props', this.props);
     //std.logInfo(RssSearch.displayName, 'State', this.state);
     const { classes, noteNumber, user, category, categorys, title } = this.props;
-    const { isAddNote, isSuccess, isNotValid, url, perPage, filename } = this.state;
+    const { isAddNote, isSuccess, isNotValid, url, perPage } = this.state;
     const color = this.getColor(category);
     const _categorys = category => categorys.filter(obj => category === obj.category)
       .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
@@ -254,6 +254,19 @@ class RssSearch extends React.Component {
       </div>
     </div>;
   }
+}
+RssSearch.displayName = 'RssSearch';
+RssSearch.defaultProps = {};
+RssSearch.propTypes = {
+  classes: PropTypes.object.isRequired
+, noteNumber: PropTypes.number.isRequired
+, notePage: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
+, file: PropTypes.object
+, categorys: PropTypes.array.isRequired
+, title: PropTypes.string.isRequired
+, changed: PropTypes.bool
 };
 
 const titleHeight = 62;
@@ -285,9 +298,4 @@ const styles = theme => ({
 , space:      { flex: 0, margin: theme.spacing.unit }
 , input:      { display: 'none' }
 });
-RssSearch.displayName = 'RssSearch';
-RssSearch.defaultProps = {};
-RssSearch.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(RssSearch);

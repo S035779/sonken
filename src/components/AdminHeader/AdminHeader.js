@@ -1,14 +1,15 @@
-import React          from 'react';
-import { withRouter } from 'react-router-dom';
-import PropTypes      from 'prop-types'
-import LoginAction    from 'Actions/LoginAction';
+import React                from 'react';
+import { withRouter }       from 'react-router-dom';
+import PropTypes            from 'prop-types'
+import LoginAction          from 'Actions/LoginAction';
 
-import { withStyles } from '@material-ui/core/styles';
-import { IconButton } from '@material-ui/core';
+import { withStyles }       from '@material-ui/core/styles';
+import { IconButton }       from '@material-ui/core';
 import { Menu as MenuIcon } from '@material-ui/icons';
-import LoginSwitch    from 'Components/LoginSwitch/LoginSwitch';
-import AdminMenu      from 'Components/AdminMenu/AdminMenu';
-import AdminButtonNav from 'Components/AdminButtonNav/AdminButtonNav';
+import LoginSwitch          from 'Components/LoginSwitch/LoginSwitch';
+import AdminMenu            from 'Components/AdminMenu/AdminMenu';
+import AdminButtonNav       from 'Components/AdminButtonNav/AdminButtonNav';
+import std                  from 'Utilities/stdutils';
 
 class AdminHeader extends React.Component {
   constructor(props) {
@@ -27,6 +28,7 @@ class AdminHeader extends React.Component {
   }
 
   handleMenu(event) {
+    std.logInfo(AdminHeader.displayName, 'handleMenu', event);
   }
 
   render() {
@@ -48,7 +50,7 @@ class AdminHeader extends React.Component {
       </div>
     </div>;
   }
-};
+}
 
 const navHeightSmDown = 56;
 const navHeightSmUp = 64;
@@ -68,5 +70,10 @@ AdminHeader.displayName = 'AdminHeader';
 AdminHeader.defaultProps = {};
 AdminHeader.propTypes = {
   classes:  PropTypes.object.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
+, admin: PropTypes.string.isRequired
+, history: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, profile: PropTypes.object.isRequired
 };
 export default withStyles(styles)(withRouter(AdminHeader));

@@ -72,6 +72,14 @@ class Faq extends React.Component {
       </div>
     </div>;
   }
+}
+Faq.displayName = 'Faq';
+Faq.defaultProps = {};
+Faq.propTypes = {
+  classes: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired
+, location: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 112;
@@ -90,9 +98,4 @@ const styles = theme => ({
             , [theme.breakpoints.up('sm')]: { height: faqHeightSmUp }}
 , faqEdit: { flex: 1 }
 });
-Faq.displayName = 'Faq';
-Faq.defaultProps = {};
-Faq.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(Container.create(Faq));

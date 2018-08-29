@@ -37,8 +37,10 @@ class MailButtons extends React.Component {
     std.logInfo(MailButtons.displayName
       , 'handleNew', selectedMailId);
     MailAction.create(admin, selectedMailId)
-      //.then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }));
+      .catch(err => {
+        std.logError(MailButtons.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+      });
     this.setState({ checked: false });
   }
 
@@ -49,7 +51,10 @@ class MailButtons extends React.Component {
     if(window.confirm('Are you sure?')) {
       MailAction.createSelect(admin, selectedMailId)
         .then(() => this.setState({ isSuccess: true }))
-        .catch(err => this.setState({ isNotValid: true }));
+        .catch(err => {
+          std.logError(MailButtons.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+        });
       this.setState({ checked: false });
     }
   }
@@ -84,6 +89,14 @@ class MailButtons extends React.Component {
       </div>
     </div>;
   }
+}
+MailButtons.displayName = 'MailButtons';
+MailButtons.defaultProps = {};
+MailButtons.propTypes = {
+  classes: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, selectedMailId: PropTypes.array.isRequired
+, mails: PropTypes.array.isRequired
 };
 
 const titleHeight   = 62;
@@ -99,9 +112,4 @@ const styles = theme => ({
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }
 });
-MailButtons.displayName = 'MailButtons';
-MailButtons.defaultProps = {};
-MailButtons.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(MailButtons);

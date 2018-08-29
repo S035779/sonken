@@ -1,7 +1,7 @@
-import React                      from 'react';
-import { BrowserRouter, Switch }  from 'react-router-dom';
-import { renderRoutes }           from 'react-router-config';
-import getRoutes                  from 'Routes';
+import React              from 'react';
+import { BrowserRouter }  from 'react-router-dom';
+import { renderRoutes }   from 'react-router-config';
+import getRoutes          from 'Routes';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -38,4 +38,4 @@ export default class Root extends React.Component {
       </BrowserRouter>
     </MuiThemeProvider>;
   }
-};
+}

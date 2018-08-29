@@ -1,6 +1,5 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
-import path             from 'path';
 import http             from 'http';
 import express          from 'express';
 import session          from 'express-session';

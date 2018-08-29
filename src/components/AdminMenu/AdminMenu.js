@@ -4,7 +4,7 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { IconButton, Menu, TextField, Typography, DialogContentText, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, TextField, Typography, MenuItem } from '@material-ui/core';
 import { AccountCircle } from '@material-ui/icons';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
@@ -56,23 +56,20 @@ class AdminMenu extends React.Component {
     std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
     const { preference } = this.state;
     switch(name) {
-      case 'url1': case 'url2': case 'url3': case 'url4':
-        const advertisement = Object.assign({}, preference.advertisement
-          , { [name]: event.target.value });
-        this.setState({ preference: Object.assign({}, preference
-          , { advertisement }) });
+      case 'url1': case 'url2': case 'url3': case 'url4': {
+          const advertisement = Object.assign({}, preference.advertisement, { [name]: event.target.value });
+          this.setState({ preference: Object.assign({}, preference, { advertisement }) });
+        }
         break;
       case 'from':
-        this.setState({ preference: Object.assign({}, preference
-          , { [name]: event.target.value }) });
+        this.setState({ preference: Object.assign({}, preference, { [name]: event.target.value }) });
         break;
-      default:
-        const number = Number(event.target.value);
-        const menu = preference.menu
-          .map(item => item.name === name
-            ? Object.assign({}, item, { name, number }) : item );
-        this.setState(
-          { preference: Object.assign({}, preference, { menu }) } );
+      default: {
+          const number = Number(event.target.value);
+          const menu = preference.menu
+            .map(item => item.name === name ? Object.assign({}, item, { name, number }) : item );
+          this.setState({ preference: Object.assign({}, preference, { menu }) } );
+        }
         break;
     }
   }
@@ -82,31 +79,33 @@ class AdminMenu extends React.Component {
     this.setState({ anchorEl: event.currentTarget });
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     std.logInfo(AdminMenu.displayName, 'handleClose', name);
     this.setState({ anchorEl: null});
   }
 
-  handleInitialize(name, event) {
+  handleInitialize(name) {
     std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
     const { admin } = this.props;
     LoginAction.createPreference(admin)
       .then(() => this.setState({ isSuccess: true }))
-      .catch(err => this.setState({ isNotValid: true }))
-    ;
+      .catch(err => {
+        std.logError(AdminMenu.displayName, err.name, err.message);
+        this.setState({ isNotValid: true })
+      });
   }
   
-  handleOpenDialog(name, event) {
+  handleOpenDialog(name) {
     std.logInfo(AdminMenu.displayName, 'handleOpenDialog', name);
     this.setState({ [name]: true });
   }
 
-  handleCloseDialog(name, event) {
+  handleCloseDialog(name) {
     std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
-  handleSubmitDialog(name, event) {
+  handleSubmitDialog(name) {
     std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
     const { profile, preference, password } = this.state;
     const { admin } = this.props;
@@ -115,7 +114,10 @@ class AdminMenu extends React.Component {
         if(this.isValidateProfile() && this.isChanged()) {
           LoginAction.updateProfile(admin, password, profile)
             .then(() => this.setState({ isSuccess: true }))
-            .catch(err => this.setState({ isNotValid: true }));
+            .catch(err => {
+              std.logError(AdminMenu.displayName, err.name, err.message);
+              this.setState({ isNotValid: true })
+            });
         } else {
           this.setState({ isNotValid: true });
         }
@@ -124,17 +126,15 @@ class AdminMenu extends React.Component {
         if(this.isValidatePreference() && this.isChanged()) {
           LoginAction.updatePreference(admin, preference)
             .then(() => this.setState({ isSuccess: true }))
-            .catch(err => this.setState({ isNotValid: true }));
+            .catch(err => {
+              std.logError(AdminMenu.displayName, err.name, err.message);
+              this.setState({ isNotValid: true })
+            });
         } else {
           this.setState({ isNotValid: true });
         }
         break;
     }
-    this.setState({ [name]: false });
-  }
-
-  handleCloseDialog(name) {
-    std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
@@ -289,17 +289,22 @@ class AdminMenu extends React.Component {
             onChange={this.handleChangePreference.bind(this, 'url4')}
             label="広告４URL" type="text" fullWidth />
           {renderMenu}
-        </LoginFormDialog>>
+        </LoginFormDialog>
       </Menu>
     </div>);
   }
-};
-const styles = theme => ({
-  title: { margin: theme.spacing.unit * 1.75 }
-});
+}
 AdminMenu.displayName = 'AdminMenu';
 AdminMenu.defaultProps = {};
 AdminMenu.propTypes = {
-  classes:  PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, profile: PropTypes.object.isRequired
+, admin: PropTypes.string.isRequired
+, auth: PropTypes.bool.isRequired
 };
+
+const styles = theme => ({
+  title: { margin: theme.spacing.unit * 1.75 }
+});
 export default withStyles(styles)(AdminMenu);

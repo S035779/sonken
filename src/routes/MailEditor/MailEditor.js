@@ -1,9 +1,7 @@
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
-import { map, flatMap }   from 'rxjs/operators';
+import { map }            from 'rxjs/operators';
 import { Mail, Selected } from 'Models/mail';
-import std                from 'Utilities/stdutils';
-import log                from 'Utilities/logutils';
 
 /**
  * MailEditor class.
@@ -19,18 +17,15 @@ export default class MailEditor {
   }
 
   request(request, options) {
-    //log.debug(request, options);
     switch(request) {
       case 'fetch/mails':
         return new Promise((resolve, reject) => {
           const conditions = {};
           Mail.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'fetch/mail':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
@@ -38,11 +33,9 @@ export default class MailEditor {
             if(err) return reject(err);
             if(obj === null) return reject(
               { name: 'Error', message: 'Mail not found.' });
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/mail':
         return new Promise((resolve, reject) => {
           const mail = new Mail({
@@ -52,11 +45,9 @@ export default class MailEditor {
           });
           mail.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'update/mail':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
@@ -68,21 +59,17 @@ export default class MailEditor {
             };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'delete/mail':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
           Mail.findOneAndRemove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
-        break;
       case 'create/select':
         return new Promise((resolve, reject) => {
           const conditions = {
@@ -94,7 +81,6 @@ export default class MailEditor {
           Selected.update(conditions, update, { upsert: true }
           , (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -105,7 +91,6 @@ export default class MailEditor {
           };
           Selected.remove(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -114,7 +99,6 @@ export default class MailEditor {
           const conditions = {};
           Selected.find(conditions, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -128,28 +112,13 @@ export default class MailEditor {
           };
           Mail.findOneAndUpdate(conditions, update, (err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
-          //fs.writeFile('tmp/' +  options.user, options.file, err => {
-          //  if(err) return reject(err);
-          //  resolve('OK');
-          //});
         });
-        break;
-      //case 'download/file':
-      //  return new Promise((resolve, reject) => {
-      //    fs.readFile('tmp/' + options.user, (err, data) => {
-      //      if(err) return reject(err);
-      //      resolve(data);
-      //    });
-      //  });
-      //  break;
       default:
         return new Promise((resolve, reject) => {
           reject({ name: 'Error', message: 'request: ' + request });
         });
-        break;
     }
   }
 
@@ -250,4 +219,4 @@ export default class MailEditor {
   uploadFile({ admin, id, file }) {
     return from(this.upFile(admin, id, file));
   }
-};
+}

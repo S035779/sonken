@@ -6,7 +6,7 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { TextField, Typography, Button, Checkbox, FormLabel, FormControl, FormGroup, FormControlLabel, FormHelperText, InputLabel } from '@material-ui/core';
+import { Typography, FormControlLabel } from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
@@ -25,7 +25,7 @@ class LoginMgmt extends React.Component {
   }
 
   handleLogin() {
-    const { username, password, checked } = this.state;
+    const { username, password } = this.state;
     LoginAction.authenticate(username, password, true)
       .then(() => {
         if(this.props.isAuthenticated) return LoginAction.presetAdmin(username);
@@ -36,6 +36,7 @@ class LoginMgmt extends React.Component {
         if(this.props.isAuthenticated) this.setState({ redirectToManagement: true });
       })
       .catch(err => {
+        std.logError(LoginMgmt.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
       });
   }
@@ -55,7 +56,7 @@ class LoginMgmt extends React.Component {
   render() {
     //std.logInfo(LoginMgmt.displayName, 'State', this.state);
     //std.logInfo(LoginMgmt.displayName, 'Props', this.props);
-    const { classes, location } = this.props;
+    const { classes } = this.props;
     const { redirectToManagement, username, password, checked, isNotValid } = this.state;
     if(redirectToManagement) {
       const admin = { pathname: '/admin/users' };
@@ -111,6 +112,12 @@ class LoginMgmt extends React.Component {
       </div>
     </div>;
   }
+}
+LoginMgmt.displayName = 'LoginMgmt';
+LoginMgmt.defaultProps = {};
+LoginMgmt.propTypes = {
+  classes: PropTypes.object.isRequired
+, isAuthenticated: PropTypes.bool.isRequired
 };
 
 const loginWidth  = 320;
@@ -137,9 +144,4 @@ const styles = theme => ({
 , input:      { flex: 1 }
 , confirm:    { fontSize: 10 }
 });
-LoginMgmt.displayName = 'LoginMgmt';
-LoginMgmt.defaultProps = {};
-LoginMgmt.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(withRouter(LoginMgmt));

@@ -1,16 +1,16 @@
 import React              from 'react';
 import PropTypes          from 'prop-types';
-import std                from 'Utilities/stdutils';
+//import std                from 'Utilities/stdutils';
 
 import { withStyles }     from '@material-ui/core/styles';
-import { Input, Button, FormControl, InputLabel }  from '@material-ui/core';
+import { Input, FormControl, InputLabel }  from '@material-ui/core';
 import RssButton          from 'Components/RssButton/RssButton';
 
 class EditButtons extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      changed: props.chenged
+      changed: props.changed
     , attached: props.attached
     };
   }
@@ -75,6 +75,19 @@ class EditButtons extends React.Component {
       </div>
     </div>;
   }
+}
+EditButtons.displayName = 'EditButtons';
+EditButtons.defaultProps = {};
+EditButtons.propTypes = {
+  classes: PropTypes.object.isRequired
+, changed: PropTypes.bool
+, attached: PropTypes.bool.isRequired
+, onSave: PropTypes.func.isRequired
+, onDelete: PropTypes.func.isRequired
+, onDraft: PropTypes.func.isRequired
+, onChange: PropTypes.func.isRequired
+, onUpload: PropTypes.func.isRequired
+, value: PropTypes.string.isRequired
 };
 
 const columnHeight = 62;
@@ -91,10 +104,4 @@ const styles = theme => ({
               , wordBreak: 'keep-all' }
 , input:      { display: 'none' }
 });
-
-EditButtons.displayName = 'EditButtons';
-EditButtons.defaultProps = {};
-EditButtons.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(EditButtons);

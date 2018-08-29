@@ -5,8 +5,8 @@ const displayName = 'profile';
 const profile = UserProfiler.of();
 
 export default {
-  fetchUsers(options) {
-    return (req, res, next) => {
+  fetchUsers() {
+    return (req, res) => {
       const { admin } = req.body;
       profile.fetchUsers({ admin }).subscribe(
         obj => {
@@ -22,8 +22,8 @@ export default {
     };
   },
 
-  fetchPreference(options) {
-    return (req, res, next) => {
+  fetchPreference() {
+    return (req, res) => {
       profile.fetchPreference().subscribe(
         obj => {
           res.status(200).send(obj);
@@ -38,8 +38,8 @@ export default {
     };
   },
 
-  createPreference(options) {
-    return (req, res, next) => {
+  createPreference() {
+    return (req, res) => {
       const { admin, data } = req.body;
       profile.createPreference({ admin, data }).subscribe(
         obj => {
@@ -55,8 +55,8 @@ export default {
     };
   },
 
-  updatePreference(options) {
-    return (req, res, next) => {
+  updatePreference() {
+    return (req, res) => {
       const { admin, data } = req.body;
       profile.updatePreference({ admin, data }).subscribe(
         obj => {
@@ -72,8 +72,8 @@ export default {
     };
   },
 
-  deletePreference(options) {
-    return (req, res, next) => {
+  deletePreference() {
+    return (req, res) => {
       const { admin, id } = req.query;
       profile.deletePreference({ admin, id }).subscribe(
         obj => {
@@ -89,8 +89,8 @@ export default {
     };
   },
 
-  fetchUser(options) {
-    return (req, res, next) => {
+  fetchUser() {
+    return (req, res) => {
       const { user, email, phone } = req.query;
       profile.fetchUser({ user, email, phone }).subscribe(
         obj => {
@@ -106,8 +106,8 @@ export default {
     };
   },
 
-  createUser(options) {
-    return (req, res, next) => {
+  createUser() {
+    return (req, res) => {
       const { user, password, data } = req.body;
       profile.createUser({ user, password, data }).subscribe(
         obj => {
@@ -123,8 +123,8 @@ export default {
     };
   },
 
-  updateUser(options) {
-    return (req, res, next) => {
+  updateUser() {
+    return (req, res) => {
       const { admin, user, password, data } = req.body;
       profile.updateUser({ admin, user, password, data }).subscribe(
         obj => {
@@ -140,8 +140,8 @@ export default {
     };
   },
 
-  deleteUser(options) {
-    return (req, res, next) => {
+  deleteUser() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       profile.deleteUser({ admin, ids }).subscribe(
         obj => {
@@ -157,8 +157,8 @@ export default {
     };
   },
 
-  authenticate(options) {
-    return (req, res, next) => {
+  authenticate() {
+    return (req, res) => {
       const { admin, user, password } = req.body;
       profile.authenticate({ admin, user, password }).subscribe(
         obj => {
@@ -177,8 +177,8 @@ export default {
     };
   },
 
-  signout(options) {
-    return (req, res, next) => {
+  signout() {
+    return (req, res) => {
       const { admin, user } = req.query;
       profile.signout({ admin, user }).subscribe(
         obj => {
@@ -196,8 +196,8 @@ export default {
     };
   },
 
-  sendmail(options) {
-    return (req, res, next) => {
+  sendmail() {
+    return (req, res) => {
       const { admin, ids } = req.body;
       profile.sendmail({ admin, ids }).subscribe(
         obj => {
@@ -213,8 +213,8 @@ export default {
     };
   },
 
-  createApproval(options) {
-    return (req, res, next) => {
+  createApproval() {
+    return (req, res) => {
       const { admin, ids } = req.body;
       profile.createApproval({ admin, ids }).subscribe(
         obj => {
@@ -230,8 +230,8 @@ export default {
     };
   },
 
-  deleteApproval(options) {
-    return (req, res, next) => {
+  deleteApproval() {
+    return (req, res) => {
       const { admin, ids } = req.query;
       profile.deleteApproval({ admin, ids }).subscribe(
         obj => {
@@ -247,8 +247,8 @@ export default {
     };
   },
 
-  inquiry(options) {
-    return (req, res, next) => {
+  inquiry() {
+    return (req, res) => {
       const { user, data } = req.body;
       profile.inquiry({ user, data }).subscribe(
         obj => {
@@ -264,7 +264,7 @@ export default {
     };
   },
 
-  notImplemented(options) {
+  notImplemented() {
     return (req, res, next) => {
       next(new Error('not implemented'));
     };

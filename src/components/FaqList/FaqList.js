@@ -5,7 +5,7 @@ import FaqAction      from 'Actions/FaqAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, Avatar, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, Checkbox, Typography, Avatar, ListItem, ListItemText } from '@material-ui/core';
 import { green }      from '@material-ui/core/colors';
 import { Assignment } from '@material-ui/icons';
 
@@ -24,7 +24,7 @@ class FaqList extends React.Component {
     this.setState({ checked, faqs });
   }
 
-  handleChangeCheckbox(id, event) {
+  handleChangeCheckbox(id) {
     std.logInfo(FaqList.displayName, 'handleChangeCheckbox', id);
     const { checked } = this.state;
     const { admin } = this.props;
@@ -78,6 +78,14 @@ class FaqList extends React.Component {
       {renderItems}
     </List>;
   }
+}
+FaqList.displayName = 'FaqList';
+FaqList.defaultProps = { faqs: null }
+FaqList.propTypes = {
+  classes: PropTypes.object.isRequired
+, selectedFaqId: PropTypes.array.isRequired
+, faqs: PropTypes.array.isRequired
+, admin: PropTypes.string.isRequired
 };
 
 const barHeightSmDown   = 104;
@@ -113,9 +121,4 @@ const styles = theme => ({
 , greenAvatar: { marginLeft: theme.spacing.unit
               , color: '#fff', backgroundColor: green[500] }
 });
-FaqList.displayName = 'FaqList';
-FaqList.defaultProps = { faqs: null }
-FaqList.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 export default withStyles(styles)(FaqList);

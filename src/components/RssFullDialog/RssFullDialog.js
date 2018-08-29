@@ -2,7 +2,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Button, Dialog, AppBar, Toolbar, Typography, IconButton, Slide, DialogContent } from '@material-ui/core';
+import { Button, Dialog, AppBar, Toolbar, Typography, IconButton, Slide } from '@material-ui/core';
 import { Close }        from '@material-ui/icons';
 
 const Transition =  props => <Slide direction="up" {...props} />;
@@ -38,15 +38,19 @@ class RssFullDialog extends React.Component {
         {children}
       </Dialog>;
   }
-};
-
-const styles = theme => ({
-  appBar: { position: 'relative' }
-, flex: { flex: 1 }
-});
+}
 RssFullDialog.displayName = 'RssFullDialog';
 RssFullDialog.defaultProps = {};
 RssFullDialog.propTypes = {
   classes: PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, open: PropTypes.bool.isRequired
+, children: PropTypes.object.isRequired
+, title: PropTypes.string.isRequired
+};
+
+const styles = {
+  appBar: { position: 'relative' }
+, flex: { flex: 1 }
 };
 export default withStyles(styles)(RssFullDialog);

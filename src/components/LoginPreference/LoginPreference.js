@@ -6,8 +6,6 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { Typography, TextField, MenuItem }
                         from '@material-ui/core';
-import { DialogContentText }
-                        from '@material-ui/core/Dialog';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
 
@@ -22,7 +20,7 @@ class LoginPreference extends React.Component {
     };
   }
 
-  handleClose(name, event) {
+  handleClose(name) {
     this.setState({ [name]: false });
   }
 
@@ -43,16 +41,19 @@ class LoginPreference extends React.Component {
     this.props.onClose(name, event);
   }
 
-  handleSubmitDialog(name, event) {
+  handleSubmitDialog(name) {
     std.logInfo(LoginPreference.displayName, 'handleSubmitDialog', name);
     const { user } = this.props;
-    const { profile, password } = this.state;
+    const { profile } = this.state;
     switch(name) {
       case 'isPreference':
         if(this.isValidate() && this.isChanged()) {
           LoginAction.updateProfile(user, null, profile)
             .then(() => this.setState({ isSuccess: true }))
-            .catch(err => this.setState({ isNotValid: true }));
+            .catch(err => {
+              std.logError(LoginPreference.displayName, err.name, err.message);
+              this.setState({ isNotValid: true });
+            });
         } else {
           this.setState({ isNotValid: true });
         }
@@ -107,9 +108,7 @@ class LoginPreference extends React.Component {
       </LoginFormDialog>
     ;
   }
-};
-const styles = theme => ({
-});
+}
 LoginPreference.displayName = 'LoginPreference';
 LoginPreference.defaultProps = {
   name: ''
@@ -120,13 +119,15 @@ LoginPreference.defaultProps = {
 , open: false
 };
 LoginPreference.propTypes = {
-  classes:            PropTypes.object.isRequired
-, onClose:            PropTypes.func.isRequired
-, name:               PropTypes.string.isRequired
-, user:               PropTypes.string.isRequired
-, plan:               PropTypes.string.isRequired
-, profile:            PropTypes.object.isRequired
-, preference:         PropTypes.object.isRequired
-, open:               PropTypes.bool.isRequired
+  classes: PropTypes.object.isRequired
+, onClose: PropTypes.func.isRequired
+, name: PropTypes.string.isRequired
+, user: PropTypes.string.isRequired
+, plan: PropTypes.string.isRequired
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
+, open: PropTypes.bool.isRequired
 };
+
+const styles = {};
 export default withStyles(styles)(LoginPreference);
