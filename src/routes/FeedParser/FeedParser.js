@@ -37,7 +37,9 @@ export default class FeedParser {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Note.find(conditions).exec((err, obj) => {
+          Note.find(conditions)
+            .limit(10)
+            .exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });

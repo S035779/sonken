@@ -1,6 +1,5 @@
 import dotenv           from 'dotenv';
 import mongoose         from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
 import log              from 'Utilities/logutils';
 
 const config = dotenv.config();
@@ -43,7 +42,6 @@ const itemSchema = new mongoose.Schema({
 , asins:            Array
 , pubDate:          { type: Date, default: Date.now() }
 });
-itemSchema.plugin(mongoosePaginate);
 
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
@@ -61,7 +59,6 @@ const noteSchema = new mongoose.Schema({
 , AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
-noteSchema.plugin(mongoosePaginate);
 
 const categorySchema = new mongoose.Schema({
   user:             { type: String, required: true }
