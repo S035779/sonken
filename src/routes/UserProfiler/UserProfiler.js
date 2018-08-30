@@ -34,18 +34,14 @@ const mail_keyset = {
  */
 export default class UserProfiler {
   constructor() {
-    this.createMenu({ admin: admin_user })
-      .subscribe(
+    this.createMenu({ admin: admin_user }).subscribe(
         obj => { log.info(obj); }
       , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
-      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Menu!!'); }
-      );
-    this.createAdmin({ admin: admin_user, password: admin_pass })
-      .subscribe(
+      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Menu!!'); });
+    this.createAdmin({ admin: admin_user, password: admin_pass }) .subscribe(
         obj => { log.info(obj); }
       , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
-      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Administrator!!'); }
-      );
+      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Administrator!!'); });
   }
 
   static of() {
@@ -56,21 +52,16 @@ export default class UserProfiler {
     switch(request) {
       case 'fetch/users':
         return new Promise((resolve, reject) => {
-          const conditions = {};
-          User.find(conditions, (err, obj) => {
+          User.find({}).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
         });
       case 'signin/user':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            user: options.user
-          , salt: options.salt
-          , hash: options.hash
-          };
+          const conditions = { user: options.user, salt: options.salt, hash: options.hash };
           const update = { isAuthenticated: true };
-          User.update(conditions, update, (err, obj) => {
+          User.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           })
@@ -79,7 +70,7 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
           const update = { isAuthenticated: false };
-          User.update(conditions, update, (err, obj) => {
+          User.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -88,30 +79,20 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const isUser = options.user !=='';
           const isEmail = !!options.email;
-          if(!isUser) return reject({
-            name: 'Request error', message: 'The user name is not included in the request.'
-          });
+          if(!isUser) 
+            return reject({ name: 'Request error', message: 'The user name is not included in the request.' });
           const conditions = isEmail
-            ? {
-              email: options.email
-            , phone: new RegExp(options.phone + '$')
-            }
-            : {
-              user: options.user
-            };
-          User.findOne(conditions, (err, obj) => {
+            ? { email: options.email, phone: new RegExp(options.phone + '$') } : { user: options.user };
+          User.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            if(obj === null) return reject({
-              name: 'Request error', message: 'User not found for request.'
-            });
+            if(obj === null) return reject({ name: 'Request error', message: 'User not found for request.' });
             resolve(obj);
           });
         });
       case 'create/user':
         return new Promise((resolve, reject) => {
           const isAdmin = !!options.admin;
-          const create = isAdmin 
-            ? {
+          const create = isAdmin ? {
               user:   options.admin
             , isAdmin:  true
             , salt:   options.salt
@@ -121,8 +102,7 @@ export default class UserProfiler {
             , email:  options.data.email
             , phone:  options.data.phone
             , plan:   options.data.plan
-            }
-            : {
+            } : {
               user:   options.user
             , isAdmin:  false
             , salt:   options.salt
@@ -144,11 +124,8 @@ export default class UserProfiler {
           const isAdmin = !!options.admin;
           const isData = !!options.data;
           const isPass = !!options.hash && !!options.salt;
-          let conditions = isAdmin
-            ? { user: options.data.user }
-            : { user: options.user };
-          let update = isAdmin && isData
-            ? {
+          let conditions = isAdmin ? { user: options.data.user } : { user: options.user };
+          let update = isAdmin && isData ? {
               isAdmin:  options.data.isAdmin
             , name:     options.data.name
             , kana:     options.data.kana
@@ -156,8 +133,7 @@ export default class UserProfiler {
             , phone:    options.data.phone
             , plan:     options.data.plan
             , updated:  new Date
-            }
-            : isData && isPass 
+            } : isData && isPass 
               ? {
                 name:   options.data.name
               , kana:   options.data.kana
@@ -167,8 +143,7 @@ export default class UserProfiler {
               , salt:   options.salt
               , hash:   options.hash
               , updated: new Date
-              }
-              : isData
+              } : isData
                 ? {
                   name:   options.data.name
                 , kana:   options.data.kana
@@ -176,13 +151,12 @@ export default class UserProfiler {
                 , phone:  options.data.phone
                 , plan:   options.data.plan
                 , updated: new Date
-                }
-                : {
+                } : {
                   salt:   options.salt
                 , hash:   options.hash
                 , updated: new Date
                 };
-          User.update(conditions, update, (err, obj) => {
+          User.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -190,7 +164,7 @@ export default class UserProfiler {
       case 'delete/user':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
-          User.remove(conditions, (err, obj) => {
+          User.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -198,17 +172,15 @@ export default class UserProfiler {
       case 'mail/address':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
-          User.findOne(conditions, (err, obj) => {
+          User.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            if(obj === null) return reject(
-              { name: 'Error', message: 'User not found.' });
+            if(obj === null) return reject( { name: 'Error', message: 'User not found.' });
             resolve(obj.email);
           });
         });
       case 'mail/selected':
         return new Promise((resolve, reject) => {
-          const conditions = {};
-          Selected.find(conditions, (err, obj) => {
+          Selected.find({}).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -216,7 +188,7 @@ export default class UserProfiler {
       case 'mail/message':
         return new Promise((resolve, reject) => {
           const conditions = { _id: options.id };
-          Mail.findOne(conditions, (err, obj) => {
+          Mail.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -225,8 +197,7 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const conditions  = { approved: options.id };
           const update      = { approved: options.id };
-          Approved.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          Approved.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -234,7 +205,7 @@ export default class UserProfiler {
       case 'delete/approval':
         return new Promise((resolve, reject) => {
           const conditions = { approved: options.id };
-          Approved.remove(conditions, (err, obj) => {
+          Approved.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -243,7 +214,7 @@ export default class UserProfiler {
         return new Promise((resolve, reject) => {
           const isId = !!options.id;
           const conditions = isId ? { approved: options.id } : {};
-          Approved.find(conditions, (err, obj) => {
+          Approved.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -251,33 +222,29 @@ export default class UserProfiler {
       case 'signin/admin':
         return new Promise((resolve, reject) => {
           const conditions = {
-            user:     options.admin
-          , salt:     options.salt
-          , hash:     options.hash
-          , isAdmin:  true
+            user: options.admin
+          , salt: options.salt
+          , hash: options.hash
+          , isAdmin: true
           };
           const update = { isAuthenticated: true };
-          User.update(conditions, update, (err, obj) => {
+          User.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           })
         });
       case 'signout/admin':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            user: options.admin
-          , isAdmin: true
-          };
+          const conditions = { user: options.admin, isAdmin: true };
           const update = { isAuthenticated: false };
-          User.update(conditions, update, (err, obj) => {
+          User.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
         });
       case 'fetch/preference':
         return new Promise((resolve, reject) => {
-          const conditions = {};
-          Admin.findOne(conditions, (err, obj) => {
+          Admin.findOne({}).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -292,7 +259,6 @@ export default class UserProfiler {
           });
           admin.save((err, obj) => {
             if(err) return reject(err);
-            log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -306,15 +272,13 @@ export default class UserProfiler {
           , advertisement:  options.data.advertisement
           , updated:        new Date
           };
-          Admin.update(conditions, update, (err, obj) => {
+          Admin.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
         });
       default:
-        return new Promise((resolve, reject) => {
-          reject({ name: 'Error', message: 'request: ' + request });
-        });
+        return new Promise((resolve, reject) => reject({ name: 'Error', message: 'request: ' + request }));
     }
   }
 

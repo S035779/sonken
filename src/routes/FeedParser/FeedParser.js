@@ -37,25 +37,23 @@ export default class FeedParser {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Note.find(conditions, (err, obj) => {
+          Note.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/categorys':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Category.find(conditions, (err, obj) => {
+          Category.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           })
         });
       case 'fetch/added':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Added.find(conditions, (err, obj) => {
+          Added.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -63,7 +61,7 @@ export default class FeedParser {
       case 'fetch/deleted':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Deleted.find(conditions, (err, obj) => {
+          Deleted.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -71,90 +69,76 @@ export default class FeedParser {
       case 'fetch/readed':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Readed.find(conditions, (err, obj) => {
+          Readed.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/traded':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Traded.find(conditions, (err, obj) => {
+          Traded.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/bided':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Bided.find(conditions, (err, obj) => {
+          Bided.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/starred':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Starred.find(conditions, (err, obj) => {
+          Starred.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/listed':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
-          Listed.find(conditions, (err, obj) => {
+          Listed.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/note':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            _id:  options.id
-          , user: options.user
-          };
-          Note.findOne(conditions, (err, obj) => {
+          const conditions = { _id: options.id, user: options.user };
+          Note.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'fetch/category':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            _id:  options.id
-          , user: options.user
-          };
-          Category.findOne(conditions, (err, obj) => {
+          const conditions = { _id:  options.id, user: options.user };
+          Category.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/note':
         return new Promise((resolve, reject) => {
           const note = new Note({
-            user:         options.user
-          , url:          options.data.url
-          , category:     options.data.category
-          , categoryIds:  options.data.categoryIds
-          , title:        options.data.title
-          , asin:         options.data.asin
-          , name:         options.data.name
-          , price:        options.data.price
-          , bidsprice:    options.data.bidsprice
-          , body:         options.data.body
-          , items:        options.data.items
+            user: options.user
+          , url: options.data.url
+          , category: options.data.category
+          , categoryIds: options.data.categoryIds
+          , title: options.data.title
+          , asin: options.data.asin
+          , name: options.data.name
+          , price: options.data.price
+          , bidsprice: options.data.bidsprice
+          , body: options.data.body
+          , items: options.data.items
           });
           note.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
@@ -162,321 +146,199 @@ export default class FeedParser {
         return new Promise((resolve, reject) => {
           const isItems = !!options.data.items;
           const isAsin = options.data.asin !== '';
-          const conditions = {
-            _id:  options.id
-          , user: options.user
-          };
+          const conditions = { _id:  options.id, user: options.user };
           const update = isItems
-            ? {
-              items:      options.data.items
-            , updated:    options.data.updated
-            }
+            ? { items: options.data.items, updated: options.data.updated }
             : isAsin
               ? {
-                title:        options.data.title
-              , asin:         options.data.asin
-              , price:        options.data.price
-              , bidsprice:    options.data.bidsprice
-              , body:         options.data.body
-              , name:         options.data.name
-              , AmazonUrl:    options.data.AmazonUrl
-              , AmazonImg:    options.data.AmazonImg
-              , categoryIds:  options.data.categoryIds
-              , updated:      new Date
+                title: options.data.title
+              , asin: options.data.asin
+              , price: options.data.price
+              , bidsprice: options.data.bidsprice
+              , body: options.data.body
+              , name: options.data.name
+              , AmazonUrl: options.data.AmazonUrl
+              , AmazonImg: options.data.AmazonImg
+              , categoryIds: options.data.categoryIds
+              , updated: new Date
               }
               : {
-                title:        options.data.title
-              , asin:         options.data.asin
-              , price:        options.data.price
-              , bidsprice:    options.data.bidsprice
-              , body:         options.data.body
-              , categoryIds:  options.data.categoryIds
-              , updated:      new Date
+                title: options.data.title
+              , asin: options.data.asin
+              , price: options.data.price
+              , bidsprice: options.data.bidsprice
+              , body: options.data.body
+              , categoryIds: options.data.categoryIds
+              , updated: new Date
               };
-          //log.debug(update.items, conditions);
-          Note.update(conditions, update, (err, obj) => {
+          Note.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/note':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            _id: options.id
-          , user: options.user
-          };
-          Note.remove(conditions, (err, obj) => {
+          const conditions = { _id: options.id, user: options.user };
+          Note.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/category':
         return new Promise((resolve, reject) => {
           const category = new Category({
-            user:           options.user
-          , category:       options.data.category
-          , subcategory:    options.data.subcategory
-          , subcategoryId:  new mongoose.Types.ObjectId
+            user: options.user
+          , category: options.data.category
+          , subcategory: options.data.subcategory
+          , subcategoryId: new mongoose.Types.ObjectId
           });
           category.save((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'update/category':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            _id:  options.id
-          , user: options.user
-          };
+          const conditions = { _id:  options.id, user: options.user };
           const update = {
-            category:       options.data.category
-          , subcategory:    options.data.subcategory
-          , subcategoryId:  new mongoose.Types
-                              .ObjectId(options.data.subcategoryId)
+            category: options.data.category
+          , subcategory: options.data.subcategory
+          , subcategoryId: new mongoose.Types.ObjectId(options.data.subcategoryId)
           };
-          Category.update(conditions, update, (err, obj) => {
+          Category.update(conditions, update).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/category':
         return new Promise((resolve, reject) => {
-          const conditions = {
-            _id: options.id
-          , user: options.user
-          };
-          Category.remove(conditions, (err, obj) => {
+          const conditions = { _id: options.id, user: options.user };
+          Category.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/added':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            added: options.id
-          , user:   options.user
-          };
-          const update = {
-            added: options.id
-          , user:   options.user
-          };
-          Added.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { added: options.id, user: options.user };
+          const update = { added: options.id, user: options.user };
+          Added.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/added':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            added: options.id
-          , user:   options.user
-          };
-          Added.remove(conditions, (err, obj) => {
+          const conditions = { added: options.id, user: options.user };
+          Added.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/deleted':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            deleted: options.id
-          , user:   options.user
-          };
-          const update = {
-            deleted: options.id
-          , user:   options.user
-          };
-          Deleted.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { deleted: options.id, user: options.user };
+          const update = { deleted: options.id, user: options.user };
+          Deleted.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/deleted':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            deleted: options.id
-          , user:   options.user
-          };
-          Deleted.remove(conditions, (err, obj) => {
+          const conditions = { deleted: options.id, user: options.user };
+          Deleted.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/readed':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            readed: options.id
-          , user:   options.user
-          };
-          const update = {
-            readed: options.id
-          , user:   options.user
-          };
-          Readed.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { readed: options.id, user: options.user };
+          const update = { readed: options.id, user: options.user };
+          Readed.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/readed':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            readed: options.id
-          , user:   options.user
-          };
-          Readed.remove(conditions, (err, obj) => {
+          const conditions = { readed: options.id, user: options.user };
+          Readed.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/traded':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            traded: options.id
-          , user:   options.user
-          };
-          const update = {
-            traded: options.id
-          , user:   options.user
-          };
-          Traded.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { traded: options.id, user: options.user };
+          const update = { traded: options.id, user: options.user };
+          Traded.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/traded':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            traded: options.id
-          , user:   options.user
-          };
-          Traded.remove(conditions, (err, obj) => {
+          const conditions = { traded: options.id, user: options.user };
+          Traded.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/bided':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            bided:  options.id
-          , user:   options.user
-          };
-          const update = {
-            bided:  options.id
-          , user:   options.user
-          };
-          Bided.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { bided:  options.id, user: options.user };
+          const update = { bided: options.id, user: options.user };
+          Bided.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/bided':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            bided: options.id
-          , user: options.user
-          };
-          Bided.remove(conditions, (err, obj) => {
+          const conditions = { bided: options.id, user: options.user };
+          Bided.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/starred':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            starred:  options.id
-          , user:     options.user
-          };
-          const update = {
-            starred:  options.id
-          , user:     options.user
-          };
-          Starred.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { starred: options.id, user: options.user };
+          const update = { starred: options.id, user: options.user };
+          Starred.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/starred':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            starred:  options.id
-          , user:     options.user
-          };
-          Starred.remove(conditions, (err, obj) => {
+          const conditions = { starred:  options.id, user:     options.user };
+          Starred.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'create/listed':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            listed: options.id
-          , user:   options.user
-          };
-          const update = {
-            listed: options.id
-          , user:   options.user
-          };
-          Listed.update(conditions, update, { upsert: true }
-          , (err, obj) => {
+          const conditions = { listed: options.id, user:   options.user };
+          const update = { listed: options.id, user:   options.user };
+          Listed.update(conditions, update, { upsert: true }).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       case 'delete/listed':
         return new Promise((resolve, reject) => {
-          //log.debug(request, options);
-          const conditions = {
-            listed: options.id
-          , user:   options.user
-          };
-          Listed.remove(conditions, (err, obj) => {
+          const conditions = { listed: options.id, user:   options.user };
+          Listed.remove(conditions).exec((err, obj) => {
             if(err) return reject(err);
-            //log.trace(request, obj);
             resolve(obj);
           });
         });
       default:
-        return new Promise((resolve, reject) => {
-          reject({ name: 'error', message: 'request: ' + request });
-        });
+        return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
     }
   }
 
@@ -732,8 +594,16 @@ export default class FeedParser {
     , this.setStarred(objs[0])
     , this.toObject
     )(objs[5]);
+    const limitItem  = obj => R.merge(obj, { items: R.slice(0, 20, obj.items) });
+    const limitItems = R.map(limitItem);
+    const limitNotes = R.slice(0, 500);
+    const setPageLimit = R.compose(
+      limitItems
+    , limitNotes
+    );
     return observables.pipe(
       map(setAttribute)
+    , map(setPageLimit)
     );
   }
 
