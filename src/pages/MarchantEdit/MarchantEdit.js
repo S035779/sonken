@@ -27,7 +27,7 @@ MarchantEdit.defaultProps = { note: null };
 MarchantEdit.propTypes = {
   classes: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
-, note: PropTypes.object.isRequired
+, note: PropTypes.object
 , category: PropTypes.string.isRequired
 , file: PropTypes.object
 };

@@ -31,8 +31,7 @@ class RssDrawer extends React.Component {
         isAuthenticated={isAuthenticated}
         preference={preference}
         profile={profile}
-        onClick={this.handleToggle.bind(this)}
-      >
+        onClick={this.handleToggle.bind(this)} >
         {children}
       </RssHeader>
       <DrawerTemporary
@@ -41,15 +40,13 @@ class RssDrawer extends React.Component {
         preference={preference}
         profile={profile}
         categorys={categorys}
-        onClose={this.handleToggle.bind(this)}
-      />
+        onClose={this.handleToggle.bind(this)} />
       <DrawerPermanent
         open={open}
         user={user}
         preference={preference}
         profile={profile}
-        categorys={categorys}
-      />
+        categorys={categorys} />
     </div>;
   }
 }

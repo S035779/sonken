@@ -33,7 +33,7 @@ class Auth extends React.Component {
       <div className={classes.authFrame}>
         <LoginHeader />
         <div className={classes.content}>
-          {renderRoutes(route.routes)}
+          { renderRoutes(route.routes) }
         </div>
       </div>
       </ErrorBoundary>

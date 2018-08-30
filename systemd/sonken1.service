@@ -4,7 +4,9 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
+Environment=NODE_ENV=staging 
 Environment=API_URL=http://ik1-309-14667.vs.sakura.ne.jp/api
+Environment=ASSET_URL=http://ik1-309-14667.vs.sakura.ne.jp/assets
 Environment=APP_NAME=SellerSearch!
 ExecStart=/usr/bin/node /home/app/work/sonken/dist/ssr.node.js
 WorkingDirectory=/home/app/work/sonken

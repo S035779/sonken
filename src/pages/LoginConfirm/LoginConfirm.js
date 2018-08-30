@@ -5,10 +5,8 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Typography, Dialog, Button }
+import { Typography, Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle }
                         from '@material-ui/core';
-import { DialogActions, DialogContent, DialogContentText, DialogTitle }
-                        from '@material-ui/core/Dialog';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssInput         from 'Components/RssInput/RssInput';
 
@@ -68,10 +66,9 @@ class LoginConfirm extends React.Component {
   }
 
   renderCorrect() {
-    const { fullScreen, user } = this.props;
+    const { user } = this.props;
     const { openedCorrect, newPassword } = this.state;
-    return <Dialog fullScreen={fullScreen}
-      open={openedCorrect}
+    return <Dialog open={openedCorrect}
       onClose={this.handleClose.bind(this, 'authenticate')}
       area-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
@@ -95,10 +92,9 @@ class LoginConfirm extends React.Component {
   }
 
   renderIncorrect() {
-    const { fullScreen, preference } = this.props;
+    const { preference } = this.props;
     const { openedIncorrect } = this.state;
-    return <Dialog fullScreen={fullScreen}
-      open={openedIncorrect}
+    return <Dialog open={openedIncorrect}
       onClose={this.handleClose.bind(this, 'confirmation')}
       area-labelledby="responsive-dialog-title">
       <DialogTitle id="responsive-dialog-title">
@@ -125,7 +121,6 @@ class LoginConfirm extends React.Component {
     const { email, phone } = this.state;
     const renderCorrect = this.renderCorrect();
     const renderIncorrect = this.renderIncorrect();
-
     return <div className={classes.container}>
       <div className={classes.loginForms}>
       <div className={classes.space} />
@@ -164,7 +159,6 @@ LoginConfirm.propTypes = {
   classes: PropTypes.object.isRequired
 , history: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
-, fullScreen: PropTypes.bool.isRequired
 , preference: PropTypes.object.isRequired
 };
 

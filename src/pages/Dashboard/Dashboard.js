@@ -27,16 +27,14 @@ class Dashboard extends React.Component {
     std.logInfo(Dashboard.displayName, 'prefetch', options);
     return NoteAction.presetUser(options.user)
       .then(() => NoteAction.prefetchNotes(options.user))
-      .then(() => NoteAction.prefetchCategorys(options.user))
-    ;
+      .then(() => NoteAction.prefetchCategorys(options.user));
   }
 
   componentDidMount() {
     if(!this.state.user) return;
     std.logInfo(Dashboard.displayName, 'fetch', 'Dashboard');
     NoteAction.fetchNotes(this.state.user)
-      .then(() => NoteAction.fetchCategorys(this.state.user))
-    ;
+      .then(() => NoteAction.fetchCategorys(this.state.user));
   }
 
   getPageNumber(number, page) {

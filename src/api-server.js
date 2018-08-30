@@ -20,7 +20,7 @@ const env           = process.env.NODE_ENV || 'development';
 const http_port     = process.env.API_PORT || 8082;
 const http_host     = process.env.API_HOST || '127.0.0.1';
 const mdb_url       = process.env.MDB_URL  || 'mongodb://localhost:27017';
-process.env.NODE_PENDING_DEPRECATION=0;
+process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName   = '[API]';
 

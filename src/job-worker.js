@@ -14,7 +14,7 @@ if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV      || 'development';
 const pages     = process.env.JOB_UPD_PAGES || 2;
-process.env.NODE_PENDING_DEPRECATION=0;
+process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[WRK]';
 

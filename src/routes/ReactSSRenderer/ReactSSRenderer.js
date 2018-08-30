@@ -19,44 +19,44 @@ class ReactSSRenderer {
 
   request() {
     return (req, res, next) => {
-      log.info(ReactSSRenderer.displayName, 'Session', req.session);
-      const options = {
-        user: req.session.user ? req.session.user : ''
-      , admin: req.session.admin ? req.session.admin : ''
-      };
+      log.trace(ReactSSRenderer.displayName, 'Session', req.session);
+      const options = { user: req.session.user || '', admin: req.session.admin || '' };
       createStores(createDispatcher());
       const routes = getRoutes();
       const location = req.originalUrl;
-      const matchs = matchRoutes(routes, location)
+      const matchs = matchRoutes(routes, location);
       this.getUserData(matchs, options)
-      .then(objs => this.prefetchData(matchs, objs))
-      .then(() => this.setInitialData(location).pipe(res))
-      .then(() => next())
-      .catch(err => res.status(500).send({ error:
-          { name: err.name, message: err.message, stack: err.stack }}));
+        .then(objs  => this.prefetchData(matchs, objs))
+        .then(()    => this.setInitialData(location).pipe(res))
+        .then(()    => next())
+        .catch(err  => res.status(500).send({ error: { name: err.name, message: err.message }}));
     };
   }
 
   setInitialData(location) {
     const initialData = JSON.stringify(dehydrateState());
-    return ReactDOMServer.renderToStaticNodeStream(
-      <Html initialData={initialData} location={location}/>
-    );
+    //log.debug(ReactSSRenderer.displayName, 'InitialData:', initialData, location);
+    return ReactDOMServer
+      .renderToStaticNodeStream(<Html initialData={initialData} location={location}/>);
   }
 
   prefetchData(matchs, objs) {
-    const promises = matchs.map(({ route, match }, index) =>
-      route.component.prefetch 
-        ? route.component.prefetch(objs[index], match)
-        : Promise.resolve(null));
+    const promises = matchs.map(({ route, match }, index) => {
+      //log.debug(ReactSSRenderer.displayName, 'prefetchData:', route, match);
+      return route.component.prefetch 
+        ? route.component.prefetch(objs[index], match) 
+        : Promise.resolve(null)
+    });
     return Promise.all(promises);
   }
 
   getUserData(matchs, options) {
-    const  promises = matchs.map(({ route, match }) => 
-      route.loadData
-        ? route.loadData(options, match)
-        : Promise.resolve(null));
+    const  promises = matchs.map(({ route, match }) => {
+      //log.debug(ReactSSRenderer.displayName, 'getUserData:', route, match);
+      return route.loadData 
+        ? route.loadData(options, match) 
+        : Promise.resolve(null);
+    });
     return Promise.all(promises);
   }
 }

@@ -20,7 +20,7 @@ const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
 const numsOfChildProc = process.env.JOB_NUM_MAX || 1;
-//process.env.NODE_PENDING_DEPRECATION = 0;
+process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[JOB]';
 

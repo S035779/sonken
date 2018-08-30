@@ -18,7 +18,7 @@ const env       = process.env.NODE_ENV || 'development';
 const http_port = process.env.SSR_PORT || 8081;
 const http_host = process.env.SSR_HOST || '127.0.0.1';
 const mdb_url   = process.env.MDB_URL  || 'mongodb://localhost:27017';
-process.env.NODE_PENDING_DEPRECATION=0;
+process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName   = '[SSR]';
 
@@ -52,7 +52,9 @@ app.use(session({
 , saveUninitialized: true
 }));
 app.use(ReactSSRenderer.of().request());
+
 const server = http.createServer(app);
+
 server.listen(http_port, http_host, () => {
   log.info(displayName, `listening on ${http_host}:${http_port}`);
 });

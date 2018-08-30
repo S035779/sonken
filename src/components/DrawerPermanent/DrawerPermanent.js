@@ -22,23 +22,16 @@ class DrawerPermanent extends React.Component {
   render() {
     //std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
     //std.logInfo(DrawerPermanent.displayName, 'State', this.state);
-    const { classes, user, profile, preference, open, categorys }
-      = this.props;
-    const paperClass
-      = { paper: classNames(classes.paper, !open && classes.paperClose) };
+    const { classes, user, profile, preference, open, categorys } = this.props;
+    const paperClass = { paper: classNames(classes.paper, !open && classes.paperClose) };
     return <Hidden smDown implementation="css">
-      <Drawer
-        variant="permanent"
-        open={open}
-        classes={paperClass}
-      >
+      <Drawer variant="permanent" open={open} classes={paperClass} >
         <DrawerList
           open={open}
           user={user}
           profile={profile}
           preference={preference}
-          categorys={categorys}
-        />
+          categorys={categorys} />
       </Drawer>
     </Hidden>
   }
@@ -60,8 +53,7 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper:{
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm})`
-      + `, url(${image + rgstImg})`
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image + rgstImg})`
   , backgroundSize: 'cover'
   , width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: {
