@@ -594,16 +594,16 @@ export default class FeedParser {
     , this.setStarred(objs[0])
     , this.toObject
     )(objs[5]);
-    const limitItem  = obj => R.merge(obj, { items: R.slice(0, 20, obj.items) });
-    const limitItems = R.map(limitItem);
-    const limitNotes = R.slice(0, 500);
-    const setPageLimit = R.compose(
-      limitItems
-    , limitNotes
-    );
+    //const limitItem  = obj => R.merge(obj, { items: R.slice(0, 20, obj.items) });
+    //const limitItems = R.map(limitItem);
+    //const limitNotes = R.slice(0, 500);
+    //const setPageLimit = R.compose(
+    //  limitItems
+    //, limitNotes
+    //);
     return observables.pipe(
       map(setAttribute)
-    , map(setPageLimit)
+    //, map(setPageLimit)
     );
   }
 
