@@ -1,3 +1,4 @@
+import * as R                           from 'ramda';
 import React                            from 'react';
 import ReactDOMServer                   from 'react-dom/server';
 import { matchRoutes }                  from 'react-router-config';
@@ -19,13 +20,14 @@ class ReactSSRenderer {
 
   request() {
     return (req, res, next) => {
+      const { user, admin } = req.session;
+      const location = req.originalUrl;
+      const category = R.split('/', location)[1];
       log.trace(ReactSSRenderer.displayName, 'Session', req.session);
-      const options = { user: req.session.user || '', admin: req.session.admin || '' };
       createStores(createDispatcher());
       const routes = getRoutes();
-      const location = req.originalUrl;
       const matchs = matchRoutes(routes, location);
-      this.getUserData(matchs, options)
+      this.getUserData(matchs, { user, admin, category })
         .then(objs  => this.prefetchData(matchs, objs))
         .then(()    => this.setInitialData(location).pipe(res))
         .then(()    => next())

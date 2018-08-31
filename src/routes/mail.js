@@ -9,10 +9,8 @@ export default {
     return (req, res) => {
       const filename = req.headers['x-uploadedfilename'];
       const filedata = Buffer.alloc(+req.headers['content-length']);
-
       const admin    = filename.split('_')[0];
       const id       = filename.split('_')[1];
-
       let bufferOffset = 0;
       req.on('data', chunk => {
         chunk.copy(filedata, bufferOffset);
@@ -34,16 +32,12 @@ export default {
     return (req, res) => {
       const { admin } = req.body;
       mail.fetchMails({ admin }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , ()  => {
-          log.info('Complete to fetch Mails.');
-      });
+      , ()  => { log.info('Complete to fetch Mails.'); });
     };
   },
 
@@ -51,16 +45,12 @@ export default {
     return (req, res) => {
       const { admin } = req.body;
       mail.fetchMails({ admin }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , ()  => {
-          log.info('Complete to fetch SelectedMails.');
-      });
+      , ()  => { log.info('Complete to fetch SelectedMails.'); });
     };
   },
 
@@ -68,16 +58,12 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.query;
       mail.fetchMail({ admin, ids }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to fetch Mail.');
-      });
+      , () => { log.info('Complete to fetch Mail.'); });
     };
   },
 
@@ -85,16 +71,12 @@ export default {
     return (req, res) => {
       const { admin } = req.body;
       mail.createMail({ admin }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to create Mail.');
-      });
+      , () => { log.info('Complete to create Mail.'); });
     };
   },
 
@@ -102,16 +84,12 @@ export default {
     return (req, res) => {
       const { admin, id, data } = req.body;
       mail.updateMail({ admin, id, data }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to update Mail.');
-      });
+      , () => { log.info('Complete to update Mail.'); });
     };
   },
 
@@ -119,16 +97,12 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.query;
       mail.deleteMail({ admin, ids }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to delete Mail.');
-      });
+      , () => { log.info('Complete to delete Mail.'); });
     };
   },
 
@@ -136,16 +110,12 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.body;
       mail.createSelect({ admin, ids }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to create Select.');
-      });
+      , () => { log.info('Complete to create Select.'); });
     };
   },
 
@@ -153,22 +123,16 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.query;
       mail.deleteSelect({ admin, ids }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => {
-          log.info('Complete to delete Select.');
-      });
+      , () => { log.info('Complete to delete Select.'); });
     };
   },
 
   notImplemented() {
-    return (req, res, next) => {
-      next(new Error('not implemented'));
-    };
+    return (req, res, next) => { next(new Error('not implemented')); };
   }
 };

@@ -6,7 +6,8 @@ import { parseString }          from 'xml2js';
 import mongoose                 from 'mongoose';
 import encoding                 from 'encoding-japanese';
 import { Iconv }                from 'iconv';
-import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } from 'Models/feed';
+import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } 
+                                from 'Models/feed';
 import std                      from 'Utilities/stdutils';
 import Amazon                   from 'Utilities/Amazon';
 import Yahoo                    from 'Utilities/Yahoo';
@@ -36,10 +37,9 @@ export default class FeedParser {
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          const conditions = { user: options.user };
-          Note.find(conditions)
-            .limit(10)
-            .exec((err, obj) => {
+          const conditions = !options.category 
+            ? { user: options.user } : { user: options.user, category: options.category };
+          Note.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -424,8 +424,8 @@ export default class FeedParser {
     return this.request('create/category', { user, data });
   }
 
-  getNotes(user) {
-    return this.request('fetch/notes', { user });
+  getNotes(user, category) {
+    return this.request('fetch/notes', { user, category });
   }
 
   getCategorys(user) {
@@ -480,7 +480,6 @@ export default class FeedParser {
     , this.setStarred(objs[1])
     , this.setReaded(objs[0])
     , this.toObject
-    //, R.tap(log.console)
     )(objs[3]);
     return observables.pipe(
       map(setAttribute)
@@ -492,26 +491,19 @@ export default class FeedParser {
     const _hasCategorys = R.curry(this.hasCategorys)(_categorys);
     const _hasNotCategorys = this.hasNotCategorys;
     const _hasFavorites = this.hasFavorites;
-    const __categorys = objs => 
-      R.concat(_hasCategorys(objs), _hasNotCategorys(objs));
-    return objs => R.isNil(objs)
-      ? _categorys
-      : R.concat(__categorys(objs), _hasFavorites(objs))
+    const __categorys = objs => R.concat(_hasCategorys(objs), _hasNotCategorys(objs));
+    return objs => R.isNil(objs) ? _categorys : R.concat(__categorys(objs), _hasFavorites(objs))
     ;
   }
 
   hasCategorys(categorys, notes) {
     // 1. Match of the same categoryId.
-    const _isNote
-      = (categoryId, obj) =>
-      obj.categoryIds ? R.contains(categoryId, obj.categoryIds) : false;
+    const _isNote = (categoryId, obj) => obj.categoryIds ? R.contains(categoryId, obj.categoryIds) : false;
     const isNote = R.curry(_isNote);
-    const isNotes
-      = (objs, categoryId) => R.filter(isNote(categoryId), objs);
+    const isNotes = (objs, categoryId) => R.filter(isNote(categoryId), objs);
     // 2. Get not readed item.
     const isNotRead = R.filter(obj => !obj.readed);
-    const isNotReads
-      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    const isNotReads = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
     // 3. Return.
     const countNew = R.countBy(R.lt(0)); 
     return R.map(obj =>
@@ -525,15 +517,12 @@ export default class FeedParser {
 
   hasNotCategorys(notes) {
     // 1. Match of the not have categoryId.
-    const _isNotNote = (category, obj) =>
-      (obj.category === category && R.isNil(obj.categoryIds));
+    const _isNotNote = (category, obj) => (obj.category === category && R.isNil(obj.categoryIds));
     const isNotNote = R.curry(_isNotNote);
-    const isNotNotes
-      = (objs, category) => R.filter(isNotNote(category), objs);
+    const isNotNotes = (objs, category) => R.filter(isNotNote(category), objs);
     // 2. Get not readed item.
     const isNotRead = R.filter(obj => !obj.readed);
-    const isNotReads
-      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    const isNotReads = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
     // 3. Return.
     const countNew = R.countBy(R.lt(0)); 
     return R.map(obj =>
@@ -552,18 +541,13 @@ export default class FeedParser {
   hasFavorites(notes) {
     // 1. Match of the starred items.
     const isStarred = R.filter(obj => obj.starred);
-    const isStarreds
-      = obj => obj.items ? R.length(isStarred(obj.items)) > 0 : false;
-    const _isStarredNote
-      = (category, obj) =>
-        obj.category === category && isStarreds(obj);
+    const isStarreds = obj => obj.items ? R.length(isStarred(obj.items)) > 0 : false;
+    const _isStarredNote = (category, obj) => obj.category === category && isStarreds(obj);
     const isStarredNote = R.curry(_isStarredNote);
-    const isStarredNotes
-      = (objs, category) => R.filter(isStarredNote(category), objs);
+    const isStarredNotes = (objs, category) => R.filter(isStarredNote(category), objs);
     // 2. Get not readed item.
     const isNotRead = R.filter(obj => !obj.readed);
-    const isNotReads
-      = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
+    const isNotReads = R.map(obj => obj.items ? R.length(isNotRead(obj.items)) : 0);
     // 3. Return.
     const countNew = R.countBy(R.lt(0)); 
     return R.map(obj =>
@@ -579,14 +563,14 @@ export default class FeedParser {
       ]);
   }
 
-  fetchNotes({ user }) {
+  fetchNotes({ user, category }) {
     const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
-    , this.getNotes(user)
+    , this.getNotes(user, category)
     ]);
     const setAttribute = objs => R.compose(
       this.setAdded(objs[4])
@@ -596,16 +580,8 @@ export default class FeedParser {
     , this.setStarred(objs[0])
     , this.toObject
     )(objs[5]);
-    //const limitItem  = obj => R.merge(obj, { items: R.slice(0, 20, obj.items) });
-    //const limitItems = R.map(limitItem);
-    //const limitNotes = R.slice(0, 500);
-    //const setPageLimit = R.compose(
-    //  limitItems
-    //, limitNotes
-    //);
     return observables.pipe(
       map(setAttribute)
-    //, map(setPageLimit)
     );
   }
 
@@ -749,99 +725,78 @@ export default class FeedParser {
 
   setAdded(added) {
     //log.trace('setAdded', added);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.added, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.added, objs);
     const isId =          obj => R.contains(obj.guid._, ids(added));
     const setAdd =        obj => R.merge(obj, { added: isId(obj) });
     const _setAddItems =  obj => R.map(setAdd, obj.items);
-    const setAddItems  =  obj => R.isNil(obj.items) 
-      ? obj : R.merge(obj, { items: _setAddItems(obj) }); 
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setAddItems, objs);
+    const setAddItems  =  obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setAddItems(obj) }); 
+    const results =       objs => R.isNil(objs) ? [] : R.map(setAddItems, objs);
     return results;
   }
 
   setDeleted(deleted) {
     //log.trace('setDeleted', deleted);
-    const ids =             objs => R.isNil(objs)
-      ? [] : R.map(obj =>   obj.deleted, objs);
+    const ids =             objs => R.isNil(objs) ? [] : R.map(obj =>   obj.deleted, objs);
     const isId =            obj => R.contains(obj.guid._, ids(deleted));
     const setDelete =       obj => R.merge(obj, { deleted: isId(obj) });
     const _setDeleteItems = obj => R.map(setDelete, obj.items);
-    const setDeleteItems  = obj => R.isNil(obj.items) 
-      ? obj : R.merge(obj, { items: _setDeleteItems(obj) }); 
-    const results =         objs => R.isNil(objs)
-      ? [] : R.map(setDeleteItems, objs);
+    const setDeleteItems  = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setDeleteItems(obj) }); 
+    const results =         objs => R.isNil(objs) ? [] : R.map(setDeleteItems, objs);
     return results;
   }
 
   setReaded(readed) {
     //log.trace('setReaded', readed);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.readed, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.readed, objs);
     const isId =          obj => R.contains(obj.guid._, ids(readed));
     const setRead =       obj => R.merge(obj, { readed: isId(obj) });
     const _setReadItems = obj => R.map(setRead, obj.items);
-    const setReadItems  = obj => R.isNil(obj.items) 
-      ? obj : R.merge(obj, { items: _setReadItems(obj) }); 
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setReadItems, objs);
+    const setReadItems  = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setReadItems(obj) }); 
+    const results =       objs => R.isNil(objs) ? [] : R.map(setReadItems, objs);
     return results;
   }
 
   setListed(listed) {
     //log.trace('setListed', listed);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.listed, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.listed, objs);
     const isId =          obj => R.contains(obj.guid._, ids(listed));
     const setList =       obj => R.merge(obj, { listed: isId(obj) });
     const _setListItems = obj => R.map(setList, obj.items);
-    const setListItems =  obj => R.isNil(obj.items) 
-      ? obj : R.merge(obj, { items: _setListItems(obj) });
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setListItems, objs);
+    const setListItems =  obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setListItems(obj) });
+    const results =       objs => R.isNil(objs) ? [] : R.map(setListItems, objs);
     return results;
   }
 
   setStarred(starred) {
     //log.trace('setStarred', starred);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.starred, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.starred, objs);
     const isId =          obj => R.contains(obj.guid._, ids(starred));
     const setStar =       obj => R.merge(obj, { starred: isId(obj) });
     const _setStarItems = obj => R.map(setStar, obj.items);
-    const setStarItems =  obj => R.isNil(obj.items)
-      ? obj : R.merge(obj, { items: _setStarItems(obj) });
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setStarItems, objs);
+    const setStarItems =  obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setStarItems(obj) });
+    const results =       objs => R.isNil(objs) ? [] : R.map(setStarItems, objs);
     return results;
   }
 
   setTraded(traded) {
     //log.trace('setTraded', traded);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.traded, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.traded, objs);
     const isId =          obj => R.contains(obj.guid._, ids(traded));
     const setTrade =      obj => R.merge(obj, { traded: isId(obj) });
     const _setTradeItems= obj => R.map(setTrade, obj.items);
-    const setTradeItems = obj => R.isNil(obj.items)
-      ? obj : R.merge(obj, { items: _setTradeItems(obj) });
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setTradeItems, objs);
+    const setTradeItems = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setTradeItems(obj) });
+    const results =       objs => R.isNil(objs) ? [] : R.map(setTradeItems, objs);
     return results;
   }
 
   setBided(bided) {
     //log.trace('setBided', bided);
-    const ids =           objs => R.isNil(objs)
-      ? [] : R.map(obj => obj.bided, objs);
+    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.bided, objs);
     const isId =          obj => R.contains(obj.guid._, ids(bided));
     const setBids =       obj => R.merge(obj, { bided: isId(obj) });
     const _setBidsItems = obj => R.map(setBids, obj.items);
-    const setBidsItems  = obj => R.isNil(obj.items)
-      ? obj : R.merge(obj, { items: _setBidsItems(obj) });
-    const results =       objs => R.isNil(objs)
-      ? [] : R.map(setBidsItems, objs);
+    const setBidsItems  = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setBidsItems(obj) });
+    const results =       objs => R.isNil(objs) ? [] : R.map(setBidsItems, objs);
     return results;
   }
 
@@ -923,18 +878,12 @@ export default class FeedParser {
   }
 
   updateHtml({ user, id, html }) {
-    const data = {
-      updated:  html.updated
-    , items:    html.items  
-    };
+    const data = { updated:  html.updated , items:    html.items  };
     return this._updateNote({ user, id, data });
   }
 
   updateRss({ user, id, rss }) {
-    const data = {
-      updated:  rss.updated
-    , items:    rss.items  
-    };
+    const data = { updated:  rss.updated , items:    rss.items  };
     return this._updateNote({ user, id, data });
   }
 
@@ -1051,12 +1000,7 @@ export default class FeedParser {
   }
   
   createNotes({ user, category, notes }) {
-    const setNote = obj => this.setNote({
-      user
-    , category
-    , title: obj.title 
-    , url: obj.url
-    });
+    const setNote = obj => this.setNote({ user , category , title: obj.title , url: obj.url });
     const setNotes = R.map(setNote);
     const promises = R.map(obj => this.addNote(user, obj));
     return forkJoin(promises(setNotes(notes)));
@@ -1155,73 +1099,6 @@ export default class FeedParser {
     });
   }
 
-  //setItemsObj({ user, category, file }) {
-  //  const toRcords = R.split('"\n');
-  //  const toTailes = R.tail;
-  //  const toColumn = R.map(R.split('",'));
-  //  const toCutHed = R.map(R.map(R.slice(1, Infinity)));
-  //  const toCutLst = R.map(R.map(R.replace(/"/g, '')))
-  //  const toCutRec = R.filter(objs => R.length(objs) > 1);
-  //  const setItems = R.map(arr => ({
-  //    title:            arr[0]
-  //  , link:             arr[1]
-  //  , description: { DIV: { A: {
-  //      attr: {
-  //        HREF:         arr[2]
-  //      }
-  //    , IMG: { attr: {
-  //        SRC:          arr[3]
-  //      , BORDER:       arr[4]
-  //      , WIDTH:        arr[5]
-  //      , HEIGHT:       arr[6]
-  //      , ALT:          arr[7]
-  //      }}
-  //    }}}
-  //  , attr_HREF:        arr[2]
-  //  , img_SRC:          arr[3]
-  //  , img_BORDER:       arr[4]
-  //  , img_WIDTH:        arr[5]
-  //  , img_HEIGHT:       arr[6]
-  //  , img_ALT:          arr[7]
-  //  , pubDate:          arr[8]
-  //  , guid: {
-  //      _:              arr[9]
-  //    , attr: {
-  //      isPermaLink:    arr[10]
-  //    }}
-  //  , guid__:           arr[9]
-  //  , guid_isPermaLink: arr[10]
-  //  , price:            arr[11]
-  //  , bids:             arr[12]
-  //  , bidStopTime:      arr[13]
-  //  }));
-  //  const setNote = objs => ({
-  //    url: ''
-  //  , category
-  //  , user
-  //  , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-  //  , items: objs
-  //  , title: 'Untitled'
-  //  , asin: ''
-  //  , name: ''
-  //  , price: 0
-  //  , bidsprice: 0
-  //  , body: ''
-  //  , AmazonUrl: ''
-  //  , AmazonImg: ''
-  //  });
-  //  return R.compose(
-  //    setNote
-  //  , setItems
-  //  , toCutRec
-  //  , toCutLst
-  //  , toCutHed
-  //  , toColumn
-  //  , toTailes
-  //  , toRcords
-  //  )(file.toString());
-  //}
-
   downloadNotes({ user, category }) {
     const isCategory = obj => obj.category === category;
     const setNotes = objs => R.map(obj => ({
@@ -1236,7 +1113,7 @@ export default class FeedParser {
       ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo']
       : ['title', 'url'];
     const setNotesCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    return this.fetchNotes({ user }).pipe(
+    return this.fetchNotes({ user, category }).pipe(
       map(objs => R.filter(isCategory, objs))
     , map(objs => setNotes(objs))
     , map(objs => setNotesCsv(objs))

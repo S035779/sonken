@@ -62,10 +62,9 @@ class RssList extends React.Component {
       });
   }
 
-  handleReaded(note) {
-    //std.logInfo(RssList.displayName, 'handleReaded', note._id);
+  handleListItem(id) {
     const { user } = this.props;
-    if(note.items.length) NoteAction.createRead(user, [note._id]);
+    NoteAction.createRead(user, [id]);
   }
 
   handleCloseDialog(name) {
@@ -75,45 +74,28 @@ class RssList extends React.Component {
   renderItem(note) {
     const { classes, user, categorys, categoryId, title } = this.props;
     const { checked } = this.state;
-    const textClass
-      = { primary: classes.primary, secondary: classes.secondary };
-    const linkTo = {
-      pathname: `/${note.category}/${note._id}/edit`
-    , state: { categoryId }
-    };
+    const textClass = { primary: classes.primary, secondary: classes.secondary };
+    const linkTo = { pathname: `/${note.category}/${note._id}/edit`, state: { categoryId } };
     let newRelease = 0;
-    if (note.items) note.items
-      .forEach(item => { if(!item.readed) newRelease++; });
+    if (note.items) note.items .forEach(item => { if(!item.readed) newRelease++; });
     const notice = newRelease ? `${newRelease}件 NEW` : '';
     const noteTitle = note.title;
-    const updated
-      = std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
-    const _categorys
-      = category => categorys
-        .filter(obj => category === obj.category)
-        .sort((a, b) =>
-          parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
-            ? 1   :
-          parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
-            ? -1  : 0
-        );
-    const categoryList
-      = category => categorys ? _categorys(category) : null;
+    const updated = std.formatDate(new Date(note.updated), 'YYYY/MM/DD hh:mm');
+    const _categorys = category => categorys
+      .filter(obj => category === obj.category)
+      .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
+        ? 1   : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16) ? -1  : 0);
+    const categoryList = category => categorys ? _categorys(category) : null;
     return <div key={note._id} className={classes.noteItem}>
-      <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, note._id)}
-        checked={checked.indexOf(note._id) !== -1}
-        tabIndex={-1} disableRipple />
+      <Checkbox className={classes.checkbox} onClick={this.handleChangeCheckbox.bind(this, note._id)}
+        checked={checked.indexOf(note._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
-          onClick={this.handleReaded.bind(this, note)}
-          component={Link} to={linkTo}>
-            <ListItemText classes={textClass}
-              primary={noteTitle} secondary={updated}/>
+          onClick={this.handleListItem.bind(this, note._id)} component={Link} to={linkTo}>
+            <ListItemText classes={textClass} primary={noteTitle} secondary={updated}/>
             <ListItemSecondaryAction>
-              <Button className={classes.button}
-                onClick={this.handleChangeDialog.bind(this, note._id)}
-                color="primary">編集</Button>
+              <Button className={classes.button} 
+                onClick={this.handleChangeDialog.bind(this, note._id)} color="primary">編集</Button>
               <RssFormDialog
                 user={user}
                 selectedNoteId={note._id}
@@ -124,8 +106,7 @@ class RssList extends React.Component {
                 categoryIds={note.categoryIds}
                 open={this.state.opened.indexOf(note._id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note._id)}
-                onSubmit={this.handleChangeTitle.bind(this)}
-              />
+                onSubmit={this.handleChangeTitle.bind(this)} />
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>
@@ -143,9 +124,7 @@ class RssList extends React.Component {
       if(a._id > b._id) return -1;
       return 0;
     };
-    const renderItems = notes
-      .sort(compareId)
-      .map(note => this.renderItem(note));
+    const renderItems = notes.sort(compareId).map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
       <RssDialog open={isSuccess} title={'送信完了'}

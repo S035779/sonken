@@ -1,17 +1,17 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { Redirect }     from 'react-router-dom';
-import { renderRoutes } from 'react-router-config';
-import { Container }    from 'flux/utils';
-import NoteAction       from 'Actions/NoteAction';
-import { getStores, getState }
-                        from 'Stores';
-import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { Redirect }             from 'react-router-dom';
+import { renderRoutes }         from 'react-router-config';
+import { Container }            from 'flux/utils';
+import NoteAction               from 'Actions/NoteAction';
+import { getStores, getState }  from 'Stores';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
-import RssSearch        from 'Components/RssSearch/RssSearch';
-import RssButtons       from 'Components/RssButtons/RssButtons';
-import RssList          from 'Components/RssList/RssList';
+import { withStyles }           from '@material-ui/core/styles';
+import RssSearch                from 'Components/RssSearch/RssSearch';
+import RssButtons               from 'Components/RssButtons/RssButtons';
+import RssList                  from 'Components/RssList/RssList';
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -23,18 +23,40 @@ class Dashboard extends React.Component {
   }
 
   static prefetch(options) {
-    if(!options.user) return null;
-    std.logInfo(Dashboard.displayName, 'prefetch', options);
-    return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchNotes(options.user))
-      .then(() => NoteAction.prefetchCategorys(options.user));
+    const { user, category } = options;
+    if(!user) return null;
+    std.logInfo(Dashboard.displayName, 'prefetch', category);
+    const spn = Spinner.of('app');
+    spn.start();
+    return NoteAction.presetUser(user)
+      .then(() => NoteAction.prefetchNotes(user, category))
+      .then(() => NoteAction.prefetchCategorys(user))
+      .then(() => spn.stop());
   }
 
   componentDidMount() {
-    if(!this.state.user) return;
-    std.logInfo(Dashboard.displayName, 'fetch', 'Dashboard');
-    NoteAction.fetchNotes(this.state.user)
-      .then(() => NoteAction.fetchCategorys(this.state.user));
+    const { match } = this.props;
+    const { user } = this.state;
+    const category = match.params.category;
+    if(!user) return;
+    std.logInfo(Dashboard.displayName, 'fetch', category);
+    const spn = Spinner.of('app');
+    spn.start();
+    NoteAction.fetchNotes(user, category)
+      .then(() => NoteAction.fetchCategorys(user))
+      .then(() => spn.stop());
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { user } = this.state;
+    const nextCategory = nextProps.match.params.category;
+    const prevCategory = this.props.match.params.category;
+    if(user && (nextCategory !== prevCategory)) {
+      const spn = Spinner.of('app');
+      spn.start();
+      NoteAction.fetchNotes(user, nextCategory)
+        .then(() => spn.stop());
+    }
   }
 
   getPageNumber(number, page) {

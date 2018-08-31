@@ -8,9 +8,7 @@ import Root from './pages/Root/Root';
 
 const dispatcher = createDispatcher();
 createStores(dispatcher);
-rehydrateState(JSON.parse(
-  document.getElementById('initial-data').getAttribute('data-init')
-));
+rehydrateState(JSON.parse(document.getElementById('initial-data').getAttribute('data-init')));
 const rootEl = document.getElementById('app');
 const renderRoot = () => {
   hydrate(

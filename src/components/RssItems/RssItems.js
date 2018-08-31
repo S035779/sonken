@@ -79,12 +79,9 @@ class RssItems extends React.Component {
         <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-      { isAlpha
-        ? (<RssButton color={color}
+          { isAlpha ? (<RssButton color={color}
             onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>)
-        : null
-      }
+            classes={classes.button}>ダウンロード</RssButton>) : null }
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -96,9 +93,7 @@ class RssItems extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList
-          user={user}
-          items={items} />
+        <RssItemList id={note._id} user={user} items={items} />
       </div>
     </div>;
   }

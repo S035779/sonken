@@ -41,8 +41,7 @@ export default {
           res.status(200).send(obj);
         }
       , err => {
-          res.status(500)
-            .send({ name: err.name, message: err.message });
+          res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
         }
       , () => { log.info('Complete to download Note.'); }  
@@ -54,10 +53,9 @@ export default {
     return (req, res) => {
       const { user, ids, filter } = req.body;
       feed.downloadItems({ user, ids, filter }).subscribe(
-        obj => { res.send(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
-          res.status(500)
-            .send({ name: err.name, message: err.message });
+          res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
         }
       , () => { log.info('Complete to download Items.'); }  
@@ -261,11 +259,25 @@ export default {
     };
   },
 
+  fetchNote() {
+    return (req, res) => {
+      const { user, id } = req.query;
+      feed.fetchNote({ user, id }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message, ':', err.stack);
+        }
+      , () => { log.info('Complete to fetch Note.'); }  
+      );
+    };
+  },
+
   createNote() {
     return (req, res) => {
       const { user, url, category, categoryIds, title } = req.body;
       feed.createNote({ user, url, category, categoryIds, title }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -307,9 +319,7 @@ export default {
     return (req, res) => {
       const { user, category, subcategory } = req.body;
       feed.createCategory({ user, category, subcategory }).subscribe(
-        obj => {
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -351,7 +361,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchAddedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -365,7 +375,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchDeletedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -379,7 +389,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchReadedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -393,7 +403,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchTradedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -407,7 +417,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchBidedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -421,7 +431,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchStarredNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -435,7 +445,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchListedNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -449,7 +459,7 @@ export default {
     return (req, res) => {
       const { user, id } = req.query;
       feed.fetchCategory({ user, id }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -461,9 +471,9 @@ export default {
 
   fetchNotes() {
     return (req, res) => {
-      const { user } = req.query;
-      feed.fetchNotes({ user }).subscribe(
-        obj => { res.json(obj); }
+      const { user, category } = req.query;
+      feed.fetchNotes({ user, category }).subscribe(
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);
@@ -477,7 +487,7 @@ export default {
     return (req, res) => {
       const { user } = req.query;
       feed.fetchCategorys({ user }).subscribe(
-        obj => { res.json(obj); }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);

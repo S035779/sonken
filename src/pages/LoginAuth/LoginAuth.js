@@ -87,15 +87,12 @@ class LoginAuth extends React.Component {
           className={classes.input}/>
       </div>
       <div className={classes.form}>
-        <FormControlLabel 
-          control={<RssCheckbox color="secondary" 
+        <FormControlLabel control={<RssCheckbox color="secondary" 
             checked={checked} onChange={this.handleChangeCheckbox.bind(this, 'checked')} />}
-          label="ＩＤ・ＰＷを保存"
-        />
+          label="ＩＤ・ＰＷを保存" />
       </div>
       <div className={classes.form}>
-        <RssButton color="flatDefault" id="confirmation"
-          classes={classes.confirm}
+        <RssButton color="flatDefault" id="confirmation" classes={classes.confirm}
           component={Link} to="/login/confirmation">
           ログインＩＤ・ＰＷを忘れた場合は こちら
         </RssButton>

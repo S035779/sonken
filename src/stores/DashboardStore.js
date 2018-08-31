@@ -29,8 +29,8 @@ export default class DashboardStore extends ReduceStore {
   }
   
   updateCategory(state, action) {
-    return state.categorys.map(category => action.id === category._id
-      ? Object.assign({}, category, action.category) : category);
+    return state.categorys
+      .map(category => action.id === category._id ? Object.assign({}, category, action.category) : category);
   }
 
   deleteCategory(state, action) {
@@ -38,9 +38,9 @@ export default class DashboardStore extends ReduceStore {
     return state.categorys.filter(category => !isCategory(category));
   }
 
-  updateNote(state, action) {
-    return state.notes.map(note => action.id === note._id
-      ? Object.assign({}, note, action.note) : note);
+  fetchNote(state, action) {
+    return state.notes
+      .map(note => action.id === note._id ? Object.assign({}, note, action.note) : note);
   }
 
   deleteNote(state, action) {
@@ -185,13 +185,17 @@ export default class DashboardStore extends ReduceStore {
         return Object.assign({}, state, {
           notes:  action.notes
         });
+      case 'note/fetch': 
+        return Object.assign({}, state, {
+          notes:  this.fetchNote(state, action)
+        });
       case 'note/create':
         return Object.assign({}, state, {
           notes:  [action.note, ...state.notes]
         });
       case 'note/update': 
         return Object.assign({}, state, {
-          notes:  this.updateNote(state, action)
+          notes:  this.fetchNote(state, action)
         });
       case 'note/delete':
         return Object.assign({}, state, {

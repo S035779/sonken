@@ -189,6 +189,7 @@ router.route('/categorys')
 .delete(feed.notImplemented());
 
 router.route('/note')
+.get(feed.fetchNote())
 .put(feed.createNote())
 .post(feed.updateNote())
 .delete(feed.deleteNote());

@@ -19,9 +19,10 @@ class Login extends React.Component {
   }
 
   static prefetch(options) {
+    const { user, admin } = options;
     std.logInfo(Login.displayName, 'prefetch', options);
-    if(options.user) return LoginAction.presetUser(options.user);
-    if(options.admin) return LoginAction.presetAdmin(options.admin);
+    if(user) return LoginAction.presetUser(user);
+    if(admin) return LoginAction.presetAdmin(admin);
   }
 
   render() {

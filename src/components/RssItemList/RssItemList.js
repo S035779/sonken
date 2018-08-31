@@ -4,7 +4,8 @@ import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
 
 import { withStyles }       from '@material-ui/core/styles';
-import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
+                            from '@material-ui/core';
 import { Star, StarBorder, Delete, FiberNew } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
@@ -129,8 +130,7 @@ class RssItemList extends React.Component {
   renderItem(index, item) {
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
-    const textClass =
-      { primary: classes.primary, secondary: classes.secondary };
+    const textClass = { primary: classes.primary, secondary: classes.secondary };
     const buttonColor = listed.indexOf(item.guid._) !== -1 ? 'green' : 'yellow';
     const buttonText = listed.indexOf(item.guid._) !== -1 ? '入札リスト 登録済み' : '入札リスト 登録';
     const title = `出品件名：${item.title}`;

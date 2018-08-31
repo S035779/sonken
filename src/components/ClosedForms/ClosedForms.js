@@ -261,11 +261,8 @@ class ClosedForms extends React.Component {
       : null }
       <div className={classNames(
         category === 'closedsellers' && classes.filterList
-      , category === 'closedmarchant' && classes.filterList
-      )}>
-        <RssItemList 
-          user={user} 
-          items={items} />
+      , category === 'closedmarchant' && classes.filterList)} >
+        <RssItemList id={note._id} user={user} items={items} />
       </div>
     </div>;
   }

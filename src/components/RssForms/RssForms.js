@@ -171,14 +171,11 @@ class RssForms extends React.Component {
       <div className={classes.header}>
         <Typography variant="title" noWrap
           className={classes.title}>{note.title}</Typography>
-        <div className={classes.buttons}>
-      { isAlpha
-        ? (<RssButton color={color}
+        <div className={classes.buttons}>{ isAlpha ? (
+          <RssButton color={color} 
             onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>)
-        : null
-      }
-        </div>
+            classes={classes.button}>ダウンロード</RssButton>
+        ) : null }</div>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
@@ -258,9 +255,7 @@ class RssForms extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList
-          user={user}
-          items={items} />
+        <RssItemList id={note._id} user={user} items={items} />
       </div>
     </div>;
   }
