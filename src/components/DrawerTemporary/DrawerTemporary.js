@@ -66,8 +66,7 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper:{
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm})`
-      + `, url(${image + rgstImg})`
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`
   , width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: {
       position: 'relative', width: drawerWidthMdUp, height: '100%'
