@@ -34,7 +34,7 @@ class Dashboard extends React.Component {
   componentDidMount() {
     const { match } = this.props;
     const { user } = this.state;
-    const category = match.params.category;
+    const category = match.params.category || 'marchant';
     if(!user) return;
     std.logInfo(Dashboard.displayName, 'fetch', category);
     const spn = Spinner.of('app');
@@ -116,7 +116,7 @@ class Dashboard extends React.Component {
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const title = this.getTitleName(location);
     const _id = match.params.id;
-    const category = match.params.category ? match.params.category : 'marchant';
+    const category = match.params.category || 'marchant';
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const note = notes.find(obj => obj._id === _id);
