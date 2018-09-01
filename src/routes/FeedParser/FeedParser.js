@@ -38,8 +38,9 @@ export default class FeedParser {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
           const conditions = !options.category 
-            ? { user: options.user } : { user: options.user, category: options.category };
-          Note.find(conditions).exec((err, obj) => {
+            ? { user: options.user } 
+            : { user: options.user, category: options.category };
+          Note.find(conditions).skip(0).limit(20).slice('items', [0, 20]).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
