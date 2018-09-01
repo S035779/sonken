@@ -588,10 +588,10 @@ export default class FeedParser {
     );
   }
 
-  //fetchAllNotes({ users }) {
-  //  const observables = R.map(user => this.getNotes(user));
-  //  return forkJoin(observables(users));
-  //}
+  fetchAllNotes({ users }) {
+    const observables = R.map(user => this.getNotes(user));
+    return forkJoin(observables(users));
+  }
 
   fetchAddedNotes({ user }) {
     const observables = forkJoin([
