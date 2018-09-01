@@ -401,8 +401,8 @@ export default {
 
   fetchTradedNotes() {
     return (req, res) => {
-      const { user } = req.query;
-      feed.fetchTradedNotes({ user }).subscribe(
+      const { user, skip, limit } = req.query;
+      feed.fetchTradedNotes({ user, skip, limit }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -415,8 +415,8 @@ export default {
 
   fetchBidedNotes() {
     return (req, res) => {
-      const { user } = req.query;
-      feed.fetchBidedNotes({ user }).subscribe(
+      const { user, skip, limit } = req.query;
+      feed.fetchBidedNotes({ user, skip, limit }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

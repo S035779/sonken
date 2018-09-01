@@ -26,7 +26,7 @@ class Trade extends React.Component {
     if(!user) return null;
     std.logInfo(Trade.displayName, 'prefetch', category);
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchTraded(user))
+      .then(() => NoteAction.prefetchTraded(user, 0, 20))
       .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
   }
 
@@ -37,7 +37,7 @@ class Trade extends React.Component {
     std.logInfo(Trade.displayName, 'fetch', category);
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchTraded(user)
+    NoteAction.fetchTraded(user, 0, 20)
       .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
       .then(() => spn.stop());
   }

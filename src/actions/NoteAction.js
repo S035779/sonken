@@ -23,15 +23,15 @@ export default {
       })
     ;
   },
-  prefetchBided(user) {
-    return NoteApiClient.prefetchBidedNotes(user)
+  prefetchBided(user, skip, limit) {
+    return NoteApiClient.prefetchBidedNotes(user, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/prefetch/bided', notes });
       })
     ;
   },
-  prefetchTraded(user) {
-    return NoteApiClient.prefetchTradedNotes(user)
+  prefetchTraded(user, skip, limit) {
+    return NoteApiClient.prefetchTradedNotes(user, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/prefetch/traded', notes });
       })
@@ -51,15 +51,15 @@ export default {
       })
     ;
   },
-  fetchBided(user) {
-    return NoteApiClient.fetchBidedNotes(user)
+  fetchBided(user, skip, limit) {
+    return NoteApiClient.fetchBidedNotes(user, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/fetch/bided', notes });
       })
     ;
   },
-  fetchTraded(user) {
-    return NoteApiClient.fetchTradedNotes(user)
+  fetchTraded(user, skip, limit) {
+    return NoteApiClient.fetchTradedNotes(user, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/fetch/traded', notes });
       })

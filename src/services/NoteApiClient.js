@@ -165,11 +165,11 @@ export default {
   prefetchCategorys(user, category, skip, limit) {
     return this.request('prefetch/categorys', { user, category, skip, limit });
   },
-  prefetchTradedNotes(user) {
-    return this.request('prefetch/traded', { user });
+  prefetchTradedNotes(user, skip, limit) {
+    return this.request('prefetch/traded', { user, skip, limit });
   },
-  prefetchBidedNotes(user) {
-    return this.request('prefetch/bided', { user });
+  prefetchBidedNotes(user, skip, limit) {
+    return this.request('prefetch/bided', { user, skip, limit });
   },
 
   /*
@@ -178,11 +178,11 @@ export default {
   fetchNotes(user, category, skip, limit) {
     return this.request('fetch/notes', { user, category, skip, limit });
   },
-  fetchTradedNotes(user) {
-    return this.request('fetch/traded', { user });
+  fetchTradedNotes(user, skip, limit) {
+    return this.request('fetch/traded', { user, skip, limit });
   },
-  fetchBidedNotes(user) {
-    return this.request('fetch/bided', { user });
+  fetchBidedNotes(user, skip, limit) {
+    return this.request('fetch/bided', { user, skip, limit });
   },
 
   /*

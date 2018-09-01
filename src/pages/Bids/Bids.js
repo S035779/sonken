@@ -26,7 +26,7 @@ class Bids extends React.Component {
     if(!user) return null;
     std.logInfo(Bids.displayName, 'prefetch', category);
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchBided(user))
+      .then(() => NoteAction.prefetchBided(user, 0, 20))
       .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
   }
 
@@ -37,7 +37,7 @@ class Bids extends React.Component {
     std.logInfo(Bids.displayName, 'fetch', category);
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchBided(user)
+    NoteAction.fetchBided(user, 0, 20)
       .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
       .then(() => spn.stop());
   }

@@ -635,11 +635,11 @@ export default class FeedParser {
     );
   }
 
-  fetchTradedNotes({ user }) {
+  fetchTradedNotes({ user, skip, limit }) {
     const observables = forkJoin([
       this.getTraded(user)
     , this.getBided(user)
-    , this.getNotes(user)
+    , this.getNotes(user, null, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setBided(objs[1])
@@ -651,11 +651,11 @@ export default class FeedParser {
     );
   }
 
-  fetchBidedNotes({ user }) {
+  fetchBidedNotes({ user, skip, limit }) {
     const observables = forkJoin([
       this.getBided(user)
     , this.getListed(user)
-    , this.getNotes(user)
+    , this.getNotes(user, null, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setListed(objs[1])
