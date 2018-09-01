@@ -1,16 +1,16 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import { Redirect }   from 'react-router-dom';
-import { Container }  from 'flux/utils';
-import NoteAction     from 'Actions/NoteAction';
-import { getStores, getState }
-                      from 'Stores';
-import std            from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { Redirect }             from 'react-router-dom';
+import { Container }            from 'flux/utils';
+import NoteAction               from 'Actions/NoteAction';
+import { getStores, getState }  from 'Stores';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import BidsSearch     from 'Components/BidsSearch/BidsSearch';
-import BidsFilter     from 'Components/BidsFilter/BidsFilter';
-import BidsItemList   from 'Components/BidsItemList/BidsItemList';
+import { withStyles }           from '@material-ui/core/styles';
+import BidsSearch               from 'Components/BidsSearch/BidsSearch';
+import BidsFilter               from 'Components/BidsFilter/BidsFilter';
+import BidsItemList             from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
@@ -22,18 +22,24 @@ class Bids extends React.Component {
   }
 
   static prefetch(options) {
-    std.logInfo(Bids.displayName, 'prefetch', options);
-    return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchBided(options.user))
-      .then(() => NoteAction.prefetchCategorys(options.user))
-    ;
+    const { user, category } = options;
+    if(!user) return null;
+    std.logInfo(Bids.displayName, 'prefetch', category);
+    return NoteAction.presetUser(user)
+      .then(() => NoteAction.prefetchBided(user))
+      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
   }
 
   componentDidMount() {
-    std.logInfo(Bids.displayName, 'fetch', 'Bids');
-    NoteAction.fetchBided(this.state.user)
-      .then(() => NoteAction.fetchCategorys(this.state.user))
-    ;
+    const { user } = this.state;
+    const category = 'bids';
+    if(!user) return;
+    std.logInfo(Bids.displayName, 'fetch', category);
+    const spn = Spinner.of('app');
+    spn.start();
+    NoteAction.fetchBided(user)
+      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
+      .then(() => spn.stop());
   }
 
   itemFilter(filter, item) {
@@ -66,17 +72,12 @@ class Bids extends React.Component {
     //std.logInfo(Bids.displayName, 'State', this.state);
     //std.logInfo(Bids.displayName, 'Props', this.props);
     const { classes, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file }
-      = this.state;
-    if(!isAuthenticated) {
-      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} />);
-    }
+    const { isAuthenticated, user, notes, page, ids, filter, file } = this.state;
+    if(!isAuthenticated) 
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
-    notes.forEach(note => { 
-      if(note.items) note.items.forEach(item => items.push(item))
-    });
-    let _items = items
-      .filter(item => item.listed && this.itemFilter(filter, item));
+    notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
+    let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
     const number = _items.length;
     _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
@@ -104,16 +105,15 @@ Bids.defaultProps = { notes: null };
 Bids.propTypes = {
   classes: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired
+, match: PropTypes.object.isRequired
 };
 
 const barHeightSmUp     = 64;//112;
 const barHeightSmDown   = 56;//104;
 const filterHeight      = 186;
 const searchHeight      = 62;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
+const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
 , noteList: { width: '100%', overflow: 'scroll'

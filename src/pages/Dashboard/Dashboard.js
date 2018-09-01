@@ -26,12 +26,9 @@ class Dashboard extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Dashboard.displayName, 'prefetch', category);
-    const spn = Spinner.of('app');
-    spn.start();
     return NoteAction.presetUser(user)
       .then(() => NoteAction.prefetchNotes(user, category, 0, 20))
-      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20))
-      .then(() => spn.stop());
+      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
   }
 
   componentDidMount() {

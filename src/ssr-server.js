@@ -33,31 +33,22 @@ if (env === 'development') {
 const db            = mongoose.createConnection();
 const app           = express();
 const SessionStore  = connect(session);
-
 db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #1 connection error.'));
 db.openUri(mdb_url + '/session', { useNewUrlParser: true });
-
 app.use(log.connect());
 app.use(favicon(path.join(__dirname, 'dist', 'favicon.ico')));
 app.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })
-, cookie: {
-    httpOnly: false
-  , maxAge: 60 * 60 * 1000
-  }
+, cookie: { httpOnly: false, maxAge: 60 * 60 * 1000 }
 , resave: false
 , saveUninitialized: true
 }));
 app.use(ReactSSRenderer.of().request());
-
 const server = http.createServer(app);
-
-server.listen(http_port, http_host, () => {
-  log.info(displayName, `listening on ${http_host}:${http_port}`);
-});
+server.listen(http_port, http_host, () => log.info(displayName, `listening on ${http_host}:${http_port}`));
 
 const rejections = new Map();
 const reject = (err, promise) => {

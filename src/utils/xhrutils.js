@@ -1,22 +1,4 @@
-/**
- * encodeFormData
- *
- * @param {object} data 
- * @returns {string}
- */
-const encodeFormData = function(data) {
-  if (!data) return ""
-  let pairs = [];
-  for(let name in data) {
-    if (!data.hasOwnProperty(name)) continue;
-    if (typeof data[name] === "function") continue;
-    let value = data[name].toString();
-    name = encodeURIComponent(name.replace(" ", "+"));
-    value = encodeURIComponent(value.replace(" ", "+"));
-    pairs.push(name + "=" + value);
-  }
-  return pairs.join('&');
-};
+import std from 'Utilities/stdutils';
 
 /**
  * get
@@ -28,7 +10,7 @@ const encodeFormData = function(data) {
  */
 const get = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
-  request.open("GET", url + "?" + encodeFormData(data));
+  request.open("GET", url + "?" + std.urlencode_rfc3986(data));
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
@@ -50,7 +32,6 @@ const get = function(url, data, resolve, reject) {
   };
   request.send(null);
 };
-module.exports.get = get;
 
 /**
  * getJSON
@@ -62,7 +43,7 @@ module.exports.get = get;
  */
 const getJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
-  request.open("GET", url + "?" + encodeFormData(data));
+  request.open("GET", url + "?" + std.urlencode_rfc3986(data));
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
@@ -84,7 +65,6 @@ const getJSON = function(url, data, resolve, reject) {
   };
   request.send(null);
 };
-module.exports.getJSON = getJSON;
 
 /**
  * deleteJSON
@@ -96,7 +76,7 @@ module.exports.getJSON = getJSON;
  */
 const deleteJSON = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
-  request.open("DELETE", url + "?" + encodeFormData(data));
+  request.open("DELETE", url + "?" + std.urlencode_rfc3986(data));
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
@@ -118,7 +98,6 @@ const deleteJSON = function(url, data, resolve, reject) {
   };
   request.send(null);
 };
-module.exports.deleteJSON = deleteJSON;
 
 /**
  * post
@@ -152,9 +131,8 @@ const post = function(url, data, resolve, reject) {
   };
   request.setRequestHeader("Content-Type"
     , "application/x-www-form-urlencoded");
-  request.send(encodeFormData(data));
+  request.send(std.urlencode_rfc3986(data));
 };
-module.exports.post = post;
 
 /**
  * getData
@@ -166,7 +144,7 @@ module.exports.post = post;
  */
 const getData = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
-  request.open("GET", url + "?" + encodeFormData(data));
+  request.open("GET", url + "?" + std.urlencode_rfc3986(data));
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
@@ -188,7 +166,6 @@ const getData = function(url, data, resolve, reject) {
   };
   request.send(null);
 };
-module.exports.getData = getData;
 
 /**
  * postData
@@ -222,9 +199,8 @@ const postData = function(url, data, resolve, reject) {
   };
   request.setRequestHeader("Content-Type"
     , "application/x-www-form-urlencoded");
-  request.send(encodeFormData(data));
+  request.send(std.urlencode_rfc3986(data));
 };
-module.exports.postData = postData;
 
 /**
  * postXML
@@ -262,7 +238,6 @@ const postXML = function(url, data, resolve, reject) {
   }
   request.send(data.body);
 };
-module.exports.postXML = postXML;
 
 /**
  * postJSON
@@ -297,7 +272,6 @@ const postJSON = function(url, data, resolve, reject) {
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
-module.exports.postJSON = postJSON;
 
 /**
  * putJSON
@@ -332,7 +306,6 @@ const putJSON = function(url, data, resolve, reject) {
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
-module.exports.putJSON = putJSON;
 
 /**
  * putFile
@@ -368,7 +341,6 @@ const putFile = function(url, file, resolve, reject) {
   request.setRequestHeader("x-uploadedfiletype", file.type)
   request.send(file.content);
 };
-module.exports.putFile = putFile;
 
 /**
  * getFile
@@ -380,7 +352,7 @@ module.exports.putFile = putFile;
  */
 const getFile = function(url, data, resolve, reject) {
   const request = new XMLHttpRequest();
-  request.open("GET", url + "?" + encodeFormData(data));
+  request.open("GET", url + "?" + std.urlencode_rfc3986(data));
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
       if (request.status === 200) {
@@ -404,7 +376,6 @@ const getFile = function(url, data, resolve, reject) {
   };
   request.send(null);
 };
-module.exports.getFile = getFile;
 
 /**
  * postFile
@@ -441,4 +412,11 @@ const postFile = function(url, data, resolve, reject) {
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
-module.exports.postFile = postFile;
+
+export default { 
+  get, post
+, getJSON, postJSON, putJSON, deleteJSON
+, getData, postData
+, postXML
+, putFile, getFile, postFile
+};

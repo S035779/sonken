@@ -31,7 +31,8 @@ class ReactSSRenderer {
         .then(objs  => this.prefetchData(matchs, objs))
         .then(()    => this.setInitialData(location).pipe(res))
         .then(()    => next())
-        .catch(err  => res.status(500).send({ error: { name: err.name, message: err.message }}));
+        .catch(err  => res.status(500)
+          .send({ error: { name: err.name, message: err.message, stack: err.stack }}));
     };
   }
 

@@ -1,16 +1,16 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import { Redirect }   from 'react-router-dom';
-import { Container }  from 'flux/utils';
-import NoteAction     from 'Actions/NoteAction';
-import { getStores, getState }
-                      from 'Stores';
-import std            from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { Redirect }             from 'react-router-dom';
+import { Container }            from 'flux/utils';
+import NoteAction               from 'Actions/NoteAction';
+import { getStores, getState }  from 'Stores';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import TradeSearch    from 'Components/TradeSearch/TradeSearch';
-import TradeFilter    from 'Components/TradeFilter/TradeFilter';
-import TradeItemList  from 'Components/TradeItemList/TradeItemList';
+import { withStyles }           from '@material-ui/core/styles';
+import TradeSearch              from 'Components/TradeSearch/TradeSearch';
+import TradeFilter              from 'Components/TradeFilter/TradeFilter';
+import TradeItemList            from 'Components/TradeItemList/TradeItemList';
 
 class Trade extends React.Component {
   static getStores() {
@@ -22,18 +22,24 @@ class Trade extends React.Component {
   }
 
   static prefetch(options) {
-    std.logInfo(Trade.displayName, 'prefetch', options);
-    return NoteAction.presetUser(options.user)
-      .then(() => NoteAction.prefetchTraded(options.user))
-      .then(() => NoteAction.prefetchCategorys(options.user))
-    ;
+    const { user, category } = options;
+    if(!user) return null;
+    std.logInfo(Trade.displayName, 'prefetch', category);
+    return NoteAction.presetUser(user)
+      .then(() => NoteAction.prefetchTraded(user))
+      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
   }
 
   componentDidMount() {
-    std.logInfo(Trade.displayName, 'fetch', 'Trade');
-    NoteAction.fetchTraded(this.state.user)
-      .then(() => NoteAction.fetchCategorys(this.state.user))
-    ;
+    const { user } = this.state;
+    const category = 'trade';
+    if(!user) return;
+    std.logInfo(Trade.displayName, 'fetch', category);
+    const spn = Spinner.of('app');
+    spn.start();
+    NoteAction.fetchTraded(user)
+      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
+      .then(() => spn.stop());
   }
 
   itemFilter(filter, item) {
