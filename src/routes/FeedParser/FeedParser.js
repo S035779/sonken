@@ -37,10 +37,12 @@ export default class FeedParser {
     switch(request) {
       case 'fetch/notes':
         return new Promise((resolve, reject) => {
-          const conditions = !options.category 
-            ? { user: options.user } 
-            : { user: options.user, category: options.category };
-          Note.find(conditions).skip(0).limit(20).slice('items', [0, 20]).exec((err, obj) => {
+          const { user, category, skip, limit } = options;
+          const conditions = !category ? { user } : { user, category };
+          const notes = skip && limit 
+            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).slice('items', [0, 20])
+            : Note.find(conditions);
+          notes.exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -425,8 +427,8 @@ export default class FeedParser {
     return this.request('create/category', { user, data });
   }
 
-  getNotes(user, category) {
-    return this.request('fetch/notes', { user, category });
+  getNotes(user, category, skip, limit) {
+    return this.request('fetch/notes', { user, category, skip, limit });
   }
 
   getCategorys(user) {
@@ -469,12 +471,12 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
 
-  fetchCategorys({ user }) {
+  fetchCategorys({ user, category, skip, limit }) {
     const observables = forkJoin([
       this.getReaded(user)
     , this.getStarred(user)
     , this.getCategorys(user)
-    , this.getNotes(user)
+    , this.getNotes(user, category, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setCategorys(objs[2])
@@ -564,14 +566,14 @@ export default class FeedParser {
       ]);
   }
 
-  fetchNotes({ user, category }) {
+  fetchNotes({ user, category, skip, limit }) {
     const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
-    , this.getNotes(user, category)
+    , this.getNotes(user, category, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setAdded(objs[4])
@@ -586,10 +588,10 @@ export default class FeedParser {
     );
   }
 
-  fetchAllNotes({ users }) {
-    const observables = R.map(user => this.getNotes(user));
-    return forkJoin(observables(users));
-  }
+  //fetchAllNotes({ users }) {
+  //  const observables = R.map(user => this.getNotes(user));
+  //  return forkJoin(observables(users));
+  //}
 
   fetchAddedNotes({ user }) {
     const observables = forkJoin([
@@ -923,7 +925,6 @@ export default class FeedParser {
   }
 
   _createRead({ user, ids }) {
-    //log.debug(user, ids);
     const promises = R.map(id => this.addRead(user, id));
     return forkJoin(promises(ids));
   }
@@ -1101,7 +1102,6 @@ export default class FeedParser {
   }
 
   downloadNotes({ user, category }) {
-    const isCategory = obj => obj.category === category;
     const setNotes = objs => R.map(obj => ({
       title:     obj.title
     , url:       obj.url
@@ -1115,8 +1115,7 @@ export default class FeedParser {
       : ['title', 'url'];
     const setNotesCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     return this.fetchNotes({ user, category }).pipe(
-      map(objs => R.filter(isCategory, objs))
-    , map(objs => setNotes(objs))
+      map(objs => setNotes(objs))
     , map(objs => setNotesCsv(objs))
     , map(csv  => Buffer.from(csv, 'utf8'))
     );
@@ -1212,8 +1211,7 @@ export default class FeedParser {
   }
 
   setNote({ user, url, category, categoryIds, title }, obj) {
-    //log.debug(FeedParser.displayName, 'setNote'
-    //  , { user, title, category, categoryIds, url });
+    //log.debug(FeedParser.displayName, 'setNote', { user, title, category, categoryIds, url });
     return ({
       url: url
     , category: category

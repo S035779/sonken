@@ -471,8 +471,8 @@ export default {
 
   fetchNotes() {
     return (req, res) => {
-      const { user, category } = req.query;
-      feed.fetchNotes({ user, category }).subscribe(
+      const { user, category, skip, limit } = req.query;
+      feed.fetchNotes({ user, category, skip, limit }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -485,8 +485,8 @@ export default {
 
   fetchCategorys() {
     return (req, res) => {
-      const { user } = req.query;
-      feed.fetchCategorys({ user }).subscribe(
+      const { user, category, skip, limit } = req.query;
+      feed.fetchCategorys({ user, category, skip, limit }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

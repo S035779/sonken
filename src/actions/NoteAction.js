@@ -9,15 +9,15 @@ export default {
       })
     ;
   },
-  prefetchNotes(user, category) {
-    return NoteApiClient.prefetchNotes(user, category)
+  prefetchNotes(user, category, skip, limit) {
+    return NoteApiClient.prefetchNotes(user, category, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/prefetch/my', notes });
       })
     ;
   },
-  prefetchCategorys(user) {
-    return NoteApiClient.prefetchCategorys(user)
+  prefetchCategorys(user, category, skip, limit) {
+    return NoteApiClient.prefetchCategorys(user, category, skip, limit)
       .then(categorys => {
         dispatch({ type: 'category/prefetch/my', categorys });
       })
@@ -37,15 +37,15 @@ export default {
       })
     ;
   },
-  fetchCategorys(user) {
-    return NoteApiClient.fetchCategorys(user)
+  fetchCategorys(user, category, skip, limit) {
+    return NoteApiClient.fetchCategorys(user, category, skip, limit)
       .then(categorys => {
         dispatch({ type: 'category/fetch/my', categorys });
       })
     ;
   },
-  fetchNotes(user, category) {
-    return NoteApiClient.fetchNotes(user, category)
+  fetchNotes(user, category, skip, limit) {
+    return NoteApiClient.fetchNotes(user, category, skip, limit)
       .then(notes => {
         dispatch({ type: 'note/fetch/my', notes });
       })

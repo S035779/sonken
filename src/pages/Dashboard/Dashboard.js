@@ -29,8 +29,8 @@ class Dashboard extends React.Component {
     const spn = Spinner.of('app');
     spn.start();
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchNotes(user, category))
-      .then(() => NoteAction.prefetchCategorys(user))
+      .then(() => NoteAction.prefetchNotes(user, category, 0, 20))
+      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20))
       .then(() => spn.stop());
   }
 
@@ -42,8 +42,8 @@ class Dashboard extends React.Component {
     std.logInfo(Dashboard.displayName, 'fetch', category);
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchNotes(user, category)
-      .then(() => NoteAction.fetchCategorys(user))
+    NoteAction.fetchNotes(user, category, 0, 20)
+      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
       .then(() => spn.stop());
   }
 
@@ -54,7 +54,8 @@ class Dashboard extends React.Component {
     if(user && (nextCategory !== prevCategory)) {
       const spn = Spinner.of('app');
       spn.start();
-      NoteAction.fetchNotes(user, nextCategory)
+      NoteAction.fetchNotes(user, nextCategory, 0, 20)
+        .then(() => NoteAction.fetchCategorys(user, nextCategory, 0, 20))
         .then(() => spn.stop());
     }
   }

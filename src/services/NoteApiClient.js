@@ -159,11 +159,11 @@ export default {
   presetUser(user) {
     return this.request('preset/user', { user });
   },
-  prefetchNotes(user, category) {
-    return this.request('prefetch/notes', { user, category });
+  prefetchNotes(user, category, skip, limit) {
+    return this.request('prefetch/notes', { user, category, skip, limit });
   },
-  prefetchCategorys(user) {
-    return this.request('prefetch/categorys', { user });
+  prefetchCategorys(user, category, skip, limit) {
+    return this.request('prefetch/categorys', { user, category, skip, limit });
   },
   prefetchTradedNotes(user) {
     return this.request('prefetch/traded', { user });
@@ -175,8 +175,8 @@ export default {
   /*
    * Notes
    */
-  fetchNotes(user, category) {
-    return this.request('fetch/notes', { user, category });
+  fetchNotes(user, category, skip, limit) {
+    return this.request('fetch/notes', { user, category, skip, limit });
   },
   fetchTradedNotes(user) {
     return this.request('fetch/traded', { user });
@@ -188,8 +188,8 @@ export default {
   /*
    * Categorys
    */
-  fetchCategorys(user) {
-    return this.request('fetch/categorys', { user });
+  fetchCategorys(user, category, skip, limit) {
+    return this.request('fetch/categorys', { user, category, skip, limit });
   },
 
   /*
