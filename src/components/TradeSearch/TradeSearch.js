@@ -1,7 +1,9 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import TradeAction      from 'Actions/TradeAction';
+import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { Select, Typography, InputLabel, FormControl, MenuItem } from '@material-ui/core';
@@ -35,33 +37,41 @@ class TradeSearch extends React.Component {
 
   handleDownload() {
     const { user, items } = this.props;
-    if(!items) return this.setState({ isNotValid: true })
-    std.logInfo(TradeSearch.displayName, 'handleDownload', items);
-    TradeAction.download(user, items)
-      .then(() => {
-        if(this.props.file) this.downloadFile(this.props.file);
-        this.setState({ isSuccess: true });
-      })
-      .catch(err => {
-        std.logError(TradeSearch.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-      });
+    if(items) {
+      const spn = Spinner.of('app');
+      spn.start();
+      std.logInfo(TradeSearch.displayName, 'handleDownload', user);
+      TradeAction.download(user, items)
+        .then(() => this.downloadFile(this.props.file))
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => spn.stop())
+        .catch(err => {
+          std.logError(TradeSearch.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          spn.stop();
+        });
+    } else {
+      this.setState({ isNotValid: true });
+    }
   }
 
   handleChangeSelect(name, event) {
     const { user, itemNumber } = this.props;
-    const value = event.target.value;
-    std.logInfo(TradeSearch.displayName, 'handleChangeSelet', value);
-    switch(name) {
-      case 'page':
-        this.setState({ perPage: value });
-        TradeAction.pagenation(user, {
-          maxNumber: Math.ceil(itemNumber / value)
-        , number: 1
-        , perPage: value
-        });
-        break;
-    }
+    const perPage = event.target.value;
+    const maxNumber = Math.ceil(itemNumber / perPage);
+    const number = 1;
+    const spn = Spinner.of('app');
+    spn.start();
+    std.logInfo(TradeSearch.displayName, 'handleChangeSelet', perPage);
+    TradeAction.pagenation(user, { maxNumber, number, perPage })
+      .then(() => NoteAction.fetchTraded(user, (number - 1) * perPage, perPage))
+      .then(() => this.setState({ perPage }))
+      .then(() => spn.stop())
+      .catch(err => {
+        std.logError(TradeSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        spn.stop();
+      });
   }
 
   handleCloseDialog(name) {
@@ -80,8 +90,7 @@ class TradeSearch extends React.Component {
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select value={perPage}
-          onChange={this.handleChangeSelect.bind(this, 'page')}>
+        <Select value={perPage} onChange={this.handleChangeSelect.bind(this, 'perPage')}>
           <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>

@@ -4,10 +4,8 @@ import TradeAction    from 'Actions/TradeAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox }
+import { List, ListItem, ListItemText, ListItemSecondaryAction, Paper, Checkbox }
                       from '@material-ui/core';
-import { ListItem, ListItemText, ListItemSecondaryAction }
-                      from '@material-ui/core/List';
 import RssButton      from 'Components/RssButton/RssButton';
 
 class TradeItemList extends React.Component {

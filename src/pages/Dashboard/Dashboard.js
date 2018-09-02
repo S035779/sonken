@@ -33,32 +33,32 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     const { match } = this.props;
-    const { user } = this.state;
-    const category = match.params.category || 'marchant';
+    const { user, page } = this.state;
     if(!user) return;
-    std.logInfo(Dashboard.displayName, 'fetch', category);
+    const skip = (page.number - 1) * page.perPage;
+    const limit = page.perPage;
+    const category = match.params.category || 'marchant';
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchNotes(user, category, 0, 20)
-      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
+    std.logInfo(Dashboard.displayName, 'fetch', category);
+    NoteAction.fetchNotes(user, category, skip, limit)
+      .then(() => NoteAction.fetchCategorys(user, category, skip, limit))
       .then(() => spn.stop());
   }
 
   componentWillReceiveProps(nextProps) {
-    const { user } = this.state;
+    const { user, page } = this.state;
     const nextCategory = nextProps.match.params.category;
     const prevCategory = this.props.match.params.category;
     if(user && (nextCategory !== prevCategory)) {
+      const skip = (page.number - 1) * page.perPage;
+      const limit = page.perPage;
       const spn = Spinner.of('app');
       spn.start();
-      NoteAction.fetchNotes(user, nextCategory, 0, 20)
-        .then(() => NoteAction.fetchCategorys(user, nextCategory, 0, 20))
+      NoteAction.fetchNotes(user, nextCategory, skip, limit)
+        .then(() => NoteAction.fetchCategorys(user, nextCategory, skip, limit))
         .then(() => spn.stop());
     }
-  }
-
-  getPageNumber(number, page) {
-    return number < page.perPage ? number : page.perPage;
   }
 
   filterNotes(notes, category, categoryId) {
@@ -121,7 +121,6 @@ class Dashboard extends React.Component {
     const _notes = this.filterNotes(notes, category, categoryId);
     const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
-    _notes.length = this.getPageNumber(number, page);
     return <div className={classes.root}>
         <RssSearch
           user={user}

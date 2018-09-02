@@ -7,21 +7,17 @@ export default class DashboardStore extends ReduceStore {
       user: ''
     , isAuthenticated: false
     , notes: []
-    , page: {
-        maxNumer: 0
-      , number:   0
-      , perPage:  20
-      }
+    , page: { maxNumer: 0, number: 1, perPage: 20 }
     , selected:false
-    , ids:     []
+    , ids: []
     , filter: {
-        lastWeekAuction:  true
-      , twoWeeksAuction:  true
+        lastWeekAuction: true
+      , twoWeeksAuction: true
       , lastMonthAuction: true
-      , allAuction:       true
-      , inAuction:        false
-      , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-      , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , allAuction: true
+      , inAuction: false
+      , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       }
     , file: null
     , categorys: []

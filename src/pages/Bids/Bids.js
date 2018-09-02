@@ -26,19 +26,19 @@ class Bids extends React.Component {
     if(!user) return null;
     std.logInfo(Bids.displayName, 'prefetch', category);
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchBided(user, 0, 20))
-      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
+      .then(() => NoteAction.prefetchBided(user, 0, 20));
   }
 
   componentDidMount() {
-    const { user } = this.state;
-    const category = 'bids';
+    const { user, page } = this.state;
     if(!user) return;
-    std.logInfo(Bids.displayName, 'fetch', category);
+    const skip = (page.number - 1) * page.perPage;
+    const limit = page.perPage;
+    const category = 'bids';
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchBided(user, 0, 20)
-      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
+    std.logInfo(Bids.displayName, 'fetch', category);
+    NoteAction.fetchBided(user, skip, limit)
       .then(() => spn.stop());
   }
 
@@ -64,10 +64,6 @@ class Bids extends React.Component {
           : true; 
   }
 
-  itemPage(number, page) {
-    return number < page.perPage ? number : page.perPage;
-  }
-
   render() {
     //std.logInfo(Bids.displayName, 'State', this.state);
     //std.logInfo(Bids.displayName, 'Props', this.props);
@@ -79,7 +75,6 @@ class Bids extends React.Component {
     notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
     let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
     const number = _items.length;
-    _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
       <BidsSearch
         user={user}

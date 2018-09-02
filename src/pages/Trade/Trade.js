@@ -26,19 +26,19 @@ class Trade extends React.Component {
     if(!user) return null;
     std.logInfo(Trade.displayName, 'prefetch', category);
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchTraded(user, 0, 20))
-      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
+      .then(() => NoteAction.prefetchTraded(user, 0, 20));
   }
 
   componentDidMount() {
-    const { user } = this.state;
-    const category = 'trade';
+    const { user, page } = this.state;
     if(!user) return;
-    std.logInfo(Trade.displayName, 'fetch', category);
+    const skip = (page.number - 1) * page.perPage;
+    const limit = page.perPage;
+    const category = 'trade';
     const spn = Spinner.of('app');
     spn.start();
-    NoteAction.fetchTraded(user, 0, 20)
-      .then(() => NoteAction.fetchCategorys(user, category, 0, 20))
+    std.logInfo(Trade.displayName, 'fetch', category);
+    NoteAction.fetchTraded(user, skip, limit)
       .then(() => spn.stop());
   }
 
@@ -58,26 +58,17 @@ class Trade extends React.Component {
           : true; 
   }
 
-  itemPage(number, page) {
-    return number < page.perPage ? number : page.perPage;
-  }
-
   render() {
     //std.logInfo(Trade.displayName, 'State', this.state);
     //std.logInfo(Trade.displayName, 'Props', this.props);
     const { classes, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file }
-      = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file } = this.state;
     if(!isAuthenticated) 
-      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}} />);
+      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
-    notes.forEach(note => {
-      if(note.items) note.items.forEach(item => items.push(item))
-    });
-    let _items = items
-      .filter(item => item.bided && this.itemFilter(filter, item));
+    notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
+    let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
     const number = _items.length;
-    _items.length = this.itemPage(number, page);
     return <div className={classes.root}>
       <TradeSearch
         user={user}

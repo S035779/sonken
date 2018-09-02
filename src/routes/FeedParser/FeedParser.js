@@ -55,6 +55,18 @@ export default class FeedParser {
             resolve(obj);
           })
         });
+      case 'fetch/items':
+        return new Promise((resolve, reject) => {
+          const { user, ids, skip, limit } = options;
+          const conditions = { user, 'items.guid__': { $in: ids } };
+          const notes = skip && limit
+            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit))
+            : Note.find(conditions);
+          notes.exec((err, obj) => {
+            if(err) return reject(err);
+            resolve(obj);
+          });
+        });
       case 'fetch/added':
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
@@ -470,6 +482,10 @@ export default class FeedParser {
   getCategory(user, id) {
     return this.request('fetch/category', { user, id });
   }
+  
+  getItems(user, ids, skip, limit) {
+    return this.request('fetch/items', { user, ids, skip, limit });
+  }
 
   fetchCategorys({ user, category, skip, limit }) {
     const observables = forkJoin([
@@ -636,34 +652,40 @@ export default class FeedParser {
   }
 
   fetchTradedNotes({ user, skip, limit }) {
-    const observables = forkJoin([
+    const observables = ids => forkJoin([
       this.getTraded(user)
     , this.getBided(user)
-    , this.getNotes(user, null, skip, limit)
+    , this.getItems(user, ids, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setBided(objs[1])
     , this.setTraded(objs[0])
     , this.toObject
     )(objs[2]);
-    return observables.pipe(
-      map(setAttribute)
+    const setIds = R.map(obj => obj.bided);
+    return from(this.getBided(user)).pipe(
+      map(setIds)
+    , flatMap(observables)
+    , map(setAttribute)
     );
   }
 
   fetchBidedNotes({ user, skip, limit }) {
-    const observables = forkJoin([
+    const observables = ids => forkJoin([
       this.getBided(user)
     , this.getListed(user)
-    , this.getNotes(user, null, skip, limit)
+    , this.getItems(user, ids, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setListed(objs[1])
     , this.setBided(objs[0])
     , this.toObject
     )(objs[2]);
-    return observables.pipe(
-      map(setAttribute)
+    const setIds = R.map(obj => obj.listed);
+    return from(this.getListed(user)).pipe(
+      map(setIds)
+    , flatMap(observables)
+    , map(setAttribute)
     );
   }
 

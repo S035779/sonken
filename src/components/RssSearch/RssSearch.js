@@ -23,7 +23,6 @@ class RssSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(RssSearch.displayName, 'Props', nextProps);
     const { notePage } = nextProps;
     this.setState({ perPage: notePage.perPage });
   }
@@ -45,19 +44,18 @@ class RssSearch extends React.Component {
   handleSubmit(title, categoryIds) {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
-    std.logInfo(RssSearch.displayName, 'Request', this.state.url);
     if(request) {
       const spn = Spinner.of('app');
       spn.start();
+      std.logInfo(RssSearch.displayName, 'Request', this.state.url);
       NoteAction.create(user, { url: request.url, category: request.category, title, categoryIds })
-        .then(()    => this.setState({ isSuccess:   true, url: '' }))
-        .then(()    => spn.stop())
-        .catch(err  => {
+        .then(() => this.setState({ isSuccess: true, url: '' }))
+        .then(() => spn.stop())
+        .catch(err => {
           std.logError(RssSearch.displayName, err.name, err.message);
-          this.setState({ isNotValid:  true, url: '' });
+          this.setState({ isNotValid: true, url: '' });
           spn.stop();
-        })
-      ;
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -69,16 +67,16 @@ class RssSearch extends React.Component {
 
   handleDownload() {
     const { user, category } = this.props;
-    std.logInfo(RssSearch.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
     spn.start();
+    std.logInfo(RssSearch.displayName, 'handleDownload', user);
     NoteAction.download(user, category)
-      .then(()    => this.setState({ isSuccess:   true }) )
-      .then(()    => this.downloadFile(this.props.file)   )
-      .then(()    => spn.stop()                           )
-      .catch(err  => {
+      .then(() => this.downloadFile(this.props.file))
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => spn.stop())
+      .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
-        this.setState({ isNotValid:  true });
+        this.setState({ isNotValid: true });
         spn.stop();
       })
     ;
@@ -91,11 +89,11 @@ class RssSearch extends React.Component {
     const spn = Spinner.of('app');
     spn.start();
     NoteAction.upload(user, category, file)
-      .then(()    => this.setState({ isSuccess:   true }) )
-      .then(()    => spn.stop()                           )
-      .catch(err  => {
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => spn.stop())
+      .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
-        this.setState({ isNotValid:  true });
+        this.setState({ isNotValid: true });
         spn.stop();
       })
     ;
@@ -103,24 +101,26 @@ class RssSearch extends React.Component {
 
   handleChangeText(name, event) {
     const value = event.target.value;
-    //std.logInfo(RssSearch.displayName, 'handleChangeText', value);
     this.setState({ [name]: value });
   }
 
   handleChangeSelect(name, event) {
-    const { user, noteNumber } = this.props;
-    const value = event.target.value;
-    std.logInfo(RssSearch.displayName, 'handleChangeSelect', value);
-    switch(name) {
-      case 'perPage':
-        this.setState({ perPage: value });
-        NoteAction.pagenation(user, {
-          maxNumber: Math.ceil(noteNumber / value)
-        , number: 1
-        , perPage: value
-        });
-        break;
-    }
+    const { user, category, noteNumber } = this.props;
+    const perPage = event.target.value;
+    const maxNumber = Math.ceil(noteNumber / perPage);
+    const number = 1;
+    const spn = Spinner.of('app');
+    spn.start();
+    std.logInfo(RssSearch.displayName, 'handleChangeSelect', perPage);
+    NoteAction.pagenation(user, { maxNumber, number, perPage })
+      .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage))
+      .then(() => this.setState({ perPage }))
+      .then(() => spn.stop())
+      .catch(err => {
+        std.logError(RssSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid:  true });
+        spn.stop();
+      });
   }
 
   handleCloseDialog(name) {
@@ -206,8 +206,7 @@ class RssSearch extends React.Component {
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select value={perPage}
-          onChange={this.handleChangeSelect.bind(this, 'perPage')}>
+        <Select value={perPage} onChange={this.handleChangeSelect.bind(this, 'perPage')}>
           <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>

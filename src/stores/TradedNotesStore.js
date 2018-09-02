@@ -5,21 +5,17 @@ export default class TradedNotesStore extends ReduceStore {
   getInitialState() {
     return { 
       user: ''
-      , isAuthenticated: false
-      , notes: []
-      , page: {
-        maxNumer: 0
-      , number:   0
-      , perPage:  20
-      }
+    , isAuthenticated: false
+    , notes: []
+    , page: { maxNumer: 0, number: 1, perPage: 20 }
     , selected: false
-    , ids:      []
-      , filter: {
-        endTrading:   true
-      , allTrading:   true
-      , inBidding:    false
+    , ids: []
+    , filter: {
+        endTrading: true
+      , allTrading: true
+      , inBidding: false
       , bidStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-      , bidStopTime:  std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , bidStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       }
     , file: null
     };
