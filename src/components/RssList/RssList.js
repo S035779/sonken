@@ -22,7 +22,6 @@ class RssList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(RssList.displayName, 'Props', nextProps);
     const { selectedNoteId: checked, notes } = nextProps;
     this.setState({ checked, notes });
   }

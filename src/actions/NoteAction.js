@@ -93,8 +93,8 @@ export default {
       })
     ;
   },
-  fetch(user, id) {
-    return NoteApiClient.fetchNote(user, id)
+  fetch(user, id, skip, limit) {
+    return NoteApiClient.fetchNote(user, id, skip, limit)
       .then(note => {
         dispatch({ type: 'note/fetch', id, note });
       })

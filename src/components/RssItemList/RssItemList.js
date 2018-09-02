@@ -2,6 +2,7 @@ import React                from 'react';
 import PropTypes            from 'prop-types';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
+import Spinner              from 'Utilities/Spinner';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
@@ -21,12 +22,8 @@ class RssItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(RssItemList.displayName, 'Props', nextProps);
     const { items } = nextProps;
-    let listed = [];
-    let starred = [];
-    let deleted = [];
-    let added = [];
+    let listed = [], starred = [], deleted = [], added = [];
     items.forEach(item => {
       if(item.listed) listed.push(item.guid._);
       if(item.starred) starred.push(item.guid._);
@@ -36,8 +33,36 @@ class RssItemList extends React.Component {
     this.setState({ listed, starred, deleted, added });
   }
 
+  componentDidMount() {
+    window.addEventListener('scroll', this.handlePagination.bind(this));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handlePagination.bind(this));
+  }
+
+  handlePagination() {
+    const scrollTop         = (document.documentElement && document.documentElement.scrollTop) 
+      || document.body.scrollTop;
+    const scrollHeight      = (document.documentElement && document.documentElement.scrollHeight)
+      || document.body.scrollHeight;
+    const clientHeight      = document.documentElement.clientHeight 
+      || window.innerHeight;
+    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+    std.logInfo(RssItemList.displayName, 'handlePagination', { scrollTop, scrollHeight, clientHeight, scrolledToBottom });
+    if(scrolledToBottom) {
+      const { user, id, page } = this.props;
+      const skip = (page.number - 1) * page.perPage;
+      const limit = page.perPage;
+      const spn = Spinner.of('app');
+      spn.start();
+      std.logInfo(RssItemList.displayName, 'handlePagination', id);
+      NoteAction.fetch(user, id, skip, limit)
+        .then(() => spn.stop());
+    }
+  }
+
   handleChangeListed(id) {
-    //std.logInfo(RssItemList.displayName, 'handleChangeListed', id);
     const { listed } = this.state;
     const { user } = this.props;
     const currentIndex = listed.indexOf(id);
@@ -53,7 +78,6 @@ class RssItemList extends React.Component {
   }
 
   handleChangeStarred(id) {
-    //std.logInfo(RssItemList.displayName, 'handleChangeStarred', id);
     const { starred } = this.state;
     const { user } = this.props;
     const currentIndex = starred.indexOf(id);
@@ -69,7 +93,6 @@ class RssItemList extends React.Component {
   }
 
   handleChangeDeleted(id) {
-    //std.logInfo(RssItemList.displayName, 'handleChangeDeleted', id);
     const { deleted } = this.state;
     const { user } = this.props;
     const currentIndex = deleted.indexOf(id);
@@ -85,7 +108,6 @@ class RssItemList extends React.Component {
   }
 
   handleChangeAdded(id) {
-    //std.logInfo(RssItemList.displayName, 'handleChangeAdded', id);
     const { added } = this.state;
     const { user } = this.props;
     const currentIndex = added.indexOf(id);
@@ -101,7 +123,6 @@ class RssItemList extends React.Component {
   }
 
   handleMouseLeaveAdded(id) {
-    //std.logInfo(RssItemList.displayName, 'handleMouseLeaveAdded', id);
     const { added } = this.state;
     const { user } = this.props;
     const currentIndex = added.indexOf(id);
@@ -213,33 +234,24 @@ RssItemList.propTypes = {
   classes: PropTypes.object.isRequired
 , items: PropTypes.array.isRequired
 , user: PropTypes.string.isRequired
+, id: PropTypes.string.isRequired
+, page: PropTypes.object.isRequired
 };
 
 const itemHeight        = 142 * 1.5;
 const itemMinWidth      = 800;
 const descMinWidth      = 133 * 1.5;
 const styles = theme => ({
-noteItem:       { display: 'flex', flexDirection: 'row'
-                , alignItems: 'center' }
-, listItem:     {
-    height: itemHeight
-  , minWidth: itemMinWidth
-  , padding: theme.spacing.unit /2
-  , '&:hover':  {
-      backgroundColor: theme.palette.primary.main
-    , '& $star': {
-        color: theme.palette.common.white
-      }
-    }
-  }
+noteItem:       { display: 'flex', flexDirection: 'row', alignItems: 'center' }
+, listItem:     { height: itemHeight, minWidth: itemMinWidth, padding: theme.spacing.unit /2
+                  , '&:hover':  { backgroundColor: theme.palette.primary.main
+                    , '& $star': { color: theme.palette.common.white } } }
 , listItemText: { marginRight: descMinWidth }
 , star:         { color: theme.palette.primary.main }
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
-                , '&:hover':  {
-                  backgroundColor: theme.palette.primary.main
-                  , '& $primary, $secondary': {
-                    color: theme.palette.common.white }}}   
+                  , '&:hover':  { backgroundColor: theme.palette.primary.main
+                    , '& $primary, $secondary': { color: theme.palette.common.white } } }
 , primary:      { }
 , secondary:    { }
 , description:  { minWidth: descMinWidth, width: descMinWidth

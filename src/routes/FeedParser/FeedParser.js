@@ -125,8 +125,12 @@ export default class FeedParser {
         });
       case 'fetch/note':
         return new Promise((resolve, reject) => {
-          const conditions = { _id: options.id, user: options.user };
-          Note.findOne(conditions).exec((err, obj) => {
+          const { user, id, skip, limit } = options;
+          const conditions = { _id: id, user };
+          const note = skip && limit 
+            ? Note.findOne(conditions).slice('items', [ Number(skip), Number(limit) ])
+            : Note.findOne(conditions);
+          note.exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -475,8 +479,8 @@ export default class FeedParser {
     return this.request('fetch/deleted', { user });
   }
 
-  getNote(user, id) {
-    return this.request('fetch/note', { user, id });
+  getNote(user, id, skip, limit) {
+    return this.request('fetch/note', { user, id, skip, limit });
   }
 
   getCategory(user, id) {
@@ -717,14 +721,14 @@ export default class FeedParser {
     );
   }
 
-  fetchNote({ user, id }) {
+  fetchNote({ user, id, skip, limit }) {
     const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
-    , this.getNote(user, id)
+    , this.getNote(user, id, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
       this.setAdded(objs[4])

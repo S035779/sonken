@@ -261,8 +261,8 @@ export default {
 
   fetchNote() {
     return (req, res) => {
-      const { user, id } = req.query;
-      feed.fetchNote({ user, id }).subscribe(
+      const { user, id, skip, limit } = req.query;
+      feed.fetchNote({ user, id, skip, limit }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

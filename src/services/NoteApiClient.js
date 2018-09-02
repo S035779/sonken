@@ -212,8 +212,8 @@ export default {
   /*
    * Note
    */
-  fetchNote(user, id) {
-    return this.request('fetch/note', { user, id });
+  fetchNote(user, id, skip, limit) {
+    return this.request('fetch/note', { user, id, skip, limit });
   },
   createNote(user, { url, category, categoryIds, title }) {
     return this.request('create/note', { user, url, category, categoryIds, title });

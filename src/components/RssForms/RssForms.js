@@ -29,7 +29,6 @@ class RssForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(RssForms.displayName, 'Props', nextProps);
     const { note } = nextProps;
     this.setState({ note });
   }
@@ -167,22 +166,20 @@ class RssForms extends React.Component {
     const name = note.name;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
+    const page = { number: 0, perPage: 20, maxNumber: 9999 };
     return <div className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{note.title}</Typography>
-        <div className={classes.buttons}>{ isAlpha ? (
-          <RssButton color={color} 
-            onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>
-        ) : null }</div>
+        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
+        <div className={classes.buttons}>
+        { isAlpha ? (<RssButton color={color} 
+          onClick={this.handleDownload.bind(this)}
+          classes={classes.button}>ダウンロード</RssButton>) : null }
+        </div>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="asin">ASIN</InputLabel>
-          <Input id="asin"
-            value={asin}
-            onChange={this.handleChangeInput.bind(this, 'asin')}/>
+          <Input id="asin" value={asin} onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
         <div className={classes.buttons}>
           <Button variant="raised" size="medium"
@@ -190,11 +187,11 @@ class RssForms extends React.Component {
             className={classes.button}>{isChanged ? '*' : ''}登録</Button>
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
+            内容に不備があります。もう一度確認してください。
           </RssDialog>
           <RssDialog open={isSuccess} title={'送信完了'}
             onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-          要求を受け付けました。
+            要求を受け付けました。
           </RssDialog>
         </div>
         <div className={classes.buttons}>
@@ -255,7 +252,7 @@ class RssForms extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList id={note._id} user={user} items={items} />
+        <RssItemList id={note._id} user={user} items={items} page={page} />
       </div>
     </div>;
   }

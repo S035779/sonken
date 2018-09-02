@@ -74,10 +74,10 @@ class RssItems extends React.Component {
     const { isNotValid, isSuccess } = this.state;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
+    const page = { number: 0, perPage: 20, maxNumber: 9999 };
     return <div className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{note.title}</Typography>
+        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           { isAlpha ? (<RssButton color={color}
             onClick={this.handleDownload.bind(this)}
@@ -93,7 +93,7 @@ class RssItems extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList id={note._id} user={user} items={items} />
+        <RssItemList id={note._id} user={user} items={items} page={page} />
       </div>
     </div>;
   }

@@ -32,7 +32,6 @@ class ClosedForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(ClosedForms.displayName, 'Props', nextProps);
     const { itemFilter, note } = nextProps;
     this.setState({ note, itemFilter });
   }
@@ -104,11 +103,13 @@ class ClosedForms extends React.Component {
   }
 
   handleFilter() {
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction
-      , allAuction, inAuction, aucStartTime, aucStopTime } = this.state;
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
     const { user } = this.props;
-    NoteAction.filter(user, {lastWeekAuction, twoWeeksAuction
-    , lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime});
+    NoteAction.filter(user, {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    });
   }
 
   handleChangeText(name, event) {
@@ -166,10 +167,10 @@ class ClosedForms extends React.Component {
       , allAuction, inAuction, isNotValid, isSuccess } = this.state;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
+    const page = { number: 0, perPage: 20, maxNumber: 9999 };
     return <div className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap 
-          className={classes.title}>{note.title}</Typography>
+        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           <RssButton color={color}
             onClick={this.handleDownload.bind(this)} 
@@ -184,8 +185,8 @@ class ClosedForms extends React.Component {
           </RssDialog>
         </div>
       </div>
-    {category === 'closedsellers' || category === 'closedmarchant'
-      ? (<div className={classes.edit}>
+    {category === 'closedsellers' || category === 'closedmarchant' ? 
+      (<div className={classes.edit}>
         <Typography variant="subheading" noWrap
           className={classes.column}>絞込件数：</Typography>
         <Checkbox color="primary" 
@@ -216,8 +217,7 @@ class ClosedForms extends React.Component {
           tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap
           className={classes.column}>全て表示</Typography>
-      </div>)
-      : null }
+      </div>) : null }
     {category === 'closedsellers'  || category === 'closedmarchant'
       ? (<div className={classes.edit}>
         <div className={classes.column}>
@@ -262,7 +262,7 @@ class ClosedForms extends React.Component {
       <div className={classNames(
         category === 'closedsellers' && classes.filterList
       , category === 'closedmarchant' && classes.filterList)} >
-        <RssItemList id={note._id} user={user} items={items} />
+        <RssItemList id={note._id} user={user} items={items} page={page} />
       </div>
     </div>;
   }
