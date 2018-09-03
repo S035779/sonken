@@ -1,5 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import * as R           from 'ramda';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
@@ -18,19 +19,58 @@ class RssForms extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      note:       props.note
-    , asin:       props.note.asin
-    , price:      props.note.price
-    , bidsprice:  props.note.bidsprice
-    , body:       props.note.body
-    , isSuccess:  false
+      note: props.note
+    , asin: props.note.asin
+    , price: props.note.price
+    , bidsprice: props.note.bidsprice
+    , body: props.note.body
+    , isSuccess: false
     , isNotValid: false
+    , isRequest: false
+    , page: 1
+    , prevPage: 1
     };
+    this.formsRef = React.createRef();
   }
 
   componentWillReceiveProps(nextProps) {
     const { note } = nextProps;
-    this.setState({ note });
+    const prevNote = this.state.note;
+    const prevPage = this.state.prevPage;
+    const nextPage = this.state.page
+    if(prevNote && (note._id !== prevNote._id)) {
+      this.setState({ note, page: 1, prevPage: 1 });
+    } else if(prevNote && prevPage !== nextPage){
+      const getItems = obj => obj.items;
+      const catItems = R.concat(note.items);
+      const setItems = objs => R.merge(note, { items: objs });
+      const setNote  = R.compose(setItems, catItems, getItems);
+      this.setState({ note: setNote(prevNote) });
+    } 
+  }
+
+  handlePagination() {
+    const documentElement   = this.formsRef.current;
+    const scrollTop         = documentElement.scrollTop;
+    const scrollHeight      = documentElement.scrollHeight;
+    const clientHeight      = documentElement.clientHeight;
+    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+    if(scrolledToBottom) this.fetch();
+  }
+
+  fetch() {
+    if(this.state.isRequest) return;
+    const { user, note } = this.props;
+    const page = this.state.page + 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const spn = Spinner.of('app');
+    std.logInfo(RssForms.displayName, 'fetch', { id: note._id, page });
+    spn.start();
+    NoteAction.fetch(user, note._id, skip, limit)
+      .then(() => this.setState({ isRequest: false, page, prevPage: this.state.page }))
+      .then(() => spn.stop());
+    this.setState({ isRequest: true });
   }
 
   downloadFile(blob) {
@@ -158,16 +198,15 @@ class RssForms extends React.Component {
     //std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note, category } = this.props;
     const { isNotValid, isSuccess } = this.state;
-    const { asin, price, bidsprice, body} = this.state.note;
+    const { items, asin, price, bidsprice, body} = this.state.note;
     const isChanged = this.isChanged();
     const link_mon = mon + asin;
     const link_fba = fba;
     const link_amz = note.AmazonUrl;
     const name = note.name;
-    const items = note.items ? note.items : [];
+    //const items = note.items ? note.items : [];
     const color = this.getColor(category);
-    const page = { number: 0, perPage: 20, maxNumber: 9999 };
-    return <div className={classes.forms}>
+    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
@@ -195,11 +234,9 @@ class RssForms extends React.Component {
           </RssDialog>
         </div>
         <div className={classes.buttons}>
-          <Button color="primary" size="large"
-            href={link_mon} target="_blank"
+          <Button color="primary" size="large" href={link_mon} target="_blank"
             className={classes.link}>モノレート</Button>
-          <Button color="primary" size="large" 
-            href={link_fba} target="_blank"
+          <Button color="primary" size="large" href={link_fba} target="_blank"
             className={classes.link}>FBA料金シュミレーター</Button>
         </div>
       </div>
@@ -214,45 +251,27 @@ class RssForms extends React.Component {
       <div className={classes.memo}>
         <div className={classes.texts}>
           <div className={classes.edit}>
-            <TextField
-              id="number"
-              label="想定売値"
-              value={price}
+            <TextField id="number" label="想定売値" value={price}
               onChange={this.handleChangeInput.bind(this, 'price')}
               onBlur={this.handleAutoSave.bind(this)}
-              type="number"
-              className={classes.text}
-              InputLabelProps={{
-                shrink: true
-              }}
-              margin="none" />
+              type="number" className={classes.text} InputLabelProps={{ shrink: true }} margin="none" />
           </div>
           <div className={classes.edit}>
-            <TextField
-              id="number"
-              label="最高入札額"
-              value={bidsprice}
+            <TextField id="number" label="最高入札額" value={bidsprice}
               onChange={this.handleChangeInput.bind(this, 'bidsprice')}
               onBlur={this.handleAutoSave.bind(this)}
-              type="number"
-              className={classes.text}
-              InputLabelProps={{
-                shrink: true
-              }}
-              margin="none" />
+              type="number" className={classes.text} InputLabelProps={{ shrink: true }} margin="none" />
           </div>
         </div>
         <div className={classes.textarea}>
-        <TextField id="body" label="自由入力欄" multiline
-          rows="4" fullWidth margin="none"
-          value={body}
+        <TextField id="body" label="自由入力欄" multiline rows="4" fullWidth margin="none" value={body}
           onChange={this.handleChangeInput.bind(this, 'body')}
           onBlur={this.handleAutoSave.bind(this)}
           className={classes.field}/>
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList id={note._id} user={user} items={items} page={page} />
+        <RssItemList user={user} items={items} />
       </div>
     </div>;
   }

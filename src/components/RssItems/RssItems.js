@@ -1,5 +1,6 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
+import * as R         from 'ramda';
 import NoteAction     from 'Actions/NoteAction';
 import std            from 'Utilities/stdutils';
 import Spinner        from 'Utilities/Spinner';
@@ -16,9 +17,54 @@ class RssItems extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isSuccess: false
+      note: props.note
+    , isSuccess: false
     , isNotValid: false
+    , isRequest: false
+    , page: 1
+    , prevPage: 1
     };
+    this.formsRef = React.createRef();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { note } = nextProps;
+    const prevNote = this.state.note;
+    const prevPage = this.state.prevPage;
+    const nextPage = this.state.page;
+    if(prevNote && (note._id !== prevNote._id)) {
+      this.setState({ note, page: 1, prevPage: 1 });
+    } else if(prevNote && (prevPage !== nextPage)) {
+      const getItems = obj => obj.items;
+      const catItems = R.concat(note.items);
+      const setItems = objs => R.merge(note, { items: objs });
+      const setNote  = R.compose(setItems ,catItems ,getItems);
+      this.setState({ note: setNote(prevNote) });
+    }
+  }
+
+  handlePagination() {
+    const documentElement = this.formsRef.current;
+    const scrollTop     = documentElement.scrollTop;
+    const scrollHeight  = documentElement.scrollHeight;
+    const clientHeight  = documentElement.clientHeight;
+    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+    if(scrolledToBottom) this.fetch();
+  }
+
+  fetch() {
+    if(this.state.isRequest) return;
+    const { user, note } = this.props;
+    const page = this.state.page + 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const spn = Spinner.of('app');
+    std.logInfo(RssItems.displayName, 'fetch', { id: note._id, page });
+    spn.start();
+    NoteAction.fetch(user, note._id, skip, limit)
+      .then(() => this.setState({ isRequest: false, page, prevPage: this.state.page }))
+      .then(() => spn.stop());
+    this.setState({ isRequest: true });
   }
 
   downloadFile(blob) {
@@ -75,7 +121,7 @@ class RssItems extends React.Component {
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
     const page = { number: 0, perPage: 20, maxNumber: 9999 };
-    return <div className={classes.forms}>
+    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
@@ -108,27 +154,22 @@ RssItems.propTypes = {
 , category: PropTypes.string.isRequired
 };
 
-const barHeightSmDown   = 104;
-const barHeightSmUp     = 112;
+const barHeightSmDown   = 64;
+const barHeightSmUp     = 56;
 const searchHeight      = 62;
 const filterHeight      = 62;
 const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const columnHeight = 62;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column'
-                , overflow: 'scroll' }
+  forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
 , noteList:     { width: '100%'
                 , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: {
-                  height: listHeightSmUp }}
-, header:       { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch', justifyContent: 'space-between'
-                , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box', padding: '5px' }
+                , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
+, header:       { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-between'
+                , height: columnHeight, minHeight: columnHeight, boxSizing: 'border-box', padding: '5px' }
 , title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
 , buttons:      { display: 'flex', flexDirection: 'row' }
-, button:       { flex: 1, margin: theme.spacing.unit
-                , wordBreak: 'keep-all'  }
+, button:       { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all'  }
 });
 export default withStyles(styles)(RssItems);

@@ -16,9 +16,18 @@ var common = {
       , use: {
           loader: 'babel-loader'
         , options: {
-            presets: [
-              '@babel/react'
-            , [ '@babel/env', { 'modules': false } ] ]
+            babelrc: false
+          , presets: [
+              '@babel/preset-react'
+            , [
+                '@babel/preset-env'
+              , {
+                  'modules': false
+                , 'targets': { 'ie': '11', 'chrome': '68', 'firefox': '61', 'edge': '42', 'node': '10' }
+                , 'useBuiltIns': 'usage'
+                }
+              ]
+            ]
           , plugins: [
               'react-hot-loader/babel'
             , '@babel/proposal-object-rest-spread'

@@ -1,5 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import * as R           from 'ramda';
 import classNames       from 'classnames';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
@@ -16,24 +17,65 @@ class ClosedForms extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      note:             props.note
-    , itemFilter:       props.itemFilter
-    , checked:          false
-    , lastWeekAuction:  true
-    , twoWeeksAuction:  true
+      note: props.note
+    , itemFilter: props.itemFilter
+    , checked: false
+    , lastWeekAuction: true
+    , twoWeeksAuction: true
     , lastMonthAuction: true
-    , allAuction:       true
-    , inAuction:        false
-    , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , isSuccess:        false
-    , isNotValid:       false
+    , allAuction: true
+    , inAuction: false
+    , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , isSuccess: false
+    , isNotValid: false
+    , isRequest: false
+    , page: 1
+    , prevPage: 1
     };
+    this.formsRef = React.createRef();
   }
 
   componentWillReceiveProps(nextProps) {
     const { itemFilter, note } = nextProps;
-    this.setState({ note, itemFilter });
+    const prevNote = this.state.note;
+    const prevPage = this.state.prevPage;
+    const nextPage = this.state.page;
+    if(prevNote && (note._id !== prevNote._id)) {
+      this.setState({ note, page: 1, prevPage: 1 });
+    } else if(prevNote && prevPage !== nextPage){
+      const getItems = obj => obj.items;
+      const catItems = R.concat(note.items);
+      const setItems = objs => R.merge(note, { items: objs });
+      const setNote  = R.compose(setItems, catItems, getItems);
+      this.setState({ note: setNote(prevNote) });
+    } else {
+      this.setState({ itemFilter });
+    }
+  }
+
+  handlePagination() {
+    const documentElement = this.formsRef.current;
+    const scrollTop     = documentElement.scrollTop;
+    const scrollHeight  = documentElement.scrollHeight;
+    const clientHeight  = documentElement.clientHeight;
+    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+    if(scrolledToBottom) this.fetch();
+  }
+
+  fetch() {
+    if(this.state.isRequest) return;
+    const { user, note } = this.props;
+    const page = this.state.page + 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const spn = Spinner.of('app');
+    std.logInfo(ClosedForms.displayName, 'fetch', { id: note._id, page });
+    spn.start();
+    NoteAction.fetch(user, note._id, skip, limit)
+      .then(() => this.setState({ isRequest: false, page, prevPage: this.state.page }))
+      .then(() => spn.stop());
+    this.setState({ isReqeust: true });
   }
 
   downloadFile(blob) {
@@ -162,18 +204,16 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, perPage, user, note, category } = this.props;
-    const { aucStartTime, aucStopTime
-      , lastWeekAuction, twoWeeksAuction, lastMonthAuction
+    const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction
       , allAuction, inAuction, isNotValid, isSuccess } = this.state;
     const items = note.items ? note.items : [];
     const color = this.getColor(category);
     const page = { number: 0, perPage: 20, maxNumber: 9999 };
-    return <div className={classes.forms}>
+    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color}
-            onClick={this.handleDownload.bind(this)} 
+          <RssButton color={color} onClick={this.handleDownload.bind(this)} 
             classes={classes.button}>ダウンロード</RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
@@ -187,36 +227,19 @@ class ClosedForms extends React.Component {
       </div>
     {category === 'closedsellers' || category === 'closedmarchant' ? 
       (<div className={classes.edit}>
-        <Typography variant="subheading" noWrap
-          className={classes.column}>絞込件数：</Typography>
-        <Checkbox color="primary" 
-          className={classes.checkbox}
-          checked={lastWeekAuction}
-          onChange={this.handleChangeCheckbox.bind(this, 'lastWeekAuction')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.column}>終了後１週間</Typography>
-        <Checkbox color="primary"
-          className={classes.checkbox}
-          checked={twoWeeksAuction}
-          onChange={this.handleChangeCheckbox.bind(this, 'twoWeeksAuction')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.column}>終了後２週間</Typography>
-        <Checkbox color="primary"
-          className={classes.checkbox}
-          checked={lastMonthAuction}
-          onChange={this.handleChangeCheckbox.bind(this, 'lastMonthAuction')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.column}>終了後１ヶ月</Typography>
-        <Checkbox color="primary"
-          className={classes.checkbox}
-          checked={allAuction}
-          onChange={this.handleChangeCheckbox.bind(this, 'allAuction')}
-          tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap
-          className={classes.column}>全て表示</Typography>
+        <Typography variant="subheading" noWrap className={classes.column}>絞込件数：</Typography>
+        <Checkbox color="primary" className={classes.checkbox} checked={lastWeekAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'lastWeekAuction')} tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap className={classes.column}>終了後１週間</Typography>
+        <Checkbox color="primary" className={classes.checkbox} checked={twoWeeksAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'twoWeeksAuction')} tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap className={classes.column}>終了後２週間</Typography>
+        <Checkbox color="primary" className={classes.checkbox} checked={lastMonthAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'lastMonthAuction')} tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap className={classes.column}>終了後１ヶ月</Typography>
+        <Checkbox color="primary" className={classes.checkbox} checked={allAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'allAuction')} tabIndex={-1} disableRipple />
+        <Typography variant="subheading" noWrap className={classes.column}>全て表示</Typography>
       </div>) : null }
     {category === 'closedsellers'  || category === 'closedmarchant'
       ? (<div className={classes.edit}>
@@ -226,13 +249,9 @@ class ClosedForms extends React.Component {
           </Typography>
         </div>
         <div className={classes.datetimes}>
-          <Checkbox color="primary"
-            tabIndex={-1} disableRipple
-            checked={inAuction}
-            onChange={this.handleChangeCheckbox.bind(this, 'inAuction')}
-            className={classes.checkbox}/>
-          <Typography variant="subheading" noWrap
-            className={classes.column}>入札終了時期：</Typography>
+          <Checkbox color="primary" tabIndex={-1} disableRipple checked={inAuction}
+            onChange={this.handleChangeCheckbox.bind(this, 'inAuction')} className={classes.checkbox}/>
+          <Typography variant="subheading" noWrap className={classes.column}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
             <TextField id="start-time" label="始め" type="datetime-local"
               InputLabelProps={{shrink: true}}
@@ -252,8 +271,7 @@ class ClosedForms extends React.Component {
       ? (<div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
-            <Button variant="raised"
-              onClick={this.handleFilter.bind(this)}
+            <Button variant="raised" onClick={this.handleFilter.bind(this)}
               className={classes.button}>絞り込み</Button>
           </div>
         </div>

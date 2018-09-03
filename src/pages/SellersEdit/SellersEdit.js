@@ -9,11 +9,7 @@ class SellersEdit extends React.Component {
     const { classes, user, note, category, file} = this.props
     if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
-      <RssItems
-        user={user}
-        note={note} 
-        category={category}
-        file={file} />
+      <RssItems user={user} note={note} category={category} file={file} />
     </div>;
   }
 }
@@ -27,16 +23,13 @@ SellersEdit.propTypes = {
 , file: PropTypes.object
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
-const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
+const rowHeight         = 62;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  noteEdit: { display: 'flex', flexDirection: 'column'
-            , height: editHeightSmDown
+  noteEdit: { display: 'flex', flexDirection: 'column', height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 });
 export default withStyles(styles)(SellersEdit);

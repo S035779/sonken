@@ -2,7 +2,6 @@ import React                from 'react';
 import PropTypes            from 'prop-types';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
-import Spinner              from 'Utilities/Spinner';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
@@ -31,35 +30,6 @@ class RssItemList extends React.Component {
       if(item.added)   added.push(item.guid._);
     });
     this.setState({ listed, starred, deleted, added });
-  }
-
-  componentDidMount() {
-    window.addEventListener('scroll', this.handlePagination.bind(this));
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('scroll', this.handlePagination.bind(this));
-  }
-
-  handlePagination() {
-    const scrollTop         = (document.documentElement && document.documentElement.scrollTop) 
-      || document.body.scrollTop;
-    const scrollHeight      = (document.documentElement && document.documentElement.scrollHeight)
-      || document.body.scrollHeight;
-    const clientHeight      = document.documentElement.clientHeight 
-      || window.innerHeight;
-    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-    std.logInfo(RssItemList.displayName, 'handlePagination', { scrollTop, scrollHeight, clientHeight, scrolledToBottom });
-    if(scrolledToBottom) {
-      const { user, id, page } = this.props;
-      const skip = (page.number - 1) * page.perPage;
-      const limit = page.perPage;
-      const spn = Spinner.of('app');
-      spn.start();
-      std.logInfo(RssItemList.displayName, 'handlePagination', id);
-      NoteAction.fetch(user, id, skip, limit)
-        .then(() => spn.stop());
-    }
   }
 
   handleChangeListed(id) {
@@ -168,15 +138,12 @@ class RssItemList extends React.Component {
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
         <ListItem disableGutters
-          onMouseLeave={
-            this.handleMouseLeaveAdded.bind(this, item.guid._)}
+          onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid._)}
           className={classes.listItem}>
-            <IconButton
-              onClick={this.handleChangeStarred.bind(this, item.guid._)}>
+            <IconButton onClick={this.handleChangeStarred.bind(this, item.guid._)}>
               {renderStar}
             </IconButton>
-            <IconButton
-              onClick={this.handleChangeAdded.bind(this, item.guid._)}>
+            <IconButton onClick={this.handleChangeAdded.bind(this, item.guid._)}>
               {renderFiberNew}
             </IconButton>
             <div className={classes.description}>
@@ -186,8 +153,7 @@ class RssItemList extends React.Component {
                 width={item.description.DIV.A.IMG.attr.WIDTH}
                 height={item.description.DIV.A.IMG.attr.HEIGHT}
                 alt={item.description.DIV.A.IMG.attr.ALT}
-                className={classes.image}
-              />
+                className={classes.image} />
               </a>
             </div>
             <ListItemText
@@ -199,8 +165,7 @@ class RssItemList extends React.Component {
               <RssButton color={buttonColor}
                 onClick={this.handleChangeListed.bind(this, item.guid._)}
                 classes={classes.button}>{buttonText}</RssButton>
-              <IconButton
-                onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
+              <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
                 <Delete />
               </IconButton>
             </ListItemSecondaryAction>
@@ -234,8 +199,6 @@ RssItemList.propTypes = {
   classes: PropTypes.object.isRequired
 , items: PropTypes.array.isRequired
 , user: PropTypes.string.isRequired
-, id: PropTypes.string.isRequired
-, page: PropTypes.object.isRequired
 };
 
 const itemHeight        = 142 * 1.5;

@@ -10,11 +10,7 @@ class MarchantEdit extends React.Component {
     const { classes, user, note, category, file } = this.props
     if(!note || !note._id) return null;
     return <div className={classes.noteEdit}>
-      <RssForms
-        user={user}
-        note={note}
-        category={category}
-        file={file}>
+      <RssForms user={user} note={note} category={category} file={file}>
         <div className={classes.view}>
           <RssView note={note}/>
         </div>
@@ -32,8 +28,8 @@ MarchantEdit.propTypes = {
 , file: PropTypes.object
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
 const rowHeight         = 62
 const editHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
