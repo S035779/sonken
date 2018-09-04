@@ -28,26 +28,27 @@ class RssItems extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { note } = nextProps;
+    const nextNote = nextProps.note;
+    const nextPage = this.state.page;
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
-    const nextPage = this.state.page;
-    if(prevNote && (note._id !== prevNote._id)) {
-      this.setState({ note, page: 1, prevPage: 1 });
-    } else if(prevNote && (prevPage !== nextPage)) {
+    if(prevNote && (nextNote._id !== prevNote._id)) {
+      this.setState({ note: nextNote, page: 1, prevPage: 1 });
+    } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
+      std.logInfo(RssItems.displayName, 'Props', { nextNote, nextPage, prevNote, prevPage });
       const getItems = obj => obj.items;
-      const catItems = R.concat(note.items);
-      const setItems = objs => R.merge(note, { items: objs });
+      const catItems = R.concat(nextNote.items);
+      const setItems = objs => R.merge(nextNote, { items: objs });
       const setNote  = R.compose(setItems ,catItems ,getItems);
-      this.setState({ note: setNote(prevNote) });
+      this.setState({ note: setNote(prevNote), prevPage: nextPage });
     }
   }
 
   handlePagination() {
-    const documentElement = this.formsRef.current;
-    const scrollTop     = documentElement.scrollTop;
-    const scrollHeight  = documentElement.scrollHeight;
-    const clientHeight  = documentElement.clientHeight;
+    const documentElement   = this.formsRef.current;
+    const scrollTop         = documentElement.scrollTop;
+    const scrollHeight      = documentElement.scrollHeight;
+    const clientHeight      = documentElement.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom) this.fetch();
   }
@@ -62,9 +63,9 @@ class RssItems extends React.Component {
     std.logInfo(RssItems.displayName, 'fetch', { id: note._id, page });
     spn.start();
     NoteAction.fetch(user, note._id, skip, limit)
-      .then(() => this.setState({ isRequest: false, page, prevPage: this.state.page }))
+      .then(() => this.setState({ isRequest: false }))
       .then(() => spn.stop());
-    this.setState({ isRequest: true });
+    this.setState({ isRequest: true, page });
   }
 
   downloadFile(blob) {
