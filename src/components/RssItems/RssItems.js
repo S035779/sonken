@@ -34,7 +34,7 @@ class RssItems extends React.Component {
     const prevPage = this.state.prevPage;
     if(prevNote && (nextNote._id !== prevNote._id)) {
       //std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
-      this.forms.Ref.current.scrollTop = 0;
+      this.formsRef.current.scrollTop = 0;
       this.setState({ note: nextNote, page: 1, prevPage: 1 });
     } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
       //std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
@@ -124,8 +124,7 @@ class RssItems extends React.Component {
     const { isNotValid, isSuccess } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
-    const ref = this.formsRef;
-    return <div ref={ref} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
+    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
