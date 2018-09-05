@@ -140,35 +140,35 @@ class RssItemList extends React.Component {
         <ListItem disableGutters
           onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid._)}
           className={classes.listItem}>
-            <IconButton onClick={this.handleChangeStarred.bind(this, item.guid._)}>
-              {renderStar}
+          <IconButton onClick={this.handleChangeStarred.bind(this, item.guid._)}>
+            {renderStar}
+          </IconButton>
+          <IconButton onClick={this.handleChangeAdded.bind(this, item.guid._)}>
+            {renderFiberNew}
+          </IconButton>
+          <div className={classes.description}>
+            <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
+            <img src={item.description.DIV.A.IMG.attr.SRC}
+              border={item.description.DIV.A.IMG.attr.BORDER}
+              width={item.description.DIV.A.IMG.attr.WIDTH}
+              height={item.description.DIV.A.IMG.attr.HEIGHT}
+              alt={item.description.DIV.A.IMG.attr.ALT}
+              className={classes.image} />
+            </a>
+          </div>
+          <ListItemText
+            classes={textClass}
+            className={classes.listItemText}
+            primary={title}
+            secondary={description}/>
+          <ListItemSecondaryAction>
+            <RssButton color={buttonColor}
+              onClick={this.handleChangeListed.bind(this, item.guid._)}
+              classes={classes.button}>{buttonText}</RssButton>
+            <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
+              <Delete />
             </IconButton>
-            <IconButton onClick={this.handleChangeAdded.bind(this, item.guid._)}>
-              {renderFiberNew}
-            </IconButton>
-            <div className={classes.description}>
-              <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-              <img src={item.description.DIV.A.IMG.attr.SRC}
-                border={item.description.DIV.A.IMG.attr.BORDER}
-                width={item.description.DIV.A.IMG.attr.WIDTH}
-                height={item.description.DIV.A.IMG.attr.HEIGHT}
-                alt={item.description.DIV.A.IMG.attr.ALT}
-                className={classes.image} />
-              </a>
-            </div>
-            <ListItemText
-              classes={textClass}
-              className={classes.listItemText}
-              primary={title}
-              secondary={description}/>
-            <ListItemSecondaryAction>
-              <RssButton color={buttonColor}
-                onClick={this.handleChangeListed.bind(this, item.guid._)}
-                classes={classes.button}>{buttonText}</RssButton>
-              <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
-                <Delete />
-              </IconButton>
-            </ListItemSecondaryAction>
+          </ListItemSecondaryAction>
         </ListItem>
       </Paper>
     </div>;
@@ -176,19 +176,19 @@ class RssItemList extends React.Component {
 
   render() {
     const { items } = this.props;
-    const compareFavorite = (a, b) => {
-      if(a.starred === true  && b.starred === false) return -1;
-      if(a.starred === false && b.starred === true ) return 1;
-      return 0;
-    };
-    const compareId = (a, b) => {
-      if(a._id < b._id) return -1;
-      if(a._id > b._id) return 1;
-      return 0;
-    };
+    //const compareFavorite = (a, b) => {
+    //  if(a.starred === true  && b.starred === false) return -1;
+    //  if(a.starred === false && b.starred === true ) return 1;
+    //  return 0;
+    //};
+    //const compareId = (a, b) => {
+    //  if(a._id < b._id) return -1;
+    //  if(a._id > b._id) return 1;
+    //  return 0;
+    //};
     const renderItems = items
-      .sort(compareId)
-      .sort(compareFavorite)
+      //.sort(compareId)
+      //.sort(compareFavorite)
       .map((item, index) => this.renderItem(index, item));
     return <List>{renderItems}</List>;
   }
@@ -205,7 +205,7 @@ const itemHeight        = 142 * 1.5;
 const itemMinWidth      = 800;
 const descMinWidth      = 133 * 1.5;
 const styles = theme => ({
-noteItem:       { display: 'flex', flexDirection: 'row', alignItems: 'center' }
+  noteItem:     { display: 'flex', flexDirection: 'row', alignItems: 'center' }
 , listItem:     { height: itemHeight, minWidth: itemMinWidth, padding: theme.spacing.unit /2
                   , '&:hover':  { backgroundColor: theme.palette.primary.main
                     , '& $star': { color: theme.palette.common.white } } }

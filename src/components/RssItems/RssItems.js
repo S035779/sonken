@@ -29,18 +29,20 @@ class RssItems extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const nextNote = nextProps.note;
-    const nextPage = this.state.page;
     const prevNote = this.state.note;
+    const nextPage = this.state.page;
     const prevPage = this.state.prevPage;
     if(prevNote && (nextNote._id !== prevNote._id)) {
+      //std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+      this.forms.Ref.current.scrollTop = 0;
       this.setState({ note: nextNote, page: 1, prevPage: 1 });
     } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
-      std.logInfo(RssItems.displayName, 'Props', { nextNote, nextPage, prevNote, prevPage });
+      //std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
       const getItems = obj => obj.items;
-      const catItems = R.concat(nextNote.items);
-      const setItems = objs => R.merge(nextNote, { items: objs });
+      const catItems = R.concat(prevNote.items);
+      const setItems = objs => R.merge(prevNote, { items: objs });
       const setNote  = R.compose(setItems ,catItems ,getItems);
-      this.setState({ note: setNote(prevNote), prevPage: nextPage });
+      this.setState({ note: setNote(nextNote), prevPage: nextPage });
     }
   }
 
@@ -56,20 +58,21 @@ class RssItems extends React.Component {
   fetch() {
     if(this.state.isRequest) return;
     const { user, note } = this.props;
+    const id = note._id;
     const page = this.state.page + 1;
     const limit = 20;
     const skip = (page - 1) * limit;
     const spn = Spinner.of('app');
-    std.logInfo(RssItems.displayName, 'fetch', { id: note._id, page });
+    //std.logInfo(RssItems.displayName, 'fetch', { id, page });
     spn.start();
-    NoteAction.fetch(user, note._id, skip, limit)
+    NoteAction.fetch(user, id, skip, limit)
       .then(() => this.setState({ isRequest: false }))
       .then(() => spn.stop());
     this.setState({ isRequest: true, page });
   }
 
   downloadFile(blob) {
-    std.logInfo(RssItems.displayName, 'downloadFile', blob);
+    //std.logInfo(RssItems.displayName, 'downloadFile', blob);
     const a = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
@@ -88,7 +91,7 @@ class RssItems extends React.Component {
 
   handleDownload() {
     const { user, note } = this.props;
-    std.logInfo(RssItems.displayName, 'handleDownload', user);
+    //std.logInfo(RssItems.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
     spn.start();
     NoteAction.downloadItems(user, note._id)
@@ -119,9 +122,8 @@ class RssItems extends React.Component {
   render() {
     const { classes, user, note, category } = this.props;
     const { isNotValid, isSuccess } = this.state;
-    const items = note.items ? note.items : [];
+    const { items } = this.state.note;
     const color = this.getColor(category);
-    const page = { number: 0, perPage: 20, maxNumber: 9999 };
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
@@ -140,7 +142,7 @@ class RssItems extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList id={note._id} user={user} items={items} page={page} />
+        <RssItemList user={user} items={items} />
       </div>
     </div>;
   }

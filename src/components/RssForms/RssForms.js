@@ -35,19 +35,21 @@ class RssForms extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const nextNote = nextProps.note;
-    const nextPage = this.state.page
     const prevNote = this.state.note;
+    const nextPage = this.state.page
     const prevPage = this.state.prevPage;
-    if(prevNote && (nextNote._id !== prevNote._id)) {
+    if(nextNote && (nextNote._id !== prevNote._id)) {
+      //std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+      this.formsRef.current.scrollTop = 0;
       this.setState({ note: nextNote, page: 1, prevPage: 1 });
-    } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
-      std.logInfo(RssForms.displayName, 'Props', { nextNote, nextPage, prevNote, prevPage });
+    } else if(nextNote && (prevPage !== nextPage) && nextNote.items.length) {
+      //std.logInfo(RssForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
       const getItems = obj => obj.items;
-      const catItems = R.concat(nextNote.items);
-      const setItems = objs => R.merge(nextNote, { items: objs });
+      const catItems = R.concat(prevNote.items);
+      const setItems = objs => R.merge(prevNote, { items: objs });
       const setNote  = R.compose(setItems, catItems, getItems);
-      this.setState({ note: setNote(prevNote), prevPage: nextPage });
-    } 
+      this.setState({ note: setNote(nextNote), prevPage: nextPage });
+    }
   }
 
   handlePagination() {
@@ -62,20 +64,21 @@ class RssForms extends React.Component {
   fetch() {
     if(this.state.isRequest) return;
     const { user, note } = this.props;
+    const id = note._id;
     const page = this.state.page + 1;
     const limit = 20;
     const skip = (page - 1) * limit;
     const spn = Spinner.of('app');
-    std.logInfo(RssForms.displayName, 'fetch', { id: note._id, page });
+    //std.logInfo(RssForms.displayName, 'fetch', { id, page });
     spn.start();
-    NoteAction.fetch(user, note._id, skip, limit)
+    NoteAction.fetch(user, id, skip, limit)
       .then(() => this.setState({ isRequest: false }))
       .then(() => spn.stop());
     this.setState({ isRequest: true, page });
   }
 
   downloadFile(blob) {
-    std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
+    //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
     const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
@@ -148,7 +151,7 @@ class RssForms extends React.Component {
 
   handleDownload() {
     const { user, note } = this.props;
-    std.logInfo(RssForms.displayName, 'handleDownload', user);
+    //std.logInfo(RssForms.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
     spn.start();
     NoteAction.downloadItems(user, note._id)
@@ -205,7 +208,6 @@ class RssForms extends React.Component {
     const link_fba = fba;
     const link_amz = note.AmazonUrl;
     const name = note.name;
-    //const items = note.items ? note.items : [];
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
@@ -288,8 +290,8 @@ RssForms.propTypes = {
 , children: PropTypes.object.isRequired
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
 const searchHeight      = 62;
 const filterHeight      = 62 * 9;
 const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;

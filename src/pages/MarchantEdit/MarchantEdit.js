@@ -31,10 +31,8 @@ MarchantEdit.propTypes = {
 const barHeightSmUp     = 64;
 const barHeightSmDown   = 56;
 const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    = 
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
   noteEdit: { display: 'flex', flexDirection: 'column'
             , height: editHeightSmDown

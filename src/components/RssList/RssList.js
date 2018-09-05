@@ -63,7 +63,8 @@ class RssList extends React.Component {
 
   handleListItem(id) {
     const { user } = this.props;
-    NoteAction.createRead(user, [id]);
+    NoteAction.fetch(user, id, 0, 20)
+      .then(() => NoteAction.createRead(user, [id]));
   }
 
   handleCloseDialog(name) {
@@ -83,7 +84,7 @@ class RssList extends React.Component {
     const _categorys = category => categorys
       .filter(obj => category === obj.category)
       .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
-        ? 1   : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16) ? -1  : 0);
+        ? 1 : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16) ? -1  : 0);
     const categoryList = category => categorys ? _categorys(category) : null;
     return <div key={note._id} className={classes.noteItem}>
       <Checkbox className={classes.checkbox} onClick={this.handleChangeCheckbox.bind(this, note._id)}
@@ -94,15 +95,11 @@ class RssList extends React.Component {
             <ListItemText classes={textClass} primary={noteTitle} secondary={updated}/>
             <ListItemSecondaryAction>
               <Button className={classes.button} 
-                onClick={this.handleChangeDialog.bind(this, note._id)} color="primary">編集</Button>
-              <RssFormDialog
-                user={user}
-                selectedNoteId={note._id}
-                noteTitle={note.title}
-                title={title}
-                category={note.category}
-                categorys={categoryList(note.category)}
-                categoryIds={note.categoryIds}
+                onClick={this.handleChangeDialog.bind(this, note._id)} color="primary">
+                編集
+              </Button>
+              <RssFormDialog user={user} selectedNoteId={note._id} noteTitle={note.title} title={title}
+                category={note.category} categorys={categoryList(note.category)} categoryIds={note.categoryIds}
                 open={this.state.opened.indexOf(note._id) !== -1}
                 onClose={this.handleChangeDialog.bind(this, note._id)}
                 onSubmit={this.handleChangeTitle.bind(this)} />

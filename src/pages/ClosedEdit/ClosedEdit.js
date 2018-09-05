@@ -48,15 +48,9 @@ class ClosedEdit extends React.Component {
     const itemNumber = items.length;
     const perPage = _items.length;
     return <div className={classes.noteEdit}>
-        <ClosedForms
-          user={user}
-          note={_note}
-          category={category}
-          itemFilter={filter} 
-          itemNumber={itemNumber}
-          perPage={perPage}
-          file={file} />
-    </div>;
+        <ClosedForms user={user} note={_note} category={category} itemFilter={filter} itemNumber={itemNumber}
+          perPage={perPage} file={file} />
+      </div>;
   }
 }
 ClosedEdit.displayName= 'ClosedEdit';
@@ -70,8 +64,8 @@ ClosedEdit.propTypes = {
 , file: PropTypes.object
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
 const rowHeight         = 62
 const editHeightSmDown  =
   `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;

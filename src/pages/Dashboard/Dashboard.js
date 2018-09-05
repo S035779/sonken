@@ -122,30 +122,13 @@ class Dashboard extends React.Component {
     const note = notes.find(obj => obj._id === _id);
     const number = _notes.length;
     return <div className={classes.root}>
-        <RssSearch
-          user={user}
-          title={title}
-          category={category}
-          categorys={categorys}
-          note={note}
-          file={file}
+        <RssSearch user={user} title={title} category={category} categorys={categorys} note={note} file={file}
           noteNumber={number} notePage={page} />
       <div className={classes.body}>
         <div className={classes.noteList}>
-          <RssButtons
-            user={user}
-            category={category}
-            notes={_notes}
-            file={file}
-            selectedNoteId={ids} />
-          <RssList
-            user={user}
-            title={title}
-            notes={_notes}
-            categorys={categorys}
-            categoryId={categoryId}
-            selectedNoteId={ids}
-            notePage={page}/>
+          <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} />
+          <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
+            selectedNoteId={ids} notePage={page}/>
         </div>
         <div className={classes.noteEdit}>
           { route.routes ? renderRoutes(route.routes, { user, note, category, filter, file }) : null }
@@ -163,8 +146,8 @@ Dashboard.propTypes = {
 , location: PropTypes.object.isRequired
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
 const listWidth         = 400;
 const searchHeight      = 62;
 const noteHeightSmUp    = 
