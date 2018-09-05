@@ -213,7 +213,8 @@ class ClosedForms extends React.Component {
       , inAuction, isNotValid, isSuccess } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
-    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
+    const ref = this.formsRef;
+    return <div ref={ref} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
