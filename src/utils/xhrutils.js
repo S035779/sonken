@@ -27,9 +27,7 @@ const get = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.send(null);
 };
 
@@ -60,9 +58,7 @@ const getJSON = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.send(null);
 };
 
@@ -93,9 +89,7 @@ const deleteJSON = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(JSON.parse(request.statusText));
-  };
+  request.onerror = function() { reject(JSON.parse(request.statusText)); };
   request.send(null);
 };
 
@@ -126,11 +120,8 @@ const post = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
-  request.setRequestHeader("Content-Type"
-    , "application/x-www-form-urlencoded");
+  request.onerror = function() { reject(request.statusText); };
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   request.send(std.urlencode_rfc3986(data));
 };
 
@@ -161,9 +152,7 @@ const getData = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.send(null);
 };
 
@@ -194,11 +183,8 @@ const postData = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
-  request.setRequestHeader("Content-Type"
-    , "application/x-www-form-urlencoded");
+  request.onerror = function() { reject(request.statusText); };
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   request.send(std.urlencode_rfc3986(data));
 };
 
@@ -229,13 +215,9 @@ const postXML = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.setRequestHeader("Content-Type", "text/xml; charset=UTF-8");
-  for(let key in data.head) {
-    request.setRequestHeader(key, data.head[key]);
-  }
+  for(let key in data.head) { request.setRequestHeader(key, data.head[key]); }
   request.send(data.body);
 };
 
@@ -266,9 +248,7 @@ const postJSON = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
@@ -300,9 +280,7 @@ const putJSON = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
@@ -334,9 +312,7 @@ const putFile = function(url, file, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.setRequestHeader("x-uploadedfilename", file.name);
   request.setRequestHeader("x-uploadedfiletype", file.type)
   request.send(file.content);
@@ -371,9 +347,7 @@ const getFile = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.send(null);
 };
 
@@ -406,9 +380,7 @@ const postFile = function(url, data, resolve, reject) {
       }
     }
   };
-  request.onerror = function() {
-    reject(request.statusText);
-  };
+  request.onerror = function() { reject(request.statusText); };
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };
