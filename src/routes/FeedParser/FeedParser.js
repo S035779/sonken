@@ -40,8 +40,34 @@ export default class FeedParser {
           const { user, category, skip, limit } = options;
           const conditions = !category ? { user } : { user, category };
           const notes = skip && limit 
-            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).slice('items', [0, 20])
-            : Note.find(conditions);
+            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
+              .where('items').slice([0, 20])
+            : Note.find(conditions).sort({ updated: 'asc' });
+          notes.exec((err, obj) => {
+            if(err) return reject(err);
+            resolve(obj);
+          });
+        });
+      case 'fetch/note':
+        return new Promise((resolve, reject) => {
+          const { user, id, skip, limit } = options;
+          const conditions = { _id: id, user };
+          const note = skip && limit 
+            ? Note.findOne(conditions)
+              .where('items').slice([ Number(skip), Number(limit) ]).sort({ pubDate: 'desc' })
+            : Note.findOne(conditions);
+          note.exec((err, obj) => {
+            if(err) return reject(err);
+            resolve(obj);
+          });
+        });
+      case 'fetch/items':
+        return new Promise((resolve, reject) => {
+          const { user, ids, skip, limit } = options;
+          const conditions = { user, 'items.guid__': { $in: ids } };
+          const notes = skip && limit
+            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
+            : Note.find(conditions).sort({ updated: 'asc' });
           notes.exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
@@ -54,18 +80,6 @@ export default class FeedParser {
             if(err) return reject(err);
             resolve(obj);
           })
-        });
-      case 'fetch/items':
-        return new Promise((resolve, reject) => {
-          const { user, ids, skip, limit } = options;
-          const conditions = { user, 'items.guid__': { $in: ids } };
-          const notes = skip && limit
-            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit))
-            : Note.find(conditions);
-          notes.exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
         });
       case 'fetch/added':
         return new Promise((resolve, reject) => {
@@ -119,18 +133,6 @@ export default class FeedParser {
         return new Promise((resolve, reject) => {
           const conditions = { user: options.user };
           Listed.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
-      case 'fetch/note':
-        return new Promise((resolve, reject) => {
-          const { user, id, skip, limit } = options;
-          const conditions = { _id: id, user };
-          const note = skip && limit 
-            ? Note.findOne(conditions).slice('items', [ Number(skip), Number(limit) ])
-            : Note.findOne(conditions);
-          note.exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
           });
@@ -940,10 +942,10 @@ export default class FeedParser {
 
   createRead({ user, ids }) {
     const promises = R.map(id => this.getNote(user, id));
-    const observables = forkJoin(promises(ids));
     const setRead = objs => this._createRead({ user, ids: objs });
-    return observables.pipe(
-      map(R.map(obj => obj.items))
+    return forkJoin(promises(ids)).pipe(
+      map(R.filter(obj => obj.items))
+    , map(R.map(obj => obj.items))
     , map(R.flatten)
     , map(R.map(obj => obj.guid._))
     , flatMap(setRead)
@@ -1006,23 +1008,16 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, file }) {
-    const observableCsv = from(this.setCsvToObj(user, category, file.content));
-    const observableOpml = from(this.setOmplToObj(user, category, file.content));
     const setNote = objs => this.createNotes({ user, category, notes: objs});
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return observableCsv.pipe(
-          flatMap(setNote)
-        );
+        return from(this.setCsvToObj(user, category, file.content)).pipe(flatMap(setNote));
       case 'opml':
-        return observableOpml.pipe(
-          flatMap(setNote)
-        );
+        return from(this.setOmplToObj(user, category, file.content)).pipe(flatMap(setNote));
       default:
-        log.error(FeedParser.displayName
-          , 'setContent', `Unknown File Type: ${file.type}`);
+        log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
         return null;
     }
   }
@@ -1036,11 +1031,7 @@ export default class FeedParser {
 
   setOmplToObj(user, category, file) {
     return new Promise((resolve, reject) => {
-      parseString(file.toString(), {
-          trim: true
-        , explicitArray: true
-        , attrkey: 'attr'
-        , charkey: '_' }
+      parseString(file.toString(), { trim: true, explicitArray: true, attrkey: 'attr', charkey: '_' }
       , (err, res) => {
         if(err) return reject(err);
         const outlines = res.opml.body[0].outline;
@@ -1071,8 +1062,7 @@ export default class FeedParser {
         , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
         });
         const base_url = 'https://auctions.yahoo.co.jp';
-        const isYahoo = obj =>
-          std.parse_url(obj.attr.htmlUrl).origin === base_url;
+        const isYahoo = obj => std.parse_url(obj.attr.htmlUrl).origin === base_url;
         resolve(R.compose(
           R.map(setNote)
         , R.filter(isYahoo)

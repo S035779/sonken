@@ -124,17 +124,17 @@ class Dashboard extends React.Component {
     return <div className={classes.root}>
         <RssSearch user={user} title={title} category={category} categorys={categorys} note={note} file={file}
           noteNumber={number} notePage={page} />
-      <div className={classes.body}>
-        <div className={classes.noteList}>
-          <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} />
-          <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
-            selectedNoteId={ids} notePage={page}/>
+        <div className={classes.body}>
+          <div className={classes.noteList}>
+            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} />
+            <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
+              selectedNoteId={ids} notePage={page}/>
+          </div>
+          <div className={classes.noteEdit}>
+            { route.routes ? renderRoutes(route.routes, { user, note, category, filter, file }) : null }
+          </div>
         </div>
-        <div className={classes.noteEdit}>
-          { route.routes ? renderRoutes(route.routes, { user, note, category, filter, file }) : null }
-        </div>
-      </div>
-    </div>;
+      </div>;
   }
 }
 Dashboard.displayName = 'Dashboard';

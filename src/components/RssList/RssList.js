@@ -61,10 +61,14 @@ class RssList extends React.Component {
       });
   }
 
-  handleListItem(id) {
+  handleReaded(note) {
     const { user } = this.props;
-    NoteAction.fetch(user, id, 0, 20)
-      .then(() => NoteAction.createRead(user, [id]));
+    if (note.items && note.items.length) {
+      NoteAction.fetch(user, note._id, 0, 20)
+      .then(() => NoteAction.createRead(user, [note._id]));
+    } else {
+      NoteAction.fetch(user, note._id, 0, 20);
+    }
   }
 
   handleCloseDialog(name) {
@@ -91,7 +95,7 @@ class RssList extends React.Component {
         checked={checked.indexOf(note._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters className={classes.listItem}
-          onClick={this.handleListItem.bind(this, note._id)} component={Link} to={linkTo}>
+          onClick={this.handleReaded.bind(this, note)} component={Link} to={linkTo}>
             <ListItemText classes={textClass} primary={noteTitle} secondary={updated}/>
             <ListItemSecondaryAction>
               <Button className={classes.button} 
@@ -115,15 +119,17 @@ class RssList extends React.Component {
   render() {
     const { classes } = this.props;
     const { isSuccess, isNotValid, notes } = this.state;
-    const compareId = (a, b) => {
-      if(a._id < b._id) return 1;
-      if(a._id > b._id) return -1;
-      return 0;
-    };
-    const renderItems = notes.sort(compareId).map(note => this.renderItem(note));
+    //const compareId = (a, b) => {
+    //  if(a._id < b._id) return 1;
+    //  if(a._id > b._id) return -1;
+    //  return 0;
+    //};
+    const renderItems = notes
+      //.sort(compareId)
+      .map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
-      <RssDialog open={isSuccess} title={'送信完了'}
+      <RssDialog open={isSuccess} title={'送信完了'} 
         onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
         要求を受け付けました。
       </RssDialog>
