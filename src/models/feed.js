@@ -42,6 +42,7 @@ const itemSchema = new mongoose.Schema({
 , asins:            Array
 , pubDate:          { type: Date, default: Date.now() }
 });
+itemSchema.index({ pubDate: 1, guid__: 1 });
 
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
@@ -59,6 +60,7 @@ const noteSchema = new mongoose.Schema({
 , AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 
 }, { collection: 'notes' });
+noteSchema.index({ updated: 1 });
 
 const categorySchema = new mongoose.Schema({
   user:             { type: String, required: true }
