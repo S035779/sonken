@@ -14,7 +14,7 @@ if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV      || 'development';
 const pages     = process.env.JOB_UPD_PAGES || 2;
-const expired   = process.env.JOB_UPD_MIN   || 10;
+//const expired   = process.env.JOB_UPD_MIN   || 10;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = `[WRK] (${process.pid})`;
@@ -103,7 +103,7 @@ const main = () => {
         log.info(displayName, 'Finished. _id/ope:', task.id, task.operation);
       });
       queue.remove(({ data }) => {
-        if(data.created < Date.now() - (expired * 60 * 1000)) {
+        if(data.created < Date.now() - (24 * 60 * 60 * 1000)) {
           log.info(displayName, 'Removed. _id/ope:', data.id, data.operation);
           return true;
         }
