@@ -60,7 +60,7 @@ const request = queue => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => obj ? { items: obj.items, operation: 'images' } : null;
+  const setQueue    = obj => ({ items: obj.items, operation: 'images', created: Date.now() });
   const setQueues   = R.map(setQueue);
   const setNote     = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);

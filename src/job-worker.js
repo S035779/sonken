@@ -14,9 +14,10 @@ if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV      || 'development';
 const pages     = process.env.JOB_UPD_PAGES || 2;
+const expired   = process.env.JOB_UPD_MIN   || 10;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
-const displayName = '[WRK]';
+const displayName = `[WRK] (${process.pid})`;
 
 if (node_env === 'development') {
   log.config('console', 'color', 'job-worker', 'TRACE');
@@ -63,43 +64,59 @@ const request = (operation, { url, user, id, items }) => {
 };
 
 const worker = ({ url, user, id, items, operation }, callback) => {
-  log.info(displayName, '== Start worker. _id/ope:', id, operation);
+  log.info(displayName, 'Started. _id/ope:', id, operation);
   const start_time = Date.now();
   request(operation, { url, user, id, items }).subscribe(
-    obj => log.debug(displayName, operation, 'is proceeding... pid:', process.pid, obj)
-  , err => log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid)
+    obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
+  , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => {
       const end_time = Date.now();
       const time_lap = (end_time - start_time) / 1000;
-      log.info(displayName, `== End worker. _id: ${id}, time: ${time_lap} sec.`);
+      log.info(displayName, `Completed. _id: ${id}, time: ${time_lap} sec.`);
       callback();
   });
 };
 
 const main = () => {
-  const queue = async.queue(worker, 1);
-  queue.drain = () => log.info(displayName, 'all jobs/items/images have been processed. pid:', process.pid);
+  const queue = async.queue(worker);
+  const wait        = () => queue.length();
+  const runs        = () => queue.running();
+  const idle        = () => queue.idle() ? '[idle]' : '[busy]';
+  //const paused      = () => queue.paused ? '[paused]' : '[resume]';
+  //const started     = () => queue.stated ? '[start]'  : '[stop]';
+  //const list        = () => queue.workersList();
+
+  queue.concurrency = 1;
+  queue.buffer      = 1;
+  queue.saturated   = () => log.debug(displayName, '== Saturated.   wait/runs:', wait(), runs(), idle());
+  queue.unsaturated = () => log.debug(displayName, '== Unsaturated. wait/runs:', wait(), runs(), idle());
+  queue.empty       = () => log.debug(displayName, '== Last.        wait/runs:', wait(), runs(), idle());
+  queue.drain       = () => log.debug(displayName, '== Drain.       wait/runs:', wait(), runs(), idle());
+  queue.error       = (err, task) => log.error(displayName, err.name, err.message, task);
+
+  process.on('disconnect', () => shutdown(null, process.exit));
   process.on('message', task => {
     if(task) {
-      log.info(displayName, 'got request. pid/ope:', process.pid, task.operation);
+      log.info(displayName, 'Received. _id/ope:', task.id, task.operation);
       queue.push(task, err => {
-        if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
-        log.info(displayName, 'finished job/item/image. pid:', process.pid);
+        if(err) log.error(displayName, err.name, err.message, err.stack);
+        log.info(displayName, 'Finished. _id/ope:', task.id, task.operation);
+      });
+      queue.remove(({ data }) => {
+        if(data.created < Date.now() - (expired * 60 * 1000)) {
+          log.info(displayName, 'Removed. _id/ope:', data.id, data.operation);
+          return true;
+        }
+        return false;
       });
     }
-  });
-
-  process.on('disconnect', () => {
-    log.error(displayName, 'worker disconnected. pid:', process.pid)
-    shutdown(null, process.exit);
   });
 };
 main();
 
 const rejections = new Map();
 const reject = (err, promise) => {
-  const { name, message, stack } = err;
-  log.warn(displayName, 'unhandledRejection', name, message, stack || promise);
+  log.warn(displayName, 'unhandledRejection', err.name, err.message, err.stack || promise);
   rejections.set(promise, err);
 };
 const shrink = promise => {
@@ -108,12 +125,12 @@ const shrink = promise => {
 };
 
 const message = (err, code, signal) => {
-  if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
+  if(err) log.error(displayName, err.name, err.message, err.stack);
   else    log.info(displayName, `worker exit. (s/c): ${signal || code}`);
 };
 
 const shutdown = (err, cbk) => {
-  if(err) log.error(displayName, err.name, err.message, err.stack, 'pid:', process.pid);
+  if(err) log.error(displayName, err.name, err.message, err.stack);
   log.info(displayName, 'worker terminated.');
   log.info(displayName, 'log4js #4 terminated.');
   log.close(() => cbk());
