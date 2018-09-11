@@ -55,7 +55,7 @@ const noteSchema = new mongoose.Schema({
 , price:            Number
 , bidsprice:        Number
 , body:             String
-, items:            [itemSchema]
+, items:            [{ type: mongoose.Schema.Types.ObjectId, ref: 'Items' }]
 , AmazonUrl:        String
 , AmazonImg:        String
 , updated:          { type: Date, default: Date.now() } 
@@ -128,6 +128,7 @@ db.openUri(mdb_url + '/feed', { useNewUrlParser: true });
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info(displayName, 'feed terminated.')));
+export const Items    = db.model('Items',     itemSchema);
 export const Note     = db.model('Note',      noteSchema);
 export const Category = db.model('Category',  categorySchema);
 export const Added    = db.model('Added',     addedSchema);

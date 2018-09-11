@@ -6,7 +6,7 @@ import { parseString }          from 'xml2js';
 import mongoose                 from 'mongoose';
 import encoding                 from 'encoding-japanese';
 import { Iconv }                from 'iconv';
-import { Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } 
+import { Items, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } 
                                 from 'Models/feed';
 import std                      from 'Utilities/stdutils';
 import Amazon                   from 'Utilities/Amazon';
@@ -36,330 +36,278 @@ export default class FeedParser {
   request(request, options) {
     switch(request) {
       case 'fetch/notes':
-        return new Promise((resolve, reject) => {
+        {
           const { user, category, skip, limit } = options;
           const conditions = !category ? { user } : { user, category };
-          const notes = skip && limit 
-            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
-              .where('items').slice([0, 20])
-            : Note.find(conditions).sort({ updated: 'asc' });
-          notes.exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
-      case 'fetch/note':
-        return new Promise((resolve, reject) => {
-          const { user, id, skip, limit } = options;
-          const conditions = { _id: id, user };
-          const note = skip && limit 
-            ? Note.findOne(conditions)
-              .where('items').slice([ Number(skip), Number(limit) ]).sort({ pubDate: 'desc' })
-            : Note.findOne(conditions);
-          note.exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
-      case 'fetch/items':
-        return new Promise((resolve, reject) => {
-          const { user, ids, skip, limit } = options;
-          const conditions = { user, 'items.guid__': { $in: ids } };
           const notes = skip && limit
-            ? Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
-            : Note.find(conditions).sort({ updated: 'asc' });
-          notes.exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+            ? Note.find(conditions).populate({ path: 'items'
+              , options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 } })
+              .skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
+            : Note.find(conditions).populate('items').sort({ updated: 'asc' });
+          return notes.exec();
+        }
+      case 'fetch/note':
+        {
+          const { user, id, skip, limit, filter } = options;
+          const conditions = { _id: id, user };
+          let match = {};
+          if(filter) {
+            const date      = new Date();
+            const start     = new Date(filter.aucStartTime);
+            const stop      = new Date(filter.aucStopTime);
+            const year      = date.getFullYear();
+            const month     = date.getMonth();
+            const day       = date.getDate();
+            const hours     = date.getHours();
+            const minutes   = date.getMinutes();
+            const seconds   = date.getSeconds();
+            const lastWeek  = new Date(year, month, day - 7);
+            const twoWeeks  = new Date(year, month, day - 14);
+            const lastMonth = new Date(year, month - 1, day);
+            const today     = new Date(year, month, day, hours, minutes, seconds);
+            if(filter.inAuction) {
+              match = { bidStopTime: { $gte: start, $lt: stop } };
+            } else if(filter.allAuction) {
+              match = null;
+            } else if(filter.lastMonthAuction) {
+              match = { bidStopTime: { $gte: lastMonth, $lt: today } , 'sold': { $gte: 3 } };
+            } else if(filter.twoWeeksAuction) {
+              match = { bidStopTime: { $gte: twoWeeks, $lt: today } , 'sold': { $gte: 2 } };
+            } else if(filter.lastWeekAuction) {
+              match = { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } };
+            }
+          }
+          const note = skip && limit 
+            ? Note.findOne(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
+            : Note.findOne(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' } } });
+          return note.exec();
+        }
+      case 'fetch/items':
+        {
+          const { user, ids, skip, limit } = options;
+          const conditions = { user };
+          const match = { guid__: { $in: ids } };
+          const notes = skip && limit
+            ? Note.find(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
+            : Note.find(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' } } });
+          return notes.exec();
+        }
       case 'fetch/categorys':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Category.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          })
-        });
+          return Category.find(conditions).exec();
+        }
       case 'fetch/added':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Added.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Added.find(conditions).exec();
+        }
       case 'fetch/deleted':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Deleted.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Deleted.find(conditions).exec();
+        }
       case 'fetch/readed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Readed.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Readed.find(conditions).exec();
+        }
       case 'fetch/traded':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Traded.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Traded.find(conditions).exec();
+        }
       case 'fetch/bided':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Bided.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Bided.find(conditions).exec();
+        }
       case 'fetch/starred':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Starred.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Starred.find(conditions).exec();
+        }
       case 'fetch/listed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { user: options.user };
-          Listed.find(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Listed.find(conditions).exec();
+        }
       case 'fetch/category':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id:  options.id, user: options.user };
-          Category.findOne(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
-      case 'create/note':
-        return new Promise((resolve, reject) => {
-          const note = new Note({
+          return Category.findOne(conditions).exec();
+        }
+      case 'create/note': 
+        {
+          const items = options.data.items;
+          const note = {
             user: options.user
           , url: options.data.url
           , category: options.data.category
           , categoryIds: options.data.categoryIds
           , title: options.data.title
           , asin: options.data.asin
-          , name: options.data.name
           , price: options.data.price
           , bidsprice: options.data.bidsprice
           , body: options.data.body
-          , items: options.data.items
-          });
-          note.save((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          , name: options.data.name
+          };
+          const getIds = R.map(obj => obj._id);
+          const setIds = objs => R.merge(note, { items: objs });
+          const putNote = obj => Note.create(obj);
+          const setNote = R.compose(putNote, setIds, getIds);
+          return Items.insertMany(items).then(setNote);
+        }
       case 'update/note':
-        return new Promise((resolve, reject) => {
-          const isItems = !!options.data.items;
-          const isAsin = options.data.asin !== '';
-          const conditions = { _id:  options.id, user: options.user };
-          const update = isItems
-            ? { items: options.data.items, updated: options.data.updated }
-            : isAsin
+        {
+          const isItems     = !!options.data.items;
+          const isAsin      = options.data.asin !== '';
+          const { id, user, data }  = options;
+          const items       = data.items;
+          const note        = isItems 
+            ? { updated:      data.updated } 
+            : isAsin 
               ? {
-                title: options.data.title
-              , asin: options.data.asin
-              , price: options.data.price
-              , bidsprice: options.data.bidsprice
-              , body: options.data.body
-              , name: options.data.name
-              , AmazonUrl: options.data.AmazonUrl
-              , AmazonImg: options.data.AmazonImg
-              , categoryIds: options.data.categoryIds
-              , updated: new Date
+                  categoryIds:  data.categoryIds
+                , title:        data.title
+                , asin:         data.asin
+                , price:        data.price
+                , bidsprice:    data.bidsprice
+                , body:         data.body
+                , name:         data.name
+                , AmazonUrl:    data.AmazonUrl
+                , AmazonImg:    data.AmazonImg
+                , updated:      new Date
               }
               : {
-                title: options.data.title
-              , asin: options.data.asin
-              , price: options.data.price
-              , bidsprice: options.data.bidsprice
-              , body: options.data.body
-              , categoryIds: options.data.categoryIds
-              , updated: new Date
+                  categoryIds:  data.categoryIds
+                , title:        data.title
+                , asin:         data.asin
+                , price:        data.price
+                , bidsprice:    data.bidsprice
+                , body:         data.body
+                , updated:      new Date
               };
-          Note.update(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          const conditions = { _id: id, user };
+          const getIds = R.map(obj => obj._id);
+          const setIds = objs => R.merge(note, { items: objs });
+          const putNote = obj => Note.update(conditions, obj).exec();
+          const setNote = R.compose(putNote, setIds, getIds);
+          return isItems 
+            ? Items.insertMany(items).then(setNote) 
+            : putNote(note);
+        }
       case 'delete/note':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id, user: options.user };
-          Note.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Note.remove(conditions).exec();
+        }
       case 'create/category':
-        return new Promise((resolve, reject) => {
-          const category = new Category({
+        {
+          const category = {
             user: options.user
           , category: options.data.category
           , subcategory: options.data.subcategory
           , subcategoryId: new mongoose.Types.ObjectId
-          });
-          category.save((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          };
+          return Category.create(category);
+        }
       case 'update/category':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id:  options.id, user: options.user };
           const update = {
             category: options.data.category
           , subcategory: options.data.subcategory
           , subcategoryId: new mongoose.Types.ObjectId(options.data.subcategoryId)
           };
-          Category.update(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Category.update(conditions, update).exec();
+        }
       case 'delete/category':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id, user: options.user };
-          Category.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Category.remove(conditions).exec();
+        }
       case 'create/added':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { added: options.id, user: options.user };
           const update = { added: options.id, user: options.user };
-          Added.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Added.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/added':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { added: options.id, user: options.user };
-          Added.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Added.remove(conditions).exec();
+        }
       case 'create/deleted':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { deleted: options.id, user: options.user };
           const update = { deleted: options.id, user: options.user };
-          Deleted.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Deleted.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/deleted':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { deleted: options.id, user: options.user };
-          Deleted.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Deleted.remove(conditions).exec();
+        }
       case 'create/readed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { readed: options.id, user: options.user };
           const update = { readed: options.id, user: options.user };
-          Readed.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Readed.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/readed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { readed: options.id, user: options.user };
-          Readed.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Readed.remove(conditions).exec();
+        }
       case 'create/traded':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { traded: options.id, user: options.user };
           const update = { traded: options.id, user: options.user };
-          Traded.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Traded.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/traded':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { traded: options.id, user: options.user };
-          Traded.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Traded.remove(conditions).exec();
+        }
       case 'create/bided':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { bided:  options.id, user: options.user };
           const update = { bided: options.id, user: options.user };
-          Bided.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Bided.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/bided':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { bided: options.id, user: options.user };
-          Bided.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Bided.remove(conditions).exec();
+        }
       case 'create/starred':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { starred: options.id, user: options.user };
           const update = { starred: options.id, user: options.user };
-          Starred.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Starred.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/starred':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { starred:  options.id, user:     options.user };
-          Starred.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Starred.remove(conditions).exec();
+        }
       case 'create/listed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { listed: options.id, user:   options.user };
           const update = { listed: options.id, user:   options.user };
-          Listed.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Listed.update(conditions, update, { upsert: true }).exec();
+        }
       case 'delete/listed':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { listed: options.id, user:   options.user };
-          Listed.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Listed.remove(conditions).exec();
+        }
       default:
         return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
     }
@@ -481,8 +429,8 @@ export default class FeedParser {
     return this.request('fetch/deleted', { user });
   }
 
-  getNote(user, id, skip, limit) {
-    return this.request('fetch/note', { user, id, skip, limit });
+  getNote(user, id, skip, limit, filter) {
+    return this.request('fetch/note', { user, id, skip, limit, filter });
   }
 
   getCategory(user, id) {
@@ -723,14 +671,14 @@ export default class FeedParser {
     );
   }
 
-  fetchNote({ user, id, skip, limit }) {
+  fetchNote({ user, id, skip, limit, filter }) {
     const observables = forkJoin([
       this.getStarred(user)
     , this.getListed(user)
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
-    , this.getNote(user, id, skip, limit)
+    , this.getNote(user, id, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setAdded(objs[4])
@@ -751,7 +699,14 @@ export default class FeedParser {
   }
 
   toObject(objs) {
-    return R.isNil(objs) ? [] : R.map(obj => obj.toObject() , objs);
+    const setObj  = obj => obj.toObject();
+    const hasObj  = obj => obj ? true : false;
+    const setObjs = R.map(setObj);
+    const hasObjs = R.filter(hasObj);
+    return R.compose(
+      setObjs
+    , hasObjs
+    )(objs);
   }
 
   setAdded(added) {
@@ -1138,10 +1093,11 @@ export default class FeedParser {
   }
   
   downloadItems({ user, ids, filter }) {
+    console.log('Filter', filter);
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
     const setAsins = R.join(':');
-    const _getItems = R.curry(this.filterItems)(filter);
-    const getItems = R.filter(_getItems);
+    //const _getItems = R.curry(this.filterItems)(filter);
+    //const getItems = R.filter(_getItems);
     const setItems = R.map(obj => ({
       title:        obj.title
     , seller:       obj.seller
@@ -1184,10 +1140,10 @@ export default class FeedParser {
     , 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const observables = R.map(id => this.fetchNote({ user, id }));
+    const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
       map(R.map(obj => obj.items))
-    , map(R.map(getItems))
+    //, map(R.map(getItems))
     , map(R.map(setItems))
     , map(R.flatten)
     , map(setItemsCsv)
@@ -1195,36 +1151,36 @@ export default class FeedParser {
     );
   }
   
-  filterItems(filter, item) {
-    if(!filter) return true;
-    const date      = new Date();
-    const now       = new Date(item.bidStopTime);
-    const start     = new Date(filter.aucStartTime);
-    const stop      = new Date(filter.aucStopTime);
-    const year      = date.getFullYear();
-    const month     = date.getMonth();
-    const day       = date.getDate();
-    const lastWeek  = new Date(year, month, day-7);
-    const twoWeeks  = new Date(year, month, day-14);
-    const lastMonth = new Date(year, month-1, day);
-    const today     = new Date(year, month, day);
-    const isLastWeek  = lastWeek  <= now && now < today && item.sold >= 1;
-    const isTwoWeeks  = twoWeeks  <= now && now < today && item.sold >= 2;
-    const isLastMonth = lastMonth <= now && now < today && item.sold >= 3;
-    const isAll = true;
-    const isNow = start <= now && now <= stop;
-    return filter.inAuction
-      ? isNow
-      : filter.allAuction
-        ? isAll
-        : filter.lastMonthAuction 
-          ? isLastMonth
-          : filter.twoWeeksAuction 
-            ? isTwoWeeks
-            : filter.lastWeekAuction 
-              ? isLastWeek
-              : true;
-  }
+  //filterItems(filter, item) {
+  //  if(!filter) return true;
+  //  const date      = new Date();
+  //  const now       = new Date(item.bidStopTime);
+  //  const start     = new Date(filter.aucStartTime);
+  //  const stop      = new Date(filter.aucStopTime);
+  //  const year      = date.getFullYear();
+  //  const month     = date.getMonth();
+  //  const day       = date.getDate();
+  //  const lastWeek  = new Date(year, month, day-7);
+  //  const twoWeeks  = new Date(year, month, day-14);
+  //  const lastMonth = new Date(year, month-1, day);
+  //  const today     = new Date(year, month, day);
+  //  const isLastWeek  = lastWeek  <= now && now < today && item.sold >= 1;
+  //  const isTwoWeeks  = twoWeeks  <= now && now < today && item.sold >= 2;
+  //  const isLastMonth = lastMonth <= now && now < today && item.sold >= 3;
+  //  const isAll = true;
+  //  const isNow = start <= now && now <= stop;
+  //  return filter.inAuction
+  //    ? isNow
+  //    : filter.allAuction
+  //      ? isAll
+  //      : filter.lastMonthAuction 
+  //        ? isLastMonth
+  //        : filter.twoWeeksAuction 
+  //          ? isTwoWeeks
+  //          : filter.lastWeekAuction 
+  //            ? isLastWeek
+  //            : true;
+  //}
 
   setNote({ user, url, category, categoryIds, title }, obj) {
     //log.debug(FeedParser.displayName, 'setNote', { user, title, category, categoryIds, url });

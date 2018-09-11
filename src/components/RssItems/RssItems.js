@@ -25,6 +25,7 @@ class RssItems extends React.Component {
     , prevPage: 1
     };
     this.formsRef = React.createRef();
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -32,43 +33,49 @@ class RssItems extends React.Component {
     const prevNote = this.state.note;
     const nextPage = this.state.page;
     const prevPage = this.state.prevPage;
-    if(prevNote && (nextNote._id !== prevNote._id)) {
-      //std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
-      this.formsRef.current.scrollTop = 0;
-      this.setState({ note: nextNote, page: 1, prevPage: 1 });
-    } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
-      //std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
-      const getItems = obj => obj.items;
-      const catItems = R.concat(prevNote.items);
-      const setItems = objs => R.merge(prevNote, { items: objs });
-      const setNote  = R.compose(setItems ,catItems ,getItems);
-      this.setState({ note: setNote(nextNote), prevPage: nextPage });
+    if(prevNote  && (nextNote.items.length > 0)) {
+      if(nextNote._id !== prevNote._id) {
+        //std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ note: nextNote, page: 1, prevPage: 1 });
+      } else if(prevPage !== nextPage) {
+        //std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        const getItems = obj => obj.items;
+        const catItems = R.concat(prevNote.items);
+        const setItems = objs => R.merge(prevNote, { items: objs });
+        const setNote  = R.compose(setItems ,catItems ,getItems);
+        this.setState({ note: setNote(nextNote), prevPage: nextPage });
+      }
     }
   }
 
   handlePagination() {
+    const { isRequest, page } = this.state;
     const documentElement   = this.formsRef.current;
     const scrollTop         = documentElement.scrollTop;
     const scrollHeight      = documentElement.scrollHeight;
     const clientHeight      = documentElement.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-    if(scrolledToBottom) this.fetch();
+    if(scrolledToBottom && !isRequest) {
+      this.spn.start();
+      this.fetch(page + 1)
+        .then(() => this.setState({ isRequest: false }))
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(RssItems.displayName, err.name, err.message);
+          this.spn.stop();
+        });
+    }
   }
 
-  fetch() {
-    if(this.state.isRequest) return;
+  fetch(page) {
     const { user, note } = this.props;
     const id = note._id;
-    const page = this.state.page + 1;
     const limit = 20;
     const skip = (page - 1) * limit;
-    const spn = Spinner.of('app');
     //std.logInfo(RssItems.displayName, 'fetch', { id, page });
-    spn.start();
-    NoteAction.fetch(user, id, skip, limit)
-      .then(() => this.setState({ isRequest: false }))
-      .then(() => spn.stop());
     this.setState({ isRequest: true, page });
+    return NoteAction.fetch(user, id, skip, limit);
   }
 
   downloadFile(blob) {
@@ -92,16 +99,15 @@ class RssItems extends React.Component {
   handleDownload() {
     const { user, note } = this.props;
     //std.logInfo(RssItems.displayName, 'handleDownload', user);
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     NoteAction.downloadItems(user, note._id)
       .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(RssItems.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
+        this.spn.stop();
       })
     ;
   }

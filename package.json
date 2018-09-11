@@ -1,6 +1,7 @@
 {
   "name": "sonken",
   "version": "1.0.0",
+  "private": true,
   "description": "This product adopts Google's Material Design for UI.",
   "author": "Mamoru Hashimoto <you@example.com>",
   "scripts": {

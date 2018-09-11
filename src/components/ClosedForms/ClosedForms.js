@@ -18,7 +18,6 @@ class ClosedForms extends React.Component {
     super(props);
     this.state = {
       note: props.note
-    , itemFilter: props.itemFilter
     , checked: false
     , lastWeekAuction: true
     , twoWeeksAuction: true
@@ -32,55 +31,75 @@ class ClosedForms extends React.Component {
     , isRequest: false
     , page: 1
     , prevPage: 1
+    , prevAllAuction: true
     };
     this.formsRef = React.createRef();
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
-    const itemFilter  = nextProps.itemFilter;
-    const nextNote    = nextProps.note;
-    const nextPage    = this.state.page;
-    const prevNote    = this.state.note;
-    const prevPage    = this.state.prevPage;
-    if(prevNote && (nextNote._id !== prevNote._id)) {
-      //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
-      this.formsRef.current.scrollTop = 0;
-      this.setState({ note: nextNote, page: 1, prevPage: 1 });
-    } else if(prevNote && (prevPage !== nextPage) && nextNote.items.length) {
-      //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
-      const getItems = obj => obj.items;
-      const catItems = R.concat(prevNote.items);
-      const setItems = objs => R.merge(prevNote, { items: objs });
-      const setNote  = R.compose(setItems, catItems, getItems);
-      this.setState({ note: setNote(nextNote), prevPage: nextPage });
-    } else {
-      this.setState({ itemFilter });
+    const itemFilter      = nextProps.itemFilter;
+    const nextNote        = nextProps.note;
+    const nextPage        = this.state.page;
+    const prevAllAuction  = this.state.prevAllAuction;
+    const prevNote        = this.state.note;
+    const prevPage        = this.state.prevPage;
+    if(prevNote && (nextNote.items.length > 0)) {
+      if(nextNote._id !== prevNote._id) {
+        //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter });
+      } else if(prevPage !== nextPage) {
+        //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        const getItems = obj => obj.items;
+        const catItems = R.concat(prevNote.items);
+        const setItems = objs => R.merge(prevNote, { items: objs });
+        const setNote  = R.compose(setItems, catItems, getItems);
+        this.setState({ note: setNote(nextNote), prevPage: nextPage, itemFilter });
+      } else if(!itemFilter.allAuction) {
+        //std.logInfo(ClosedForms.displayName, 'Filter', { itemFilter, prevAllAuction });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter, prevAllAuction: false });
+      } else if(itemFilter.allAuction !== prevAllAuction) {
+        //std.logInfo(ClosedForms.displayName, 'Normal', { itemFilter, prevAllAuction });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter, prevAllAuction: true });
+      }
     }
   }
 
   handlePagination() {
+    const { isRequest, page } = this.state;
     const documentElement   = this.formsRef.current;
     const scrollTop         = documentElement.scrollTop;
     const scrollHeight      = documentElement.scrollHeight;
     const clientHeight      = documentElement.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-    if(scrolledToBottom) this.fetch();
+    if(scrolledToBottom && !isRequest) {
+      this.fetch(page + 1)
+        .then(() => this.setState({ isRequest: false }))
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(ClosedForms.displayName, err.name, err.message);
+          this.spn.stop();
+        });
+    }
   }
 
-  fetch() {
-    if(this.state.isRequest) return;
+  fetch(page) {
     const { user, note } = this.props;
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
     const id = note._id;
-    const page = this.state.page + 1;
     const limit = 20;
     const skip = (page - 1) * limit;
-    const spn = Spinner.of('app');
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
-    spn.start();
-    NoteAction.fetch(user, id, skip, limit)
-      .then(() => this.setState({ isRequest: false }))
-      .then(() => spn.stop());
-    this.setState({ isReqeust: true, page });
+    this.spn.start();
+    this.setState({ isRequest: true, page });
+    return NoteAction.fetch(user, id, skip, limit, {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    });
   }
 
   downloadFile(blob) {
@@ -150,13 +169,22 @@ class ClosedForms extends React.Component {
   }
 
   handleFilter() {
+    const { user } = this.props;
     const {
       lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    , isRequest
     } = this.state;
-    const { user } = this.props;
-    NoteAction.filter(user, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
+    if(isRequest) return;
+    this.fetch(1)
+      .then(() => NoteAction.filter(user , {
+        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+      }))
+      .then(() => this.setState({ isRequest: false }))
+      .then(() => this.spn.stop())
+      .catch(err => {
+        std.logError(ClosedForms.displayName, err.name, err.message);
+        this.spn.stop();
+      });
   }
 
   handleChangeText(name, event) {
@@ -170,26 +198,28 @@ class ClosedForms extends React.Component {
     }
   }
 
-  handleCloseDialog(name) {
-    this.setState({ [name]: false });
-  }
-
   handleDownload() {
     const { user, note } = this.props;
-    const { itemFilter } = this.state;
     //std.logInfo(ClosedForms.displayName, 'handleDownload', user);
-    const spn = Spinner.of('app');
-    spn.start();
-    NoteAction.downloadItems(user, note._id, itemFilter)
-      .then(() => this.setState({ isSuccess: true }))
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
+    const id = note._id;
+    this.spn.start();
+    NoteAction.downloadItems(user, id, {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    }).then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
-      })
-    ;
+        this.spn.stop();
+      });
+  }
+
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   getColor(category) {

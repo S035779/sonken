@@ -12,8 +12,8 @@ sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const node_env  = process.env.NODE_ENV      || 'development';
-const pages     = process.env.JOB_UPD_PAGES || 2;
+const node_env  = process.env.NODE_ENV    || 'development';
+const numbers   = process.env.JOB_UPD_NUM || 1000;
 //const expired   = process.env.JOB_UPD_MIN   || 10;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
@@ -51,13 +51,17 @@ const request = (operation, { url, user, id, items }) => {
   switch(operation) {
     case 'search':
     case 'seller':
-      return yahoo.jobHtml({ url }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobHtml({ url })
+        .pipe(map(setNote), flatMap(putHtml));
     case 'closedsearch':
-      return yahoo.jobClosedMerchant({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobClosedMerchant({ url, pages: Math.ceil(numbers / 100) })
+        .pipe(map(setNote), flatMap(putHtml));
     case 'closedsellers':
-      return yahoo.jobClosedSellers({ url, pages }).pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobClosedSellers({ url, pages: Math.ceil(numbers / 25) })
+        .pipe(map(setNote), flatMap(putHtml));
     case 'rss':
-      return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
+      return yahoo.jobRss({ url })
+        .pipe(map(setNote), flatMap(putRss));
     case 'images':
       return yahoo.jobImages({ items, operator });
   }

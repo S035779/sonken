@@ -51,7 +51,12 @@ export default {
 
   downloadItems() {
     return (req, res) => {
-      const { user, ids, filter } = req.body;
+      const { user, ids
+      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+      } = req.body;
+      const filter = allAuction ? null : {
+        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+      };
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -261,8 +266,13 @@ export default {
 
   fetchNote() {
     return (req, res) => {
-      const { user, id, skip, limit } = req.query;
-      feed.fetchNote({ user, id, skip, limit }).subscribe(
+      const { user, id, skip, limit
+      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+      } = req.query;
+      const filter = allAuction ? null : {
+        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+      };
+      feed.fetchNote({ user, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
