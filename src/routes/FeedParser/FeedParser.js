@@ -52,7 +52,7 @@ export default class FeedParser {
           const conditions = { _id: id, user };
           let match = {};
           if(filter) {
-            log.trace(FeedParser.displayName, 'Filter', filter);
+            //log.trace(FeedParser.displayName, 'Filter', filter);
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
@@ -1094,11 +1094,8 @@ export default class FeedParser {
   }
   
   downloadItems({ user, ids, filter }) {
-    console.log('Filter', filter);
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
     const setAsins = R.join(':');
-    //const _getItems = R.curry(this.filterItems)(filter);
-    //const getItems = R.filter(_getItems);
     const setItems = R.map(obj => ({
       title:        obj.title
     , seller:       obj.seller
@@ -1144,7 +1141,6 @@ export default class FeedParser {
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
       map(R.map(obj => obj.items))
-    //, map(R.map(getItems))
     , map(R.map(setItems))
     , map(R.flatten)
     , map(setItemsCsv)
@@ -1152,37 +1148,6 @@ export default class FeedParser {
     );
   }
   
-  //filterItems(filter, item) {
-  //  if(!filter) return true;
-  //  const date      = new Date();
-  //  const now       = new Date(item.bidStopTime);
-  //  const start     = new Date(filter.aucStartTime);
-  //  const stop      = new Date(filter.aucStopTime);
-  //  const year      = date.getFullYear();
-  //  const month     = date.getMonth();
-  //  const day       = date.getDate();
-  //  const lastWeek  = new Date(year, month, day-7);
-  //  const twoWeeks  = new Date(year, month, day-14);
-  //  const lastMonth = new Date(year, month-1, day);
-  //  const today     = new Date(year, month, day);
-  //  const isLastWeek  = lastWeek  <= now && now < today && item.sold >= 1;
-  //  const isTwoWeeks  = twoWeeks  <= now && now < today && item.sold >= 2;
-  //  const isLastMonth = lastMonth <= now && now < today && item.sold >= 3;
-  //  const isAll = true;
-  //  const isNow = start <= now && now <= stop;
-  //  return filter.inAuction
-  //    ? isNow
-  //    : filter.allAuction
-  //      ? isAll
-  //      : filter.lastMonthAuction 
-  //        ? isLastMonth
-  //        : filter.twoWeeksAuction 
-  //          ? isTwoWeeks
-  //          : filter.lastWeekAuction 
-  //            ? isLastWeek
-  //            : true;
-  //}
-
   setNote({ user, url, category, categoryIds, title }, obj) {
     //log.debug(FeedParser.displayName, 'setNote', { user, title, category, categoryIds, url });
     return ({

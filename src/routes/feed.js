@@ -10,10 +10,8 @@ export default {
       const filename = req.headers['x-uploadedfilename'];
       const filetype = req.headers['x-uploadedfiletype'];
       const filedata = Buffer.alloc(+req.headers['content-length']);
-
       const username = filename.split('_')[0];
       const category = filename.split('_')[1];
-
       let bufferOffset = 0;
       req.on('data', chunk => {
         chunk.copy(filedata, bufferOffset);
@@ -54,11 +52,11 @@ export default {
       const { user, ids
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
       } = req.body;
-      log.trace(displayName, 'Request', req.body);
+      //log.trace(displayName, 'Request', req.body);
       const filter = allAuction === false ? {
         lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
       } : null;
-      log.trace(displayName, 'Filter', filter);
+      //log.trace(displayName, 'Filter', filter);
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
