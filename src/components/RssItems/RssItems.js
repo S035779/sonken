@@ -68,6 +68,26 @@ class RssItems extends React.Component {
     }
   }
 
+  handleDownload() {
+    const { user, note } = this.props;
+    //std.logInfo(RssItems.displayName, 'handleDownload', user);
+    this.spn.start();
+    NoteAction.downloadItems(user, note._id)
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.downloadFile(this.props.file))
+      .then(() => this.spn.stop())
+      .catch(err => {
+        std.logError(RssItems.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      })
+    ;
+  }
+
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
+  }
+
   fetch(page) {
     const { user, note } = this.props;
     const id = note._id;
@@ -92,26 +112,6 @@ class RssItems extends React.Component {
     fileReader.readAsArrayBuffer(blob);
   }
   
-  handleCloseDialog(name) {
-    this.setState({ [name]: false });
-  }
-
-  handleDownload() {
-    const { user, note } = this.props;
-    //std.logInfo(RssItems.displayName, 'handleDownload', user);
-    this.spn.start();
-    NoteAction.downloadItems(user, note._id)
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.downloadFile(this.props.file))
-      .then(() => this.spn.stop())
-      .catch(err => {
-        std.logError(RssItems.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        this.spn.stop();
-      })
-    ;
-  }
-
   getColor(category) {
     switch(category) {
       case 'marchant':
@@ -127,7 +127,7 @@ class RssItems extends React.Component {
 
   render() {
     const { classes, user, note, category } = this.props;
-    const { isNotValid, isSuccess } = this.state;
+    const { page, isNotValid, isSuccess } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
@@ -148,7 +148,7 @@ class RssItems extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList user={user} items={items} />
+        <RssItemList user={user} items={items} noteId={note._id} page={page}/>
       </div>
     </div>;
   }

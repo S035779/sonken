@@ -86,36 +86,6 @@ class ClosedForms extends React.Component {
     }
   }
 
-  fetch(page) {
-    const { user, note } = this.props;
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    } = this.state;
-    const id = note._id;
-    const limit = 20;
-    const skip = (page - 1) * limit;
-    //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
-    this.spn.start();
-    this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
-  }
-
-  downloadFile(blob) {
-    //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
-    const anchor = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-      anchor.target = '_blank';
-      anchor.download = 'download.csv';
-      anchor.click();
-    }
-    fileReader.readAsArrayBuffer(blob);
-  }
-
   handleChangeCheckbox(name, event) {
     //std.logInfo(ClosedForms.displayName, 'handleChangeCheckbox', name);
     const checked = event.target.checked;
@@ -222,6 +192,36 @@ class ClosedForms extends React.Component {
     this.setState({ [name]: false });
   }
 
+  fetch(page) {
+    const { user, note } = this.props;
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
+    const id = note._id;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
+    this.spn.start();
+    this.setState({ isRequest: true, page });
+    return NoteAction.fetch(user, id, skip, limit, {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    });
+  }
+
+  downloadFile(blob) {
+    //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
+    const anchor = document.createElement('a');
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
+    }
+    fileReader.readAsArrayBuffer(blob);
+  }
+
   getColor(category) {
     switch(category) {
       case 'marchant':
@@ -240,7 +240,7 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, perPage, user, note, category } = this.props;
     const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, isNotValid, isSuccess } = this.state;
+      , inAuction, page, isNotValid, isSuccess } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
@@ -315,7 +315,7 @@ class ClosedForms extends React.Component {
         category === 'closedsellers'  && classes.filterList
       , category === 'closedmarchant' && classes.filterList
       )} >
-        <RssItemList user={user} items={items} />
+        <RssItemList user={user} items={items} noteId={note._id} page={page}/>
       </div>
     </div>;
   }

@@ -42,7 +42,7 @@ const itemSchema = new mongoose.Schema({
 , asins:            Array
 , pubDate:          { type: Date, default: Date.now() }
 });
-itemSchema.index({ pubDate: 1, guid__: 1 });
+itemSchema.index({ bidStopTime: 1, guid__: 1 });
 
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 

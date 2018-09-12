@@ -74,30 +74,6 @@ class RssForms extends React.Component {
     }
   }
 
-  fetch(page) {
-    const { user, note } = this.props;
-    const id = note._id;
-    const limit = 20;
-    const skip = (page - 1) * limit;
-    //std.logInfo(RssForms.displayName, 'fetch', { id, page });
-    this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit);
-  }
-
-  downloadFile(blob) {
-    //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
-    const anchor = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-      anchor.target = '_blank';
-      anchor.download = 'download.csv';
-      anchor.click();
-    }
-    fileReader.readAsArrayBuffer(blob);
-  }
-
   handleSave() {
     const { user } = this.props;
     const { note } = this.state;
@@ -171,6 +147,30 @@ class RssForms extends React.Component {
       });
   }
 
+  fetch(page) {
+    const { user, note } = this.props;
+    const id = note._id;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    //std.logInfo(RssForms.displayName, 'fetch', { id, page });
+    this.setState({ isRequest: true, page });
+    return NoteAction.fetch(user, id, skip, limit);
+  }
+
+  downloadFile(blob) {
+    //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
+    const anchor = document.createElement('a');
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
+    }
+    fileReader.readAsArrayBuffer(blob);
+  }
+
   isValidate() {
     const { asin, price, bidsprice } = this.state.note;
     return (
@@ -207,7 +207,7 @@ class RssForms extends React.Component {
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
     const { classes, user, note, category } = this.props;
-    const { isNotValid, isSuccess } = this.state;
+    const { page, isNotValid, isSuccess } = this.state;
     const { items, asin, price, bidsprice, body} = this.state.note;
     const isChanged = this.isChanged();
     const link_mon = mon + asin;
@@ -280,7 +280,7 @@ class RssForms extends React.Component {
         </div>
       </div>
       <div className={classes.noteList}>
-        <RssItemList user={user} items={items} />
+        <RssItemList user={user} items={items} noteId={note._id} page={page}/>
       </div>
     </div>;
   }

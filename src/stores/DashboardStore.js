@@ -1,4 +1,5 @@
 import { ReduceStore }  from 'flux/utils';
+import * as R           from 'ramda';
 import std              from 'Utilities/stdutils';
 
 export default class DashboardStore extends ReduceStore {
@@ -25,121 +26,117 @@ export default class DashboardStore extends ReduceStore {
   }
   
   updateCategory(state, action) {
-    return state.categorys
-      .map(category => action.id === category._id ? Object.assign({}, category, action.category) : category);
+    const setCategory = category => action.id === category._id ? R.merge(category, action.category) : category;
+    const setCategorys = R.map(setCategory);
+    return setCategorys(state.categorys);
   }
 
   deleteCategory(state, action) {
-    const isCategory = obj => action.ids.some(id => id === obj._id);
-    return state.categorys.filter(category => !isCategory(category));
+    const isCategory = obj => R.any(id => id === obj._id)(action.ids);
+    const hasCategorys = R.filter(category => !isCategory(category));
+    return hasCategorys(state.categorys);
   }
 
   fetchNote(state, action) {
-    return state.notes
-      .map(note => action.id === note._id ? Object.assign({}, note, action.note) : note);
+    const setNote = note => action.id === note._id ? R.merge(note, action.note) : note;
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   deleteNote(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj._id)
-    return state.notes.filter(note => !isNote(note));
+    const isNote = obj => R.any(id => id === obj._id)(action.ids);
+    const hasNotes = R.filter(note => !isNote(note))
+    return hasNotes(state.notes);
   }
 
   createRead(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj._id)
-    const setItem = obj => Object.assign({}, obj, { readed: true });
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(note => isNote(note) ? setNote(note) : note);
+    const setItem = obj => R.merge(obj, { readed: true });
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const isNote = obj => R.any(id => id === obj._id)(action.ids);
+    const setNotes = R.map(note => isNote(note) ? setNote(note) : note);
+    return setNotes(state.notes);
   }
 
   deleteRead(state, action) {
-    const isNote = obj => action.ids.some(id => id === obj._id)
-    const setItem = obj => Object.assign({}, obj, { readed: false });
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(note => isNote(note) ? setNote(note) : note);
+    const setItem = obj => R.merge(obj, { readed: false });
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const isNote = obj => R.any(id => id === obj._id)(action.ids);
+    const setNotes = R.map(note => isNote(note) ? setNote(note) : note);
+    return setNotes(state.notes);
   }
 
   createAdd(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { added: true }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { added: true }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   deleteAdd(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { added: false }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { added: false }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   createDelete(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { deleted: true }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { deleted: true }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   deleteDelete(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { deleted: false }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { deleted: false }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   createStar(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { starred: true }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { starred: true }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   deleteStar(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { starred: false }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { starred: false }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   createList(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { listed: true }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { listed: true }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   deleteList(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { listed: false }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { listed: false }) : obj;
+    const setItems = R.map(setItem)
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote);
+    return setNotes(state.notes);
   }
 
   reduce(state, action) {

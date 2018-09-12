@@ -54,9 +54,11 @@ export default {
       const { user, ids
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
       } = req.body;
-      const filter = allAuction ? null : {
+      log.trace(displayName, 'Request', req.body);
+      const filter = allAuction === false ? {
         lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      };
+      } : null;
+      log.trace(displayName, 'Filter', filter);
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -269,9 +271,14 @@ export default {
       const { user, id, skip, limit
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
       } = req.query;
-      const filter = allAuction ? null : {
-        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      };
+      const filter = allAuction && allAuction ==='false' ? {
+        lastWeekAuction:  lastWeekAuction   === 'true'
+      , twoWeeksAuction:  twoWeeksAuction   === 'true'
+      , lastMonthAuction: lastMonthAuction  === 'true'
+      , allAuction:       false
+      , inAuction:        inAuction         === 'true'
+      , aucStartTime, aucStopTime
+      } : null;
       feed.fetchNote({ user, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {

@@ -12,24 +12,32 @@ import RssButton            from 'Components/RssButton/RssButton';
 class RssItemList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      listed:   []
-    , starred:  []
-    , added:    []
-    , deleted:  []
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { items } = nextProps;
     let listed = [], starred = [], deleted = [], added = [];
-    items.forEach(item => {
+    props.items.forEach(item => {
       if(item.listed) listed.push(item.guid._);
       if(item.starred) starred.push(item.guid._);
       if(item.deleted) deleted.push(item.guid._);
       if(item.added)   added.push(item.guid._);
     });
-    this.setState({ listed, starred, deleted, added });
+    this.state = { listed, starred, added, deleted };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const prevNoteId = this.props.noteId;
+    const nextNoteId = nextProps.noteId;
+    const prevPage = this.props.page;
+    const nextPage = nextProps.page;
+    if((prevNoteId !== nextNoteId) || (prevPage !== nextPage)) {
+      //std.logInfo(RssItemList.displayName, 'Props', nextProps);
+      let listed = [], starred = [], deleted = [], added = [];
+      nextProps.items.forEach(item => {
+        if(item.listed) listed.push(item.guid._);
+        if(item.starred) starred.push(item.guid._);
+        if(item.deleted) deleted.push(item.guid._);
+        if(item.added)   added.push(item.guid._);
+      });
+      this.setState({ listed, starred, added, deleted });
+    }
   }
 
   handleChangeListed(id) {
@@ -114,7 +122,7 @@ class RssItemList extends React.Component {
     return <StarBorder className={classes.star} />;
   }
 
-  renderFiberNew() {
+  renderNewAdded() {
     return <FiberNew color="error"/>
   }
 
@@ -122,8 +130,8 @@ class RssItemList extends React.Component {
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
     const textClass = { primary: classes.primary, secondary: classes.secondary };
-    const buttonColor = listed.indexOf(item.guid._) !== -1 ? 'green' : 'yellow';
-    const buttonText = listed.indexOf(item.guid._) !== -1 ? '入札リスト 登録済み' : '入札リスト 登録';
+    const buttonColor = listed.indexOf(item.guid._) === -1 ? 'yellow' : 'green';
+    const buttonText = listed.indexOf(item.guid._) === -1 ? '入札リスト 登録' : '入札リスト 登録済み';
     const title = `出品件名：${item.title}`;
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
@@ -132,8 +140,8 @@ class RssItemList extends React.Component {
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid._}、`
     + `Seller：${item.seller}`;
-    const renderStar = starred.indexOf(item.guid._) !== -1 ? this.renderStar() : this.renderUnStar();
-    const renderFiberNew = added.indexOf(item.guid._) !== -1 ? null : this.renderFiberNew();
+    const renderStar = starred.indexOf(item.guid._) === -1 ? this.renderUnStar() : this.renderStar();
+    const renderNewAdded = added.indexOf(item.guid._) === -1 ? this.renderNewAdded() : null;
     if(deleted.indexOf(item.guid._) !== -1) return;
     return <div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
@@ -144,7 +152,7 @@ class RssItemList extends React.Component {
             {renderStar}
           </IconButton>
           <IconButton onClick={this.handleChangeAdded.bind(this, item.guid._)}>
-            {renderFiberNew}
+            {renderNewAdded}
           </IconButton>
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
@@ -199,6 +207,8 @@ RssItemList.propTypes = {
   classes: PropTypes.object.isRequired
 , items: PropTypes.array.isRequired
 , user: PropTypes.string.isRequired
+, noteId: PropTypes.string.isRequired
+, page: PropTypes.number.isRequired
 };
 
 const itemHeight        = 142 * 1.5;

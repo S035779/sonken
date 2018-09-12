@@ -52,6 +52,7 @@ export default class FeedParser {
           const conditions = { _id: id, user };
           let match = {};
           if(filter) {
+            log.trace(FeedParser.displayName, 'Filter', filter);
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
