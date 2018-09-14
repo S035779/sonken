@@ -19,6 +19,7 @@ const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
 const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
 const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
 const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
+const baseurl = 'https://auctions.yahoo.co.jp';
 
 /**
  * FeedPaser class.
@@ -965,7 +966,7 @@ export default class FeedParser {
 
   uploadNotes({ user, category, file }) {
     const setNote = objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] });
-    const subcategory = 'uploadfile';
+    const subcategory = 'Uploadfile';
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
@@ -1024,8 +1025,7 @@ export default class FeedParser {
         , body: ''
         , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
         });
-        const base_url = 'https://auctions.yahoo.co.jp';
-        const isYahoo = obj => std.parse_url(obj.attr.htmlUrl).origin === base_url;
+        const isYahoo = obj => std.parse_url(obj.attr.htmlUrl).origin === baseurl;
         resolve(R.compose(
           R.map(setNote)
         , R.filter(isYahoo)
@@ -1058,9 +1058,9 @@ export default class FeedParser {
       const toCutRec = R.filter(objs => R.length(objs) > 1);
       const setNotes = R.map(arr => ({
         user
-      , url:          arr[1]
       , category
       , title:        arr[0]
+      , url:          this.setUrl(category, arr[1])
       , asin:         arr[2]
       , price:        arr[3]
       , bidsprice:    arr[4]
@@ -1078,6 +1078,23 @@ export default class FeedParser {
       )(file.toString())
       );
     });
+  }
+
+  setUrl(category, string) {
+    if(string.match(/^(https?|ftp)(:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+)$/)) {
+      return string;
+    } else {
+      switch(category) {
+        case 'closedmarchant':
+          return baseurl + '/closedsearch/closedsearch?' + std.urlencode({ p: string });
+        case 'closedsellers':
+          return baseurl + '/jp/show/rating?' + std.urlencode({ userID: string, role: 'seller' });
+        case 'sellers':
+          return baseurl + '/seller/' + string;
+        default:
+          return baseurl + '/search/search?' + std.urlencode({ p: string });
+      }
+    }
   }
 
   downloadNotes({ user, category }) {
