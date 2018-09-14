@@ -58,26 +58,17 @@ class RssNewDialog extends React.Component {
     const { classes, open, title } = this.props;
     const { isNotValid, isSuccess, name } = this.state;
     const paperClass = { paper: classes.dialog };
-    return <LoginFormDialog 
-        open={open} 
-        title={'カテゴリー編集'}
-        onClose={this.handleCloseDialog.bind(this)}
-        onSubmit={this.handleSubmitDialog.bind(this)}
-        isSubmit classes={paperClass}
-        className={classes.fieldset}>
+    return <LoginFormDialog open={open} title={'カテゴリー編集'}
+        onClose={this.handleCloseDialog.bind(this)} onSubmit={this.handleSubmitDialog.bind(this)}
+        isSubmit classes={paperClass} className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
-          <TextField autoFocus margin="dense" value={name}
-            onChange={this.handleChangeText.bind(this, 'name')}
+          <TextField autoFocus margin="dense" value={name} onChange={this.handleChangeText.bind(this, 'name')}
             label={title + 'カテゴリー'} type="text" fullWidth />
         </FormControl>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleClose.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
-        </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleClose.bind(this, 'isSuccess')}>
-          要求を受け付けました。
-        </RssDialog>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。</RssDialog>
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
+          要求を受け付けました。</RssDialog>
       </LoginFormDialog>
     ;
   }

@@ -25,22 +25,22 @@ class DrawerList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      openUser:         false
-    , openMarchant:     isAlpha ? false : true
-    , openSellers:      isAlpha ? false : true
+      openUser: false
+    , openMarchant: isAlpha ? false : true
+    , openSellers: isAlpha ? false : true
     , openClosedMarchant: false
     , openClosedSellers:  false
-    , isProfile:        false
-    , isPreference:     false
-    , isEditMarchant:   false 
-    , isEditSellers:    false 
-    , isEditClosedMarchant:   false 
-    , isEditClosedSellers:    false 
-    , dragged:          false
-    , dropZoneEntered:  false
-    , dragSrcEl:        null
-    , dragDstEl:        null
-    , categorys:        props.categorys
+    , isProfile: false
+    , isPreference: false
+    , isEditMarchant: false 
+    , isEditSellers: false 
+    , isEditClosedMarchant: false 
+    , isEditClosedSellers: false 
+    , dragged: false
+    , dropZoneEntered: false
+    , dragSrcEl: null
+    , dragDstEl: null
+    , categorys: props.categorys
     };
   }
 
@@ -106,8 +106,7 @@ class DrawerList extends React.Component {
   handleDragStart(name, event) {
     std.logInfo(DrawerList.displayName, 'handleDragStart', name)
     event.dataTransfer.effectAllowed = 'move';
-    const dragSrcEl
-      = this.state.categorys.find(obj => obj.subcategory === name);
+    const dragSrcEl = this.state.categorys.find(obj => obj.subcategory === name);
     event.dataTransfer.setData('text/plain', dragSrcEl.subcategoryId);
     this.setState({ dragged: true, dragSrcEl: dragSrcEl });
   }
@@ -120,8 +119,7 @@ class DrawerList extends React.Component {
 
   handleDragEnter(name) {
     std.logInfo(DrawerList.displayName, 'handleDragEnter', name)
-    const dragDstEl
-      = this.state.categorys.find(obj => obj.subcategory === name);
+    const dragDstEl = this.state.categorys.find(obj => obj.subcategory === name);
     this.setState({ dropZoneEntered: true, dragDstEl });
   }
 
@@ -158,8 +156,7 @@ class DrawerList extends React.Component {
         .catch(err  => {
           std.logError(DrawerList.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-        })
-      ;
+        });
     }
   }
 
@@ -171,23 +168,17 @@ class DrawerList extends React.Component {
   renderCategoryList(index, category, subcategory, categoryId, release) {
     const { classes } = this.props;
     const { dragged, dropZoneEntered, dragSrcEl, dragDstEl } = this.state;
-    const isDragDstEl
-      = dragDstEl && dragDstEl.subcategory === subcategory;
-    const isDragSrcEl
-      = dragSrcEl && dragSrcEl.subcategory === subcategory;
+    const isDragDstEl = dragDstEl && dragDstEl.subcategory === subcategory;
+    const isDragSrcEl = dragSrcEl && dragSrcEl.subcategory === subcategory;
     const isRelease = release > 0;
-    const textClass = {
-      primary:        classes.textPrimary
-    , secondary:      classes.textSecondary
-    };
+    const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     const badgeClass = {
-      colorPrimary:   classes.badgePrimary
+      colorPrimary: classes.badgePrimary
     , colorSecondary: classes.badgeSecondary
-    , colorError:     classes.badgeError
-    , badge:          classNames(!isRelease && classes.nonbadge)
+    , colorError: classes.badgeError
+    , badge: classNames(!isRelease && classes.nonbadge)
     };
-    return <ListItem dense button key={index}
-        draggable="true"
+    return <ListItem dense button key={index} draggable="true"
         onDragOver={this.handleDragOver.bind(this, subcategory)}
         onDragEnter={this.handleDragEnter.bind(this, subcategory)}
         onDragLeave={this.handleDragLeave.bind(this, subcategory)}
@@ -195,21 +186,11 @@ class DrawerList extends React.Component {
         onDragEnd={this.handleDragEnd.bind(this, subcategory)}
         onDrop={this.handleDrop.bind(this, subcategory)}
         onClick={this.handleCategoryList.bind(this, category, categoryId)}
-        className={classNames(
-            classes.draggable
-          , isDragSrcEl && dragged && classes.dragged
-          , isDragDstEl && dropZoneEntered && classes.dragOver
-        )}
-      >
+        className={classNames(classes.draggable, isDragSrcEl && dragged && classes.dragged
+          , isDragDstEl && dropZoneEntered && classes.dragOver)} >
         <ListItemIcon>
-          <Badge
-            badgeContent={release}
-            color="error"
-            classes={badgeClass}
-          >
-            <Avatar className={classes.avatar}>
-              {subcategory.substr(0,1)}
-            </Avatar>
+          <Badge badgeContent={release} color="error" classes={badgeClass} >
+            <Avatar className={classes.avatar}>{subcategory.substr(0,1)}</Avatar>
           </Badge>
         </ListItemIcon>
         <ListItemText primary={subcategory} classes={textClass} />
@@ -219,28 +200,17 @@ class DrawerList extends React.Component {
   renderNonCategoryList(index, category, subcategory, release) {
     const { classes } = this.props;
     const isRelease = release > 0;
-    const textClass = {
-      primary:        classes.textPrimary
-    , secondary:      classes.textSecondary
-    };
+    const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     const badgeClass = {
-      colorPrimary:   classes.badgePrimary
+      colorPrimary: classes.badgePrimary
     , colorSecondary: classes.badgeSecondary
-    , colorError:     classes.badgeError
-    , badge:          classNames(!isRelease && classes.nonbadge)
+    , colorError: classes.badgeError
+    , badge: classNames(!isRelease && classes.nonbadge)
     };
-    return <ListItem dense button key={index}
-        onClick={this.handleCategoryList.bind(this, category, 'none')}
-      >
+    return <ListItem dense button key={index} onClick={this.handleCategoryList.bind(this, category, 'none')} >
         <ListItemIcon>
-          <Badge
-            badgeContent={release}
-            color="error"
-            classes={badgeClass}
-          >
-            <Avatar className={classes.avatar}>
-              {subcategory.substr(0,1)}
-            </Avatar>
+          <Badge badgeContent={release} color="error" classes={badgeClass} >
+            <Avatar className={classes.avatar}>{subcategory.substr(0,1)}</Avatar>
           </Badge>
         </ListItemIcon>
         <ListItemText primary={subcategory} classes={textClass} />
@@ -250,28 +220,18 @@ class DrawerList extends React.Component {
   renderFavoriteList(index, category, subcategory, release) {
     const { classes } = this.props;
     const isRelease = release > 0;
-    const textClass = {
-      primary:        classes.textPrimary
-    , secondary:      classes.textSecondary
-    };
+    const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     const badgeClass = {
-      colorPrimary:   classes.badgePrimary
+      colorPrimary: classes.badgePrimary
     , colorSecondary: classes.badgeSecondary
-    , colorError:     classes.badgeError
-    , badge:          classNames(!isRelease && classes.nonbadge)
+    , colorError: classes.badgeError
+    , badge: classNames(!isRelease && classes.nonbadge)
     };
     return <ListItem dense button key={index}
-        onClick={this.handleCategoryList.bind(this, category, 'favorite')}
-      >
+        onClick={this.handleCategoryList.bind(this, category, 'favorite')} >
         <ListItemIcon>
-          <Badge
-            badgeContent={release}
-            color="error"
-            classes={badgeClass}
-          >
-            <Avatar className={classes.avatar}>
-              {subcategory.substr(0,1)}
-            </Avatar>
+          <Badge badgeContent={release} color="error" classes={badgeClass} >
+            <Avatar className={classes.avatar}>{subcategory.substr(0,1)}</Avatar>
           </Badge>
         </ListItemIcon>
         <ListItemText primary={subcategory} classes={textClass} />
@@ -280,9 +240,8 @@ class DrawerList extends React.Component {
 
   renderListItems() {
     const { classes, open, profile } = this.props;
-    const { isEditMarchant, isEditSellers, openMarchant, openSellers
-    , isEditClosedMarchant, isEditClosedSellers, openClosedMarchant, openClosedSellers
-    , categorys } = this.state;
+    const { isEditMarchant, isEditSellers, openMarchant, openSellers, isEditClosedMarchant, isEditClosedSellers
+      , openClosedMarchant, openClosedSellers, categorys } = this.state;
     const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     const _categorys = category => categorys
       .filter(obj => obj._id !== '9999')
@@ -316,12 +275,8 @@ class DrawerList extends React.Component {
           <IconButton onClick={this.handleClickButton.bind(this, 'isEditMarchant')}>
           <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
       </ListItem>
-      <RssEditDialog
-        title={'商品RSS'}
-        user={profile.user}
-        category="marchant"
-        categorys={categoryList('marchant')}
-        open={isEditMarchant}
+      <RssEditDialog title={'商品RSS'} user={profile.user} category="marchant"
+        categorys={categoryList('marchant')} open={isEditMarchant}
         onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')} />
       <Collapse in={openMarchant} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -338,12 +293,8 @@ class DrawerList extends React.Component {
           <IconButton onClick={this.handleClickButton.bind(this, 'isEditSellers')}>
           <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
       </ListItem>
-      <RssEditDialog
-        title={'出品者RSS'}
-        user={profile.user}
-        category="sellers"
-        categorys={categoryList('sellers')}
-        open={isEditSellers}
+      <RssEditDialog title={'出品者RSS'} user={profile.user} category="sellers"
+        categorys={categoryList('sellers')} open={isEditSellers}
         onClose={this.handleCloseDialog.bind(this, 'isEditSellers')} />
       <Collapse in={openSellers} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -367,12 +318,8 @@ class DrawerList extends React.Component {
         : null
       }
       { isAlpha 
-        ? (<RssEditDialog
-            title={'落札相場'}
-            user={profile.user}
-            category="closedmarchant"
-            categorys={categoryList('closedmarchant')}
-            open={isEditClosedMarchant}
+        ? (<RssEditDialog title={'落札相場'} user={profile.user} category="closedmarchant"
+            categorys={categoryList('closedmarchant')} open={isEditClosedMarchant}
             onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} />)
         : null
       }
@@ -401,12 +348,8 @@ class DrawerList extends React.Component {
         : null
       }
       { isAlpha 
-        ? (<RssEditDialog
-            title={'落札履歴'}
-            user={profile.user}
-            category="closedsellers"
-            categorys={categoryList('closedsellers')}
-            open={isEditClosedSellers}
+        ? (<RssEditDialog title={'落札履歴'} user={profile.user} category="closedsellers"
+            categorys={categoryList('closedsellers')} open={isEditClosedSellers}
             onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} />)
         : null
       }
@@ -435,66 +378,34 @@ class DrawerList extends React.Component {
     const { classes, profile, preference } = this.props;
     const { openUser, isProfile, isPreference } = this.state;
     const { name, user, kana, email, phone, plan } = profile;
-    const textClass
-      = { primary: classes.textPrimary
-        , secondary: classes.textSecondary };
+    const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     return <div>
-        <ListItem button 
-          onClick={this.handleClickButton.bind(this, 'user')}>
-          <ListItemIcon>
-            <AccountBox className={classes.icon} />
-          </ListItemIcon>
+        <ListItem button onClick={this.handleClickButton.bind(this, 'user')}>
+          <ListItemIcon><AccountBox className={classes.icon} /></ListItemIcon>
           <ListItemText primary={user} classes={textClass} />
-          {openUser
-            ? <ArrowDropUp className={classes.icon} />
-            : <ArrowDropDown className={classes.icon} />
-          }
+          {openUser ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
         </ListItem>
         <Collapse in={openUser} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItem button>
-              <ListItemIcon>
-                <Avatar className={classes.avatar}>MP</Avatar>
-              </ListItemIcon>
+              <ListItemIcon><Avatar className={classes.avatar}>MP</Avatar></ListItemIcon>
               <ListItemText primary="My Profile" classes={textClass} />
             </ListItem>
-            <ListItem button
-              onClick={this.handleClickButton.bind(this, 'isProfile')}>
-              <ListItemIcon>
-                <Avatar className={classes.avatar}>EP</Avatar>
-              </ListItemIcon>
+            <ListItem button onClick={this.handleClickButton.bind(this, 'isProfile')}>
+              <ListItemIcon><Avatar className={classes.avatar}>EP</Avatar></ListItemIcon>
               <ListItemText primary="Edit Profile" classes={textClass} />
             </ListItem>
-            <ListItem button
-              onClick={this.handleClickButton.bind(this, 'isPreference')}>
-              <ListItemIcon>
-                <Avatar className={classes.avatar}>S</Avatar>
-              </ListItemIcon>
+            <ListItem button onClick={this.handleClickButton.bind(this, 'isPreference')}>
+              <ListItemIcon><Avatar className={classes.avatar}>S</Avatar></ListItemIcon>
               <ListItemText primary="Setting" classes={textClass} />
             </ListItem>
           </List>
-          <LoginProfile
-            open={isProfile}
-            profile={profile}
-            name={name}
-            user={user}
-            kana={kana}
-            email={email}
-            phone={phone}
-            onClose={this.handleCloseDialog.bind(this, 'isProfile')}
-          />
-          <LoginPreference 
-            open={isPreference}
-            profile={profile}
-            preference={preference}
-            name={name}
-            user={user}
-            plan={plan}
-            onClose={this.handleCloseDialog.bind(this, 'isPreference')}
-          />
+          <LoginProfile open={isProfile} profile={profile} name={name} user={user} kana={kana} email={email}
+            phone={phone} onClose={this.handleCloseDialog.bind(this, 'isProfile')} />
+          <LoginPreference open={isPreference} profile={profile} preference={preference} name={name}
+            user={user} plan={plan} onClose={this.handleCloseDialog.bind(this, 'isPreference')} />
         </Collapse>
-      </div>
-    ;
+      </div>;
   }
     
   renderTitleListItems() {

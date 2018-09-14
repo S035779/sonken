@@ -49,8 +49,7 @@ class RssFormDialog extends React.Component {
         .catch(err  => {
           std.logError(RssFormDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-        })
-      ;
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -65,8 +64,7 @@ class RssFormDialog extends React.Component {
         .catch(err  => {
           std.logError(RssFormDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-        })
-      ;
+        });
     }
   }
 
@@ -74,14 +72,12 @@ class RssFormDialog extends React.Component {
     std.logInfo(RssFormDialog.displayName, 'handleUpdate', id);
     const { user, category } = this.props;
     if(this.isValidate() && this.isChanged()) {
-      NoteAction.updateCategory(user, id
-        , { category, subcategory, subcategoryId })
+      NoteAction.updateCategory(user, id, { category, subcategory, subcategoryId })
         .then(()    => this.setState({ isSuccess: true }))
         .catch(err  => {
           std.logError(RssFormDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-        })
-      ;
+        });
     } else {
       this.setState({ isNotValid: true });
     }
@@ -133,36 +129,22 @@ class RssFormDialog extends React.Component {
     const { isNotValid, isSuccess, checked, openAdd, openUpd } = this.state;
     const paperClass = { paper: classes.dialog };
     const isCategory = obj => obj._id !== '9999' && obj._id !== '9998';
-    return <LoginFormDialog
-        open={open}
-        title={'ノート編集'}
-        onClose={this.handleCloseDialog.bind(this)}
-        onSubmit={this.handleSubmitDialog.bind(this)}
-        isSubmit classes={paperClass}
-        className={classes.fieldset}>
+    return <LoginFormDialog open={open} title={'ノート編集'}
+        onClose={this.handleCloseDialog.bind(this)} onSubmit={this.handleSubmitDialog.bind(this)}
+        isSubmit classes={paperClass} className={classes.fieldset}>
         <FormControl component="fieldset" className={classes.column}>
-          <TextField autoFocus margin="dense"
-            value={this.state.noteTitle}
+          <TextField autoFocus margin="dense" value={this.state.noteTitle}
             onChange={this.handleChangeText.bind(this, 'noteTitle')}
             label={title + 'タイトル'} type="text" fullWidth />
         </FormControl>
         <FormControl component="fieldset" className={classes.column}>
           <FormLabel component="legend">{title}カテゴリー</FormLabel>
-          <RssButton color="success"
-            onClick={this.handleClickButton.bind(this, 'openAdd')} 
+          <RssButton color="success" onClick={this.handleClickButton.bind(this, 'openAdd')} 
             classes={classes.button}>新規追加</RssButton>
-          <RssNewDialog
-            title={title}
-            open={openAdd}
-            user={user}
-            category={category}
-            name={'Untitled'}
-            onClose={this.handleClose.bind(this, 'openAdd')}
-            onSubmit={this.handleCreate.bind(this)}
-          />
+          <RssNewDialog title={title} open={openAdd} user={user} category={category} name={'Untitled'}
+            onClose={this.handleClose.bind(this, 'openAdd')} onSubmit={this.handleCreate.bind(this)} />
           <List dense>
-          {categorys.filter(isCategory).map(obj => (
-            <ListItem 
+          {categorys.filter(isCategory).map(obj => (<ListItem 
               key={obj._id} dense button onClick={this.handleChangeToggle.bind(this, 'checked', obj._id)}>
               <RssCheckbox 
                 color="secondary" checked={checked.indexOf(obj._id) !== -1} tabIndex={-1} disableRipple />
@@ -171,31 +153,23 @@ class RssFormDialog extends React.Component {
                 <IconButton onClick={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}>
                   <Edit className={classes.editIcon}/>
                 </IconButton>
-                <RssNewDialog
-                  title={title}
-                  open={openUpd.indexOf(obj._id) !== -1}
-                  user={user}
-                  category={category}
-                  name={obj.subcategory}
+                <RssNewDialog title={title} open={openUpd.indexOf(obj._id) !== -1} user={user}
+                  category={category} name={obj.subcategory}
                   onClose={this.handleChangeToggle.bind(this, 'openUpd', obj._id)}
                   onSubmit={this.handleUpdate.bind(this, obj._id, obj.subcategoryId)} />
                 <IconButton onClick={this.handleDelete.bind(this, obj._id)} >
                   <Clear className={classes.clearIcon}/>
                 </IconButton>
               </ListItemSecondaryAction>
-            </ListItem>
-          ))}
+            </ListItem>))}
           </List>
           <FormHelperText>該当するカテゴリーを追加・選択することが出来ます。</FormHelperText>
         </FormControl>
         <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
-        </RssDialog>
+          内容に不備があります。もう一度確認してください。</RssDialog>
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
-          要求を受け付けました。
-        </RssDialog>
-      </LoginFormDialog>
-    ;
+          要求を受け付けました。</RssDialog>
+      </LoginFormDialog>;
   }
 }
 RssFormDialog.displayName = 'RssFormDialog';

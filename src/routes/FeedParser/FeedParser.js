@@ -964,22 +964,29 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, file }) {
-    const setNote = objs => this.createNotes({ user, category, notes: objs});
+    const setNote = objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] });
+    const subcategory = 'uploadfile';
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return from(this.setCsvToObj(user, category, file.content)).pipe(flatMap(setNote));
+        return forkJoin([
+            this.addCategory(user, { category, subcategory })
+          , this.setCsvToObj(user, category, file.content)
+          ]).pipe(flatMap(setNote));
       case 'opml':
-        return from(this.setOmplToObj(user, category, file.content)).pipe(flatMap(setNote));
+        return forkJoin([
+            this.addCategory(user, { category, subcategory })
+          , this.setOmplToObj(user, category, file.content)
+          ]).pipe(flatMap(setNote));
       default:
         log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
         return null;
     }
   }
   
-  createNotes({ user, category, notes }) {
-    const setNote = obj => this.setNote({ user , category , title: obj.title , url: obj.url });
+  createNotes({ user, category, categoryIds, notes }) {
+    const setNote = obj => this.setNote({ user, category, categoryIds, title: obj.title , url: obj.url });
     const setNotes = R.map(setNote);
     const promises = R.map(obj => this.addNote(user, obj));
     return forkJoin(promises(setNotes(notes)));
@@ -1094,6 +1101,12 @@ export default class FeedParser {
   }
   
   downloadItems({ user, ids, filter }) {
+    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const keys = [ 'auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
+    , 'bids', 'countdown', 'seller', 'link', 'image1', 'image2', 'image3', 'image4', 'image5', 'image6'
+    , 'image7', 'image8', 'image9',  'image10', 'offers', 'market', 'sale', 'sold', 'categoryid'
+    , 'explanation', 'payment', 'shipping', 'asins', 'date'];
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
     const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
     const setAsins = R.join(':');
     const setItems = R.map(obj => ({
@@ -1130,17 +1143,12 @@ export default class FeedParser {
     , asins:        setAsins(obj.asins)
     , date:         obj.pubDate
     }));
-    const keys = [
-      'auid', 'title', 'categorys'
-    , 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown', 'seller', 'link'
-    , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
-    , 'offers', 'market', 'sale', 'sold'
-    , 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const getTitle    = obj => obj.title;
+    const getItems    = obj => obj.items;
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
-      map(R.map(obj => obj.items))
+      map(R.map(getItems))
+    , map(R.uniqWith(getTitle))
     , map(R.map(setItems))
     , map(R.flatten)
     , map(setItemsCsv)

@@ -20,6 +20,7 @@ class RssSearch extends React.Component {
     , isNotValid:   false
     , isAddNote:    false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -45,16 +46,15 @@ class RssSearch extends React.Component {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
     if(request) {
-      const spn = Spinner.of('app');
-      spn.start();
+      this.spn.start();
       std.logInfo(RssSearch.displayName, 'Request', this.state.url);
       NoteAction.create(user, { url: request.url, category: request.category, title, categoryIds })
         .then(() => this.setState({ isSuccess: true, url: '' }))
-        .then(() => spn.stop())
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssSearch.displayName, err.name, err.message);
           this.setState({ isNotValid: true, url: '' });
-          spn.stop();
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });
@@ -67,34 +67,34 @@ class RssSearch extends React.Component {
 
   handleDownload() {
     const { user, category } = this.props;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
     NoteAction.download(user, category)
       .then(() => this.downloadFile(this.props.file))
       .then(() => this.setState({ isSuccess: true }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
+        this.spn.stop();
       })
     ;
   }
 
   handleChangeFile(event) {
     const { user, category } = this.props;
+    const { perPage } = this.state;
     const file = event.target.files.item(0);
+    this.spn.start();
     std.logInfo(RssSearch.displayName, 'handleChangeFile', file.type + ";" + file.name);
-    const spn = Spinner.of('app');
-    spn.start();
     NoteAction.upload(user, category, file)
+      .then(() => NoteAction.fetchCategorys(user, category, 0, perPage))
       .then(() => this.setState({ isSuccess: true }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
+        this.spn.stop();
       })
     ;
   }
@@ -109,17 +109,16 @@ class RssSearch extends React.Component {
     const perPage = event.target.value;
     const maxNumber = Math.ceil(noteNumber / perPage);
     const number = 1;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(RssSearch.displayName, 'handleChangeSelect', perPage);
     NoteAction.pagenation(user, { maxNumber, number, perPage })
       .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage))
       .then(() => this.setState({ perPage }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid:  true });
-        spn.stop();
+        this.spn.stop();
       });
   }
 
@@ -218,37 +217,30 @@ class RssSearch extends React.Component {
         <Input id="url" value={url} onChange={this.handleChangeText.bind(this, 'url')}/>
       </FormControl>
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleClickButton.bind(this)}>
-          {this.props.changed ? '*' : ''}URL登録</Button>
-        <RssAddDialog 
-          title={title}
-          open={isAddNote}
-          user={user}
-          category={category}
+        <Button variant="raised" className={classes.button} onClick={this.handleClickButton.bind(this)}>
+          {this.props.changed ? '*' : ''}URL登録
+        </Button>
+        <RssAddDialog title={title} open={isAddNote} user={user} category={category}
           categorys={categoryList(category)}
-          onClose={this.handleCloseDialog.bind(this, 'isAddNote')}
-          onSubmit={this.handleSubmit.bind(this)}
-        />
+          onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
         <div className={classes.space} />
-        <RssButton color={color}
-          onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>ダウンロード</RssButton>
+        <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>
+          ダウンロード
+        </RssButton>
         <input type="file" id="file" accept=".csv,.opml,text/csv,text/opml"
-          onChange={this.handleChangeFile.bind(this)}
-          className={classes.input}/>
+          onChange={this.handleChangeFile.bind(this)} className={classes.input}/>
         <label htmlFor="file" className={classes.uplabel}>
-          <RssButton color={color} component="span"
-            classes={classes.upbutton}>アップロード</RssButton>
+          <RssButton color={color} component="span" classes={classes.upbutton}>
+            アップロード
+          </RssButton>
         </label>
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+          要求を受け付けました。
         </RssDialog>
         <RssDialog open={isNotValid} title={'送信エラー'}
           onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
       </div>
     </div>;
