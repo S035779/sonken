@@ -10,7 +10,6 @@ import Spinner                  from 'Utilities/Spinner';
 import { withStyles }           from '@material-ui/core/styles';
 import BidsSearch               from 'Components/BidsSearch/BidsSearch';
 import BidsFilter               from 'Components/BidsFilter/BidsFilter';
-import BidsItemList             from 'Components/BidsItemList/BidsItemList';
 
 class Bids extends React.Component {
   static getStores() {
@@ -42,27 +41,27 @@ class Bids extends React.Component {
       .then(() => spn.stop());
   }
 
-  itemFilter(filter, item) {
-    const date      = new Date();
-    const now       = new Date(item.bidStopTime);
-    const start     = new Date(filter.bidStartTime);
-    const stop      = new Date(filter.bidStopTime);
-    const year      = date.getFullYear();
-    const month     = date.getMonth();
-    const day       = date.getDate();
-    const today     = new Date(year, month, day+1);
-    const yesterday = new Date(year, month, day);
-    const isDay = yesterday <= now && now < today; 
-    const isAll = true;
-    const isNow = start <= now && now <= stop;
-    return filter.inBidding
-      ? isNow
-      : filter.endBidding && filter.allBidding
-        ? isAll
-        : filter.endBidding
-          ? isDay
-          : true; 
-  }
+  //itemFilter(filter, item) {
+  //  const date      = new Date();
+  //  const now       = new Date(item.bidStopTime);
+  //  const start     = new Date(filter.bidStartTime);
+  //  const stop      = new Date(filter.bidStopTime);
+  //  const year      = date.getFullYear();
+  //  const month     = date.getMonth();
+  //  const day       = date.getDate();
+  //  const today     = new Date(year, month, day+1);
+  //  const yesterday = new Date(year, month, day);
+  //  const isDay = yesterday <= now && now < today; 
+  //  const isAll = true;
+  //  const isNow = start <= now && now <= stop;
+  //  return filter.inBidding
+  //    ? isNow
+  //    : filter.endBidding && filter.allBidding
+  //      ? isAll
+  //      : filter.endBidding
+  //        ? isDay
+  //        : true; 
+  //}
 
   render() {
     //std.logInfo(Bids.displayName, 'State', this.state);
@@ -73,25 +72,11 @@ class Bids extends React.Component {
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
     notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
-    let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
+    let _items = items.filter(item => item.listed);// && this.itemFilter(filter, item));
     const number = _items.length;
     return <div className={classes.root}>
-      <BidsSearch
-        user={user}
-        items={_items}
-        file={file}
-        itemNumber={number} itemPage={page}/>
-      <BidsFilter
-        user={user}
-        items={_items}
-        itemFilter={filter}
-        selectedItemId={ids}/>
-      <div className={classes.noteList}>
-        <BidsItemList
-          user={user}
-          items={_items}
-          selectedItemId={ids}/>
-      </div>
+      <BidsSearch user={user} items={_items} file={file} itemNumber={number} itemPage={page}/>
+      <BidsFilter user={user} items={_items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }
@@ -100,19 +85,7 @@ Bids.defaultProps = { notes: null };
 Bids.propTypes = {
   classes: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired
-, match: PropTypes.object.isRequired
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
-const filterHeight      = 186;
-const searchHeight      = 62;
-const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const styles = theme => ({
-  root:     { display: 'flex', flexDirection: 'column' }
-, noteList: { width: '100%', overflow: 'scroll'
-            , height: listHeightSmDown
-            , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
-});
+const styles = { root: { display: 'flex', flexDirection: 'column' } };
 export default withStyles(styles)(Container.create(Bids));

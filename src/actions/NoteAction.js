@@ -37,13 +37,13 @@ export default {
         dispatch({ type: 'note/fetch/my', notes });
       });
   },
-  fetchBided(user, skip, limit) {
-    return NoteApiClient.fetchBidedNotes(user, skip, limit).then(notes => {
+  fetchBided(user, skip, limit, filter) {
+    return NoteApiClient.fetchBidedNotes(user, skip, limit, filter).then(notes => {
         dispatch({ type: 'note/fetch/bided', notes });
       });
   },
-  fetchTraded(user, skip, limit) {
-    return NoteApiClient.fetchTradedNotes(user, skip, limit).then(notes => {
+  fetchTraded(user, skip, limit, filter) {
+    return NoteApiClient.fetchTradedNotes(user, skip, limit, filter).then(notes => {
         dispatch({ type: 'note/fetch/traded', notes });
       });
   },

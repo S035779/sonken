@@ -178,11 +178,13 @@ export default {
   fetchNotes(user, category, skip, limit) {
     return this.request('fetch/notes', { user, category, skip, limit });
   },
-  fetchTradedNotes(user, skip, limit) {
-    return this.request('fetch/traded', { user, skip, limit });
+  fetchTradedNotes(user, skip, limit, filter) {
+    const params = filter ? R.merge({ user, skip, limit }, filter) : { user, skip, limit };
+    return this.request('fetch/traded', params);
   },
-  fetchBidedNotes(user, skip, limit) {
-    return this.request('fetch/bided', { user, skip, limit });
+  fetchBidedNotes(user, skip, limit, filter) {
+    const params = filter ? R.merge({ user, skip, limit }, filter) : { user, skip, limit };
+    return this.request('fetch/bided', params);
   },
 
   /*

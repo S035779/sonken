@@ -68,34 +68,54 @@ export default class FeedParser {
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
             if(filter.inAuction) {
-              match = { bidStopTime: { $gte: start, $lt: stop } };
+              match = R.merge(match, { bidStopTime: { $gte: start, $lt: stop } });
             } else if(filter.allAuction) {
               match = null;
             } else if(filter.lastMonthAuction) {
-              match = { bidStopTime: { $gte: lastMonth, $lt: today } , 'sold': { $gte: 3 } };
+              match = R.merge(match, { bidStopTime: { $gte: lastMonth, $lt: today } , 'sold': { $gte: 3 } });
             } else if(filter.twoWeeksAuction) {
-              match = { bidStopTime: { $gte: twoWeeks, $lt: today } , 'sold': { $gte: 2 } };
+              match = R.merge(match, { bidStopTime: { $gte: twoWeeks, $lt: today } , 'sold': { $gte: 2 } });
             } else if(filter.lastWeekAuction) {
-              match = { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } };
+              match = R.merge(match, { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } });
             }
           }
           const note = skip && limit 
-            ? Note.findOne(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
-            : Note.findOne(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' } } });
+            ? Note.findOne(conditions)
+              .populate({ path: 'items', match
+                , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
+            : Note.findOne(conditions)
+              .populate({ path: 'items', match, options: { sort: { bidStopTime: 'desc' } } });
           return note.exec();
         }
       case 'fetch/items':
         {
-          const { user, ids, skip, limit } = options;
+          const { user, ids, skip, limit, filter } = options;
           const conditions = { user };
-          const match = { guid__: { $in: ids } };
+          let match = { guid__: { $in: ids } };
+          if(filter) {
+            log.trace(FeedParser.displayName, 'Filter', filter);
+            const date      = new Date();
+            const start     = new Date(filter.bidStartTime);
+            const stop      = new Date(filter.bidStopTime);
+            const year      = date.getFullYear();
+            const month     = date.getMonth();
+            const day       = date.getDate();
+            const yesterday = new Date(year, month, day);
+            const today     = new Date(year, month, day + 1);
+            if(filter.inBidding) {
+              match = R.merge(match, { bidStopTime: { $gte: start, $lt: stop } });
+            } else if(filter.allBidding || filter.allTrading) {
+              match = R.merge(match, {});
+            } else if(filter.endBidding) {
+              match = R.merge(match, { bidStopTime: { $gte: yesterday, $lt: today } });
+            }
+          }
           const notes = skip && limit
-            ? Note.find(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
-            : Note.find(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' } } });
+            ? Note.find(conditions)
+                .populate({ path: 'items', match
+                  , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
+            : Note.find(conditions)
+                .populate({ path: 'items', match, options: { sort: { bidStopTime: 'desc' } } });
           return notes.exec();
         }
       case 'fetch/categorys':
@@ -439,8 +459,8 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  getItems(user, ids, skip, limit) {
-    return this.request('fetch/items', { user, ids, skip, limit });
+  getItems(user, ids, skip, limit, filter) {
+    return this.request('fetch/items', { user, ids, skip, limit, filter });
   }
 
   fetchCategorys({ user, category, skip, limit }) {
@@ -607,11 +627,11 @@ export default class FeedParser {
     );
   }
 
-  fetchTradedNotes({ user, skip, limit }) {
+  fetchTradedNotes({ user, skip, limit, filter }) {
     const observables = ids => forkJoin([
       this.getTraded(user)
     , this.getBided(user)
-    , this.getItems(user, ids, skip, limit)
+    , this.getItems(user, ids, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setBided(objs[1])
@@ -626,11 +646,11 @@ export default class FeedParser {
     );
   }
 
-  fetchBidedNotes({ user, skip, limit }) {
+  fetchBidedNotes({ user, skip, limit, filter }) {
     const observables = ids => forkJoin([
       this.getBided(user)
     , this.getListed(user)
-    , this.getItems(user, ids, skip, limit)
+    , this.getItems(user, ids, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setListed(objs[1])

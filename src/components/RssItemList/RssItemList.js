@@ -28,7 +28,6 @@ class RssItemList extends React.Component {
     const prevPage = this.props.page;
     const nextPage = nextProps.page;
     if((prevNoteId !== nextNoteId) || (prevPage !== nextPage)) {
-      //std.logInfo(RssItemList.displayName, 'Props', nextProps);
       let listed = [], starred = [], deleted = [], added = [];
       nextProps.items.forEach(item => {
         if(item.listed) listed.push(item.guid._);

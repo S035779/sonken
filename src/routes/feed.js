@@ -49,14 +49,10 @@ export default {
 
   downloadItems() {
     return (req, res) => {
-      const { user, ids
-      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      } = req.body;
-      //log.trace(displayName, 'Request', req.body);
-      const filter = allAuction === false ? {
-        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      } : null;
-      //log.trace(displayName, 'Filter', filter);
+      const { user, ids, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+      , aucStartTime, aucStopTime } = req.body;
+      const filter = allAuction === false ? { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+      , inAuction, aucStartTime, aucStopTime } : null;
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -266,17 +262,11 @@ export default {
 
   fetchNote() {
     return (req, res) => {
-      const { user, id, skip, limit
-      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      } = req.query;
-      const filter = allAuction && allAuction ==='false' ? {
-        lastWeekAuction:  lastWeekAuction   === 'true'
-      , twoWeeksAuction:  twoWeeksAuction   === 'true'
-      , lastMonthAuction: lastMonthAuction  === 'true'
-      , allAuction:       false
-      , inAuction:        inAuction         === 'true'
-      , aucStartTime, aucStopTime
-      } : null;
+      const { user, id, skip, limit, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+      , aucStartTime, aucStopTime } = req.query;
+      const filter = allAuction && allAuction ==='false' ? { lastWeekAuction:  lastWeekAuction === 'true'
+      , twoWeeksAuction: twoWeeksAuction === 'true', lastMonthAuction: lastMonthAuction === 'true'
+      , allAuction: false, inAuction: inAuction === 'true', aucStartTime, aucStopTime } : null;
       feed.fetchNote({ user, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -416,8 +406,10 @@ export default {
 
   fetchTradedNotes() {
     return (req, res) => {
-      const { user, skip, limit } = req.query;
-      feed.fetchTradedNotes({ user, skip, limit }).subscribe(
+      const { user, skip, limit, endTrading, allTrading, inBidding, bidStartTime, bidStopTime } = req.query;
+      const filter = allTrading && allTrading === 'false' ? { endTrading: endTrading === 'true'
+      , allTrading: false, inBidding: inBidding === 'true', bidStartTime, bidStopTime } : null;
+      feed.fetchTradedNotes({ user, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -430,8 +422,10 @@ export default {
 
   fetchBidedNotes() {
     return (req, res) => {
-      const { user, skip, limit } = req.query;
-      feed.fetchBidedNotes({ user, skip, limit }).subscribe(
+      const { user, skip, limit, endBidding, allBidding, inBidding, bidStartTime, bidStopTime } = req.query;
+      const filter = allBidding && allBidding === 'false' ? { endBidding: endBidding === 'true'
+      , allBidding: false , inBidding: inBidding === 'true', bidStartTime, bidStopTime } : null;
+      feed.fetchBidedNotes({ user, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

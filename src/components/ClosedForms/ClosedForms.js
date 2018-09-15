@@ -140,10 +140,8 @@ class ClosedForms extends React.Component {
 
   handleFilter() {
     const { user } = this.props;
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    , isRequest
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
+    , aucStopTime, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
       .then(() => NoteAction.filter(user , {
@@ -176,9 +174,9 @@ class ClosedForms extends React.Component {
     } = this.state;
     const id = note._id;
     this.spn.start();
-    NoteAction.downloadItems(user, id, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    }).then(() => this.setState({ isSuccess: true }))
+    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+    , inAuction, aucStartTime, aucStopTime })
+      .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
       .then(() => this.spn.stop())
       .catch(err => {
@@ -194,18 +192,16 @@ class ClosedForms extends React.Component {
 
   fetch(page) {
     const { user, note } = this.props;
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
+    , aucStopTime } = this.state;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
     this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
+    return NoteAction.fetch(user, id, skip, limit, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
+    , allAuction, inAuction, aucStartTime, aucStopTime });
   }
 
   downloadFile(blob) {

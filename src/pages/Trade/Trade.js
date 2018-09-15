@@ -10,7 +10,6 @@ import Spinner                  from 'Utilities/Spinner';
 import { withStyles }           from '@material-ui/core/styles';
 import TradeSearch              from 'Components/TradeSearch/TradeSearch';
 import TradeFilter              from 'Components/TradeFilter/TradeFilter';
-import TradeItemList            from 'Components/TradeItemList/TradeItemList';
 
 class Trade extends React.Component {
   static getStores() {
@@ -42,21 +41,21 @@ class Trade extends React.Component {
       .then(() => spn.stop());
   }
 
-  itemFilter(filter, item) {
-    const now       = new Date(item.bidStopTime);
-    const start     = new Date(filter.bidStartTime);
-    const stop      = new Date(filter.bidStopTime);
-    const isTrade = item.traded;
-    const isAll = true;
-    const isNow = start <= now && now <= stop;
-    return filter.inBidding
-      ? isNow
-      : filter.endTrading && filter.allTrading
-        ? isAll
-        : filter.endTrading
-          ? isTrade
-          : true; 
-  }
+  //itemFilter(filter, item) {
+  //  const now       = new Date(item.bidStopTime);
+  //  const start     = new Date(filter.bidStartTime);
+  //  const stop      = new Date(filter.bidStopTime);
+  //  const isTrade = item.traded;
+  //  const isAll = true;
+  //  const isNow = start <= now && now <= stop;
+  //  return filter.inBidding
+  //    ? isNow
+  //    : filter.endTrading && filter.allTrading
+  //      ? isAll
+  //      : filter.endTrading
+  //        ? isTrade
+  //        : true; 
+  //}
 
   render() {
     //std.logInfo(Trade.displayName, 'State', this.state);
@@ -67,25 +66,11 @@ class Trade extends React.Component {
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
     notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
-    let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
+    let _items = items.filter(item => item.bided);// && this.itemFilter(filter, item));
     const number = _items.length;
     return <div className={classes.root}>
-      <TradeSearch
-        user={user}
-        file={file}
-        items={_items}
-        itemNumber={number} itemPage={page}/>
-      <TradeFilter
-        user={user}
-        items={_items}
-        itemFilter={filter}
-        selectedItemId={ids}/>
-      <div className={classes.noteList}>
-        <TradeItemList
-          user={user}
-          items={_items}
-          selectedItemId={ids}/>
-      </div>
+      <TradeSearch user={user} items={_items} file={file} itemNumber={number} itemPage={page}/>
+      <TradeFilter user={user} items={_items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }
@@ -96,18 +81,5 @@ Trade.propTypes = {
 , location: PropTypes.object.isRequired
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
-const filterHeight      = 186;
-const searchHeight      = 62;
-const listHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px - ${searchHeight}px)`;
-const listHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
-const styles = theme => ({
-  root:     { display: 'flex', flexDirection: 'column' }
-, noteList: { width: '100%', overflow: 'scroll'
-            , height: listHeightSmDown
-            , [theme.breakpoints.up('sm')]: { height: listHeightSmUp } }
-});
+const styles = { root: { display: 'flex', flexDirection: 'column' } };
 export default withStyles(styles)(Container.create(Trade));
