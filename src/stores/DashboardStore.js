@@ -142,133 +142,63 @@ export default class DashboardStore extends ReduceStore {
   reduce(state, action) {
     switch (action.type) { 
       case 'user/preset':
-        return Object.assign({}, state, {
-          user:   action.user
-        , isAuthenticated: action.isAuthenticated
-        })
+        return R.merge(state, { user: action.user, isAuthenticated: action.isAuthenticated })
       case 'login/authenticate':
-        return Object.assign({}, state, {
-          isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { isAuthenticated: action.isAuthenticated });
       case 'category/prefetch/my':
-        return Object.assign({}, state, {
-          categorys: action.categorys
-        });
+        return R.merge(state, { categorys: action.categorys });
       case 'category/fetch/my':
-        return Object.assign({}, state, {
-          categorys: action.categorys
-        });
+        return R.merge(state, { categorys: action.categorys });
       case 'category/create':
-        return Object.assign({}, state, {
-          categorys:  [action.category, ...state.categorys]
-        });
+        return R.merge(state, { categorys: [action.category, ...state.categorys] });
       case 'category/update': 
-        return Object.assign({}, state, {
-          categorys:  this.updateCategory(state, action)
-        });
+        return R.merge(state, { categorys: this.updateCategory(state, action) });
       case 'category/delete':
-        return Object.assign({}, state, {
-          categorys:  this.deleteCategory(state, action)
-        });
+        return R.merge(state, { categorys: this.deleteCategory(state, action) });
       case 'note/prefetch/my':
-        return Object.assign({}, state, {
-          notes:  action.notes
-        });
+        return R.merge(state, { notes: action.notes });
       case 'note/fetch/my':
-        return Object.assign({}, state, {
-          notes:  action.notes
-        });
+        return R.merge(state, { notes: action.notes });
       case 'note/fetch': 
-        return Object.assign({}, state, {
-          notes:  this.fetchNote(state, action)
-        });
+        return R.merge(state, { notes: this.fetchNote(state, action) });
       case 'note/create':
-        return Object.assign({}, state, {
-          notes:  [action.note, ...state.notes]
-        });
+        return R.merge(state, { notes: [action.note, ...state.notes] });
       case 'note/update': 
-        return Object.assign({}, state, {
-          notes:  this.fetchNote(state, action)
-        });
+        return R.merge(state, { notes: this.fetchNote(state, action) });
       case 'note/delete':
-        return Object.assign({}, state, {
-          notes:  this.deleteNote(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteNote(state, action), ids: [] });
       case 'note/pagenation':
-        return Object.assign({}, state, {
-          page:   action.page
-        });
+        return R.merge(state, { page: action.page });
       case 'note/select':
-        return Object.assign({}, state, {
-          ids:    action.ids
-        });
+        return R.merge(state, { ids: action.ids });
       case 'note/filter':
-        return Object.assign({}, state, {
-          filter: action.filter
-        });
+        return R.merge(state, { filter: action.filter });
       case 'note/upload/my':
-        return Object.assign({}, state, {
-          notes:  action.notes
-        });
+        return R.merge(state, { notes: action.notes });
       case 'note/download/my':
-        return Object.assign({}, state, {
-          file:  action.file
-        });
+        return R.merge(state, { file: action.file });
       case 'note/download/items':
-        return Object.assign({}, state, {
-          file:  action.file
-        });
+        return R.merge(state, { file: action.file });
       case 'add/create':
-        return Object.assign({}, state, {
-          notes: this.createAdd(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createAdd(state, action), ids: [] });
       case 'add/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteAdd(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteAdd(state, action), ids: [] });
       case 'delete/create':
-        return Object.assign({}, state, {
-          notes: this.createDelete(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createDelete(state, action), ids: [] });
       case 'delete/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteDelete(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteDelete(state, action), ids: [] });
       case 'read/create':
-        return Object.assign({}, state, {
-          notes: this.createRead(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createRead(state, action), ids: [] });
       case 'read/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteRead(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteRead(state, action), ids: [] });
       case 'star/create':
-        return Object.assign({}, state, {
-          notes: this.createStar(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createStar(state, action), ids: [] });
       case 'star/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteStar(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteStar(state, action), ids: [] });
       case 'list/create':
-        return Object.assign({}, state, {
-          notes: this.createList(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createList(state, action), ids: [] });
       case 'list/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteList(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteList(state, action), ids: [] });
       case 'note/rehydrate/my':
         return action.state;
       default: 

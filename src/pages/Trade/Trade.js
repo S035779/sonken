@@ -2,7 +2,7 @@ import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
 import { Container }            from 'flux/utils';
-import NoteAction               from 'Actions/NoteAction';
+import TradeAction              from 'Actions/TradeAction';
 import { getStores, getState }  from 'Stores';
 import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
@@ -24,8 +24,8 @@ class Trade extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Trade.displayName, 'prefetch', category);
-    return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchTraded(user, 0, 20));
+    return TradeAction.presetUser(user)
+      .then(() => TradeAction.prefetchTraded(user, 0, 20));
   }
 
   componentDidMount() {
@@ -33,11 +33,10 @@ class Trade extends React.Component {
     if(!user) return;
     const skip = (page.number - 1) * page.perPage;
     const limit = page.perPage;
-    const category = 'trade';
     const spn = Spinner.of('app');
     spn.start();
-    std.logInfo(Trade.displayName, 'fetch', category);
-    NoteAction.fetchTraded(user, skip, limit)
+    std.logInfo(Trade.displayName, 'fetch', 'trade');
+    TradeAction.fetchTraded(user, skip, limit)
       .then(() => spn.stop());
   }
 
@@ -65,17 +64,17 @@ class Trade extends React.Component {
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
-    notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
-    let _items = items.filter(item => item.bided);// && this.itemFilter(filter, item));
-    const number = _items.length;
+    notes.forEach(note => { if(note.items !== null) note.items.forEach(item => items.push(item)) });
+    //let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
+    const number = items.length;
     return <div className={classes.root}>
-      <TradeSearch user={user} items={_items} file={file} itemNumber={number} itemPage={page}/>
-      <TradeFilter user={user} items={_items} itemFilter={filter} selectedItemId={ids}/>
+      <TradeSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
+      <TradeFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }
 Trade.displayName = 'Trade';
-Trade.defaultProps = { notes: null };
+Trade.defaultProps = {};
 Trade.propTypes = {
   classes: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired

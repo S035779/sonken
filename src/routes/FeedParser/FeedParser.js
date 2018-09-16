@@ -41,8 +41,8 @@ export default class FeedParser {
           const { user, category, skip, limit } = options;
           const conditions = !category ? { user } : { user, category };
           const notes = skip && limit
-            ? Note.find(conditions).populate({ path: 'items'
-              , options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 } })
+            ? Note.find(conditions)
+              .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 } })
               .skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
             : Note.find(conditions).populate('items').sort({ updated: 'asc' });
           return notes.exec();
@@ -51,9 +51,9 @@ export default class FeedParser {
         {
           const { user, id, skip, limit, filter } = options;
           const conditions = { _id: id, user };
-          let match = {};
+          let match = null;
           if(filter) {
-            //log.trace(FeedParser.displayName, 'Filter', filter);
+            //log.trace(FeedParser.displayName, 'Note', filter);
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
@@ -68,32 +68,32 @@ export default class FeedParser {
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
             if(filter.inAuction) {
-              match = R.merge(match, { bidStopTime: { $gte: start, $lt: stop } });
+              match = { bidStopTime: { $gte: start, $lt: stop } };
             } else if(filter.allAuction) {
               match = null;
             } else if(filter.lastMonthAuction) {
-              match = R.merge(match, { bidStopTime: { $gte: lastMonth, $lt: today } , 'sold': { $gte: 3 } });
+              match = { bidStopTime: { $gte: lastMonth, $lt: today } , 'sold': { $gte: 3 } };
             } else if(filter.twoWeeksAuction) {
-              match = R.merge(match, { bidStopTime: { $gte: twoWeeks, $lt: today } , 'sold': { $gte: 2 } });
+              match = { bidStopTime: { $gte: twoWeeks, $lt: today } , 'sold': { $gte: 2 } };
             } else if(filter.lastWeekAuction) {
-              match = R.merge(match, { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } });
+              match = { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } };
             }
           }
+          //log.trace(FeedParser.displayName, 'Match', match);
           const note = skip && limit 
-            ? Note.findOne(conditions)
-              .populate({ path: 'items', match
-                , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
-            : Note.findOne(conditions)
-              .populate({ path: 'items', match, options: { sort: { bidStopTime: 'desc' } } });
+            ? Note.findOne(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
+            : Note.findOne(conditions).populate({ path: 'items', match
+              , options: { sort: { bidStopTime: 'desc' } } });
           return note.exec();
         }
-      case 'fetch/items':
+      case 'fetch/traded':
         {
-          const { user, ids, skip, limit, filter } = options;
+          const { user, skip, limit, filter } = options;
           const conditions = { user };
-          let match = { guid__: { $in: ids } };
+          let match = null;
           if(filter) {
-            log.trace(FeedParser.displayName, 'Filter', filter);
+            //log.trace(FeedParser.displayName, 'Traded', filter);
             const date      = new Date();
             const start     = new Date(filter.bidStartTime);
             const stop      = new Date(filter.bidStopTime);
@@ -103,25 +103,79 @@ export default class FeedParser {
             const yesterday = new Date(year, month, day);
             const today     = new Date(year, month, day + 1);
             if(filter.inBidding) {
-              match = R.merge(match, { bidStopTime: { $gte: start, $lt: stop } });
-            } else if(filter.allBidding || filter.allTrading) {
-              match = R.merge(match, {});
-            } else if(filter.endBidding) {
-              match = R.merge(match, { bidStopTime: { $gte: yesterday, $lt: today } });
+              match = { bidStopTime: { $gte: start, $lt: stop } };
+            } else if(filter.allListing) {
+              match = null;
+            } else if(filter.endListing) {
+              match = { bidStopTime: { $gte: yesterday, $lt: today } };
             }
           }
-          const notes = skip && limit
-            ? Note.find(conditions)
-                .populate({ path: 'items', match
-                  , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
-            : Note.find(conditions)
-                .populate({ path: 'items', match, options: { sort: { bidStopTime: 'desc' } } });
-          return notes.exec();
+          const traded = skip && limit
+            ? Traded.find(conditions).skip(Number(skip)).limit(Number(limit))
+              .sort({ created: 'desc' }).populate({ path: 'items', match })
+            : Traded.find(conditions)
+              .sort({ created: 'desc' }).populate({ path: 'items', match });
+          return traded.exec();
         }
-      case 'fetch/categorys':
+      case 'fetch/bided':
         {
-          const conditions = { user: options.user };
-          return Category.find(conditions).exec();
+          const { user, skip, limit, filter } = options;
+          const conditions = { user };
+          let match = null;
+          if(filter) {
+            //log.trace(FeedParser.displayName, 'Bided', filter);
+            const date      = new Date();
+            const start     = new Date(filter.bidStartTime);
+            const stop      = new Date(filter.bidStopTime);
+            const year      = date.getFullYear();
+            const month     = date.getMonth();
+            const day       = date.getDate();
+            const yesterday = new Date(year, month, day);
+            const today     = new Date(year, month, day + 1);
+            if(filter.inBidding) {
+              match = { bidStopTime: { $gte: start, $lt: stop } };
+            } else if(filter.allTrading) {
+              match = null;
+            } else if(filter.endTrading) {
+              match = { bidStopTime: { $gte: yesterday, $lt: today } };
+            }
+          }
+          const bided = skip && limit
+            ? Bided.find(conditions).skip(Number(skip)).limit(Number(limit))
+              .sort({ created: 'desc' }).populate({ path: 'items', match })
+            : Bided.find(conditions)
+              .sort({ created: 'desc' }).populate({ path: 'items', match });
+          return bided.exec();
+        }
+      case 'fetch/listed':
+        {
+          const { user, skip, limit, filter } = options;
+          const conditions = { user };
+          let match = null;
+          if(filter) {
+            log.trace(FeedParser.displayName, 'Listed', filter);
+            const date      = new Date();
+            const start     = new Date(filter.bidStartTime);
+            const stop      = new Date(filter.bidStopTime);
+            const year      = date.getFullYear();
+            const month     = date.getMonth();
+            const day       = date.getDate();
+            const yesterday = new Date(year, month, day);
+            const today     = new Date(year, month, day + 1);
+            if(filter.inBidding) {
+              match = { bidStopTime: { $gte: start, $lt: stop } };
+            } else if(filter.allBidding) {
+              match = null;
+            } else if(filter.endBidding) {
+              match = { bidStopTime: { $gte: yesterday, $lt: today } };
+            }
+          }
+          const listed = skip && limit
+            ? Listed.find(conditions).skip(Number(skip)).limit(Number(limit))
+              .sort({ created: 'desc' }).populate({ path: 'items', match })
+            : Listed.find(conditions)
+              .sort({ created: 'desc' }).populate({ path: 'items', match });
+          return listed.exec();
         }
       case 'fetch/added':
         {
@@ -138,25 +192,15 @@ export default class FeedParser {
           const conditions = { user: options.user };
           return Readed.find(conditions).exec();
         }
-      case 'fetch/traded':
-        {
-          const conditions = { user: options.user };
-          return Traded.find(conditions).exec();
-        }
-      case 'fetch/bided':
-        {
-          const conditions = { user: options.user };
-          return Bided.find(conditions).exec();
-        }
       case 'fetch/starred':
         {
           const conditions = { user: options.user };
           return Starred.find(conditions).exec();
         }
-      case 'fetch/listed':
+      case 'fetch/categorys':
         {
           const conditions = { user: options.user };
-          return Listed.find(conditions).exec();
+          return Category.find(conditions).exec();
         }
       case 'fetch/category':
         {
@@ -423,20 +467,20 @@ export default class FeedParser {
     return this.request('fetch/categorys', { user });
   }
 
-  getListed(user) {
-    return this.request('fetch/listed', { user });
+  getListed(user, skip, limit, filter) {
+    return this.request('fetch/listed', { user, skip, limit, filter });
+  }
+
+  getBided(user, skip, limit, filter) {
+    return this.request('fetch/bided', { user, skip, limit, filter });
+  }
+
+  getTraded(user, skip, limit, filter) {
+    return this.request('fetch/traded', { user, skip, limit, filter });
   }
 
   getStarred(user) {
     return this.request('fetch/starred', { user });
-  }
-
-  getBided(user) {
-    return this.request('fetch/bided', { user });
-  }
-
-  getTraded(user) {
-    return this.request('fetch/traded', { user });
   }
 
   getReaded(user) {
@@ -627,44 +671,6 @@ export default class FeedParser {
     );
   }
 
-  fetchTradedNotes({ user, skip, limit, filter }) {
-    const observables = ids => forkJoin([
-      this.getTraded(user)
-    , this.getBided(user)
-    , this.getItems(user, ids, skip, limit, filter)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setBided(objs[1])
-    , this.setTraded(objs[0])
-    , this.toObject
-    )(objs[2]);
-    const setIds = R.map(obj => obj.bided);
-    return from(this.getBided(user)).pipe(
-      map(setIds)
-    , flatMap(observables)
-    , map(setAttribute)
-    );
-  }
-
-  fetchBidedNotes({ user, skip, limit, filter }) {
-    const observables = ids => forkJoin([
-      this.getBided(user)
-    , this.getListed(user)
-    , this.getItems(user, ids, skip, limit, filter)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setListed(objs[1])
-    , this.setBided(objs[0])
-    , this.toObject
-    )(objs[2]);
-    const setIds = R.map(obj => obj.listed);
-    return from(this.getListed(user)).pipe(
-      map(setIds)
-    , flatMap(observables)
-    , map(setAttribute)
-    );
-  }
-
   fetchStarredNotes({ user }) {
     const observables = forkJoin([
       this.getStarred(user)
@@ -679,18 +685,59 @@ export default class FeedParser {
     );
   }
 
-  fetchListedNotes({ user }) {
-    const observables = forkJoin([
-      this.getListed(user)
-    , this.getNotes(user)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setListed(objs[0])
-    , this.toObject
-    )(objs[1]);
-    return observables.pipe(
-      map(setAttribute)
-    );
+  fetchTradedNotes({ user, skip, limit, filter }) {
+    //const observables = ids => forkJoin([
+    //  this.getTraded(user)
+    //, this.getBided(user)
+    //, this.getItems(user, ids, skip, limit, filter)
+    //]);
+    //const setAttribute = objs => R.compose(
+    //  this.setBided(objs[1])
+    //, this.setTraded(objs[0])
+    //, this.toObject
+    //)(objs[2]);
+    //const setIds = R.map(obj => obj.bided);
+    return from(this.getBided(user, skip, limit, filter));
+    //  .pipe(
+    //  map(setIds)
+    //, flatMap(observables)
+    //, map(setAttribute)
+    //);
+  }
+
+  fetchBidedNotes({ user, skip, limit, filter }) {
+    //const observables = ids => forkJoin([
+    //  this.getBided(user)
+    //, this.getListed(user)
+    //, this.getItems(user, ids, skip, limit, filter)
+    //]);
+    //const setAttribute = objs => R.compose(
+    //  this.setListed(objs[1])
+    //, this.setBided(objs[0])
+    //, this.toObject
+    //)(objs[2]);
+    //const setIds = R.map(obj => obj.listed);
+    return from(this.getListed(user, skip, limit, filter));
+    //  .pipe(
+    //  map(setIds)
+    //, flatMap(observables)
+    //, map(setAttribute)
+    //);
+  }
+
+  fetchListedNotes({ user, skip, limit, filter }) {
+    //const observables = forkJoin([
+    //  this.getListed(user)
+    //, this.getNotes(user)
+    //]);
+    //const setAttribute = objs => R.compose(
+    //  this.setListed(objs[0])
+    //, this.toObject
+    //)(objs[1]);
+    return from(this.getTraded(user, skip, limit, filter));
+    //return observables.pipe(
+    //  map(setAttribute)
+    //);
   }
 
   fetchNote({ user, id, skip, limit, filter }) {

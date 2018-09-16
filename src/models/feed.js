@@ -91,20 +91,6 @@ const readedSchema = new mongoose.Schema({
 }, { collection: 'readed' });
 readedSchema.index({ readed: 1 }, { unique: true });
 
-const tradedSchema = new mongoose.Schema({
-  user:             { type: String, required: true } 
-, traded:           { type: String, required: true }
-, created:          { type: Date, default: Date.now() }
-}, { collection: 'traded' });
-tradedSchema.index({ traded: 1 }, { unique: true });
-
-const bidedSchema = new mongoose.Schema({
-  user:             { type: String, required: true } 
-, bided:            { type: String, required: true }
-, created:          { type: Date, default: Date.now() }
-}, { collection: 'bided' });
-bidedSchema.index({ bided: 1 }, { unique: true });
-
 const starredSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , starred:          { type: String, required: true }
@@ -112,12 +98,38 @@ const starredSchema = new mongoose.Schema({
 }, { collection: 'starred' });
 starredSchema.index({ starred: 1 }, { unique: true });
 
+const tradedSchema = new mongoose.Schema({
+  user:             { type: String, required: true } 
+, traded:           { type: String, required: true }
+, created:          { type: Date, default: Date.now() }
+}, { collection: 'traded', toObject: { virtuals: true } });
+tradedSchema.index({ traded: 1 }, { unique: true });
+tradedSchema.virtual('items', {
+  ref: 'Items', localField: 'traded', foreignField: 'guid__', justOne: false 
+, options: { sort: { bidStopTime: 'desc' }, limit: 1 }
+});
+
+const bidedSchema = new mongoose.Schema({
+  user:             { type: String, required: true } 
+, bided:            { type: String, required: true }
+, created:          { type: Date, default: Date.now() }
+}, { collection: 'bided', toObject: { virtuals: true } });
+bidedSchema.index({ bided: 1 }, { unique: true });
+bidedSchema.virtual('items', {
+  ref: 'Items', localField: 'bided', foreignField: 'guid__', justOne: false
+, options: { sort: { bidStopTime: 'desc' }, limit: 1 }
+});
+
 const listedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , listed:           { type: String, required: true }
 , created:          { type: Date, default: Date.now() }
-}, { collection: 'listed' });
+}, { collection: 'listed', toObject: { virtuals: true } });
 listedSchema.index({ listed: 1 }, { unique: true });
+listedSchema.virtual('items', {
+  ref: 'Items', localField: 'listed', foreignField: 'guid__', justOne: false
+, options: { sort: { bidStopTime: 'desc' }, limit: 1 }
+});
 
 const displayName = '[MDB]';
 const db = mongoose.createConnection();

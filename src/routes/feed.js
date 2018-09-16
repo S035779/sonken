@@ -404,6 +404,20 @@ export default {
     };
   },
 
+  fetchStarredNotes() {
+    return (req, res) => {
+      const { user } = req.query;
+      feed.fetchStarredNotes({ user }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message, ':', err.stack);
+        }
+      , () => { log.info('Complete to fetch Starred.'); }  
+      );
+    };
+  },
+
   fetchTradedNotes() {
     return (req, res) => {
       const { user, skip, limit, endTrading, allTrading, inBidding, bidStartTime, bidStopTime } = req.query;
@@ -436,24 +450,12 @@ export default {
     };
   },
 
-  fetchStarredNotes() {
-    return (req, res) => {
-      const { user } = req.query;
-      feed.fetchStarredNotes({ user }).subscribe(
-        obj => { res.status(200).send(obj); }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message, ':', err.stack);
-        }
-      , () => { log.info('Complete to fetch Starred.'); }  
-      );
-    };
-  },
-
   fetchListedNotes() {
     return (req, res) => {
-      const { user } = req.query;
-      feed.fetchListedNotes({ user }).subscribe(
+      const { user, skip, limit, endListing, allListing, inBidding, bidStartTime, bidStopTime } = req.query;
+      const filter = allListing && allListing === 'false' ? { endListing: endListing === 'true'
+      , allListing: false , inBidding: inBidding === 'true', bidStartTime, bidStopTime } : null;
+      feed.fetchListedNotes({ user, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

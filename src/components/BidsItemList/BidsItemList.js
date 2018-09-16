@@ -19,17 +19,15 @@ class BidsItemList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(BidsItemList.displayName, 'Props', nextProps);
     const selectedItemId = nextProps.selectedItemId;
     const nextItems = nextProps.items;
     const nextPage = nextProps.page;
     const prevItems = this.props.items;
     const prevPage = this.props.page;
     if((prevItems.length === 0 && nextItems.length > 0) || (prevPage !== nextPage)) {
+      std.logInfo(BidsItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let bided = [];
-      nextItems.forEach(item => {
-        if(item.bided) bided.push(item.guid._);
-      });
+      nextItems.forEach(item => { if(item.bided) bided.push(item.guid._); });
       this.setState({ selectedItemId, bided });
     } else {
       this.setState({ selectedItemId });

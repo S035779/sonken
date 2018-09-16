@@ -2,7 +2,7 @@ import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
 import { Container }            from 'flux/utils';
-import NoteAction               from 'Actions/NoteAction';
+import BidsAction               from 'Actions/BidsAction';
 import { getStores, getState }  from 'Stores';
 import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
@@ -24,8 +24,8 @@ class Bids extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Bids.displayName, 'prefetch', category);
-    return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchBided(user, 0, 20));
+    return BidsAction.presetUser(user)
+      .then(() => BidsAction.prefetchBided(user, 0, 20));
   }
 
   componentDidMount() {
@@ -33,11 +33,10 @@ class Bids extends React.Component {
     if(!user) return;
     const skip = (page.number - 1) * page.perPage;
     const limit = page.perPage;
-    const category = 'bids';
     const spn = Spinner.of('app');
     spn.start();
-    std.logInfo(Bids.displayName, 'fetch', category);
-    NoteAction.fetchBided(user, skip, limit)
+    std.logInfo(Bids.displayName, 'fetch', 'bids');
+    BidsAction.fetchBided(user, skip, limit)
       .then(() => spn.stop());
   }
 
@@ -72,16 +71,16 @@ class Bids extends React.Component {
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
     notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
-    let _items = items.filter(item => item.listed);// && this.itemFilter(filter, item));
-    const number = _items.length;
+    //let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
+    const number = items.length;
     return <div className={classes.root}>
-      <BidsSearch user={user} items={_items} file={file} itemNumber={number} itemPage={page}/>
-      <BidsFilter user={user} items={_items} itemFilter={filter} selectedItemId={ids}/>
+      <BidsSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
+      <BidsFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }
 Bids.displayName = 'Bids';
-Bids.defaultProps = { notes: null };
+Bids.defaultProps = {};
 Bids.propTypes = {
   classes: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired

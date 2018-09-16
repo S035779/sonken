@@ -1,7 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import * as R           from 'ramda';
-import NoteAction       from 'Actions/NoteAction';
 import TradeAction      from 'Actions/TradeAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
@@ -26,6 +25,7 @@ class TradeFilter extends React.Component {
     , isRequest: false
     , page: 1
     , prevPage: 1
+    , prevAllTrading: true
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -36,25 +36,32 @@ class TradeFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(TradeFilter.displayName, 'nextProps', nextProps);
     const selectedItemId = nextProps.selectedItemId;
     const itemFilter = nextProps.itemFilter;
     const nextItems = nextProps.items;
     const nextPage = this.state.page;
+    const prevAllTrading = this.state.prevAllTrading;
     const prevItems = this.state.items;
     const prevPage = this.state.prevPage;
     if(prevItems && (nextItems.length > 0)) {
-      if(prevPage !== nextPage) {
+      if(prevItems.length === 0) {
+        //std.logInfo(TradeFilter.displayName, 'Init', nextProps);
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
+      } else if(prevPage !== nextPage) {
         //std.logInfo(TradeFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
         this.setState({ items: catItems(nextItems), prevPage: nextPage, selectedItemId, itemFilter })
       } else if(!itemFilter.allTrading) {
         //std.logInfo(TradeFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter });
-      } else {
+        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
+        , prevAllTrading: false });
+      } else if(itemFilter.allTrading !== prevAllTrading) {
         //std.logInfo(TradeFilter.displayName, 'Normal', nextProps);
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
+        , prevAllTrading: true });
       }
     }
   }
@@ -150,7 +157,7 @@ class TradeFilter extends React.Component {
     const skip = (page - 1) * limit;
     this.spn.start();
     this.setState({ isRequest: true, page });
-    return NoteAction.fetchTraded(user, skip, limit, { endTrading, allTrading, inBidding, bidStartTime
+    return TradeAction.fetchTraded(user, skip, limit, { endTrading, allTrading, inBidding, bidStartTime
     , bidStopTime });
   }
 

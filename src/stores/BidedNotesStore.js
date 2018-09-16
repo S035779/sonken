@@ -1,4 +1,5 @@
 import { ReduceStore }  from 'flux/utils';
+import * as R           from 'ramda';
 import std              from 'Utilities/stdutils';
 
 export default class BidedNotesStore extends ReduceStore {
@@ -22,95 +23,56 @@ export default class BidedNotesStore extends ReduceStore {
   }
   
   createBids(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)? Object.assign({}, obj
-    , { bided: true }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { bided: true }) : obj;
+    const setItems = R.map(setItem)
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
+    const setNotes = R.map(setNote)
+    return setNotes(state.notes);
   }
 
   deleteBids(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj) ? Object.assign({}, obj
-    , { bided: false }) : obj;
-    const setItems = objs => objs.map(item =>setItem(item))
-    return state.notes.map(note => note.items ? Object.assign({}, note
-    , { items: setItems(note.items) }) : note );
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { bided: false }) : obj;
+    const setItems = R.map(setItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
+    const setNotes = R.map(setNote)
+    return setNotes(state.notes);
   }
 
-  //deleteItem(state, action) {
-  //  const isItem = obj => action.ids.some(id => id === obj.guid._);
-  //  const delItems = objs => objs.filter(item => !isItem(item));
-  //  return state.notes.map(note => note.items ? Object.assign({}, note
-  //  , { items: delItems(note.items) }) : note );
-  //}
-
   deleteList(state, action) {
-    const isItem = obj => action.ids.some(id => id === obj.guid._);
-    const setItem = obj => isItem(obj)
-      ? Object.assign({}, obj, { listed: false }) : obj;
-    const setItems = objs => objs.map(setItem)
-    const setNote = obj => obj.items
-      ? Object.assign({}, obj, { items: setItems(obj.items) }) : obj; 
-    return state.notes.map(setNote);
+    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const setItem = obj => isItem(obj) ? R.merge(obj, { listed: false }) : obj;
+    const setItems = R.map(setItem)
+    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const setNotes = R.map(setNote)
+    return setNotes(state.notes);
   }
 
   reduce(state, action) {
     switch (action.type) { 
       case 'user/preset':
-        return Object.assign({}, state, {
-          user: action.user
-        , isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { user: action.user, isAuthenticated: action.isAuthenticated });
       case 'login/authenticate':
-        return Object.assign({}, state, {
-          isAuthenticated: action.isAuthenticated
-        });
-      case 'note/prefetch/bided':
-        return Object.assign({}, state, {
-          notes: action.notes
-        });
-      case 'note/fetch/bided':
-        return Object.assign({}, state, {
-          notes: action.notes
-        });
-      //case 'item/delete/bided':
-      //  return Object.assign({}, state, {
-      //    notes:  this.deleteItem(state, action)
-      //  , ids:    []
-      //  });
+        return R.merge(state, { isAuthenticated: action.isAuthenticated });
       case 'list/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteList(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteList(state, action), ids: [] });
+      case 'bids/prefetch':
+        return R.merge(state, { notes: action.notes });
+      case 'bids/fetch':
+        return R.merge(state, { notes: action.notes });
       case 'bids/create':
-        return Object.assign({}, state, {
-          notes: this.createBids(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.createBids(state, action), ids: [] });
       case 'bids/delete':
-        return Object.assign({}, state, {
-          notes: this.deleteBids(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { notes: this.deleteBids(state, action), ids: [] });
       case 'bids/pagenation':
-        return Object.assign({}, state, {
-          page:   action.page
-        });
+        return R.merge(state, { page: action.page });
       case 'bids/select':
-        return Object.assign({}, state, {
-          ids:    action.ids
-        });
+        return R.merge(state, { ids: action.ids });
       case 'bids/filter':
-        return Object.assign({}, state, {
-          filter: action.filter
-        });
+        return R.merge(state, { filter: action.filter });
       case 'bids/download':
-        return Object.assign({}, state, {
-          file:  action.file
-        });
+        return R.merge(state, { file: action.file });
       case 'bids/rehydrate':
         return action.state;
       default: 
@@ -119,4 +81,3 @@ export default class BidedNotesStore extends ReduceStore {
   } 
 }
 BidedNotesStore.displayName = 'BidedNotesStore';
-
