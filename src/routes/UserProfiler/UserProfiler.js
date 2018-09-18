@@ -35,13 +35,13 @@ const mail_keyset = {
 export default class UserProfiler {
   constructor() {
     this.createMenu({ admin: admin_user }).subscribe(
-        obj => { log.info(obj); }
-      , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
-      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Menu!!'); });
-    this.createAdmin({ admin: admin_user, password: admin_pass }) .subscribe(
-        obj => { log.info(obj); }
-      , err => { log.warn(UserProfiler.displayName, err.name, err.message); }
-      , ()  => { log.info(UserProfiler.displayName, 'Complete to create Administrator!!'); });
+        obj => log.info(UserProfiler.displayName, obj)
+      , err => log.warn(UserProfiler.displayName, err.name, err.message)
+      , ()  => log.info(UserProfiler.displayName, 'Complete to create Menu!!'));
+    this.createAdmin({ admin: admin_user, password: admin_pass }).subscribe(
+        obj => log.info(UserProfiler.displayName, obj)
+      , err => log.warn(UserProfiler.displayName, err.name, err.message)
+      , ()  => log.info(UserProfiler.displayName, 'Complete to create Administrator!!'));
   }
 
   static of() {

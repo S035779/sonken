@@ -28,6 +28,38 @@ const baseurl = 'https://auctions.yahoo.co.jp';
  */
 export default class FeedParser {
   constructor() {
+    this.defragItems().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment items.'));
+    this.defragAdded().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment added.'));
+    this.defragDeleted().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment deleted.'));
+    this.defragReaded().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment readed.'));
+    this.defragStarred().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment starred.'));
+    this.defragBided().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment bided.'));
+    this.defragTraded().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment traded.'));
+    this.defragListed().subscribe(
+      obj => log.info(FeedParser.displayName, obj)
+    , err => log.warn(FeedParser.displayName, err.name, err.message)
+    , ()  => log.info(FeedParser.displayName, 'Complete to defragment listed.'));
   }
 
   static of() {
@@ -36,24 +68,113 @@ export default class FeedParser {
 
   request(request, options) {
     switch(request) {
+      case 'defrag/items':
+        {
+          const date      = new Date();
+          const year      = date.getFullYear();
+          const month     = date.getMonth();
+          const day       = date.getDate();
+          const yesterday = new Date(year, month, day - 1);
+          const setDate   = date => new Date(date);
+          const expireItems = R.filter(obj => yesterday > setDate(obj.pubDate));
+          const promises = R.map(obj => Items.remove({ _id: obj._id }).exec());
+          const promise = Items.find({}).exec();
+          return promise
+            .then(docs => expireItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/added':
+        {
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
+          const promise = Added.find({}).populate('items').exec();
+          return promise
+            .then(R.tap(log.trace.bind(this)))
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/deleted':
+        {
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
+          const promise = Deleted.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/readed':
+        { 
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
+          const promise = Readed.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/starred':
+        {
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
+          const promise = Starred.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/bided':
+        { 
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
+          const promise = Bided.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/traded':
+        { 
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
+          const promise = Traded.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/listed':
+        {
+          const hasNotItems = R.filter(R.isEmpty);
+          const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
+          const promise = Listed.find({}).populate('items').exec();
+          return promise
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'count/notes':
       case 'fetch/notes':
         {
+          const isCount = request === 'count/notes';
           const { user, category, skip, limit } = options;
           const conditions = !category ? { user } : { user, category };
           const notes = skip && limit
             ? Note.find(conditions)
-              .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 } })
-              .skip(Number(skip)).limit(Number(limit)).sort({ updated: 'desc' })
-            : Note.find(conditions).populate('items').sort({ updated: 'asc' });
-          return notes.exec();
+              .sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
+              .populate({ path: 'items', options: {
+                sort: { bidStopTime: 'desc' }
+              , skip: 0, limit: 20
+              }})
+            : Note.find(conditions)
+              .sort({ updated: 'asc' })
+              .populate({ path: 'items', options: {
+                sort: { bidStopTime: 'desc' }
+              }});
+          return isCount ? notes.countDocuments().exec() : notes.exec();
         }
+      case 'count/note':
       case 'fetch/note':
         {
+          const isCount = request === 'count/note';
           const { user, id, skip, limit, filter } = options;
           const conditions = { _id: id, user };
           let match = null;
           if(filter) {
-            //log.trace(FeedParser.displayName, 'Note', filter);
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
@@ -79,81 +200,61 @@ export default class FeedParser {
               match = { bidStopTime: { $gte: lastWeek, $lt: today } , 'sold': { $gte: 1 } };
             }
           }
-          //log.trace(FeedParser.displayName, 'Match', match);
           const note = skip && limit 
-            ? Note.findOne(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) } })
-            : Note.findOne(conditions).populate({ path: 'items', match
-              , options: { sort: { bidStopTime: 'desc' } } });
-          return note.exec();
+            ? Note.findOne(conditions)
+              .populate({ path: 'items', match, options: {
+                sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit)
+              }})
+            : Note.findOne(conditions)
+              .populate({ path: 'items', match, options: {
+                sort: { bidStopTime: 'desc' }
+              }});
+          return isCount ? note.countDocuments().exec() : note.exec();
         }
+      case 'count/traded':
       case 'fetch/traded':
         {
+          log.trace(FeedParser.displayName, 'Traded', options);
+          const isCount = request === 'count/traded';
           const { user, skip, limit, filter } = options;
           const conditions = { user };
-          let match = null;
+          let Model;
+          let match;
           if(filter) {
-            //log.trace(FeedParser.displayName, 'Traded', filter);
-            const date      = new Date();
             const start     = new Date(filter.bidStartTime);
             const stop      = new Date(filter.bidStopTime);
-            const year      = date.getFullYear();
-            const month     = date.getMonth();
-            const day       = date.getDate();
-            const yesterday = new Date(year, month, day);
-            const today     = new Date(year, month, day + 1);
             if(filter.inBidding) {
-              match = { bidStopTime: { $gte: start, $lt: stop } };
-            } else if(filter.allListing) {
-              match = null;
-            } else if(filter.endListing) {
-              match = { bidStopTime: { $gte: yesterday, $lt: today } };
-            }
-          }
-          const traded = skip && limit
-            ? Traded.find(conditions).skip(Number(skip)).limit(Number(limit))
-              .sort({ created: 'desc' }).populate({ path: 'items', match })
-            : Traded.find(conditions)
-              .sort({ created: 'desc' }).populate({ path: 'items', match });
-          return traded.exec();
-        }
-      case 'fetch/bided':
-        {
-          const { user, skip, limit, filter } = options;
-          const conditions = { user };
-          let match = null;
-          if(filter) {
-            //log.trace(FeedParser.displayName, 'Bided', filter);
-            const date      = new Date();
-            const start     = new Date(filter.bidStartTime);
-            const stop      = new Date(filter.bidStopTime);
-            const year      = date.getFullYear();
-            const month     = date.getMonth();
-            const day       = date.getDate();
-            const yesterday = new Date(year, month, day);
-            const today     = new Date(year, month, day + 1);
-            if(filter.inBidding) {
-              match = { bidStopTime: { $gte: start, $lt: stop } };
+              Model = Bided;
+              match = { 'items.bidStopTime': { $gte: start, $lt: stop } };
             } else if(filter.allTrading) {
+              Model = Bided;
               match = null;
             } else if(filter.endTrading) {
-              match = { bidStopTime: { $gte: yesterday, $lt: today } };
+              Model = Traded;
+              match = null;
             }
+          } else {
+            Model = Bided;
+            match = null
           }
-          const bided = skip && limit
-            ? Bided.find(conditions).skip(Number(skip)).limit(Number(limit))
-              .sort({ created: 'desc' }).populate({ path: 'items', match })
-            : Bided.find(conditions)
-              .sort({ created: 'desc' }).populate({ path: 'items', match });
-          return bided.exec();
+          const model = skip && limit
+            ? Model.find(conditions, null, match)
+              .sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
+              .populate({ path: 'items' })
+            : Model.find({}, null, match)
+              .sort({ updated: 'desc' })
+              .populate({ path: 'items' });
+          return isCount ? model.countDocuments().exec() : model.exec();
         }
-      case 'fetch/listed':
+      case 'count/bided':
+      case 'fetch/bided':
         {
+          log.trace(FeedParser.displayName, 'Bided', options);
+          const isCount = request === 'count/bided';
           const { user, skip, limit, filter } = options;
           const conditions = { user };
           let match = null;
           if(filter) {
-            log.trace(FeedParser.displayName, 'Listed', filter);
             const date      = new Date();
             const start     = new Date(filter.bidStartTime);
             const stop      = new Date(filter.bidStopTime);
@@ -163,19 +264,26 @@ export default class FeedParser {
             const yesterday = new Date(year, month, day);
             const today     = new Date(year, month, day + 1);
             if(filter.inBidding) {
-              match = { bidStopTime: { $gte: start, $lt: stop } };
+              match = { 'items.bidStopTime': { $gte: start, $lt: stop } };
             } else if(filter.allBidding) {
               match = null;
             } else if(filter.endBidding) {
-              match = { bidStopTime: { $gte: yesterday, $lt: today } };
+              match = { 'items.bidStopTime': { $gte: yesterday, $lt: today } };
             }
           }
           const listed = skip && limit
-            ? Listed.find(conditions).skip(Number(skip)).limit(Number(limit))
-              .sort({ created: 'desc' }).populate({ path: 'items', match })
-            : Listed.find(conditions)
-              .sort({ created: 'desc' }).populate({ path: 'items', match });
-          return listed.exec();
+            ? Listed.find(conditions, null, match)
+              .sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
+              .populate({ path: 'items' })
+            : Listed.find(conditions, null, match)
+              .sort({ updated: 'desc' })
+              .populate({ path: 'items' });
+          return isCount ? listed.countDocuments().exec() : listed.exec();
+        }
+      case 'fetch/listed':
+        {
+          const conditions = { user: options.user };
+          return Listed.find(conditions).exec();
         }
       case 'fetch/added':
         {
@@ -467,8 +575,8 @@ export default class FeedParser {
     return this.request('fetch/categorys', { user });
   }
 
-  getListed(user, skip, limit, filter) {
-    return this.request('fetch/listed', { user, skip, limit, filter });
+  getListed(user) {
+    return this.request('fetch/listed', { user });
   }
 
   getBided(user, skip, limit, filter) {
@@ -503,8 +611,84 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  getItems(user, ids, skip, limit, filter) {
-    return this.request('fetch/items', { user, ids, skip, limit, filter });
+  cntNotes(user, skip, limit, filter) {
+    return this.request('count/notes', { user, skip, limit, filter });
+  }
+
+  cntNote(user, ids, skip, limit, filter) { 
+    return this.request('count/note', { user, ids, limit, filter });
+  }
+
+  cntBided(user, skip, limit, filter) {
+    return this.request('count/bided', { user, skip, limit, filter });
+  }
+
+  cntTraded(user, skip, limit, filter) {
+    return this.request('count/traded', { user, skip, limit, filter });
+  }
+
+  trashItems() {
+    return this.request('defrag/items');
+  }
+
+  trashAdded() {
+    return this.request('defrag/added');
+  }
+
+  trashDeleted() {
+    return this.request('defrag/deleted');
+  }
+  
+  trashReaded() {
+    return this.request('defrag/readed');
+  }
+
+  trashStarred() {
+    return this.request('defrag/starred');
+  }
+
+  trashBided() {
+    return this.request('defrag/bided');
+  }
+
+  trashTraded() {
+    return this.request('defrag/traded');
+  }
+
+  trashListed() {
+    return this.request('defrag/listed');
+  }
+
+  defragItems() {
+    return from(this.trashItems());
+  }
+
+  defragAdded() {
+    return from(this.trashAdded());
+  }
+
+  defragDeleted() {
+    return from(this.trashDeleted());
+  }
+
+  defragReaded() {
+    return from(this.trashReaded());
+  }
+
+  defragStarred() {
+    return from(this.trashStarred());
+  }
+
+  defragBided() {
+    return from(this.trashBided());
+  }
+
+  defragTraded() {
+    return from(this.trashTraded());
+  }
+
+  defragListed() {
+    return from(this.trashListed());
   }
 
   fetchCategorys({ user, category, skip, limit }) {
@@ -686,58 +870,45 @@ export default class FeedParser {
   }
 
   fetchTradedNotes({ user, skip, limit, filter }) {
-    //const observables = ids => forkJoin([
-    //  this.getTraded(user)
-    //, this.getBided(user)
-    //, this.getItems(user, ids, skip, limit, filter)
-    //]);
-    //const setAttribute = objs => R.compose(
-    //  this.setBided(objs[1])
-    //, this.setTraded(objs[0])
-    //, this.toObject
-    //)(objs[2]);
-    //const setIds = R.map(obj => obj.bided);
-    return from(this.getBided(user, skip, limit, filter));
-    //  .pipe(
-    //  map(setIds)
-    //, flatMap(observables)
-    //, map(setAttribute)
-    //);
+    const observables = forkJoin([
+      this.cntTraded(user, null,  null, filter)
+    , this.getTraded(user, skip, limit, filter)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setAttributes(skip, limit, objs[0])
+    )(objs[1]);
+    return observables.pipe(
+      map(R.tap(log.trace.bind(this)))
+    , map(setAttribute)
+    );
   }
 
   fetchBidedNotes({ user, skip, limit, filter }) {
-    //const observables = ids => forkJoin([
-    //  this.getBided(user)
-    //, this.getListed(user)
-    //, this.getItems(user, ids, skip, limit, filter)
-    //]);
-    //const setAttribute = objs => R.compose(
-    //  this.setListed(objs[1])
-    //, this.setBided(objs[0])
-    //, this.toObject
-    //)(objs[2]);
-    //const setIds = R.map(obj => obj.listed);
-    return from(this.getListed(user, skip, limit, filter));
-    //  .pipe(
-    //  map(setIds)
-    //, flatMap(observables)
-    //, map(setAttribute)
-    //);
+    const observables = forkJoin([
+      this.cntBided(user, null,  null, filter)
+    , this.getBided(user, skip, limit, filter)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setAttributes(skip, limit, objs[0])
+    )(objs[1]);
+    return observables.pipe(
+      map(R.tap(log.trace.bind(this)))
+    , map(setAttribute)
+    );
   }
 
-  fetchListedNotes({ user, skip, limit, filter }) {
-    //const observables = forkJoin([
-    //  this.getListed(user)
-    //, this.getNotes(user)
-    //]);
-    //const setAttribute = objs => R.compose(
-    //  this.setListed(objs[0])
-    //, this.toObject
-    //)(objs[1]);
-    return from(this.getTraded(user, skip, limit, filter));
-    //return observables.pipe(
-    //  map(setAttribute)
-    //);
+  fetchListedNotes({ user }) {
+    const observables = forkJoin([
+      this.getListed(user)
+    , this.getNotes(user)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setListed(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.pipe(
+      map(setAttribute)
+    );
   }
 
   fetchNote({ user, id, skip, limit, filter }) {
@@ -783,9 +954,9 @@ export default class FeedParser {
     const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.added, objs);
     const isId =          obj => R.contains(obj.guid._, ids(added));
     const setAdd =        obj => R.merge(obj, { added: isId(obj) });
-    const _setAddItems =  obj => R.map(setAdd, obj.items);
-    const setAddItems  =  obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setAddItems(obj) }); 
-    const results =       objs => R.isNil(objs) ? [] : R.map(setAddItems, objs);
+    const _setAddItems  = obj => R.map(setAdd, obj.items);
+    const setAddItems   = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setAddItems(obj) }); 
+    const results       = objs => R.isNil(objs) ? [] : R.map(setAddItems, objs);
     return results;
   }
 
@@ -833,27 +1004,36 @@ export default class FeedParser {
     return results;
   }
 
-  setTraded(traded) {
-    //log.trace('setTraded', traded);
-    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.traded, objs);
-    const isId =          obj => R.contains(obj.guid._, ids(traded));
-    const setTrade =      obj => R.merge(obj, { traded: isId(obj) });
-    const _setTradeItems= obj => R.map(setTrade, obj.items);
-    const setTradeItems = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setTradeItems(obj) });
-    const results =       objs => R.isNil(objs) ? [] : R.map(setTradeItems, objs);
+  setAttributes(skip, limit, counts) {
+    const page = { total: Math.ceil(counts / Number(limit)), count: Math.ceil(Number(skip) / Number(limit)) };
+    const item = { total: counts, count: Number(skip)};
+    const setItems = R.map(obj => obj.items);
+    const setNotes = objs => ([{ attributes: { page, item }, items: setItems(objs) }]);
+    const results = objs => R.isNil(objs) ? [] : setNotes(objs);
     return results;
   }
 
-  setBided(bided) {
-    //log.trace('setBided', bided);
-    const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.bided, objs);
-    const isId =          obj => R.contains(obj.guid._, ids(bided));
-    const setBids =       obj => R.merge(obj, { bided: isId(obj) });
-    const _setBidsItems = obj => R.map(setBids, obj.items);
-    const setBidsItems  = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setBidsItems(obj) });
-    const results =       objs => R.isNil(objs) ? [] : R.map(setBidsItems, objs);
-    return results;
-  }
+  //setTraded(traded) {
+  //  //log.trace('setTraded', traded);
+  //  const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.traded, objs);
+  //  const isId =          obj => R.contains(obj.guid._, ids(traded));
+  //  const setTrade =      obj => R.merge(obj, { traded: isId(obj) });
+  //  const _setTradeItems= obj => R.map(setTrade, obj.items);
+  //  const setTradeItems = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setTradeItems(obj) });
+  //  const results =       objs => R.isNil(objs) ? [] : R.map(setTradeItems, objs);
+  //  return results;
+  //}
+
+  //setBided(bided) {
+  //  //log.trace('setBided', bided);
+  //  const ids =           objs => R.isNil(objs) ? [] : R.map(obj => obj.bided, objs);
+  //  const isId =          obj => R.contains(obj.guid._, ids(bided));
+  //  const setBids =       obj => R.merge(obj, { bided: isId(obj) });
+  //  const _setBidsItems = obj => R.map(setBids, obj.items);
+  //  const setBidsItems  = obj => R.isNil(obj.items) ? obj : R.merge(obj, { items: _setBidsItems(obj) });
+  //  const results =       objs => R.isNil(objs) ? [] : R.map(setBidsItems, objs);
+  //  return results;
+  //}
 
   createNote({ user, url, category, categoryIds, title }) {
     let observable;
