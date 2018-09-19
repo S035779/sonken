@@ -15,7 +15,10 @@ class TradeItemList extends React.Component {
     props.items.forEach(item => {
       if(item.traded) traded.push(item.guid._);
     });
-    this.state = { traded, selectedItemId: props.selectedItemId };
+    this.state = {
+      traded
+    , selectedItemId: props.selectedItemId
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -27,7 +30,9 @@ class TradeItemList extends React.Component {
     if((prevItems.length === 0 && nextItems.length > 0) || (prevPage !== nextPage)) {
       std.logInfo(TradeItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let traded = [];
-      nextItems.forEach(item => { if(item.traded) traded.push(item.guid._); });
+      nextItems.forEach(item => {
+        if(item.traded) traded.push(item.guid._);
+      });
       this.setState({ selectedItemId, traded });
     } else {
       this.setState({ selectedItemId });

@@ -63,16 +63,20 @@ class Bids extends React.Component {
   //}
 
   render() {
-    std.logInfo(Bids.displayName, 'State', this.state);
+    //std.logInfo(Bids.displayName, 'State', this.state);
     //std.logInfo(Bids.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file } = this.state;
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
-    notes.forEach(note => { if(note.items) note.items.forEach(item => items.push(item)) });
+    let number = 0;
+    notes.forEach(note => { 
+      if(note.items) items = note.items;
+      if(note.attributes) number = note.attributes.item.total;
+    });
     //let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
-    const number = items.length;
+    //let number = items.length;
     return <div className={classes.root}>
       <BidsSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
       <BidsFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>

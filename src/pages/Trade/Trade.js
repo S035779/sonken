@@ -64,9 +64,13 @@ class Trade extends React.Component {
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     let items = [];
-    notes.forEach(note => { if(note.items !== null) note.items.forEach(item => items.push(item)) });
+    let number = 0;
+    notes.forEach(note => {
+      if(note.items) items = note.items;
+      if(note.attributes) number = note.attributes.item.total;
+    });
     //let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
-    const number = items.length;
+    //let  number = items.length;
     return <div className={classes.root}>
       <TradeSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
       <TradeFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>

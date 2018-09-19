@@ -29,36 +29,36 @@ const baseurl = 'https://auctions.yahoo.co.jp';
 export default class FeedParser {
   constructor() {
     this.defragItems().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment items.'));
     this.defragAdded().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment added.'));
     this.defragDeleted().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment deleted.'));
     this.defragReaded().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment readed.'));
     this.defragStarred().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment starred.'));
     this.defragBided().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment bided.'));
     this.defragTraded().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment traded.'));
     this.defragListed().subscribe(
-      obj => log.info(FeedParser.displayName, obj)
-    , err => log.warn(FeedParser.displayName, err.name, err.message)
+      obj => log.debug(FeedParser.displayName, obj)
+    , err => log.error(FeedParser.displayName, err.name, err.message)
     , ()  => log.info(FeedParser.displayName, 'Complete to defragment listed.'));
   }
 
@@ -76,7 +76,7 @@ export default class FeedParser {
           const day       = date.getDate();
           const yesterday = new Date(year, month, day - 1);
           const setDate   = date => new Date(date);
-          const expireItems = R.filter(obj => yesterday > setDate(obj.pubDate));
+          const expireItems = R.filter(obj => R.gte(yesterday, setDate(obj.pubDate)));
           const promises = R.map(obj => Items.remove({ _id: obj._id }).exec());
           const promise = Items.find({}).exec();
           return promise
@@ -85,17 +85,16 @@ export default class FeedParser {
         }
       case 'defrag/added':
         {
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
           const promise = Added.find({}).populate('items').exec();
           return promise
-            .then(R.tap(log.trace.bind(this)))
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/deleted':
         {
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
           const promise = Deleted.find({}).populate('items').exec();
           return promise
@@ -104,7 +103,7 @@ export default class FeedParser {
         }
       case 'defrag/readed':
         { 
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
           const promise = Readed.find({}).populate('items').exec();
           return promise
@@ -113,7 +112,7 @@ export default class FeedParser {
         }
       case 'defrag/starred':
         {
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
           const promise = Starred.find({}).populate('items').exec();
           return promise
@@ -122,7 +121,7 @@ export default class FeedParser {
         }
       case 'defrag/bided':
         { 
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
           const promise = Bided.find({}).populate('items').exec();
           return promise
@@ -131,7 +130,7 @@ export default class FeedParser {
         }
       case 'defrag/traded':
         { 
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
           const promise = Traded.find({}).populate('items').exec();
           return promise
@@ -140,7 +139,7 @@ export default class FeedParser {
         }
       case 'defrag/listed':
         {
-          const hasNotItems = R.filter(R.isEmpty);
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
           const promise = Listed.find({}).populate('items').exec();
           return promise
@@ -214,46 +213,70 @@ export default class FeedParser {
       case 'count/traded':
       case 'fetch/traded':
         {
-          log.trace(FeedParser.displayName, 'Traded', options);
-          const isCount = request === 'count/traded';
           const { user, skip, limit, filter } = options;
-          const conditions = { user };
-          let Model;
-          let match;
+          const isCounts = request === 'count/traded';
+          const isPaginate = skip && limit;
+          const hasTraded = R.filter(doc => doc.traded && R.equals(doc.traded.user, user));
+          const hasBided = R.filter(doc => doc.bided && R.equals(doc.bided.user, user));
+          const setIds = R.map(doc => doc.guid__);
+          let match, model, conditions, populates, promise;
           if(filter) {
             const start     = new Date(filter.bidStartTime);
             const stop      = new Date(filter.bidStopTime);
             if(filter.inBidding) {
-              Model = Bided;
-              match = { 'items.bidStopTime': { $gte: start, $lt: stop } };
+              match = { 'bidStopTime': { $gte: start, $lt: stop }};
+              promise = Items.find(match).populate('bided').exec()
+                .then(R.tap(log.trace.bind(this)))
+                .then(docs => hasBided(docs))
+                .then(docs => setIds(docs))
+                .then(docs => {
+                  conditions = { user, bided: { $in: docs } };
+                  populates = { path: 'items', populate: { path: 'bided' } };
+                  model = Bided.find(conditions).populate(populates).sort('-updated')
+                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+                  model = isCounts ? model.countDocuments() : model;
+                  return model.exec();
+                });
             } else if(filter.allTrading) {
-              Model = Bided;
-              match = null;
+              conditions = { user };
+              populates = { path: 'items', populate: { path: 'bided' } };
+              model = Bided.find(conditions).populate('items').sort('-updated');
+              model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+              model = isCounts ? model.countDocuments() : model;
+              promise = model.exec();
             } else if(filter.endTrading) {
-              Model = Traded;
-              match = null;
+              match = {};
+              promise = Items.find(match).populate('traded').exec()
+                .then(docs => hasTraded(docs))
+                .then(docs => setIds(docs))
+                .then(docs => {
+                  conditions = { user, traded: { $in: docs } };
+                  populates = { path: 'items', populate: { path: 'traded' }};
+                  model = Traded.find(conditions).populate(populates).sort('-updated')
+                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+                  model = isCounts ? model.countDocuments() : model;
+                  return model.exec();
+                });
             }
           } else {
-            Model = Bided;
-            match = null
+            conditions = { user };
+            populates = { path: 'items', populate: { path: 'bided' } };
+            model = Bided.find(conditions).populate(populates).sort('-updated');
+            model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+            model = isCounts ? model.countDocuments() : model;
+            promise = model.exec();
           }
-          const model = skip && limit
-            ? Model.find(conditions, null, match)
-              .sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
-              .populate({ path: 'items' })
-            : Model.find({}, null, match)
-              .sort({ updated: 'desc' })
-              .populate({ path: 'items' });
-          return isCount ? model.countDocuments().exec() : model.exec();
+          return promise;
         }
       case 'count/bided':
       case 'fetch/bided':
         {
-          log.trace(FeedParser.displayName, 'Bided', options);
-          const isCount = request === 'count/bided';
           const { user, skip, limit, filter } = options;
-          const conditions = { user };
-          let match = null;
+          const isCounts = request === 'count/bided';
+          const isPaginate = skip && limit;
+          const hasListed = R.filter(doc => doc.listed && R.equals(doc.listed.user, user));
+          const setIds = R.map(doc => doc.guid__);
+          let match, model, conditions, populates, promise;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.bidStartTime);
@@ -264,21 +287,48 @@ export default class FeedParser {
             const yesterday = new Date(year, month, day);
             const today     = new Date(year, month, day + 1);
             if(filter.inBidding) {
-              match = { 'items.bidStopTime': { $gte: start, $lt: stop } };
+              match = { 'bidStopTime': { $gte: start, $lt: stop } };
+              promise = Items.find(match).populate('listed').exec()
+                .then(docs => hasListed(docs))
+                .then(docs => setIds(docs))
+                .then(docs => {
+                  conditions = { user, listed: { $in: docs } };
+                  populates = { path: 'items', populate: { path: 'listed' }};
+                  model = Listed.find(conditions).populate(populates).sort('-updated');
+                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+                  model = isCounts ? model.countDocuments() : model;
+                  return model.exec();
+                });
             } else if(filter.allBidding) {
-              match = null;
+              conditions = { user };
+              populates = { path: 'items', populate: { path: 'listed' }};
+              model = Listed.find(conditions).populate(populates).sort('-updated');
+              model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+              model = isCounts ? model.countDocuments() : model;
+              promise = model.exec();
             } else if(filter.endBidding) {
-              match = { 'items.bidStopTime': { $gte: yesterday, $lt: today } };
+              match = { 'bidStopTime': { $gte: yesterday, $lt: today } };
+              promise = Items.find(match).populate('listed').exec()
+                .then(docs => hasListed(docs))
+                .then(docs => setIds(docs))
+                .then(docs => {
+                  conditions = { user, listed: { $in: docs } };
+                  populates = { path: 'items', populate: { path: 'listed' }};
+                  model = Listed.find(conditions).populate(populates).sort('-updated');
+                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+                  model = isCounts ? model.countDocuments() : model;
+                  return model.exec();
+                });
             }
+          } else {
+            conditions = { user };
+            populates = { path: 'items', populate: { path: 'listed' }};
+            model = Listed.find(conditions).populate(populates).sort('-updated');
+            model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
+            model = isCounts ? model.countDocuments() : model;
+            promise = model.exec();
           }
-          const listed = skip && limit
-            ? Listed.find(conditions, null, match)
-              .sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
-              .populate({ path: 'items' })
-            : Listed.find(conditions, null, match)
-              .sort({ updated: 'desc' })
-              .populate({ path: 'items' });
-          return isCount ? listed.countDocuments().exec() : listed.exec();
+          return promise;
         }
       case 'fetch/listed':
         {
@@ -1005,10 +1055,16 @@ export default class FeedParser {
   }
 
   setAttributes(skip, limit, counts) {
-    const page = { total: Math.ceil(counts / Number(limit)), count: Math.ceil(Number(skip) / Number(limit)) };
-    const item = { total: counts, count: Number(skip)};
+    const inCounts = R.gte(counts, Number(skip));
+    const item = { 
+      total: counts
+    , count: inCounts ? (Number(skip) + 1) : counts };
+    const page = {
+      total: Math.ceil(counts / Number(limit))
+    , count: inCounts ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(counts / Number(limit))
+    };
     const setItems = R.map(obj => obj.items);
-    const setNotes = objs => ([{ attributes: { page, item }, items: setItems(objs) }]);
+    const setNotes = objs => ([{ attributes: { item, page }, items: setItems(objs) }]);
     const results = objs => R.isNil(objs) ? [] : setNotes(objs);
     return results;
   }

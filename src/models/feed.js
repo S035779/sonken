@@ -7,6 +7,7 @@ const config = dotenv.config();
 if(config.error) throw config.error;
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 
+// Items model.
 const itemSchema = new mongoose.Schema({
   title:            { type: String, required: true }
 , link:             { type: String, required: true }
@@ -44,6 +45,10 @@ const itemSchema = new mongoose.Schema({
 , pubDate:          { type: Date, default: Date.now() }
 }, { collection: 'items' });
 itemSchema.index({ bidStopTime: 1, guid__: 1 });
+itemSchema.virtual('listed',  { ref: 'Listed',  localField: 'guid__', foreignField: 'listed', justOne: true });
+itemSchema.virtual('bided',   { ref: 'Bided',   localField: 'guid__', foreignField: 'bided',  justOne: true });
+itemSchema.virtual('traded',  { ref: 'Traded',  localField: 'guid__', foreignField: 'traded', justOne: true });
+itemSchema.set('toObject', { virtuals: true });
 itemSchema.post('remove', doc => {
   const promises = [
     Listed.remove({ user: doc.user, listed: doc.guid__ }).exec()
@@ -57,6 +62,7 @@ itemSchema.post('remove', doc => {
   return Promise.all(promises);
 });
 
+// Notes model.
 const noteSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , url:              String
@@ -81,6 +87,7 @@ noteSchema.post('remove', doc => {
   return Promise.all(promises);
 });
 
+// Categorys model.
 const categorySchema = new mongoose.Schema({
   user:             { type: String, required: true }
 , category:         { type: String, required: true }
@@ -89,86 +96,93 @@ const categorySchema = new mongoose.Schema({
 , created:          { type: Date, default: Date.now() }
 }, { collection: 'categorys' });
 
+// Added model.
 const addedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , added:            { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'added' });
 addedSchema.index({ added: 1 }, { unique: true });
-addedSchema.virtual('items', { ref: 'Items', localField: 'added', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+addedSchema.virtual('items', { ref: 'Items', localField: 'added', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 addedSchema.set('toObject', { virtuals: true });
 addedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Deleted model.
 const deletedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , deleted:          { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'deleted' });
 deletedSchema.index({ deleted: 1 }, { unique: true });
-deletedSchema.virtual('items', { ref: 'Items', localField: 'deleted', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+deletedSchema.virtual('items', { ref: 'Items', localField: 'deleted', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 deletedSchema.set('toObject', { virtuals: true });
 deletedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Readed model.
 const readedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , readed:           { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'readed' });
 readedSchema.index({ readed: 1 }, { unique: true });
-readedSchema.virtual('items', { ref: 'Items', localField: 'readed', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+readedSchema.virtual('items', { ref: 'Items', localField: 'readed', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 readedSchema.set('toObject', { virtuals: true });
 readedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Starred model.
 const starredSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , starred:          { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'starred' });
 starredSchema.index({ starred: 1 }, { unique: true });
-starredSchema.virtual('items', { ref: 'Items', localField: 'starred', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+starredSchema.virtual('items', { ref: 'Items', localField: 'starred', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 starredSchema.set('toObject', { virtuals: true });
 starredSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Traded model.
 const tradedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , traded:           { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'traded' });
 tradedSchema.index({ traded: 1 }, { unique: true });
-tradedSchema.virtual('items', { ref: 'Items', localField: 'traded', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+tradedSchema.virtual('items', { ref: 'Items', localField: 'traded', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 tradedSchema.set('toObject', { virtuals: true });
 tradedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Bided model.
 const bidedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , bided:            { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'bided' });
 bidedSchema.index({ bided: 1 }, { unique: true });
-bidedSchema.virtual('items', { ref: 'Items', localField: 'bided', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+bidedSchema.virtual('items', { ref: 'Items', localField: 'bided', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 bidedSchema.set('toObject', { virtuals: true });
 bidedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
 
+// Listed model.
 const listedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , listed:           { type: String, required: true }
 , updated:          { type: Date, default: Date.now() }
 }, { collection: 'listed' });
 listedSchema.index({ listed: 1 }, { unique: true });
-listedSchema.virtual('items', { ref: 'Items', localField: 'listed', foreignField: 'guid__', justOne: false
-, options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 1 }
+listedSchema.virtual('items', { ref: 'Items', localField: 'listed', foreignField: 'guid__', justOne: true
+, options: { sort: { bidStopTime: 'desc' } }
 });
 listedSchema.set('toObject', { virtuals: true });
 listedSchema.pre('create', () => this.update({}, { $set: { updated: Date.now() } }));
