@@ -1,5 +1,6 @@
 import React                    from 'react';
 import PropTypes                from 'prop-types';
+import * as R                   from 'ramda';
 import { Redirect }             from 'react-router-dom';
 import { Container }            from 'flux/utils';
 import TradeAction              from 'Actions/TradeAction';
@@ -63,12 +64,9 @@ class Trade extends React.Component {
     const { isAuthenticated, user, notes, page, ids, filter, file } = this.state;
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
-    let items = [];
-    let number = 0;
-    notes.forEach(note => {
-      if(note.items) items = note.items;
-      if(note.attributes) number = note.attributes.item.total;
-    });
+    const note = R.head(notes);
+    const items = note && note.items ? note.items : [];
+    const number = note && note.attributes ? note.attributes.item.total : 0;
     //let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
     //let  number = items.length;
     return <div className={classes.root}>

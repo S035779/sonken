@@ -45,20 +45,20 @@ class BidsFilter extends React.Component {
     const selectedItemId  = nextProps.selectedItemId;
     if(prevItems && (nextItems.length > 0)) {
       if(prevItems.length === 0) {
-        std.logInfo(BidsFilter.displayName, 'Init', nextProps);
+        //std.logInfo(BidsFilter.displayName, 'Init', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
-        std.logInfo(BidsFilter.displayName, 'Update', nextProps);
+        //std.logInfo(BidsFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
         this.setState({ items: catItems(nextItems), prevPage: nextPage, selectedItemId, itemFilter });
       } else if(!itemFilter.allBidding) {
-        std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
+        //std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
         , prevAllBidding: false });
       } else if(itemFilter.allBidding !== prevAllBidding) {
-        std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
+        //std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
         , prevAllBidding: true });

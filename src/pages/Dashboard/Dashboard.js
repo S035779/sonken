@@ -126,7 +126,8 @@ class Dashboard extends React.Component {
           noteNumber={number} notePage={page} />
         <div className={classes.body}>
           <div className={classes.noteList}>
-            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} />
+            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids}
+              itemFilter={filter} />
             <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
               selectedNoteId={ids} notePage={page}/>
           </div>

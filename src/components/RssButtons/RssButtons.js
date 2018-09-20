@@ -77,12 +77,12 @@ class RssButtons extends React.Component {
   }
 
   handleDownload() {
-    const { user, selectedNoteId } = this.props;
+    const { user, selectedNoteId, itemFilter } = this.props;
     std.logInfo(RssButtons.displayName, 'handleDownload', user);
     const spn = Spinner.of('app');
     if(selectedNoteId.length) {
       spn.start();
-      NoteAction.downloadItems(user, selectedNoteId)
+      NoteAction.downloadItems(user, selectedNoteId, itemFilter)
         .then(() => this.setState({ isSuccess: true }))
         .then(() => this.downloadFile(this.props.file))
         .then(() => spn.stop())
@@ -121,18 +121,17 @@ class RssButtons extends React.Component {
         onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleReaded.bind(this)}>既読にする</Button>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleDelete.bind(this)}>削除</Button>
+        <Button variant="raised" className={classes.button} onClick={this.handleReaded.bind(this)}>
+          既読にする
+        </Button>
+        <Button variant="raised" className={classes.button} onClick={this.handleDelete.bind(this)}>
+          削除
+        </Button>
       { isAlpha 
-        ? <RssButton color={color}
-          className={classes.button}
-          onClick={this.handleDownload.bind(this)}>ダウンロード</RssButton>
-        : null
-      }
+        ? <RssButton color={color} className={classes.button} onClick={this.handleDownload.bind(this)}>
+            ダウンロード
+          </RssButton>
+        : null }
         <RssDialog open={isSuccess} title={'送信完了'}
           onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
@@ -154,6 +153,7 @@ RssButtons.propTypes = {
 , selectedNoteId: PropTypes.array.isRequired
 , file: PropTypes.object
 , category: PropTypes.string.isRequired
+, itemFilter: PropTypes.object.isRequired
 };
 
 const titleHeight   = 62;

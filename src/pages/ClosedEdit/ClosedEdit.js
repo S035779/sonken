@@ -11,11 +11,10 @@ class ClosedEdit extends React.Component {
     //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
     const { classes, user, note, category, filter, file } = this.props
     if(!note || !note._id) return null;
-    const items = note.items ? note.items : [];
-    const itemNumber = items.length;
+    const number = note.attributes ? note.attributes.item.total : 0;
     return <div className={classes.noteEdit}>
-        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}
-          perPage={itemNumber} file={file} />
+        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={number}
+          perPage={number} file={file} />
       </div>;
   }
 }
@@ -33,13 +32,10 @@ ClosedEdit.propTypes = {
 const barHeightSmUp     = 64;
 const barHeightSmDown   = 56;
 const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  noteEdit: { display: 'flex', flexDirection: 'column'
-            , height: editHeightSmDown
+  noteEdit: { display: 'flex', flexDirection: 'column', height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 });
 export default withStyles(styles)(ClosedEdit);

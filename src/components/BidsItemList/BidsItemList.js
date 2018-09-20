@@ -28,7 +28,7 @@ class BidsItemList extends React.Component {
     const prevItems = this.props.items;
     const prevPage = this.props.page;
     if((prevItems.length === 0 && nextItems.length > 0) || (prevPage !== nextPage)) {
-      std.logInfo(BidsItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
+      //std.logInfo(BidsItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let bided = [];
       nextItems.forEach(item => {
         if(item.bided) bided.push(item.guid._);

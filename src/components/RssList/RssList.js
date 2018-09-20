@@ -5,7 +5,8 @@ import NoteAction     from 'Actions/NoteAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction }
+                      from '@material-ui/core';
 import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
 import RssDialog      from 'Components/RssDialog/RssDialog';
 
@@ -129,7 +130,7 @@ class RssList extends React.Component {
       .map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
-      <RssDialog open={isSuccess} title={'送信完了'} 
+      <RssDialog open={isSuccess} title={'送信完了'}
         onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
         要求を受け付けました。
       </RssDialog>
