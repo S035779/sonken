@@ -147,30 +147,82 @@ export default class FeedParser {
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
+      case 'counts/notes':
       case 'count/notes':
       case 'fetch/notes':
         {
           const { user, category, skip, limit } = options;
-          const isCounts = request === 'count/notes';
+          const isCounts = request === 'counts/notes';
+          const isCount = request === 'count/notes';
           const isPaginate = skip && limit;
-          let conditions, model;
-          conditions = category ? { user, category } : { user };
-          model = Note.find(conditions);
-          model = isPaginate
-            ? model.sort({ updated: 'desc' }).skip(Number(skip)).limit(Number(limit))
-              .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }})
-            : model.sort({ updated: 'asc' })
-              .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }}});
-          model = isCounts ? model.countDocuments() : model;
-          return model.exec();
+          const setIds = R.map(doc => doc._id);
+          const conditions = category ? { user, category } : { user };
+          let model, promise;
+          if(isCount) {
+            promise = Note.find(conditions).exec()
+              .then(docs => setIds(docs))
+              .then(docs => {
+                model = Note.aggregate()
+                  .match({ user, _id: { $in: docs.map(id => ObjectId(id)) } })
+                  .project({ item_size: { $size: "$items" }})
+                  .group({ _id: "$_id", counts: { $sum: "$item_size" } });
+                return model.exec();
+              });
+          } else {
+            model = Note.find(conditions);
+            model = isPaginate
+              ? model
+                .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }})
+                .sort('-updated').skip(Number(skip)).limit(Number(limit))
+              : model
+                .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }}})
+                .sort('updated');
+            promise = isCounts ? model.countDocuments().exec() : model.exec();
+          }
+          return promise;
         }
       case 'count/note':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
-          const isCounts = request === 'count/note';
+          const isCount = request === 'count/note';
           const isPaginate = skip && limit;
-          let model, conditions;
+          const setIds = R.map(doc => doc._id);
+          const getModel = (match, docs) => {
+            let model, conditions;
+            if(isCount) {
+              conditions = docs
+                ? { user, _id: ObjectId(id), items: { $in: docs.map(id => ObjectId(id)) } }
+                : { user, _id: ObjectId(id) };
+              //conditions = match 
+              //  ? R.merge(conditions, { "items.bidStopTime": match.bidStopTime, "items.sold": match.sold })
+              //  : conditions;
+              model = Note.aggregate()
+                .match(conditions)
+                //.lookup({ from: "Items", localField: "guid__", foriegnField: "items", as: "items" })
+                .project({ item_size: { $size: "$items" }})
+                .group({ _id: "$_id", counts: { $sum: "$item_size" }})
+            } else {
+              conditions = { user, _id: id };
+              //match = match && docs
+              //  ? R.merge(match, { items: { $in: docs.map(id => ObjectId(id)) } })
+              //  : match;
+              model = Note.findOne(conditions);
+              model = isPaginate 
+                ? model.populate({ path: 'items', match
+                  , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) }})
+                : model.populate({ path: 'items', match
+                  , options: { sort: { bidStopTime: 'desc' } }});
+            }
+            return model.exec();
+          };
+          const setModel = match => match
+            ? Items.find(match).exec()
+              .then(docs => setIds(docs))
+              .then(docs => getModel(match, docs))
+              //.then(R.tap(log.trace.bind(this)))
+            : getModel();
+          let promise;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -186,44 +238,26 @@ export default class FeedParser {
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
             if(filter.inAuction) {
-              conditions = { _id: id, user
-              , 'items.bidStopTime': { $gte: start, $lt: stop } };
+              promise = setModel({ bidStopTime: { $gte: start, $lt: stop } });
             } else if(filter.allAuction) {
-              conditions = { _id: id, user };
+              promise = setModel();
             } else if(filter.lastMonthAuction) {
-              conditions = { _id: id, user
-              , 'items.bidStopTime': { $gte: lastMonth, $lt: today }, 'items.sold': { $gte: 3 } };
+              promise = setModel({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: 3 } });
             } else if(filter.twoWeeksAuction) {
-              conditions = { _id: id, user
-              , 'items.bidStopTime': { $gte: twoWeeks, $lt: today }, 'items.sold': { $gte: 2 } };
+              promise = setModel({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: 2 } });
             } else if(filter.lastWeekAuction) {
-              conditions = { _id: id, user
-              , 'items.bidStopTime': { $gte: lastWeek, $lt: today }, 'items.sold': { $gte: 1 } };
+              promise = setModel({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: 1 } });
             }
           } else {
-            conditions = { _id: id, user };
+            promise = setModel();
           }
-
-          if(isCounts) {
-            model = Note.aggregate()
-              .match({ user, _id: ObjectId(id) })
-              .project({ item_size: { $size: "$items" }})
-              .group({ _id: "$_id", counts: { $sum: "$item_size" }});
-            model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-          } else {
-            model = Note.findOne(conditions);
-            model = isPaginate 
-              ? model.populate({ path: 'items'
-                , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) }})
-              : model.populate({ path: 'items', options: { sort: { bidStopTime: 'desc' } }});
-          }
-          return model.exec();
+          return promise;
         }
       case 'count/traded':
       case 'fetch/traded':
         {
           const { user, skip, limit, filter } = options;
-          const isCounts = request === 'count/traded';
+          const isCount = request === 'count/traded';
           const isPaginate = skip && limit;
           const hasTraded = R.filter(doc => doc.traded && R.equals(doc.traded.user, user));
           const hasBided = R.filter(doc => doc.bided && R.equals(doc.bided.user, user));
@@ -240,9 +274,9 @@ export default class FeedParser {
                 .then(docs => {
                   conditions = { user, bided: { $in: docs } };
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] } ;
-                  model = Bided.find(conditions).populate(populates).sort('-updated')
+                  model = Bided.find(conditions).populate(populates).sort('-updated');
                   model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCounts ? model.countDocuments() : model;
+                  model = isCount ? model.countDocuments() : model;
                   return model.exec();
                 });
             } else if(filter.allTrading) {
@@ -250,7 +284,7 @@ export default class FeedParser {
               populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] };
               model = Bided.find(conditions).populate('items').sort('-updated');
               model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-              model = isCounts ? model.countDocuments() : model;
+              model = isCount ? model.countDocuments() : model;
               promise = model.exec();
             } else if(filter.endTrading) {
               conditions = {};
@@ -262,7 +296,7 @@ export default class FeedParser {
                   populates = { path: 'items', populate: [{ path: 'traded' }, { path: 'traded' }] };
                   model = Traded.find(conditions).populate(populates).sort('-updated')
                   model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCounts ? model.countDocuments() : model;
+                  model = isCount ? model.countDocuments() : model;
                   return model.exec();
                 });
             }
@@ -271,7 +305,7 @@ export default class FeedParser {
             populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] };
             model = Bided.find(conditions).populate(populates).sort('-updated');
             model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-            model = isCounts ? model.countDocuments() : model;
+            model = isCount ? model.countDocuments() : model;
             promise = model.exec();
           }
           return promise;
@@ -280,7 +314,7 @@ export default class FeedParser {
       case 'fetch/bided':
         {
           const { user, skip, limit, filter } = options;
-          const isCounts = request === 'count/bided';
+          const isCount = request === 'count/bided';
           const isPaginate = skip && limit;
           const hasListed = R.filter(doc => doc.listed && R.equals(doc.listed.user, user));
           const setIds = R.map(doc => doc.guid__);
@@ -304,7 +338,7 @@ export default class FeedParser {
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
                   model = Listed.find(conditions).populate(populates).sort('-updated');
                   model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCounts ? model.countDocuments() : model;
+                  model = isCount ? model.countDocuments() : model;
                   return model.exec();
                 });
             } else if(filter.allBidding) {
@@ -312,7 +346,7 @@ export default class FeedParser {
               populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
               model = Listed.find(conditions).populate(populates).sort('-updated');
               model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-              model = isCounts ? model.countDocuments() : model;
+              model = isCount ? model.countDocuments() : model;
               promise = model.exec();
             } else if(filter.endBidding) {
               conditions = { 'bidStopTime': { $gte: yesterday, $lt: today } };
@@ -324,7 +358,7 @@ export default class FeedParser {
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
                   model = Listed.find(conditions).populate(populates).sort('-updated');
                   model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCounts ? model.countDocuments() : model;
+                  model = isCount ? model.countDocuments() : model;
                   return model.exec();
                 });
             }
@@ -333,7 +367,7 @@ export default class FeedParser {
             populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
             model = Listed.find(conditions).populate(populates).sort('-updated');
             model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-            model = isCounts ? model.countDocuments() : model;
+            model = isCount ? model.countDocuments() : model;
             promise = model.exec();
           }
           return promise;
@@ -431,7 +465,7 @@ export default class FeedParser {
           const setNote = R.compose(putNote, setIds, getIds);
           return isItems 
             ? Items.insertMany(items).then(setNote) 
-            : putNote(note);
+            : setNote(note);
         }
       case 'delete/note':
         {
@@ -669,12 +703,16 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  cntNotes(user, skip, limit, filter) {
-    return this.request('count/notes', { user, skip, limit, filter });
+  cntsNotes(user) {
+    return this.request('counts/notes', { user });
   }
 
-  cntNote(user, id, skip, limit, filter) { 
-    return this.request('count/note', { user, id, limit, filter });
+  cntNotes(user) {
+    return this.request('count/notes', { user });
+  }
+
+  cntNote(user, id, filter) { 
+    return this.request('count/note', { user, id, filter });
   }
 
   cntBided(user, skip, limit, filter) {
@@ -851,16 +889,20 @@ export default class FeedParser {
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
+    , this.cntNotes(user, category)
+    , this.cntsNotes(user, category)
     , this.getNotes(user, category, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
-      this.setAdded(objs[4])
+      this.setNotePage(skip, limit, objs[6])
+    , this.setItemPage(   0,    20, objs[5])
+    , this.setAdded(objs[4])
     , this.setDeleted(objs[3])
     , this.setReaded(objs[2])
     , this.setListed(objs[1])
     , this.setStarred(objs[0])
     , this.toObject
-    )(objs[5]);
+    )(objs[7]);
     return observables.pipe(
       map(setAttribute)
     );
@@ -974,11 +1016,11 @@ export default class FeedParser {
     , this.getReaded(user)
     , this.getDeleted(user)
     , this.getAdded(user)
-    , this.cntNote(user, id, null,  null, filter)
+    , this.cntNote(user, id, filter)
     , this.getNote(user, id, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
-      this.setPages(skip, limit, objs[5])
+      this.setItemPage(skip, limit, objs[5])
     , this.setAdded(objs[4])
     , this.setDeleted(objs[3])
     , this.setReaded(objs[2])
@@ -1059,19 +1101,37 @@ export default class FeedParser {
     return results;
   }
 
-  setPages(skip, limit, counts) {
-    //log.trace(FeedParser.displayName, 'setPages', counts);
-    const _counts = R.compose(obj => obj.counts, R.head)(counts)
-    const inCounts = R.gt(_counts, Number(skip));
-    const item = { 
-      total: _counts
-    , count: inCounts ? (Number(skip) + 1) : _counts };
-    const page = {
-      total: Math.ceil(_counts / Number(limit))
-    , count: inCounts ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(_counts / Number(limit))
+  setItemPage(skip, limit, counts) {
+    //log.trace(FeedParser.displayName, 'setItemPage', counts);
+    const _counts = id => R.find(obj => id.equals(obj._id))(counts);
+    const inCounts = num => R.gt(num, Number(skip))
+    const setItem = num => ({
+      total: num
+    , count: inCounts(num) ? Number(skip) + 1 : num
+    });
+    const setPage = num => ({
+      total: Math.ceil(num / Number(limit))
+    , count: inCounts(num) ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(num / Number(limit))
+    });
+    const setAttributes = obj => ({ item: setItem(obj.counts), page: setPage(obj.counts) });
+    const setCounts = obj => R.merge(obj, { attributes: setAttributes(_counts(obj._id)) });
+    const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
+    return results;
+  }
+
+  setNotePage(skip, limit, counts) {
+    //log.trace(FeedParser.displayName, 'setNotePage', counts);
+    const inCounts = R.gt(counts, Number(skip));
+    const note = { 
+      total: counts
+    , count: inCounts ? (Number(skip) + 1) : counts
     };
-    const setCounts = obj => R.merge(obj, { attributes: { item, page } });
-    const results = objs => R.isNil(objs) ? [] : R.map(setCounts, objs);
+    const page = {
+      total: Math.ceil(counts / Number(limit))
+    , count: inCounts ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(counts / Number(limit))
+    };
+    const setCounts = obj => R.merge(obj, { note_attributes: { note, page } });
+    const results = objs => R.isNil(objs) || counts === 0 ? [] : R.map(setCounts, objs);
     return results;
   }
 
@@ -1485,7 +1545,7 @@ export default class FeedParser {
     , date:         obj.pubDate
     }));
     const getTitle    = obj => obj.title;
-    const getItems    = obj => obj.items;
+    const getItems    = obj => obj.items ? obj.items : [];
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
       map(R.map(getItems))
