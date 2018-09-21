@@ -187,41 +187,16 @@ export default class FeedParser {
           const { user, id, skip, limit, filter } = options;
           const isCount = request === 'count/note';
           const isPaginate = skip && limit;
-          const setIds = R.map(doc => doc._id);
-          const getModel = (match, docs) => {
-            let model, conditions;
-            if(isCount) {
-              conditions = docs
-                ? { user, _id: ObjectId(id), items: { $in: docs.map(id => ObjectId(id)) } }
-                : { user, _id: ObjectId(id) };
-              //conditions = match 
-              //  ? R.merge(conditions, { "items.bidStopTime": match.bidStopTime, "items.sold": match.sold })
-              //  : conditions;
-              model = Note.aggregate()
-                .match(conditions)
-                //.lookup({ from: "Items", localField: "guid__", foriegnField: "items", as: "items" })
-                .project({ item_size: { $size: "$items" }})
-                .group({ _id: "$_id", counts: { $sum: "$item_size" }})
-            } else {
-              conditions = { user, _id: id };
-              //match = match && docs
-              //  ? R.merge(match, { items: { $in: docs.map(id => ObjectId(id)) } })
-              //  : match;
-              model = Note.findOne(conditions);
-              model = isPaginate 
-                ? model.populate({ path: 'items', match
-                  , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) }})
-                : model.populate({ path: 'items', match
-                  , options: { sort: { bidStopTime: 'desc' } }});
-            }
+          const setQuery = match => {
+            const conditions = { user, _id: id };
+            let model = Note.findOne(conditions);
+            model = isPaginate 
+              ? model.populate({ path: 'items', match
+                , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) }})
+              : model.populate({ path: 'items', match
+                , options: { sort: { bidStopTime: 'desc' } }});
             return model.exec();
           };
-          const setModel = match => match
-            ? Items.find(match).exec()
-              .then(docs => setIds(docs))
-              .then(docs => getModel(match, docs))
-              //.then(R.tap(log.trace.bind(this)))
-            : getModel();
           let promise;
           if(filter) {
             const date      = new Date();
@@ -238,20 +213,20 @@ export default class FeedParser {
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
             if(filter.inAuction) {
-              promise = setModel({ bidStopTime: { $gte: start, $lt: stop } });
+              promise = setQuery({ bidStopTime: { $gte: start, $lt: stop } });
             } else if(filter.allAuction) {
-              promise = setModel();
+              promise = setQuery();
             } else if(filter.lastMonthAuction) {
-              promise = setModel({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: 3 } });
+              promise = setQuery({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: 3 } });
             } else if(filter.twoWeeksAuction) {
-              promise = setModel({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: 2 } });
+              promise = setQuery({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: 2 } });
             } else if(filter.lastWeekAuction) {
-              promise = setModel({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: 1 } });
+              promise = setQuery({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: 1 } });
             }
           } else {
-            promise = setModel();
+            promise = setQuery();
           }
-          return promise;
+          return isCount ? promise.then(doc => ([{ _id: doc._id, counts: doc.items.length }])) : promise;
         }
       case 'count/traded':
       case 'fetch/traded':
