@@ -1544,14 +1544,14 @@ export default class FeedParser {
     , asins:        setAsins(obj.asins)
     , date:         obj.pubDate
     }));
-    const getTitle    = obj => obj.title;
     const getItems    = obj => obj.items ? obj.items : [];
+    const dupItems    = objs => std.dupObj(objs, 'title');
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
       map(R.map(getItems))
-    , map(R.uniqWith(getTitle))
     , map(R.map(setItems))
     , map(R.flatten)
+    , map(dupItems)
     , map(setItemsCsv)
     , map(setBuffer)
     );

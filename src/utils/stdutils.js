@@ -296,6 +296,10 @@ export default {
     return result;
   },
 
+  dupObj(arr, key) {
+    return arr.filter((o, i, arr) => arr.findIndex(p => o[key] === p[key]) === i);
+  },
+
   /**
    * dst.
    *
