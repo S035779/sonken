@@ -11,10 +11,11 @@ class ClosedEdit extends React.Component {
     //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
     const { classes, user, note, category, filter, file } = this.props
     if(!note || !note._id) return null;
-    const number = note.attributes ? note.attributes.item.total : 0;
+    const itemNumber = note.attributes ? note.attributes.item.total : 0;
+    const perPage = note.attributes ? note.attributes.item.count : 0;
     return <div className={classes.noteEdit}>
-        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={number}
-          perPage={number} file={file} />
+        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}
+          perPage={perPage} file={file} />
       </div>;
   }
 }

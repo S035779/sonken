@@ -1079,15 +1079,10 @@ export default class FeedParser {
   setItemPage(skip, limit, counts) {
     //log.trace(FeedParser.displayName, 'setItemPage', counts);
     const _counts = id => R.find(obj => id.equals(obj._id))(counts);
-    const inCounts = num => R.gt(num, Number(skip))
-    const setItem = num => ({
-      total: num
-    , count: inCounts(num) ? Number(skip) + 1 : num
-    });
-    const setPage = num => ({
-      total: Math.ceil(num / Number(limit))
-    , count: inCounts(num) ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(num / Number(limit))
-    });
+    const inCounts = num => R.gt(num, Number(skip) + Number(limit))
+    const setItem = num => ({ total: num, count: inCounts(num) ? Number(skip) + Number(limit) : num });
+    const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
+      ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
     const setAttributes = obj => ({ item: setItem(obj.counts), page: setPage(obj.counts) });
     const setCounts = obj => R.merge(obj, { attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
@@ -1096,29 +1091,21 @@ export default class FeedParser {
 
   setNotePage(skip, limit, counts) {
     //log.trace(FeedParser.displayName, 'setNotePage', counts);
-    const inCounts = R.gt(counts, Number(skip));
-    const note = { 
-      total: counts
-    , count: inCounts ? (Number(skip) + 1) : counts
-    };
-    const page = {
-      total: Math.ceil(counts / Number(limit))
-    , count: inCounts ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(counts / Number(limit))
-    };
+    const inCounts = R.gt(counts, Number(skip) + Number(limit));
+    const note = { total: counts, count: inCounts ? Number(skip) + Number(limit) : counts };
+    const page = { total: Math.ceil(counts / Number(limit)), count: inCounts
+      ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(counts / Number(limit)) };
     const setCounts = obj => R.merge(obj, { note_attributes: { note, page } });
     const results = objs => R.isNil(objs) || counts === 0 ? [] : R.map(setCounts, objs);
     return results;
   }
 
   setAttributes(skip, limit, counts) {
-    const inCounts = R.gt(counts, Number(skip));
-    const item = { 
-      total: counts
-    , count: inCounts ? (Number(skip) + 1) : counts };
-    const page = {
-      total: Math.ceil(counts / Number(limit))
-    , count: inCounts ? Math.ceil((Number(skip) + 1) / Number(limit)) : Math.ceil(counts / Number(limit))
-    };
+    //log.trace(FeedParser.displayName, 'setAttributes', counts);
+    const inCounts = R.gt(counts, Number(skip) + Number(limit));
+    const item = { total: counts, count: inCounts ? Number(skip) + Number(limit) : counts };
+    const page = { total: Math.ceil(counts / Number(limit)), count: inCounts
+      ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(counts / Number(limit)) };
     const setItems = R.map(obj => obj.items);
     const setNotes = objs => ([{ attributes: { item, page }, items: setItems(objs) }]);
     const results = objs => R.isNil(objs) ? [] : setNotes(objs);
