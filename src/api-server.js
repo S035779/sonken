@@ -137,13 +137,13 @@ router.route('/authenticate')
 router.route('/traded')
 .get(feed.fetchTradedNotes())
 .put(feed.createTrade())
-.post(feed.notImplemented())
+.post(feed.downloadTrade())
 .delete(feed.deleteTrade());
 
 router.route('/bided')
 .get(feed.fetchBidedNotes())
 .put(feed.createBids())
-.post(feed.notImplemented())
+.post(feed.downloadBids())
 .delete(feed.deleteBids());
 
 router.route('/starred')

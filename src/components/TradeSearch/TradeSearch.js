@@ -26,33 +26,34 @@ class TradeSearch extends React.Component {
     this.setState({ perPage: itemPage.perPage });
   }
 
-  downloadFile(file) {
-    std.logInfo(TradeSearch.displayName, 'downloadFile', file);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(file);
-    a.target = '_blank';
-    a.download = 'download.csv';
-    a.click();
+  downloadFile(blob) {
+    //std.logInfo(TradeSearch.displayName, 'downloadFile', blob);
+    const anchor = document.createElement("a");
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.target = '_blank';
+      anchor.download = 'download.csv';
+      anchor.click();
+    }
+    fileReader.readAsArrayBuffer(blob);
   }
 
   handleDownload() {
-    const { user, items } = this.props;
-    if(items) {
-      const spn = Spinner.of('app');
-      spn.start();
-      std.logInfo(TradeSearch.displayName, 'handleDownload', user);
-      TradeAction.download(user, items)
-        .then(() => this.downloadFile(this.props.file))
-        .then(() => this.setState({ isSuccess: true }))
-        .then(() => spn.stop())
-        .catch(err => {
-          std.logError(TradeSearch.displayName, err.name, err.message);
-          this.setState({ isNotValid: true });
-          spn.stop();
-        });
-    } else {
-      this.setState({ isNotValid: true });
-    }
+    const { user, itemFilter } = this.props;
+    const spn = Spinner.of('app');
+    spn.start();
+    std.logInfo(TradeSearch.displayName, 'handleDownload', user);
+    TradeAction.download(user, itemFilter)
+      .then(() => this.downloadFile(this.props.file))
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => spn.stop())
+      .catch(err => {
+        std.logError(TradeSearch.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        spn.stop();
+      });
   }
 
   handleChangeSelect(name, event) {
@@ -121,11 +122,12 @@ TradeSearch.displayName = 'TradeSearch';
 TradeSearch.defaultProps = {};
 TradeSearch.propTypes = {
   classes: PropTypes.object.isRequired
+, items: PropTypes.array.isRequired
+, itemFilter: PropTypes.object.isRequired
+, user: PropTypes.string.isRequired
+, file: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , itemPage: PropTypes.object.isRequired
-, user: PropTypes.string.isRequired
-, items: PropTypes.array.isRequired
-, file: PropTypes.object
 };
 
 const titleHeight = 62;

@@ -140,6 +140,14 @@ export default {
         return new Promise((resolve, reject) => {
           xhr.postFile(api + '/file', options, obj => resolve(obj), err => reject(err));
         });
+      case 'download/traded':
+        return new Promise((resolve, reject) => {
+          xhr.postFile(api + '/traded', options, obj => resolve(obj), err => reject(err));
+        });
+      case 'download/bided':
+        return new Promise((resolve, reject) => {
+          xhr.postFile(api + '/bided', options, obj => resolve(obj), err => reject(err));
+        });
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -248,7 +256,7 @@ export default {
     return this.request('download/notes', { user, category });
   },
   downloadItems(user, ids, filter) {
-    const _ids = Array.isArray(ids) ? ids : [ids];
+    const _ids = ids ? (Array.isArray(ids) ? ids : [ids]) : [];
     const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
     return this.request('download/items', params);
   },
@@ -272,6 +280,10 @@ export default {
     const filter = { endTrading, allTrading, inBidding, bidStartTime, bidStopTime };
     return this.request('filter/traded', { user, filter });
   },
+  downloadTrade(user, filter) {
+    const params = filter ? R.merge({ user }, filter) : { user };
+    return this.request('download/traded', params);
+  },
 
   /*
    *  Bids
@@ -291,6 +303,10 @@ export default {
   filterBids(user, { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }) {
     const filter = { endBidding, allBidding, inBidding, bidStartTime, bidStopTime };
     return this.request('filter/bided', { user, filter });
+  },
+  downloadBids(user, filter) {
+    const params = filter ? R.merge({ user }, filter) : { user };
+    return this.request('download/bided', params);
   },
 
   /*

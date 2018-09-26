@@ -76,8 +76,10 @@ class Bids extends React.Component {
     //let _items = items.filter(item => item.listed && this.itemFilter(filter, item));
     //let number = items.length;
     return <div className={classes.root}>
-      <BidsSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
-      <BidsFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
+      <BidsSearch 
+        user={user} items={items} itemFilter={filter} file={file} itemNumber={number} itemPage={page}/>
+      <BidsFilter 
+        user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }

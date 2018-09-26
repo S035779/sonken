@@ -64,6 +64,38 @@ export default {
     };
   },
 
+  downloadTrade() {
+    return (req, res) => {
+      const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
+      const filter
+        = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
+      feed.downloadTrade({ user, filter }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message, ':', err.stack);
+        }
+      , () => { log.info('Complete to download Traded Items.'); }  
+      );
+    }
+  },
+
+  downloadBids() {
+    return (req, res) => {
+      const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
+      const filter
+        = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
+      feed.downloadBids({ user, filter }).subscribe(
+        obj => { res.status(200).send(obj); }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message, ':', err.stack);
+        }
+      , () => { log.info('Complete to download Bided Items.'); }  
+      );
+    }
+  },
+
   deleteList() {
     return (req, res) => {
       const { user, ids } = req.query;

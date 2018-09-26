@@ -1,4 +1,5 @@
 import { ReduceStore } from 'flux/utils';
+import * as R           from 'ramda';
 
 export default class LoginStore extends ReduceStore {
   getInitialState() {
@@ -25,89 +26,56 @@ export default class LoginStore extends ReduceStore {
   }
   
   updateCategory(state, action) {
-    return state.categorys.map(category => action.id === category._id
-      ? Object.assign({}, category, action.category) : category);
+    const setCategory = obj => action.id === obj._id ? R.merge(obj, action.category) : obj;
+    const setCategorys = R.map(setCategory);
+    return setCategorys(state.categorys);
   }
 
   deleteCategory(state, action) {
-    const isCategory = obj => action.ids.some(id => id === obj._id);
-    return state.categorys.filter(category => !isCategory(category));
+    const isCategory = obj => R.any(id => id === obj._id)(action.ids);
+    const hasCategorys = R.filter(obj => !isCategory(obj));
+    return hasCategorys(state.categorys);
   }
 
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
-        return Object.assign({}, state, {
-          admin:   action.admin
-        , isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { admin:   action.admin, isAuthenticated: action.isAuthenticated });
       case 'user/preset':
-        return Object.assign({}, state, {
-          user:   action.user
-        , isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { user:   action.user, isAuthenticated: action.isAuthenticated });
       case 'category/prefetch/my':
-        return Object.assign({}, state, {
-          categorys: action.categorys
-        });
+        return R.merge(state, { categorys: action.categorys });
       case 'category/fetch/my':
-        return Object.assign({}, state, {
-          categorys: action.categorys
-        });
+        return R.merge(state, { categorys: action.categorys });
       case 'category/create':
-        return Object.assign({}, state, {
-          categorys: [action.category, ...state.categorys]
-        });
+        return R.merge(state, { categorys: [action.category, ...state.categorys] });
       case 'category/update':
-        return Object.assign({}, state, {
-          categorys: this.updateCategory(state, action)
-        });
+        return R.merge(state, { categorys: this.updateCategory(state, action) });
       case 'category/delete':
-        return Object.assign({}, state, {
-          categorys: this.deleteCategory(state, action)
-        });
+        return R.merge(state, { categorys: this.deleteCategory(state, action) });
       case 'preference/fetch':
-        return Object.assign({}, state, {
-          preference: action.preference
-        });
+        return R.merge(state, { preference: action.preference });
       case 'preference/update':
-        return Object.assign({}, state, {
-          preference: action.preference
-        });
+        return R.merge(state, { preference: action.preference });
       case 'preference/create':
-        return Object.assign({}, state, {
-          preference: action.preference
-        });
+        return R.merge(state, { preference: action.preference });
       case 'profile/fetch':
-        return Object.assign({}, state, {
-          profile: action.profile
-        });
+        return R.merge(state, { profile: action.profile });
       case 'profile/update':
-        return Object.assign({}, state, {
-          profile: action.profile
-        });
+        return R.merge(state, { profile: action.profile });
       case 'login/authenticate':
-        return Object.assign({}, state, {
-          isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { isAuthenticated: action.isAuthenticated });
       case 'login/confirmation':
-        return Object.assign({}, state, {
-          user: action.user
-        });
+        return R.merge(state, { user: action.user });
       case 'login/changepassword':
-        return Object.assign({}, state, {
-          user: action.user
-        });
+        return R.merge(state, { user: action.user });
       case 'login/registration':
-        return Object.assign({}, state, {
-          user: action.user
-        });
+        return R.merge(state, { user: action.user });
       case 'login/rehydrate/my':
-        return    action.state;
+        return action.state;
       default: 
         return state; 
     } 
   } 
 }
 LoginStore.displayName = 'LoginStore';
-

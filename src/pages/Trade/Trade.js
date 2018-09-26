@@ -70,8 +70,10 @@ class Trade extends React.Component {
     //let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
     //let  number = items.length;
     return <div className={classes.root}>
-      <TradeSearch user={user} items={items} file={file} itemNumber={number} itemPage={page}/>
-      <TradeFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
+      <TradeSearch 
+        user={user} items={items} itemFilter={filter} file={file} itemNumber={number} itemPage={page}/>
+      <TradeFilter 
+        user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
     </div>;
   }
 }

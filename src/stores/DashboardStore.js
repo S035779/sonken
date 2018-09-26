@@ -21,6 +21,20 @@ export default class DashboardStore extends ReduceStore {
       , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       }
     , file: null
+    , profile: {
+        name:           ''
+      , kana:           ''
+      , email:          ''
+      , phone:          ''
+      , username:       ''
+      , plan:           ''
+      }
+    , preference: {
+        from:           ''
+      , agreement:      ''
+      , menu:           []
+      , advertisement:  { url1: '', url2: '', url3: '', url4: '' }
+      }
     , categorys: []
     };
   }
@@ -155,6 +169,16 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { categorys: this.updateCategory(state, action) });
       case 'category/delete':
         return R.merge(state, { categorys: this.deleteCategory(state, action) });
+      case 'preference/fetch':
+        return R.merge(state, { preference: action.preference });
+      case 'preference/update':
+        return R.merge(state, { preference: action.preference });
+      case 'preference/create':
+        return R.merge(state, { preference: action.preference });
+      case 'profile/fetch':
+        return R.merge(state, { profile: action.profile });
+      case 'profile/update':
+        return R.merge(state, { profile: action.profile });
       case 'note/prefetch/my':
         return R.merge(state, { notes: action.notes });
       case 'note/fetch/my':
