@@ -36,6 +36,7 @@ export default class DashboardStore extends ReduceStore {
       , advertisement:  { url1: '', url2: '', url3: '', url4: '' }
       }
     , categorys: []
+    , images: []
     };
   }
   
@@ -203,6 +204,8 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { file: action.file });
       case 'note/download/items':
         return R.merge(state, { file: action.file });
+      case 'note/download/images':
+        return R.merge(state, { images: action.images });
       case 'add/create':
         return R.merge(state, { notes: this.createAdd(state, action), ids: [] });
       case 'add/delete':

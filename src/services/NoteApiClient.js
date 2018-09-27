@@ -130,15 +130,19 @@ export default {
         });
       case 'upload/notes':
         return new Promise((resolve, reject) => {
-          xhr.putFile(api + '/file', options, obj => resolve(obj), err => reject(err));
+          xhr.putFile(api + '/upload', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/notes':
         return new Promise((resolve, reject) => {
-          xhr.getFile(api + '/file', options, obj => resolve(obj), err => reject(err));
+          xhr.getFile(api + '/download', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/items':
         return new Promise((resolve, reject) => {
-          xhr.postFile(api + '/file', options, obj => resolve(obj), err => reject(err));
+          xhr.postFile(api + '/download', options, obj => resolve(obj), err => reject(err));
+        });
+      case 'download/images':
+        return new Promise((resolve, reject) => {
+          xhr.putJSON(api + '/download', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/traded':
         return new Promise((resolve, reject) => {
@@ -259,6 +263,11 @@ export default {
     const _ids = ids ? (Array.isArray(ids) ? ids : [ids]) : [];
     const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
     return this.request('download/items', params);
+  },
+  downloadImages(user, ids, filter) {
+    const _ids = ids ? (Array.isArray(ids) ? ids : [ids]) : [];
+    const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
+    return this.request('download/images', params);
   },
 
   /*

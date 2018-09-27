@@ -81,6 +81,23 @@ class awsutils {
     const promise = this.s3.getBucketWebsite(params).promise();
     return promise;
   }
+
+  fetchReadStream(bucket, filename) {
+    const params = { Bucket: bucket, Key: filename };
+    const read = this.s3.getObject(params).createReadStream();
+    return read;
+  }
+
+  fetchSignedUrl(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
+    return new Promise((resolve, reject) => {
+      this.s3.getSignedUrl('getObject', params, (err, url) => {
+        if(err) reject(err);
+        resolve(url);
+      });
+    });
+  }
 }
 awsutils.displayName = 'awsutils';
 export default awsutils;

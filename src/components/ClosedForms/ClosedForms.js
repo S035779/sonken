@@ -186,6 +186,26 @@ class ClosedForms extends React.Component {
       });
   }
 
+  handleImages() {
+    const { user, note } = this.props;
+    //std.logInfo(ClosedForms.displayName, 'handleImages', user);
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
+    const id = note._id;
+    this.spn.start();
+    NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+    , inAuction, aucStartTime, aucStopTime })
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => R.map(this.downloadImage, this.props.images))
+      .then(() => this.spn.stop())
+      .catch(err => {
+        std.logError(ClosedForms.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      });
+  }
+
   handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
@@ -218,6 +238,14 @@ class ClosedForms extends React.Component {
     fileReader.readAsArrayBuffer(blob);
   }
 
+  downloadImage(url) {
+    //std.logInfo(ClosedForms.displayName, 'downloadFile', url);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.target = '_blank';
+    anchor.click();
+  }
+
   getColor(category) {
     switch(category) {
       case 'marchant':
@@ -243,8 +271,12 @@ class ClosedForms extends React.Component {
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color} onClick={this.handleDownload.bind(this)} 
-            classes={classes.button}>ダウンロード</RssButton>
+          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
+            画像取得
+          </RssButton>
+          <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>
+            ダウンロード
+          </RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -324,6 +356,7 @@ ClosedForms.propTypes = {
 , itemFilter: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , file: PropTypes.object
+, images: PropTypes.array
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
 , category: PropTypes.string.isRequired

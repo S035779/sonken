@@ -8,7 +8,8 @@ import std                        from 'Utilities/stdutils';
 import Sendmail                   from 'Utilities/Sendmail';
 import log                        from 'Utilities/logutils';
 
-dotenv.config()
+const config = dotenv.config();
+if(config.error) throw config.error();
 const node_env    = process.env.NODE_ENV;
 const app_name    = process.env.APP_NAME;
 const admin_user  = process.env.ADMIN_USER;

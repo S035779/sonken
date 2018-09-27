@@ -1,3 +1,4 @@
+import path                     from 'path';
 import dotenv                   from 'dotenv';
 import * as R                   from 'ramda';
 import { from, forkJoin }       from 'rxjs';
@@ -13,12 +14,19 @@ import Amazon                   from 'Utilities/Amazon';
 import Yahoo                    from 'Utilities/Yahoo';
 import log                      from 'Utilities/logutils';
 import js2Csv                   from 'Utilities/js2Csv';
+import aws                      from 'Utilities/awsutils';
 
-dotenv.config();
+const config = dotenv.config();
+if(config.error) throw config.error();
 const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
 const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
 const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
 const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
+const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
+const aws_keyset = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+const STORAGE = process.env.STORAGE;
 const baseurl = 'https://auctions.yahoo.co.jp';
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -1443,6 +1451,26 @@ export default class FeedParser {
     }
   }
 
+  setNote({ user, url, category, categoryIds, title }, obj) {
+    //log.debug(FeedParser.displayName, 'setNote', { user, title, category, categoryIds, url });
+    return ({
+      url: url
+    , category: category
+    , categoryIds: categoryIds ? categoryIds : []
+    , user: user
+    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
+    , items: obj ? obj.item : []
+    , title: title ? title : obj.title
+    , asin: ''
+    , name: ''
+    , price: 0
+    , bidsprice: 0
+    , body: ''
+    , AmazonUrl: ''
+    , AmazonImg: ''
+    });
+  }
+
   downloadNotes({ user, category }) {
     const keys = category === 'marchant'
       ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo'] : ['title', 'url'];
@@ -1499,13 +1527,13 @@ export default class FeedParser {
     , image4: setImage(obj.images, 4), image5: setImage(obj.images, 5), image6: setImage(obj.images, 6)
     , image7: setImage(obj.images, 7), image8: setImage(obj.images, 8), image9: setImage(obj.images, 9)
     , image10: setImage(obj.images, 10)
-    , coments_of_image1: '-', coments_of_image2:  '-', coments_of_image3: '-', coments_of_image4: '-'
-    , coments_of_image5: '-', coments_of_image6:  '-', coments_of_image7: '-', coments_of_image8: '-'
-    , coments_of_image9: '-', coments_of_image10: '-'
+    , coments1: '-', coments2:  '-', coments3: '-', coments4: '-'
+    , coments5: '-', coments6:  '-', coments7: '-', coments8: '-'
+    , coments9: '-', coments10: '-'
     , number: '-', start_price: '-', buynow_price: obj.buynow, negotiation: '-', duration: obj.countdown
     , end_time: '-', auto_re_sale: '-', auto_price_cut: '-', auto_extension: '-', early_termination: '-'
     , bidder_limit: '-', bad_evaluation: '-', identification: '-', condition: obj.item_condition
-    , remarks_on_condition: '-', returns: '-', remarks_on_retuens: '-', yahoo_eady_settlement: '-'
+    , remarks_on_condition: '-', returns: '-', remarks_on_returns: '-', yahoo_easy_settlement: '-'
     , check_seller_information: '-', region: '-', municipality: '-', shipping_charge_borne: '-'
     , shipping_input_method: '-', delivaly_days: '-', yafuneko: '-', yafuneko_compact: '-'
     , yafuneko_post: '-', jpp_pack: '-', jpp_packet: '-', unused1: '-', unused2: '-', size: '-', weight: '-'
@@ -1645,24 +1673,27 @@ export default class FeedParser {
     );
   }
 
-  setNote({ user, url, category, categoryIds, title }, obj) {
-    //log.debug(FeedParser.displayName, 'setNote', { user, title, category, categoryIds, url });
-    return ({
-      url: url
-    , category: category
-    , categoryIds: categoryIds ? categoryIds : []
-    , user: user
-    , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-    , items: obj ? obj.item : []
-    , title: title ? title : obj.title
-    , asin: ''
-    , name: ''
-    , price: 0
-    , bidsprice: 0
-    , body: ''
-    , AmazonUrl: ''
-    , AmazonImg: ''
-    });
+  downloadImages({ user, ids, filter }) {
+    const AWS         = aws.of(aws_keyset);
+    const promises    = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
+    const getImageUrl = objs => forkJoin(promises(objs));
+    const setKey      = (aid, url) => std.crypto_sha256(url, aid, 'hex') + '.img';
+    const setName     = (aid, url) => aid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage    = (aid, urls) => R.map(url => ({ key: setKey(aid,url), name: setName(aid,url) }), urls);
+    const setImages   = R.map(obj => setImage(obj.auid, obj.images))
+    const dupItems    = objs => std.dupObj(objs, 'title');
+    const setItems    = R.map(obj => ({ auid: obj.guid__, title: obj.title, images: obj.images}));
+    const getItems    = obj => obj.items ? obj.items : [];
+    const observables = R.map(id => this.fetchNote({ user, id, filter }));
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(getItems))
+    , map(R.map(setItems))
+    , map(R.flatten)
+    , map(dupItems)
+    , map(setImages)
+    , map(R.flatten)
+    , flatMap(getImageUrl)
+    );
   }
 }
 FeedParser.displayName = 'FeedParser';

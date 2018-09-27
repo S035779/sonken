@@ -13,12 +13,11 @@ import Amazon             from 'Utilities/Amazon';
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const STORAGE   = process.env.STORAGE || 'storage';
-const amazon    = Amazon.of({ 
-  access_key: process.env.AMZ_ACCESS_KEY
-, secret_key: process.env.AMZ_SECRET_KEY
-, associ_tag: process.env.AMZ_ASSOCI_TAG 
-});
+const STORAGE   = process.env.STORAGE;
+const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 const searchurl = 'https://auctions.yahoo.co.jp/search/search';
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
@@ -41,6 +40,7 @@ class Yahoo {
     this.redirect_url = redirect_url;
     this.tokens = [];
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
+    this.AMZ = Amazon.of(amz_keyset);
   }
 
   static of(options) {
@@ -281,10 +281,12 @@ class Yahoo {
             )(pairs);
             return R.merge(_obj, { explanation }); 
           };
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems      = objs => ({ url: options.url, title: obj.title, item:  objs });
           const result = R.compose(
             setItems
           //, R.tap(log.trace.bind(this))
+          , R.map(setImages)
           , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
@@ -441,10 +443,12 @@ class Yahoo {
             )(pairs);
             return R.merge(_obj, { explanation }); 
           };
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
           const result = R.compose(
             setItems
           //, R.tap(log.trace.bind(this))
+          , R.map(setImages)
           , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
@@ -566,9 +570,11 @@ class Yahoo {
           const setHifn       = str  => R.isNil(str) ? '-' : str;
           const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_price) });
           const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_buynow) });
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems        = objs => ({ url: options.url, title: obj.title, item:  objs });
           return results        = R.compose(
             setItems
+          , R.map(setImages)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
           , R.map(setCategoryId)
@@ -648,7 +654,7 @@ class Yahoo {
     const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
     const setAsins    = R.curry(_setAsins)(note.item);
     const setItems    = R.curry(_setItems)(note);
-    const observables = R.map(obj => amazon.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
+    const observables = R.map(obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(note.item)).pipe(
       map(setAsins)
     , map(setItems)

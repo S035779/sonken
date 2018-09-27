@@ -111,7 +111,7 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file , categorys, profile, preference } 
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } 
       = this.state;
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
@@ -133,9 +133,10 @@ class Dashboard extends React.Component {
             <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
               selectedNoteId={ids} notePage={page}/>
           </div>
-          <div className={classes.noteEdit}>
-            { route.routes ? renderRoutes(route.routes, { user, note: _note, category, filter, file }) : null }
-          </div>
+          <div className={classes.noteEdit}>{ route.routes 
+            ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images })
+            : null
+          }</div>
         </div>
       </div>;
   }

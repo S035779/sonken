@@ -457,6 +457,7 @@ export default {
         if (e) setTimeout(() => { clearInterval(h); }, e);
       }, s);
     }
+    return true;
   },
 
   invokeMap(fn, s, i) {
@@ -468,6 +469,7 @@ export default {
       if (argLen >= 3) {
         setTimeout(() => arr.forEach(setTime), s);
       }
+      return true;
     };
   },
 
