@@ -20,4 +20,5 @@ cp $WORKDIR/systemd/sonken2.service /etc/systemd/system/
 cp $WORKDIR/systemd/sonken3.service /etc/systemd/system/
 cp $WORKDIR/systemd/sonken4.service /etc/systemd/system/
 cp $WORKDIR/systemd/sonken5.service /etc/systemd/system/
+cp $WORKDIR/systemd/sonken6.service /etc/systemd/system/
 cp $WORKDIR/systemd/nginx.conf /etc/nginx/
