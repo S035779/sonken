@@ -28,7 +28,7 @@ ClosedEdit.propTypes = {
 , category: PropTypes.string.isRequired
 , filter: PropTypes.object.isRequired
 , file: PropTypes.object
-, images: PropTypes.array
+, images: PropTypes.object
 };
 
 const barHeightSmUp     = 64;

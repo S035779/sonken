@@ -197,7 +197,7 @@ class ClosedForms extends React.Component {
     NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
     , inAuction, aucStartTime, aucStopTime })
       .then(() => this.setState({ isSuccess: true }))
-      .then(() => R.map(this.downloadImage, this.props.images))
+      .then(() => this.downloadImages(this.props.images))
       .then(() => this.spn.stop())
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
@@ -225,25 +225,30 @@ class ClosedForms extends React.Component {
   }
 
   downloadFile(blob) {
-    //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
+    std.logInfo(ClosedForms.displayName, 'downloadFile', blob);
     const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      const url = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.href = url;
       anchor.target = '_blank';
       anchor.download = 'download.csv';
       anchor.click();
+      URL.revokeObjectURL(url);
     }
     fileReader.readAsArrayBuffer(blob);
   }
 
-  downloadImage(url) {
-    //std.logInfo(ClosedForms.displayName, 'downloadFile', url);
+  downloadImages(blob) {
+    std.logInfo(ClosedForms.displayName, 'downloadImages', blob);
     const anchor = document.createElement('a');
+    const url = URL.createObjectURL(blob);
     anchor.href = url;
     anchor.target = '_blank';
+    anchor.download = 'download.zip';
     anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   getColor(category) {
@@ -272,7 +277,7 @@ class ClosedForms extends React.Component {
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
-            画像取得
+            画像保存
           </RssButton>
           <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>
             ダウンロード
@@ -356,7 +361,7 @@ ClosedForms.propTypes = {
 , itemFilter: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , file: PropTypes.object
-, images: PropTypes.array
+, images: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
 , category: PropTypes.string.isRequired

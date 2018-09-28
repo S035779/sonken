@@ -12,6 +12,7 @@
     "start:job": "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:img": "supervisor -q -n error -w dist -i node_modules dist/img.node.js",
     "start:itm": "supervisor -q -n error -w dist -i node_modules dist/itm.node.js",
+    "start:dfg": "supervisor -q -n error -w dist -i node_modules dist/dfg.node.js",
     "start:mms": "node -r ./src/hook/babel-register src/mms-server.js",
     "start:dev": "node -r ./src/hook/babel-register src/dev-server.js",
     "start:node": "npm-run-all -p start:api start:ssr watch:node",
@@ -32,6 +33,7 @@
   "dependencies": {
     "@material-ui/core": "^3.0.1",
     "@material-ui/icons": "^3.0.1",
+    "archiver": "^3.0.0",
     "async": "^2.6.1",
     "aws-sdk": "2.305.0",
     "body-parser": "1.18.3",
@@ -64,6 +66,7 @@
     "serve-favicon": "2.5.0",
     "serve-static": "1.13.2",
     "source-map-support": "^0.5.6",
+    "stream-buffers": "^3.0.2",
     "xml2js": "0.4.19"
   },
   "devDependencies": {

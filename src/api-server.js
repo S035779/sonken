@@ -176,9 +176,9 @@ router.route('/added')
 .post(feed.notImplemented())
 .delete(feed.deleteAdd());
 
-router.route('/download')
+router.route('/file')
 .get(feed.downloadNotes())
-.put(feed.downloadImages())
+.put(feed.uploadNotes())
 .post(feed.downloadItems())
 .delete(feed.notImplemented());
 
@@ -188,10 +188,10 @@ router.route('/notes')
 .post(feed.notImplemented())
 .delete(feed.notImplemented());
 
-router.route('/upload')
+router.route('/image')
 .get(feed.notImplemented())
-.put(feed.uploadNotes())
-.post(feed.notImplemented())
+.put(feed.notImplemented())
+.post(feed.downloadImages())
 .delete(feed.notImplemented())
 
 router.route('/categorys')

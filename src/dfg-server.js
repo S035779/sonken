@@ -22,16 +22,16 @@ const updatedInterval = process.env.JOB_UPD_MIN || 10;
 const numsOfChildProc = process.env.JOB_NUM_MAX || 1;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
-const displayName = '[IMG]';
+const displayName = '[DFG]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'img-server', 'TRACE' );
+  log.config('console', 'color', 'dfg-server', 'TRACE' );
 } else
 if(node_env === 'staging') {
-  log.config('file',    'basic', 'img-server', 'DEBUG' );
+  log.config('file',    'basic', 'dfg-server', 'DEBUG' );
 } else
 if(node_env === 'production') {
-  log.config('file',    'json',  'img-server', 'INFO'  );
+  log.config('file',    'json',  'dfg-server', 'INFO'  );
 }
 
 const feed        = FeedParser.of();
@@ -60,7 +60,7 @@ const request = queue => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => ({ id: obj._id, items: obj.items, operation: 'images', created: Date.now() });
+  const setQueue    = obj => ({ id: obj._id, items: obj.items, operation: 'defrag', created: Date.now() });
   const setQueues   = R.map(setQueue);
   const setNote     = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);
@@ -93,14 +93,14 @@ const worker = (task, callback) => {
 };
 
 const main = () => {
-  log.info(displayName, 'start fetch images server.')
+  log.info(displayName, 'start fetch defrag server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'all images have been processed.');
+  queue.drain = () => log.info(displayName, 'all defrag have been processed.');
 
   std.invoke(() => request(queue).subscribe(
     obj => log.debug(displayName, 'finished proceeding image...', obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'post images completed.')
+  , ()  => log.info(displayName, 'post defrag completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();

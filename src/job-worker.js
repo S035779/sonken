@@ -1,12 +1,12 @@
-import sourceMapSupport from 'source-map-support';
-import dotenv           from 'dotenv';
-import { flatMap, map } from 'rxjs/operators';
-import async            from 'async';
-import FeedParser       from 'Routes/FeedParser/FeedParser';
-import Yahoo            from 'Utilities/Yahoo';
-import log              from 'Utilities/logutils';
-import aws              from 'Utilities/awsutils';
-//import fs             from 'fs';
+import sourceMapSupport           from 'source-map-support';
+import dotenv                     from 'dotenv';
+import * as R                     from 'ramda';
+import { flatMap, map }           from 'rxjs/operators';
+import async                      from 'async';
+import FeedParser                 from 'Routes/FeedParser/FeedParser';
+import Yahoo                      from 'Utilities/Yahoo';
+import log                        from 'Utilities/logutils';
+import aws                        from 'Utilities/awsutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -17,7 +17,6 @@ const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
-//const expired   = process.env.JOB_UPD_MIN   || 10;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = `[WRK] (${process.pid})`;
@@ -32,21 +31,12 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const yahoo = Yahoo.of();
-const feed = FeedParser.of();
-const Aws   = aws.of(aws_keyset);
-
-const createWriteStream = (storage, filename) => {
-  const operator = Aws.createWriteStream(storage, filename);
-  //const operator = fs.createWriteStream(path.resolve(storage, filename)); 
-  return operator;
-}
-
 const request = (operation, { url, user, id, items }) => {
+  const yahoo = Yahoo.of();
+  const feed  = FeedParser.of();
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
-  const operator = createWriteStream;
   switch(operation) {
     case 'search':
     case 'seller':
@@ -62,7 +52,11 @@ const request = (operation, { url, user, id, items }) => {
       return yahoo.jobRss({ url })
         .pipe(map(setNote), flatMap(putRss));
     case 'images':
-      return yahoo.jobImages({ items, operator });
+      return yahoo.jobImages({
+        items, operator: (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename)
+      });
+    case 'defrag':
+      return feed.defragItems({ ids: R.map(obj => obj._id, items) });
   }
 };
 

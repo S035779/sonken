@@ -34,10 +34,7 @@ export default {
     return (req, res) => {
       const { user, category } = req.query;
       feed.downloadNotes({ user, category }).subscribe(
-        obj => {
-          res.set('Content-Type', 'application/octet-stream');
-          res.status(200).send(obj);
-        }
+        obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message, ':', err.stack);

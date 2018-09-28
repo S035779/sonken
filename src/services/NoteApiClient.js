@@ -130,19 +130,19 @@ export default {
         });
       case 'upload/notes':
         return new Promise((resolve, reject) => {
-          xhr.putFile(api + '/upload', options, obj => resolve(obj), err => reject(err));
+          xhr.putFile(api + '/file', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/notes':
         return new Promise((resolve, reject) => {
-          xhr.getFile(api + '/download', options, obj => resolve(obj), err => reject(err));
+          xhr.getFile(api + '/file', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/items':
         return new Promise((resolve, reject) => {
-          xhr.postFile(api + '/download', options, obj => resolve(obj), err => reject(err));
+          xhr.postFile(api + '/file', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/images':
         return new Promise((resolve, reject) => {
-          xhr.putJSON(api + '/download', options, obj => resolve(obj), err => reject(err));
+          xhr.postFile(api + '/image', options, obj => resolve(obj), err => reject(err));
         });
       case 'download/traded':
         return new Promise((resolve, reject) => {
