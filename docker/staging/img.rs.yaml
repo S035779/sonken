@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: worker
+  labels:
+    app: feedparser
+    tier: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: worker
+    matchExpressions:
+      - { key: tier, operator: In, values: [worker] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: worker
+    spec:
+      containers:
+      - name: node-img
+        image: asia.gcr.io/feedparser-217913/feedparser/node_img:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi

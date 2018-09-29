@@ -1,2 +1,2 @@
 #!/bin/sh
-gcloud container builds submit --config=cloudbuild.yaml .
+gcloud builds submit --config=cloudbuild.yaml .

@@ -16,7 +16,7 @@ RUN mkdir -p /data/db
 
 # install mongodb.
 ENV LIST_VERSION 3.6
-ENV RELEASE_VERSION 3
+ENV RELEASE_VERSION 8
 RUN apt-get -y install apt-transport-https ca-certificates \
   && set -ex \
   && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \

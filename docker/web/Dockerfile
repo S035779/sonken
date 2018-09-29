@@ -1,16 +1,17 @@
-FROM alpine:3.7
+FROM alpine:3.8
 MAINTAINER M.H Mamoru Hashimoto <you@example.com>
 
 # timezone
 RUN apk add --no-cache tzdata \
   && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+  && rm -rf /var/cache/apk/* && rm -rf /tmp/* && apk update \
   && apk del --purge tzdata
 
 # initialize
 EXPOSE 8080
 
 # install nginx
-ENV NGINX_VERSION 1.13.9
+ENV NGINX_VERSION 1.15.4
 RUN set -x \
   && apk add --no-cache pcre-dev openssl-dev \
   && apk add --no-cache --virtual .depNginx build-base curl \
@@ -32,6 +33,7 @@ RUN set -x \
   && ln -sf /dev/stderr /var/log/nginx/error.log \
   && cd / \
   && rm -rf nginx-$NGINX_VERSION nginx-$NGINX_VERSION.tar.gz \
+  && rm -rf /var/cache/apk/* && rm -rf /tmp/* && apk update \
   && apk del .depNginx
 
 # configuration files

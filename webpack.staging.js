@@ -11,8 +11,8 @@ var production = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV':  JSON.stringify('staging')
     , 'process.env.PLATFORM':  JSON.stringify('web')
-    , 'process.env.API_URL':   JSON.stringify('http://ik1-309-14667.vs.sakura.ne.jp/api')
-    , 'process.env.ASSET_URL': JSON.stringify('http://ik1-309-14667.vs.sakura.ne.jp/assets')
+    , 'process.env.API_URL':   JSON.stringify('http://35.227.255.168/api')
+    , 'process.env.ASSET_URL': JSON.stringify('http://35.227.255.168/assets')
     , 'process.env.APP_NAME':  JSON.stringify('SellerSearch!')
     }),
     new UglifyJSPlugin({ cache: false, parallel: true })

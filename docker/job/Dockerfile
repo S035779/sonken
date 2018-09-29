@@ -13,7 +13,7 @@ RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
 
 #install nodejs
-ENV NODE_VERSION 9.10.1
+ENV NODE_VERSION 10.11.0
 RUN buildDeps='xz-utils' \
   && ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -38,6 +38,7 @@ RUN buildDeps='xz-utils' \
     B9AE9905FFD7803F25714661B63B535A4C206CA9 \
     56730D5401028683275BD23C23EFEFE93C4CFFFE \
     77984A986EBC2AA786BC0F66B01FBB92821C587A \
+    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
   ; do \
      gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" \
     || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
@@ -55,7 +56,7 @@ RUN buildDeps='xz-utils' \
     && apt-get purge -y --auto-remove $buildDeps \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
-ENV YARN_VERSION 1.5.1
+ENV YARN_VERSION 1.9.4
 
 RUN set -ex \
   && for key in \

@@ -7,7 +7,7 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # initialize
-EXPOSE 8082
+
 WORKDIR /app/sonken
 RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
@@ -47,14 +47,14 @@ RUN buildDeps='xz-utils' \
     || gpg --keyserver pgp.mit.edu --recv-keys "$key" \
     || gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
   ; done \
-  && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
-  && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
-  && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
-  && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-  && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
-  && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
-  && apt-get purge -y --auto-remove $buildDeps \
-  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+    && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
+    && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+    && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
+    && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+    && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+    && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
+    && apt-get purge -y --auto-remove $buildDeps \
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 ENV YARN_VERSION 1.9.4
 
@@ -80,17 +80,17 @@ RUN set -ex \
 
 RUN buildDeps='git' \
   && apt-get update && apt-get install -y $buildDeps \
-  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/lib/apt/list/* \
 # install applications
-  && cd /app \
+  &&cd /app \
   && git clone https://github.com/S035779/sonken.git \
   && apt-get purge -y --auto-remove $buildDeps
 
 COPY .env /app/sonken
 
-RUN buildDeps='build-essential python' \
+RUN buildDeps='python build-essential' \
   && apt-get update && apt-get install -y $buildDeps \
-  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/lib/apt/list/* \
   && cd /app/sonken \
   && yarn install \
   && yarn run build:node \
@@ -98,4 +98,4 @@ RUN buildDeps='build-essential python' \
   && apt-get purge -y --auto-remove $buildDeps
 
 USER app
-CMD ["node", "dist/api.node.js"]
+CMD ["node", "dist/img.node.js"]

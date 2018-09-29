@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: feedparser
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: backend
+    matchExpressions:
+      - { key: tier, operator: In, values: [backend] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: backend
+    spec:
+      containers:
+        - name: mongodb
+          image: asia.gcr.io/feedparser-217913/feedparser/mongodb:latest
+          ports:
+          - containerPort: 27017
+          resources:
+            requests:
+              cpu: "256m"
+              memory: "500Mi"
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          gcePersistentDisk:
+            pdName: mongo-disk
+            fsType: ext4
