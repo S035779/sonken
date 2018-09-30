@@ -86,7 +86,8 @@ RUN buildDeps='git' \
   && git clone https://github.com/S035779/sonken.git \
   && apt-get purge -y --auto-remove $buildDeps
 
-RUN .env /app/sonken
+ARG DOTENV
+RUN echo "$DOTENV" > /app/sonken/.env
 
 RUN buildDeps='build-essential python' \
   && apt-get update && apt-get install -y $buildDeps \

@@ -55,71 +55,64 @@ export default class FeedParser {
         }
       case 'defrag/added':
         {
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
-          const promise = Added.find({ added: { $in: ids }}).populate('items').exec();
-          return promise
+          return Added.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/deleted':
         {
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
-          const promise = Deleted.find({ deleted: { $in: ids } }).populate('items').exec();
-          return promise
+          return  Deleted.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/readed':
         { 
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
-          const promise = Readed.find({ readed: { $in: ids } }).populate('items').exec();
-          return promise
+          return Readed.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/starred':
         {
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
-          const promise = Starred.find({ starred: { $in: ids } }).populate('items').exec();
-          return promise
+          return Starred.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/bided':
         { 
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
-          const promise = Bided.find({ bided: { $in: ids } }).populate('items').exec();
-          return promise
+          return Bided.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/traded':
         { 
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
-          const promise = Traded.find({ traded: { $in: ids } }).populate('items').exec();
-          return promise
+          return Traded.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
       case 'defrag/listed':
         {
-          const { ids } = options;
+          const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
-          const promise = Listed.find({ lisetd: { $in: ids } }).populate('items').exec();
-          return promise
+          return Listed.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -678,44 +671,44 @@ export default class FeedParser {
     return this.request('defrag/items', { ids });
   }
 
-  dfgAdded(ids) {
-    return this.request('defrag/added', { ids });
+  dfgAdded(user) {
+    return this.request('defrag/added', { user });
   }
 
-  dfgDeleted(ids) {
-    return this.request('defrag/deleted', { ids });
+  dfgDeleted(user) {
+    return this.request('defrag/deleted', { user });
   }
   
-  dfgReaded(ids) {
-    return this.request('defrag/readed', { ids });
+  dfgReaded(user) {
+    return this.request('defrag/readed', { user });
   }
 
-  dfgStarred(ids) {
-    return this.request('defrag/starred', { ids });
+  dfgStarred(user) {
+    return this.request('defrag/starred', { user });
   }
 
-  dfgBided(ids) {
-    return this.request('defrag/bided', { ids });
+  dfgBided(user) {
+    return this.request('defrag/bided', { user });
   }
 
-  dfgTraded(ids) {
-    return this.request('defrag/traded', { ids });
+  dfgTraded(user) {
+    return this.request('defrag/traded', { user });
   }
 
-  dfgListed(ids) {
-    return this.request('defrag/listed', { ids });
+  dfgListed(user) {
+    return this.request('defrag/listed', { user });
   }
 
-  defragItems({ ids }) {
+  defragItems({ user, ids }) {
     return forkJoin([
         this.dfgItems(ids)
-      , this.dfgAdded(ids)
-      , this.dfgDeleted(ids)
-      , this.dfgReaded(ids)
-      , this.dfgStarred(ids)
-      , this.dfgListed(ids)
-      , this.dfgBided(ids)
-      , this.dfgTraded(ids)
+      , this.dfgAdded(user)
+      , this.dfgDeleted(user)
+      , this.dfgReaded(user)
+      , this.dfgStarred(user)
+      , this.dfgListed(user)
+      , this.dfgBided(user)
+      , this.dfgTraded(user)
       ]);
   }
 

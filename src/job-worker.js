@@ -37,6 +37,7 @@ const request = (operation, { url, user, id, items }) => {
   const setNote = obj => ({ updated: new Date(), items: obj.item });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+  const setIds  = R.map(obj => obj._id);
   switch(operation) {
     case 'search':
     case 'seller':
@@ -56,7 +57,7 @@ const request = (operation, { url, user, id, items }) => {
         items, operator: (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename)
       });
     case 'defrag':
-      return feed.defragItems({ ids: R.map(obj => obj._id, items) });
+      return feed.defragItems({ user, ids: setIds(items) });
   }
 };
 
