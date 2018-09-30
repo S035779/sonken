@@ -50,13 +50,8 @@ export default class FeedParser {
           const month     = date.getMonth();
           const day       = date.getDate();
           const yesterday = new Date(year, month, day - 1);
-          const setDate   = date => new Date(date);
-          const expireItems = R.filter(obj => R.gte(yesterday, setDate(obj.pubDate)));
-          const promises = R.map(obj => Items.remove({ _id: obj._id }).exec());
-          const promise = Items.find({ id: { $in: ids }}).exec();
-          return promise
-            .then(docs => expireItems(docs))
-            .then(docs => Promise.all(promises(docs)));
+          const conditions = { _id: { $in: ids }, pubDate: { $lt: yesterday  }};
+          return Items.remove(conditions).exec();
         }
       case 'defrag/added':
         {
