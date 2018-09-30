@@ -1,5 +1,6 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
+import * as R           from 'ramda';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
@@ -19,8 +20,8 @@ class RssSearch extends React.Component {
     , isSuccess:    false
     , isNotValid:   false
     , isAddNote:    false
+    , isLimit:      false
     };
-    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -34,10 +35,12 @@ class RssSearch extends React.Component {
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      const url = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.href = url;
       anchor.target = '_blank';
       anchor.download = 'download.csv';
       anchor.click();
+      URL.revokeObjectURL(url);
     }
     fileReader.readAsArrayBuffer(blob);
   }
@@ -46,15 +49,16 @@ class RssSearch extends React.Component {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
     if(request) {
-      this.spn.start();
+      const spn = Spinner.of('app');
+      spn.start();
       std.logInfo(RssSearch.displayName, 'Request', this.state.url);
       NoteAction.create(user, { url: request.url, category: request.category, title, categoryIds })
         .then(() => this.setState({ isSuccess: true, url: '' }))
-        .then(() => this.spn.stop())
+        .then(() => spn.stop())
         .catch(err => {
           std.logError(RssSearch.displayName, err.name, err.message);
           this.setState({ isNotValid: true, url: '' });
-          this.spn.stop();
+          spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });
@@ -62,21 +66,26 @@ class RssSearch extends React.Component {
   }
 
   handleClickButton() {
-    this.setState({ isAddNote: true });
+    const { noteNumber, profile, preference } = this.props;
+    const menu = R.find(obj => obj.id === profile.plan)(preference.menu)
+    //std.logInfo(RssSearch.displayName, 'handleClickButton', noteNumber);
+    if(menu.number > noteNumber) this.setState({ isAddNote: true });
+    else this.setState({ isLimit: true });
   }
 
   handleDownload() {
     const { user, category } = this.props;
-    this.spn.start();
+    const spn = Spinner.of('app');
+    spn.start();
     std.logInfo(RssSearch.displayName, 'handleDownload', user);
     NoteAction.download(user, category)
       .then(() => this.downloadFile(this.props.file))
       .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.spn.stop())
+      .then(() => spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        this.spn.stop();
+        spn.stop();
       })
     ;
   }
@@ -85,16 +94,17 @@ class RssSearch extends React.Component {
     const { user, category } = this.props;
     const { perPage } = this.state;
     const file = event.target.files.item(0);
-    this.spn.start();
+    const spn = Spinner.of('app');
+    spn.start();
     std.logInfo(RssSearch.displayName, 'handleChangeFile', file.type + ";" + file.name);
     NoteAction.upload(user, category, file)
       .then(() => NoteAction.fetchCategorys(user, category, 0, perPage))
       .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.spn.stop())
+      .then(() => spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        this.spn.stop();
+        spn.stop();
       })
     ;
   }
@@ -109,16 +119,17 @@ class RssSearch extends React.Component {
     const perPage = event.target.value;
     const maxNumber = Math.ceil(noteNumber / perPage);
     const number = 1;
-    this.spn.start();
+    const spn = Spinner.of('app');
+    spn.start();
     std.logInfo(RssSearch.displayName, 'handleChangeSelect', perPage);
     NoteAction.pagenation(user, { maxNumber, number, perPage })
       .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage))
       .then(() => this.setState({ perPage }))
-      .then(() => this.spn.stop())
+      .then(() => spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid:  true });
-        this.spn.stop();
+        spn.stop();
       });
   }
 
@@ -190,7 +201,7 @@ class RssSearch extends React.Component {
     //std.logInfo(RssSearch.displayName, 'Props', this.props);
     //std.logInfo(RssSearch.displayName, 'State', this.state);
     const { classes, noteNumber, user, category, categorys, title } = this.props;
-    const { isAddNote, isSuccess, isNotValid, url, perPage } = this.state;
+    const { isLimit, isAddNote, isSuccess, isNotValid, url, perPage } = this.state;
     const color = this.getColor(category);
     const _categorys = category => categorys.filter(obj => category === obj.category)
       .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
@@ -242,6 +253,10 @@ class RssSearch extends React.Component {
           onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>
+        <RssDialog open={isLimit} title={'送信エラー'}
+          onClose={this.handleCloseDialog.bind(this, 'isLimit')}>
+          登録数上限に達しました。アップグレードをご検討ください。
+        </RssDialog>
       </div>
     </div>;
   }
@@ -258,6 +273,8 @@ RssSearch.propTypes = {
 , categorys: PropTypes.array.isRequired
 , title: PropTypes.string.isRequired
 , changed: PropTypes.bool
+, profile: PropTypes.object.isRequired
+, preference: PropTypes.object.isRequired
 };
 
 const titleHeight = 62;

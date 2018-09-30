@@ -11,20 +11,32 @@ import RssButton      from 'Components/RssButton/RssButton';
 class BidsItemList extends React.Component {
   constructor(props) {
     super(props);
+    let bided = [];
+    props.items.forEach(item => {
+      if(item.bided) bided.push(item.guid._);
+    });
     this.state = {
-      bided:         []
+      bided
     , selectedItemId: props.selectedItemId
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(BidsItemList.displayName, 'Props', nextProps);
-    const { selectedItemId, items } = nextProps;
-    let bided = [];
-    items.forEach(item => {
-      if(item.bided) bided.push(item.guid._);
-    });
-    this.setState({ selectedItemId, bided });
+    const selectedItemId = nextProps.selectedItemId;
+    const nextItems = nextProps.items;
+    const nextPage = nextProps.page;
+    const prevItems = this.props.items;
+    const prevPage = this.props.page;
+    if((prevItems.length === 0 && nextItems.length > 0) || (prevPage !== nextPage)) {
+      //std.logInfo(BidsItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
+      let bided = [];
+      nextItems.forEach(item => {
+        if(item.bided) bided.push(item.guid._);
+      });
+      this.setState({ selectedItemId, bided });
+    } else {
+      this.setState({ selectedItemId });
+    }
   }
 
   handleChangeBided(id) {
@@ -67,13 +79,10 @@ class BidsItemList extends React.Component {
     + `入札終了時間：${ std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm') }、`
     + `AuctionID：${item.guid._}`;
     return <div key={index} className={classes.noteItem}>
-      <Checkbox
-        onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
-        checked={selectedItemId.indexOf(item.guid._) !== -1}
-        tabIndex={-1} disableRipple />
+      <Checkbox onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
+        checked={selectedItemId.indexOf(item.guid._) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem disableGutters
-          className={classes.listItem}>
+        <ListItem disableGutters className={classes.listItem}>
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
             <img src={item.description.DIV.A.IMG.attr.SRC}
@@ -84,12 +93,10 @@ class BidsItemList extends React.Component {
               className={classes.image}/>
             </a>
           </div>
-          <ListItemText classes={textClass}
-            primary={title} secondary={description}
+          <ListItemText classes={textClass} primary={title} secondary={description}
             className={classes.listItemText}/>
           <ListItemSecondaryAction>
-            <RssButton color={buttonColor}
-              onClick={this.handleChangeBided.bind(this, item.guid._)}
+            <RssButton color={buttonColor} onClick={this.handleChangeBided.bind(this, item.guid._)}
               classes={classes.button}>{buttonText}</RssButton>
           </ListItemSecondaryAction>
         </ListItem>
@@ -99,16 +106,17 @@ class BidsItemList extends React.Component {
   }
 
   render() {
+    //std.logInfo(BidsItemList.displayName, 'State', this.state);
     const { items } = this.props;
-    const compareId = ((a, b) => {
-      if(a._id < b._id) return -1;
-      if(a._id > b._id) return 1;
-      return 0;
-    });
-    const _items = items
-      .sort(compareId)
+    //const compareId = ((a, b) => {
+    //  if(a._id < b._id) return -1;
+    //  if(a._id > b._id) return 1;
+    //  return 0;
+    //});
+    const renderItems = items
+      //.sort(compareId)
       .map((item, index) => this.renderItem(index, item));
-    return <List>{_items}</List>;
+    return <List>{renderItems}</List>;
   }
 }
 BidsItemList.displayName = 'BidsItemList';
@@ -118,33 +126,24 @@ BidsItemList.propTypes = {
 , selectedItemId: PropTypes.array.isRequired
 , items: PropTypes.array.isRequired
 , user: PropTypes.string.isRequired
+, page: PropTypes.number.isRequired
 };
 
-const itemHeight        = 142 * 1.5;
-const itemMinWidth      = 800;
-const descMinWidth      = 133 * 1.5;
+const itemHeight = 142 * 1.5;
+const itemMinWidth = 800;
+const descMinWidth = 133 * 1.5;
 const styles = theme => ({
-  noteItem:     { display: 'flex', flexDirection: 'row'
-                , alignItems: 'center' }
-, listItem:     {
-    height: itemHeight
-  , minWidth: itemMinWidth
-  , padding: theme.spacing.unit /2
-  , '&:hover':  {
-      backgroundColor: theme.palette.primary.main
-    }
-  }
+  noteItem:     { display: 'flex', flexDirection: 'row', alignItems: 'center' }
+, listItem:     { height: itemHeight, minWidth: itemMinWidth, padding: theme.spacing.unit /2
+                , '&:hover':  { backgroundColor: theme.palette.primary.main } }
 , listItemText: { marginRight: descMinWidth }
 , button:       { width: 128, wordBreak: 'keep-all' }
 , paper:        { width: '100%', margin: theme.spacing.unit /8
-                , '&:hover':  {
-                  backgroundColor: theme.palette.primary.main
-                  , '& $primary, $secondary': {
-                    color: theme.palette.common.white }}}   
+                , '&:hover':  { backgroundColor: theme.palette.primary.main
+                  , '& $primary, $secondary': { color: theme.palette.common.white }}}   
 , primary:      { }
 , secondary:    { }
-, description:  { minWidth: descMinWidth, width: descMinWidth
-                , fontSize: 12 }
+, description:  { minWidth: descMinWidth, width: descMinWidth, fontSize: 12 }
 , image:        { width: '100%', height: '100%' }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });

@@ -111,7 +111,8 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file , categorys } = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } 
+      = this.state;
     if(!isAuthenticated) 
       return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const title = this.getTitleName(location);
@@ -119,20 +120,23 @@ class Dashboard extends React.Component {
     const category = match.params.category || 'marchant';
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
-    const note = notes.find(obj => obj._id === _id);
-    const number = _notes.length;
+    const _note = _notes.find(obj => obj._id === _id);
+    const noteNumber = _notes.length;
     return <div className={classes.root}>
-        <RssSearch user={user} title={title} category={category} categorys={categorys} note={note} file={file}
-          noteNumber={number} notePage={page} />
+        <RssSearch user={user} 
+          title={title} category={category} categorys={categorys} note={_note} file={file}
+          notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
         <div className={classes.body}>
           <div className={classes.noteList}>
-            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} />
+            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids}
+              itemFilter={filter} />
             <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
               selectedNoteId={ids} notePage={page}/>
           </div>
-          <div className={classes.noteEdit}>
-            { route.routes ? renderRoutes(route.routes, { user, note, category, filter, file }) : null }
-          </div>
+          <div className={classes.noteEdit}>{ route.routes 
+            ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images })
+            : null
+          }</div>
         </div>
       </div>;
   }

@@ -140,10 +140,8 @@ class ClosedForms extends React.Component {
 
   handleFilter() {
     const { user } = this.props;
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    , isRequest
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
+    , aucStopTime, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
       .then(() => NoteAction.filter(user , {
@@ -176,10 +174,30 @@ class ClosedForms extends React.Component {
     } = this.state;
     const id = note._id;
     this.spn.start();
-    NoteAction.downloadItems(user, id, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    }).then(() => this.setState({ isSuccess: true }))
+    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+    , inAuction, aucStartTime, aucStopTime })
+      .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
+      .then(() => this.spn.stop())
+      .catch(err => {
+        std.logError(ClosedForms.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      });
+  }
+
+  handleImages() {
+    const { user, note } = this.props;
+    //std.logInfo(ClosedForms.displayName, 'handleImages', user);
+    const {
+      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    } = this.state;
+    const id = note._id;
+    this.spn.start();
+    NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+    , inAuction, aucStartTime, aucStopTime })
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.downloadImages(this.props.images))
       .then(() => this.spn.stop())
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
@@ -194,32 +212,43 @@ class ClosedForms extends React.Component {
 
   fetch(page) {
     const { user, note } = this.props;
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
+    , aucStopTime } = this.state;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
     this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit, {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    });
+    return NoteAction.fetch(user, id, skip, limit, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
+    , allAuction, inAuction, aucStartTime, aucStopTime });
   }
 
   downloadFile(blob) {
-    //std.logInfo(ClosedForms.dislpayName, 'downloadFile', blob);
+    std.logInfo(ClosedForms.displayName, 'downloadFile', blob);
     const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      const url = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      anchor.href = url;
       anchor.target = '_blank';
       anchor.download = 'download.csv';
       anchor.click();
+      URL.revokeObjectURL(url);
     }
     fileReader.readAsArrayBuffer(blob);
+  }
+
+  downloadImages(blob) {
+    std.logInfo(ClosedForms.displayName, 'downloadImages', blob);
+    const anchor = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    anchor.href = url;
+    anchor.target = '_blank';
+    anchor.download = 'download.zip';
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   getColor(category) {
@@ -247,8 +276,12 @@ class ClosedForms extends React.Component {
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color} onClick={this.handleDownload.bind(this)} 
-            classes={classes.button}>ダウンロード</RssButton>
+          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
+            画像保存
+          </RssButton>
+          <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>
+            ダウンロード
+          </RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'}
             onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -328,6 +361,7 @@ ClosedForms.propTypes = {
 , itemFilter: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , file: PropTypes.object
+, images: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
 , category: PropTypes.string.isRequired

@@ -22,14 +22,14 @@ spec:
         - name: assets
       containers:
       - name: nginx
-        image: asia.gcr.io/feedparser-198104/feedparser/nginx:latest
+        image: asia.gcr.io/feedparser-217913/feedparser/nginx:latest
         ports:
           - containerPort: 8080
         volumeMounts:
           - mountPath: /app/assets
             name: assets
       - name: node-ssr
-        image: asia.gcr.io/feedparser-198104/feedparser/node_ssr:latest
+        image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
         lifecycle:
           postStart:
             exec:
@@ -46,11 +46,13 @@ spec:
             name: assets
         env:
           - name: API_URL
-            value: "https://feedparser.alpha-one-rss.jp/api"
+            value: "http://35.227.255.168/api"
+          - name: ASSET_URL
+            value: "http://35.227.255.168"
           - name: APP_NAME
-            value: "アルファOne"
+            value: "SellerSearch!"
       - name: node-api
-        image: asia.gcr.io/feedparser-198104/feedparser/node_api:latest
+        image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
             cpu: 100m

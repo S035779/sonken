@@ -147,7 +147,7 @@ const log = function(nam, mlv, msg) {
 const connect = function(nam, mlv) {
   const logger = log4js.getLogger(nam);
   const level = lvls[mlv];
-  const format = ':method :url';
+  const format = ':method :url :status :content-length';
   const nolog = '\\.(gif|jpe?g|png)$';
   return log4js.connectLogger(logger, { level, format, nolog });
 }

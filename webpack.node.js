@@ -16,6 +16,7 @@ var node = {
   , wrk: ['./job-worker.js']
   , img: ['./img-server.js']
   , itm: ['./itm-server.js']
+  , dfg: ['./dfg-server.js']
   }
 , optimization: {
     nodeEnv: false

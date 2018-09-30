@@ -296,6 +296,10 @@ export default {
     return result;
   },
 
+  dupObj(arr, key) {
+    return arr.filter((o, i, arr) => arr.findIndex(p => o[key] === p[key]) === i);
+  },
+
   /**
    * dst.
    *
@@ -453,6 +457,7 @@ export default {
         if (e) setTimeout(() => { clearInterval(h); }, e);
       }, s);
     }
+    return true;
   },
 
   invokeMap(fn, s, i) {
@@ -464,6 +469,7 @@ export default {
       if (argLen >= 3) {
         setTimeout(() => arr.forEach(setTime), s);
       }
+      return true;
     };
   },
 

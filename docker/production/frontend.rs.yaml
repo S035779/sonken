@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: feedparser
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: frontend
+    matchExpressions:
+      - { key: tier, operator: In, values: [frontend] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: frontend
+    spec:
+      volumes:
+        - name: assets
+      containers:
+      - name: nginx
+        image: asia.gcr.io/feedparser-198104/feedparser/nginx:latest
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - mountPath: /app/assets
+            name: assets
+      - name: node-ssr
+        image: asia.gcr.io/feedparser-198104/feedparser/node_ssr:latest
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - "/app/sonken/docker/install.sh"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+          - containerPort: 8081
+        volumeMounts:
+          - mountPath: /app/assets
+            name: assets
+        env:
+          - name: API_URL
+            value: "https://feedparser.alpha-one-rss.jp/api"
+          - name: ASSET_URL
+            value: "https://feedparser.alpha-one-rss.jp"
+          - name: APP_NAME
+            value: "アルファOne"
+      - name: node-api
+        image: asia.gcr.io/feedparser-198104/feedparser/node_api:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+          - containerPort: 8082

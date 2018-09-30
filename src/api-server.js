@@ -54,7 +54,13 @@ app.use(session({
   }
 , resave: false
 , saveUninitialized: true
-}))
+}));
+
+app.set('etag', false);
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, proxy-revalidate');
+  next();
+});
 
 router.route('/inquiry')
 .get(profile.notImplemented())
@@ -131,13 +137,13 @@ router.route('/authenticate')
 router.route('/traded')
 .get(feed.fetchTradedNotes())
 .put(feed.createTrade())
-.post(feed.notImplemented())
+.post(feed.downloadTrade())
 .delete(feed.deleteTrade());
 
 router.route('/bided')
 .get(feed.fetchBidedNotes())
 .put(feed.createBids())
-.post(feed.notImplemented())
+.post(feed.downloadBids())
 .delete(feed.deleteBids());
 
 router.route('/starred')
@@ -181,6 +187,12 @@ router.route('/notes')
 .put(feed.notImplemented())
 .post(feed.notImplemented())
 .delete(feed.notImplemented());
+
+router.route('/image')
+.get(feed.notImplemented())
+.put(feed.notImplemented())
+.post(feed.downloadImages())
+.delete(feed.notImplemented())
 
 router.route('/categorys')
 .get(feed.fetchCategorys())

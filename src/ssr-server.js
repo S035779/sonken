@@ -37,6 +37,7 @@ db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #1 connection error.'));
 db.openUri(mdb_url + '/session', { useNewUrlParser: true });
+
 app.use(log.connect());
 app.use(favicon(path.join(__dirname, 'dist', 'favicon.ico')));
 app.use(session({
@@ -47,6 +48,7 @@ app.use(session({
 , saveUninitialized: true
 }));
 app.use(ReactSSRenderer.of().request());
+
 const server = http.createServer(app);
 server.listen(http_port, http_host, () => log.info(displayName, `listening on ${http_host}:${http_port}`));
 

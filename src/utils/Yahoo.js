@@ -13,12 +13,11 @@ import Amazon             from 'Utilities/Amazon';
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const STORAGE   = process.env.STORAGE || 'storage';
-const amazon    = Amazon.of({ 
-  access_key: process.env.AMZ_ACCESS_KEY
-, secret_key: process.env.AMZ_SECRET_KEY
-, associ_tag: process.env.AMZ_ASSOCI_TAG 
-});
+const STORAGE   = process.env.STORAGE;
+const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 const searchurl = 'https://auctions.yahoo.co.jp/search/search';
 const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
 const authurl   = baseurl + '.well-known/openid-configuration';
@@ -41,6 +40,7 @@ class Yahoo {
     this.redirect_url = redirect_url;
     this.tokens = [];
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
+    this.AMZ = Amazon.of(amz_keyset);
   }
 
   static of(options) {
@@ -254,10 +254,40 @@ class Yahoo {
           const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
           const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
           const setShipping   = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
+          const setExplanation = _obj => { 
+            const input = R.replace(/\r?\n/g, '', _obj.explanation);
+            const len = R.length(input);
+            const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
+            let num1 = R.length(words), idx = 0, pairs = [];
+            while(num1--) {
+              idx = R.indexOf(words[num1], input);
+              if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
+            }
+            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(obj => !R.isNil(obj)))(pairs);
+            const max = R.length(pairs);
+            let num2 = max;
+            while(num2--) {
+              if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
+              else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
+            }
+            const subString = __obj => input.substring(__obj.from, __obj.to);
+            const setSubStr = __obj => R.merge(__obj, { string: subString(__obj) });
+            const setExplan = __obj => __obj ? __obj.string : '';
+            const isExplan = __obj => __obj.name === '商品詳細';
+            const explanation = R.compose(
+              setExplan
+            , R.find(isExplan)
+            , R.map(setSubStr)
+            )(pairs);
+            return R.merge(_obj, { explanation }); 
+          };
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems      = objs => ({ url: options.url, title: obj.title, item:  objs });
           const result = R.compose(
             setItems
           //, R.tap(log.trace.bind(this))
+          , R.map(setImages)
+          , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
@@ -386,10 +416,40 @@ class Yahoo {
           const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
           const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
           const setShipping   = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
+          const setExplanation = _obj => { 
+            const input = R.replace(/\r?\n/g, '', _obj.explanation);
+            const len = R.length(input);
+            const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
+            let num1 = R.length(words), idx = 0, pairs = [];
+            while(num1--) {
+              idx = R.indexOf(words[num1], input)
+              if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
+            }
+            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(obj => !R.isNil(obj)))(pairs);
+            const max = R.length(pairs);
+            let num2 = max;
+            while(num2--) {
+              if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
+              else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
+            }
+            const subString = __obj => input.substring(__obj.from, __obj.to);
+            const setSubStr = __obj => R.merge(__obj, { string: subString(__obj) });
+            const setExplan = __obj => __obj ? __obj.string : '';
+            const isExplan  = __obj => __obj.name === '商品詳細';
+            const explanation = R.compose(
+              setExplan
+            , R.find(isExplan)
+            , R.map(setSubStr)
+            )(pairs);
+            return R.merge(_obj, { explanation }); 
+          };
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
           const result = R.compose(
             setItems
           //, R.tap(log.trace.bind(this))
+          , R.map(setImages)
+          , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
@@ -510,9 +570,11 @@ class Yahoo {
           const setHifn       = str  => R.isNil(str) ? '-' : str;
           const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_price) });
           const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_buynow) });
+          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const setItems        = objs => ({ url: options.url, title: obj.title, item:  objs });
           return results        = R.compose(
             setItems
+          , R.map(setImages)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
           , R.map(setCategoryId)
@@ -592,7 +654,7 @@ class Yahoo {
     const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
     const setAsins    = R.curry(_setAsins)(note.item);
     const setItems    = R.curry(_setItems)(note);
-    const observables = R.map(obj => amazon.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
+    const observables = R.map(obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(note.item)).pipe(
       map(setAsins)
     , map(setItems)
@@ -635,7 +697,9 @@ class Yahoo {
 
   fetchMarchant(note) {
     const isItem            = obj => !!obj.title;
-    const urls              = R.compose(R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item);
+    const urls              = note.item
+      ? R.compose( R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item)
+      : [];
     const _setMarkets       = (items, objs) => R.map(item => this.setMarket(item, objs), items);
     const _setPerformances  = (items, objs) => R.map(obj => this.setPerformance(items, obj), objs);
     const _setItems         = (_note, objs) => R.merge(_note, { item: objs });

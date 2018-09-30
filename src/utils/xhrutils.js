@@ -326,29 +326,17 @@ const putFile = function(url, file, resolve, reject) {
  * @param {function} resolve 
  * @param {function} reject 
  */
-const getFile = function(url, data, resolve, reject) {
+const getFile = (url, data, resolve, reject) => {
   const request = new XMLHttpRequest();
-  request.open("GET", url + "?" + std.urlencode_rfc3986(data));
-  request.onreadystatechange = function() {
-    if (request.readyState === 4) {
-      if (request.status === 200) {
-        const type = request.getResponseHeader("Content-Type");
-        if (type.indexOf("xml") !== -1 && request.responseXML) {
-          resolve(request.responseXML);
-        } else if (type === "application/json; charset=utf-8") {
-          resolve(JSON.parse(request.responseText));
-        } else if (type === "application/octet-stream") {
-          resolve(new Blob([request.response]));
-        } else {
-          resolve(request.responseText);
-        }
-      } else {
-        reject(JSON.parse(request.responseText));
-      }
-    }
+  request.open("GET", url + "?" + std.urlencode_rfc3986(data), true);
+  request.responseType = 'blob';
+  request.onload = () => {
+    const blob = request.response;
+    resolve(blob);
   };
-  request.onerror = function() { reject(request.statusText); };
-  request.send(null);
+  request.onerror = () => reject(request.statusText);
+  request.setRequestHeader("Content-Type", "application/json");
+  request.send();
 };
 
 /**
@@ -359,28 +347,15 @@ const getFile = function(url, data, resolve, reject) {
  * @param {function} resolve 
  * @param {function} reject 
  */
-const postFile = function(url, data, resolve, reject) {
+const postFile = (url, data, resolve, reject) => {
   const request = new XMLHttpRequest();
-  request.open("POST", url);
-  request.onreadystatechange = function() {
-    if (request.readyState === 4) {
-      if (request.status === 200) {
-        const type = request.getResponseHeader("Content-Type");
-        if (type === "text/xml; charset=utf-8") {
-          resolve(request.responseXML);
-        } else if (type === "application/json; charset=utf-8") {
-          resolve(JSON.parse(request.responseText));
-        } else if (type === "application/octet-stream") {
-          resolve(new Blob([request.response]));
-        } else {
-          resolve(request.responseText);
-        }
-      } else {
-        reject(JSON.parse(request.responseText));
-      }
-    }
+  request.open("POST", url, true);
+  request.responseType = 'blob';
+  request.onload = () => {
+    const blob = request.response;
+    resolve(blob);
   };
-  request.onerror = function() { reject(request.statusText); };
+  request.onerror = () => reject(request.statusText);
   request.setRequestHeader("Content-Type", "application/json");
   request.send(JSON.stringify(data));
 };

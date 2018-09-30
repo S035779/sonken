@@ -17,16 +17,16 @@ export default {
         dispatch({ type: 'category/prefetch/my', categorys });
       });
   },
-  prefetchBided(user, skip, limit) {
-    return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/bided', notes });
-      });
-  },
-  prefetchTraded(user, skip, limit) {
-    return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/traded', notes });
-      });
-  },
+//  prefetchBided(user, skip, limit) {
+//    return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
+//        dispatch({ type: 'note/prefetch/bided', notes });
+//      });
+//  },
+//  prefetchTraded(user, skip, limit) {
+//    return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
+//        dispatch({ type: 'note/prefetch/traded', notes });
+//      });
+//  },
   fetchCategorys(user, category, skip, limit) {
     return NoteApiClient.fetchCategorys(user, category, skip, limit).then(categorys => {
         dispatch({ type: 'category/fetch/my', categorys });
@@ -37,16 +37,16 @@ export default {
         dispatch({ type: 'note/fetch/my', notes });
       });
   },
-  fetchBided(user, skip, limit) {
-    return NoteApiClient.fetchBidedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/fetch/bided', notes });
-      });
-  },
-  fetchTraded(user, skip, limit) {
-    return NoteApiClient.fetchTradedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/fetch/traded', notes });
-      });
-  },
+//  fetchBided(user, skip, limit, filter) {
+//    return NoteApiClient.fetchBidedNotes(user, skip, limit, filter).then(notes => {
+//        dispatch({ type: 'note/fetch/bided', notes });
+//      });
+//  },
+//  fetchTraded(user, skip, limit, filter) {
+//    return NoteApiClient.fetchTradedNotes(user, skip, limit, filter).then(notes => {
+//        dispatch({ type: 'note/fetch/traded', notes });
+//      });
+//  },
   fetchCategory(user, id) {
     return NoteApiClient.fetchCategory(user, id).then(category => {
         dispatch({ type: 'category/fetch', category });
@@ -115,6 +115,11 @@ export default {
   downloadItems(user, ids, filter) {
     return NoteApiClient.downloadItems(user, ids, filter).then(file => {
         dispatch({ type: 'note/download/items', file });
+      });
+  },
+  downloadImages(user, ids, filter) {
+    return NoteApiClient.downloadImages(user, ids, filter).then(images => {
+        dispatch({ type: 'note/download/images', images });
       });
   },
   createAdd(user, ids) {

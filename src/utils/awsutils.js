@@ -1,4 +1,7 @@
 import AWS              from 'aws-sdk';
+import * as R           from 'ramda';
+import archiver         from 'archiver';
+import bufferStream     from 'stream-buffers';
 import stream           from 'stream';
 import log              from 'Utilities/logutils';
 
@@ -18,7 +21,7 @@ class awsutils {
     };
     this.props = { config: { s3, rekognition } };
     this.rekognition = new AWS.Rekognition(rekognition);
-    this.s3          = new AWS.S3(s3);
+    this.s3 = new AWS.S3(s3);
   }
 
   static of(props) {
@@ -38,13 +41,13 @@ class awsutils {
   }
 
   createWriteStream(bucket, filename) {
-    const pass = new stream.PassThrough();
-    const params = { Bucket: bucket, Key: filename, Body: pass };
+    const passStream = new stream.PassThrough();
+    const params = { Bucket: bucket, Key: filename, Body: passStream };
     const promise = this.s3.upload(params).promise();
     promise
       //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
       .catch(err => log.error(awsutils.displayName, err.name, err.message, err.stack));
-    return pass;
+    return passStream;
   }
 
   fetchBucketAcl(bucket) {
@@ -80,6 +83,43 @@ class awsutils {
     const params = { Bucket: bucket };
     const promise = this.s3.getBucketWebsite(params).promise();
     return promise;
+  }
+
+  fetchObjects(bucket, files) {
+    const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
+    return Promise.all(promises(files))
+      .then(this.createArchive);
+  }
+
+  createArchive(files) {
+    return new Promise((resolve, reject) => {
+      const output = new bufferStream.WritableStreamBuffer();
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      output.on('finish', () => resolve(output.getContents()));
+      archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      archive.on('error', err => reject(err));
+      archive.pipe(output);
+      R.map(obj => archive.append(obj.buffer , { name: obj.name }), files);
+      archive.finalize();
+    });
+  }
+
+  fetchObject(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
+    const promise = this.s3.getObject(params).promise();
+    return promise.then(obj => ({ name, buffer: obj.Body }));
+  }
+
+  fetchSignedUrl(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
+    return new Promise((resolve, reject) => {
+      this.s3.getSignedUrl('getObject', params, (err, url) => {
+        if(err) reject(err);
+        resolve(url);
+      });
+    });
   }
 }
 awsutils.displayName = 'awsutils';
