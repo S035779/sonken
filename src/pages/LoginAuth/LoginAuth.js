@@ -27,7 +27,7 @@ class LoginAuth extends React.Component {
 
   handleLogin() {
     const { username, password } = this.state;
-    LoginAction.authenticate(username, password, false)
+    LoginAction.authenticate(username, password)
       .then(() => {
         if(this.props.isAuthenticated) {
           return LoginAction.presetUser(username);
@@ -71,25 +71,19 @@ class LoginAuth extends React.Component {
     return <div className={classes.container}>
      <div className={classes.loginForms}>
       <div className={classes.space}/>
-      <Typography variant="headline" align="center"
-        className={classes.title}>Login</Typography>
+      <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
       <div className={classes.space}/>
       <div className={classes.form}>
-        <RssInput label="USER ID" value={username}
-          placeholder="Enter User ID"
-          onChange={this.handleChangeText.bind(this, 'username')}
-          className={classes.input}/>
+        <RssInput label="USER ID" value={username} placeholder="Enter User ID"
+          onChange={this.handleChangeText.bind(this, 'username')} className={classes.input}/>
       </div>
       <div className={classes.form}>
-        <RssInput type="password" label="PASSWORD" value={password}
-          placeholder="Password"
-          onChange={this.handleChangeText.bind(this, 'password')}
-          className={classes.input}/>
+        <RssInput type="password" label="PASSWORD" value={password} placeholder="Password"
+          onChange={this.handleChangeText.bind(this, 'password')} className={classes.input}/>
       </div>
       <div className={classes.form}>
-        <FormControlLabel control={<RssCheckbox color="secondary" 
-            checked={checked} onChange={this.handleChangeCheckbox.bind(this, 'checked')} />}
-          label="ＩＤ・ＰＷを保存" />
+        <FormControlLabel control={<RssCheckbox color="secondary" checked={checked}
+          onChange={this.handleChangeCheckbox.bind(this, 'checked')} />} label="ＩＤ・ＰＷを保存" />
       </div>
       <div className={classes.form}>
         <RssButton color="flatDefault" id="confirmation" classes={classes.confirm}
@@ -99,11 +93,10 @@ class LoginAuth extends React.Component {
       </div>
       <div className={classes.buttons}>
         <div className={classes.space}/>
-        <RssButton color="warning"
-          onClick={this.handleLogin.bind(this)}
-          className={classes.button}>Login</RssButton>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this)}>
+        <RssButton color="warning" onClick={this.handleLogin.bind(this)} className={classes.button}>
+          Login
+        </RssButton>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>
         <div className={classes.space}/>

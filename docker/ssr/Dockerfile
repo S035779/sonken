@@ -94,7 +94,8 @@ RUN buildDeps='python build-essential' \
   && rm -rf /var/lib/apt/list/* \
   && cd /app/sonken \
   && yarn install \
-  && yarn run build:all \
+  #&& yarn run build:production \
+  && yarn run build:staging \
   && chown -R app:app /app \
   && apt-get purge -y --auto-remove $buildDeps
 

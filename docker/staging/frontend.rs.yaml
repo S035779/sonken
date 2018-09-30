@@ -45,10 +45,12 @@ spec:
           - mountPath: /app/assets
             name: assets
         env:
+          - name: NODE_ENV
+            value: "staging"
           - name: API_URL
             value: "http://35.227.255.168/api"
           - name: ASSET_URL
-            value: "http://35.227.255.168"
+            value: "http://35.227.255.168/assets"
           - name: APP_NAME
             value: "SellerSearch!"
       - name: node-api
