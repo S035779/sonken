@@ -368,26 +368,24 @@ export default class UserProfiler {
 
   authenticate({ admin, user, password }) {
     const isAdmin = admin !== '';
-    const observable = obj => isAdmin
+    const signIn = obj => isAdmin
       ? from(this.signinAdmin(admin, obj.salt, obj.hash))
       : from(this.signinUser(user, obj.salt, obj.hash));
     const options = isAdmin ? { user: admin } : { user: user };
     return this.fetchUser(options).pipe(
       flatMap(obj => this.createSaltAndHash(password, obj.salt))
-    , flatMap(obj => observable(obj))
+    , flatMap(signIn)
     , flatMap(() => this.fetchUser(options))
-    , map(R.tap(log.info.bind(this)))
-    , flatMap(obj => this.fetchApproved(obj))
+    , flatMap(obj => this.fetchApproved(isAdmin, obj))
     );
   }
 
-  fetchApproved(user) {
-    log.info(user._id, user.isAuthenticated);
+  fetchApproved(isAdmin, user) {
     const objectId = user._id;
-    const setApproved = obj => obj && objectId.equals(obj.approved) ? user.isAuthenticated : false;
+    const isApproved = obj => obj && objectId.equals(obj.approved);
+    const setApproved = obj => isAdmin ? true : (isApproved(obj) ? user.isAuthenticated : false);
     return from(this.getApproval(objectId)).pipe(
-      map(R.tap(log.info.bind(this)))
-    , map(R.head)
+      map(R.head)
     , map(setApproved)
     );
   }

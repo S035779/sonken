@@ -1,4 +1,3 @@
-import * as R from 'ramda';
 import xhr    from 'Utilities/xhrutils';
 
 const api = process.env.API_URL;
@@ -35,12 +34,12 @@ export default {
   authenticate(username, password, isAdmin) {
     const admin = isAdmin ? username : '';
     const user = isAdmin ? '' : username;
-    return this.request('signin/authenticate', { admin, user, password }).then(R.tap(console.log));
+    return this.request('signin/authenticate', { admin, user, password });
   },
   signout(username, isAdmin) {
     const admin = isAdmin ? username : '';
     const user = isAdmin ? '' : username;
-    return this.request('signout/authenticate', { admin, user }).then(R.tap(console.log));
+    return this.request('signout/authenticate', { admin, user });
   },
 
   /*

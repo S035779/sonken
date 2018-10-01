@@ -51,8 +51,8 @@ class LoginAuth extends React.Component {
   }
 
   render() {
-    std.logInfo(LoginAuth.displayName, 'State', this.state);
-    std.logInfo(LoginAuth.displayName, 'Props', this.props);
+    //std.logInfo(LoginAuth.displayName, 'State', this.state);
+    //std.logInfo(LoginAuth.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
     if(redirectToRefferer) {
