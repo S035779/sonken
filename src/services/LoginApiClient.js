@@ -1,4 +1,5 @@
-import xhr from 'Utilities/xhrutils';
+import * as R from 'ramda';
+import xhr    from 'Utilities/xhrutils';
 
 const api = process.env.API_URL;
 
@@ -6,75 +7,25 @@ export default {
   request(request, options) {
     switch(request) {
       case 'signin/authenticate':
-        return new Promise((resolve, reject) => {
-          xhr.postJSON(api + '/authenticate', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.postJSON(  api+'/authenticate', options, resolve, reject));
       case 'signout/authenticate':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(api + '/authenticate', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.deleteJSON(api+'/authenticate', options, resolve, reject));
       case 'preference/fetch':
-        return new Promise((resolve, reject) => {
-          xhr.getJSON(api + '/preference', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.getJSON(   api+'/preference',   options, resolve, reject));
       case 'preference/update':
-        return new Promise((resolve, reject) => {
-          xhr.postJSON(api + '/preference', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.postJSON(  api+'/preference',   options, resolve, reject));
       case 'preference/create':
-        return new Promise((resolve, reject) => {
-          xhr.putJSON(api + '/preference', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.putJSON(   api+'/preference',   options, resolve, reject));
       case 'fetch/user':
-        return new Promise((resolve, reject) => {
-          xhr.getJSON(api + '/login', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.getJSON(   api+'/login',        options, resolve, reject));
       case 'update/user':
-        return new Promise((resolve, reject) => {
-          xhr.postJSON(api + '/login', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.postJSON(  api+'/login',        options, resolve, reject));
       case 'create/user':
-        return new Promise((resolve, reject) => {
-          xhr.putJSON(api + '/login', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.putJSON(   api+'/login',        options, resolve, reject));
       case 'delete/user':
-        return new Promise((resolve, reject) => {
-          xhr.deleteJSON(api + '/login', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.deleteJSON(api+'/login',        options, resolve, reject));
       case 'inquiry/create':
-        return new Promise((resolve, reject) => {
-          xhr.putJSON(api + '/inquiry', options
-          , obj => { resolve(obj); }
-          , err => { reject(err); }
-          );
-        });
+        return new Promise((resolve, reject) => xhr.putJSON(   api+'/inquiry',      options, resolve, reject));
     }
   },
 
@@ -82,26 +33,14 @@ export default {
    * Authenticate
    */
   authenticate(username, password, isAdmin) {
-    let admin, user;
-    if(isAdmin) {
-      admin = username;
-      user = '';
-    } else {
-      admin = '';
-      user = username;
-    }
-    return this.request('signin/authenticate', { admin, user, password });
+    const admin = isAdmin ? username : '';
+    const user = isAdmin ? '' : username;
+    return this.request('signin/authenticate', { admin, user, password }).then(R.tap(console.log));
   },
   signout(username, isAdmin) {
-    let admin, user;
-    if(isAdmin) {
-      admin = username;
-      user = '';
-    } else {
-      admin = '';
-      user = username;
-    }
-    return this.request('signout/authenticate', { admin, user });
+    const admin = isAdmin ? username : '';
+    const user = isAdmin ? '' : username;
+    return this.request('signout/authenticate', { admin, user }).then(R.tap(console.log));
   },
 
   /*
@@ -111,8 +50,7 @@ export default {
     return this.request('fetch/user', { user });
   },
   confirmation(email, phone) {
-    return this.request('fetch/user', { email, phone })
-    .then(obj => obj.user);
+    return this.request('fetch/user', { email, phone }).then(obj => obj.user);
   },
   updateProfile(user, password, data) {
     return this.request('update/user', { user, password, data });
@@ -131,13 +69,13 @@ export default {
    * Preference
    */
   fetchPreference() {
-    return this.request('preference/fetch', {  });
+    return this.request('preference/fetch', {});
   },
   createPreference(admin) {
     return this.request('preference/create', { admin });
   },
   updatePreference(admin, data) {
-    return this.request('preference/update', { admin, data});
+    return this.request('preference/update', { admin, data });
   },
 
   /*
