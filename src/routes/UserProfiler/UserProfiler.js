@@ -383,7 +383,7 @@ export default class UserProfiler {
   fetchApproved(isAdmin, user) {
     const objectId = user._id;
     const isApproved = obj => obj && objectId.equals(obj.approved);
-    const setApproved = obj => isAdmin ? true : (isApproved(obj) ? user.isAuthenticated : false);
+    const setApproved = obj => isAdmin  || isApproved(obj) ? user.isAuthenticated : false;
     return from(this.getApproval(objectId)).pipe(
       map(R.head)
     , map(setApproved)
