@@ -213,8 +213,7 @@ export default class UserProfiler {
         });
       case 'fetch/approval':
         return new Promise((resolve, reject) => {
-          const isId = !!options.id;
-          const conditions = isId ? { approved: options.id } : {};
+          const conditions = options.id ? { approved: options.id } : {};
           Approved.find(conditions).exec((err, obj) => {
             if(err) return reject(err);
             resolve(obj);
@@ -383,12 +382,12 @@ export default class UserProfiler {
   }
 
   fetchApproved(user) {
-    console.log(user._id, user.isAuthenticated);
+    log.info(user._id, user.isAuthenticated);
     const objectId = user._id;
     const setApproved = obj => obj && objectId.equals(obj.approved) ? user.isAuthenticated : false;
     return from(this.getApproval(objectId)).pipe(
-      map(R.head)
-    , map(R.tap(console.log))
+      map(R.tap(log.info.bind(this)))
+    , map(R.head)
     , map(setApproved)
     );
   }
