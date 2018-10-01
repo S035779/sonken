@@ -379,16 +379,17 @@ export default class UserProfiler {
     , flatMap(() => this.fetchUser(options))
     , map(R.tap(log.info.bind(this)))
     , flatMap(obj => this.fetchApproved(obj))
-    )
-    ;
+    );
   }
 
   fetchApproved(user) {
-    const id = user._id.toString();
-    const isId = obj => obj && obj.approved === id;
-    const observable = from(this.getApproval(id));
-    return observable.pipe(
-      map(obj => isId(obj[0]) && user.isAuthenticated)
+    console.log(user._id, user.isAuthenticated);
+    const objectId = user._id;
+    const setApproved = obj => obj && objectId.equals(obj.approved) ? user.isAuthenticated : false;
+    return from(this.getApproval(objectId)).pipe(
+      map(R.head)
+    , map(R.tap(console.log))
+    , map(setApproved)
     );
   }
 
@@ -423,13 +424,12 @@ export default class UserProfiler {
   }
 
   setApproved(approved) {
-    const ids = 
-      objs => R.isNil(objs) ? [] : R.map(obj => obj.approved, objs);
-    const isId = id => R.contains(id, ids(approved));
-    const _setApproved =
-      obj => R.merge(obj, { approved: isId(obj._id.toString()) });
-    const results = 
-      objs => R.isNil(objs) ? [] : R.map(_setApproved, objs);
+    const ids = R.isNil(approved) ? [] : R.map(obj => obj.approved, approved);
+    const isObjectId = (id1, id2) => id1.equals(id2);
+    const _isObjectId = R.curry(isObjectId);
+    const isId = id => R.any(_isObjectId(id))(ids);
+    const _setApproved = obj => R.merge(obj, { approved: isId(obj._id) });
+    const results = objs => R.isNil(objs) ? [] : R.map(_setApproved, objs);
     return results;
   }
 
