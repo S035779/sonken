@@ -128,6 +128,7 @@ export default {
         obj => {
           if(obj && admin !== '') req.session.admin = admin;
           else if(obj && user !== '') req.session.user = user;
+          log.info('isAuthenticated:', obj);
           res.status(200).send(obj);
         }
       , err => {
