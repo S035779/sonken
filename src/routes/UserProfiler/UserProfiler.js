@@ -377,6 +377,7 @@ export default class UserProfiler {
       flatMap(obj => this.createSaltAndHash(password, obj.salt))
     , flatMap(obj => observable(obj))
     , flatMap(() => this.fetchUser(options))
+    , map(R.tap(log.info.bind(this)))
     , flatMap(obj => this.fetchApproved(obj))
     )
     ;
