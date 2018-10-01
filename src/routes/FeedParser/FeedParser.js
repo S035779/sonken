@@ -445,7 +445,8 @@ export default class FeedParser {
         {
           const conditions = { added: options.id, user: options.user };
           const update = { added: options.id, user: options.user };
-          return Added.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Added.update(conditions, update, params).exec();
         }
       case 'delete/added':
         {
@@ -456,7 +457,8 @@ export default class FeedParser {
         {
           const conditions = { deleted: options.id, user: options.user };
           const update = { deleted: options.id, user: options.user };
-          return Deleted.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Deleted.update(conditions, update, params).exec();
         }
       case 'delete/deleted':
         {
@@ -467,7 +469,8 @@ export default class FeedParser {
         {
           const conditions = { readed: options.id, user: options.user };
           const update = { readed: options.id, user: options.user };
-          return Readed.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Readed.update(conditions, update, params).exec();
         }
       case 'delete/readed':
         {
@@ -478,7 +481,8 @@ export default class FeedParser {
         {
           const conditions = { traded: options.id, user: options.user };
           const update = { traded: options.id, user: options.user };
-          return Traded.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Traded.update(conditions, update, params).exec();
         }
       case 'delete/traded':
         {
@@ -489,7 +493,8 @@ export default class FeedParser {
         {
           const conditions = { bided:  options.id, user: options.user };
           const update = { bided: options.id, user: options.user };
-          return Bided.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Bided.update(conditions, update, params).exec();
         }
       case 'delete/bided':
         {
@@ -500,7 +505,8 @@ export default class FeedParser {
         {
           const conditions = { starred: options.id, user: options.user };
           const update = { starred: options.id, user: options.user };
-          return Starred.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Starred.update(conditions, update, params).exec();
         }
       case 'delete/starred':
         {
@@ -511,7 +517,8 @@ export default class FeedParser {
         {
           const conditions = { listed: options.id, user:   options.user };
           const update = { listed: options.id, user:   options.user };
-          return Listed.update(conditions, update, { upsert: true }).exec();
+          const params = { upsert: true };
+          return Listed.update(conditions, update, params).exec();
         }
       case 'delete/listed':
         {

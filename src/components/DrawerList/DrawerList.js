@@ -78,9 +78,7 @@ class DrawerList extends React.Component {
         this.props.history.push('/trade');
         break;
       case 'user':
-        this.setState({
-          openUser:     !this.state.openUser
-        });
+        this.setState({ openUser: !this.state.openUser });
         break;
       case 'isPreference':
       case 'isProfile':
