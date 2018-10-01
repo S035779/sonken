@@ -29,17 +29,8 @@ class LoginAuth extends React.Component {
     const { username, password } = this.state;
     LoginAction.authenticate(username, password)
       .then(() => {
-        if(this.props.isAuthenticated) {
-          return LoginAction.presetUser(username);
-        } else {
-          this.setState({ isNotValid: true });
-          return null;
-        }
-      })
-      .then(() => {
-        if(this.props.isAuthenticated) {
-          this.setState({ redirectToRefferer: true });
-        }
+        if(!this.props.isAuthenticated) return this.setState({ isNotValid: true });
+        LoginAction.presetUser(username).then(() => this.setState({ redirectToRefferer: true }));
       })
       .catch(err => {
         std.logError(LoginAuth.displayName, err.name, err.message);
@@ -60,8 +51,8 @@ class LoginAuth extends React.Component {
   }
 
   render() {
-    //std.logInfo(LoginAuth.displayName, 'State', this.state);
-    //std.logInfo(LoginAuth.displayName, 'Props', this.props);
+    std.logInfo(LoginAuth.displayName, 'State', this.state);
+    std.logInfo(LoginAuth.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
     if(redirectToRefferer) {
