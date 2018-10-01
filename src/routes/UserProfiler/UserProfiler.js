@@ -376,17 +376,19 @@ export default class UserProfiler {
       flatMap(obj => this.createSaltAndHash(password, obj.salt))
     , flatMap(signIn)
     , flatMap(() => this.fetchUser(options))
-    , flatMap(obj => this.fetchApproved(isAdmin, obj))
+    , flatMap(obj => this.fetchApproved(obj))
     );
   }
 
-  fetchApproved(isAdmin, user) {
-    const objectId = user._id;
-    const isApproved = obj => obj && objectId.equals(obj.approved);
-    const setApproved = obj => isAdmin  || isApproved(obj) ? user.isAuthenticated : false;
-    return from(this.getApproval(objectId)).pipe(
+  fetchApproved(user) {
+    const { _id, isAdmin, isAuthenticated } = user;
+    log.info(UserProfiler.displayName, 'isAdmin', isAdmin);
+    const isApproved = obj => obj && _id.equals(obj.approved);
+    const setApproved = obj => isAdmin  || isApproved(obj) ? isAuthenticated : false;
+    return from(this.getApproval(_id)).pipe(
       map(R.head)
     , map(setApproved)
+    , map(R.tap(log.info.bind(this)))
     );
   }
 
