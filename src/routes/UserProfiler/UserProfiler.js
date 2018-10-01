@@ -87,6 +87,7 @@ export default class UserProfiler {
           User.findOne(conditions).exec((err, obj) => {
             if(err) return reject(err);
             if(obj === null) return reject({ name: 'Request error', message: 'User not found for request.' });
+            log.info(UserProfiler.displayName, 'fetchUser', obj);
             resolve(obj);
           });
         });
@@ -378,7 +379,6 @@ export default class UserProfiler {
     , flatMap(obj => observable(obj))
     , flatMap(() => this.fetchUser(options))
     , flatMap(obj => this.fetchApproved(obj))
-    //, map(R.tap(log.trace.bind(this)))
     )
     ;
   }
