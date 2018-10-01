@@ -174,7 +174,7 @@ class BidsFilter extends React.Component {
   }
 
   render() {
-    std.logInfo(BidsFilter.displayName, 'State', this.state);
+    //std.logInfo(BidsFilter.displayName, 'State', this.state);
     //std.logInfo(BidsFilter.displayName, 'Props', this.props);
     const { classes, user, selectedItemId } = this.props;
     const { checked, bidStartTime, bidStopTime, endBidding, allBidding, inBidding, items, page } = this.state;

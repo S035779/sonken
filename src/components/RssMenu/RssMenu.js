@@ -46,7 +46,7 @@ class RssMenu extends React.Component {
   }
 
   handleMenu(event) {
-    std.logInfo(RssMenu.displayName, 'handleMenu', event.currentTarget);
+    //std.logInfo(RssMenu.displayName, 'handleMenu', event.currentTarget);
     this.setState({ anchorEl: event.currentTarget });
   }
 
