@@ -43,9 +43,6 @@ log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
 
-let pids = [];
-let idx  = 0;
-
 const fork = () => {
   const cps = child_process.fork(job);
   cps.on('message',            mes => log.info(displayName, 'got message.', mes));
@@ -90,8 +87,10 @@ const request = queue => {
     );
 };
 
+let pids=[], idx=0;
 const worker = (task, callback) => {
   idx = idx < job_num ? idx : 0;
+  log.info(displayName, 'Process is fork. _id/idx:', task.id, idx);
   if(pids[idx] === undefined || !pids[idx].connected) {
     log.info(displayName, 'Process is forked. _id/idx:', task.id, idx);
     pids[idx] = fork();
