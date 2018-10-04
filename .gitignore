@@ -1,6 +1,6 @@
 .env
+yarn.lock
 *.log
-*.lock
 /node_modules/*
 /.cache-loader/*
 /.git/*

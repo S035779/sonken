@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: worker
+  name: job-worker
   labels:
     app: feedparser
     tier: worker

@@ -1,3 +1,4 @@
+import stream                           from 'stream';
 import * as R                           from 'ramda';
 import React                            from 'react';
 import ReactDOMServer                   from 'react-dom/server';
@@ -8,6 +9,8 @@ import getRoutes                        from 'Routes';
 import log                              from 'Utilities/logutils';
 
 import Html from 'Pages/Html/Html';
+
+const docType = '<!DOCTYPE html>'
 
 class ReactSSRenderer {
   constructor(options) {
@@ -27,20 +30,21 @@ class ReactSSRenderer {
       createStores(createDispatcher());
       const routes = getRoutes();
       const matchs = matchRoutes(routes, location);
+      const appStream = this.setInitialData(location);
+      const pass = new stream.PassThrough();
+      pass.write(docType);
       this.getUserData(matchs, { user, admin, category })
-        .then(objs  => this.prefetchData(matchs, objs))
-        .then(()    => this.setInitialData(location).pipe(res))
-        .then(()    => next())
-        .catch(err  => res.status(500)
-          .send({ error: { name: err.name, message: err.message, stack: err.stack }}));
+        .then(objs => this.prefetchData(matchs, objs))
+        .then(()   => appStream.pipe(pass).pipe(res))
+        .then(()   => next())
+        .catch(err => res.status(500).send({ error: { name: err.name, message: err.message, stack: err.stack }}));
     };
   }
 
   setInitialData(location) {
     const initialData = JSON.stringify(dehydrateState());
     //log.debug(ReactSSRenderer.displayName, 'InitialData:', initialData, location);
-    return ReactDOMServer
-      .renderToStaticNodeStream(<Html initialData={initialData} location={location}/>);
+    return ReactDOMServer.renderToStaticNodeStream(<Html initialData={initialData} location={location}/>);
   }
 
   prefetchData(matchs, objs) {

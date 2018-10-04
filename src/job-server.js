@@ -39,6 +39,7 @@ const profile     = UserProfiler.of();
 const cpu_num     = os.cpus().length;
 const job_num     = numsOfChildProc < cpu_num ? numsOfChildProc : cpu_num;
 const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
+log.info(displayName, 'worker:', job);
 
 let pids = [];
 let idx  = 0;
