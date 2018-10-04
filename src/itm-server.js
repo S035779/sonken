@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import path             from 'path';
-import os               from 'os';
+//import os               from 'os';
 import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
@@ -36,7 +36,7 @@ if(node_env === 'production') {
 
 const feed        = FeedParser.of();
 const profile     = UserProfiler.of();
-const cpu_num     = os.cpus().length;
+const cpu_num     = 1;//os.cpus().length;
 const job_num     = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
 const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
