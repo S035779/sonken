@@ -92,8 +92,10 @@ const request = queue => {
 
 const worker = (task, callback) => {
   idx = idx < job_num ? idx : 0;
-  //log.debug(displayName, 'task(id/idx#/cpu#)', task.id, idx, cpu_num);
-  if(pids[idx] === undefined || !pids[idx].connected) pids[idx] = fork();
+  if(pids[idx] === undefined || !pids[idx].connected) {
+    log.info(displayName, 'Process is forked. _id/idx:', task.id, idx);
+    pids[idx] = fork();
+  }
   pids[idx].send(task, err => {
     if(err) log.error(displayName, err.name, err.message, err.stack);
     callback();
