@@ -19,7 +19,7 @@ const node_env        = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
-const numsOfChildProc = process.env.JOB_NUM_MAX || 1;
+const numChildProcess = process.env.JOB_NUM_MAX || 1;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[JOB]';
@@ -37,8 +37,10 @@ if(node_env === 'production') {
 const feed        = FeedParser.of();
 const profile     = UserProfiler.of();
 const cpu_num     = os.cpus().length;
-const job_num     = numsOfChildProc < cpu_num ? numsOfChildProc : cpu_num;
+const job_num     = numChildProcess < cpu_num ? numChildProcess : cpu_num;
 const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
+log.info(displayName, 'cpu#:', cpu_num);
+log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
 
 let pids = [];

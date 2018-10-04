@@ -1,3 +1,3 @@
 #!/bin/sh
-DATA=`cat ../.env`
+DATA=`cat ../staging/.env`
 gcloud builds submit --config=cloudbuild.yaml --substitutions=_DOTENV="$DATA" .
