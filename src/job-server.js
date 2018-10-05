@@ -61,15 +61,17 @@ const operation = url => {
 };
 
 const request = queue => {
-  log.info(displayName, '----- Request -----');
   const queuePush = obj => {
-    log.info(displayName, '----- Queue push -----');
     if(obj) queue.push(obj, err => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => ({ 
-    user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url), created: Date.now()
+  const setQueue = obj => ({ 
+    user: obj.user
+  , id: obj._id
+  , url: obj.url
+  , operation: operation(obj.url)
+  , created: Date.now()
   });
   const setQueues = R.map(setQueue);
   const setNote = objs => feed.fetchAllNotes({ users: objs });
@@ -90,10 +92,6 @@ const request = queue => {
     , map(hasOldItem)
     , map(hasOpened)
     , map(setQueues)
-    , map(objs => {
-      log.info(displayName, '----- Queue set ---');
-      return objs;
-    })
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
@@ -118,9 +116,8 @@ const main = () => {
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all jobs have been processed.');
   std.invoke(() => {
-    log.info(displayName, '----- Invoked -----');
     request(queue).subscribe(
-      obj => log.info(displayName, 'finished proceeding job...', obj)
+      obj => log.trace(displayName, 'finished proceeding job...', obj)
     , err => log.error(displayName, err.name, err.message, err.stack)
     , ()  => log.info(displayName, 'post jobs completed.')
     ), 0, 1000 * 60 * monitorInterval
