@@ -36,11 +36,7 @@ class App extends React.Component {
 }
 App.displayName = 'App';
 App.defaultProps = {};
-App.propTypes = {
-  classes:  PropTypes.object.isRequired
-, route: PropTypes.object.isRequired
-};
-
+App.propTypes = { classes:  PropTypes.object.isRequired, route: PropTypes.object.isRequired };
 const styles = {
   root:     { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh' }
 , appFrame: { position: 'relative', display: 'flex', flexDirection: 'column', width: '100%' }

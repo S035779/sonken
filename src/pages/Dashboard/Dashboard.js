@@ -13,6 +13,8 @@ import RssSearch                from 'Components/RssSearch/RssSearch';
 import RssButtons               from 'Components/RssButtons/RssButtons';
 import RssList                  from 'Components/RssList/RssList';
 
+const isBeta = process.env.NODE_ENV !== 'staging';
+
 class Dashboard extends React.Component {
   static getStores() {
     return getStores(['dashboardStore']);
@@ -79,32 +81,21 @@ class Dashboard extends React.Component {
     }
   }
 
-  getTitleName(location) {
-    let category = location.pathname.split('/')[1];
+  getTitleName(category) {
     switch(category) {
       case 'marchant':
-        category='商品RSS';
-        break;
+        return '商品RSS';
       case 'sellers':
-        category='出品者RSS';
-        break;
+        return '出品者RSS';
       case 'closedmarchant':
-        category='落札相場';
-        break;
+        return '落札相場';
       case 'closedsellers':
-        category='落札履歴';
-        break;
+        return '落札履歴';
       case 'bids':
-        category='入札リスト';
-        break;
+        return '入札リスト';
       case 'trade':
-        category='取引チェック';
-        break;
-      default:
-        category='商品RSS';
-        break;
+        return '取引チェック';
     }
-    return category;
   }
 
   render() {
@@ -113,11 +104,10 @@ class Dashboard extends React.Component {
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } 
       = this.state;
-    if(!isAuthenticated) 
-      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
-    const title = this.getTitleName(location);
+    if(!isAuthenticated) return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const _id = match.params.id;
-    const category = match.params.category || 'marchant';
+    const category = match.params.category || (isBeta ? 'marchant' : 'sellers');
+    const title = this.getTitleName(category);
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const _note = _notes.find(obj => obj._id === _id);

@@ -390,15 +390,10 @@ class DrawerList extends React.Component {
     
   renderTitleListItems() {
     const { classes } = this.props;
-    const textClass
-      = { primary: classes.title
-        , secondary: classes.textSecondary };
+    const textClass = { primary: classes.title, secondary: classes.textSecondary };
     return <div>
-      <ListItem button
-        onClick={this.handleClickButton.bind(this, 'title')}>
-        <ListItemIcon>
-          <BlurOn className={classes.icon} />
-        </ListItemIcon>
+      <ListItem button onClick={this.handleClickButton.bind(this, 'title')}>
+        <ListItemIcon><BlurOn className={classes.icon} /></ListItemIcon>
         <ListItemText primary={app_name} classes={textClass}/>
       </ListItem>
     </div>;
