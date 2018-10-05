@@ -54,7 +54,8 @@ class DrawerList extends React.Component {
   handleClickButton(name) {
     switch(name) {
       case 'title':
-        this.props.history.push('/');
+        if(isBeta) this.props.history.push('/');
+        else this.props.history.push('/sellers');
         break;
       case 'marchant':
         this.setState({ openMarchant: !this.state.openMarchant });

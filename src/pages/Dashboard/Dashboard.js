@@ -13,8 +13,6 @@ import RssSearch                from 'Components/RssSearch/RssSearch';
 import RssButtons               from 'Components/RssButtons/RssButtons';
 import RssList                  from 'Components/RssList/RssList';
 
-const isBeta = process.env.NODE_ENV !== 'staging';
-
 class Dashboard extends React.Component {
   static getStores() {
     return getStores(['dashboardStore']);
@@ -106,7 +104,7 @@ class Dashboard extends React.Component {
       = this.state;
     if(!isAuthenticated) return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const _id = match.params.id;
-    const category = match.params.category || (isBeta ? 'marchant' : 'sellers');
+    const category = match.params.category || 'marchant';
     const title = this.getTitleName(category);
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);

@@ -46,28 +46,16 @@ class Faq extends React.Component {
     const faq = faqs.find(obj => obj._id === _id);
     const number = faqs.length;
     faqs.length = this.faqPage(number, page);
-    if(!isAuthenticated) {
-      return <Redirect to={{
-        pathname: '/login/authenticate', state: { from: location } }} />;
-    }
+    if(!isAuthenticated) return <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} />;
     return <div className={classes.root}>
-        <FaqSearch
-          admin={admin}
-          faqNumber={number} faqPage={page} />
+      <FaqSearch admin={admin} faqNumber={number} faqPage={page} />
       <div className={classes.body}>
         <div className={classes.faqList}>
-          <FaqButtons
-            admin={admin}
-            faqs={faqs}
-            selectedFaqId={ids} />
-          <FaqList
-            admin={admin}
-            faqs={faqs}
-            selectedFaqId={ids}
-            faqPage={page}/>
+          <FaqButtons admin={admin} faqs={faqs} selectedFaqId={ids} />
+          <FaqList admin={admin} faqs={faqs} selectedFaqId={ids} faqPage={page}/>
         </div>
         <div className={classes.faqEdit}>
-        {route.routes ? renderRoutes(route.routes,{ admin, faq }) : null}
+          {route.routes ? renderRoutes(route.routes,{ admin, faq }) : null}
         </div>
       </div>
     </div>;

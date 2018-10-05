@@ -43,8 +43,7 @@ class Inquiry extends React.Component {
     //std.logInfo(Inquiry.displayName, 'Props', this.props);
     const { classes, route, location } = this.props;
     const { user, isAuthenticated, preference } = this.state;
-    const to = 
-      { pathname: '/login/authenticate', state: { from: location } };
+    const to = { pathname: '/login/authenticate', state: { from: location } };
     if(!isAuthenticated) return <Redirect to={to} />;
     return <div className={classes.root}>
       <ErrorBoundary>
@@ -52,8 +51,7 @@ class Inquiry extends React.Component {
       <div className={classes.inquiryFrame}>
         <LoginHeader />
         <div className={classes.content}>
-          {route.routes ?
-            renderRoutes(route.routes, { user, preference }): null}
+          {route.routes ? renderRoutes(route.routes, { user, preference }): null}
         </div>
       </div>
       </ErrorBoundary>
@@ -73,19 +71,12 @@ const iqry_btm = std.toRGBa('#e4b1db', 0.8);
 const barHeightSmUp   = 64;
 const barHeightSmDown = 56;
 const styles = theme => ({
-  root:         { width: '100vw', zIndex: 1, overflow: 'hidden'
-                , height: '100vh'
-                , background:
-                    `linear-gradient(315deg, ${iqry_top}, ${iqry_btm})`
-                      + `, url(${image + iqryImg})`
+  root:         { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
+                , background: `linear-gradient(315deg, ${iqry_top}, ${iqry_btm})` + `, url(${image + iqryImg})`
                 , backgroundSize: 'cover' }
 , inquiryFrame: { position: 'relative', height: '100%' }
-, content:      { position: 'absolute', width: '100%'
-                , display: 'flex', flexDirection: 'column'
-                , justifyContent: 'center', alignItems: 'center'
-                , height: `calc(100vh - ${barHeightSmDown}px)`
-                , [theme.breakpoints.up('sm')]: {
-                    height: `calc(100vh - ${barHeightSmUp}px)`
-                }}
+, content:      { position: 'absolute', width: '100%' , display: 'flex', flexDirection: 'column'
+                , justifyContent: 'center', alignItems: 'center', height: `calc(100vh - ${barHeightSmDown}px)`
+                , [theme.breakpoints.up('sm')]: { height: `calc(100vh - ${barHeightSmUp}px)` }}
 });
 export default withStyles(styles)(Container.create(Inquiry));

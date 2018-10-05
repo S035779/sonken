@@ -9,9 +9,7 @@ import { Select, Typography, FormControl, MenuItem, InputLabel } from '@material
 class FaqSearch extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      perPage:    props.faqNumber
-    };
+    this.state = { perPage: props.faqNumber };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -26,10 +24,7 @@ class FaqSearch extends React.Component {
     std.logInfo(FaqSearch.displayName, 'handleChangeSelect', value);
     switch(name) {
       case 'page':
-        FaqAction.pagenation(admin, {
-          maxNumber: Math.ceil(faqNumber / value)
-          , number: 1, perPage: value
-        });
+        FaqAction.pagenation(admin, { maxNumber: Math.ceil(faqNumber / value), number: 1, perPage: value });
         this.setState({ perPage: value });
         break;
     }
@@ -41,9 +36,7 @@ class FaqSearch extends React.Component {
     return <div className={classes.faqSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>
-          全{faqNumber}件中{
-            perPage > faqNumber ? faqNumber : perPage
-          }件表示
+          全{faqNumber}件中{perPage > faqNumber ? faqNumber : perPage}件表示
         </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
@@ -79,21 +72,14 @@ const titleHeight = 62;
 const minWidth = 125;
 const buttonWidth = 88;
 const styles = theme => ({
-  faqSearchs:{ display: 'flex', flexDirection: 'row'
-              , alignItems: 'stretch'
-              , height: titleHeight, minHeight: titleHeight
-              , boxSizing: 'border-box'
-              , padding: '5px'
+  faqSearchs:{ display: 'flex', flexDirection: 'row', alignItems: 'stretch'
+              , height: titleHeight, minHeight: titleHeight, boxSizing: 'border-box', padding: '5px'
               , overflow: 'hidden' }
 , inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
 , inputText:  { flex: 2, minWidth: minWidth * 2 }
 , buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, width: buttonWidth
-              , margin: theme.spacing.unit /2
-              , wordBreak: 'keep-all', padding: 4 }
-, results:    { flex: 1, minWidth
-              , display: 'flex'
-              , justifyContent: 'center', alignItems: 'flex-end' }
+, button:     { flex: 1, width: buttonWidth, margin: theme.spacing.unit /2, wordBreak: 'keep-all', padding: 4 }
+, results:    { flex: 1, minWidth, display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }
 , title:      { wordBreak: 'keep-all' }
 , space:      { flex: 0, margin: theme.spacing.unit }
 });
