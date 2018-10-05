@@ -374,42 +374,40 @@ export default class FeedParser {
         }
       case 'update/note':
         {
-          const isItems     = !!options.data.items;
-          const isAsin      = options.data.asin !== '';
-          const { id, user, data }  = options;
-          const items       = data.items;
-          const note        = isItems 
-            ? { updated:      data.updated } 
-            : isAsin 
-              ? {
-                  categoryIds:  data.categoryIds
-                , title:        data.title
-                , asin:         data.asin
-                , price:        data.price
-                , bidsprice:    data.bidsprice
-                , body:         data.body
-                , name:         data.name
-                , AmazonUrl:    data.AmazonUrl
-                , AmazonImg:    data.AmazonImg
-                , updated:      new Date
-              }
-              : {
-                  categoryIds:  data.categoryIds
-                , title:        data.title
-                , asin:         data.asin
-                , price:        data.price
-                , bidsprice:    data.bidsprice
-                , body:         data.body
-                , updated:      new Date
-              };
+          const isItems = !!options.data.items;
+          const isAsin = options.data.asin !== '';
+          const { id, user, data } = options;
           const conditions = { _id: id, user };
+          const docs = isItems 
+            ? { updated:      data.updated } 
+            : isAsin ? {
+                categoryIds:  data.categoryIds
+              , title:        data.title
+              , asin:         data.asin
+              , price:        data.price
+              , bidsprice:    data.bidsprice
+              , body:         data.body
+              , name:         data.name
+              , AmazonUrl:    data.AmazonUrl
+              , AmazonImg:    data.AmazonImg
+              , updated:      new Date
+              } : {
+                categoryIds:  data.categoryIds
+              , title:        data.title
+              , asin:         data.asin
+              , price:        data.price
+              , bidsprice:    data.bidsprice
+              , body:         data.body
+              , updated:      new Date
+              };
           const getIds = R.map(obj => obj._id);
-          const setIds = objs => R.merge(note, { items: objs });
-          const putNote = obj => Note.update(conditions, obj).exec();
-          const setNote = R.compose(putNote, setIds, getIds);
+          const setItems = objs => R.merge(docs, { items: objs });
           return isItems 
-            ? Items.insertMany(items).then(setNote) 
-            : setNote(note);
+            ? Items.insertMany(data.items)
+              .then(getIds)
+              .then(setItems)
+              .then(obj => Note.update(conditions, obj).exec())
+            : Note.update(conditions, docs).exec();
         }
       case 'delete/note':
         {

@@ -97,6 +97,7 @@ RUN buildDeps='python build-essential' \
   #&& yarn run build:production \
   && yarn run build:staging \
   && chown -R app:app /app \
+  && chmod 755 /app/sonken/docker/staging/install.sh \
   && apt-get purge -y --auto-remove $buildDeps
 
 USER app

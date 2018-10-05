@@ -84,7 +84,7 @@ class RssFormDialog extends React.Component {
   }
 
   handleChangeText(name, event) {
-    std.logInfo(RssFormDialog.displayName, 'handleChangeText', name);
+    //std.logInfo(RssFormDialog.displayName, 'handleChangeText', name);
     this.setState({ [name]: event.target.value });
   }
 
