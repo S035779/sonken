@@ -90,6 +90,10 @@ const request = queue => {
     , map(hasOldItem)
     , map(hasOpened)
     , map(setQueues)
+    , map(objs => {
+      log.info(displayName, '----- Queue set ---');
+      return objs;
+    })
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
@@ -116,7 +120,7 @@ const main = () => {
   std.invoke(() => {
     log.info(displayName, '----- Invoked -----');
     request(queue).subscribe(
-      obj => log.debug(displayName, 'finished proceeding job...', obj)
+      obj => log.info(displayName, 'finished proceeding job...', obj)
     , err => log.error(displayName, err.name, err.message, err.stack)
     , ()  => log.info(displayName, 'post jobs completed.')
     ), 0, 1000 * 60 * monitorInterval

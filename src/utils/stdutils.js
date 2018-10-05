@@ -457,7 +457,7 @@ export default {
         if (e) setTimeout(() => clearInterval(h), e);
       }, s);
     }
-    return true;
+    return 'OK!';
   },
 
   invokeMap(fn, s, i) {
@@ -466,10 +466,8 @@ export default {
     return arr => {
       const setTime = (obj, idx) => setTimeout(fn.bind(this, obj), i*idx);
       setTimeout(fn.bind(this, arr.shift()), s);
-      if (argLen >= 3) {
-        setTimeout(() => arr.forEach(setTime), s);
-      }
-      return true;
+      if (argLen >= 3) setTimeout(() => arr.forEach(setTime), s);
+      return 'OK!';
     };
   },
 
