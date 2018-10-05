@@ -14,10 +14,10 @@ class RssItemList extends React.Component {
     super(props);
     let listed = [], starred = [], deleted = [], added = [];
     props.items.forEach(item => {
-      if(item.listed) listed.push(item.guid._);
-      if(item.starred) starred.push(item.guid._);
-      if(item.deleted) deleted.push(item.guid._);
-      if(item.added)   added.push(item.guid._);
+      if(item.listed) listed.push(item.guid__);
+      if(item.starred) starred.push(item.guid__);
+      if(item.deleted) deleted.push(item.guid__);
+      if(item.added)   added.push(item.guid__);
     });
     this.state = { listed, starred, added, deleted };
   }
@@ -30,10 +30,10 @@ class RssItemList extends React.Component {
     if((prevNoteId !== nextNoteId) || (prevPage !== nextPage)) {
       let listed = [], starred = [], deleted = [], added = [];
       nextProps.items.forEach(item => {
-        if(item.listed) listed.push(item.guid._);
-        if(item.starred) starred.push(item.guid._);
-        if(item.deleted) deleted.push(item.guid._);
-        if(item.added)   added.push(item.guid._);
+        if(item.listed) listed.push(item.guid__);
+        if(item.starred) starred.push(item.guid__);
+        if(item.deleted) deleted.push(item.guid__);
+        if(item.added)   added.push(item.guid__);
       });
       this.setState({ listed, starred, added, deleted });
     }
@@ -126,31 +126,32 @@ class RssItemList extends React.Component {
   }
 
   renderItem(index, item) {
+    //std.logInfo(RssItemList.displayName, 'Item', { index, item });
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
     const textClass = { primary: classes.primary, secondary: classes.secondary };
-    const buttonColor = listed.indexOf(item.guid._) === -1 ? 'yellow' : 'green';
-    const buttonText = listed.indexOf(item.guid._) === -1 ? '入札リスト 登録' : '入札リスト 登録済み';
+    const buttonColor = listed.indexOf(item.guid__) === -1 ? 'yellow' : 'green';
+    const buttonText = listed.indexOf(item.guid__) === -1 ? '入札リスト 登録' : '入札リスト 登録済み';
     const title = `出品件名：${item.title}`;
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
     + `入札数：${item.bids}、`
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
-    + `AuctionID：${item.guid._}、`
+    + `AuctionID：${item.guid__}、`
     + `Seller：${item.seller}`;
-    const renderStar = starred.indexOf(item.guid._) === -1 ? this.renderUnStar() : this.renderStar();
-    const renderNewAdded = added.indexOf(item.guid._) === -1 ? this.renderNewAdded() : null;
-    if(deleted.indexOf(item.guid._) !== -1) return;
-    return <div key={index} className={classes.noteItem}>
+    const renderStar = starred.indexOf(item.guid__) === -1 ? this.renderUnStar() : this.renderStar();
+    const renderNewAdded = added.indexOf(item.guid__) === -1 ? this.renderNewAdded() : null;
+    if(deleted.indexOf(item.guid__) !== -1) return;
+    return item.description ? (<div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
         <ListItem disableGutters
-          onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid._)}
+          onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
           className={classes.listItem}>
-          <IconButton onClick={this.handleChangeStarred.bind(this, item.guid._)}>
+          <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>
             {renderStar}
           </IconButton>
-          <IconButton onClick={this.handleChangeAdded.bind(this, item.guid._)}>
+          <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>
             {renderNewAdded}
           </IconButton>
           <div className={classes.description}>
@@ -170,18 +171,20 @@ class RssItemList extends React.Component {
             secondary={description}/>
           <ListItemSecondaryAction>
             <RssButton color={buttonColor}
-              onClick={this.handleChangeListed.bind(this, item.guid._)}
+              onClick={this.handleChangeListed.bind(this, item.guid__)}
               classes={classes.button}>{buttonText}</RssButton>
-            <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid._)}>
+            <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}>
               <Delete />
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>
       </Paper>
-    </div>;
+    </div>) : null;
   }
 
   render() {
+    //std.logInfo(RssItemList.displayName, 'State', this.state);
+    //std.logInfo(RssItemList.displayName, 'Props', this.props);
     const { items } = this.props;
     //const compareFavorite = (a, b) => {
     //  if(a.starred === true  && b.starred === false) return -1;

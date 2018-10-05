@@ -23,7 +23,7 @@ export default class BidedNotesStore extends ReduceStore {
   }
   
   createBids(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { bided: true }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
@@ -32,7 +32,7 @@ export default class BidedNotesStore extends ReduceStore {
   }
 
   deleteBids(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { bided: false }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
@@ -41,7 +41,7 @@ export default class BidedNotesStore extends ReduceStore {
   }
 
   deleteList(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { listed: false }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 

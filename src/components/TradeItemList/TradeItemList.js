@@ -13,7 +13,7 @@ class TradeItemList extends React.Component {
     super(props);
     let traded = [];
     props.items.forEach(item => {
-      if(item.traded) traded.push(item.guid._);
+      if(item.traded) traded.push(item.guid__);
     });
     this.state = {
       traded
@@ -31,7 +31,7 @@ class TradeItemList extends React.Component {
       //std.logInfo(TradeItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let traded = [];
       nextItems.forEach(item => {
-        if(item.traded) traded.push(item.guid._);
+        if(item.traded) traded.push(item.guid__);
       });
       this.setState({ selectedItemId, traded });
     } else {
@@ -67,20 +67,21 @@ class TradeItemList extends React.Component {
   }
 
   renderItem(index, item) {
+    //std.logInfo(RssItemList.displayName, 'Item', { index, item });
     const { classes } = this.props;
     const { traded, selectedItemId } = this.state;
     const textClass ={ primary: classes.primary, secondary: classes.secondary };
-    const buttonColor = traded.indexOf(item.guid._) !== -1 ? 'green' : 'yellow';
-    const buttonText = traded.indexOf(item.guid._) !== -1 ? '取引 完了' : '取引 未完了';
+    const buttonColor = traded.indexOf(item.guid__) !== -1 ? 'green' : 'yellow';
+    const buttonText = traded.indexOf(item.guid__) !== -1 ? '取引 完了' : '取引 未完了';
     const title = `出品件名：${item.title}`;
     const description = `配信時間：${ std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm') }、`
     + `現在価格：${item.price}円、`
     + `入札数：${item.bids}、`
     + `入札終了時間：${ std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm') }、`
-    + `AuctionID：${item.guid._}` ;
-    return <div key={index} className={classes.noteItem}>
-      <Checkbox onClick={this.handleChangeCheckbox.bind(this, item.guid._)}
-        checked={selectedItemId.indexOf(item.guid._) !== -1} tabIndex={-1} disableRipple />
+    + `AuctionID：${item.guid__}` ;
+    return item.description ? (<div key={index} className={classes.noteItem}>
+      <Checkbox onClick={this.handleChangeCheckbox.bind(this, item.guid__)}
+        checked={selectedItemId.indexOf(item.guid__) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem disableGutters className={classes.listItem}>
           <div className={classes.description}>
@@ -96,13 +97,13 @@ class TradeItemList extends React.Component {
           <ListItemText classes={textClass} primary={title} secondary={description}
             className={classes.listItemText}/>
           <ListItemSecondaryAction>
-            <RssButton color={buttonColor} onClick={this.handleChangeTraded.bind(this, item.guid._)}
+            <RssButton color={buttonColor} onClick={this.handleChangeTraded.bind(this, item.guid__)}
               classes={classes.button}>{buttonText}</RssButton>
           </ListItemSecondaryAction>
         </ListItem>
       </Paper>
       <div className={classes.space} />
-    </div>;
+    </div>) : null;
   }
 
   render() {

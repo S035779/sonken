@@ -23,7 +23,7 @@ export default class TradedNotesStore extends ReduceStore {
   }
   
   createTrade(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { traded: true }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
@@ -32,7 +32,7 @@ export default class TradedNotesStore extends ReduceStore {
   }
 
   deleteTrade(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { traded: false }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj;
@@ -41,7 +41,7 @@ export default class TradedNotesStore extends ReduceStore {
   }
 
   deleteBids(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { bided: false }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 

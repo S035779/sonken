@@ -83,7 +83,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createAdd(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { added: true }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -92,7 +92,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteAdd(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { added: false }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -101,7 +101,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createDelete(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { deleted: true }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -110,7 +110,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteDelete(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { deleted: false }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -119,7 +119,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createStar(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { starred: true }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -128,7 +128,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteStar(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { starred: false }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -137,7 +137,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   createList(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { listed: true }) : obj;
     const setItems = R.map(setItem);
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
@@ -146,7 +146,7 @@ export default class DashboardStore extends ReduceStore {
   }
 
   deleteList(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid._)(action.ids);
+    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
     const setItem = obj => isItem(obj) ? R.merge(obj, { listed: false }) : obj;
     const setItems = R.map(setItem)
     const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
