@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import path             from 'path';
-//import os               from 'os';
+import os               from 'os';
 import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
@@ -15,7 +15,7 @@ sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error;
 
-const node_env        = process.env.NODE_ENV    || 'development';
+const node_env = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 10;
@@ -25,31 +25,31 @@ process.env.NODE_PENDING_DEPRECATION = 0;
 const displayName = '[DFG]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'dfg-server', 'TRACE' );
+  log.config('console', 'color', 'dfg-server', 'TRACE');
 } else
 if(node_env === 'staging') {
-  log.config('file',    'basic', 'dfg-server', 'DEBUG' );
+  log.config('file', 'basic', 'dfg-server', 'DEBUG');
 } else
 if(node_env === 'production') {
-  log.config('file',    'json',  'dfg-server', 'INFO'  );
+  log.config('file', 'json',  'dfg-server', 'INFO');
 }
 
-const feed        = FeedParser.of();
-const profile     = UserProfiler.of();
-const cpu_num     = 1;//os.cpus().length;
-const job_num     = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
+const feed = FeedParser.of();
+const profile = UserProfiler.of();
+const cpu_num = os.cpus().length;
+const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
+const job = path.resolve(__dirname, 'dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message',            mes => log.info(displayName, 'got message.', mes));
-  cps.on('error',              err => log.error(displayName, err.name, err.message));
-  cps.on('disconnect',          () => log.info(displayName, 'worker disconnected.'));
-  cps.on('exit',    (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
-  cps.on('close',   (code, signal) => log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
+  cps.on('message', mes => log.info(displayName, 'got message.', mes));
+  cps.on('error', err => log.error(displayName, err.name, err.message));
+  cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
+  cps.on('exit', (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
+  cps.on('close', (code, signal) => log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
   log.info(displayName, 'forked worker pid', ':', cps.pid);
   return cps;
 };
@@ -60,21 +60,21 @@ const request = queue => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
   }; 
-  const setQueue    = obj => ({ 
+  const setQueue = obj => ({ 
     id: obj._id
   , user: obj.user
   , items: obj.items
   , operation: 'defrag'
   , created: Date.now()
   });
-  const setQueues   = R.map(setQueue);
-  const setNote     = objs => feed.fetchAllNotes({ users: objs });
+  const setQueues = R.map(setQueue);
+  const setNote = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);
-  const setUsers    = R.map(obj => obj.user);
-  const hasUrl      = R.filter(obj => obj.url !== '');
-  const interval    = updatedInterval * 1000 * 60;
-  const isOldItem   = obj => interval < Date.now() - new Date(obj.updated).getTime();
-  const hasOldItem  = R.filter(isOldItem);
+  const setUsers = R.map(obj => obj.user);
+  const hasUrl = R.filter(obj => obj.url !== '');
+  const interval = updatedInterval * 1000 * 60;
+  const isOldItem = obj => interval < Date.now() - new Date(obj.updated).getTime();
+  const hasOldItem = R.filter(isOldItem);
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(hasApproved)
     , map(setUsers)
