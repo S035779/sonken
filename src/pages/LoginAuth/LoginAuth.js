@@ -13,6 +13,8 @@ import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssInput         from 'Components/RssInput/RssInput';
 import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
 
+const isBeta = process.env.NODE_ENV !== 'staging';
+
 class LoginAuth extends React.Component {
   constructor(props) {
     super(props);
@@ -56,7 +58,7 @@ class LoginAuth extends React.Component {
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
     if(redirectToRefferer) {
-      const from = location.state || { pathname: '/marchant' };
+      const from = location.state || { pathname: isBeta ? '/marchant' : '/sellers' };
       return <Redirect to={from} />;
     }
     return <div className={classes.container}>
