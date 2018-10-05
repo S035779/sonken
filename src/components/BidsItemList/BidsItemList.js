@@ -87,9 +87,6 @@ class BidsItemList extends React.Component {
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
             <img src={item.description.DIV.A.IMG.attr.SRC}
-              border={item.description.DIV.A.IMG.attr.BORDER}
-              width={item.description.DIV.A.IMG.attr.WIDTH}
-              height={item.description.DIV.A.IMG.attr.HEIGHT}
               alt={item.description.DIV.A.IMG.attr.ALT}
               className={classes.image}/>
             </a>
@@ -145,7 +142,7 @@ const styles = theme => ({
 , primary:      { }
 , secondary:    { }
 , description:  { minWidth: descMinWidth, width: descMinWidth, fontSize: 12 }
-, image:        { width: '100%', height: '100%' }
+, image:        { width: 200, height: 200 }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });
 export default withStyles(styles)(BidsItemList);

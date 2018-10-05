@@ -157,9 +157,6 @@ class RssItemList extends React.Component {
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
             <img src={item.description.DIV.A.IMG.attr.SRC}
-              border={item.description.DIV.A.IMG.attr.BORDER}
-              width={item.description.DIV.A.IMG.attr.WIDTH}
-              height={item.description.DIV.A.IMG.attr.HEIGHT}
               alt={item.description.DIV.A.IMG.attr.ALT}
               className={classes.image} />
             </a>
@@ -231,6 +228,6 @@ const styles = theme => ({
 , secondary:    { }
 , description:  { minWidth: descMinWidth, width: descMinWidth
                 , fontSize: 12 }
-, image:        { height: '100%', width: '100%' }
+, image:        { height: 200, width: 200 }
 });
 export default withStyles(styles)(RssItemList);

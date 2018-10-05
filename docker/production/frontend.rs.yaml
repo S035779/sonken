@@ -34,7 +34,9 @@ spec:
           postStart:
             exec:
               command:
-                - "/app/sonken/docker/install.sh"
+                - sh
+                - -c
+                - /app/sonken/docker/production/install.sh
         resources:
           requests:
             cpu: 100m
