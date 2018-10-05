@@ -454,7 +454,7 @@ export default {
     if (arguments.length >= 3) {
       setTimeout(() => {
         const h = setInterval(fn, i);
-        if (e) setTimeout(() => { clearInterval(h); }, e);
+        if (e) setTimeout(() => clearInterval(h), e);
       }, s);
     }
     return true;

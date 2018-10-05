@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import path             from 'path';
-//import os               from 'os';
+import os               from 'os';
 import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
@@ -25,43 +25,45 @@ process.env.NODE_PENDING_DEPRECATION = 0;
 const displayName = '[JOB]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'job-server', 'TRACE' );
+  log.config('console', 'color', 'job-server', 'TRACE');
 } else
 if(node_env === 'staging') {
-  log.config('file',    'basic', 'job-server', 'DEBUG' );
+  log.config('file', 'basic', 'job-server', 'DEBUG');
 } else
 if(node_env === 'production') {
-  log.config('file',    'json',  'job-server', 'INFO'  );
+  log.config('file', 'json', 'job-server', 'INFO');
 }
 
-const feed        = FeedParser.of();
-const profile     = UserProfiler.of();
-const cpu_num     = 1;//os.cpus().length;
-const job_num     = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const job         = path.resolve(__dirname, 'dist', 'wrk.node.js');
+const feed = FeedParser.of();
+const profile = UserProfiler.of();
+const cpu_num = os.cpus().length;
+const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
+const job = path.resolve(__dirname, 'dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message',            mes => log.info(displayName, 'got message.', mes));
-  cps.on('error',              err => log.error(displayName, err.name, err.message));
-  cps.on('disconnect',          () => log.info(displayName, 'worker disconnected.'));
-  cps.on('exit',    (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
-  cps.on('close',   (code, signal) => log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
+  cps.on('message', mes => log.info(displayName, 'got message.', mes));
+  cps.on('error', err => log.error(displayName, err.name, err.message));
+  cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
+  cps.on('exit', (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
+  cps.on('close', (code, signal) => log.warn(displayName, `worker exit. (s/c): ${signal || code}`));
   log.info(displayName, 'forked worker pid', ':', cps.pid);
   return cps;
 };
 
 const operation = url => {
-  const api       = std.parse_url(url);
-  const path      = R.split('/', api.pathname);
+  const api = std.parse_url(url);
+  const path = R.split('/', api.pathname);
   return api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
 };
 
 const request = queue => {
+  log.info(displayName, '----- Request -----');
   const queuePush = obj => {
+    log.info(displayName, '----- Queue push -----');
     if(obj) queue.push(obj, err => {
       if(err) log.error(displayName, err.name, err.message, err.stack);
     });
@@ -69,16 +71,16 @@ const request = queue => {
   const setQueue    = obj => ({ 
     user: obj.user, id: obj._id, url: obj.url, operation: operation(obj.url), created: Date.now()
   });
-  const setQueues   = R.map(setQueue);
-  const setNote     = objs => feed.fetchAllNotes({ users: objs });
+  const setQueues = R.map(setQueue);
+  const setNote = objs => feed.fetchAllNotes({ users: objs });
   const hasApproved = R.filter(obj => obj.approved);
-  const setUsers    = R.map(obj => obj.user);
-  const hasUrl      = R.filter(obj => obj.url !== '');
-  const interval    = updatedInterval * 1000 * 60;
-  const isOldItem   = obj => interval < Date.now() - new Date(obj.updated).getTime();
-  const hasOldItem  = R.filter(isOldItem);
-  const isOpened    = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search';
-  const hasOpened   = R.filter(isOpened);
+  const setUsers = R.map(obj => obj.user);
+  const hasUrl = R.filter(obj => obj.url !== '');
+  const interval = updatedInterval * 1000 * 60;
+  const isOldItem = obj => interval < Date.now() - new Date(obj.updated).getTime();
+  const hasOldItem = R.filter(isOldItem);
+  const isOpened = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search';
+  const hasOpened = R.filter(isOpened);
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
       map(hasApproved)
     , map(setUsers)
@@ -111,12 +113,14 @@ const main = () => {
   log.info(displayName, 'Start JOB Server.')
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all jobs have been processed.');
-
-  std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding job...', obj)
-  , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'post jobs completed.')
-  ), 0, 1000 * 60 * monitorInterval);
+  std.invoke(() => {
+    log.info(displayName, '----- Invoked -----');
+    request(queue).subscribe(
+      obj => log.debug(displayName, 'finished proceeding job...', obj)
+    , err => log.error(displayName, err.name, err.message, err.stack)
+    , ()  => log.info(displayName, 'post jobs completed.')
+    ), 0, 1000 * 60 * monitorInterval
+  });
 };
 main();
 
