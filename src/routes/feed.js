@@ -309,10 +309,17 @@ export default {
   fetchNote() {
     return (req, res) => {
       const { user, id, skip, limit, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-      , aucStartTime, aucStopTime } = req.query;
-      const filter = allAuction && allAuction ==='false' ? { lastWeekAuction:  lastWeekAuction === 'true'
-      , twoWeeksAuction: twoWeeksAuction === 'true', lastMonthAuction: lastMonthAuction === 'true'
-      , allAuction: false, inAuction: inAuction === 'true', aucStartTime, aucStopTime } : null;
+      , aucStartTime, aucStopTime, sold } = req.query;
+      const filter = allAuction && allAuction ==='false' ? {
+        lastWeekAuction:  lastWeekAuction === 'true'
+      , twoWeeksAuction:  twoWeeksAuction === 'true'
+      , lastMonthAuction: lastMonthAuction === 'true'
+      , allAuction:       false
+      , inAuction:        inAuction === 'true'
+      , aucStartTime
+      , aucStopTime
+      , sold
+      } : null;
       feed.fetchNote({ user, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {

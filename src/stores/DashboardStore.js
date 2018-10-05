@@ -19,6 +19,7 @@ export default class DashboardStore extends ReduceStore {
       , inAuction: false
       , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+      , sold: 0
       }
     , file: null
     , profile: {

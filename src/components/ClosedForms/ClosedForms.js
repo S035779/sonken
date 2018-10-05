@@ -1,13 +1,12 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import * as R           from 'ramda';
-import classNames       from 'classnames';
 import NoteAction       from 'Actions/NoteAction';
 import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Button, Checkbox, Typography, TextField }
+import { Button, Checkbox, Typography, TextField, Select, InputLabel, FormControl, MenuItem }
                         from '@material-ui/core';
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
@@ -26,6 +25,7 @@ class ClosedForms extends React.Component {
     , inAuction: false
     , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , sold: 1
     , isSuccess: false
     , isNotValid: false
     , isRequest: false
@@ -141,12 +141,11 @@ class ClosedForms extends React.Component {
   handleFilter() {
     const { user } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
-    , aucStopTime, isRequest } = this.state;
+    , aucStopTime, sold, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
-      .then(() => NoteAction.filter(user , {
-        lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-      }))
+      .then(() => NoteAction.filter(user , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+      , inAuction, aucStartTime, aucStopTime, sold }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
       .catch(err => {
@@ -166,16 +165,21 @@ class ClosedForms extends React.Component {
     }
   }
 
+  handleChangeSelect(name, event) {
+    const sold = event.target.value;
+    std.logInfo(ClosedForms.displayName, 'handleChangeSelect', sold);
+    this.setState({ sold })
+  }
+
   handleDownload() {
     const { user, note } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleDownload', user);
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    , sold } = this.state;
     const id = note._id;
     this.spn.start();
-    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-    , inAuction, aucStartTime, aucStopTime })
+    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+    , aucStartTime, aucStopTime, sold })
       .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
       .then(() => this.spn.stop())
@@ -189,13 +193,12 @@ class ClosedForms extends React.Component {
   handleImages() {
     const { user, note } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleImages', user);
-    const {
-      lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    , sold } = this.state;
     const id = note._id;
     this.spn.start();
     NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-    , inAuction, aucStartTime, aucStopTime })
+    , inAuction, aucStartTime, aucStopTime, sold })
       .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadImages(this.props.images))
       .then(() => this.spn.stop())
@@ -213,7 +216,7 @@ class ClosedForms extends React.Component {
   fetch(page) {
     const { user, note } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
-    , aucStopTime } = this.state;
+    , aucStopTime, sold } = this.state;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
@@ -221,7 +224,7 @@ class ClosedForms extends React.Component {
     this.spn.start();
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, id, skip, limit, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
-    , allAuction, inAuction, aucStartTime, aucStopTime });
+      , allAuction, inAuction, aucStartTime, aucStopTime, sold });
   }
 
   downloadFile(blob) {
@@ -269,7 +272,7 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, perPage, user, note, category } = this.props;
     const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, page, isNotValid, isSuccess } = this.state;
+      , inAuction, sold, page, isNotValid, isSuccess } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
@@ -292,8 +295,7 @@ class ClosedForms extends React.Component {
           </RssDialog>
         </div>
       </div>
-    {category === 'closedsellers' || category === 'closedmarchant' ? 
-      (<div className={classes.edit}>
+      <div className={classes.edit}>
         <Typography variant="subheading" noWrap className={classes.column}>絞込件数：</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={lastWeekAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'lastWeekAuction')} tabIndex={-1} disableRipple />
@@ -307,9 +309,8 @@ class ClosedForms extends React.Component {
         <Checkbox color="primary" className={classes.checkbox} checked={allAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'allAuction')} tabIndex={-1} disableRipple />
         <Typography variant="subheading" noWrap className={classes.column}>全て表示</Typography>
-      </div>) : null }
-    {category === 'closedsellers'  || category === 'closedmarchant'
-      ? (<div className={classes.edit}>
+      </div>
+      <div className={classes.edit}>
         <div className={classes.column}>
           <Typography className={classes.title}>
             全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示
@@ -332,22 +333,25 @@ class ClosedForms extends React.Component {
               className={classes.text}/>
           </form>
         </div>
-      </div>)
-      : null }
-    {category === 'closedsellers'  || category === 'closedmarchant'
-      ? (<div className={classes.edit}>
+        <FormControl className={classes.inputSelect}>
+          <InputLabel htmlFor="results">落札件数</InputLabel>
+          <Select value={sold} onChange={this.handleChangeSelect.bind(this, 'sold')}>
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={3}>3</MenuItem>
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+      <div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
             <Button variant="raised" onClick={this.handleFilter.bind(this)}
               className={classes.button}>絞り込み</Button>
           </div>
         </div>
-      </div>)
-      : null }
-      <div className={classNames(
-        category === 'closedsellers'  && classes.filterList
-      , category === 'closedmarchant' && classes.filterList
-      )} >
+      </div>
+      <div className={classes.filterList}>
         <RssItemList user={user} items={items} noteId={note._id} page={page}/>
       </div>
     </div>;
@@ -380,6 +384,7 @@ const columnHeight        = 62;
 const contentWidth        = 112;
 const checkboxWidth       = 38;
 const datetimeWidth       = 200;
+const minWidth            = 125;
 const styles = theme => ({
   forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
 , normalList:   { width: '100%', height: normalHeightSmDown 
@@ -399,6 +404,7 @@ const styles = theme => ({
                 , height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box', padding: '5px' }
 , checkbox:     { flex: 0, minWidth: checkboxWidth }
+, inputSelect:  { margin: theme.spacing.unit / 3 + 1, minWidth }
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit
                 , wordBreak: 'keep-all' }

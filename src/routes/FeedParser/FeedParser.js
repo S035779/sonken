@@ -42,80 +42,6 @@ export default class FeedParser {
 
   request(request, options) {
     switch(request) {
-      case 'defrag/items':
-        {
-          const { ids } = options;
-          const date      = new Date();
-          const year      = date.getFullYear();
-          const month     = date.getMonth();
-          const day       = date.getDate();
-          const yesterday = new Date(year, month, day - 1);
-          const conditions = { _id: { $in: ids }, pubDate: { $lt: yesterday  }};
-          return Items.remove(conditions).exec();
-        }
-      case 'defrag/added':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
-          return Added.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/deleted':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
-          return  Deleted.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/readed':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
-          return Readed.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/starred':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
-          return Starred.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/bided':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
-          return Bided.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/traded':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
-          return Traded.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/listed':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
-          return Listed.find({ user }).populate('items').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
       case 'counts/notes':
       case 'count/notes':
       case 'fetch/notes':
@@ -181,16 +107,17 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
+            const sold      = Number(filter.sold);
             if(filter.inAuction) {
               promise = setQuery({ bidStopTime: { $gte: start, $lt: stop } });
             } else if(filter.allAuction) {
               promise = setQuery();
             } else if(filter.lastMonthAuction) {
-              promise = setQuery({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: 3 } });
+              promise = setQuery({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: sold } });
             } else if(filter.twoWeeksAuction) {
-              promise = setQuery({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: 2 } });
+              promise = setQuery({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: sold } });
             } else if(filter.lastWeekAuction) {
-              promise = setQuery({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: 1 } });
+              promise = setQuery({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: sold } });
             }
           } else {
             promise = setQuery();
@@ -522,6 +449,80 @@ export default class FeedParser {
         {
           const conditions = { listed: options.id, user:   options.user };
           return Listed.remove(conditions).exec();
+        }
+      case 'defrag/items':
+        {
+          const { ids } = options;
+          const date      = new Date();
+          const year      = date.getFullYear();
+          const month     = date.getMonth();
+          const day       = date.getDate();
+          const yesterday = new Date(year, month, day - 1);
+          const conditions = { _id: { $in: ids }, pubDate: { $lt: yesterday  }};
+          return Items.remove(conditions).exec();
+        }
+      case 'defrag/added':
+        {
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
+          return Added.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/deleted':
+        {
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
+          return  Deleted.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/readed':
+        { 
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
+          return Readed.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/starred':
+        {
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
+          return Starred.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/bided':
+        { 
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
+          return Bided.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/traded':
+        { 
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
+          return Traded.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/listed':
+        {
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
+          return Listed.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
         }
       default:
         return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
