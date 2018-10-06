@@ -156,19 +156,14 @@ class RssItemList extends React.Component {
           </IconButton>
           <div className={classes.description}>
             <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-            <img src={item.description.DIV.A.IMG.attr.SRC}
-              alt={item.description.DIV.A.IMG.attr.ALT}
+            <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT}
               className={classes.image} />
             </a>
           </div>
-          <ListItemText
-            classes={textClass}
-            className={classes.listItemText}
-            primary={title}
+          <ListItemText classes={textClass} className={classes.listItemText} primary={title}
             secondary={description}/>
           <ListItemSecondaryAction>
-            <RssButton color={buttonColor}
-              onClick={this.handleChangeListed.bind(this, item.guid__)}
+            <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)}
               classes={classes.button}>{buttonText}</RssButton>
             <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}>
               <Delete />
@@ -210,9 +205,9 @@ RssItemList.propTypes = {
 , page: PropTypes.number.isRequired
 };
 
-const itemHeight        = 142 * 1.5;
+const itemHeight        = 208;
 const itemMinWidth      = 800;
-const descMinWidth      = 133 * 1.5;
+const descMinWidth      = 200;
 const styles = theme => ({
   noteItem:     { display: 'flex', flexDirection: 'row', alignItems: 'center' }
 , listItem:     { height: itemHeight, minWidth: itemMinWidth, padding: theme.spacing.unit /2
@@ -226,8 +221,7 @@ const styles = theme => ({
                     , '& $primary, $secondary': { color: theme.palette.common.white } } }
 , primary:      { }
 , secondary:    { }
-, description:  { minWidth: descMinWidth, width: descMinWidth
-                , fontSize: 12 }
-, image:        { height: 200, width: 200 }
+, description:  { minWidth: descMinWidth, width: descMinWidth, height: descMinWidth, fontSize: 12 }
+, image:        { height: '100%', width: '100%' }
 });
 export default withStyles(styles)(RssItemList);

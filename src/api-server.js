@@ -6,6 +6,7 @@ import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import bodyParser       from 'body-parser';
+import cookieParser     from 'cookie-parser';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
@@ -48,13 +49,11 @@ app.use(bodyParser.json());
 app.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })
-, cookie: {
-    httpOnly: false
-  , maxAge: 60 * 60 * 1000
-  }
+, cookie: { httpOnly: false, maxAge: 60 * 60 * 1000 }
 , resave: false
 , saveUninitialized: true
 }));
+app.use(cookieParser());
 
 app.set('etag', false);
 app.use((req, res, next) => {
@@ -129,7 +128,7 @@ router.route('/login')
 .delete(profile.deleteUser());
 
 router.route('/authenticate')
-.get(profile.notImplemented())
+.get(profile.autologin())
 .put(profile.notImplemented())
 .post(profile.authenticate())
 .delete(profile.signout());

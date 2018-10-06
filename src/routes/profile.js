@@ -1,5 +1,6 @@
 import UserProfiler from 'Routes/UserProfiler/UserProfiler';
 import log          from 'Utilities/logutils';
+import std          from 'Utilities/stdutils';
 
 const displayName = 'profile';
 const profile = UserProfiler.of();
@@ -123,18 +124,65 @@ export default {
 
   authenticate() {
     return (req, res) => {
-      const { admin, user, password } = req.body;
-      profile.authenticate({ admin, user, password }).subscribe(
+      const { admin, user, password, auto } = req.body;
+      profile.authenticate({ admin, user, password, auto }).subscribe(
         obj => {
-          if(obj && admin !== '') req.session.admin = admin;
-          else if(obj && user !== '') req.session.user = user;
+          const isAdmin = obj && admin !== '';
+          const isUser  = obj && user  !== '';
+          const isAuto  = obj && auto;
+          const key     = std.rndString(10);
+          const hash    = std.crypto_sha256(key, 'koobkooCedoN');
+          const params  = { maxAge: 60 * 60 * 1000, httpOnly: true };
+          if(isAdmin)   req.session.admin = admin;
+          if(isUser)    req.session.user  = user;
+          if(isAuto) {
+            req.session.auto  = hash;
+            res.cookie('auto', hash, params);
+          } else {
+            req.session.auto  = '';
+            res.clearCookie('auto');
+          }
           res.status(200).send(obj);
+          log.info(displayName, 'req.cookies:', req.cookies);
+          log.info(displayName, 'req.session:', req.session);
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Authenticate.'); });
+      , () => log.info('Complete to Authenticate.'));
+    };
+  },
+
+  autologin() {
+    return(req, res) => {
+      const { admin, user } = req.query;
+      profile.autologin({ admin, user }).subscribe(
+        obj => {
+          const isAdmin = obj && admin !== '';
+          const isUser  = obj && user  !== '';
+          const isAuth = obj && req.cookies.auto === req.session.auto;
+          const key     = std.rndString(10);
+          const hash    = std.crypto_sha256(key, 'koobkooCedoN');
+          const params  = { maxAge: 60 * 60 * 1000, httpOnly: true };
+          if(isAdmin)   req.session.admin = admin;
+          if(isUser)    req.session.user  = user;
+          if(isAuth) {
+            req.session.auto = hash;
+            res.cookie('auto', hash, params);
+            res.status(200).send(obj);
+          } else {
+            res.status(401).send({ name: 'Client Error', message: 'Unauthorized.' });
+            log.error(displayName, 'Client Error', ':', 'Unauthorized.');
+          }
+          log.info(displayName, 'req.cookies:', req.cookies);
+          log.info(displayName, 'req.session:', req.session);
+        }
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => log.info('Complete to Auto login.'));
     };
   },
 
@@ -143,14 +191,22 @@ export default {
       const { admin, user } = req.query;
       profile.signout({ admin, user }).subscribe(
         obj => {
-          if(!obj) req.session.destroy();
-          res.status(200).send(obj);
+          if(!obj) {
+            req.session.destroy();
+            res.clearCookie('auto');
+            res.status(200).send(obj);
+          } else {
+            res.status(401).send({ name: 'Client Error', message: 'Unauthorized.' });
+            log.error(displayName, 'Client Error', ':', 'Unauthorized.');
+          }
+          log.info(displayName, 'req.cookies:', req.cookies);
+          log.info(displayName, 'req.session:', req.session);
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Sign out.'); });
+      , () => log.info('Complete to Sign out.'));
     };
   },
 

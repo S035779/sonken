@@ -327,13 +327,11 @@ export default class UserProfiler {
     );
   }
 
-  fetchApproved(user) {
-    const { _id, isAdmin, isAuthenticated } = user;
-    const isApproved = obj => obj && _id.equals(obj.approved);
-    const setApproved = obj => isAdmin  || isApproved(obj) ? isAuthenticated : false;
-    return from(this.getApproval(_id)).pipe(
-      map(R.head)
-    , map(setApproved)
+  autologin({ admin, user }) {
+    const isAdmin = admin !== '';
+    const options = isAdmin ? { user: admin } : { user: user };
+    return from(this.fetchUser(options)).pipe(
+      map(obj => obj.isAuthenticated)
     );
   }
 
@@ -346,6 +344,16 @@ export default class UserProfiler {
     return observable.pipe(
       flatMap(() => this.fetchUser(options))
     , map(obj => obj.isAuthenticated)
+    );
+  }
+
+  fetchApproved(user) {
+    const { _id, isAdmin, isAuthenticated } = user;
+    const isApproved = obj => obj && _id.equals(obj.approved);
+    const setApproved = obj => isAdmin  || isApproved(obj) ? isAuthenticated : false;
+    return from(this.getApproval(_id)).pipe(
+      map(R.head)
+    , map(setApproved)
     );
   }
 

@@ -10,29 +10,16 @@ class RssInput extends React.Component {
   }
 
   render() {
-    const { classes, type, id, label, value, ...other } = this.props;
+    const { classes, type, id, label, value, autoComplete, ...other } = this.props;
     const inputProps = {
       disableUnderline: true,
-      classes: {
-        root: classes.textFieldRoot,
-        input: classes.textFieldInput
-      }
+      classes: { root: classes.textFieldRoot, input: classes.textFieldInput }
     };
-    const inputLabelProps = {
-      shrink: true,
-      className: classes.textFieldFormLabel
-    }
+    const inputLabelProps = { shrink: true, className: classes.textFieldFormLabel };
 
-    return <TextField fullWidth
-      type={type}
-      value={value}
-      label={label}
-      id={id}
-      InputProps={inputProps}
-      InputLabelProps={inputLabelProps}
-      onChange={this.handleChange.bind(this)}
-      { ...other }
-    />;
+    return <TextField fullWidth type={type} value={value} label={label} id={id} InputProps={inputProps}
+      autoComplete={autoComplete} InputLabelProps={inputLabelProps} onChange={this.handleChange.bind(this)}
+      { ...other } />;
   }
 }
 

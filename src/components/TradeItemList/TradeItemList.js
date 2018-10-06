@@ -127,9 +127,9 @@ TradeItemList.propTypes = {
 , page: PropTypes.number.isRequired
 };
 
-const itemHeight = 142 * 1.5;
-const itemMinWidth = 800;
-const descMinWidth = 133 * 1.5;
+const itemHeight    = 208;
+const itemMinWidth  = 800;
+const descMinWidth  = 200;
 const styles = theme => ({
   noteItem:     { display: 'flex', flexDirection: 'row' , alignItems: 'center' }
 , listItem:     { height: itemHeight, minWidth: itemMinWidth, padding: theme.spacing.unit /2
@@ -141,8 +141,8 @@ const styles = theme => ({
                   , '& $primary, $secondary': { color: theme.palette.common.white }}}   
 , primary:      { }
 , secondary:    { }
-, description:  { minWidth: descMinWidth, width: descMinWidth, fontSize: 12 }
-, image:        { width: 200, height: 200 }
+, description:  { minWidth: descMinWidth, width: descMinWidth, height: descMinWidth, fontSize: 12 }
+, image:        { width: '100%', height: '100%' }
 , space:        { minWidth: theme.spacing.unit * 6 }
 });
 export default withStyles(styles)(TradeItemList);

@@ -27,9 +27,10 @@ class LoginAuth extends React.Component {
     };
   }
 
-  handleLogin() {
-    const { username, password } = this.state;
-    LoginAction.authenticate(username, password)
+  handleLogin(event) {
+    event.preventDefault();
+    const { username, password, checked } = this.state;
+    LoginAction.authenticate(username, password, false, checked)
       .then(() => {
         if(!this.props.isAuthenticated) return this.setState({ isNotValid: true });
         LoginAction.presetUser(username).then(() => this.setState({ redirectToRefferer: true }));
@@ -57,46 +58,40 @@ class LoginAuth extends React.Component {
     //std.logInfo(LoginAuth.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
-    if(redirectToRefferer) {
-      const from = location.state || { pathname: isBeta ? '/marchant' : '/sellers' };
-      return <Redirect to={from} />;
-    }
+    if(redirectToRefferer) 
+      return <Redirect to={ location.state || { pathname: isBeta ? '/marchant' : '/sellers' }} />;
     return <div className={classes.container}>
-     <div className={classes.loginForms}>
-      <div className={classes.space}/>
-      <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
-      <div className={classes.space}/>
-      <div className={classes.form}>
-        <RssInput label="USER ID" value={username} placeholder="Enter User ID"
-          onChange={this.handleChangeText.bind(this, 'username')} className={classes.input}/>
-      </div>
-      <div className={classes.form}>
-        <RssInput type="password" label="PASSWORD" value={password} placeholder="Password"
-          onChange={this.handleChangeText.bind(this, 'password')} className={classes.input}/>
-      </div>
-      <div className={classes.form}>
-        <FormControlLabel control={<RssCheckbox color="secondary" checked={checked}
-          onChange={this.handleChangeCheckbox.bind(this, 'checked')} />} label="ＩＤ・ＰＷを保存" />
-      </div>
-      <div className={classes.form}>
-        <RssButton color="flatDefault" id="confirmation" classes={classes.confirm}
-          component={Link} to="/login/confirmation">
-          ログインＩＤ・ＰＷを忘れた場合は こちら
-        </RssButton>
-      </div>
-      <div className={classes.buttons}>
-        <div className={classes.space}/>
-        <RssButton color="warning" onClick={this.handleLogin.bind(this)} className={classes.button}>
-          Login
-        </RssButton>
-        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
-          内容に不備があります。もう一度確認してください。
-        </RssDialog>
-        <div className={classes.space}/>
-      </div>
-      <div className={classes.space}/>
-      </div>
-    </div>;
+        <form className={classes.loginForms} onSubmit={this.handleLogin.bind(this)}>
+          <div className={classes.space}/>
+          <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
+          <div className={classes.space}/>
+          <div className={classes.form}>
+            <RssInput label="USER ID" value={username} placeholder="Enter User ID" 
+              onChange={this.handleChangeText.bind(this, 'username')} className={classes.input}/>
+          </div>
+          <div className={classes.form}>
+            <RssInput type="password" label="PASSWORD" value={password} placeholder="Password"
+              onChange={this.handleChangeText.bind(this, 'password')} className={classes.input}/>
+          </div>
+          <div className={classes.form}>
+            <FormControlLabel control={<RssCheckbox color="secondary" checked={checked}
+              onChange={this.handleChangeCheckbox.bind(this, 'checked')} />} label="ＩＤ・ＰＷを保存" />
+          </div>
+          <div className={classes.form}>
+            <RssButton color="flatDefault" id="confirmation" classes={classes.confirm}
+              component={Link} to="/login/confirmation">ログインＩＤ・ＰＷを忘れた場合は こちら</RssButton>
+          </div>
+          <div className={classes.buttons}>
+            <div className={classes.space}/>
+            <RssButton type="submit" color="warning" className={classes.button}>Login</RssButton>
+            <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
+              内容に不備があります。もう一度確認してください。
+            </RssDialog>
+            <div className={classes.space}/>
+          </div>
+          <div className={classes.space}/>
+        </form>
+      </div>;
   }
 }
 LoginAuth.displayName = 'LoginAuth';

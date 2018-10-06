@@ -39,6 +39,7 @@
     "body-parser": "1.18.3",
     "classnames": "2.2.6",
     "connect-mongo": "2.0.1",
+    "cookie-parser": "^1.4.3",
     "dotenv": "6.0.0",
     "encoding-japanese": "1.0.29",
     "express": "4.16.3",

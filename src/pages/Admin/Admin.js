@@ -21,15 +21,12 @@ class Admin extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { admin, isAuthenticated, profile, preference }
-      = this.state;
+    const { admin, isAuthenticated, profile, preference } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <CssBaseline />
       <div className={classes.adminFrame}>
-        <AdminHeader admin={admin}
-          preference={preference} profile={profile}
-          isAuthenticated={isAuthenticated}/>
+        <AdminHeader admin={admin} preference={preference} profile={profile} isAuthenticated={isAuthenticated}/>
         <div className={classes.content}>
           {renderRoutes(route.routes)}
         </div>
@@ -40,25 +37,14 @@ class Admin extends React.Component {
 }
 Admin.displayName = 'Admin';
 Admin.defaultProps = {};
-Admin.propTypes = {
-  classes:  PropTypes.object.isRequired
-, route: PropTypes.object.isRequired
-};
-
+Admin.propTypes = { classes:  PropTypes.object.isRequired, route: PropTypes.object.isRequired };
 const barHeightSmUp = 112;
 const barHeightSmDown = 104;
 const styles = theme => ({
-  root:     { width: '100%', zIndex: 1
-            , overflow: 'hidden', height: '100vh' },
-  adminFrame: { position: 'relative'
-            , display: 'flex', flexDirection: 'column'
-            , width: '100%'},
-  content:  { position: 'absolute'
-            , width: '100%'
-            , height: `calc(100vh - ${barHeightSmDown}px)`
-            , marginTop: barHeightSmDown
-            , [theme.breakpoints.up('sm')]: {
-              height: `calc(100vh - ${barHeightSmUp}px)`
-            , marginTop: barHeightSmUp }}
+  root:     { width: '100%', zIndex: 1, overflow: 'hidden', height: '100vh' },
+  adminFrame: { position: 'relative', display: 'flex', flexDirection: 'column', width: '100%'},
+  content:  { position: 'absolute' , width: '100%', height: `calc(100vh - ${barHeightSmDown}px)`
+            , marginTop: barHeightSmDown, [theme.breakpoints.up('sm')]: { 
+                height: `calc(100vh - ${barHeightSmUp}px)`, marginTop: barHeightSmUp }}
 });
 export default withStyles(styles)(Container.create(Admin));

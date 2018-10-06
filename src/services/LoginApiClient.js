@@ -31,10 +31,10 @@ export default {
   /*
    * Authenticate
    */
-  authenticate(username, password, isAdmin) {
+  authenticate(username, password, isAdmin, auto) {
     const admin = isAdmin ? username : '';
     const user = isAdmin ? '' : username;
-    return this.request('signin/authenticate', { admin, user, password });
+    return this.request('signin/authenticate', { admin, user, password, auto });
   },
   signout(username, isAdmin) {
     const admin = isAdmin ? username : '';

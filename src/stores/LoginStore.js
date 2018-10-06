@@ -40,9 +40,9 @@ export default class LoginStore extends ReduceStore {
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
-        return R.merge(state, { admin:   action.admin, isAuthenticated: action.isAuthenticated });
+        return R.merge(state, { admin: action.admin, isAuthenticated: action.isAuthenticated });
       case 'user/preset':
-        return R.merge(state, { user:   action.user, isAuthenticated: action.isAuthenticated });
+        return R.merge(state, { user: action.user, isAuthenticated: action.isAuthenticated });
       case 'category/prefetch/my':
         return R.merge(state, { categorys: action.categorys });
       case 'category/fetch/my':
