@@ -136,7 +136,7 @@ class RssItemList extends React.Component {
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
-    + `入札数：${item.bids}、`
+    + `入札数：${item.bids}、` + `出品数：${item.sale ? item.sale : '-'}、`
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid__}、`
     + `Seller：${item.seller}`;
@@ -145,8 +145,7 @@ class RssItemList extends React.Component {
     if(deleted.indexOf(item.guid__) !== -1) return;
     return item.description ? (<div key={index} className={classes.noteItem}>
       <Paper className={classes.paper}>
-        <ListItem disableGutters
-          onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
+        <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
           className={classes.listItem}>
           <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>
             {renderStar}
@@ -178,20 +177,7 @@ class RssItemList extends React.Component {
     //std.logInfo(RssItemList.displayName, 'State', this.state);
     //std.logInfo(RssItemList.displayName, 'Props', this.props);
     const { items } = this.props;
-    //const compareFavorite = (a, b) => {
-    //  if(a.starred === true  && b.starred === false) return -1;
-    //  if(a.starred === false && b.starred === true ) return 1;
-    //  return 0;
-    //};
-    //const compareId = (a, b) => {
-    //  if(a._id < b._id) return -1;
-    //  if(a._id > b._id) return 1;
-    //  return 0;
-    //};
-    const renderItems = items
-      //.sort(compareId)
-      //.sort(compareFavorite)
-      .map((item, index) => this.renderItem(index, item));
+    const renderItems = items.map((item, index) => this.renderItem(index, item));
     return <List>{renderItems}</List>;
   }
 }
