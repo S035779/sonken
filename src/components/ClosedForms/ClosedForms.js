@@ -148,6 +148,7 @@ class ClosedForms extends React.Component {
       , inAuction, aucStartTime, aucStopTime, sold }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
+      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotValid: true }) : null)
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
         this.spn.stop();
@@ -172,41 +173,45 @@ class ClosedForms extends React.Component {
   }
 
   handleDownload() {
-    const { user, note } = this.props;
+    const { user, note, itemNumber } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleDownload', user);
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
     , sold } = this.state;
     const id = note._id;
-    this.spn.start();
-    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-    , inAuction, aucStartTime, aucStopTime, sold })
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.downloadFile(this.props.file))
-      .then(() => this.spn.stop())
-      .catch(err => {
-        std.logError(ClosedForms.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        this.spn.stop();
-      });
+    if(itemNumber !== 0) {
+      this.spn.start();
+      NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+      , inAuction, aucStartTime, aucStopTime, sold })
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.downloadFile(this.props.file))
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(ClosedForms.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          this.spn.stop();
+        });
+    }
   }
 
   handleImages() {
-    const { user, note } = this.props;
+    const { user, note, itemNumber } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleImages', user);
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
     , sold } = this.state;
     const id = note._id;
-    this.spn.start();
-    NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-    , inAuction, aucStartTime, aucStopTime, sold })
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.downloadImages(this.props.images))
-      .then(() => this.spn.stop())
-      .catch(err => {
-        std.logError(ClosedForms.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        this.spn.stop();
-      });
+    if(itemNumber !== 0) {
+      this.spn.start();
+      NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+      , inAuction, aucStartTime, aucStopTime, sold })
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.downloadImages(this.props.images))
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(ClosedForms.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          this.spn.stop();
+        });
+    }
   }
 
   handleCloseDialog(name) {
@@ -346,8 +351,9 @@ class ClosedForms extends React.Component {
       <div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
-            <Button variant="raised" onClick={this.handleFilter.bind(this)}
-              className={classes.button}>絞り込み</Button>
+            <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>
+              絞り込み
+            </Button>
           </div>
         </div>
       </div>

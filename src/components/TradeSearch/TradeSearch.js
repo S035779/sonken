@@ -43,19 +43,21 @@ class TradeSearch extends React.Component {
   }
 
   handleDownload() {
-    const { user, itemFilter } = this.props;
+    const { user, itemFilter, itemNumber } = this.props;
     const spn = Spinner.of('app');
-    spn.start();
-    std.logInfo(TradeSearch.displayName, 'handleDownload', user);
-    TradeAction.download(user, itemFilter)
-      .then(() => this.downloadFile(this.props.file))
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => spn.stop())
-      .catch(err => {
-        std.logError(TradeSearch.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        spn.stop();
-      });
+    if(itemNumber !== 0) {
+      spn.start();
+      std.logInfo(TradeSearch.displayName, 'handleDownload', user);
+      TradeAction.download(user, itemFilter)
+        .then(() => this.downloadFile(this.props.file))
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => spn.stop())
+        .catch(err => {
+          std.logError(TradeSearch.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          spn.stop();
+        });
+    }
   }
 
   handleChangeSelect(name, event) {
@@ -104,16 +106,15 @@ class TradeSearch extends React.Component {
       <div className={classes.buttons}>
         <div className={classes.button} />
         <div className={classes.space} />
-        <RssButton color={'yellow'} 
-          onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>ダウンロード</RssButton>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssButton color={'yellow'} onClick={this.handleDownload.bind(this)} classes={classes.button}>
+          ダウンロード
+        </RssButton>
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
-        <RssDialog open={isNotValid} title={'送信エラー'}
+        <RssDialog open={isNotValid} title={'送信エラー'} 
           onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
         <div className={classes.button} />
       </div>

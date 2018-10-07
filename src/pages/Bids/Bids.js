@@ -52,8 +52,9 @@ class Bids extends React.Component {
     return isAuthenticated 
       ? ( <div className={classes.root}>
             <BidsSearch 
-              user={user} items={items} itemFilter={filter} file={file} itemNumber={number} itemPage={page}/>
-            <BidsFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
+              user={user} items={items} itemFilter={filter} itemNumber={number} itemPage={page} file={file}/>
+            <BidsFilter 
+              user={user} items={items} itemFilter={filter} itemNumber={number} selectedItemId={ids}/>
           </div> )
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );
   }

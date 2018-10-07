@@ -9,6 +9,7 @@ import { withStyles }   from '@material-ui/core/styles';
 import { Button, Checkbox, Typography, TextField }
                         from '@material-ui/core';
 import BidsItemList     from 'Components/BidsItemList/BidsItemList';
+import RssDialog        from 'Components/RssDialog/RssDialog';
 
 class BidsFilter extends React.Component {
   constructor(props) {
@@ -26,6 +27,8 @@ class BidsFilter extends React.Component {
     , page: 1
     , prevPage: 1
     , prevAllBidding: true
+    , isSuccess:  false
+    , isNotValid: false
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -145,6 +148,7 @@ class BidsFilter extends React.Component {
       .then(() => BidsAction.filter(user, { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
+      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotValid: true }) : null)
       .catch(err => {
         std.logError(BidsFilter.displayName, err.name, err.message);
         this.spn.stop();
@@ -173,11 +177,16 @@ class BidsFilter extends React.Component {
     , bidStopTime });
   }
 
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
+  }
+
   render() {
     //std.logInfo(BidsFilter.displayName, 'State', this.state);
     //std.logInfo(BidsFilter.displayName, 'Props', this.props);
     const { classes, user, selectedItemId } = this.props;
-    const { checked, bidStartTime, bidStopTime, endBidding, allBidding, inBidding, items, page } = this.state;
+    const { isSuccess, isNotValid
+    , checked, bidStartTime, bidStopTime, endBidding, allBidding, inBidding, items, page } = this.state;
     return <div className={classes.forms}>
         <div className={classes.edit}>
           <div className={classes.space}/>
@@ -209,6 +218,14 @@ class BidsFilter extends React.Component {
               <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>
                 絞り込み
               </Button>
+              <RssDialog 
+                open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+                要求を受け付けました。
+              </RssDialog>
+              <RssDialog open={isNotValid} title={'送信エラー'} 
+                onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+                内容に不備があります。もう一度確認してください。
+              </RssDialog>
             </div>
           </div>
         </div>
@@ -235,6 +252,7 @@ BidsFilter.propTypes = {
   classes: PropTypes.object.isRequired
 , selectedItemId: PropTypes.array.isRequired
 , itemFilter: PropTypes.object.isRequired
+, itemNumber: PropTypes.number.isRequired
 , user: PropTypes.string.isRequired
 , items: PropTypes.array.isRequired
 };
