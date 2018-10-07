@@ -106,7 +106,7 @@ class awsutils {
 
   createArchive(files) {
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.' })
+      if(files.length === 0) return reject({ name: 'awsutils', message: 'File not found.' });
       const output = new bufferStream.WritableStreamBuffer();
       const archive = archiver('zip', { zlib: { level: 9 } });
       output.on('finish', () => resolve(output.getContents()));

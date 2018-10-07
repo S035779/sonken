@@ -140,8 +140,8 @@ class ClosedForms extends React.Component {
 
   handleFilter() {
     const { user } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
-    , aucStopTime, sold, isRequest } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
+    , sold, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
       .then(() => NoteAction.filter(user , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
@@ -178,8 +178,8 @@ class ClosedForms extends React.Component {
     , sold } = this.state;
     const id = note._id;
     this.spn.start();
-    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-    , aucStartTime, aucStopTime, sold })
+    NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
+    , inAuction, aucStartTime, aucStopTime, sold })
       .then(() => this.setState({ isSuccess: true }))
       .then(() => this.downloadFile(this.props.file))
       .then(() => this.spn.stop())

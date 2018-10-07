@@ -1624,8 +1624,8 @@ export default class FeedParser {
   downloadImages({ user, ids, filter }) {
     const AWS         = aws.of(aws_keyset);
     //const promises    = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
-    //const promise     = objs => AWS.fetchObjects(STORAGE, objs);
-    const promise     = objs => AWS.fetchTorrents(STORAGE, objs);
+    const promise     = objs => AWS.fetchObjects(STORAGE, objs);
+    //const promise     = objs => AWS.fetchTorrents(STORAGE, objs);
     const getImages   = objs => from(promise(objs));
     const setKey      = (aid, url) => std.crypto_sha256(url, aid, 'hex') + '.img';
     const setName     = (aid, url) => aid + '_' + path.basename(std.parse_url(url).pathname);

@@ -47,9 +47,17 @@ export default {
   downloadItems() {
     return (req, res) => {
       const { user, ids, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-      , aucStartTime, aucStopTime } = req.body;
-      const filter = allAuction === false ? { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, aucStartTime, aucStopTime } : null;
+      , aucStartTime, aucStopTime, sold } = req.body;
+      const filter = allAuction === false ? {
+        lastWeekAuction
+      , twoWeeksAuction
+      , lastMonthAuction
+      , allAuction
+      , inAuction
+      , aucStartTime
+      , aucStopTime
+      , sold
+      } : null;
       feed.downloadItems({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -64,9 +72,17 @@ export default {
   downloadImages() {
     return (req, res) => {
       const { user, ids, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-      , aucStartTime, aucStopTime } = req.body;
-      const filter = allAuction === false ? { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, aucStartTime, aucStopTime } : null;
+      , aucStartTime, aucStopTime, sold } = req.body;
+      const filter = allAuction === false ? {
+        lastWeekAuction
+      , twoWeeksAuction
+      , lastMonthAuction
+      , allAuction
+      , inAuction
+      , aucStartTime
+      , aucStopTime
+      , sold
+      } : null;
       feed.downloadImages({ user, ids, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -81,8 +97,13 @@ export default {
   downloadTrade() {
     return (req, res) => {
       const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
-      const filter
-        = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
+      const filter = allAuction === false ? {
+        endAuction
+      , allAuction
+      , inAuction
+      , bidStartTime
+      , bidStopTime
+      } : null;
       feed.downloadTrade({ user, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -97,8 +118,13 @@ export default {
   downloadBids() {
     return (req, res) => {
       const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
-      const filter
-        = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
+      const filter = allAuction === false ? {
+        endAuction
+      , allAuction
+      , inAuction
+      , bidStartTime
+      , bidStopTime 
+      } : null;
       feed.downloadBids({ user, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
