@@ -23,17 +23,13 @@ UserEdit.propTypes = {
 , user: PropTypes.object.isRequired
 , preference: PropTypes.object.isRequired
 };
-
 const barHeightSmDown   = 104;
 const barHeightSmUp     = 112;
 const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  userEdit: { display: 'flex', flexDirection: 'column'
-            , height: editHeightSmDown
+  userEdit: { display: 'flex', flexDirection: 'column', height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , forms:    { overflow: 'scroll' }
 });

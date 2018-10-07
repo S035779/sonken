@@ -3,6 +3,7 @@ import PropTypes                from 'prop-types';
 import { renderRoutes }         from 'react-router-config';
 import { Container }            from 'flux/utils';
 import { getStores, getState }  from 'Stores';
+import LoginAction              from 'Actions/LoginAction';
 
 import { withStyles }           from '@material-ui/core/styles';
 import { CssBaseline }          from '@material-ui/core';
@@ -16,6 +17,10 @@ class App extends React.Component {
 
   static calculateState() {
     return getState('loginStore');
+  }
+
+  componentDidMount() {
+    if(!this.state.isAuthenticated) LoginAction.autologin();
   }
 
   render() {

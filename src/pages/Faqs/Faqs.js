@@ -51,19 +51,19 @@ class Faqs extends React.Component {
     const { isAuthenticated, faqs } = this.state;
     let _faqs = [];
     faqs.forEach(faq => { if(faq.posted) _faqs.push(faq); });
-    const to = { pathname: '/login/authenticate', state: { from: location } };
-    if(!isAuthenticated) return <Redirect to={to} />;
-    return <div className={classes.root}>
-      <ErrorBoundary>
-      <CssBaseline />
-      <div className={classes.faqsFrame}>
-        <LoginHeader />
-        <div className={classes.content}>
-          {route.routes ? renderRoutes(route.routes , { faqs: _faqs }) : null }
-        </div>
-      </div>
-      </ErrorBoundary>
-    </div>;
+    return isAuthenticated 
+      ? ( <div className={classes.root}>
+            <ErrorBoundary>
+            <CssBaseline />
+            <div className={classes.faqsFrame}>
+              <LoginHeader />
+              <div className={classes.content}>
+                {route.routes ? renderRoutes(route.routes , { faqs: _faqs }) : null }
+              </div>
+            </div>
+            </ErrorBoundary>
+          </div> )
+      : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} /> );
   }
 }
 Faqs.propTypes = {

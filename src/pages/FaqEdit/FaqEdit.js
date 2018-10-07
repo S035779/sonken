@@ -128,17 +128,14 @@ class FaqEdit extends React.Component {
         onDraft={this.handleDraft.bind(this)}
         onSave={this.handleSave.bind(this)}
         onDelete={this.handleDelete.bind(this)} />
-      <RssDialog open={isNotValid} title={'送信エラー'}
-        onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-      内容に不備があります。もう一度確認してください。
+      <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
       </RssDialog>
-      <RssDialog open={isSuccess} title={'送信完了'}
-        onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-      要求を受け付けました。
+      <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
       </RssDialog>
       <div className={classes.editBody}>
-        <textarea className={classes.inputArea}
-          id="note-body" value={faq.body}
+        <textarea className={classes.inputArea} id="note-body" value={faq.body}
           onChange={this.handleChangeBody.bind(this)}/>
       </div>
       <div className={classes.editView}>
@@ -150,48 +147,24 @@ class FaqEdit extends React.Component {
 FaqEdit.displayName= 'FaqEdit';
 FaqEdit.defaultProps = { faq: null };
 FaqEdit.propTypes = {
-  classes: PropTypes.object.isRequired
-, faq: PropTypes.object.isRequired
-, admin: PropTypes.string.isRequired
+  classes: PropTypes.object.isRequired, faq: PropTypes.object.isRequired, admin: PropTypes.string.isRequired
 };
-
 const barHeightSmDown   = 104;
 const barHeightSmUp     = 112;
 const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  faqEdit:    { display: 'flex', flexDirection: 'column'
-              , height: editHeightSmDown
+  faqEdit:    { display: 'flex', flexDirection: 'column', height: editHeightSmDown
               , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, editBody:   {
-                borderBottom: '1px solid #CCC'
-              , borderLeft: '1px solid #CCC'
-              , borderRight: '1px solid #CCC'
-              }
-, inputArea:  { display: 'block', resize: 'none' 
-              , height: '260px'
-              , width: '100%',    boxSizing: 'border-box'
-              , border: 'none',   padding: '10px'
-              , fontSize: '16px', outline: 'none'
-              , maxHeight: editHeightSmDown
-              , [theme.breakpoints.up('sm')]: {
-                maxHeight: editHeightSmUp }}
-, editView:   { flex: '1 1 auto', overflow: 'auto'
-              , position: 'relative'
-              , padding: '20px 10px 10px 10px'
-              , borderBottom: '1px solid #CCC'
-              , borderLeft: '1px solid #CCC'
-              , borderRight: '1px solid #CCC'
-              , '&:before': {
-                content: '"Preview"', display: 'inline-block'
-                , position: 'absolute', top: 0, left: 0
-                , backgroundColor: '#F5F5F5'
-                , padding: '5px 10px', fontSize: '12px'
-                , borderRight: '1px solid #CCC'
-                , borderBottom: '1px solid #CCC'
-              }}
+, editBody:   { borderBottom: '1px solid #CCC', borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC' }
+, inputArea:  { display: 'block', resize: 'none', height: '260px', width: '100%',    boxSizing: 'border-box'
+              , border: 'none',   padding: '10px', fontSize: '16px', outline: 'none', maxHeight: editHeightSmDown
+              , [theme.breakpoints.up('sm')]: { maxHeight: editHeightSmUp }}
+, editView:   { flex: '1 1 auto', overflow: 'auto', position: 'relative', padding: '20px 10px 10px 10px'
+              , borderBottom: '1px solid #CCC', borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC'
+              , '&:before': { content: '"Preview"', display: 'inline-block', position: 'absolute', top: 0, left: 0
+                , backgroundColor: '#F5F5F5', padding: '5px 10px', fontSize: '12px', borderRight: '1px solid #CCC'
+                , borderBottom: '1px solid #CCC' }}
 });
 export default withStyles(styles)(FaqEdit);

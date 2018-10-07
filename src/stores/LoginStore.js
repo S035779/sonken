@@ -4,9 +4,9 @@ import * as R           from 'ramda';
 export default class LoginStore extends ReduceStore {
   getInitialState() {
     return { 
-      user:             ''
+      admin:            ''
+    , user:             ''
     , isAuthenticated:  false
-    , admin:            ''
     , profile: {
         name:           ''
       , kana:           ''

@@ -33,17 +33,18 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     const { match } = this.props;
-    const { user, page } = this.state;
-    if(!user) return;
-    const skip = (page.number - 1) * page.perPage;
-    const limit = page.perPage;
-    const category = match.params.category || 'marchant';
-    const spn = Spinner.of('app');
-    spn.start();
-    std.logInfo(Dashboard.displayName, 'fetch', category);
-    NoteAction.fetchNotes(user, category, skip, limit)
-      .then(() => NoteAction.fetchCategorys(user, category, skip, limit))
-      .then(() => spn.stop());
+    const { isAuthenticated, user, page } = this.state;
+    if(isAuthenticated) {
+      const skip = (page.number - 1) * page.perPage;
+      const limit = page.perPage;
+      const category = match.params.category || 'marchant';
+      const spn = Spinner.of('app');
+      spn.start();
+      std.logInfo(Dashboard.displayName, 'fetch', category);
+      NoteAction.fetchNotes(user, category, skip, limit)
+        .then(() => NoteAction.fetchCategorys(user, category, skip, limit))
+        .then(() => spn.stop());
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -100,9 +101,8 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } 
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference }
       = this.state;
-    if(!isAuthenticated) return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const _id = match.params.id;
     const category = match.params.category || 'marchant';
     const title = this.getTitleName(category);
@@ -110,23 +110,25 @@ class Dashboard extends React.Component {
     const _notes = this.filterNotes(notes, category, categoryId);
     const _note = _notes.find(obj => obj._id === _id);
     const noteNumber = _notes.length;
-    return <div className={classes.root}>
-        <RssSearch user={user} 
-          title={title} category={category} categorys={categorys} note={_note} file={file}
-          notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
-        <div className={classes.body}>
-          <div className={classes.noteList}>
-            <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids}
-              itemFilter={filter} />
-            <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
-              selectedNoteId={ids} notePage={page}/>
+    return isAuthenticated
+      ? ( <div className={classes.root}>
+          <RssSearch user={user} 
+            title={title} category={category} categorys={categorys} note={_note} file={file}
+            notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
+          <div className={classes.body}>
+            <div className={classes.noteList}>
+              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids}
+                itemFilter={filter} />
+              <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
+                selectedNoteId={ids} notePage={page}/>
+            </div>
+            <div className={classes.noteEdit}>{ route.routes 
+              ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images })
+              : null
+            }</div>
           </div>
-          <div className={classes.noteEdit}>{ route.routes 
-            ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images })
-            : null
-          }</div>
-        </div>
-      </div>;
+        </div> )
+      : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );
   }
 }
 Dashboard.displayName = 'Dashboard';

@@ -85,14 +85,28 @@ class awsutils {
     return promise;
   }
 
+  fetchSignedUrl(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
+    const promise = this.s3.getSignedUrl('getObject', params).promise();
+    return promise;
+  }
+
   fetchObjects(bucket, files) {
     const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
     return Promise.all(promises(files))
       .then(this.createArchive);
   }
 
+  fetchTorrents(bucket, files) {
+    const promises = R.map(obj => this.fetchTorrent(bucket, { key: obj.key, name: obj.name }));
+    return Promise.all(promises(files))
+      .then(this.createArchive);
+  }
+
   createArchive(files) {
     return new Promise((resolve, reject) => {
+      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.' })
       const output = new bufferStream.WritableStreamBuffer();
       const archive = archiver('zip', { zlib: { level: 9 } });
       output.on('finish', () => resolve(output.getContents()));
@@ -108,18 +122,16 @@ class awsutils {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
     const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
     const promise = this.s3.getObject(params).promise();
-    return promise.then(obj => ({ name, buffer: obj.Body }));
+    return promise
+      .then(obj => ({ name, buffer: obj.Body }));
   }
 
-  fetchSignedUrl(bucket, { key, name }) {
-    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
-    const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
-    return new Promise((resolve, reject) => {
-      this.s3.getSignedUrl('getObject', params, (err, url) => {
-        if(err) reject(err);
-        resolve(url);
-      });
-    });
+  fetchTorrent(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachement; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
+    const promise = this.s3.getObjectTorrent(params).promise();
+    return promise
+      .then(obj => ({ name, buffer: obj.Body }));
   }
 }
 awsutils.displayName = 'awsutils';

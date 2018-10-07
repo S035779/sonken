@@ -43,19 +43,19 @@ class Inquiry extends React.Component {
     //std.logInfo(Inquiry.displayName, 'Props', this.props);
     const { classes, route, location } = this.props;
     const { user, isAuthenticated, preference } = this.state;
-    const to = { pathname: '/login/authenticate', state: { from: location } };
-    if(!isAuthenticated) return <Redirect to={to} />;
-    return <div className={classes.root}>
-      <ErrorBoundary>
-      <CssBaseline />
-      <div className={classes.inquiryFrame}>
-        <LoginHeader />
-        <div className={classes.content}>
-          {route.routes ? renderRoutes(route.routes, { user, preference }): null}
-        </div>
-      </div>
-      </ErrorBoundary>
-    </div>;
+    return isAuthenticated
+      ? ( <div className={classes.root}>
+          <ErrorBoundary>
+          <CssBaseline />
+          <div className={classes.inquiryFrame}>
+            <LoginHeader />
+            <div className={classes.content}>
+              {route.routes ? renderRoutes(route.routes, { user, preference }): null}
+            </div>
+          </div>
+          </ErrorBoundary>
+        </div> )
+      : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} /> );
   }
 }
 Inquiry.displayName = 'Inquiry';
@@ -65,7 +65,6 @@ Inquiry.propTypes = {
 , route: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired
 };
-
 const iqry_top = std.toRGBa('#8f2785', 0.8);
 const iqry_btm = std.toRGBa('#e4b1db', 0.8);
 const barHeightSmUp   = 64;

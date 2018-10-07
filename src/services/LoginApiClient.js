@@ -7,6 +7,8 @@ export default {
     switch(request) {
       case 'signin/authenticate':
         return new Promise((resolve, reject) => xhr.postJSON(  api+'/authenticate', options, resolve, reject));
+      case 'auto/authenticate':
+        return new Promise((resolve, reject) => xhr.getJSON(   api+'/authenticate', options, resolve, reject));
       case 'signout/authenticate':
         return new Promise((resolve, reject) => xhr.deleteJSON(api+'/authenticate', options, resolve, reject));
       case 'preference/fetch':
@@ -35,6 +37,9 @@ export default {
     const admin = isAdmin ? username : '';
     const user = isAdmin ? '' : username;
     return this.request('signin/authenticate', { admin, user, password, auto });
+  },
+  autologin() {
+    return this.request('auto/authenticate', {});
   },
   signout(username, isAdmin) {
     const admin = isAdmin ? username : '';

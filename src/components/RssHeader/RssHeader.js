@@ -12,13 +12,6 @@ import { Menu, MoreVert }
 import RssMenu        from 'Components/RssMenu/RssMenu';
 
 class RssHeader extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      auth: props.isAuthenticated
-    };
-  }
-
   handleToggle() {
     this.props.onClick();
   }
@@ -54,36 +47,16 @@ class RssHeader extends React.Component {
   render() {
     //std.logInfo(RssHeader.displayName, 'Props', this.props);
     //std.logInfo(RssHeader.displayName, 'State', this.state);
-    const { classes, user, preference, profile, open, children, location } = this.props;
-    const { auth } = this.state;
+    const { classes, user, preference, profile, open, children, location, isAuthenticated } = this.props;
     const title = this.getTitleName(location);
     return <div className={classNames(classes.navHeader, open && classes.navHeaderShift)}>
-      <AppBar
-        color="default"
-        position="static"
-        className={classes.navBar}>
+      <AppBar color="default" position="static" className={classes.navBar}>
       <Toolbar>
-        <Button
-          mini
-          variant="fab"
-          color="primary"
-          onClick={this.handleToggle.bind(this)}
-          className={classes.navIcon}>
-          {open ? <MoreVert /> : <Menu />}
-        </Button>
-        <Typography
-          variant="title"
-          color="inherit"
-          className={classes.title}>
-          {title}
-        </Typography>
+        <Button mini variant="fab" color="primary" onClick={this.handleToggle.bind(this)}
+          className={classes.navIcon}>{open ? <MoreVert /> : <Menu />}</Button>
+        <Typography variant="title" color="inherit" className={classes.title}>{title}</Typography>
         <div className={classes.loginIcon}>
-          <RssMenu
-            auth={auth} 
-            user={user}
-            preference={preference}
-            profile={profile}
-          />
+          <RssMenu isAuthenticated={isAuthenticated} user={user} preference={preference} profile={profile} />
         </div>
       </Toolbar>
       </AppBar>

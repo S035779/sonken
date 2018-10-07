@@ -156,21 +156,19 @@ export default {
 
   autologin() {
     return(req, res) => {
-      const { admin, user } = req.query;
+      const admin = req.session.admin ? req.session.admin : '';
+      const user  = req.session.user  ? req.session.user  : '';
+      const auto  = req.session.auto  ? req.session.auto  : '';
       profile.autologin({ admin, user }).subscribe(
         obj => {
-          const isAdmin = obj && admin !== '';
-          const isUser  = obj && user  !== '';
-          const isAuth = obj && req.cookies.auto === req.session.auto;
+          const isAuth = obj && req.cookies.auto === auto;
           const key     = std.rndString(10);
           const hash    = std.crypto_sha256(key, 'koobkooCedoN');
           const params  = { maxAge: 60 * 60 * 1000, httpOnly: true };
-          if(isAdmin)   req.session.admin = admin;
-          if(isUser)    req.session.user  = user;
           if(isAuth) {
             req.session.auto = hash;
             res.cookie('auto', hash, params);
-            res.status(200).send(obj);
+            res.status(200).send({ admin, user, isAuthenticated: obj });
           } else {
             res.status(401).send({ name: 'Client Error', message: 'Unauthorized.' });
             log.error(displayName, 'Client Error', ':', 'Unauthorized.');

@@ -46,20 +46,20 @@ class Management extends React.Component {
     const user = users.find(obj => obj._id === _id);
     const number = users.length;
     users.length = this.userPage(number, page);
-    if(!isAuthenticated) 
-      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} />);
-    return <div className={classes.root}>
-        <AdminSearch admin={admin} category={category} userNumber={number} userPage={page} />
-        <div className={classes.body}>
-        <div className={classes.userList}>
-          <AdminButtons admin={admin} users={users} selectedUserId={ids} />
-          <AdminList admin={admin} category={category} users={users} selectedUserId={ids} userPage={page}/>
-        </div>
-        <div className={classes.userEdit}>
-          { route.routes ? renderRoutes(route.routes,{ admin, user, preference }) : null }
-        </div>
-      </div>
-    </div>;
+    return isAuthenticated
+      ? ( <div className={classes.root}>
+            <AdminSearch admin={admin} category={category} userNumber={number} userPage={page} />
+            <div className={classes.body}>
+            <div className={classes.userList}>
+              <AdminButtons admin={admin} users={users} selectedUserId={ids} />
+              <AdminList admin={admin} category={category} users={users} selectedUserId={ids} userPage={page}/>
+            </div>
+            <div className={classes.userEdit}>
+              { route.routes ? renderRoutes(route.routes,{ admin, user, preference }) : null }
+            </div>
+          </div>
+        </div> )
+      : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} /> );
   }
 }
 Management.displayName = 'Management';

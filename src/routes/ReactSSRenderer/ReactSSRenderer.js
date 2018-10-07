@@ -6,7 +6,7 @@ import { matchRoutes }                  from 'react-router-config';
 import { dehydrateState, createStores } from 'Stores';
 import { createDispatcher }             from 'Main/dispatcher';
 import getRoutes                        from 'Routes';
-import log                              from 'Utilities/logutils';
+//import log                              from 'Utilities/logutils';
 
 import Html from 'Pages/Html/Html';
 
@@ -26,7 +26,7 @@ class ReactSSRenderer {
       const { user, admin } = req.session;
       const location = req.originalUrl;
       const category = R.split('/', location)[1];
-      log.trace(ReactSSRenderer.displayName, 'Session', req.session);
+      //log.trace(ReactSSRenderer.displayName, 'Session', req.session);
       createStores(createDispatcher());
       const routes = getRoutes();
       const matchs = matchRoutes(routes, location);

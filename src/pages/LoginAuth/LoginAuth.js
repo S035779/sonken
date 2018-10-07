@@ -25,20 +25,30 @@ class LoginAuth extends React.Component {
     , checked: false
     , isNotValid: false
     };
+    this.formRef = React.createRef();
   }
 
   handleLogin(event) {
     event.preventDefault();
     const { username, password, checked } = this.state;
+    //std.logInfo(LoginAuth.displayName, 'handleLogin', username);
     LoginAction.authenticate(username, password, false, checked)
-      .then(() => {
-        if(!this.props.isAuthenticated) return this.setState({ isNotValid: true });
-        LoginAction.presetUser(username).then(() => this.setState({ redirectToRefferer: true }));
-      })
+      .then(() => this.props.isAuthenticated 
+        ? LoginAction.presetUser(username).then(() => this.setState({ redirectToRefferer: true }))
+        : this.setState({ isNotValid: true }))
       .catch(err => {
         std.logError(LoginAuth.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
       });
+  }
+
+  handleChangeButton() {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    //std.logInfo(LoginAuth.displayName, 'handleChangeButton', userAgent);
+    if(userAgent.indexOf("trident") !== -1 || userAgent.indexOf("msie") !== -1) {
+      const node = this.formRef.current;
+      window.external.AutoCompleteSaveForm(node);
+    }
   }
 
   handleChangeText(name, event) {
@@ -61,7 +71,7 @@ class LoginAuth extends React.Component {
     if(redirectToRefferer) 
       return <Redirect to={ location.state || { pathname: isBeta ? '/marchant' : '/sellers' }} />;
     return <div className={classes.container}>
-        <form className={classes.loginForms} onSubmit={this.handleLogin.bind(this)}>
+        <form ref={this.formRef} className={classes.loginForms} onSubmit={this.handleLogin.bind(this)}>
           <div className={classes.space}/>
           <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
           <div className={classes.space}/>
@@ -83,7 +93,10 @@ class LoginAuth extends React.Component {
           </div>
           <div className={classes.buttons}>
             <div className={classes.space}/>
-            <RssButton type="submit" color="warning" className={classes.button}>Login</RssButton>
+            <RssButton type="submit" color="warning" onClick={this.handleChangeButton.bind(this)} 
+              className={classes.button}>
+              Login
+            </RssButton>
             <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
               内容に不備があります。もう一度確認してください。
             </RssDialog>

@@ -41,40 +41,21 @@ class Trade extends React.Component {
       .then(() => spn.stop());
   }
 
-  //itemFilter(filter, item) {
-  //  const now       = new Date(item.bidStopTime);
-  //  const start     = new Date(filter.bidStartTime);
-  //  const stop      = new Date(filter.bidStopTime);
-  //  const isTrade = item.traded;
-  //  const isAll = true;
-  //  const isNow = start <= now && now <= stop;
-  //  return filter.inBidding
-  //    ? isNow
-  //    : filter.endTrading && filter.allTrading
-  //      ? isAll
-  //      : filter.endTrading
-  //        ? isTrade
-  //        : true; 
-  //}
-
   render() {
     //std.logInfo(Trade.displayName, 'State', this.state);
     //std.logInfo(Trade.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file } = this.state;
-    if(!isAuthenticated) 
-      return (<Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/>);
     const note = R.head(notes);
     const items = note && note.items ? note.items : [];
     const number = note && note.attributes ? note.attributes.item.total : 0;
-    //let _items = items.filter(item => item.bided && this.itemFilter(filter, item));
-    //let  number = items.length;
-    return <div className={classes.root}>
-      <TradeSearch 
-        user={user} items={items} itemFilter={filter} file={file} itemNumber={number} itemPage={page}/>
-      <TradeFilter 
-        user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
-    </div>;
+    return isAuthenticated
+      ? ( <div className={classes.root}>
+            <TradeSearch 
+              user={user} items={items} itemFilter={filter} file={file} itemNumber={number} itemPage={page}/>
+            <TradeFilter user={user} items={items} itemFilter={filter} selectedItemId={ids}/>
+          </div> )
+      : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );
   }
 }
 Trade.displayName = 'Trade';

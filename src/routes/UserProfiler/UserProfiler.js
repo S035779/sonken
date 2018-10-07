@@ -328,10 +328,12 @@ export default class UserProfiler {
   }
 
   autologin({ admin, user }) {
+    console.log(admin, user);
     const isAdmin = admin !== '';
     const options = isAdmin ? { user: admin } : { user: user };
-    return from(this.fetchUser(options)).pipe(
-      map(obj => obj.isAuthenticated)
+    return this.fetchUser(options).pipe(
+      map(R.tap(log.trace.bind(this)))
+    , map(obj => obj.isAuthenticated)
     );
   }
 

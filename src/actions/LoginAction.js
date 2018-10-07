@@ -74,6 +74,13 @@ export default {
         dispatch({ type: 'login/authenticate', isAuthenticated });
       });
   },
+  autologin() {
+    return LoginApiClient.autologin().then(obj => {
+        const { user, isAuthenticated } = obj;
+        dispatch({ type: 'login/authenticate', isAuthenticated });
+        dispatch({ type: 'user/preset', user, isAuthenticated });
+      });
+  },
   signout(username, isAdmin) {
     return LoginApiClient.signout(username, isAdmin).then(isAuthenticated => {
         dispatch({ type: 'login/authenticate', isAuthenticated });
