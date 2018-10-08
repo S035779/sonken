@@ -1,6 +1,7 @@
 import sourceMapSupport           from 'source-map-support';
 import dotenv                     from 'dotenv';
 import * as R                     from 'ramda';
+import { throwError }             from 'rxjs';
 import { flatMap, map }           from 'rxjs/operators';
 import async                      from 'async';
 import FeedParser                 from 'Routes/FeedParser/FeedParser';
@@ -41,8 +42,7 @@ const request = (operation, { url, user, id, items }) => {
   switch(operation) {
     case 'search':
     case 'seller':
-      return yahoo.jobHtml({ url })
-        .pipe(map(setNote), flatMap(putHtml));
+      return yahoo.jobHtml({ url }).pipe(map(setNote), flatMap(putHtml));
     case 'closedsearch':
       return yahoo.jobClosedMerchant({ url, pages: Math.ceil(numbers / 100) })
         .pipe(map(setNote), flatMap(putHtml));
@@ -50,14 +50,15 @@ const request = (operation, { url, user, id, items }) => {
       return yahoo.jobClosedSellers({ url, pages: Math.ceil(numbers / 25) })
         .pipe(map(setNote), flatMap(putHtml));
     case 'rss':
-      return yahoo.jobRss({ url })
-        .pipe(map(setNote), flatMap(putRss));
+      return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
     case 'images':
       return yahoo.jobImages({
         items, operator: (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename)
       });
     case 'defrag':
       return feed.defragItems({ user, ids: setIds(items) });
+    default:
+      return throwError('Unknown operation!');
   }
 };
 
@@ -83,7 +84,6 @@ const main = () => {
   //const paused      = () => queue.paused ? '[paused]' : '[resume]';
   //const started     = () => queue.stated ? '[start]'  : '[stop]';
   //const list        = () => queue.workersList();
-
   queue.concurrency = 1;
   queue.buffer      = 1;
   queue.saturated   = () => log.debug(displayName, '== Saturated.   wait/runs:', wait(), runs(), idle());
@@ -91,17 +91,16 @@ const main = () => {
   queue.empty       = () => log.debug(displayName, '== Last.        wait/runs:', wait(), runs(), idle());
   queue.drain       = () => log.debug(displayName, '== Drain.       wait/runs:', wait(), runs(), idle());
   queue.error       = (err, task) => log.error(displayName, err.name, err.message, task);
-
   process.on('disconnect', () => shutdown(null, process.exit));
   process.on('message', task => {
     if(task) {
       log.info(displayName, 'Received. _id/ope:', task.id, task.operation);
-      queue.push(task, err => {
-        if(err) log.error(displayName, err.name, err.message, err.stack);
-        log.info(displayName, 'Finished. _id/ope:', task.id, task.operation);
-      });
+      queue.push(task, err => err 
+        ? log.error(displayName, err.name, err.message, err.stack) 
+        : log.info(displayName, 'Finished. _id/ope:', task.id, task.operation)
+      );
       queue.remove(({ data }) => {
-        if(data.created < Date.now() - (24 * 60 * 60 * 1000)) {
+        if(Date.now() - new Date(data.created).getTime() > (24 * 60 * 60 * 1000)) {
           log.info(displayName, 'Removed. _id/ope:', data.id, data.operation);
           return true;
         }

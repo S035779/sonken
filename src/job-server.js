@@ -57,41 +57,36 @@ const fork = () => {
 const operation = url => {
   const api = std.parse_url(url);
   const path = R.split('/', api.pathname);
-  return api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
+  const operation = path[1];
+  return operation;
 };
 
 const request = queue => {
-  const queuePush = obj => {
-    if(obj) queue.push(obj, err => {
-      if(err) log.error(displayName, err.name, err.message, err.stack);
-    });
-  }; 
-  const setQueue = obj => ({ 
-    user: obj.user
-  , id: obj._id
-  , url: obj.url
-  , operation: operation(obj.url)
-  , created: Date.now()
+  const getNotes    = objs => feed.fetchAllNotes({ users: objs });
+  const isApproved  = obj => obj.approved;
+  const setUser     = obj => obj.user;
+  const isUrl       = obj => obj.url !== '';
+  const isOldItem   = obj => (updatedInterval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
+  const isOpened    = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search'
+  const setQueue    = obj => ({ 
+    user:       obj.user
+  , id:         obj._id
+  , url:        obj.url
+  , operation:  operation(obj.url)
+  , created:    Date.now()
   });
-  const setQueues = R.map(setQueue);
-  const setNote = objs => feed.fetchAllNotes({ users: objs });
-  const hasApproved = R.filter(obj => obj.approved);
-  const setUsers = R.map(obj => obj.user);
-  const hasUrl = R.filter(obj => obj.url !== '');
-  const interval = updatedInterval * 1000 * 60;
-  const isOldItem = obj => interval < Date.now() - new Date(obj.updated).getTime();
-  const hasOldItem = R.filter(isOldItem);
-  const isOpened = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search';
-  const hasOpened = R.filter(isOpened);
+  const queuePush = obj => {
+    if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
+  }; 
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
-      map(hasApproved)
-    , map(setUsers)
-    , flatMap(setNote)
+      map(R.filter(isApproved))
+    , map(R.map(setUser))
+    , flatMap(getNotes)
     , map(R.flatten)
-    , map(hasUrl)
-    , map(hasOldItem)
-    , map(hasOpened)
-    , map(setQueues)
+    , map(R.filter(isUrl))
+    , map(R.filter(isOldItem))
+    , map(R.filter(isOpened))
+    , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
@@ -115,13 +110,11 @@ const main = () => {
   log.info(displayName, 'Start JOB Server.')
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all jobs have been processed.');
-  std.invoke(() => {
-    request(queue).subscribe(
+  std.invoke(() => request(queue).subscribe(
       obj => log.debug(displayName, 'finished proceeding job...', obj)
     , err => log.error(displayName, err.name, err.message, err.stack)
     , ()  => log.info(displayName, 'post jobs completed.')
-    ), 0, 1000 * 60 * monitorInterval
-  });
+    ), 0, 1000 * 60 * monitorInterval);
 };
 main();
 

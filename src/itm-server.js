@@ -57,46 +57,41 @@ const fork = () => {
 const operation = url => {
   const api = std.parse_url(url);
   const path = R.split('/', api.pathname);
-  return api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
+  const operation = api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
+  return operation;
 };
 
 const request = queue => {
-  const queuePush = obj => {
-    if(obj) queue.push(obj, err => {
-      if(err) log.error(displayName, err.name, err.message, err.stack);
-    });
-  }; 
-  const setQueue = obj => ({
-    user: obj.user
-  , id: obj._id
-  , url: obj.url
-  , operation: operation(obj.url)
-  , created: Date.now()
+  const getNotes    = objs => feed.fetchAllNotes({ users: objs });
+  const isApproved  = obj => obj.approved;
+  const setUser     = obj => obj.user;
+  const isUrl       = obj => obj.url !== '';
+  const isOldItem   = obj => (updatedInterval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
+  const isClosed    = obj => operation(obj.url) === 'closedsellers' || operation(obj.url) === 'closedsearch';
+  const setQueue    = obj => ({
+    user:       obj.user
+  , id:         obj._id
+  , url:        obj.url
+  , operation:  operation(obj.url)
+  , created:    Date.now()
   });
-  const setQueues = R.map(setQueue);
-  const setNote = objs => feed.fetchAllNotes({ users: objs });
-  const hasApproved = R.filter(obj => obj.approved);
-  const setUsers = R.map(obj => obj.user);
-  const hasUrl = R.filter(obj => obj.url !== '');
-  const interval = updatedInterval * 1000 * 60;
-  const isOldItem = obj => interval < Date.now() - new Date(obj.updated).getTime();
-  const hasOldItem = R.filter(isOldItem);
-  const isClosed = obj => operation(obj.url) === 'closedsellers' || operation(obj.url) === 'closedsearch';
-  const hasClosed = R.filter(isClosed);
+  const queuePush = obj => {
+    if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
+  }; 
   return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
-      map(hasApproved)
-    , map(setUsers)
-    , flatMap(setNote)
+      map(R.filter(isApproved))
+    , map(R.map(setUser))
+    , flatMap(getNotes)
     , map(R.flatten)
-    , map(hasUrl)
-    , map(hasOldItem)
-    , map(hasClosed)
-    , map(setQueues)
+    , map(R.filter(isUrl))
+    , map(R.filter(isOldItem))
+    , map(R.filter(isClosed))
+    , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
 
-let pids=[], idx=0;
+let idx=0, pids=[];
 const worker = (task, callback) => {
   idx = idx < job_num ? idx : 0;
   log.info(displayName, 'Process is fork. _id/idx:', task.id, idx);
