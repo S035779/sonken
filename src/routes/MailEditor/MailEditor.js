@@ -9,9 +9,6 @@ import { Mail, Selected } from 'Models/mail';
  * @constructor
  */
 export default class MailEditor {
-  constructor() {
-  }
-
   static of() {
     return new MailEditor();
   }
@@ -19,31 +16,22 @@ export default class MailEditor {
   request(request, options) {
     switch(request) {
       case 'fetch/mails':
-        return new Promise((resolve, reject) => {
-          Mail.find({}).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const conditions = {};
+          return Mail.find(conditions).exec();
+        }
       case 'fetch/mail':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          Mail.findOne(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            if(obj === null) return reject({ name: 'Error', message: 'Mail not found.' });
-            resolve(obj);
-          });
-        });
+          return Mail.findOne(conditions).exec();
+        }
       case 'create/mail':
-        return new Promise((resolve, reject) => {
-          const mail = new Mail({ user: options.admin, title: options.data.title, body: options.data.body });
-          mail.save((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const docs = { user: options.admin, title: options.data.title, body: options.data.body };
+          return Mail.create(docs);
+        }
       case 'update/mail':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
           const update = { 
             user: options.admin
@@ -51,52 +39,40 @@ export default class MailEditor {
           , body: options.data.body
           , updated: new Date
           };
-          Mail.findOneAndUpdate(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Mail.findOneAndUpdate(conditions, update).exec();
+        }
       case 'delete/mail':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          Mail.findOneAndRemove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Mail.findOneAndRemove(conditions).exec();
+        }
       case 'create/select':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { selected: options.id };
           const update = { selected: options.id };
-          Selected.update(conditions, update, { upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          const params = { upsert: true };
+          return Selected.update(conditions, update, params).exec();
+        }
       case 'delete/select':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { selected: options.id };
-          Selected.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Selected.remove(conditions).exec();
+        }
       case 'fetch/select':
-        return new Promise((resolve, reject) => {
-          Selected.find({}).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const conditions = {};
+          return  Selected.find(conditions).exec();
+        }
       case 'upload/file':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          const update = { user: options.admin, file: options.file, updated: new Date };
-          Mail.findOneAndUpdate(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          const update = {
+            user: options.admin
+          , file: options.file
+          , updated: new Date
+          };
+          return Mail.findOneAndUpdate(conditions, update).exec();
+        }
       default:
         return new Promise((resolve, reject) => reject({ name: 'Error', message: 'request: ' + request }));
     }

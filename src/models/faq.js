@@ -11,13 +11,13 @@ const faqSchema = new mongoose.Schema({
 , title:            { type: String }
 , body:             { type: String }
 , file:             { type: Buffer, default: null }
-, updated:          { type: Date, default: Date.now() } 
+, created:          { type: Date, required: true, default: Date.now } 
+, updated:          { type: Date, required: true, default: Date.now } 
 }, { collection: 'faqs' });
-faqSchema.set('toObject');
 
 const postedSchema = new mongoose.Schema({
   posted:           { type: String, required: true }
-, created:          { type: Date, default: Date.now() }
+, created:          { type: Date, required: true, default: Date.now }
 }, { collection: 'posted' });
 postedSchema.index({ posted: 1 }, { unique: true });
 

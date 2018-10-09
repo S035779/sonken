@@ -15,8 +15,7 @@ class TradeFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedItemId: props.selectedItemId
-    , items: props.items
+      items: props.items
     , checked: false
     , endTrading: true
     , allTrading: true
@@ -39,14 +38,13 @@ class TradeFilter extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const selectedItemId = nextProps.selectedItemId;
     const itemFilter = nextProps.itemFilter;
     const nextItems = nextProps.items;
     const nextPage = this.state.page;
     const prevAllTrading = this.state.prevAllTrading;
     const prevItems = this.state.items;
     const prevPage = this.state.prevPage;
-    if(prevItems && (nextItems.length > 0)) {
+    if(prevItems && (nextItems.length !== 0)) {
       if(prevItems.length === 0) {
         //std.logInfo(TradeFilter.displayName, 'Init', nextProps);
         this.formsRef.current.scrollTop = 0;
@@ -54,17 +52,19 @@ class TradeFilter extends React.Component {
       } else if(prevPage !== nextPage) {
         //std.logInfo(TradeFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
-        this.setState({ items: catItems(nextItems), prevPage: nextPage, selectedItemId, itemFilter })
+        this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter })
       } else if(!itemFilter.allTrading) {
         //std.logInfo(TradeFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter
         , prevAllTrading: false });
       } else if(itemFilter.allTrading !== prevAllTrading) {
         //std.logInfo(TradeFilter.displayName, 'Normal', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
-        , prevAllTrading: true });
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllTrading: true });
+      } else {
+        //std.logInfo(TradeFilter.displayName, 'All', nextProps);
+        this.setState({ items: nextItems });
       }
     }
   }
@@ -92,19 +92,31 @@ class TradeFilter extends React.Component {
     const checked = event.target.checked;
     switch(name) {
       case 'inBidding':
-        this.setState({ inBidding: checked, allTrading: !checked, endTrading: !checked });
+        this.setState({
+          inBidding: checked
+        , allTrading: !checked
+        , endTrading: !checked
+        });
         break;
       case 'allTrading':
-        this.setState({ inBidding: false, allTrading: checked, endTrading: true });
+        this.setState({
+          inBidding: false
+        , allTrading: checked
+        , endTrading: true
+        });
         break;
       case 'endTrading':
-        this.setState({ inBidding: !checked, allTrading: false, endTrading: checked });
+        this.setState({
+          inBidding: !checked
+        , allTrading: false
+        , endTrading: checked
+        });
         break;
       case 'checked':
         {
           this.setState({ checked: checked });
           const { user, items } = this.props;
-          const ids = checked ? items.map(item => item.guid._) : [];
+          const ids = checked ? items.map(item => item.guid__) : [];
           TradeAction.select(user, ids);
           break;
         }
@@ -112,15 +124,13 @@ class TradeFilter extends React.Component {
   }
 
   handleBided() {
-    const { selectedItemId } = this.state;
-    const { user } = this.props;
+    const { user, selectedItemId } = this.props;
     std.logInfo(TradeFilter.displayName, 'handleBided', selectedItemId);
     TradeAction.createBids(user, selectedItemId);
   }
 
   handleDelete() {
-    const { selectedItemId } = this.state;
-    const { user } = this.props;
+    const { user, selectedItemId  } = this.props;
     std.logInfo(TradeFilter.displayName, 'handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       TradeAction.deleteBids(user, selectedItemId);

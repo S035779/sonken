@@ -9,9 +9,6 @@ import { Faq, Posted }    from 'Models/faq';
  * @constructor
  */
 export default class FaqEditor {
-  constructor() {
-  }
-
   static of() {
     return new FaqEditor();
   }
@@ -19,31 +16,26 @@ export default class FaqEditor {
   request(request, options) {
     switch(request) {
       case 'fetch/faqs':
-        return new Promise((resolve, reject) => {
-          Faq.find({}).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const conditions = {};
+          return Faq.find(conditions).exec();
+        }
       case 'fetch/faq':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          Faq.findOne(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            if(obj === null) return reject({ name: 'Error', message: 'Faq not found.' });
-            resolve(obj);
-          });
-        });
+          return Faq.findOne(conditions).exec();
+        }
       case 'create/faq':
-        return new Promise((resolve, reject) => {
-          const faq = new Faq({ user: options.admin, title: options.data.title, body: options.data.body });
-          faq.save((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const docs = { 
+            user: options.admin
+          , title: options.data.title
+          , body: options.data.body
+          };
+          return Faq.create(docs);
+        }
       case 'update/faq':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
           const update = {
             user: options.admin
@@ -51,52 +43,40 @@ export default class FaqEditor {
           , body: options.data.body
           , updated: new Date
           };
-          Faq.findOneAndUpdate(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Faq.findOneAndUpdate(conditions, update).exec();
+        }
       case 'delete/faq':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          Faq.findOneAndRemove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Faq.findOneAndRemove(conditions).exec();
+        }
       case 'create/post':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { posted: options.id };
           const update = { posted: options.id };
-          Posted.update(conditions, update).exec({ upsert: true }).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          const params = { upsert: true };
+          return Posted.update(conditions, update, params).exec();
+        }
       case 'delete/post':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { posted: options.id };
-          Posted.remove(conditions).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          return Posted.remove(conditions).exec();
+        }
       case 'fetch/post':
-        return new Promise((resolve, reject) => {
-          Posted.find({}).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+        {
+          const conditions = {};
+          return Posted.find(conditions).exec();
+        }
       case 'upload/file':
-        return new Promise((resolve, reject) => {
+        {
           const conditions = { _id: options.id };
-          const update = { user: options.admin, file: options.file, update: new Date };
-          Faq.findOneAndUpdate(conditions, update).exec((err, obj) => {
-            if(err) return reject(err);
-            resolve(obj);
-          });
-        });
+          const update = {
+            user: options.admin
+          , file: options.file
+          , update: new Date
+          };
+          return Faq.findOneAndUpdate(conditions, update).exec();
+        }
       default:
         return new Promise((resolve, reject) => reject({ name: 'Error', message: 'request: ' + request }));
     }

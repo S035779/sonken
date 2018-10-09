@@ -41,10 +41,9 @@ export default class BidedNotesStore extends ReduceStore {
   }
 
   deleteList(state, action) {
-    const isItem = obj => R.any(id => id === obj.guid__)(action.ids);
-    const setItem = obj => isItem(obj) ? R.merge(obj, { listed: false }) : obj;
-    const setItems = R.map(setItem)
-    const setNote = obj => obj.items ? R.merge(obj, { items: setItems(obj.items) }) : obj; 
+    const isItem = obj => R.none(id => id === obj.guid__)(action.ids);
+    const hasItems = R.filter(isItem);
+    const setNote = obj => obj.items ? R.merge(obj, { items: hasItems(obj.items) }) : obj; 
     const setNotes = R.map(setNote)
     return setNotes(state.notes);
   }

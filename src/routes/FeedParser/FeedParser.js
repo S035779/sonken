@@ -338,18 +338,38 @@ export default class FeedParser {
         }
       case 'delete/note':
         {
-          const conditions = { _id: options.id, user: options.user };
-          return Note.remove(conditions).exec();
+          const { id, user } = options;
+          const conditions = { _id: id, user };
+          const setIds   = R.map(obj => obj._id);
+          const setGuids = R.map(obj => obj.guid__);
+          const setItems = obj => obj.items;
+          const getItems = objs => Items.find({ _id: { $in: setIds(objs) }});
+          const delItems = objs => Promise.all([
+            Items.remove({    _id: { $in: setIds(objs) }})
+          , Listed.remove({   user, listed:  { $in: setGuids(objs) }}).exec()
+          , Traded.remove({   user, traded:  { $in: setGuids(objs) }}).exec()
+          , Bided.remove({    user, bided:   { $in: setGuids(objs) }}).exec()
+          , Added.remove({    user, added:   { $in: setGuids(objs) }}).exec()
+          , Deleted.remove({  user, deleted: { $in: setGuids(objs) }}).exec()
+          , Readed.remove({   user, readed:  { $in: setGuids(objs) }}).exec()
+          , Starred.remove({  user, starred: { $in: setGuids(objs) }}).exec()
+          ]);
+          return Note.findOneAndDelete(conditions).exec()
+            .then(setItems)
+            .then(getItems)
+            .then(delItems)
+            .then(R.tap(log.trace.bind(this)))
+          ;
         }
       case 'create/category':
         {
-          const category = {
+          const docs = {
             user: options.user
           , category: options.data.category
           , subcategory: options.data.subcategory
           , subcategoryId: new ObjectId
           };
-          return Category.create(category);
+          return Category.create(docs);
         }
       case 'update/category':
         {
@@ -452,13 +472,12 @@ export default class FeedParser {
         }
       case 'defrag/items':
         {
-          const { ids } = options;
           const date      = new Date();
           const year      = date.getFullYear();
           const month     = date.getMonth();
           const day       = date.getDate();
           const yesterday = new Date(year, month, day - 1);
-          const conditions = { _id: { $in: ids }, pubDate: { $lt: yesterday  }};
+          const conditions = { pubDate: { $lt: yesterday }};
           return Items.remove(conditions).exec();
         }
       case 'defrag/added':
@@ -673,8 +692,8 @@ export default class FeedParser {
     return this.request('count/traded', { user, skip, limit, filter });
   }
 
-  dfgItems(ids) {
-    return this.request('defrag/items', { ids });
+  dfgItems() {
+    return this.request('defrag/items', {});
   }
 
   dfgAdded(user) {
@@ -705,9 +724,9 @@ export default class FeedParser {
     return this.request('defrag/listed', { user });
   }
 
-  defragItems({ user, ids }) {
+  garbageCollection({ user }) {
     return forkJoin([
-        this.dfgItems(ids)
+        this.dfgItems()
       , this.dfgAdded(user)
       , this.dfgDeleted(user)
       , this.dfgReaded(user)

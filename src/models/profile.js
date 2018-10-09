@@ -17,13 +17,14 @@ const userSchema = new mongoose.Schema({
 , email:            { type: String, required: true }
 , phone:            { type: String, required: true }
 , plan:             { type: String, required: true }
-, updated:          { type: Date, default: Date.now() } 
+, created:          { type: Date, required: true, default: Date.now } 
+, updated:          { type: Date, required: true, default: Date.now } 
 }, { collection: 'users' });
 userSchema.index({ user: 1, email: 1 }, { unique: true });
 
 const approvedSchema = new mongoose.Schema({
   approved:         { type: String, required: true }
-, created:          { type: Date, default: Date.now() }
+, created:          { type: Date, required: true, default: Date.now }
 }, { collection: 'approved' });
 approvedSchema.index({ approved: 1 }, { unique: true });
 
@@ -40,7 +41,8 @@ const adminSchema = new mongoose.Schema({
 , from:             { type: String, required: true }
 , menu:             [menuSchema]
 , advertisement:    { type: Object, required: true }
-, updated:          { type: Date, default: Date.now() } 
+, created:          { type: Date, required: true, default: Date.now } 
+, updated:          { type: Date, required: true, default: Date.now } 
 }, { collection: 'admin' });
 adminSchema.index({ appname: 1 }, { unique: true });
 

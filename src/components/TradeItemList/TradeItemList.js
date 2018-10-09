@@ -27,7 +27,7 @@ class TradeItemList extends React.Component {
     const nextPage = nextProps.page;
     const prevItems = this.props.items;
     const prevPage = this.props.page;
-    if((prevItems.length === 0 && nextItems.length > 0) || (prevPage !== nextPage)) {
+    if((nextItems.length !== 0 && prevItems.length === 0) || (prevPage !== nextPage)) {
       //std.logInfo(TradeItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let traded = [];
       nextItems.forEach(item => {
@@ -61,8 +61,11 @@ class TradeItemList extends React.Component {
     const { user } = this.props;
     const currentIndex = selectedItemId.indexOf(id);
     const newChecked = [...selectedItemId];
-    if (currentIndex === -1)  newChecked.push(id);
-    else newChecked.splice(currentIndex, 1);
+    if (currentIndex === -1) {
+      newChecked.push(id);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
     TradeAction.select(user, newChecked);
   }
 
@@ -74,46 +77,41 @@ class TradeItemList extends React.Component {
     const buttonColor = traded.indexOf(item.guid__) !== -1 ? 'green' : 'yellow';
     const buttonText = traded.indexOf(item.guid__) !== -1 ? '取引 完了' : '取引 未完了';
     const title = `出品件名：${item.title}`;
-    const description = `配信時間：${ std.formatDate(new Date(item.pubDate),      'YYYY/MM/DD hh:mm') }、`
+    const description = `配信時間：${ std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm') }、`
     + `現在価格：${item.price}円、`
-    + `入札数：${item.bids}、`
+    + `入札数：${item.bids}、` + `出品数：${item.sale ? item.sale : '-'}、`
     + `入札終了時間：${ std.formatDate(new Date(item.bidStopTime),  'YYYY/MM/DD hh:mm') }、`
     + `AuctionID：${item.guid__}` ;
-    return item.description ? (<div key={index} className={classes.noteItem}>
-      <Checkbox onClick={this.handleChangeCheckbox.bind(this, item.guid__)}
-        checked={selectedItemId.indexOf(item.guid__) !== -1} tabIndex={-1} disableRipple />
-      <Paper className={classes.paper}>
-        <ListItem disableGutters className={classes.listItem}>
-          <div className={classes.description}>
-            <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noreferrer noopener">
-            <img src={item.description.DIV.A.IMG.attr.SRC}
-              alt={item.description.DIV.A.IMG.attr.ALT}
-              className={classes.image}/>
-            </a>
-          </div>
-          <ListItemText classes={textClass} primary={title} secondary={description}
-            className={classes.listItemText}/>
-          <ListItemSecondaryAction>
-            <RssButton color={buttonColor} onClick={this.handleChangeTraded.bind(this, item.guid__)}
-              classes={classes.button}>{buttonText}</RssButton>
-          </ListItemSecondaryAction>
-        </ListItem>
-      </Paper>
-      <div className={classes.space} />
-    </div>) : null;
+    return item.description
+      ? ( <div key={index} className={classes.noteItem}>
+          <Checkbox onClick={this.handleChangeCheckbox.bind(this, item.guid__)}
+            checked={selectedItemId.indexOf(item.guid__) !== -1} tabIndex={-1} disableRipple />
+          <Paper className={classes.paper}>
+            <ListItem disableGutters className={classes.listItem}>
+              <div className={classes.description}>
+                <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
+                <img src={item.description.DIV.A.IMG.attr.SRC}
+                  alt={item.description.DIV.A.IMG.attr.ALT}
+                  className={classes.image}/>
+                </a>
+              </div>
+              <ListItemText classes={textClass} primary={title} secondary={description}
+                className={classes.listItemText}/>
+              <ListItemSecondaryAction>
+                <RssButton color={buttonColor} onClick={this.handleChangeTraded.bind(this, item.guid__)}
+                  classes={classes.button}>{buttonText}</RssButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          </Paper>
+          <div className={classes.space} />
+        </div> ) 
+      : null;
   }
 
   render() {
     //std.logInfo(TradeItemList.displayName, 'State', this.state);
     const { items } = this.props;
-    //const compareId = ((a, b) => {
-    //  if(a._id < b._id) return -1;
-    //  if(a._id > b._id) return 1;
-    //  return 0;
-    //});
-    const renderItems = items
-      //.sort(compareId)
-      .map((item, index) => this.renderItem(index, item));
+    const renderItems = items.map((item, index) => this.renderItem(index, item));
     return <List>{renderItems}</List>;
   }
 }
@@ -126,7 +124,6 @@ TradeItemList.propTypes = {
 , user: PropTypes.string.isRequired
 , page: PropTypes.number.isRequired
 };
-
 const itemHeight    = 208;
 const itemMinWidth  = 800;
 const descMinWidth  = 200;

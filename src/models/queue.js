@@ -12,13 +12,13 @@ const jobSchema = new mongoose.Schema({
   worker:           { type: String, required: true }
 , jobname:          { type: String, required: true }
 , params:           { type: Object, required: true }
-, timeout:          Date
-, delay:            { type: Date, required: true, default: Date.now() }
-, priority:         Number
-, status:           String
-, enqueued:         { type: Date, required: true, default: Date.now() }
-, dequeued:         { type: Date, required: true, default: Date.now() }
-, result:           String
+, timeout:          { type: Date }
+, delay:            { type: Date }
+, priority:         { type: Number }
+, status:           { type: String }
+, enqueued:         { type: Date, required: true, default: Date.now }
+, dequeued:         { type: Date }
+, result:           { type: String }
 }, { collection: 'jobs' });
 jobSchema.index({ worker: 1, jobname: 1 });
 

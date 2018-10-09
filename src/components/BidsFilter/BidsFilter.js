@@ -15,8 +15,7 @@ class BidsFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedItemId: props.selectedItemId
-    , items: props.items
+      items: props.items
     , checked: false
     , endBidding: true
     , allBidding: true
@@ -45,8 +44,7 @@ class BidsFilter extends React.Component {
     const prevAllBidding = this.state.prevAllBidding;
     const prevItems = this.state.items; 
     const prevPage = this.state.prevPage;
-    const selectedItemId  = nextProps.selectedItemId;
-    if(prevItems && (nextItems.length > 0)) {
+    if(prevItems && (nextItems.length !== 0)) {
       if(prevItems.length === 0) {
         //std.logInfo(BidsFilter.displayName, 'Init', nextProps);
         this.formsRef.current.scrollTop = 0;
@@ -54,17 +52,19 @@ class BidsFilter extends React.Component {
       } else if(prevPage !== nextPage) {
         //std.logInfo(BidsFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
-        this.setState({ items: catItems(nextItems), prevPage: nextPage, selectedItemId, itemFilter });
+        this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter });
       } else if(!itemFilter.allBidding) {
         //std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter
         , prevAllBidding: false });
       } else if(itemFilter.allBidding !== prevAllBidding) {
         //std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, selectedItemId, itemFilter
-        , prevAllBidding: true });
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllBidding: true });
+      } else {
+        //std.logInfo(BidsFilter.displayName, 'All', nextProps);
+        this.setState({ items: nextItems });
       }
     }
   }
@@ -116,7 +116,7 @@ class BidsFilter extends React.Component {
         {
           this.setState({ checked });
           const { user, items } = this.props;
-          const ids = checked ? items.map(item => item.guid._) : [];
+          const ids = checked ? items.map(item => item.guid__) : [];
           BidsAction.select(user, ids);
           break;
         }
@@ -124,15 +124,13 @@ class BidsFilter extends React.Component {
   }
 
   handleTraded() {
-    const { user } = this.props;
-    const { selectedItemId } = this.state;
+    const { user, selectedItemId } = this.props;
     std.logInfo(BidsFilter.displayName, 'handleTraded', selectedItemId);
     BidsAction.createTrade(user, selectedItemId);
   }
 
   handleDelete() {
-    const { user } = this.props;
-    const { selectedItemId } = this.state;
+    const { user, selectedItemId } = this.props;
     std.logInfo(BidsFilter.displayName, 'handleDelete', selectedItemId);
     if(window.confirm('Are you sure?')) {
       BidsAction.deleteList(user, selectedItemId);
