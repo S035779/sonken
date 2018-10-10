@@ -1,18 +1,19 @@
-import sourceMapSupport           from 'source-map-support';
-import dotenv                     from 'dotenv';
-import { throwError }             from 'rxjs';
-import { flatMap, map }           from 'rxjs/operators';
-import async                      from 'async';
-import FeedParser                 from 'Routes/FeedParser/FeedParser';
-import Yahoo                      from 'Utilities/Yahoo';
-import log                        from 'Utilities/logutils';
-import aws                        from 'Utilities/awsutils';
+import sourceMapSupport from 'source-map-support';
+import dotenv           from 'dotenv';
+import * as R           from 'ramda';
+import { throwError }   from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
+import async            from 'async';
+import FeedParser       from 'Routes/FeedParser/FeedParser';
+import Yahoo            from 'Utilities/Yahoo';
+import log              from 'Utilities/logutils';
+import aws              from 'Utilities/awsutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error();
 const node_env  = process.env.NODE_ENV    || 'development';
-const numbers   = process.env.JOB_UPD_NUM || 1000;
+const numbers   = process.env.JOB_UPD_NUM || 100;
 const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
@@ -31,30 +32,69 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const request = (operation, { url, user, id, items }) => {
+const request = (operation, { url, user, id, items, skip, limit }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
-  const setNote = obj => ({ updated: new Date(), items: obj.item });
+  const setNote = obj => ({ updated: new Date(), items: obj });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+  const isNotItems = (objs, item) => R.none(_obj => _obj.guid__ === item.guid__, objs);
+  const hasNotItems = objs => R.filter(item => isNotItems(objs, item), items);
+  const setItems = obj => R.concat(obj.item, hasNotItems(obj.item));
   switch(operation) {
     case 'search':
     case 'seller':
-      return yahoo.jobHtml({ url }).pipe(map(setNote), flatMap(putHtml));
+      {
+        const pages = Math.ceil(numbers / limit);
+        const conditions = { url, skip, limit, pages };
+        return yahoo.jobHtml(conditions).pipe(
+            map(setItems)
+          , map(R.tap(console.log))
+          , map(setNote)
+          , flatMap(putHtml)
+          );
+      }
     case 'closedsearch':
-      return yahoo.jobClosedMerchant({ url, pages: Math.ceil(numbers / 100) })
-        .pipe(map(setNote), flatMap(putHtml));
+      {
+        const pages = Math.ceil(numbers / limit);
+        const conditions = { url, skip, limit, pages };
+        return yahoo.jobClosedMerchant(conditions).pipe(
+            map(setItems)
+          , map(R.tap(console.log))
+          , map(setNote)
+          , flatMap(putHtml)
+          );
+      }
     case 'closedsellers':
-      return yahoo.jobClosedSellers({ url, pages: Math.ceil(numbers / 25) })
-        .pipe(map(setNote), flatMap(putHtml));
+      {
+        const pages = Math.ceil(numbers / limit);
+        const conditions = { url, skip, limit, pages };
+        return yahoo.jobClosedSellers(conditions).pipe(
+            map(setItems)
+          , map(R.tap(console.log))
+          , map(setNote)
+          , flatMap(putHtml)
+          );
+      }
     case 'rss':
-      return yahoo.jobRss({ url }).pipe(map(setNote), flatMap(putRss));
+      {
+        const conditions = { url };
+        return yahoo.jobRss(conditions).pipe(
+          map(setNote)
+        , flatMap(putRss)
+        );
+      }
     case 'images':
-      return yahoo.jobImages({
-        items, operator: (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename)
-      });
+      {
+        const operator = (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename);
+        const conditions = { items, operator };
+        return yahoo.jobImages(conditions);
+      }
     case 'defrag':
-      return feed.garbageCollection({ user });
+      {
+        const conditions = { user };
+        return feed.garbageCollection(conditions);
+      }
     default:
       return throwError('Unknown operation!');
   }

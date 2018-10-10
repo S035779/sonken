@@ -164,10 +164,14 @@ class Yahoo {
 
   promiseClosedMerchant(options) {
     return new Promise((resolve, reject) => {
+      const url   = options.url;
+      const pages = options.pages || 1;
+      const skip  = options.skip  || 0;
+      const limit = options.limit || 20;
       let results;
-      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
-      osmosis.get(options.url, { n: 100, b: 1 })
-        .paginate({ b: +100 }, options.pages - 1)
+      if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
+      osmosis.get(url, { n: limit, b: skip + 1 })
+        .paginate({ b: +limit }, pages - 1)
         .set({ title: 'title', item: [ osmosis
           .find('div#list01 tr')
           .filter('td.i, td.a1')
@@ -176,10 +180,7 @@ class Yahoo {
           , attr_HREF : 'div.th a@href'
           , img_SRC:    'div.th img@src' 
           , img_ALT:    'div.th img@alt'
-          , description: { DIV: { A: {
-              attr: { HREF: 'div.th a@href' }
-            , IMG: { attr: { SRC:  'div.th img@src', ALT: 'div.th img@alt' } }
-            } } }
+          , description: { DIV: { A: { attr: { HREF: 'div.th a@href' }, IMG: { attr: { SRC:  'div.th img@src', ALT: 'div.th img@alt' } } } } }
           })
           .follow('div.a1wrp h3 a')
           .set({
@@ -199,49 +200,39 @@ class Yahoo {
           , images:       ['div#imageinfo img@src'  ]
           })
         ]})
-        .data(obj   => { 
-          const setSize       = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
-          const setImage      = _obj => { 
-            _obj.description.DIV.A.IMG['attr'] 
-              = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
+        .data(data => { 
+          const setSize         = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
+          const setImage        = _obj => { 
+            _obj.description.DIV.A.IMG['attr'] = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
             return _obj;
           };
-          const zipDetail     = _obj => R.zip(_obj.property, _obj.details);
-          const _getDetail    = (str, _objs) => {
+          const zipDetail       = _obj => R.zip(_obj.property, _obj.details);
+          const _getDetail      = (str, _objs) => {
             const details = R.find(_obj => _obj[0] === str, _objs);
             return details ? details[1] : '';
           };
-          const getDetail     = R.curry(_getDetail);
-          const setDetail     = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
-          const setAuctionId  = _obj =>  !!_obj.property || !!_obj.details 
-            ? R.merge(_obj, {
-                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-              , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+          const getDetail       = R.curry(_getDetail);
+          const setDetail       = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
+          const setAuctionId    = _obj =>  !!_obj.property || !!_obj.details 
+            ? R.merge(_obj, 
+              { guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+                , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
             : _obj;
-          const setPubDate    = _obj => R.merge(_obj, {
-            pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
-          });
-          const _setPrice     = _obj => R.replace(/円|,|\s/g, '', _obj);
-          const setBuyNow     = _obj => _obj.buynow
-            ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
-          const setPrice      = _obj => _obj.price
-            ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
-          const setSeller     = _obj => _obj.seller
-            ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
-          const setBids       = _obj => _obj.bids
-            ? R.merge(_obj, { bids: _obj.bids }) : R.merge(_obj, { bids: '-' });
-          const setCountdown  = _obj => R.merge(_obj, { countdown: '終了' });
-          const setCondition  = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
-          const setOffers     = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
-          const setCategory   = R.join(' > ');
-          const setCategorys  = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId= R.compose(
-            R.last, R.filter(c => c !== '')
-          , R.split('/'), url => std.parse_url(url).pathname, R.last
-          );
-          const setCategoryId = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
-          const _setDate      = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
-          const setBidStopTime= _obj => {
+          const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
+          const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
+          const setBuyNow       = _obj => _obj.buynow ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
+          const setPrice        = _obj => _obj.price ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
+          const setSeller       = _obj => _obj.seller ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
+          const setBids         = _obj => _obj.bids ? R.merge(_obj, { bids: _obj.bids }) : R.merge(_obj, { bids: '-' });
+          const setCountdown    = _obj => R.merge(_obj, { countdown: '終了' });
+          const setCondition    = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
+          const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
+          const setCategory     = R.join(' > ');
+          const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
+          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), str => std.parse_url(str).pathname, R.last);
+          const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+          const _setDate        = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
+          const setBidStopTime  = _obj => {
             const today = new Date();
             const yyyy = today.getFullYear();
             const _date = _setDate(setDetail('終了日時', _obj));
@@ -250,11 +241,11 @@ class Yahoo {
             const date = Date.now() < next ? past : next;
             return R.merge(_obj, { bidStopTime: std.formatDate(new Date(date), 'YYYY/MM/DD hh:mm')});
           };
-          const setHifn       = str  => R.isEmpty(str) ? '-' : str;
-          const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
-          const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
-          const setShipping   = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
-          const setExplanation = _obj => { 
+          const setHifn         = str  => R.isEmpty(str) ? '-' : str;
+          const setShipPrice    = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
+          const setShipBuyNow   = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
+          const setShipping     = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
+          const setExplanation  = _obj => { 
             const input = R.replace(/\r?\n/g, '', _obj.explanation);
             const len = R.length(input);
             const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
@@ -263,29 +254,25 @@ class Yahoo {
               idx = R.indexOf(words[num1], input);
               if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
             }
-            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(obj => !R.isNil(obj)))(pairs);
+            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(__obj => !R.isNil(__obj)))(pairs);
             const max = R.length(pairs);
             let num2 = max;
             while(num2--) {
               if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
               else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
             }
-            const subString = __obj => input.substring(__obj.from, __obj.to);
-            const setSubStr = __obj => R.merge(__obj, { string: subString(__obj) });
-            const setExplan = __obj => __obj ? __obj.string : '';
-            const isExplan = __obj => __obj.name === '商品詳細';
-            const explanation = R.compose(
-              setExplan
-            , R.find(isExplan)
-            , R.map(setSubStr)
-            )(pairs);
+            const subString     = __obj => input.substring(__obj.from, __obj.to);
+            const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
+            const setExplan     = __obj => __obj ? __obj.string : '';
+            const isExplan      = __obj => __obj.name === '商品詳細';
+            const explanation = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
             return R.merge(_obj, { explanation }); 
           };
-          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
-          const setItems      = objs => ({ url: options.url, title: obj.title, item:  objs });
+          const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
+          const isGuid          = _obj => _obj.guid__;
+          const setItems        = _objs => ({ url, title: data.title, item: _objs });
           const result = R.compose(
             setItems
-          //, R.tap(log.trace.bind(this))
           , R.map(setImages)
           , R.map(setExplanation)
           , R.map(setShipping)
@@ -302,19 +289,19 @@ class Yahoo {
           , R.map(setPrice)
           , R.map(setBidStopTime)
           , R.map(setPubDate)
-          , R.filter(_obj => !!_obj.guid__)
+          , R.filter(isGuid)
           , R.map(setAuctionId)
           , R.map(setSize)
           , R.map(setImage)
           , R.filter(R.is(Object))
-          )(obj.item);
+          )(data.item);
           const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
           results = R.mergeWithKey(concatValues, results, result);
         })
         .then((context, data) => {
           const params = context.request.params;
           const b = params && params.b ? params.b : 1;
-          log.info(Yahoo.displayName, 'Title:', data.title, 'Items:', b, 'Pages:', options.pages);
+          log.info(Yahoo.displayName, 'Title:', data.title, 'Items:', b, 'Pages:', pages);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
         //.debug(msg  => log.debug(Yahoo.displayName, msg))
@@ -325,24 +312,23 @@ class Yahoo {
   
   promiseClosedSellers(options) {
     return new Promise((resolve, reject) => {
-      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
+      const url   = options.url;
+      const pages = options.pages || 1;
+      const skip  = options.skip  || 0;
+      const limit = options.limit || 25;
       let results;
-      osmosis.get(options.url, { apg: 1 })
-        .paginate({ apg: +1 }, options.pages - 1)
+      if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
+      osmosis.get(url, { apg: Math.ceil((skip + 1) / limit) })
+        .paginate({ apg: +1 }, pages - 1)
         .set({ title: 'title', item: [ osmosis
           .find('div.maincol')
           .filter('table[1] > tbody > tr > td > table > tbody > tr[1] > td > small')
-          .set({ 
-            link: 'a@href'
-          , attr_HREF : 'a@href'
-          })
+          .set({ link: 'small a@href', attr_HREF : 'small a@href' })
           .follow('a')
           .set({
             img_SRC:    'img#acMdThumPhoto@src' 
           , img_ALT:    'img#acMdThumPhoto@alt'
-          , description: { DIV: { A: { 
-              IMG:  { attr: { SRC: 'img#acMdThumPhoto@src', ALT: 'img#acMdThumPhoto@alt' } }
-            } } }
+          , description: { DIV: { A: { IMG:  { attr: { SRC: 'img#acMdThumPhoto@src', ALT: 'img#acMdThumPhoto@alt' } } } } }
           , title:        'div.decBg04 h1 > text()'
           , bids:         'td.decBg01 > b > text()'
           , buynow:       'p.decTxtBuyPrice > text()'
@@ -359,51 +345,44 @@ class Yahoo {
           , images:       ['div#imageinfo img@src' ]
           })
         ]})
-        .data(obj => {
-          const setSize       = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
-          const setImage      = _obj => { 
-            _obj.description.DIV['A']
-              = R.merge({ attr: { HREF: _obj.attr_HREF } }, _obj.description.DIV.A);
-            _obj.description.DIV.A.IMG['attr'] 
-              = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
+        .data(data => {
+          const setSize         = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
+          const setImage        = _obj => { 
+            _obj.description.DIV['A'] = R.merge(
+              { attr: { HREF: `https://page.auctions.yahoo.co.jp/jp/auction/${setDetail('オークションID', _obj)}#enlargeimg` } }
+            , _obj.description.DIV.A);
+            _obj.description.DIV.A.IMG['attr'] = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
             return _obj;
           };
-          const zipDetail     = _obj => R.zip(_obj.property, _obj.details);
-          const _getDetail    = (str, _objs) => {
+          const zipDetail       = _obj => R.zip(_obj.property, _obj.details);
+          const _getDetail      = (str, _objs) => {
             const details = R.find(_obj => _obj[0] === str, _objs);
             return details ? details[1] : '';
           };
-          const getDetail    = R.curry(_getDetail);
-          const setDetail     = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
-          const setAuctionId  = _obj => !!_obj.property || !!_obj.details
-            ? R.merge(_obj, {
-                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-              , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+          const getDetail       = R.curry(_getDetail);
+          const setDetail       = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
+          const setAuctionId    = _obj => _obj.property || _obj.details 
+            ? R.merge(_obj, { guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+                , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
             : _obj;
-          const setPubDate    = _obj => R.merge(_obj, {
-            pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
-          });
-          const _setPrice     = _obj => R.replace(/円|,|\s/g, '', _obj);
-          const setBuyNow     = _obj => _obj.buynow
-            ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
-          const setPrice      = _obj => _obj.price
-            ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
-          const setSeller     = _obj => _obj.seller
-            ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
-          const setBids       = _obj => _obj.bids
-            ? R.merge(_obj, { bids: _obj.bids }) : R.merge(_obj, { bids: '-' });
-          const setCountdown  = _obj => R.merge(_obj, { countdown: '終了' });
-          const setCondition  = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
-          const setOffers     = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
-          const setCategory   = R.join(' > ');
-          const setCategorys  = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId= R.compose(
+          const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
+          const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
+          const setBuyNow       = _obj => _obj.buynow ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
+          const setPrice        = _obj => _obj.price ? R.merge(_obj, { price: _setPrice(_obj.price) }) : R.merge(_obj, { price: '-' });
+          const setSeller       = _obj => _obj.seller ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
+          const setBids         = _obj => _obj.bids ? R.merge(_obj, { bids: _obj.bids }) : R.merge(_obj, { bids: '-' });
+          const setCountdown    = _obj => R.merge(_obj, { countdown: '終了' });
+          const setCondition    = _obj => R.merge(_obj, { item_condition: setDetail('商品の状態', _obj) });
+          const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
+          const setCategory     = R.join(' > ');
+          const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
+          const _setCategoryId  = R.compose(
             R.last, R.filter(c => c !== '')
           , R.split('/'), url => std.parse_url(url).pathname, R.last
           );
-          const setCategoryId = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
-          const _setDate      = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
-          const setBidStopTime= _obj => {
+          const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+          const _setDate        = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
+          const setBidStopTime  = _obj => {
             const today = new Date();
             const yyyy = today.getFullYear();
             const _date = _setDate(setDetail('終了日時', _obj));
@@ -412,11 +391,11 @@ class Yahoo {
             const date = Date.now() < next ? past : next;
             return R.merge(_obj, { bidStopTime: std.formatDate(new Date(date), 'YYYY/MM/DD hh:mm')});
           };
-          const setHifn       = str  => R.isEmpty(str) ? '-' : str;
-          const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
-          const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
-          const setShipping   = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
-          const setExplanation = _obj => { 
+          const setHifn         = str  => R.isEmpty(str) ? '-' : str;
+          const setShipPrice    = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
+          const setShipBuyNow   = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
+          const setShipping     = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
+          const setExplanation  = _obj => { 
             const input = R.replace(/\r?\n/g, '', _obj.explanation);
             const len = R.length(input);
             const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
@@ -425,29 +404,26 @@ class Yahoo {
               idx = R.indexOf(words[num1], input)
               if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
             }
-            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(obj => !R.isNil(obj)))(pairs);
+            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(__obj => !R.isNil(__obj)))(pairs);
             const max = R.length(pairs);
             let num2 = max;
             while(num2--) {
               if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
               else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
             }
-            const subString = __obj => input.substring(__obj.from, __obj.to);
-            const setSubStr = __obj => R.merge(__obj, { string: subString(__obj) });
-            const setExplan = __obj => __obj ? __obj.string : '';
-            const isExplan  = __obj => __obj.name === '商品詳細';
-            const explanation = R.compose(
-              setExplan
-            , R.find(isExplan)
-            , R.map(setSubStr)
-            )(pairs);
+            const subString     = __obj => input.substring(__obj.from, __obj.to);
+            const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
+            const setExplan     = __obj => __obj ? __obj.string : '';
+            const isExplan      = __obj => __obj.name === '商品詳細';
+            const explanation = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
             return R.merge(_obj, { explanation }); 
           };
-          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
-          const setItems = objs => ({ url: options.url, title: obj.title, item:  objs });
-          const result = R.compose(
+          const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
+          const isGuid          = _obj => _obj.guid__;
+          const isDescription   = _obj => _obj.description;
+          const setItems        = _objs => ({ url, title: data.title, item: _objs });
+          const result          = R.compose(
             setItems
-          //, R.tap(log.trace.bind(this))
           , R.map(setImages)
           , R.map(setExplanation)
           , R.map(setShipping)
@@ -464,20 +440,20 @@ class Yahoo {
           , R.map(setPrice)
           , R.map(setBidStopTime)
           , R.map(setPubDate)
-          , R.filter(_obj => !!_obj.guid__)
+          , R.filter(isGuid)
           , R.map(setAuctionId)
           , R.map(setSize)
           , R.map(setImage)
-          , R.filter(_obj => !!_obj.description)
+          , R.filter(isDescription)
           , R.filter(R.is(Object))
-          )(obj.item);
+          )(data.item);
           const concatValues = (k,l,r) => k === 'item' ? R.concat(l,r) : r;
           results = R.mergeWithKey(concatValues, results, result);
         })
         .then((context, data) => {
           const params = context.request.params;
           const apg = params && params.apg ? params.apg : 1;
-          log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', options.pages);
+          log.info(Yahoo.displayName, 'Title:', data.title, 'Page:', apg, 'Pages:', pages);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
         //.debug(msg  => log.debug(Yahoo.displayName, msg))
@@ -488,9 +464,14 @@ class Yahoo {
   
   promiseHtml(options) {
     return new Promise((resolve, reject) => {
-      if(!options.url) reject({ name: 'Error', message: 'Url not passed.' });
+      const url   = options.url;
+      const pages = options.pages || 1;
+      const skip  = options.skip  || 0;
+      const limit = options.limit || 20;
       let results;
-      osmosis.get(options.url)
+      if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
+      osmosis.get(url, { n: limit, b: skip + 1 })
+        .paginate({ b: +limit }, pages -1)
         .set({ title: 'title', item: [ osmosis
           .find('div#list01 tr')
           .filter('td.i, td.a1')
@@ -524,54 +505,38 @@ class Yahoo {
           , images:       ['ul.ProductImage__thumbnails img@src'   ]
           })
         ]})
-        .data(obj => {
-          const setSize = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
+        .data(data => {
+          const setSize         = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
           const setImage        = _obj => {
-            _obj.description.DIV.A.IMG['attr'] 
-              = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
+            _obj.description.DIV.A.IMG['attr'] = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
             return _obj;
           };
-          const setAuctionId    = _obj => R.merge(_obj, {
-            guid: { _:    _obj.details[10], attr: { isPermaLink: false } }
-          , guid__: _obj.details[10]
-          , guid_isPermaLink: false
-          });
-          const setPubDate      = _obj => R.merge(_obj, {
-            pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm')
-          });
+          const setAuctionId    = _obj => 
+            R.merge(_obj, { guid: { _: _obj.details[10], attr: { isPermaLink: false } }, guid__: _obj.details[10] , guid_isPermaLink: false });
+          const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
           const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
-          const setBuyNow       = _obj => _obj.buynow
-            ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) 
-            : R.merge(_obj, { buynow: '-' });
+          const setBuyNow       = _obj => _obj.buynow ? R.merge(_obj, { buynow: _setPrice(_obj.buynow) }) : R.merge(_obj, { buynow: '-' });
           const setPrice        = _obj => _obj.price
             ? R.merge(_obj, { price: _setPrice(_obj.price), market: _setPrice(_obj.price) }) 
             : R.merge(_obj, { price: '-', market: '-' });
-          const setSeller       = _obj => _obj.seller
-            ? R.merge(_obj, { seller: _obj.seller })
-            : R.merge(_obj, { seller: '-' });
-          const setBids         = _obj => _obj.bids
-            ? R.merge(_obj, { bids: _obj.bids }) 
-            : R.merge(_obj, { bids: '-' });
-          const setCountdown    = _obj => _obj.countnumber
-            ? R.merge(_obj, { countdown: _obj.countnumber + _obj.countunit })
-            : R.merge(_obj, { countdown: '_' });
+          const setSeller       = _obj => _obj.seller ? R.merge(_obj, { seller: _obj.seller }) : R.merge(_obj, { seller: '-' });
+          const setBids         = _obj => _obj.bids ? R.merge(_obj, { bids: _obj.bids }) : R.merge(_obj, { bids: '-' });
+          const setCountdown    = _obj => 
+            _obj.countnumber ? R.merge(_obj, { countdown: _obj.countnumber + _obj.countunit }) : R.merge(_obj, { countdown: '_' });
           const setCondition    = _obj => R.merge(_obj, { item_condition: _obj.details[0] });
           const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(_obj.details[9]) });
           const setCategory     = R.join(' > ');
           const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId  = R.compose(
-            R.last, R.filter(c => c !== '')
-          , R.split('/'), url => std.parse_url(url).pathname, R.last
-          );
-          const setCategoryId   
-            = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
+          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), str => std.parse_url(str).pathname, R.last);
+          const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
           const _setDate        = R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
           const setBidStopTime  = _obj => R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
-          const setHifn       = str  => R.isNil(str) ? '-' : str;
-          const setShipPrice  = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_price) });
-          const setShipBuyNow = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_buynow) });
-          const setImages     = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
-          const setItems        = objs => ({ url: options.url, title: obj.title, item:  objs });
+          const setHifn         = str  => R.isNil(str) ? '-' : str;
+          const setShipPrice    = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_price) });
+          const setShipBuyNow   = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_buynow) });
+          const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
+          const isGuid          = _obj => _obj.guid__;
+          const setItems        = _objs => ({ url, title: data.title, item: _objs });
           return results        = R.compose(
             setItems
           , R.map(setImages)
@@ -588,13 +553,17 @@ class Yahoo {
           , R.map(setPrice)
           , R.map(setBidStopTime)
           , R.map(setPubDate)
-          , R.filter(_obj => !!_obj.guid__)
+          , R.filter(isGuid)
           , R.map(setAuctionId)
-          //, R.tap(log.trace.bind(this))
           , R.map(setSize)
           , R.map(setImage)
           , R.filter(R.is(Object))
-          )(obj.item);
+          )(data.item);
+        })
+        .then((context, data) => {
+          const params = context.request.params;
+          const b = params && params.b ? params.b : 1;
+          log.info(Yahoo.displayName, 'Title:', data.title, 'Items:', b, 'Pages:', pages);
         })
         //.log(msg => log.trace(Yahoo.displayName, msg))
         //.debug(msg => log.debug(Yahoo.displayName, msg))
@@ -603,24 +572,22 @@ class Yahoo {
     });
   }
 
-  jobClosedMerchant({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedMerchant(url, pages)).pipe(
+  jobClosedMerchant({ url, pages, skip, limit }) {
+    return from(this.getClosedMerchant(url, pages, skip, limit)).pipe(
       flatMap(this.fetchMarchant.bind(this))
     , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
-  jobClosedSellers({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedSellers(url, pages)).pipe(
+  jobClosedSellers({ url, pages, skip, limit }) {
+    return from(this.getClosedSellers(url, pages, skip, limit)).pipe(
       flatMap(this.fetchMarchant.bind(this))
     , flatMap(this.fetchItemSearch.bind(this))
     );
   }
 
-  jobHtml({ url }) {
-    return from(this.getHtml(url));
+  jobHtml({ url, pages, skip, limit }) {
+    return from(this.getHtml(url, pages, skip, limit));
   }
 
   jobImages({ operator, items }) {
@@ -635,18 +602,16 @@ class Yahoo {
     return forkJoin(promises(images));
   }
 
-  fetchClosedMerchant({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedMerchant(url, pages));
+  fetchClosedMerchant({ url, pages, skip, limit }) {
+    return from(this.getClosedMerchant(url, pages, skip, limit));
   }
 
-  fetchClosedSellers({ url, pages }) {
-    if(!pages) pages  = 1;
-    return from(this.getClosedSellers(url, pages));
+  fetchClosedSellers({ url, pages, skip, limit }) {
+    return from(this.getClosedSellers(url, pages, skip, limit));
   }
 
-  fetchHtml({ url }) {
-    return from(this.getHtml(url));
+  fetchHtml({ url, pages, skip, limit }) {
+    return from(this.getHtml(url, pages, skip, limit));
   }
 
   fetchItemSearch(note) {
@@ -663,8 +628,7 @@ class Yahoo {
 
   setAsin (item, objs) {
     const setASINs  = _objs => R.merge(item, { asins: _objs });
-    const getASIN   = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) 
-      : [ _obj.Item.ASIN ];
+    const getASIN   = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
     const isValid   = _obj  => _obj
       && _obj.Request.IsValid === 'True'
       && _obj.Request.ItemSearchRequest.Keywords === this.repSpace(item.title)
@@ -697,9 +661,7 @@ class Yahoo {
 
   fetchMarchant(note) {
     const isItem            = obj => !!obj.title;
-    const urls              = note.item
-      ? R.compose( R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item)
-      : [];
+    const urls              = note.item ? R.compose( R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item) : [];
     const _setMarkets       = (items, objs) => R.map(item => this.setMarket(item, objs), items);
     const _setPerformances  = (items, objs) => R.map(obj => this.setPerformance(items, obj), objs);
     const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
@@ -721,12 +683,10 @@ class Yahoo {
   }
 
   setMarket(item, objs) {
-    const _isSeller = _obj  => 
-      R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+    const _isSeller = _obj  => R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
     const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
     const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-    const getSales  = _objs => _objs.length > 0
-      ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+    const getSales  = _objs => _objs.length > 0 ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
     const setSale   = _obj  => R.merge(item, _obj);
     return R.compose(
       setSale
@@ -810,9 +770,7 @@ class Yahoo {
       };
       const isSuccess =
         this.hasToken(code) ? false : this.addToken(newToken);
-      if(!isSuccess) throw new Error({
-          name: 'Error', message: 'Create Token Error!!'
-        });
+      if(!isSuccess) throw new Error({ name: 'Error', message: 'Create Token Error!!' });
       return newToken;
     };
     return from(this.getAccessToken(query, auth)).pipe(
@@ -837,9 +795,7 @@ class Yahoo {
       };
       const isSuccess =
         this.hasToken(code) ? this.updToken(code, newToken) : false;
-      if(!isSuccess) throw new Error({
-        name: 'Error', message: 'Update Token Error!!'
-      });
+      if(!isSuccess) throw new Error({ name: 'Error', message: 'Update Token Error!!' });
       return newToken;
     };
     return from(this.getAccessToken(query, auth)).pipe(
@@ -849,9 +805,7 @@ class Yahoo {
 
   deleteAuthToken({ code }) {
     const isSuccess = this.delToken(code);
-    if(!isSuccess) throw new Error({
-      name: 'Error', message: 'Delete Token Error!!'
-    });
+    if(!isSuccess) throw new Error({ name: 'Error', message: 'Delete Token Error!!' });
     return;
   }
 

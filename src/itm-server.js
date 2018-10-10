@@ -72,8 +72,11 @@ const request = queue => {
     user:       obj.user
   , id:         obj._id
   , url:        obj.url
+  , items:      obj.items
   , operation:  operation(obj.url)
   , created:    Date.now()
+  , skip:       0
+  , limit:      operation(obj.url) === 'closedsearch' ? 20 : 25
   });
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
