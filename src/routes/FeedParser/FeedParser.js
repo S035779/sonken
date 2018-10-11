@@ -306,7 +306,8 @@ export default class FeedParser {
           const conditions = { _id: id, user };
           const docs = data.items
           ? { updated:      new Date }
-          : isAsin ? {
+          : isAsin
+            ? {
               categoryIds:  data.categoryIds
             , title:        data.title
             , asin:         data.asin
@@ -329,7 +330,8 @@ export default class FeedParser {
           const newItems = R.filter(obj => !obj._id, data.items);
           const curItems = R.filter(obj => obj._id, data.items);
           const getItemIds = R.map(obj => obj._id);
-          const conItemIds = objs => R.compose(R.concat(objs), getItemIds)(curItems);
+          const setObjectIds = R.map(obj => ObjectId(obj._id));
+          const conItemIds = objs => R.compose(R.concat(objs), setObjectIds)(curItems);
           const setItemIds = objs => R.merge(docs, { items: objs });
           return data.items
             ? Items.insertMany(newItems)

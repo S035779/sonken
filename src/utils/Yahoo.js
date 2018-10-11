@@ -109,11 +109,12 @@ class Yahoo {
 
   promiseClosedMerchant(options) {
     return new Promise((resolve, reject) => {
-      log.info(Yahoo.displayName, 'closedsearch:', options);
       const url   = options.url;
       const pages = options.pages || 1;
       const skip  = options.skip  || 0;
       const limit = options.limit || 20;
+      log.info(Yahoo.displayName, 'closedsearch:', 'skip =', skip, 'limit =', limit);
+
       let results;
       if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
       osmosis.get(url, { n: limit, b: skip + 1 })
@@ -248,8 +249,12 @@ class Yahoo {
         })
         .then((context, data) => {
           const params = context.request.params;
-          const b = params && params.b ? params.b : 1;
-          log.info(Yahoo.displayName, 'closedsearch:', data.title, 'Items:', b);
+          const title = data.title;
+          const len   = R.length(data.item);
+          const skip  = params && params.b ? params.b : 1;
+          const limit = params && params.n ? params.n : 20;
+          const page  = Math.ceil(skip / limit);
+          log.info(Yahoo.displayName, 'closedsearch:', title, 'items =', len, 'page =', page);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
         //.debug(msg  => log.debug(Yahoo.displayName, msg))
@@ -260,11 +265,12 @@ class Yahoo {
   
   promiseClosedSellers(options) {
     return new Promise((resolve, reject) => {
-      log.info(Yahoo.displayName, 'closedsellers:', options);
       const url   = options.url;
       const pages = options.pages || 1;
       const skip  = options.skip  || 0;
       const limit = options.limit || 25;
+      log.info(Yahoo.displayName, 'closedsellers:', 'skip =', skip, 'limit =', limit);
+
       const page  = Math.ceil((skip + 1) / limit);
       let results;
       if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
@@ -406,8 +412,10 @@ class Yahoo {
         })
         .then((context, data) => {
           const params = context.request.params;
-          const apg = params && params.apg ? params.apg : 1;
-          log.info(Yahoo.displayName, 'closedsellers:', data.title, 'Page:', apg);
+          const title = data.title;
+          const len   = R.length(data.item);
+          const page  = params && params.apg ? params.apg : 1;
+          log.info(Yahoo.displayName, 'closedsellers:', title, 'items =', len, 'page =', page);
         })
         //.log(msg    => log.trace(Yahoo.displayName, msg))
         //.debug(msg  => log.debug(Yahoo.displayName, msg))
@@ -418,11 +426,12 @@ class Yahoo {
   
   promiseHtml(options) {
     return new Promise((resolve, reject) => {
-      log.info(Yahoo.displayName, 'html:', options);
       const url   = options.url;
       const pages = options.pages || 1;
       const skip  = options.skip  || 0;
       const limit = options.limit || 20;
+      log.info(Yahoo.displayName, 'html:', 'skip =', skip, 'limit =', limit);
+
       let results;
       if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
       osmosis.get(url, { n: limit, b: skip + 1 })
@@ -519,8 +528,12 @@ class Yahoo {
         })
         .then((context, data) => {
           const params = context.request.params;
-          const b = params && params.b ? params.b : 1;
-          log.info(Yahoo.displayName, 'html:', data.title, 'Items:', b);
+          const title = data.title;
+          const len   = R.length(data.item);
+          const skip  = params && params.b ? params.b : 1;
+          const limit = params && params.n ? params.n : 20;
+          const page  = Math.ceil(skip / limit);
+          log.info(Yahoo.displayName, 'html:', title, 'items =', len, 'page =', page);
         })
         //.log(msg => log.trace(Yahoo.displayName, msg))
         //.debug(msg => log.debug(Yahoo.displayName, msg))
