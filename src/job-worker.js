@@ -13,7 +13,6 @@ sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error();
 const node_env  = process.env.NODE_ENV    || 'development';
-const numbers   = process.env.JOB_UPD_NUM || 100;
 const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
@@ -35,43 +34,37 @@ if (node_env === 'production') {
 const request = (operation, { url, user, id, items, skip, limit }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
-  const setNote = obj => ({ updated: new Date(), items: obj });
-  const putHtml = obj => feed.updateHtml({ user, id, html: obj });
-  const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   const isNotItems = (objs, item) => R.none(_obj => _obj.guid__ === item.guid__, objs);
   const hasNotItems = objs => R.filter(item => isNotItems(objs, item), items);
-  const setItems = obj => R.concat(obj.item, hasNotItems(obj.item));
+  const setItems = obj => obj ? R.concat(obj.item, hasNotItems(obj.item)) : items;
+  const setNote = obj => ({ items: obj });
+  const putHtml = obj => feed.updateHtml({ user, id, html: obj });
+  const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   switch(operation) {
     case 'search':
     case 'seller':
       {
-        const pages = Math.ceil(numbers / limit);
-        const conditions = { url, skip, limit, pages };
+        const conditions = { url, skip, limit };
         return yahoo.jobHtml(conditions).pipe(
             map(setItems)
-          , map(R.tap(console.log))
           , map(setNote)
           , flatMap(putHtml)
           );
       }
     case 'closedsearch':
       {
-        const pages = Math.ceil(numbers / limit);
-        const conditions = { url, skip, limit, pages };
+        const conditions = { url, skip, limit };
         return yahoo.jobClosedMerchant(conditions).pipe(
             map(setItems)
-          , map(R.tap(console.log))
           , map(setNote)
           , flatMap(putHtml)
           );
       }
     case 'closedsellers':
       {
-        const pages = Math.ceil(numbers / limit);
-        const conditions = { url, skip, limit, pages };
+        const conditions = { url, skip, limit };
         return yahoo.jobClosedSellers(conditions).pipe(
             map(setItems)
-          , map(R.tap(console.log))
           , map(setNote)
           , flatMap(putHtml)
           );
@@ -100,16 +93,16 @@ const request = (operation, { url, user, id, items, skip, limit }) => {
   }
 };
 
-const worker = ({ url, user, id, items, operation }, callback) => {
+const worker = ({ url, user, id, items, operation, skip, limit }, callback) => {
   log.info(displayName, 'Started. _id/ope:', id, operation);
-  const start_time = Date.now();
-  request(operation, { url, user, id, items }).subscribe(
+  const start = new Date();
+  request(operation, { url, user, id, items, skip, limit }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => {
-      const end_time = Date.now();
-      const time_lap = (end_time - start_time) / 1000;
-      log.info(displayName, `Completed. _id: ${id}, time: ${time_lap} sec.`);
+      const end = new Date();
+      const seconds = Math.floor((end.getTime() - start.getTime()) / 1000);
+      log.info(displayName, `Completed. _id: ${id}, time: ${seconds} sec.`);
       callback();
   });
 };

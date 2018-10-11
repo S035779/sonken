@@ -53,7 +53,7 @@ export default class FaqEditor {
       case 'create/post':
         {
           const conditions = { posted: options.id };
-          const update = { posted: options.id };
+          const update = { posted: options.id, updated: new Date };
           const params = { upsert: true };
           return Posted.update(conditions, update, params).exec();
         }
@@ -70,11 +70,7 @@ export default class FaqEditor {
       case 'upload/file':
         {
           const conditions = { _id: options.id };
-          const update = {
-            user: options.admin
-          , file: options.file
-          , update: new Date
-          };
+          const update = { user: options.admin, file: options.file, updated: new Date };
           return Faq.findOneAndUpdate(conditions, update).exec();
         }
       default:

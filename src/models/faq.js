@@ -17,7 +17,7 @@ const faqSchema = new mongoose.Schema({
 
 const postedSchema = new mongoose.Schema({
   posted:           { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'posted' });
 postedSchema.index({ posted: 1 }, { unique: true });
 

@@ -49,7 +49,7 @@ export default class MailEditor {
       case 'create/select':
         {
           const conditions = { selected: options.id };
-          const update = { selected: options.id };
+          const update = { selected: options.id, updated: new Date };
           const params = { upsert: true };
           return Selected.update(conditions, update, params).exec();
         }
@@ -66,11 +66,7 @@ export default class MailEditor {
       case 'upload/file':
         {
           const conditions = { _id: options.id };
-          const update = {
-            user: options.admin
-          , file: options.file
-          , updated: new Date
-          };
+          const update = { user: options.admin, file: options.file, updated: new Date };
           return Mail.findOneAndUpdate(conditions, update).exec();
         }
       default:

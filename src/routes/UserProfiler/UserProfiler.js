@@ -166,7 +166,7 @@ export default class UserProfiler {
       case 'create/approval':
         {
           const conditions  = { approved: options.id };
-          const update = { approved: options.id };
+          const update = { approved: options.id, updated: new Date };
           const params = { upsert: true };
           return Approved.update(conditions, update, params).exec();
         }

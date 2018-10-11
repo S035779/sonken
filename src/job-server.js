@@ -18,8 +18,9 @@ if(config.error) throw config.error;
 const node_env        = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
-const updatedInterval = process.env.JOB_UPD_MIN || 10;
-const numChildProcess = process.env.JOB_NUM_MAX || 1;
+const updatedInterval = process.env.JOB_UPD_MIN || 5;
+const numChildProcess = process.env.JOB_NUM_MAX || 2;
+const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[JOB]';
@@ -75,9 +76,13 @@ const request = queue => {
   , items:      obj.items
   , operation:  operation(obj.url)
   , created:    Date.now()
-  , skip:       0
-  , limit:      20
   });
+  const limit = 20;
+  const range = R.range(0, Math.ceil(numUpdatedItems / limit));
+  const _setItems = (obj, idx) => R.merge(obj, { skip: idx * limit, limit });
+  const setItems = R.curry(_setItems);
+  const repQueue = obj => R.map(setItems(obj), range);
+  const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
@@ -89,7 +94,7 @@ const request = queue => {
     , map(R.filter(isUrl))
     , map(R.filter(isOldItem))
     , map(R.filter(isOpened))
-    , map(R.map(setQueue))
+    , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };

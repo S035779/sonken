@@ -24,7 +24,7 @@ userSchema.index({ user: 1, email: 1 }, { unique: true });
 
 const approvedSchema = new mongoose.Schema({
   approved:         { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'approved' });
 approvedSchema.index({ approved: 1 }, { unique: true });
 

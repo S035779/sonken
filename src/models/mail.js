@@ -17,7 +17,7 @@ const mailSchema = new mongoose.Schema({
 
 const selectedSchema = new mongoose.Schema({
   selected:         { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'selected' });
 selectedSchema.index({ selected: 1 }, { unique: true });
 

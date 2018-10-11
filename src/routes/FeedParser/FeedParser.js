@@ -301,38 +301,41 @@ export default class FeedParser {
         }
       case 'update/note':
         {
-          const isItems = !!options.data.items;
-          const isAsin = options.data.asin !== '';
           const { id, user, data } = options;
+          const isAsin = data.asin !== '';
           const conditions = { _id: id, user };
-          const docs = isItems 
-            ? { updated:      data.updated } 
-            : isAsin ? {
-                categoryIds:  data.categoryIds
-              , title:        data.title
-              , asin:         data.asin
-              , price:        data.price
-              , bidsprice:    data.bidsprice
-              , body:         data.body
-              , name:         data.name
-              , AmazonUrl:    data.AmazonUrl
-              , AmazonImg:    data.AmazonImg
-              , updated:      new Date
-              } : {
-                categoryIds:  data.categoryIds
-              , title:        data.title
-              , asin:         data.asin
-              , price:        data.price
-              , bidsprice:    data.bidsprice
-              , body:         data.body
-              , updated:      new Date
-              };
-          const getIds = R.map(obj => obj._id);
-          const setItems = objs => R.merge(docs, { items: objs });
-          return isItems 
-            ? Items.insertMany(data.items)
-              .then(getIds)
-              .then(setItems)
+          const docs = data.items
+          ? { updated:      new Date }
+          : isAsin ? {
+              categoryIds:  data.categoryIds
+            , title:        data.title
+            , asin:         data.asin
+            , price:        data.price
+            , bidsprice:    data.bidsprice
+            , body:         data.body
+            , name:         data.name
+            , AmazonUrl:    data.AmazonUrl
+            , AmazonImg:    data.AmazonImg
+            , updated:      new Date
+            } : {
+              categoryIds:  data.categoryIds
+            , title:        data.title
+            , asin:         data.asin
+            , price:        data.price
+            , bidsprice:    data.bidsprice
+            , body:         data.body
+            , updated:      new Date
+            };
+          const newItems = R.filter(obj => !obj._id, data.items);
+          const curItems = R.filter(obj => obj._id, data.items);
+          const getItemIds = R.map(obj => obj._id);
+          const conItemIds = objs => R.compose(R.concat(objs), getItemIds)(curItems);
+          const setItemIds = objs => R.merge(docs, { items: objs });
+          return data.items
+            ? Items.insertMany(newItems)
+              .then(getItemIds)
+              .then(conItemIds)
+              .then(setItemIds)
               .then(obj => Note.update(conditions, obj).exec())
             : Note.update(conditions, docs).exec();
         }
@@ -358,7 +361,6 @@ export default class FeedParser {
             .then(setItems)
             .then(getItems)
             .then(delItems)
-            .then(R.tap(log.trace.bind(this)))
           ;
         }
       case 'create/category':
@@ -389,7 +391,7 @@ export default class FeedParser {
       case 'create/added':
         {
           const conditions = { added: options.id, user: options.user };
-          const update = { added: options.id, user: options.user };
+          const update = { added: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Added.update(conditions, update, params).exec();
         }
@@ -401,7 +403,7 @@ export default class FeedParser {
       case 'create/deleted':
         {
           const conditions = { deleted: options.id, user: options.user };
-          const update = { deleted: options.id, user: options.user };
+          const update = { deleted: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Deleted.update(conditions, update, params).exec();
         }
@@ -413,7 +415,7 @@ export default class FeedParser {
       case 'create/readed':
         {
           const conditions = { readed: options.id, user: options.user };
-          const update = { readed: options.id, user: options.user };
+          const update = { readed: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Readed.update(conditions, update, params).exec();
         }
@@ -425,7 +427,7 @@ export default class FeedParser {
       case 'create/traded':
         {
           const conditions = { traded: options.id, user: options.user };
-          const update = { traded: options.id, user: options.user };
+          const update = { traded: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Traded.update(conditions, update, params).exec();
         }
@@ -437,7 +439,7 @@ export default class FeedParser {
       case 'create/bided':
         {
           const conditions = { bided:  options.id, user: options.user };
-          const update = { bided: options.id, user: options.user };
+          const update = { bided: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Bided.update(conditions, update, params).exec();
         }
@@ -449,7 +451,7 @@ export default class FeedParser {
       case 'create/starred':
         {
           const conditions = { starred: options.id, user: options.user };
-          const update = { starred: options.id, user: options.user };
+          const update = { starred: options.id, user: options.user, updated: new Date };
           const params = { upsert: true };
           return Starred.update(conditions, update, params).exec();
         }
@@ -461,7 +463,7 @@ export default class FeedParser {
       case 'create/listed':
         {
           const conditions = { listed: options.id, user:   options.user };
-          const update = { listed: options.id, user:   options.user };
+          const update = { listed: options.id, user:   options.user, updated: new Date };
           const params = { upsert: true };
           return Listed.update(conditions, update, params).exec();
         }

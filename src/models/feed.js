@@ -82,7 +82,7 @@ const categorySchema = new mongoose.Schema({
 const addedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , added:            { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true }
 }, { collection: 'added' });
 addedSchema.index({ added: 1 }, { unique: true });
 addedSchema.virtual('items', { ref: 'Items', localField: 'added', foreignField: 'guid__', justOne: true
@@ -94,7 +94,7 @@ addedSchema.set('toObject', { virtuals: true });
 const deletedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , deleted:          { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'deleted' });
 deletedSchema.index({ deleted: 1 }, { unique: true });
 deletedSchema.virtual('items', { ref: 'Items', localField: 'deleted', foreignField: 'guid__', justOne: true
@@ -106,7 +106,7 @@ deletedSchema.set('toObject', { virtuals: true });
 const readedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , readed:           { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'readed' });
 readedSchema.index({ readed: 1 }, { unique: true });
 readedSchema.virtual('items', { ref: 'Items', localField: 'readed', foreignField: 'guid__', justOne: true
@@ -118,7 +118,7 @@ readedSchema.set('toObject', { virtuals: true });
 const starredSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , starred:          { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'starred' });
 starredSchema.index({ starred: 1 }, { unique: true });
 starredSchema.virtual('items', { ref: 'Items', localField: 'starred', foreignField: 'guid__', justOne: true
@@ -130,7 +130,7 @@ starredSchema.set('toObject', { virtuals: true });
 const tradedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , traded:           { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'traded' });
 tradedSchema.index({ traded: 1 }, { unique: true });
 tradedSchema.virtual('items', { ref: 'Items', localField: 'traded', foreignField: 'guid__', justOne: true
@@ -142,7 +142,7 @@ tradedSchema.set('toObject', { virtuals: true });
 const bidedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , bided:            { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'bided' });
 bidedSchema.index({ bided: 1 }, { unique: true });
 bidedSchema.virtual('items', { ref: 'Items', localField: 'bided', foreignField: 'guid__', justOne: true
@@ -154,7 +154,7 @@ bidedSchema.set('toObject', { virtuals: true });
 const listedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , listed:           { type: String, required: true }
-, created:          { type: Date, required: true, default: Date.now }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'listed' });
 listedSchema.index({ listed: 1 }, { unique: true });
 listedSchema.virtual('items', { ref: 'Items', localField: 'listed', foreignField: 'guid__', justOne: true
