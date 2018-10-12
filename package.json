@@ -11,6 +11,8 @@
     "start:api": "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
     "start:job": "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:img": "supervisor -q -n error -w dist -i node_modules dist/img.node.js",
+    "start:its": "supervisor -q -n error -w dist -i node_modules dist/its.node.js",
+    "start:att": "supervisor -q -n error -w dist -i node_modules dist/att.node.js",
     "start:itm": "supervisor -q -n error -w dist -i node_modules dist/itm.node.js",
     "start:dfg": "supervisor -q -n error -w dist -i node_modules dist/dfg.node.js",
     "start:mms": "node -r ./src/hook/babel-register src/mms-server.js",

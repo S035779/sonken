@@ -90,13 +90,10 @@ class Yahoo {
     return new Promise((resolve, reject) => {
       const price = R.compose(R.join(''), R.map(R.last), R.map(R.split(':')), R.match(/現在価格:[0-9,]+/g));
       const bids  = R.compose(R.join(''), R.map(R.last), R.map(R.split(':')), R.match(/入札数:[0-9-]+/g));
-      const bidStopTime = R.compose(
-        R.join('')
-      , R.map(R.join(':')), R.map(R.tail), R.map(R.split(':'))
-      , R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g)
-      );
+      const setStopTime = R.match(/終了日時:\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/g);
+      const bidStopTime = R.compose(R.join(''), R.map(R.join(':')), R.map(R.tail), R.map(R.split(':')), setStopTime);
       const _setItem = (obj, str) => 
-        Object.assign({}, options.xml, { description: obj, price: price(str), bids: bids(str), bidStopTime: bidStopTime(str) });
+        R.merge(options.xml, { description: obj, price: price(str), bids: bids(str), bidStopTime: bidStopTime(str) });
       const setItem = R.curry(_setItem);
       const newItem = obj => R.compose( setItem(obj), R.last, R.split('>') );
       parseString(options.xml.description, { trim: true, explicitArray: false, strict: false, attrkey: 'attr', charkey: '_' }
@@ -178,7 +175,8 @@ class Yahoo {
           const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
           const setCategory     = R.join(' > ');
           const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), str => std.parse_url(str).pathname, R.last);
+          const setPathName     = str => std.parse_url(str).pathname;
+          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), setPathName, R.last);
           const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
           const _setDate        = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
           const setBidStopTime  = _obj => {
@@ -336,10 +334,8 @@ class Yahoo {
           const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(setDetail('開始時の価格', _obj)) });
           const setCategory     = R.join(' > ');
           const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId  = R.compose(
-            R.last, R.filter(c => c !== '')
-          , R.split('/'), url => std.parse_url(url).pathname, R.last
-          );
+          const setPathName     = str => std.parse_url(str).pathname;
+          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), setPathName, R.last);
           const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
           const _setDate        = R.replace(/(\d+)月\s(\d+)日[\s\S]*(\d+)時\s(\d+)分/, '$1/$2 $3:$4');
           const setBidStopTime  = _obj => {
@@ -493,7 +489,8 @@ class Yahoo {
           const setOffers       = _obj => R.merge(_obj, { offers: _setPrice(_obj.details[9]) });
           const setCategory     = R.join(' > ');
           const setCategorys    = _obj => R.merge(_obj, { item_categorys: setCategory(_obj.categorys) });
-          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), str => std.parse_url(str).pathname, R.last);
+          const setPathName     = str => std.parse_url(str).pathname;
+          const _setCategoryId  = R.compose(R.last, R.filter(c => c !== ''), R.split('/'), setPathName, R.last);
           const setCategoryId   = _obj => R.merge(_obj, { item_categoryid: _setCategoryId(_obj.categoryUrls) });
           const _setDate        = R.compose(R.replace(/（.）/g, ' '), R.replace(/\./g, '/'));
           const setBidStopTime  = _obj => R.merge(_obj, { bidStopTime: _setDate(_obj.details[3]) });
@@ -589,17 +586,11 @@ class Yahoo {
   }
   
   jobClosedMerchant({ url, pages, skip, limit }) {
-    return from(this.getClosedMerchant(url, pages, skip, limit)).pipe(
-      flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
-    );
+    return from(this.getClosedMerchant(url, pages, skip, limit));
   }
 
   jobClosedSellers({ url, pages, skip, limit }) {
-    return from(this.getClosedSellers(url, pages, skip, limit)).pipe(
-      flatMap(this.fetchMarchant.bind(this))
-    , flatMap(this.fetchItemSearch.bind(this))
-    );
+    return from(this.getClosedSellers(url, pages, skip, limit));
   }
 
   jobHtml({ url, pages, skip, limit }) {
@@ -630,16 +621,59 @@ class Yahoo {
     return from(this.getHtml(url, pages, skip, limit));
   }
 
-  fetchItemSearch(note) {
-    const _setAsins   = (items, objs) => R.map(item => this.setAsin(item, objs), items);
-    const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
-    const setAsins    = R.curry(_setAsins)(note.item);
-    const setItems    = R.curry(_setItems)(note);
-    const observables = R.map(obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1));
-    return forkJoin(observables(note.item)).pipe(
-      map(setAsins)
+  jobAttribute({ items }) {
+    const urls              = R.map(this.setUrl, items);
+    const omitIds           = R.map(R.omit(['_id']));
+    const _setMarkets       = (_items, objs) => R.map(_item => this.setMarket(_item, objs), _items);
+    const setMarkets        = R.curry(_setMarkets)(items);
+    const _setPerformances  = (_items, objs) => R.map(obj => this.setPerformance(_items, obj), objs);
+    const setPerformances   = R.curry(_setPerformances)(items);
+    const setItems          = objs => ({ item: objs });
+    const promise           = obj => this.getHtml(obj);
+    const promises          = R.map(promise);
+    return forkJoin(promises(urls)).pipe(
+      map(setMarkets)
+    , map(setPerformances)
+    , map(omitIds)
     , map(setItems)
     );
+  }
+
+  jobItemSearch({ items }) {
+    const omitIds     = R.map(R.omit(['_id']));
+    const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, objs), _items);
+    const setAsins    = R.curry(_setAsins)(items);
+    const setItems    = objs => ({ item: objs });
+    const observable  = obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1)
+    const observables = R.map(observable);
+    return forkJoin(observables(items)).pipe(
+      map(setAsins)
+    , map(omitIds)
+    , map(setItems)
+    );
+  }
+
+  fetchRss({ url }) {
+    let _note;
+    const _setItems = (note, item) => R.merge(note.rss.channel, { item });
+    const setItems = R.curry(_setItems)(_note);
+    const setNote  = obj => _note = obj;
+    const fetchRss = obj => from(this.getRss(obj));
+    const fetchXml = obj => from(this.getXmlNote(obj.body));
+    const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
+    const fetchXmlItems = obj => forkJoin(promises(obj));
+    return fetchRss(url).pipe(
+      flatMap(fetchXml)
+    , map(setNote)
+    , flatMap(fetchXmlItems)
+    , map(setItems)
+    );
+  }
+
+  setUrl(obj) {
+    const api = std.parse_url(searchurl);
+    api.searchParams.append('p', obj.title);
+    return api.href;
   }
 
   setAsin (item, objs) {
@@ -675,29 +709,6 @@ class Yahoo {
     return repString(keywords);
   }
 
-  fetchMarchant(note) {
-    const isItem            = obj => !!obj.title;
-    const urls              = note.item ? R.compose( R.map(this.setUrl.bind(this)), R.filter(isItem))(note.item) : [];
-    const _setMarkets       = (items, objs) => R.map(item => this.setMarket(item, objs), items);
-    const _setPerformances  = (items, objs) => R.map(obj => this.setPerformance(items, obj), objs);
-    const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
-    const setMarkets        = R.curry(_setMarkets)(note.item);
-    const setPerformances   = R.curry(_setPerformances)(note.item);
-    const setItems          = R.curry(_setItems)(note);
-    const promises          = R.map(this.getHtml.bind(this));
-    return forkJoin(promises(urls)).pipe(
-      map(setMarkets)
-    , map(setPerformances)
-    , map(setItems)
-    );
-  }
-
-  setUrl(obj) {
-    const api = std.parse_url(searchurl);
-    api.searchParams.append('p', obj.title);
-    return api.href;
-  }
-
   setMarket(item, objs) {
     const _isSeller = _obj  => R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
     const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
@@ -722,23 +733,6 @@ class Yahoo {
     , getSolds
     , isSolds
     )(items);
-  }
-
-  fetchRss({ url }) {
-    let _note;
-    const _setItems = (note, item) => R.merge(note.rss.channel, { item });
-    const setItems = R.curry(_setItems)(_note);
-    const setNote  = obj => _note = obj;
-    const fetchRss = obj => from(this.getRss(obj));
-    const fetchXml = obj => from(this.getXmlNote(obj.body));
-    const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
-    const fetchXmlItems = obj => forkJoin(promises(obj));
-    return fetchRss(url).pipe(
-      flatMap(fetchXml)
-    , map(setNote)
-    , flatMap(fetchXmlItems)
-    , map(setItems)
-    );
   }
 
   fetchAuthSupport() {

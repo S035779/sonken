@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: job-worker
+  name: its-worker
   labels:
     app: feedparser
     tier: worker
@@ -19,8 +19,8 @@ spec:
         tier: worker
     spec:
       containers:
-      - name: node-job
-        image: asia.gcr.io/feedparser-217913/feedparser/node_job:latest
+      - name: node-its
+        image: asia.gcr.io/feedparser-217913/feedparser/node_its:latest
         resources:
           requests:
             cpu: 128m

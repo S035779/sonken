@@ -83,6 +83,24 @@ const request = (operation, { url, user, id, items, skip, limit }) => {
         const conditions = { items, operator };
         return yahoo.jobImages(conditions);
       }
+    case 'attribute':
+      {
+        const conditions = { items };
+        return yahoo.jobAttribute(conditions).pipe(
+            map(setItems)
+          , map(setNote)
+          , flatMap(putHtml)
+          );
+      }
+    case 'itemsearch':
+      {
+        const conditions = { items };
+        return yahoo.jobItemSearch(conditions).pipe(
+            map(setItems)
+          , map(setNote)
+          , flatMap(putHtml)
+          );
+      }
     case 'defrag':
       {
         const conditions = { user };

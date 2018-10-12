@@ -22,16 +22,16 @@ const updatedInterval = process.env.JOB_UPD_MIN || 10;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
-const displayName = '[IMG]';
+const displayName = '[ITS]';
 
 if(node_env === 'development') {
-  log.config('console', 'color', 'img-server', 'TRACE');
+  log.config('console', 'color', 'its-server', 'TRACE');
 } else
 if(node_env === 'staging') {
-  log.config('file', 'basic', 'img-server', 'DEBUG');
+  log.config('file', 'basic', 'its-server', 'DEBUG');
 } else
 if(node_env === 'production') {
-  log.config('file', 'json',  'img-server', 'INFO');
+  log.config('file', 'json',  'its-server', 'INFO');
 }
 
 const feed = FeedParser.of();
@@ -71,7 +71,7 @@ const request = queue => {
   const setQueue    = obj => ({
     id:         obj._id
   , items:      obj.items
-  , operation:  'images'
+  , operation:  'itemsearch'
   , created:    Date.now()
   });
 
@@ -107,13 +107,13 @@ const worker = (task, callback) => {
 };
 
 const main = () => {
-  log.info(displayName, 'start fetch images server.')
+  log.info(displayName, 'start fetch itemsearch server.')
   const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'all images have been processed.');
+  queue.drain = () => log.info(displayName, 'all itemsearch have been processed.');
   std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding images...', obj)
+    obj => log.debug(displayName, 'finished proceeding itemsearch...', obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'post images completed.')
+  , ()  => log.info(displayName, 'post itemsearch completed.')
   ), 0, 1000 * 60 * monitorInterval);
 };
 main();
