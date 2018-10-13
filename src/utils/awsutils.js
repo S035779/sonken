@@ -28,21 +28,21 @@ class awsutils {
     return new awsutils(props);
   }
 
-  fetchText(bucket, filename) {
-    const params = { Image: { S3Object: { Bucket: bucket, Name: filename }}, MinConfidence: 0.0 };
+  fetchText(bucket, name) {
+    const params = { Image: { S3Object: { Bucket: bucket, Name: name }}, MinConfidence: 0.0 };
     const promise = this.rekognition.detectText(params).promise();
     return promise;
   }
 
-  fetchLabel(bucket, filename) {
-    const params = { Image: { S3Object: { Bucket: bucket, Name: filename }}, MaxLabels: 1, MinConfidence: 70 };
+  fetchLabel(bucket, name) {
+    const params = { Image: { S3Object: { Bucket: bucket, Name: name }}, MaxLabels: 1, MinConfidence: 70 };
     const promise = this.rekognition.detectLabels(params).promise();
     return promise;
   }
 
-  createWriteStream(bucket, filename) {
+  createWriteStream(bucket, key) {
     const passStream = new stream.PassThrough();
-    const params = { Bucket: bucket, Key: filename, Body: passStream };
+    const params = { Bucket: bucket, Key: key, Body: passStream };
     const promise = this.s3.upload(params).promise();
     promise
       //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
@@ -92,46 +92,41 @@ class awsutils {
     return promise;
   }
 
+  fetchObject(bucket, { key, name }) {
+    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
+    const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
+    const promise = this.s3.getObject(params).promise();
+    return promise.then(obj => ({ name, buffer: obj.Body }));
+  }
+
   fetchObjects(bucket, files) {
     const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files))
-      .then(this.createArchive);
+    return Promise.all(promises(files)).then(this.createArchive);
+  }
+
+  fetchTorrent(bucket, { key, name }) {
+    const params = { Bucket: bucket, Key: key };
+    const promise = this.s3.getObjectTorrent(params).promise();
+    return promise.then(obj => ({ name: name + '.torrent', buffer: obj.Body }));
   }
 
   fetchTorrents(bucket, files) {
     const promises = R.map(obj => this.fetchTorrent(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files))
-      .then(this.createArchive);
+    return Promise.all(promises(files)).then(this.createArchive);
   }
 
   createArchive(files) {
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'awsutils', message: 'File not found.' });
+      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.' });
       const output = new bufferStream.WritableStreamBuffer();
       const archive = archiver('zip', { zlib: { level: 9 } });
       output.on('finish', () => resolve(output.getContents()));
       archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       archive.on('error', err => reject(err));
       archive.pipe(output);
-      R.map(obj => archive.append(obj.buffer , { name: obj.name }), files);
+      R.map(obj => archive.append(obj.buffer, { name: obj.name }), files);
       archive.finalize();
     });
-  }
-
-  fetchObject(bucket, { key, name }) {
-    const ResponseContentDisposition = 'attachment; filename="' + name + '"';
-    const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
-    const promise = this.s3.getObject(params).promise();
-    return promise
-      .then(obj => ({ name, buffer: obj.Body }));
-  }
-
-  fetchTorrent(bucket, { key, name }) {
-    const ResponseContentDisposition = 'attachement; filename="' + name + '"';
-    const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
-    const promise = this.s3.getObjectTorrent(params).promise();
-    return promise
-      .then(obj => ({ name, buffer: obj.Body }));
   }
 }
 awsutils.displayName = 'awsutils';

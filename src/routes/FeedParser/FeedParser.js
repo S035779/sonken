@@ -1646,16 +1646,15 @@ export default class FeedParser {
 
   downloadImages({ user, ids, filter }) {
     const AWS         = aws.of(aws_keyset);
-    //const promises    = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
-    const promise     = objs => AWS.fetchObjects(STORAGE, objs);
-    //const promise     = objs => AWS.fetchTorrents(STORAGE, objs);
-    const getImages   = objs => from(promise(objs));
-    const setKey      = (aid, url) => std.crypto_sha256(url, aid, 'hex') + '.img';
-    const setName     = (aid, url) => aid + '_' + path.basename(std.parse_url(url).pathname);
-    const setImage    = (aid, urls) => R.map(url => ({ key: setKey(aid,url), name: setName(aid,url) }), urls);
-    const setImages   = R.map(obj => setImage(obj.auid, obj.images))
+    //const getSignUrl  = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
+    const getObjects  = objs => AWS.fetchObjects(STORAGE, objs);
+    //const getTorrents = objs => AWS.fetchTorrents(STORAGE, objs);
+    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
+    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
+    const setImages   = R.map(obj => setImage(obj.guid, obj.images))
     const dupItems    = objs => std.dupObj(objs, 'title');
-    const setItems    = R.map(obj => ({ auid: obj.guid__, title: obj.title, images: obj.images}));
+    const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const getItems    = obj => obj.items ? obj.items : [];
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
@@ -1665,7 +1664,7 @@ export default class FeedParser {
     , map(dupItems)
     , map(setImages)
     , map(R.flatten)
-    , flatMap(getImages)
+    , flatMap(objs => from(getObjects(objs)))
     );
   }
 }

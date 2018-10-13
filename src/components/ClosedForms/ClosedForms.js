@@ -26,12 +26,13 @@ class ClosedForms extends React.Component {
     , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , sold: 1
-    , isSuccess: false
-    , isNotValid: false
-    , isRequest: false
     , page: 1
     , prevPage: 1
     , prevAllAuction: true
+    , isSuccess: false
+    , isNotValid: false
+    , isRequest: false
+    , isNotResult: false
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -44,7 +45,7 @@ class ClosedForms extends React.Component {
     const prevAllAuction  = this.state.prevAllAuction;
     const prevNote        = this.state.note;
     const prevPage        = this.state.prevPage;
-    if(prevNote && (nextNote.items.length > 0)) {
+    if(prevNote && (nextNote.items.length !== 0)) {
       if(nextNote._id !== prevNote._id) {
         //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.current.scrollTop = 0;
@@ -92,47 +93,27 @@ class ClosedForms extends React.Component {
     switch(name) {
       case 'inAuction':
         this.setState({
-          inAuction:        checked
-        , allAuction:       !checked
-        , lastWeekAuction:  !checked
-        , twoWeeksAuction:  !checked
-        , lastMonthAuction: !checked
+          inAuction: checked, allAuction: !checked, lastWeekAuction: !checked, twoWeeksAuction: !checked, lastMonthAuction: !checked
         });
         break;
       case 'allAuction':
         this.setState({
-          inAuction:        false
-        , allAuction:       checked
-        , lastWeekAuction:  true
-        , twoWeeksAuction:  true
-        , lastMonthAuction: true
+          inAuction: false, allAuction: checked, lastWeekAuction: true, twoWeeksAuction:  true, lastMonthAuction: true
         });
         break;
       case 'lastWeekAuction':
         this.setState({
-          inAuction:        !checked
-        , allAuction:       false
-        , lastWeekAuction:  checked
-        , twoWeeksAuction:  false
-        , lastMonthAuction: false
+          inAuction: !checked, allAuction: false, lastWeekAuction: checked, twoWeeksAuction: false, lastMonthAuction: false
         });
         break;
       case 'twoWeeksAuction':
         this.setState({
-          inAuction:        false
-        , allAuction:       false
-        , lastWeekAuction:  true
-        , twoWeeksAuction:  checked
-        , lastMonthAuction: false
+          inAuction: false, allAuction: false, lastWeekAuction: true, twoWeeksAuction: checked, lastMonthAuction: false
         });
         break;
       case 'lastMonthAuction':
         this.setState({
-          inAuction:        false
-        , allAuction:       false
-        , lastWeekAuction:  true
-        , twoWeeksAuction:  true
-        , lastMonthAuction: checked
+          inAuction: false, allAuction: false, lastWeekAuction: true, twoWeeksAuction: true, lastMonthAuction: checked
         });
         break;
     }
@@ -140,15 +121,15 @@ class ClosedForms extends React.Component {
 
   handleFilter() {
     const { user } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    , sold, isRequest } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold, isRequest }
+      = this.state;
     if(isRequest) return;
     this.fetch(1)
-      .then(() => NoteAction.filter(user , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, aucStartTime, aucStopTime, sold }))
+      .then(() => NoteAction.filter(user
+        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
-      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotValid: true }) : null)
+      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
         this.spn.stop();
@@ -169,19 +150,18 @@ class ClosedForms extends React.Component {
   handleChangeSelect(name, event) {
     const sold = event.target.value;
     std.logInfo(ClosedForms.displayName, 'handleChangeSelect', sold);
-    this.setState({ sold })
+    this.setState({ sold, allAuction: false  })
   }
 
   handleDownload() {
     const { user, note, itemNumber } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleDownload', user);
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    , sold } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
     if(itemNumber !== 0) {
       this.spn.start();
-      NoteAction.downloadItems(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, aucStartTime, aucStopTime, sold })
+      NoteAction.downloadItems(user, id
+        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
         .then(() => this.setState({ isSuccess: true }))
         .then(() => this.downloadFile(this.props.file))
         .then(() => this.spn.stop())
@@ -196,13 +176,12 @@ class ClosedForms extends React.Component {
   handleImages() {
     const { user, note, itemNumber } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleImages', user);
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime
-    , sold } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
     if(itemNumber !== 0) {
       this.spn.start();
-      NoteAction.downloadImages(user, id, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, aucStartTime, aucStopTime, sold })
+      NoteAction.downloadImages(user, id
+        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
         .then(() => this.setState({ isSuccess: true }))
         .then(() => this.downloadImages(this.props.images))
         .then(() => this.spn.stop())
@@ -228,8 +207,8 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
     this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit, { lastWeekAuction, twoWeeksAuction, lastMonthAuction
-      , allAuction, inAuction, aucStartTime, aucStopTime, sold });
+    return NoteAction.fetch(user, id, skip, limit
+      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold });
   }
 
   downloadFile(blob) {
@@ -276,27 +255,24 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, perPage, user, note, category } = this.props;
-    const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction
-      , inAuction, sold, page, isNotValid, isSuccess } = this.state;
+    const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold, page, isNotValid
+      , isSuccess, isNotResult } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
-            画像保存
-          </RssButton>
-          <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>
-            ダウンロード
-          </RssButton>
-          <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>画像保存</RssButton>
+          <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>ダウンロード</RssButton>
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssDialog open={isSuccess} title={'送信完了'}
-            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
             要求を受け付けました。
+          </RssDialog>
+          <RssDialog open={isNotResult} title={'検索結果なし'} onClose={this.handleCloseDialog.bind(this, 'isNotResult')}>
+            検索条件を見直してください。
           </RssDialog>
         </div>
       </div>
@@ -317,25 +293,17 @@ class ClosedForms extends React.Component {
       </div>
       <div className={classes.edit}>
         <div className={classes.column}>
-          <Typography className={classes.title}>
-            全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示
-          </Typography>
+          <Typography className={classes.title}>全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示</Typography>
         </div>
         <div className={classes.datetimes}>
           <Checkbox color="primary" tabIndex={-1} disableRipple checked={inAuction}
             onChange={this.handleChangeCheckbox.bind(this, 'inAuction')} className={classes.checkbox}/>
           <Typography variant="subheading" noWrap className={classes.column}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
-            <TextField id="start-time" label="始め" type="datetime-local"
-              InputLabelProps={{shrink: true}}
-              value={aucStartTime}
-              onChange={this.handleChangeText.bind(this, 'aucStartTime')}
-              className={classes.text}/>
-            <TextField id="end-time" label="終わり" type="datetime-local"
-              InputLabelProps={{shrink: true}}
-              value={aucStopTime}
-              onChange={this.handleChangeText.bind(this, 'aucStopTime')}
-              className={classes.text}/>
+            <TextField id="start-time" label="始め" type="datetime-local" InputLabelProps={{shrink: true}} value={aucStartTime}
+              onChange={this.handleChangeText.bind(this, 'aucStartTime')} className={classes.text}/>
+            <TextField id="end-time" label="終わり" type="datetime-local" InputLabelProps={{shrink: true}} value={aucStopTime}
+              onChange={this.handleChangeText.bind(this, 'aucStopTime')} className={classes.text}/>
           </form>
         </div>
         <FormControl className={classes.inputSelect}>
@@ -351,9 +319,7 @@ class ClosedForms extends React.Component {
       <div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
-            <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>
-              絞り込み
-            </Button>
+            <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
           </div>
         </div>
       </div>

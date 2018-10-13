@@ -28,6 +28,7 @@ class BidsFilter extends React.Component {
     , prevAllBidding: true
     , isSuccess:  false
     , isNotValid: false
+    , isNotResult: false
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -146,7 +147,7 @@ class BidsFilter extends React.Component {
       .then(() => BidsAction.filter(user, { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
-      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotValid: true }) : null)
+      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
       .catch(err => {
         std.logError(BidsFilter.displayName, err.name, err.message);
         this.spn.stop();
@@ -183,8 +184,8 @@ class BidsFilter extends React.Component {
     //std.logInfo(BidsFilter.displayName, 'State', this.state);
     //std.logInfo(BidsFilter.displayName, 'Props', this.props);
     const { classes, user, selectedItemId } = this.props;
-    const { isSuccess, isNotValid
-    , checked, bidStartTime, bidStopTime, endBidding, allBidding, inBidding, items, page } = this.state;
+    const { isSuccess, isNotValid, isNotResult, checked, bidStartTime, bidStopTime, endBidding, allBidding, inBidding, items, page } 
+      = this.state;
     return <div className={classes.forms}>
         <div className={classes.edit}>
           <div className={classes.space}/>
@@ -213,16 +214,15 @@ class BidsFilter extends React.Component {
           <div className={classes.space}/>
           <div className={classes.buttons}>
             <div className={classes.buttons}>
-              <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>
-                絞り込み
-              </Button>
-              <RssDialog 
-                open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+              <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
+              <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
                 要求を受け付けました。
               </RssDialog>
-              <RssDialog open={isNotValid} title={'送信エラー'} 
-                onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+              <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
                 内容に不備があります。もう一度確認してください。
+              </RssDialog>
+              <RssDialog open={isNotResult} title={'検索結果なし'} onClose={this.handleCloseDialog.bind(this, 'isNotResult')}>
+                検索条件を見直してください。
               </RssDialog>
             </div>
           </div>
@@ -232,9 +232,7 @@ class BidsFilter extends React.Component {
             <Checkbox checked={checked} onChange={this.handleChangeCheckbox.bind(this, 'checked')}
               tabIndex={-1} disableRipple className={classes.checkbox}/>
             <div className={classes.buttons}>
-              <Button variant="raised" onClick={this.handleDelete.bind(this)} className={classes.button}>
-                削除
-              </Button>
+              <Button variant="raised" onClick={this.handleDelete.bind(this)} className={classes.button}>削除</Button>
             </div>
           </div>
         </div>
