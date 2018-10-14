@@ -15,10 +15,11 @@ var node = {
   , job: ['./job-server.js']
   , wrk: ['./job-worker.js']
   , img: ['./img-server.js']
-  , its: ['./its-server.js']
-  , att: ['./att-server.js']
   , itm: ['./itm-server.js']
   , dfg: ['./dfg-server.js']
+  , att: ['./att-server.js']
+  , its: ['./its-server.js']
+  , arc: ['./arc-server.js']
   }
 , optimization: {
     nodeEnv: false

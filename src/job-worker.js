@@ -31,7 +31,7 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const request = (operation, { url, user, id, items, skip, limit }) => {
+const request = (operation, { url, user, id, items, skip, limit, key }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   const isNotItems = (objs, item) => R.none(_obj => _obj.guid__ === item.guid__, objs);
@@ -106,15 +106,20 @@ const request = (operation, { url, user, id, items, skip, limit }) => {
         const conditions = { user };
         return feed.garbageCollection(conditions);
       }
+    case 'archives':
+      {
+        const conditions = { key, items };
+        return feed.createArchives(conditions);
+      }
     default:
       return throwError('Unknown operation!');
   }
 };
 
-const worker = ({ url, user, id, items, operation, skip, limit }, callback) => {
+const worker = ({ url, user, id, items, operation, skip, limit, key }, callback) => {
   log.info(displayName, 'Started. _id/ope:', id, operation);
   const start = new Date();
-  request(operation, { url, user, id, items, skip, limit }).subscribe(
+  request(operation, { url, user, id, items, skip, limit, key }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => {

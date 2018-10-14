@@ -40,16 +40,6 @@ class awsutils {
     return promise;
   }
 
-  createWriteStream(bucket, key) {
-    const passStream = new stream.PassThrough();
-    const params = { Bucket: bucket, Key: key, Body: passStream };
-    const promise = this.s3.upload(params).promise();
-    promise
-      //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
-      .catch(err => log.error(awsutils.displayName, err.name, err.message, err.stack));
-    return passStream;
-  }
-
   fetchBucketAcl(bucket) {
     const params = { Bucket: bucket };
     const promise = this.s3.getBucketAcl(params).promise();
@@ -96,28 +86,56 @@ class awsutils {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
     const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
     const promise = this.s3.getObject(params).promise();
-    return promise.then(obj => ({ name, buffer: obj.Body }));
+    return promise
+      .then(obj => ({ name, buffer: obj.Body }));
   }
 
   fetchObjects(bucket, files) {
     const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files)).then(this.createArchive);
+    return Promise.all(promises(files))
+      .then(this.createArchive);
   }
 
   fetchTorrent(bucket, { key, name }) {
     const params = { Bucket: bucket, Key: key };
     const promise = this.s3.getObjectTorrent(params).promise();
-    return promise.then(obj => ({ name: name + '.torrent', buffer: obj.Body }));
+    return promise
+      .then(obj => ({ name: name + '.torrent', buffer: obj.Body }));
   }
 
   fetchTorrents(bucket, files) {
     const promises = R.map(obj => this.fetchTorrent(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files)).then(this.createArchive);
+    return Promise.all(promises(files))
+      .then(this.createArchive);
+  }
+
+  createWriteStream(bucket, key) {
+    const passStream = new stream.PassThrough();
+    const params = { Bucket: bucket, Key: key, Body: passStream };
+    const promise = this.s3.upload(params).promise();
+    promise
+      //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
+      .catch(err => log.error(awsutils.displayName, err.name, err.message, err.stack));
+    return passStream;
+  }
+
+  createObject(bucket, { key, body }) {
+    const params = { Bucket: bucket, Key: key, Body: body };
+    const promise = this.s3.upload(params).promise();
+    return promise;
+  }
+
+  createArchives(bucket, { key, files }) {
+    const putObject =  body => this.createObject(bucket, { key, body })
+    const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
+    return Promise.all(promises(files))
+      .then(this.createArchive)
+      .then(putObject);
   }
 
   createArchive(files) {
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.' });
+      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.', stack: files });
       const output = new bufferStream.WritableStreamBuffer();
       const archive = archiver('zip', { zlib: { level: 9 } });
       output.on('finish', () => resolve(output.getContents()));

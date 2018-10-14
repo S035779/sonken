@@ -1,20 +1,20 @@
-import path                     from 'path';
-import dotenv                   from 'dotenv';
-import * as R                   from 'ramda';
-import { from, forkJoin }       from 'rxjs';
-import { map, flatMap }         from 'rxjs/operators';
-import { parseString }          from 'xml2js';
-import mongoose                 from 'mongoose';
-import encoding                 from 'encoding-japanese';
-import { Iconv }                from 'iconv';
+import path                       from 'path';
+import dotenv                     from 'dotenv';
+import * as R                     from 'ramda';
+import { from, forkJoin }         from 'rxjs';
+import { map, flatMap }           from 'rxjs/operators';
+import { parseString }            from 'xml2js';
+import mongoose                   from 'mongoose';
+import encoding                   from 'encoding-japanese';
+import { Iconv }                  from 'iconv';
 import { Items, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } 
-                                from 'Models/feed';
-import std                      from 'Utilities/stdutils';
-import Amazon                   from 'Utilities/Amazon';
-import Yahoo                    from 'Utilities/Yahoo';
-import log                      from 'Utilities/logutils';
-import js2Csv                   from 'Utilities/js2Csv';
-import aws                      from 'Utilities/awsutils';
+                                  from 'Models/feed';
+import std                        from 'Utilities/stdutils';
+import Amazon                     from 'Utilities/Amazon';
+import Yahoo                      from 'Utilities/Yahoo';
+import log                        from 'Utilities/logutils';
+import js2Csv                     from 'Utilities/js2Csv';
+import aws                        from 'Utilities/awsutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
@@ -729,16 +729,17 @@ export default class FeedParser {
   }
 
   garbageCollection({ user }) {
-    return forkJoin([
-        this.dfgItems()
-      , this.dfgAdded(user)
-      , this.dfgDeleted(user)
-      , this.dfgReaded(user)
-      , this.dfgStarred(user)
-      , this.dfgListed(user)
-      , this.dfgBided(user)
-      , this.dfgTraded(user)
-      ]);
+    const observables = forkJoin([
+      this.dfgItems()
+    , this.dfgAdded(user)
+    , this.dfgDeleted(user)
+    , this.dfgReaded(user)
+    , this.dfgStarred(user)
+    , this.dfgListed(user)
+    , this.dfgBided(user)
+    , this.dfgTraded(user)
+    ]);
+    return observables;
   }
 
   fetchCategorys({ user, category, skip, limit }) {
@@ -1646,13 +1647,13 @@ export default class FeedParser {
 
   downloadImages({ user, ids, filter }) {
     const AWS         = aws.of(aws_keyset);
-    //const getSignUrl  = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
     const getObjects  = objs => AWS.fetchObjects(STORAGE, objs);
+    //const getSignUrl  = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
     //const getTorrents = objs => AWS.fetchTorrents(STORAGE, objs);
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
-    const setImages   = R.map(obj => setImage(obj.guid, obj.images))
+    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const getItems    = obj => obj.items ? obj.items : [];
@@ -1667,5 +1668,25 @@ export default class FeedParser {
     , flatMap(objs => from(getObjects(objs)))
     );
   }
+
+  createArchives({ key, items }) {
+    const AWS         = aws.of(aws_keyset);
+    const putArchives = objs => AWS.createArchives(STORAGE, { key, files: objs });
+    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
+    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
+    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
+    const dupItems    = objs => std.dupObj(objs, 'title');
+    const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
+    const files = R.compose(
+      R.flatten
+    , setImages
+    , dupItems
+    , setItems
+    )(items);
+    log.info(FeedParser.displayName, 'Length:', R.length(files));
+    return from(putArchives(files));
+  }
+
 }
 FeedParser.displayName = 'FeedParser';
