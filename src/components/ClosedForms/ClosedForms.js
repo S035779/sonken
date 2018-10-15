@@ -39,32 +39,47 @@ class ClosedForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const itemFilter      = nextProps.itemFilter;
+    const resetFilter = {
+      lastWeekAuction: true
+    , twoWeeksAuction: true
+    , lastMonthAuction: true
+    , allAuction: true
+    , inAuction: false
+    , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , sold: 1
+    }
+    const nextFilter      = nextProps.itemFilter;
     const nextNote        = nextProps.note;
     const nextPage        = this.state.page;
     const prevAllAuction  = this.state.prevAllAuction;
     const prevNote        = this.state.note;
     const prevPage        = this.state.prevPage;
+    let newState;
     if(prevNote && (nextNote.items.length !== 0)) {
       if(nextNote._id !== prevNote._id) {
-        //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage, resetFilter });
+        newState = R.merge({ note: nextNote, page: 1, prevPage: 1 }, resetFilter);
+        this.setState(newState);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
         //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
-        this.setState({ note: setNote(nextNote), prevPage: nextPage, itemFilter });
-      } else if(!itemFilter.allAuction) {
-        //std.logInfo(ClosedForms.displayName, 'Filter', { itemFilter, prevAllAuction });
+        newState = { note: setNote(nextNote), prevPage: nextPage };
+        this.setState(newState);
+      } else if(!nextFilter.allAuction) {
+        //std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
+        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: false };
+        this.setState(newState);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter, prevAllAuction: false });
-      } else if(itemFilter.allAuction !== prevAllAuction) {
-        //std.logInfo(ClosedForms.displayName, 'Normal', { itemFilter, prevAllAuction });
+      } else if(nextFilter.allAuction !== prevAllAuction) {
+        //std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
+        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: true };
+        this.setState(newState);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ note: nextNote, page: 1, prevPage: 1, itemFilter, prevAllAuction: true });
       }
     }
   }
