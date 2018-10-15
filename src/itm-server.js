@@ -55,45 +55,26 @@ const fork = () => {
   return cps;
 };
 
-const operation = url => {
-  const api = std.parse_url(url);
-  const path = R.split('/', api.pathname);
-  const operation = api.pathname === '/jp/show/rating' ? 'closedsellers' : path[1];
-  return operation;
-};
-
 const request = queue => {
-  const getNotes    = objs => feed.fetchAllNotes({ users: objs });
-  const isApproved  = obj => obj.approved;
-  const setUser     = obj => obj.user;
-  const isUrl       = obj => obj.url !== '';
-  const isOldItem   = obj => (updatedInterval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
-  const isClosed    = obj => operation(obj.url) === 'closedsellers' || operation(obj.url) === 'closedsearch';
-  const setQueue    = obj => ({
-    user:       obj.user
-  , id:         obj._id
-  , url:        obj.url
-  , items:      obj.items
-  , operation:  operation(obj.url)
-  , created:    Date.now()
-  });
-  const setLimit = str => operation(str) === 'closedsearch' ? 20 : 25;
-  const setRange = str => R.range(0, Math.ceil(numUpdatedItems / setLimit(str)));
-  const _setItems = (obj, idx) => R.merge(obj, { skip: idx * setLimit(obj.url), limit: setLimit(obj.url) });
-  const setItems = R.curry(_setItems);
-  const repQueue = obj => R.map(setItems(obj), setRange(obj.url));
-  const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
-  return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
-      map(R.filter(isApproved))
-    , map(R.map(setUser))
-    , flatMap(getNotes)
-    , map(R.flatten)
-    , map(R.filter(isUrl))
-    , map(R.filter(isOldItem))
-    , map(R.filter(isClosed))
+  const setQueue    = obj => ({
+    operation:  obj.category
+  , user:       obj.user
+  , id:         obj._id
+  , url:        obj.url
+  , items:      obj.items
+  , created:    Date.now()
+  });
+  const setLimit = category => category === 'closedsellers' ? 25 : 20;
+  const setRange = category => R.range(0, Math.ceil(numUpdatedItems / setLimit(category)));
+  const _setItems = (obj, idx) => R.merge(obj, { skip: idx * setLimit(obj.category), limit: setLimit(obj.category) });
+  const setItems = R.curry(_setItems);
+  const repQueue = obj => R.map(setItems(obj), setRange(obj.url));
+  const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
+  return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
+      flatMap(objs => feed.fetchJobNotes({ users: objs, categorys: ['closedsellers', 'closedmarchant'], interval: updatedInterval }))
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );

@@ -373,6 +373,24 @@ export default class UserProfiler {
     );
   }
 
+  fetchJobUsers({ admin }) {
+    const isApproved  = obj => obj.approved;
+    const setUser     = obj => obj.user;
+    const observables = forkJoin([
+      this.getApproval()
+    , this.getUsers(admin)
+    ]);
+    const setAttribute = objs => R.compose(
+      this.setApproved(objs[0])
+    , this.toObject
+    )(objs[1]);
+    return observables.pipe(
+      map(setAttribute)
+    , map(R.filter(isApproved))
+    , map(R.map(setUser))
+    );
+  }
+
   toObject(objs) {
     return R.isNil(objs) ? [] : R.map(obj => obj.toObject(), objs);
   }

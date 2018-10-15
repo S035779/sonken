@@ -85,28 +85,26 @@ class awsutils {
   fetchObject(bucket, { key, name }) {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
     const params = { Bucket: bucket, Key: key, ResponseContentDisposition };
+    const setBuffer = obj => ({ name: name, buffer: obj.Body });
     const promise = this.s3.getObject(params).promise();
-    return promise
-      .then(obj => ({ name, buffer: obj.Body }));
+    return promise.then(setBuffer);
   }
 
   fetchObjects(bucket, files) {
     const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files))
-      .then(this.createArchive);
+    return Promise.all(promises(files)).then(this.createArchive);
   }
 
   fetchTorrent(bucket, { key, name }) {
     const params = { Bucket: bucket, Key: key };
+    const setTorrent = obj => ({ name: name + '.torrent', buffer: obj.Body });
     const promise = this.s3.getObjectTorrent(params).promise();
-    return promise
-      .then(obj => ({ name: name + '.torrent', buffer: obj.Body }));
+    return promise.then(setTorrent);
   }
 
   fetchTorrents(bucket, files) {
     const promises = R.map(obj => this.fetchTorrent(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files))
-      .then(this.createArchive);
+    return Promise.all(promises(files)).then(this.createArchive);
   }
 
   createWriteStream(bucket, key) {

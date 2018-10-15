@@ -868,6 +868,19 @@ export default class FeedParser {
     return forkJoin(observables(users));
   }
 
+  fetchJobNotes({ users, categorys, interval }) {
+    const isUrl       = obj => obj.url !== '';
+    const isOldItem   = obj => (interval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
+    const isCategory  = obj => R.any(category => obj.category === category)(categorys);
+    const observables = R.map(user => this.getNotes(user));
+    return forkJoin(observables(users)).pipe(
+        map(R.flatten)
+      , map(R.filter(isUrl))
+      , map(R.filter(isOldItem))
+      , map(R.filter(isCategory))
+      );
+  }
+
   fetchAddedNotes({ user }) {
     const observables = forkJoin([
       this.getAdded(user)
@@ -1645,27 +1658,36 @@ export default class FeedParser {
     );
   }
 
-  downloadImages({ user, ids, filter }) {
+  //downloadImages({ user, id, filter }) {
+  //  const AWS         = aws.of(aws_keyset);
+  //  const getObjects  = objs => AWS.fetchObjects(STORAGE, objs);
+  //  const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
+  //  const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
+  //  const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
+  //  const setImages   = R.map(obj => setImage(obj.guid, obj.images));
+  //  const dupItems    = objs => std.dupObj(objs, 'title');
+  //  const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
+  //  const getItems    = obj => obj.items;
+  //  return this.fetchNote({ user, id, filter }).pipe(
+  //    map(getItems)
+  //  , map(setItems)
+  //  , map(dupItems)
+  //  , map(setImages)
+  //  , map(R.flatten)
+  //  , flatMap(objs => from(getObjects(objs)))
+  //  );
+  //}
+
+  downloadImages({ user, id }) {
     const AWS         = aws.of(aws_keyset);
-    const getObjects  = objs => AWS.fetchObjects(STORAGE, objs);
-    //const getSignUrl  = R.map(obj => AWS.fetchSignedUrl(STORAGE, obj));
-    //const getTorrents = objs => AWS.fetchTorrents(STORAGE, objs);
-    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
-    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
-    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
-    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
-    const dupItems    = objs => std.dupObj(objs, 'title');
-    const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
-    const getItems    = obj => obj.items ? obj.items : [];
-    const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
-      map(R.map(getItems))
-    , map(R.map(setItems))
-    , map(R.flatten)
-    , map(dupItems)
-    , map(setImages)
-    , map(R.flatten)
-    , flatMap(objs => from(getObjects(objs)))
+    const getObject   = obj => AWS.fetchObject(STORAGE, obj);
+    const setKey      = (_id, url) => std.crypto_sha256(url, _id, 'hex') + '.zip';
+    const setName     = (_id, url) => _id + '_' + path.basename(std.parse_url(url).pathname);
+    const setArchives = obj => ({ key: setKey(obj._id.toString(), obj.url), name: setName(obj._id.toString(), obj.url) });
+    return this.fetchNote({ user, id }).pipe(
+      map(setArchives)
+    , flatMap(obj => from(getObject(obj)))
+    , map(obj => obj.buffer)
     );
   }
 
@@ -1684,7 +1706,7 @@ export default class FeedParser {
     , dupItems
     , setItems
     )(items);
-    log.info(FeedParser.displayName, 'Length:', R.length(files));
+    log.info(FeedParser.displayName, 'Items:', R.length(files));
     return from(putArchives(files));
   }
 

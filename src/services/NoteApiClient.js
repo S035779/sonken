@@ -193,9 +193,8 @@ export default {
     const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
     return this.request('download/items', params);
   },
-  downloadImages(user, ids, filter) {
-    const _ids = ids ? (Array.isArray(ids) ? ids : [ids]) : [];
-    const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
+  downloadImages(user, id, filter) {
+    const params = filter ? R.merge({ user, id }, filter) : { user, id };
     return this.request('download/images', params);
   },
 

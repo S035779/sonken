@@ -71,7 +71,7 @@ export default {
 
   downloadImages() {
     return (req, res) => {
-      const { user, ids, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+      const { user, id, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
       , aucStartTime, aucStopTime, sold } = req.body;
       const filter = allAuction === false ? {
         lastWeekAuction
@@ -83,7 +83,7 @@ export default {
       , aucStopTime
       , sold
       } : null;
-      feed.downloadImages({ user, ids, filter }).subscribe(
+      feed.downloadImages({ user, id, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

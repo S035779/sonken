@@ -19,7 +19,7 @@ const node_env        = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 5;
-const numChildProcess = process.env.JOB_NUM_MAX || 2;
+const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
@@ -55,26 +55,16 @@ const fork = () => {
   return cps;
 };
 
-const operation = url => {
-  const api = std.parse_url(url);
-  const path = R.split('/', api.pathname);
-  const operation = path[1];
-  return operation;
-};
-
 const request = queue => {
-  const getNotes    = objs => feed.fetchAllNotes({ users: objs });
-  const isApproved  = obj => obj.approved;
-  const setUser     = obj => obj.user;
-  const isUrl       = obj => obj.url !== '';
-  const isOldItem   = obj => (updatedInterval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
-  const isOpened    = obj => operation(obj.url) === 'seller' || operation(obj.url) === 'search'
+  const queuePush = obj => {
+    if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
+  }; 
   const setQueue    = obj => ({ 
-    user:       obj.user
+    operation:  obj.category
+  , user:       obj.user
   , id:         obj._id
   , url:        obj.url
   , items:      obj.items
-  , operation:  operation(obj.url)
   , created:    Date.now()
   });
   const limit = 20;
@@ -83,17 +73,8 @@ const request = queue => {
   const setItems = R.curry(_setItems);
   const repQueue = obj => R.map(setItems(obj), range);
   const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
-  const queuePush = obj => {
-    if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
-  }; 
-  return profile.fetchUsers({ adimn: 'Administrator' }).pipe(
-      map(R.filter(isApproved))
-    , map(R.map(setUser))
-    , flatMap(getNotes)
-    , map(R.flatten)
-    , map(R.filter(isUrl))
-    , map(R.filter(isOldItem))
-    , map(R.filter(isOpened))
+  return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
+      flatMap(objs => feed.fetchJobNotes({ users: objs, categorys: ['sellers', 'marchant'], interval: updatedInterval }))
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );

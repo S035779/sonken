@@ -41,8 +41,8 @@ const request = (operation, { url, user, id, items, skip, limit, key }) => {
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   switch(operation) {
-    case 'search':
-    case 'seller':
+    case 'marchant':
+    case 'sellers':
       {
         const conditions = { url, skip, limit };
         return yahoo.jobHtml(conditions).pipe(
@@ -51,7 +51,7 @@ const request = (operation, { url, user, id, items, skip, limit, key }) => {
           , flatMap(putHtml)
           );
       }
-    case 'closedsearch':
+    case 'closedmarchant':
       {
         const conditions = { url, skip, limit };
         return yahoo.jobClosedMerchant(conditions).pipe(
