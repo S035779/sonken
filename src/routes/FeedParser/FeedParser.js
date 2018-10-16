@@ -1303,9 +1303,8 @@ export default class FeedParser {
     return forkJoin(promises(_ids));
   }
 
-  uploadNotes({ user, category, file }) {
+  uploadNotes({ user, category, subcategory, file }) {
     const setNote = objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] });
-    const subcategory = 'Uploadfile';
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
@@ -1334,8 +1333,8 @@ export default class FeedParser {
 
   setOmplToObj(user, category, file) {
     return new Promise((resolve, reject) => {
-      parseString(file.toString(), { trim: true, explicitArray: true, attrkey: 'attr', charkey: '_' }
-      , (err, res) => {
+      const data = file.toString();
+      parseString(data, { trim: true, explicitArray: true, attrkey: 'attr', charkey: '_' }, (err, res) => {
         if(err) return reject(err);
         const outlines = res.opml.body[0].outline;
         const getOutline = obj => R.map(_obj => ({ attr: {
@@ -1349,8 +1348,7 @@ export default class FeedParser {
             type: 'rss'
           , category: obj.attr.category ? obj.attr.category : ''
           , title: obj.attr.title
-          , htmlUrl: obj.attr.htmlUrl
-          }}]
+          , htmlUrl: obj.attr.htmlUrl }}]
         : getOutline(obj);
         const setNote = obj => ({
           user
@@ -1362,8 +1360,7 @@ export default class FeedParser {
         , price: 0
         , bidsprice: 0
         , body: ''
-        , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-        });
+        , updated: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss') });
         const isYahoo = obj => std.parse_url(obj.attr.htmlUrl).origin === baseurl;
         resolve(R.compose(
           R.map(setNote)
@@ -1379,6 +1376,7 @@ export default class FeedParser {
   
   setCsvToObj(user, category, file) {
     return new Promise(resolve => {
+      const data = file.toString();
       const encode   = _str => encoding.detect(_str);
       const isUtf    = _str => encode(_str) === 'UNICODE' || encode(_str) === 'ASCII';
       const iconv    = new Iconv('CP932', 'UTF-8//TRANSLIT//IGNORE');
@@ -1394,18 +1392,33 @@ export default class FeedParser {
       const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
       const mergeCsv = (csv1, csv2) => R.isNil(csv1) ? csv2 : csv1;
       const forkJoin = R.map(R.map(std.fork(mergeCsv,toCutDbl,toNonCut)));
-      const toCutRec = R.filter(objs => R.length(objs) > 1);
-      const setNotes = R.map(arr => ({
+      const toCutRec = R.filter(objs => R.length(objs) !== 0 && objs[0] !== '');
+      const setUrl   = (category, array) => {
+        const string = R.length(array) === 1 ? array[0] : array[1];
+        let result;
+        if(string.match(/^(https?|ftp)(:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+)$/)) {
+          result = string;
+        } else if(category === 'closedmarchant') {
+          result = baseurl + '/closedsearch/closedsearch?' + std.urlencode({ p: string });
+        } else if(category === 'closedsellers') {
+          result = baseurl + '/jp/show/rating?' + std.urlencode({ userID: string, role: 'seller' });
+        } else if(category === 'sellers') {
+          result = baseurl + '/seller/' + string;
+        } else if(category === 'marchant') {
+          result = baseurl + '/search/search?' + std.urlencode({ p: string });
+        }
+        return result;
+      }
+      const setNotes = R.map(array => ({
         user
       , category
-      , title:        arr[0]
-      , url:          this.setUrl(category, arr[1])
-      , asin:         arr[2]
-      , price:        arr[3]
-      , bidsprice:    arr[4]
-      , body:         arr[5]
-      , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss')
-      }));
+      , title:        array[0]
+      , url:          setUrl(category, array)
+      , asin:         array[2]
+      , price:        array[3]
+      , bidsprice:    array[4]
+      , body:         array[5]
+      , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss') }));
       resolve(R.compose(
         setNotes
       , toCutRec
@@ -1414,26 +1427,8 @@ export default class FeedParser {
       , toColumn
       , toTailes
       , toRcords
-      )(file.toString())
-      );
+      )(data));
     });
-  }
-
-  setUrl(category, string) {
-    if(string.match(/^(https?|ftp)(:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+)$/)) {
-      return string;
-    } else {
-      switch(category) {
-        case 'closedmarchant':
-          return baseurl + '/closedsearch/closedsearch?' + std.urlencode({ p: string });
-        case 'closedsellers':
-          return baseurl + '/jp/show/rating?' + std.urlencode({ userID: string, role: 'seller' });
-        case 'sellers':
-          return baseurl + '/seller/' + string;
-        default:
-          return baseurl + '/search/search?' + std.urlencode({ p: string });
-      }
-    }
   }
 
   setNote({ user, url, category, categoryIds, title }, obj) {

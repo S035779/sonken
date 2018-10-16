@@ -178,8 +178,8 @@ export default {
   filterNote(user, filter) {
     return this.request('filter/note', { user, filter });
   },
-  uploadNotes(user, category, file) {
-    const name = user + '_' + category;
+  uploadNotes(user, category, file, subcategory) {
+    const name = user + '_' + category + '_' + subcategory;
     const ext  = file.name.match(/(.*)(?:\.([^.]+$))/);
     const type = file.type ? file.type : ext[2];
     const content = file;

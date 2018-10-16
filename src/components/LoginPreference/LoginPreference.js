@@ -1,5 +1,6 @@
 import React            from 'react';
-import PropTypes        from 'prop-types'
+import PropTypes        from 'prop-types';
+import * as R           from 'ramda';
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
@@ -27,13 +28,11 @@ class LoginPreference extends React.Component {
   handleChangeSelect(name, event) {
     std.logInfo(LoginPreference.displayName, 'handleChangeSelect', name);
     const { profile } = this.state;
-    switch(name) {
-      case 'plan':
-        this.setState({
-          profile: Object.assign({}, profile, { [name]: event.target.value  })
-        , [name]: event.target.value 
-        });
-        break;
+    if(name === 'plan') {
+      this.setState({ 
+        profile:  R.merge(profile, { [name]: event.target.value  })
+      , [name]:   event.target.value
+      });
     }
   }
 
@@ -45,21 +44,18 @@ class LoginPreference extends React.Component {
     std.logInfo(LoginPreference.displayName, 'handleSubmitDialog', name);
     const { user } = this.props;
     const { profile } = this.state;
-    switch(name) {
-      case 'isPreference':
-        if(this.isValidate() && this.isChanged()) {
-          LoginAction.updateProfile(user, null, profile)
-            .then(() => this.setState({ isSuccess: true }))
-            .catch(err => {
-              std.logError(LoginPreference.displayName, err.name, err.message);
-              this.setState({ isNotValid: true });
-            });
-        } else {
-          this.setState({ isNotValid: true });
-        }
-        break;
+    if(name === 'isPreference') {
+      if(this.isValidate() && this.isChanged()) {
+        LoginAction.updateProfile(user, null, profile)
+          .then(() => this.setState({ isSuccess: true }))
+          .catch(err => {
+            std.logError(LoginPreference.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+          });
+      } else {
+        this.setState({ isNotValid: true });
+      }
     }
-    this.setState({ [name]: false });
   }
 
   isValidate() {
@@ -74,9 +70,7 @@ class LoginPreference extends React.Component {
   }
 
   renderMenu(obj, idx) {
-    return <MenuItem key={idx} value={obj.id}>
-      {obj.name}（上限数：{obj.number}）
-    </MenuItem>;
+    return <MenuItem key={idx} value={obj.id}>{obj.name}（上限数：{obj.number}）</MenuItem>;
   }
 
   render() {
@@ -84,29 +78,21 @@ class LoginPreference extends React.Component {
     //std.logInfo(LoginPreference.displayName, 'State', this.state);
     const { classes, name, user, preference, open } = this.props;
     const { isNotValid, isSuccess, plan } = this.state;
-    const renderMenu = preference.menu ? preference.menu
-      .map((obj, idx) => this.renderMenu(obj, idx)) : [];
-    return <LoginFormDialog isSubmit open={open} title={'契約内容変更'}
-        onClose={this.handleCloseDialog.bind(this, 'isPreference')}
-        onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{name}（{user}）</Typography>
-        <TextField select autoFocus margin="dense"
-          value={plan}
-          onChange={this.handleChangeSelect.bind(this, 'plan')}
+    const renderMenu = preference.menu ? preference.menu.map((obj, idx) => this.renderMenu(obj, idx)) : [];
+    return <LoginFormDialog isSubmit open={open} title={'契約内容変更'} onClose={this.handleCloseDialog.bind(this, 'isPreference')}
+          onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
+        <Typography variant="title" noWrap className={classes.title}>{name}（{user}）</Typography>
+        <TextField select autoFocus margin="dense" value={plan} onChange={this.handleChangeSelect.bind(this, 'plan')}
           label="契約プラン" fullWidth>
           {renderMenu}
         </TextField>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleClose.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleClose.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
-      </LoginFormDialog>
-    ;
+      </LoginFormDialog>;
   }
 }
 LoginPreference.displayName = 'LoginPreference';

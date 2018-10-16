@@ -15,36 +15,18 @@ class LoginFormDialog extends React.Component {
   }
 
   renderSubmitButton() {
-    return <Button
-        onClick={this.handleSubmit.bind(this)}
-        color="primary">
-        設定
-      </Button>
-    ;
+    return <Button onClick={this.handleSubmit.bind(this)} color="primary">設定</Button>;
   }
 
   render() {
-    const { open, fullScreen, children, title, isSubmit, classes }
-      = this.props;
-    const renderSubmitButton
-      = isSubmit ? this.renderSubmitButton() : null;
-    return <Dialog
-      fullScreen={fullScreen}
-      TransitionComponent={Transition}
-      open={open}
-      onClose={this.handleClose.bind(this)}
-      classes={classes}
-      aria-labelledby="responsive-dialog-title">
-      <DialogTitle id="responsive-dialog-title">
-        {title}
-      </DialogTitle>
-      <DialogContent>
-        {children}
-      </DialogContent>
+    const { open, fullScreen, children, title, isSubmit, classes } = this.props;
+    const renderSubmitButton = isSubmit ? this.renderSubmitButton() : null;
+    return <Dialog fullScreen={fullScreen} TransitionComponent={Transition} open={open} onClose={this.handleClose.bind(this)}
+      classes={classes} aria-labelledby="responsive-dialog-title">
+      <DialogTitle id="responsive-dialog-title">{title}</DialogTitle>
+      <DialogContent>{children}</DialogContent>
       <DialogActions>
-        <Button onClick={this.handleClose.bind(this)} color="primary">
-        戻る
-        </Button>
+        <Button onClick={this.handleClose.bind(this)} color="primary">戻る</Button>
         {renderSubmitButton}
       </DialogActions>
     </Dialog>;

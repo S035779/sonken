@@ -12,13 +12,13 @@ export default {
       const filedata = Buffer.alloc(+req.headers['content-length']);
       const username = filename.split('_')[0];
       const category = filename.split('_')[1];
+      const subcategory = filename.split('_')[2];
       let bufferOffset = 0;
       req.on('data', chunk => {
         chunk.copy(filedata, bufferOffset);
         bufferOffset += chunk.length;
       }).on('end', () => {
-        feed.uploadNotes({ user: username, category: category
-        , file: { type: filetype, content: filedata } }).subscribe(
+        feed.uploadNotes({ user: username, category, subcategory, file: { type: filetype, content: filedata } }).subscribe(
           obj => { res.status(200).send(obj); }
         , err => {
             res.status(500).send({ name: err.name, message: err.message });

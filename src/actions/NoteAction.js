@@ -102,8 +102,8 @@ export default {
         dispatch({ type: 'note/filter', filter });
       });
   },
-  upload(user, category, file) {
-    return NoteApiClient.uploadNotes(user, category, file).then(notes => {
+  upload(user, category, file, subcategory) {
+    return NoteApiClient.uploadNotes(user, category, file, subcategory).then(notes => {
         dispatch({ type: 'note/upload/my', notes });
       });
   },
