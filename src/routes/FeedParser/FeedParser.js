@@ -1451,91 +1451,204 @@ export default class FeedParser {
     });
   }
 
+  setCsvNotes(category) {
+    let map, keys;
+    switch(category) {
+      case 'marchant':
+      case 'closedmarchant':
+        keys = ['title', 'url', 'asin', 'price', 'bidsprice', 'memo'];
+        map = R.map(obj => ({
+          title:     obj.title
+        , url:       obj.url
+        , asin:      obj.asin
+        , price:     obj.price
+        , bidsprice: obj.bidsprice
+        , memo:      obj.body
+        }));
+        break;
+      case 'sellers':
+      case 'closedsellers':
+        keys = ['title', 'url'];
+        map = R.map(obj => ({
+          title:     obj.title
+        , url:       obj.url
+        }));
+        break;
+    }
+    return { keys, map };
+  }
+
+  setCsvItems(type) {
+    const setAsins = R.join(':');
+    const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
+    const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '-';
+    let map, keys;
+    switch(type) {
+      case '0001':
+        keys = [ 'auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown'
+        , 'seller', 'link'
+        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
+        , 'offers', 'market', 'sale', 'sold', 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
+        map = R.map(obj => ({
+          title:        obj.title
+        , seller:       obj.seller
+        , auid:         obj.guid__
+        , link:         obj.link
+        , price:        obj.price
+        , buynow:       obj.buynow
+        , condition:    obj.item_condition
+        , categorys:    obj.item_categorys
+        , bids:         obj.bids
+        , countdown:    obj.countdown
+        , image1:       setImage(obj.images, 1)
+        , image2:       setImage(obj.images, 2)
+        , image3:       setImage(obj.images, 3)
+        , image4:       setImage(obj.images, 4)
+        , image5:       setImage(obj.images, 5)
+        , image6:       setImage(obj.images, 6)
+        , image7:       setImage(obj.images, 7)
+        , image8:       setImage(obj.images, 8)
+        , image9:       setImage(obj.images, 9)
+        , image10:      setImage(obj.images, 10)
+        , offers:       obj.offers
+        , market:       obj.market
+        , sale:         obj.sale
+        , sold:         obj.sold
+        , categoryid:   obj.item_categoryid
+        , explanation:  obj.explanation
+        , payment:      obj.payment
+        , shipping:     obj.shipping
+        , ship_price:   obj.ship_price
+        , ship_buynow:  obj.ship_buynow
+        , asins:        setAsins(obj.asins)
+        , date:         obj.pubDate
+        }));
+        break;
+      case '0002':
+        keys = [
+          'filename', 'category_id', 'title', 'input_method_of_description', 'description'
+        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'
+        , 'coment1', 'coment2', 'coment3', 'coment4', 'coment5', 'coment6', 'coment7', 'coment8', 'coment9'
+        , 'coment10', 'number', 'start_price', 'buynow_price'
+        , 'negotiation', 'duration', 'end_time', 'auto_re_sale', 'auto_price_cut', 'auto_extension'
+        , 'early_termination', 'bidder_limit', 'bad_evaluation', 'identification', 'condition'
+        , 'remarks_on_condition'
+        , 'returns', 'remarks_on_returns', 'yahoo_easy_settlement', 'check_seller_information'
+        , 'region', 'municipality', 'shipping_charge_borne', 'shipping_input_method', 'delivaly_days'
+        , 'yafuneko', 'yafuneko_compact', 'yafuneko_post', 'jpp_pack'
+        , 'jpp_packet', 'unused1', 'unused2', 'size', 'weight'
+        , 'shipping_method1',   'domestic1',  'hokkaido1',  'okinawa1',   'remote1'
+        , 'shipping_method2',   'domestic2',  'hokkaido2',  'okinawa2',   'remote2'
+        , 'shipping_method3',   'domestic3',  'hokkaido3',  'okinawa3',   'remote3'
+        , 'shipping_method4',   'domestic4',  'hokkaido4',  'okinawa4',   'remote4'
+        , 'shipping_method5',   'domestic5',  'hokkaido5',  'okinawa5',   'remote5'
+        , 'shipping_method6',   'domestic6',  'hokkaido6',  'okinawa6',   'remote6'
+        , 'shipping_method7',   'domestic7',  'hokkaido7',  'okinawa7',   'remote7'
+        , 'shipping_method8',   'domestic8',  'hokkaido8',  'okinawa8',   'remote8'
+        , 'shipping_method9',   'domestic9',  'hokkaido9',  'okinawa9',   'remote9'
+        , 'shipping_method10',  'domestic10', 'hokkaido10', 'okinawa10',  'remote10'
+        , 'arrival_jpp_pack', 'arrival_mail', 'arrival_neko', 'arrival_sagawa'
+        , 'arrival_seino', 'oversea', 'options', 'bold', 'background', 'affiliate'
+        ];
+        map = R.map(obj => ({
+          filename: '-', category_id: obj.item_categoryid, title: obj.title, input_method_of_description: '-'
+        , description: obj.explanation
+        , image1: setImage(obj.images, 1), image2: setImage(obj.images, 2), image3: setImage(obj.images, 3)
+        , image4: setImage(obj.images, 4), image5: setImage(obj.images, 5), image6: setImage(obj.images, 6)
+        , image7: setImage(obj.images, 7), image8: setImage(obj.images, 8), image9: setImage(obj.images, 9)
+        , image10: setImage(obj.images, 10)
+        , coments1: '-', coments2:  '-', coments3: '-', coments4: '-'
+        , coments5: '-', coments6:  '-', coments7: '-', coments8: '-'
+        , coments9: '-', coments10: '-'
+        , number: '-', start_price: '-', buynow_price: obj.buynow, negotiation: '-', duration: obj.countdown
+        , end_time: '-', auto_re_sale: '-', auto_price_cut: '-', auto_extension: '-', early_termination: '-'
+        , bidder_limit: '-', bad_evaluation: '-', identification: '-', condition: obj.item_condition
+        , remarks_on_condition: '-', returns: '-', remarks_on_returns: '-', yahoo_easy_settlement: '-'
+        , check_seller_information: '-', region: '-', municipality: '-', shipping_charge_borne: '-'
+        , shipping_input_method: '-', delivaly_days: '-', yafuneko: '-', yafuneko_compact: '-'
+        , yafuneko_post: '-', jpp_pack: '-', jpp_packet: '-', unused1: '-', unused2: '-', size: '-', weight: '-'
+        , shipping_method1:  '-', domestic1:    '-', hokkaido1:    '-', okinawa1:       '-', remote1: '-'
+        , shipping_method2:  '-', domestic2:    '-', hokkaido2:    '-', okinawa2:       '-', remote2: '-'
+        , shipping_method3:  '-', domestic3:    '-', hokkaido3:    '-', okinawa3:       '-', remote3: '-'
+        , shipping_method4:  '-', domestic4:    '-', hokkaido4:    '-', okinawa4:       '-', remote4: '-'
+        , shipping_method5:  '-', domestic5:    '-', hokkaido5:    '-', okinawa5:       '-', remote5: '-'
+        , shipping_method6:  '-', domestic6:    '-', hokkaido6:    '-', okinawa6:       '-', remote6: '-'
+        , shipping_method7:  '-', domestic7:    '-', hokkaido7:    '-', okinawa7:       '-', remote7: '-'
+        , shipping_method8:  '-', domestic8:    '-', hokkaido8:    '-', okinawa8:       '-', remote8: '-'
+        , shipping_method9:  '-', domestic9:    '-', hokkaido9:    '-', okinawa9:       '-', remote9: '-'
+        , shipping_method10: '-', domestic10:   '-', hokkaido10:   '-', okinawa10:      '-', remote10: '-'
+        , arrival_jpp_pack:  '-', arrival_mail: '-', arrival_neko: '-', arrival_sagawa: '-', arrival_seino: '-'
+        , oversea: '-',           options:      '-', bold:         '-', background:     '-', affiliate: '-'
+        }));
+        break;
+      case '0003':
+        keys = [ 'asin', 'title', 'brand', 'category', 'description', 'word_count', 'rating', 'review', 'list_price', 'price'
+        , 'discount', 'commision', 'sales_rank', 'available', 'thumbnail', 'product_url', 'fullfilled', 'ship_price', 'total_price'
+        , 'parent_asin', 'child_asin', 'upc', 'ean', 'prime', 'affiliate_link'
+        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'];
+        map = R.map(obj => ({
+          asin:           setAsin(obj.asins)
+        , title:          obj.title
+        , brand:          '-'
+        , category:       obj.item_categoryid
+        , description:    obj.explanation
+        , word_count:     '-'
+        , rating:         '-'
+        , review:         '-'
+        , list_price:     '-'
+        , price:          obj.price
+        , discount:       '-'
+        , commision:      '-'
+        , sales_rank:     '-'
+        , available:      '-'
+        , thumbnail:      '-'
+        , product_url:    '-'
+        , fullfilled:     '-'
+        , ship_price:     '-'
+        , total_price:    '-'
+        , parent_asin:    '-'
+        , child_asin:     '-'
+        , upc:            '-'
+        , ean:            '-'
+        , prime:          '-'
+        , affiliate_link: '-'
+        , image1:         setImage(obj.images, 1)
+        , image2:         setImage(obj.images, 2)
+        , image3:         setImage(obj.images, 3)
+        , image4:         setImage(obj.images, 4)
+        , image5:         setImage(obj.images, 5)
+        , image6:         setImage(obj.images, 6)
+        , image7:         setImage(obj.images, 7)
+        , image8:         setImage(obj.images, 8)
+        , image9:         setImage(obj.images, 9)
+        , image10:        setImage(obj.images, 10)
+        }));
+        break;
+    }
+    return { keys, map };
+  }
+
   downloadNotes({ user, category }) {
-    const keys = category === 'marchant'
-      ? ['title', 'url', 'asin', 'price', 'bidsprice', 'memo'] : ['title', 'url'];
+    const CSV = this.setCsvNotes(category);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const setNotes = R.map(obj => ({
-      title:     obj.title
-    , url:       obj.url
-    , asin:      obj.asin
-    , price:     obj.price
-    , bidsprice: obj.bidsprice
-    , memo:      obj.body
-    }));
-    const setNotesCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
+    const setNotesCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     return this.fetchNotes({ user, category }).pipe(
-      map(setNotes)
+      map(CSV.map)
     , map(setNotesCsv)
     , map(setBuffer)
     );
   }
   
-  downloadItems({ user, ids, filter }) {
-    const keys = [
-      'filename', 'category_id', 'title', 'input_method_of_description', 'description'
-    , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'
-    , 'coment1', 'coment2', 'coment3', 'coment4', 'coment5', 'coment6', 'coment7', 'coment8', 'coment9'
-    , 'coment10', 'number', 'start_price', 'buynow_price'
-    , 'negotiation', 'duration', 'end_time', 'auto_re_sale', 'auto_price_cut', 'auto_extension'
-    , 'early_termination', 'bidder_limit', 'bad_evaluation', 'identification', 'condition'
-    , 'remarks_on_condition'
-    , 'returns', 'remarks_on_returns', 'yahoo_easy_settlement', 'check_seller_information'
-    , 'region', 'municipality', 'shipping_charge_borne', 'shipping_input_method', 'delivaly_days'
-    , 'yafuneko', 'yafuneko_compact', 'yafuneko_post', 'jpp_pack'
-    , 'jpp_packet', 'unused1', 'unused2', 'size', 'weight'
-    , 'shipping_method1',   'domestic1',  'hokkaido1',  'okinawa1',   'remote1'
-    , 'shipping_method2',   'domestic2',  'hokkaido2',  'okinawa2',   'remote2'
-    , 'shipping_method3',   'domestic3',  'hokkaido3',  'okinawa3',   'remote3'
-    , 'shipping_method4',   'domestic4',  'hokkaido4',  'okinawa4',   'remote4'
-    , 'shipping_method5',   'domestic5',  'hokkaido5',  'okinawa5',   'remote5'
-    , 'shipping_method6',   'domestic6',  'hokkaido6',  'okinawa6',   'remote6'
-    , 'shipping_method7',   'domestic7',  'hokkaido7',  'okinawa7',   'remote7'
-    , 'shipping_method8',   'domestic8',  'hokkaido8',  'okinawa8',   'remote8'
-    , 'shipping_method9',   'domestic9',  'hokkaido9',  'okinawa9',   'remote9'
-    , 'shipping_method10',  'domestic10', 'hokkaido10', 'okinawa10',  'remote10'
-    , 'arrival_jpp_pack', 'arrival_mail', 'arrival_neko', 'arrival_sagawa'
-    , 'arrival_seino', 'oversea', 'options', 'bold', 'background', 'affiliate'
-    ];
+  downloadItems({ user, ids, filter, type }) {
+    const CSV = this.setCsvItems(type);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
-    const setItems = R.map(obj => ({
-      filename: '-', category_id: obj.item_categoryid, title: obj.title, input_method_of_description: '-'
-    , description: obj.explanation
-    , image1: setImage(obj.images, 1), image2: setImage(obj.images, 2), image3: setImage(obj.images, 3)
-    , image4: setImage(obj.images, 4), image5: setImage(obj.images, 5), image6: setImage(obj.images, 6)
-    , image7: setImage(obj.images, 7), image8: setImage(obj.images, 8), image9: setImage(obj.images, 9)
-    , image10: setImage(obj.images, 10)
-    , coments1: '-', coments2:  '-', coments3: '-', coments4: '-'
-    , coments5: '-', coments6:  '-', coments7: '-', coments8: '-'
-    , coments9: '-', coments10: '-'
-    , number: '-', start_price: '-', buynow_price: obj.buynow, negotiation: '-', duration: obj.countdown
-    , end_time: '-', auto_re_sale: '-', auto_price_cut: '-', auto_extension: '-', early_termination: '-'
-    , bidder_limit: '-', bad_evaluation: '-', identification: '-', condition: obj.item_condition
-    , remarks_on_condition: '-', returns: '-', remarks_on_returns: '-', yahoo_easy_settlement: '-'
-    , check_seller_information: '-', region: '-', municipality: '-', shipping_charge_borne: '-'
-    , shipping_input_method: '-', delivaly_days: '-', yafuneko: '-', yafuneko_compact: '-'
-    , yafuneko_post: '-', jpp_pack: '-', jpp_packet: '-', unused1: '-', unused2: '-', size: '-', weight: '-'
-    , shipping_method1:  '-', domestic1:    '-', hokkaido1:    '-', okinawa1:       '-', remote1: '-'
-    , shipping_method2:  '-', domestic2:    '-', hokkaido2:    '-', okinawa2:       '-', remote2: '-'
-    , shipping_method3:  '-', domestic3:    '-', hokkaido3:    '-', okinawa3:       '-', remote3: '-'
-    , shipping_method4:  '-', domestic4:    '-', hokkaido4:    '-', okinawa4:       '-', remote4: '-'
-    , shipping_method5:  '-', domestic5:    '-', hokkaido5:    '-', okinawa5:       '-', remote5: '-'
-    , shipping_method6:  '-', domestic6:    '-', hokkaido6:    '-', okinawa6:       '-', remote6: '-'
-    , shipping_method7:  '-', domestic7:    '-', hokkaido7:    '-', okinawa7:       '-', remote7: '-'
-    , shipping_method8:  '-', domestic8:    '-', hokkaido8:    '-', okinawa8:       '-', remote8: '-'
-    , shipping_method9:  '-', domestic9:    '-', hokkaido9:    '-', okinawa9:       '-', remote9: '-'
-    , shipping_method10: '-', domestic10:   '-', hokkaido10:   '-', okinawa10:      '-', remote10: '-'
-    , arrival_jpp_pack:  '-', arrival_mail: '-', arrival_neko: '-', arrival_sagawa: '-', arrival_seino: '-'
-    , oversea: '-',           options:      '-', bold:         '-', background:     '-', affiliate: '-'
-    }));
-    const getItems    = obj => obj.items ? obj.items : [];
-    const dupItems    = objs => std.dupObj(objs, 'title');
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
+    const getItems = obj => obj.items ? obj.items : [];
+    const dupItems = objs => std.dupObj(objs, 'title');
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
       map(R.map(getItems))
-    , map(R.map(setItems))
+    , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)
     , map(setItemsCsv)
@@ -1544,53 +1657,14 @@ export default class FeedParser {
   }
 
   downloadTrade({ user, filter }) {
-    const keys = [ 'auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
-    , 'bids', 'countdown', 'seller', 'link', 'image1', 'image2', 'image3', 'image4', 'image5', 'image6'
-    , 'image7', 'image8', 'image9',  'image10', 'offers', 'market', 'sale', 'sold', 'categoryid'
-    , 'explanation', 'payment', 'shipping', 'asins', 'date'];
+    const CSV = this.setCsvItems('0001');
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
-    const setAsins = R.join(':');
-    const setItems = R.map(obj => ({
-      title:        obj.title
-    , seller:       obj.seller
-    , auid:         obj.guid__
-    , link:         obj.link
-    , price:        obj.price
-    , buynow:       obj.buynow
-    , condition:    obj.item_condition
-    , categorys:    obj.item_categorys
-    , bids:         obj.bids
-    , countdown:    obj.countdown
-    , image1:       setImage(obj.images, 1)
-    , image2:       setImage(obj.images, 2)
-    , image3:       setImage(obj.images, 3)
-    , image4:       setImage(obj.images, 4)
-    , image5:       setImage(obj.images, 5)
-    , image6:       setImage(obj.images, 6)
-    , image7:       setImage(obj.images, 7)
-    , image8:       setImage(obj.images, 8)
-    , image9:       setImage(obj.images, 9)
-    , image10:      setImage(obj.images, 10)
-    , offers:       obj.offers
-    , market:       obj.market
-    , sale:         obj.sale
-    , sold:         obj.sold
-    , categoryid:   obj.item_categoryid
-    , explanation:  obj.explanation
-    , payment:      obj.payment
-    , shipping:     obj.shipping
-    , ship_price:   obj.ship_price
-    , ship_buynow:  obj.ship_buynow
-    , asins:        setAsins(obj.asins)
-    , date:         obj.pubDate
-    }));
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     const dupItems    = objs => std.dupObj(objs, 'title');
     return this.fetchTradedNotes({ user, filter }).pipe(
       map(R.map(getItems))
-    , map(R.map(setItems))
+    , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)
     , map(setItemsCsv)
@@ -1599,53 +1673,14 @@ export default class FeedParser {
   }
   
   downloadBids({ user, filter }) {
-    const keys = [ 'auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition'
-    , 'bids', 'countdown', 'seller', 'link', 'image1', 'image2', 'image3', 'image4', 'image5', 'image6'
-    , 'image7', 'image8', 'image9',  'image10', 'offers', 'market', 'sale', 'sold', 'categoryid'
-    , 'explanation', 'payment', 'shipping', 'asins', 'date'];
+    const CSV = this.setCsvItems('0001');
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys }).parse();
-    const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '';
-    const setAsins = R.join(':');
-    const setItems = R.map(obj => ({
-      title:        obj.title
-    , seller:       obj.seller
-    , auid:         obj.guid__
-    , link:         obj.link
-    , price:        obj.price
-    , buynow:       obj.buynow
-    , condition:    obj.item_condition
-    , categorys:    obj.item_categorys
-    , bids:         obj.bids
-    , countdown:    obj.countdown
-    , image1:       setImage(obj.images, 1)
-    , image2:       setImage(obj.images, 2)
-    , image3:       setImage(obj.images, 3)
-    , image4:       setImage(obj.images, 4)
-    , image5:       setImage(obj.images, 5)
-    , image6:       setImage(obj.images, 6)
-    , image7:       setImage(obj.images, 7)
-    , image8:       setImage(obj.images, 8)
-    , image9:       setImage(obj.images, 9)
-    , image10:      setImage(obj.images, 10)
-    , offers:       obj.offers
-    , market:       obj.market
-    , sale:         obj.sale
-    , sold:         obj.sold
-    , categoryid:   obj.item_categoryid
-    , explanation:  obj.explanation
-    , payment:      obj.payment
-    , shipping:     obj.shipping
-    , ship_price:   obj.ship_price
-    , ship_buynow:  obj.ship_buynow
-    , asins:        setAsins(obj.asins)
-    , date:         obj.pubDate
-    }));
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     const dupItems    = objs => std.dupObj(objs, 'title');
     return this.fetchBidedNotes({ user, filter }).pipe(
       map(R.map(getItems))
-    , map(R.map(setItems))
+    , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)
     , map(setItemsCsv)

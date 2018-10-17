@@ -107,13 +107,13 @@ export default {
         dispatch({ type: 'note/upload/my', notes });
       });
   },
-  download(user, category) {
-    return NoteApiClient.downloadNotes(user, category).then(file => {
+  download(user, category, type) {
+    return NoteApiClient.downloadNotes(user, category, type).then(file => {
         dispatch({ type: 'note/download/my', file });
       });
   },
-  downloadItems(user, ids, filter) {
-    return NoteApiClient.downloadItems(user, ids, filter).then(file => {
+  downloadItems(user, ids, filter, type) {
+    return NoteApiClient.downloadItems(user, ids, filter, type).then(file => {
         dispatch({ type: 'note/download/items', file });
       });
   },

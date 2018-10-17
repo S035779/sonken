@@ -1,16 +1,17 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import * as R           from 'ramda';
-import NoteAction       from 'Actions/NoteAction';
-import std              from 'Utilities/stdutils';
-import Spinner          from 'Utilities/Spinner';
+import React                  from 'react';
+import PropTypes              from 'prop-types';
+import * as R                 from 'ramda';
+import NoteAction             from 'Actions/NoteAction';
+import std                    from 'Utilities/stdutils';
+import Spinner                from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
+import { withStyles }         from '@material-ui/core/styles';
 import { Button, Checkbox, Typography, TextField, Select, InputLabel, FormControl, MenuItem }
-                        from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssItemList      from 'Components/RssItemList/RssItemList';
+                              from '@material-ui/core';
+import RssButton              from 'Components/RssButton/RssButton';
+import RssDialog              from 'Components/RssDialog/RssDialog';
+import RssItemList            from 'Components/RssItemList/RssItemList';
+import RssDownloadItemsDialog from 'Components/RssDownloadItemsDialog/RssDownloadItemsDialog';
 
 class ClosedForms extends React.Component {
   constructor(props) {
@@ -33,6 +34,7 @@ class ClosedForms extends React.Component {
     , isNotValid: false
     , isRequest: false
     , isNotResult: false
+    , isDownload: false
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -168,26 +170,6 @@ class ClosedForms extends React.Component {
     this.setState({ sold, allAuction: false  })
   }
 
-  handleDownload() {
-    const { user, note, itemNumber } = this.props;
-    //std.logInfo(ClosedForms.displayName, 'handleDownload', user);
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
-    const id = note._id;
-    if(itemNumber !== 0) {
-      this.spn.start();
-      NoteAction.downloadItems(user, id
-        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
-        .then(() => this.setState({ isSuccess: true }))
-        .then(() => this.downloadFile(this.props.file))
-        .then(() => this.spn.stop())
-        .catch(err => {
-          std.logError(ClosedForms.displayName, err.name, err.message);
-          this.setState({ isNotValid: true });
-          this.spn.stop();
-        });
-    }
-  }
-
   handleImages() {
     const { user, note, itemNumber } = this.props;
     //std.logInfo(ClosedForms.displayName, 'handleImages', user);
@@ -208,6 +190,10 @@ class ClosedForms extends React.Component {
     }
   }
 
+  handleOpenDialog(name) {
+    this.setState({ [name]: true });
+  }
+
   handleCloseDialog(name) {
     this.setState({ [name]: false });
   }
@@ -224,22 +210,6 @@ class ClosedForms extends React.Component {
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, id, skip, limit
       , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold });
-  }
-
-  downloadFile(blob) {
-    std.logInfo(ClosedForms.displayName, 'downloadFile', blob);
-    const anchor = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      const url = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-      anchor.href = url;
-      anchor.target = '_blank';
-      anchor.download = 'download.csv';
-      anchor.click();
-      URL.revokeObjectURL(url);
-    }
-    fileReader.readAsArrayBuffer(blob);
   }
 
   downloadImages(blob) {
@@ -269,17 +239,24 @@ class ClosedForms extends React.Component {
   render() {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
-    const { classes, itemNumber, perPage, user, note, category } = this.props;
+    const { classes, itemNumber, perPage, user, note, category, file } = this.props;
     const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold, page, isNotValid
-      , isSuccess, isNotResult } = this.state;
+      , isSuccess, isNotResult, isDownload } = this.state;
     const { items } = this.state.note;
+    const filter = { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold };
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>画像保存</RssButton>
-          <RssButton color={color} onClick={this.handleDownload.bind(this)} classes={classes.button}>ダウンロード</RssButton>
+          <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
+            画像保存
+          </RssButton>
+          <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
+            ダウンロード
+          </RssButton>
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} id={note._id} itemNumber={itemNumber} 
+            filter={filter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>

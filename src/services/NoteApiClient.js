@@ -185,12 +185,12 @@ export default {
     const content = file;
     return this.request('upload/notes', { name, type, content });
   },
-  downloadNotes(user, category) {
-    return this.request('download/notes', { user, category });
+  downloadNotes(user, category, type) {
+    return this.request('download/notes', { user, category, type });
   },
-  downloadItems(user, ids, filter) {
+  downloadItems(user, ids, filter, type) {
     const _ids = ids ? (Array.isArray(ids) ? ids : [ids]) : [];
-    const params = filter ? R.merge({ user, ids: _ids }, filter) : { user, ids: _ids };
+    const params = filter ? R.merge({ user, ids: _ids, type }, filter) : { user, ids: _ids, type };
     return this.request('download/items', params);
   },
   downloadImages(user, id, filter) {

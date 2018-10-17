@@ -1,16 +1,17 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import * as R           from 'ramda';
-import NoteAction       from 'Actions/NoteAction';
-import std              from 'Utilities/stdutils';
-import Spinner          from 'Utilities/Spinner';
+import React              from 'react';
+import PropTypes          from 'prop-types';
+import * as R             from 'ramda';
+import NoteAction         from 'Actions/NoteAction';
+import std                from 'Utilities/stdutils';
+import Spinner            from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
+import { withStyles }     from '@material-ui/core/styles';
 import { Select, Input, Button, Typography, InputLabel, FormControl, MenuItem } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssAddDialog     from 'Components/RssAddDialog/RssAddDialog';
-import RssFileDialog    from 'Components/RssFileDialog/RssFileDialog';
+import RssButton          from 'Components/RssButton/RssButton';
+import RssDialog          from 'Components/RssDialog/RssDialog';
+import RssAddDialog       from 'Components/RssAddDialog/RssAddDialog';
+import RssUploadDialog    from 'Components/RssUploadDialog/RssUploadDialog';
+import RssDownloadDialog  from 'Components/RssDownloadDialog/RssDownloadDialog';
 
 class RssSearch extends React.Component {
   constructor(props) {
@@ -60,14 +61,6 @@ class RssSearch extends React.Component {
     else this.setState({ isLimit: true });
   }
 
-  handleDownload() {
-    this.setState({ isDownload: true });
-  }
-
-  handleUpload() {
-    this.setState({ isUpload: true });
-  }
-
   handleChangeText(name, event) {
     const value = event.target.value;
     this.setState({ [name]: value });
@@ -90,6 +83,10 @@ class RssSearch extends React.Component {
         this.setState({ isNotValid:  true });
         spn.stop();
       });
+  }
+
+  handleOpenDialog(name) {
+    this.setState({ [name]: true });
   }
 
   handleCloseDialog(name) {
@@ -188,15 +185,19 @@ class RssSearch extends React.Component {
         <Button variant="raised" className={classes.button} onClick={this.handleClickButton.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録
         </Button>
-        <RssAddDialog title={title} open={isAddNote} user={user} category={category} categorys={categoryList(category)}
-          onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
         <div className={classes.space} />
-        <RssButton isdownload color={color} onClick={this.handleDownload.bind(this)} classes={classes.button} file={file}>
+        <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
           ダウンロード
         </RssButton>
-        <RssButton isupload   color={color} onClick={this.handleUpload.bind(this)}   classes={classes.button}>
+        <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isUpload')} classes={classes.button}>
           アップロード
         </RssButton>
+        <RssAddDialog title={title} open={isAddNote} user={user} category={category} categorys={categoryList(category)}
+          onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
+        <RssUploadDialog open={isUpload} title={'カテゴリ名'} user={user} category={category} name="Uploadfile" perPage={perPage} 
+          onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
+        <RssDownloadDialog open={isDownload} title={'フォーマット'} user={user} category={category} name="0001" file={file}
+          onClose={this.handleCloseDialog.bind(this, 'isDownload')}/>
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
@@ -206,10 +207,6 @@ class RssSearch extends React.Component {
         <RssDialog open={isLimit} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isLimit')}>
           登録数上限に達しました。アップグレードをご検討ください。
         </RssDialog>
-        <RssFileDialog isupload   open={isUpload}    title={'カテゴリ名'}  user={user} category={category}  
-          name="Uploadfile" perPage={perPage} onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
-        <RssFileDialog isdownload open={isDownload}  title={'フォーマット'} user={user} category={category} 
-          name="0001"       perPage={perPage} onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
       </div>
     </div>;
   }
@@ -234,29 +231,18 @@ const titleHeight = 62;
 const minWidth = 125;
 const buttonWidth = 88;
 const styles = theme => ({
-  noteSearchs:{ display: 'flex', flexDirection: 'row'
-              , alignItems: 'stretch'
-              , height: titleHeight, minHeight: titleHeight
-              , boxSizing: 'border-box'
-              , padding: '5px'
-              , overflow: 'hidden' }
-, inputSelect:{ margin: theme.spacing.unit / 3 + 1, minWidth }
-, inputText:  { flex: 2, minWidth: minWidth * 2 }
-, buttons:    { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:     { flex: 1, width: buttonWidth
-              , margin: theme.spacing.unit /2
-              , textAlign: 'center'
-              , wordBreak: 'keep-all', padding: 4 }
-, uplabel:     { flex: 1, width: buttonWidth + theme.spacing.unit }
-, upbutton:   { width: buttonWidth, height: buttonWidth /2
-              , margin: theme.spacing.unit /2
-              , textAlign: 'center'
-              , wordBreak: 'keep-all', padding: 4 }
-, results:    { flex: 1, minWidth
-              , display: 'flex'
-              , justifyContent: 'center', alignItems: 'flex-end' }
-, title:      { wordBreak: 'keep-all' }
-, space:      { flex: 0, margin: theme.spacing.unit }
-, input:      { display: 'none' }
+  noteSearchs:  { display: 'flex', flexDirection: 'row', alignItems: 'stretch', height: titleHeight, minHeight: titleHeight
+                , boxSizing: 'border-box', padding: '5px', overflow: 'hidden' }
+, inputSelect:  { margin: theme.spacing.unit / 3 + 1, minWidth }
+, inputText:    { flex: 2, minWidth: minWidth * 2 }
+, buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
+, button:       { flex: 1, width: buttonWidth, margin: theme.spacing.unit /2, textAlign: 'center', wordBreak: 'keep-all', padding: 4 }
+, uplabel:      { flex: 1, width: buttonWidth + theme.spacing.unit }
+, upbutton:     { width: buttonWidth, height: buttonWidth /2, margin: theme.spacing.unit /2, textAlign: 'center'
+                , wordBreak: 'keep-all', padding: 4 }
+, results:      { flex: 1, minWidth, display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }
+, title:        { wordBreak: 'keep-all' }
+, space:        { flex: 0, margin: theme.spacing.unit }
+, input:        { display: 'none' }
 });
 export default withStyles(styles)(RssSearch);
