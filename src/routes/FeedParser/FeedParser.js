@@ -42,6 +42,22 @@ export default class FeedParser {
 
   request(request, options) {
     switch(request) {
+      case 'job/notes':
+        {
+          const { users, categorys, items, skip, limit, interval } = options;
+          let conditions = { user: { $in: users }, category: { $in: categorys }, updated: { $lt: Date.now() - interval } };
+          if(items) conditions = R.merge(conditions, { items });
+          const model = Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort('updated');
+          return model.exec();
+        }
+      case 'job/note':
+        {
+          const { user, id } = options;
+          const conditions = { user, _id: id };
+          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
+          const model = Note.findOne(conditions).populate(params);
+          return model.exec();
+        }
       case 'counts/notes':
       case 'count/notes':
       case 'fetch/notes':
@@ -66,11 +82,9 @@ export default class FeedParser {
           } else {
             model = Note.find(conditions);
             model = isPaginate
-              ? model
-                .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }})
+              ? model.populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }})
                 .sort('-updated').skip(Number(skip)).limit(Number(limit))
-              : model
-                .populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }}})
+              : model.populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }}})
                 .sort('updated');
             promise = isCounts ? model.countDocuments().exec() : model.exec();
           }
@@ -81,18 +95,8 @@ export default class FeedParser {
         {
           const { user, id, skip, limit, filter } = options;
           const isCount = request === 'count/note';
-          const isPaginate = skip && limit;
-          const setQuery = match => {
-            const conditions = { user, _id: id };
-            let model = Note.findOne(conditions);
-            model = isPaginate 
-              ? model.populate({ path: 'items', match
-                , options: { sort: { bidStopTime: 'desc' }, skip: Number(skip), limit: Number(limit) }})
-              : model.populate({ path: 'items', match
-                , options: { sort: { bidStopTime: 'desc' } }});
-            return model.exec();
-          };
-          let promise;
+          const conditions = { user, _id: id };
+          let promise, match, params;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -109,19 +113,23 @@ export default class FeedParser {
             const today     = new Date(year, month, day, hours, minutes, seconds);
             const sold      = filter.sold ? Number(filter.sold) : 1;
             if(filter.inAuction) {
-              promise = setQuery({ bidStopTime: { $gte: start, $lt: stop } });
+              match = { bidStopTime: { $gte: start, $lt: stop } };
             } else if(filter.allAuction) {
-              promise = setQuery();
+              match = null;
             } else if(filter.lastMonthAuction) {
-              promise = setQuery({ bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: sold } });
+              match = { bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: sold } };
             } else if(filter.twoWeeksAuction) {
-              promise = setQuery({ bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: sold } });
+              match = { bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: sold } };
             } else if(filter.lastWeekAuction) {
-              promise = setQuery({ bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: sold } });
+              match = { bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: sold } };
             }
           } else {
-            promise = setQuery();
+            match = null;
           }
+          params = { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
+          if(skip && limit) params = R.merge(params, { skip: Number(skip), limit: Number(limit) });
+          if(match)         params = R.merge(params, { match });
+          promise = Note.findOne(conditions).populate(params).exec();
           return isCount ? promise.then(doc => ([{ _id: doc._id, counts: doc.items.length }])) : promise;
         }
       case 'count/traded':
@@ -327,16 +335,18 @@ export default class FeedParser {
             , body:         data.body
             , updated:      new Date
             };
-          const newItems = R.filter(obj => !obj._id, data.items);
-          const curItems = R.filter(obj => obj._id, data.items);
-          const getItemIds = R.map(obj => obj._id);
-          const setObjectIds = R.map(obj => ObjectId(obj._id));
-          const conItemIds = objs => R.compose(R.concat(objs), setObjectIds)(curItems);
-          const setItemIds = objs => R.merge(docs, { items: objs });
+          const isNotItems  = (obj, items) => R.none(item => obj.guid__ === item.guid__, items);
+          const curItems    = objs => R.filter(obj => isNotItems(obj, objs[0]), objs[1].items);
+          const conItems    = objs => R.concat(objs[0], curItems(objs));
+          const getItemIds  = R.map(obj => obj._id);
+          const setItemIds  = objs => R.merge(docs, { items: objs });
           return data.items
-            ? Items.insertMany(newItems)
+            ? Promise.all([
+                Items.insertMany(data.items)
+              , Note.findOne(conditions, 'items').populate('items')
+              ])
+              .then(conItems)
               .then(getItemIds)
-              .then(conItemIds)
               .then(setItemIds)
               .then(obj => Note.update(conditions, obj).exec())
             : Note.update(conditions, docs).exec();
@@ -550,6 +560,14 @@ export default class FeedParser {
       default:
         return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
     }
+  }
+
+  getJobNotes(users, categorys, items, skip, limit, interval) {
+    return this.request('job/notes', { users, categorys, items, skip, limit, interval });
+  }
+
+  getJobNote(user, id) {
+    return this.request('job/note', { user, id });
   }
 
   addList(user, id) {
@@ -863,22 +881,12 @@ export default class FeedParser {
     );
   }
 
-  fetchAllNotes({ users }) {
-    const observables = R.map(user => this.getNotes(user));
-    return forkJoin(observables(users));
+  fetchJobNotes({ users, categorys, items, skip, limit, interval }) {
+    return from(this.getJobNotes(users, categorys, items, skip, limit, interval));
   }
 
-  fetchJobNotes({ users, categorys, interval }) {
-    const isUrl       = obj => obj.url !== '';
-    const isOldItem   = obj => (interval * 1000 * 60) < Date.now() - new Date(obj.updated).getTime();
-    const isCategory  = obj => R.any(category => obj.category === category)(categorys);
-    const observables = R.map(user => this.getNotes(user));
-    return forkJoin(observables(users)).pipe(
-        map(R.flatten)
-      , map(R.filter(isUrl))
-      , map(R.filter(isOldItem))
-      , map(R.filter(isCategory))
-      );
+  fetchJobNote({ user, id }) {
+    return from(this.getJobNote(user, id));
   }
 
   fetchAddedNotes({ user }) {
@@ -1205,14 +1213,14 @@ export default class FeedParser {
   }
 
   updateHtml({ user, id, html }) {
-    const data = { updated:  html.updated , items:    html.items  };
+    const data = { items: html.items  };
     return this._updateNote({ user, id, data });
   }
 
-  updateRss({ user, id, rss }) {
-    const data = { updated:  rss.updated , items:    rss.items  };
-    return this._updateNote({ user, id, data });
-  }
+  //updateRss({ user, id, rss }) {
+  //  const data = { items: rss.items  };
+  //  return this._updateNote({ user, id, data });
+  //}
 
   createAdd({ user, ids }) {
     const promises = R.map(id => this.addAdd(user, id));

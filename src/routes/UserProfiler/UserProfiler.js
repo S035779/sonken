@@ -328,7 +328,6 @@ export default class UserProfiler {
   }
 
   autologin({ admin, user }) {
-    console.log(admin, user);
     const isAdmin = admin !== '';
     const options = isAdmin ? { user: admin } : { user: user };
     return this.fetchUser(options).pipe(

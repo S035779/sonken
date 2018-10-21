@@ -164,6 +164,8 @@ class RssSearch extends React.Component {
         ? 1 : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16)
           ? -1 : 0 );
     const categoryList = category => categorys ? _categorys(category) : null;
+    const newSubCategory = std.formatDate(new Date(), 'YYYY-MM-DD hh:mm');
+    const downloadFormat = '0001';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography className={classes.title}>全{noteNumber}件中 {perPage > noteNumber ? noteNumber : perPage}件表示</Typography>
@@ -194,9 +196,11 @@ class RssSearch extends React.Component {
         </RssButton>
         <RssAddDialog title={title} open={isAddNote} user={user} category={category} categorys={categoryList(category)}
           onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
-        <RssUploadDialog open={isUpload} title={'カテゴリ名'} user={user} category={category} name="Uploadfile" perPage={perPage} 
+        <RssUploadDialog open={isUpload} title={'カテゴリ名'} user={user} category={category} 
+          name={newSubCategory} perPage={perPage} 
           onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
-        <RssDownloadDialog open={isDownload} title={'フォーマット'} user={user} category={category} name="0001" file={file}
+        <RssDownloadDialog open={isDownload} title={'フォーマット'} user={user} category={category} 
+          name={downloadFormat} file={file}
           onClose={this.handleCloseDialog.bind(this, 'isDownload')}/>
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。

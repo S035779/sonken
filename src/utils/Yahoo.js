@@ -555,9 +555,9 @@ class Yahoo {
     return this.request('fetch/accesstoken', { query, auth });
   }
 
-  getRss(url) {
-    return this.request('fetch/file', { url });
-  }
+  //getRss(url) {
+  //  return this.request('fetch/file', { url });
+  //}
 
   getXmlNote(xml) {
     return this.request('parse/xml/note', { xml });
@@ -621,54 +621,58 @@ class Yahoo {
     return from(this.getHtml(url, pages, skip, limit));
   }
 
-  jobAttribute({ items }) {
+  jobAttribute(data) {
+    const { items }         = data;
     const urls              = R.map(this.setUrl, items);
-    const omitIds           = R.map(R.omit(['_id']));
     const _setMarkets       = (_items, objs) => R.map(_item => this.setMarket(_item, objs), _items);
     const setMarkets        = R.curry(_setMarkets)(items);
     const _setPerformances  = (_items, objs) => R.map(obj => this.setPerformance(_items, obj), objs);
     const setPerformances   = R.curry(_setPerformances)(items);
-    const setItems          = objs => ({ item: objs });
+    const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
+    const setItems          = R.curry(_setItems)(data);
+    const delIds            = R.map(R.omit(['_id']))
     const promise           = obj => this.getHtml(obj);
-    const promises          = R.map(promise);
-    return forkJoin(promises(urls)).pipe(
+    const promises          = R.map(promise, urls);
+    return forkJoin(promises).pipe(
       map(setMarkets)
     , map(setPerformances)
-    , map(omitIds)
+    , map(delIds)
     , map(setItems)
     );
   }
 
-  jobItemSearch({ items }) {
-    const omitIds     = R.map(R.omit(['_id']));
+  jobItemSearch(data) {
+    const { items }   = data;
     const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, objs), _items);
     const setAsins    = R.curry(_setAsins)(items);
-    const setItems    = objs => ({ item: objs });
+    const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
+    const setItems    = R.curry(_setItems)(data);
+    const delIds      = R.map(R.omit(['_id']))
     const observable  = obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1)
-    const observables = R.map(observable);
-    return forkJoin(observables(items)).pipe(
+    const observables = R.map(observable, items);
+    return forkJoin(observables).pipe(
       map(setAsins)
-    , map(omitIds)
+    , map(delIds)
     , map(setItems)
     );
   }
 
-  fetchRss({ url }) {
-    let _note;
-    const _setItems = (note, item) => R.merge(note.rss.channel, { item });
-    const setItems = R.curry(_setItems)(_note);
-    const setNote  = obj => _note = obj;
-    const fetchRss = obj => from(this.getRss(obj));
-    const fetchXml = obj => from(this.getXmlNote(obj.body));
-    const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
-    const fetchXmlItems = obj => forkJoin(promises(obj));
-    return fetchRss(url).pipe(
-      flatMap(fetchXml)
-    , map(setNote)
-    , flatMap(fetchXmlItems)
-    , map(setItems)
-    );
-  }
+  //fetchRss({ url }) {
+  //  let _note;
+  //  const _setItems = (note, item) => R.merge(note.rss.channel, { item });
+  //  const setItems = R.curry(_setItems)(_note);
+  //  const setNote  = obj => _note = obj;
+  //  const fetchRss = obj => from(this.getRss(obj));
+  //  const fetchXml = obj => from(this.getXmlNote(obj.body));
+  //  const promises = obj => R.map(this.getXmlItem.bind(this), obj.rss.channel.item);
+  //  const fetchXmlItems = obj => forkJoin(promises(obj));
+  //  return fetchRss(url).pipe(
+  //    flatMap(fetchXml)
+  //  , map(setNote)
+  //  , flatMap(fetchXmlItems)
+  //  , map(setItems)
+  //  );
+  //}
 
   setUrl(obj) {
     const api = std.parse_url(searchurl);
@@ -710,11 +714,12 @@ class Yahoo {
   }
 
   setMarket(item, objs) {
-    const _isSeller = _obj  => R.find(_item => item.title === _item.title && item.seller === _item.seller)(_obj.item);
+    const { title, seller } = item;
+    const _isSeller = _obj  => R.find(_item => title === _item.title && seller === _item.seller)(_obj.item);
     const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
     const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-    const getSales  = _objs => _objs.length > 0
-      ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+    const getSales  =
+      _objs => _objs.length !== 0 ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
     const setSale   = _obj  => R.merge(item, _obj);
     return R.compose(
       setSale

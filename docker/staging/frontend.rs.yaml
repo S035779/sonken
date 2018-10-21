@@ -23,6 +23,10 @@ spec:
       containers:
       - name: nginx
         image: asia.gcr.io/feedparser-217913/feedparser/nginx:latest
+        resources:
+          requests:
+            cpu: 64m
+            memory: 128Mi
         ports:
           - containerPort: 8080
         volumeMounts:
@@ -39,7 +43,7 @@ spec:
                 - /app/sonken/docker/staging/install.sh
         resources:
           requests:
-            cpu: 128m
+            cpu: 64m
             memory: 128Mi
         ports:
           - containerPort: 8081
@@ -59,7 +63,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 128m
+            cpu: 64m
             memory: 128Mi
         ports:
           - containerPort: 8082

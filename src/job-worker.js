@@ -1,6 +1,5 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
-import * as R           from 'ramda';
 import { throwError }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
@@ -31,23 +30,17 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const request = (operation, { url, user, id, items, skip, limit, key }) => {
+const request = (operation, { url, user, id, skip, limit, key }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
-  const isNotItems = (objs, item) => R.none(_obj => _obj.guid__ === item.guid__, objs);
-  const hasNotItems = objs => R.filter(item => isNotItems(objs, item), items);
-  const setItems = obj => obj ? R.concat(obj.item, hasNotItems(obj.item)) : items;
-  const setNote = obj => ({ items: obj });
   const putHtml = obj => feed.updateHtml({ user, id, html: obj });
-  const putRss  = obj => feed.updateRss({ user, id, rss: obj });
   switch(operation) {
     case 'marchant':
     case 'sellers':
       {
         const conditions = { url, skip, limit };
         return yahoo.jobHtml(conditions).pipe(
-            map(setItems)
-          , map(setNote)
+            map(obj => ({ items: obj.item }))
           , flatMap(putHtml)
           );
       }
@@ -55,8 +48,7 @@ const request = (operation, { url, user, id, items, skip, limit, key }) => {
       {
         const conditions = { url, skip, limit };
         return yahoo.jobClosedMerchant(conditions).pipe(
-            map(setItems)
-          , map(setNote)
+            map(obj => ({ items: obj.item }))
           , flatMap(putHtml)
           );
       }
@@ -64,40 +56,42 @@ const request = (operation, { url, user, id, items, skip, limit, key }) => {
       {
         const conditions = { url, skip, limit };
         return yahoo.jobClosedSellers(conditions).pipe(
-            map(setItems)
-          , map(setNote)
+            map(obj => ({ items: obj.item }))
           , flatMap(putHtml)
           );
       }
-    case 'rss':
-      {
-        const conditions = { url };
-        return yahoo.jobRss(conditions).pipe(
-          map(setNote)
-        , flatMap(putRss)
-        );
-      }
+    //case 'rss':
+    //  {
+    //    const putRss  = obj => feed.updateRss({ user, id, rss: obj });
+    //    const conditions = { url };
+    //    return yahoo.jobRss(conditions).pipe(
+    //        map(obj => ({ items: obj.item }))
+    //      , flatMap(putRss)
+    //      );
+    //  }
     case 'images':
       {
+        const conditions = { user, id };
         const operator = (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename);
-        const conditions = { items, operator };
-        return yahoo.jobImages(conditions);
+        return feed.fetchJobNote(conditions).pipe(
+            flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
+          );
       }
     case 'attribute':
       {
-        const conditions = { items };
-        return yahoo.jobAttribute(conditions).pipe(
-            map(setItems)
-          , map(setNote)
+        const conditions = { user, id };
+        return feed.fetchJobNote(conditions).pipe(
+            flatMap(obj => yahoo.jobAttribute(obj.toObject()))
+          , map(obj => ({ items: obj.item }))
           , flatMap(putHtml)
           );
       }
     case 'itemsearch':
       {
-        const conditions = { items };
-        return yahoo.jobItemSearch(conditions).pipe(
-            map(setItems)
-          , map(setNote)
+        const conditions = { user, id };
+        return feed.fetchJobNote(conditions).pipe(
+            flatMap(obj => yahoo.jobItemSearch(obj.toObject()))
+          , map(obj => ({ items: obj.item }))
           , flatMap(putHtml)
           );
       }
@@ -108,18 +102,20 @@ const request = (operation, { url, user, id, items, skip, limit, key }) => {
       }
     case 'archives':
       {
-        const conditions = { key, items };
-        return feed.createArchives(conditions);
+        const conditions = { user, id };
+        return feed.fetchJobNote(conditions).pipe(
+            flatMap(obj => feed.createArchives({ items: obj.items, key }))
+          );
       }
     default:
       return throwError('Unknown operation!');
   }
 };
 
-const worker = ({ url, user, id, items, operation, skip, limit, key }, callback) => {
+const worker = ({ url, user, id, operation, skip, limit, key }, callback) => {
   log.info(displayName, 'Started. _id/ope:', id, operation);
   const start = new Date();
-  request(operation, { url, user, id, items, skip, limit, key }).subscribe(
+  request(operation, { url, user, id, skip, limit, key }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => {

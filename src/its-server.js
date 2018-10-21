@@ -18,8 +18,9 @@ if(config.error) throw config.error;
 const node_env        = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;
 const executeInterval = process.env.JOB_EXE_SEC || 1;
-const updatedInterval = process.env.JOB_UPD_MIN || 10;
+const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
+const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[ITS]';
@@ -62,11 +63,16 @@ const request = queue => {
     operation:  'itemsearch'
   , user:       obj.user
   , id:         obj._id
-  , items:      obj.items
   , created:    Date.now()
   });
   return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
-      flatMap(objs => feed.fetchJobNotes({ users: objs, categorys: ['closedsellers', 'closedmarchant'], interval: updatedInterval }))
+      flatMap(objs => feed.fetchJobNotes({
+        users: objs
+      , categorys: ['closedsellers', 'closedmarchant']
+      , interval: updatedInterval * 60 * 1000
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 20) * 60))
+      , items: { $ne: [] }
+      }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );

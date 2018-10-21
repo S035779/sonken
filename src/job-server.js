@@ -64,7 +64,6 @@ const request = queue => {
   , user:       obj.user
   , id:         obj._id
   , url:        obj.url
-  , items:      obj.items
   , created:    Date.now()
   });
   const limit = 20;
@@ -74,7 +73,12 @@ const request = queue => {
   const repQueue = obj => R.map(setItems(obj), range);
   const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
   return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
-      flatMap(objs => feed.fetchJobNotes({ users: objs, categorys: ['sellers', 'marchant'], interval: updatedInterval }))
+      flatMap(objs => feed.fetchJobNotes({
+        users: objs
+      , categorys: ['sellers', 'marchant']
+      , interval: updatedInterval * 60 * 1000
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 20) * 3))
+      }))
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
