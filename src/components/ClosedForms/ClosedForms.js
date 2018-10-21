@@ -26,7 +26,7 @@ class ClosedForms extends React.Component {
     , inAuction: false
     , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , sold: 1
+    , sold: 0
     , page: 1
     , prevPage: 1
     , prevAllAuction: true
@@ -49,7 +49,7 @@ class ClosedForms extends React.Component {
     , inAuction: false
     , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , sold: 1
+    , sold: 0
     }
     const nextFilter      = nextProps.itemFilter;
     const nextNote        = nextProps.note;
@@ -200,8 +200,7 @@ class ClosedForms extends React.Component {
 
   fetch(page) {
     const { user, note } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime
-    , aucStopTime, sold } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
@@ -301,6 +300,7 @@ class ClosedForms extends React.Component {
         <FormControl className={classes.inputSelect}>
           <InputLabel htmlFor="results">落札件数</InputLabel>
           <Select value={sold} onChange={this.handleChangeSelect.bind(this, 'sold')}>
+            <MenuItem value={0}>0</MenuItem>
             <MenuItem value={1}>1</MenuItem>
             <MenuItem value={3}>3</MenuItem>
             <MenuItem value={5}>5</MenuItem>

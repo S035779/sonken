@@ -95,8 +95,10 @@ export default class FeedParser {
         {
           const { user, id, skip, limit, filter } = options;
           const isCount = request === 'count/note';
+          const isPaginate = skip && limit;
           const conditions = { user, _id: id };
-          let promise, match, params;
+
+          let match = null;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -111,26 +113,43 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
-            const sold      = filter.sold ? Number(filter.sold) : 1;
+            const sold      = Number(filter.sold);
             if(filter.inAuction) {
               match = { bidStopTime: { $gte: start, $lt: stop } };
             } else if(filter.allAuction) {
               match = null;
             } else if(filter.lastMonthAuction) {
-              match = { bidStopTime: { $gte: lastMonth, $lt: today },  sold: { $gte: sold } };
+              match = { bidStopTime: { $gte: lastMonth, $lt: today } };
             } else if(filter.twoWeeksAuction) {
-              match = { bidStopTime: { $gte: twoWeeks, $lt: today },   sold: { $gte: sold } };
+              match = { bidStopTime: { $gte: twoWeeks, $lt: today } };
             } else if(filter.lastWeekAuction) {
-              match = { bidStopTime: { $gte: lastWeek, $lt: today },   sold: { $gte: sold } };
+              match = { bidStopTime: { $gte: lastWeek, $lt: today } };
             }
-          } else {
-            match = null;
+            if(sold !== 0) {
+              match = R.merge(match, { sold: { $gte: sold } });
+            }
           }
-          params = { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
-          if(skip && limit) params = R.merge(params, { skip: Number(skip), limit: Number(limit) });
-          if(match)         params = R.merge(params, { match });
-          promise = Note.findOne(conditions).populate(params).exec();
-          return isCount ? promise.then(doc => ([{ _id: doc._id, counts: doc.items.length }])) : promise;
+
+          let option = { sort: { bidStopTime: 'desc' } };
+          if(isPaginate) {
+            option = R.merge(option, { skip: Number(skip), limit: Number(limit) });
+          }
+
+          let params = { path: 'items' };
+          if(match) {
+            params = R.merge(params, { options: option, match });
+          } else {
+            params = R.merge(params, { options: option });
+          }
+
+          //const sliItems = doc => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit)) : doc;
+          //const hasItems = R.filter(obj => R.lte(sold, obj.sold));
+          //const setItems = R.compose(sliItems, hasItems);
+          //const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setCount = doc => isCount ? [{ _id: doc._id, counts: doc.items.length }] : doc;
+          return Note.findOne(conditions).populate(params).exec()
+            //.then(setNote)
+            .then(setCount);
         }
       case 'count/traded':
       case 'fetch/traded':

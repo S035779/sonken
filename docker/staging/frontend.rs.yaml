@@ -43,7 +43,7 @@ spec:
                 - /app/sonken/docker/staging/install.sh
         resources:
           requests:
-            cpu: 64m
+            cpu: 100m
             memory: 128Mi
         ports:
           - containerPort: 8081
@@ -63,7 +63,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 64m
+            cpu: 100m
             memory: 128Mi
         ports:
           - containerPort: 8082
