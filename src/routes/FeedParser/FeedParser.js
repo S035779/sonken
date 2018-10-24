@@ -7,7 +7,7 @@ import { parseString }            from 'xml2js';
 import mongoose                   from 'mongoose';
 import encoding                   from 'encoding-japanese';
 import { Iconv }                  from 'iconv';
-import { Items, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed } 
+import { Item, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed, Attribute } 
                                   from 'Models/feed';
 import std                        from 'Utilities/stdutils';
 import Amazon                     from 'Utilities/Amazon';
@@ -45,60 +45,81 @@ export default class FeedParser {
       case 'job/notes':
         {
           const { users, categorys, items, skip, limit, interval } = options;
-          let conditions = { user: { $in: users }, category: { $in: categorys }, updated: { $lt: Date.now() - interval } };
-          if(items) conditions = R.merge(conditions, { items });
-          const model = Note.find(conditions).skip(Number(skip)).limit(Number(limit)).sort('updated');
-          return model.exec();
+          const conditions = items ? { 
+            user:     { $in: users }
+          , category: { $in: categorys }
+          , items
+          , updated:  { $lt: Date.now() - interval }
+          } : {
+            user:     { $in: users }
+          , category: { $in: categorys }
+          , updated:  { $lt: Date.now() - interval }
+          };
+          const query = Note.find(conditions);
+          return query
+            .sort('-updated')
+            .skip(Number(skip)).limit(Number(limit))
+            .exec();
         }
       case 'job/note':
         {
           const { user, id } = options;
           const conditions = { user, _id: id };
-          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
-          const model = Note.findOne(conditions).populate(params);
-          return model.exec();
+          const query = Note.findOne(conditions);
+          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
+          return query
+            .populate(params)
+            .exec()
+            .then(doc => doc.toObject());
+        }
+      case 'count/notes':
+        {
+          const { user } = options;
+          const conditions = { user };
+          const query = Note.find(conditions);
+          const setIds = R.map(doc => doc._id);
+          return query.exec()
+            .then(docs => setIds(docs))
+            .then(docs =>  Note.aggregate()
+              .match({ user, _id: { $in: docs.map(id => ObjectId(id)) } })
+              .project({ item_size: { $size: "$items" }})
+              .group({ _id: "$_id", counts: { $sum: "$item_size" } })
+              .exec());
         }
       case 'counts/notes':
-      case 'count/notes':
+        {
+          const { user } = options;
+          const conditions = { user };
+          const query = Note.find(conditions);
+          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
+          return query
+            .populate(params)
+            .sort('updated')
+            .countDocuments()
+            .exec();
+        }
       case 'fetch/notes':
         {
           const { user, category, skip, limit } = options;
-          const isCounts = request === 'counts/notes';
-          const isCount = request === 'count/notes';
-          const isPaginate = skip && limit;
-          const setIds = R.map(doc => doc._id);
           const conditions = category ? { user, category } : { user };
-          let model, promise;
-          if(isCount) {
-            promise = Note.find(conditions).exec()
-              .then(docs => setIds(docs))
-              .then(docs => {
-                model = Note.aggregate()
-                  .match({ user, _id: { $in: docs.map(id => ObjectId(id)) } })
-                  .project({ item_size: { $size: "$items" }})
-                  .group({ _id: "$_id", counts: { $sum: "$item_size" } });
-                return model.exec();
-              });
-          } else {
-            model = Note.find(conditions);
-            model = isPaginate
-              ? model.populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }})
-                .sort('-updated').skip(Number(skip)).limit(Number(limit))
-              : model.populate({ path: 'items', options: { sort: { bidStopTime: 'desc' }}})
-                .sort('updated');
-            promise = isCounts ? model.countDocuments().exec() : model.exec();
-          }
-          return promise;
+          const query = Note.find(conditions);
+          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }};
+          return query
+            .populate(params)
+            .sort('-updated')
+            .skip(Number(skip)).limit(Number(limit))
+            .exec();
         }
       case 'count/note':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
-          const isCount = request === 'count/note';
           const isPaginate = skip && limit;
+          const isCount = request === 'count/note';
           const conditions = { user, _id: id };
-
+          const query = Note.findOne(conditions);
           let match = null;
+          let sold = 0;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -113,7 +134,6 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
-            const sold      = Number(filter.sold);
             if(filter.inAuction) {
               match = { bidStopTime: { $gte: start, $lt: stop } };
             } else if(filter.allAuction) {
@@ -125,30 +145,23 @@ export default class FeedParser {
             } else if(filter.lastWeekAuction) {
               match = { bidStopTime: { $gte: lastWeek, $lt: today } };
             }
-            if(sold !== 0) {
-              match = R.merge(match, { sold: { $gte: sold } });
+            if(filter.sold) {
+              sold  = Number(filter.sold);
             }
           }
 
-          let option = { sort: { bidStopTime: 'desc' } };
-          if(isPaginate) {
-            option = R.merge(option, { skip: Number(skip), limit: Number(limit) });
-          }
+          const params = match
+            ? { path: 'items', options: { sort: { bidStopTime: 'desc' } }, match }
+            : { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
 
-          let params = { path: 'items' };
-          if(match) {
-            params = R.merge(params, { options: option, match });
-          } else {
-            params = R.merge(params, { options: option });
-          }
-
-          //const sliItems = doc => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit)) : doc;
-          //const hasItems = R.filter(obj => R.lte(sold, obj.sold));
-          //const setItems = R.compose(sliItems, hasItems);
-          //const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setCount = doc => isCount ? [{ _id: doc._id, counts: doc.items.length }] : doc;
-          return Note.findOne(conditions).populate(params).exec()
-            //.then(setNote)
+          const sliItems = doc => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), doc) : doc;
+          const hasItems = R.filter(obj => obj.sold ? R.lte(sold, obj.sold) : R.lte(sold, 0));
+          const setItems = R.compose(sliItems, hasItems);
+          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          return query.populate(params).exec()
+            .then(doc => doc.toObject())
+            .then(setNote)
             .then(setCount);
         }
       case 'count/traded':
@@ -160,51 +173,51 @@ export default class FeedParser {
           const hasTraded = R.filter(doc => doc.traded && R.equals(doc.traded.user, user));
           const hasBided = R.filter(doc => doc.bided && R.equals(doc.bided.user, user));
           const setIds = R.map(doc => doc.guid__);
-          let model, conditions, populates, promise;
+          let query, conditions, populates, promise;
           if(filter) {
             const start     = new Date(filter.bidStartTime);
             const stop      = new Date(filter.bidStopTime);
             if(filter.inBidding) {
               conditions = { 'bidStopTime': { $gte: start, $lt: stop }};
-              promise = Items.find(conditions).populate('bided').exec()
+              promise = Item.find(conditions).populate('bided').exec()
                 .then(docs => hasBided(docs))
                 .then(docs => setIds(docs))
                 .then(docs => {
                   conditions = { user, bided: { $in: docs } };
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] } ;
-                  model = Bided.find(conditions).populate(populates).sort('-updated');
-                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCount ? model.countDocuments() : model;
-                  return model.exec();
+                  query = Bided.find(conditions).populate(populates).sort('-updated');
+                  query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+                  query = isCount ? query.countDocuments() : query;
+                  return query.exec();
                 });
             } else if(filter.allTrading) {
               conditions = { user };
               populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] };
-              model = Bided.find(conditions).populate('items').sort('-updated');
-              model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-              model = isCount ? model.countDocuments() : model;
-              promise = model.exec();
+              query = Bided.find(conditions).populate('items').sort('-updated');
+              query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+              query = isCount ? query.countDocuments() : query;
+              promise = query.exec();
             } else if(filter.endTrading) {
               conditions = {};
-              promise = Items.find(conditions).populate('traded').exec()
+              promise = Item.find(conditions).populate('traded').exec()
                 .then(docs => hasTraded(docs))
                 .then(docs => setIds(docs))
                 .then(docs => {
                   conditions = { user, traded: { $in: docs } };
                   populates = { path: 'items', populate: [{ path: 'traded' }, { path: 'traded' }] };
-                  model = Traded.find(conditions).populate(populates).sort('-updated')
-                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCount ? model.countDocuments() : model;
-                  return model.exec();
+                  query = Traded.find(conditions).populate(populates).sort('-updated')
+                  query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+                  query = isCount ? query.countDocuments() : query;
+                  return query.exec();
                 });
             }
           } else {
             conditions = { user };
             populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'traded' }] };
-            model = Bided.find(conditions).populate(populates).sort('-updated');
-            model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-            model = isCount ? model.countDocuments() : model;
-            promise = model.exec();
+            query = Bided.find(conditions).populate(populates).sort('-updated');
+            query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+            query = isCount ? query.countDocuments() : query;
+            promise = query.exec();
           }
           return promise;
         }
@@ -216,7 +229,7 @@ export default class FeedParser {
           const isPaginate = skip && limit;
           const hasListed = R.filter(doc => doc.listed && R.equals(doc.listed.user, user));
           const setIds = R.map(doc => doc.guid__);
-          let model, conditions, populates, promise;
+          let query, conditions, populates, promise;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.bidStartTime);
@@ -228,45 +241,45 @@ export default class FeedParser {
             const today     = new Date(year, month, day + 1);
             if(filter.inBidding) {
               conditions = { 'bidStopTime': { $gte: start, $lt: stop } };
-              promise = Items.find(conditions).populate('listed').exec()
+              promise = Item.find(conditions).populate('listed').exec()
                 .then(docs => hasListed(docs))
                 .then(docs => setIds(docs))
                 .then(docs => {
                   conditions = { user, listed: { $in: docs } };
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
-                  model = Listed.find(conditions).populate(populates).sort('-updated');
-                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCount ? model.countDocuments() : model;
-                  return model.exec();
+                  query = Listed.find(conditions).populate(populates).sort('-updated');
+                  query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+                  query = isCount ? query.countDocuments() : query;
+                  return query.exec();
                 });
             } else if(filter.allBidding) {
               conditions = { user };
               populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
-              model = Listed.find(conditions).populate(populates).sort('-updated');
-              model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-              model = isCount ? model.countDocuments() : model;
-              promise = model.exec();
+              query = Listed.find(conditions).populate(populates).sort('-updated');
+              query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+              query = isCount ? query.countDocuments() : query;
+              promise = query.exec();
             } else if(filter.endBidding) {
               conditions = { 'bidStopTime': { $gte: yesterday, $lt: today } };
-              promise = Items.find(conditions).populate('listed').exec()
+              promise = Item.find(conditions).populate('listed').exec()
                 .then(docs => hasListed(docs))
                 .then(docs => setIds(docs))
                 .then(docs => {
                   conditions = { user, listed: { $in: docs } };
                   populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
-                  model = Listed.find(conditions).populate(populates).sort('-updated');
-                  model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-                  model = isCount ? model.countDocuments() : model;
-                  return model.exec();
+                  query = Listed.find(conditions).populate(populates).sort('-updated');
+                  query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+                  query = isCount ? query.countDocuments() : query;
+                  return query.exec();
                 });
             }
           } else {
             conditions = { user };
             populates = { path: 'items', populate: [{ path: 'bided' }, { path: 'listed' }] };
-            model = Listed.find(conditions).populate(populates).sort('-updated');
-            model = isPaginate ? model.skip(Number(skip)).limit(Number(limit)) : model;
-            model = isCount ? model.countDocuments() : model;
-            promise = model.exec();
+            query = Listed.find(conditions).populate(populates).sort('-updated');
+            query = isPaginate ? query.skip(Number(skip)).limit(Number(limit)) : query;
+            query = isCount ? query.countDocuments() : query;
+            promise = query.exec();
           }
           return promise;
         }
@@ -324,7 +337,8 @@ export default class FeedParser {
           const setIds = objs => R.merge(note, { items: objs });
           const putNote = obj => Note.create(obj);
           const setNote = R.compose(putNote, setIds, getIds);
-          return Items.insertMany(items).then(setNote);
+          return Item.insertMany(items)
+            .then(setNote);
         }
       case 'update/note':
         {
@@ -355,19 +369,24 @@ export default class FeedParser {
             , updated:      new Date
             };
           const isNotItems  = (obj, items) => R.none(item => obj.guid__ === item.guid__, items);
-          const curItems    = objs => R.filter(obj => isNotItems(obj, objs[0]), objs[1].items);
-          const conItems    = objs => R.concat(objs[0], curItems(objs));
-          const getItemIds  = R.map(obj => obj._id);
-          const setItemIds  = objs => R.merge(docs, { items: objs });
+          const newItems    = objs => R.filter(obj => isNotItems(obj, objs[0]), objs[1].items);
+          const isItems     = (obj, items) => R.any(item => obj.guid__ === item.guid__, items);
+          const oldItems    = objs => R.filter(obj => isItems(obj, objs[0]), objs[1].items);
+          const conItems    = objs => ([R.concat(objs[0], newItems(objs)),  oldItems(objs)]);
+          const getItemIds  = objs => ([R.map(obj => obj._id, objs[0]),     R.map(obj => obj._id, objs[1])]);
+          const setItemIds  = objs => ([R.merge(docs, { items: objs[0] }),  objs[1]]);
           return data.items
             ? Promise.all([
-                Items.insertMany(data.items)
-              , Note.findOne(conditions, 'items').populate('items')
+                Item.insertMany(data.items)
+              , Note.findOne(conditions, 'items').populate('items').exec()
               ])
               .then(conItems)
               .then(getItemIds)
               .then(setItemIds)
-              .then(obj => Note.update(conditions, obj).exec())
+              .then(objs => Promise.all([
+                Note.update(conditions, objs[0]).exec()
+              , Item.remove({ _id: { $in: objs[1] }}).exec()
+              ]))
             : Note.update(conditions, docs).exec();
         }
       case 'delete/note':
@@ -377,131 +396,166 @@ export default class FeedParser {
           const setIds   = R.map(obj => obj._id);
           const setGuids = R.map(obj => obj.guid__);
           const setItems = obj => obj.items;
-          const getItems = objs => Items.find({ _id: { $in: setIds(objs) }});
+          const getItems = objs => Item.find({ _id: { $in: setIds(objs) }});
           const delItems = objs => Promise.all([
-            Items.remove({    _id: { $in: setIds(objs) }})
-          , Listed.remove({   user, listed:  { $in: setGuids(objs) }}).exec()
-          , Traded.remove({   user, traded:  { $in: setGuids(objs) }}).exec()
-          , Bided.remove({    user, bided:   { $in: setGuids(objs) }}).exec()
-          , Added.remove({    user, added:   { $in: setGuids(objs) }}).exec()
-          , Deleted.remove({  user, deleted: { $in: setGuids(objs) }}).exec()
-          , Readed.remove({   user, readed:  { $in: setGuids(objs) }}).exec()
-          , Starred.remove({  user, starred: { $in: setGuids(objs) }}).exec()
+            Item.remove({    _id: { $in: setIds(objs) }})
+          , Listed.remove({     user, listed:  { $in: setGuids(objs) }}).exec()
+          , Traded.remove({     user, traded:  { $in: setGuids(objs) }}).exec()
+          , Bided.remove({      user, bided:   { $in: setGuids(objs) }}).exec()
+          , Added.remove({      user, added:   { $in: setGuids(objs) }}).exec()
+          , Deleted.remove({    user, deleted: { $in: setGuids(objs) }}).exec()
+          , Readed.remove({     user, readed:  { $in: setGuids(objs) }}).exec()
+          , Starred.remove({    user, starred: { $in: setGuids(objs) }}).exec()
+          , Attribute.remove({  user, guid:    { $in: setGuids(objs) }}).exec()
           ]);
           return Note.findOneAndDelete(conditions).exec()
             .then(setItems)
             .then(getItems)
-            .then(delItems)
-          ;
+            .then(delItems);
         }
       case 'create/category':
         {
-          const docs = {
-            user: options.user
-          , category: options.data.category
-          , subcategory: options.data.subcategory
-          , subcategoryId: new ObjectId
-          };
+          const { user, data } = options;
+          const docs = { user, category: data.category, subcategory: data.subcategory, subcategoryId: new ObjectId };
           return Category.create(docs);
         }
       case 'update/category':
         {
-          const conditions = { _id:  options.id, user: options.user };
-          const update = {
-            category: options.data.category
-          , subcategory: options.data.subcategory
-          , subcategoryId: ObjectId(options.data.subcategoryId)
-          };
+          const { id, user, data } = options;
+          const conditions = { _id: id, user };
+          const update = { category: data.category, subcategory: data.subcategory, subcategoryId: ObjectId(data.subcategoryId) };
           return Category.update(conditions, update).exec();
         }
       case 'delete/category':
         {
-          const conditions = { _id: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { _id: id, user };
           return Category.remove(conditions).exec();
         }
       case 'create/added':
         {
-          const conditions = { added: options.id, user: options.user };
-          const update = { added: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { added: id, user };
+          const update = { added: id, user, updated: new Date };
           const params = { upsert: true };
           return Added.update(conditions, update, params).exec();
         }
       case 'delete/added':
         {
-          const conditions = { added: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { added: id, user };
           return Added.remove(conditions).exec();
         }
       case 'create/deleted':
         {
-          const conditions = { deleted: options.id, user: options.user };
-          const update = { deleted: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { deleted: id, user };
+          const update = { deleted: id, user, updated: new Date };
           const params = { upsert: true };
           return Deleted.update(conditions, update, params).exec();
         }
       case 'delete/deleted':
         {
-          const conditions = { deleted: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { deleted: id, user };
           return Deleted.remove(conditions).exec();
         }
       case 'create/readed':
         {
-          const conditions = { readed: options.id, user: options.user };
-          const update = { readed: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { readed: id, user };
+          const update = { readed: id, user, updated: new Date };
           const params = { upsert: true };
           return Readed.update(conditions, update, params).exec();
         }
       case 'delete/readed':
         {
-          const conditions = { readed: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { readed: id, user };
           return Readed.remove(conditions).exec();
         }
       case 'create/traded':
         {
-          const conditions = { traded: options.id, user: options.user };
-          const update = { traded: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { traded: id, user };
+          const update = { traded: id, user, updated: new Date };
           const params = { upsert: true };
           return Traded.update(conditions, update, params).exec();
         }
       case 'delete/traded':
         {
-          const conditions = { traded: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { traded: id, user };
           return Traded.remove(conditions).exec();
         }
       case 'create/bided':
         {
-          const conditions = { bided:  options.id, user: options.user };
-          const update = { bided: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { bided: id, user };
+          const update = { bided: id, user, updated: new Date };
           const params = { upsert: true };
           return Bided.update(conditions, update, params).exec();
         }
       case 'delete/bided':
         {
-          const conditions = { bided: options.id, user: options.user };
+          const { id, user } = options;
+          const conditions = { bided: id, user };
           return Bided.remove(conditions).exec();
         }
       case 'create/starred':
         {
-          const conditions = { starred: options.id, user: options.user };
-          const update = { starred: options.id, user: options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { starred: id, user };
+          const update = { starred: id, user, updated: new Date };
           const params = { upsert: true };
           return Starred.update(conditions, update, params).exec();
         }
       case 'delete/starred':
         {
-          const conditions = { starred:  options.id, user:     options.user };
+          const { id, user } = options;
+          const conditions = { starred: id, user };
           return Starred.remove(conditions).exec();
         }
       case 'create/listed':
         {
-          const conditions = { listed: options.id, user:   options.user };
-          const update = { listed: options.id, user:   options.user, updated: new Date };
+          const { id, user } = options;
+          const conditions = { listed: id, user };
+          const update = { listed: id, user, updated: new Date };
           const params = { upsert: true };
           return Listed.update(conditions, update, params).exec();
         }
       case 'delete/listed':
         {
-          const conditions = { listed: options.id, user:   options.user };
+          const { id, user } = options;
+          const conditions = { listed: id, user };
           return Listed.remove(conditions).exec();
+        }
+      case 'create/attribute':
+        {
+          const { id, user, data } = options;
+          const isAsins = data.asins;
+          const conditions = { guid: id, user };
+          const update = isAsins ? { 
+            user
+          , guid: id
+          , asins: data.asins
+          , updated: new Date
+          } : {
+            user
+          , guid: id
+          , sale: data.sale
+          , sold: data.sold
+          , market: data.market
+          , updated: new Date
+          };
+          const params = { upsert: true };
+          return Attribute.update(conditions, update, params).exec();
+        }
+      case 'delete/attribute':
+        {
+          const { id, user } = options;
+          const conditions = { guid: id, user };
+          return Attribute.remove(conditions).exec();
         }
       case 'defrag/items':
         {
@@ -509,9 +563,9 @@ export default class FeedParser {
           const year      = date.getFullYear();
           const month     = date.getMonth();
           const day       = date.getDate();
-          const yesterday = new Date(year, month, day - 1);
-          const conditions = { pubDate: { $lt: yesterday }};
-          return Items.remove(conditions).exec();
+          const lastWeek  = new Date(year, month, day - 7);
+          const conditions = { pubDate: { $lt: lastWeek }};
+          return Item.remove(conditions).exec();
         }
       case 'defrag/added':
         {
@@ -573,6 +627,15 @@ export default class FeedParser {
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
           return Listed.find({ user }).populate('items').exec()
+            .then(docs => hasNotItems(docs))
+            .then(docs => Promise.all(promises(docs)));
+        }
+      case 'defrag/attribute':
+        {
+          const { user } = options;
+          const hasNotItems = R.filter(obj => R.isNil(obj.items));
+          const promises = R.map(obj => Attribute.remove({ guid: obj.guid }).exec());
+          return Attribute.find({ user }).populate('items').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -643,6 +706,14 @@ export default class FeedParser {
 
   removeDelete(user, id) {
     return this.request('delete/deleted', { user, id });
+  }
+
+  addAttribute(user, id, data) {
+    return this.request('create/attribute', { user, id, data });
+  }
+
+  removeAttribute(user, id) {
+    return this.request('delete/attribute', { user, id });
   }
 
   removeNote(user, id) {
@@ -765,6 +836,10 @@ export default class FeedParser {
     return this.request('defrag/listed', { user });
   }
 
+  dfgAttribute(user) {
+    return this.request('defrag/attribute', { user });
+  }
+
   garbageCollection({ user }) {
     const observables = forkJoin([
       this.dfgItems()
@@ -775,6 +850,7 @@ export default class FeedParser {
     , this.dfgListed(user)
     , this.dfgBided(user)
     , this.dfgTraded(user)
+    , this.dfgAttribute(user)
     ]);
     return observables;
   }
@@ -1021,7 +1097,7 @@ export default class FeedParser {
     , this.setReaded(objs[2])
     , this.setListed(objs[1])
     , this.setStarred(objs[0])
-    , this.toObject
+    //, this.toObject
     )([objs[6]]);
     return observables.pipe(
       map(setAttribute)
@@ -1035,7 +1111,7 @@ export default class FeedParser {
 
   toObject(objs) {
     const setObj  = obj => obj.toObject();
-    const hasObj  = obj => obj ? true : false;
+    const hasObj  = obj => !!obj;
     const setObjs = R.map(setObj);
     const hasObjs = R.filter(hasObj);
     return R.compose(setObjs, hasObjs)(objs);
@@ -1328,6 +1404,14 @@ export default class FeedParser {
     const _ids = R.split(',', ids);
     const promises = R.map(id => this.removeList(user, id));
     return forkJoin(promises(_ids));
+  }
+
+  createAttribute({ user, id, data }) {
+    return from(this.addAttribute(user, id, data));
+  }
+
+  deleteAttribute({ user, id }) {
+    return from(this.removeAttribute(user, id));
   }
 
   uploadNotes({ user, category, subcategory, file }) {

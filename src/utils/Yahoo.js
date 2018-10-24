@@ -518,6 +518,7 @@ class Yahoo {
           , R.map(setPubDate)
           , R.filter(isGuid)
           , R.map(setAuctionId)
+          , R.tap(console.log)
           , R.map(setSize)
           , R.map(setImage)
           , R.filter(R.is(Object))
@@ -621,39 +622,37 @@ class Yahoo {
     return from(this.getHtml(url, pages, skip, limit));
   }
 
-  jobAttribute(data) {
-    const { items }         = data;
+  jobAttribute({ items }) {
     const urls              = R.map(this.setUrl, items);
     const _setMarkets       = (_items, objs) => R.map(_item => this.setMarket(_item, objs), _items);
     const setMarkets        = R.curry(_setMarkets)(items);
     const _setPerformances  = (_items, objs) => R.map(obj => this.setPerformance(_items, obj), objs);
     const setPerformances   = R.curry(_setPerformances)(items);
-    const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
-    const setItems          = R.curry(_setItems)(data);
-    const delIds            = R.map(R.omit(['_id']))
+    //const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
+    //const setItems          = R.curry(_setItems)(data);
+    //const delIds            = R.map(R.omit(['_id']))
     const promise           = obj => this.getHtml(obj);
     const promises          = R.map(promise, urls);
     return forkJoin(promises).pipe(
       map(setMarkets)
     , map(setPerformances)
-    , map(delIds)
-    , map(setItems)
+    //, map(delIds)
+    //, map(setItems)
     );
   }
 
-  jobItemSearch(data) {
-    const { items }   = data;
+  jobItemSearch({ items }) {
     const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, objs), _items);
     const setAsins    = R.curry(_setAsins)(items);
-    const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
-    const setItems    = R.curry(_setItems)(data);
-    const delIds      = R.map(R.omit(['_id']))
+    //const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
+    //const setItems    = R.curry(_setItems)(data);
+    //const delIds      = R.map(R.omit(['_id']))
     const observable  = obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1)
     const observables = R.map(observable, items);
     return forkJoin(observables).pipe(
       map(setAsins)
-    , map(delIds)
-    , map(setItems)
+    //, map(delIds)
+    //, map(setItems)
     );
   }
 
@@ -681,12 +680,14 @@ class Yahoo {
   }
 
   setAsin (item, objs) {
-    const setASINs  = _objs => R.merge(item, { asins: _objs });
-    const getASIN   = _obj  => Array.isArray(_obj.Item) ?  R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
     const isValid   = _obj  => _obj
       && _obj.Request.IsValid === 'True'
       && _obj.Request.ItemSearchRequest.Keywords === this.repSpace(item.title)
-      && Number(_obj.TotalResults) > 0;
+      && Number(_obj.TotalResults) !== 0;
+    const getASIN   = _obj  => Array.isArray(_obj.Item)
+      ? R.map(Item => Item.ASIN, _obj.Item)
+      : [ _obj.Item.ASIN ];
+    const setASINs  = _objs => R.merge(item, { asins: _objs });
     return R.compose(
       setASINs 
     , R.head
@@ -716,10 +717,11 @@ class Yahoo {
   setMarket(item, objs) {
     const { title, seller } = item;
     const _isSeller = _obj  => R.find(_item => title === _item.title && seller === _item.seller)(_obj.item);
-    const isSeller  = _obj  => _obj && _obj.item && _obj.item.length > 0 ? _isSeller(_obj) : false;
+    const isSeller  = _obj  => _obj && _obj.item && _obj.item.length !== 0 ? _isSeller(_obj) : false;
     const isSales   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-    const getSales  =
-      _objs => _objs.length !== 0 ? { market: _objs[0].item[0].price, sale: _objs[0].item.length } : { market: '-', sale: 0 };
+    const getSales  = _objs => _objs.length !== 0
+      ? { market: _objs[0].item[0].price, sale: _objs[0].item.length }
+      : { market: '-', sale: 0 };
     const setSale   = _obj  => R.merge(item, _obj);
     return R.compose(
       setSale
@@ -731,7 +733,9 @@ class Yahoo {
   setPerformance(items, obj) {
     const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
     const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
-    const getSolds  = _objs => _objs.length > 0 ? { sold: _objs.length } : { sold: 0 };
+    const getSolds  = _objs => _objs.length !== 0
+      ? { sold: _objs.length }
+      : { sold: 0 };
     const setSold   = item  => R.merge(obj, item);
     return R.compose(
       setSold

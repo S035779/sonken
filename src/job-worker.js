@@ -1,6 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
-import { throwError }   from 'rxjs';
+import * as R           from 'ramda';
+import { throwError, forkJoin }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
@@ -33,15 +34,14 @@ if (node_env === 'production') {
 const request = (operation, { url, user, id, skip, limit, key }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
-  const putHtml = obj => feed.updateHtml({ user, id, html: obj });
   switch(operation) {
     case 'marchant':
     case 'sellers':
       {
         const conditions = { url, skip, limit };
-        return yahoo.jobHtml(conditions).pipe(
+        return yahoo.jobHtml(conditions).pipe( 
             map(obj => ({ items: obj.item }))
-          , flatMap(putHtml)
+          , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
       }
     case 'closedmarchant':
@@ -49,7 +49,7 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
         const conditions = { url, skip, limit };
         return yahoo.jobClosedMerchant(conditions).pipe(
             map(obj => ({ items: obj.item }))
-          , flatMap(putHtml)
+          , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
       }
     case 'closedsellers':
@@ -57,7 +57,7 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
         const conditions = { url, skip, limit };
         return yahoo.jobClosedSellers(conditions).pipe(
             map(obj => ({ items: obj.item }))
-          , flatMap(putHtml)
+          , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
       }
     //case 'rss':
@@ -80,19 +80,21 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
     case 'attribute':
       {
         const conditions = { user, id };
+        const setAttribute = obj => ({ user, id: obj.guid__, data: { sale: obj.sale, sold: obj.sold, market: obj.market } });
+        const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
         return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => yahoo.jobAttribute(obj.toObject()))
-          , map(obj => ({ items: obj.item }))
-          , flatMap(putHtml)
+            flatMap(obj => yahoo.jobAttribute(obj))
+          , flatMap(objs => forkJoin(observables(objs)))
           );
       }
     case 'itemsearch':
       {
         const conditions = { user, id };
+        const setAttribute = obj => ({ user, id: obj.guid__, data: { asins: obj.asins } });
+        const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
         return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => yahoo.jobItemSearch(obj.toObject()))
-          , map(obj => ({ items: obj.item }))
-          , flatMap(putHtml)
+            flatMap(obj => yahoo.jobItemSearch(obj))
+          , flatMap(objs => forkJoin(observables(objs)))
           );
       }
     case 'defrag':
