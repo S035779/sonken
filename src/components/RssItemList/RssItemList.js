@@ -136,7 +136,8 @@ class RssItemList extends React.Component {
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
-    + `入札数：${item.bids}、` + `出品数：${item.sale ? item.sale : '-'}、`
+    + `入札数：${item.bids}、`
+    + `出品数：${item.attributes ? item.attributes.sale : '-'}、`
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid__}、`
     + `Seller：${item.seller}`;

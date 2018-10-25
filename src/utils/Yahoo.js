@@ -40,6 +40,7 @@ class Yahoo {
     this.redirect_url = redirect_url;
     this.tokens = [];
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
+    this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 5, promiseImplementation: Promise });
     this.AMZ = Amazon.of(amz_keyset);
   }
 
@@ -63,17 +64,21 @@ class Yahoo {
         return net.promise(tokenurl,  { method: 'POST', type: 'NV', accept: 'JSON'
           , auth: { user: options.auth.client_id, pass: options.auth.client_secret }, search: options.query });
       case 'fetch/file':
-        return net.get(options.url,   { operator: options.operator, filename: options.filename });
+        return this.gpromiseThrottle
+          .add(net.gpromise.bind(this, options.url, { operator: options.operator, filename: options.filename }));
       case 'parse/xml/note':
         return this.promiseXmlNote(options);
       case 'parse/xml/item':
         return this.promiseXmlItem(options);
       case 'fetch/closedmerchant':
-        return this.promiseThrottle.add(this.promiseClosedMerchant.bind(this, options));
+        return this.promiseThrottle
+          .add(this.promiseClosedMerchant.bind(this, options));
       case 'fetch/closedsellers':
-        return this.promiseThrottle.add(this.promiseClosedSellers.bind(this, options));
+        return this.promiseThrottle
+          .add(this.promiseClosedSellers.bind(this, options));
       case 'fetch/html':
-        return this.promiseThrottle.add(this.promiseHtml.bind(this, options));
+        return this.promiseThrottle
+          .add(this.promiseHtml.bind(this, options));
     }
   }
   

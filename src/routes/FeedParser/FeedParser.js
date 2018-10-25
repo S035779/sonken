@@ -162,8 +162,7 @@ export default class FeedParser {
           return query.populate(params).exec()
             .then(doc => doc.toObject())
             .then(setNote)
-            .then(setCount)
-            .then(R.tap(console.log));
+            .then(setCount);
         }
       case 'count/traded':
       case 'fetch/traded':
@@ -399,7 +398,7 @@ export default class FeedParser {
           const setItems = obj => obj.items;
           const getItems = objs => Item.find({ _id: { $in: setIds(objs) }});
           const delItems = objs => Promise.all([
-            Item.remove({    _id: { $in: setIds(objs) }})
+            Item.remove({       _id: { $in: setIds(objs) }})
           , Listed.remove({     user, listed:  { $in: setGuids(objs) }}).exec()
           , Traded.remove({     user, traded:  { $in: setGuids(objs) }}).exec()
           , Bided.remove({      user, bided:   { $in: setGuids(objs) }}).exec()
@@ -1619,16 +1618,16 @@ export default class FeedParser {
         , image9:       setImage(obj.images, 9)
         , image10:      setImage(obj.images, 10)
         , offers:       obj.offers
-        , market:       obj.market
-        , sale:         obj.sale
-        , sold:         obj.sold
+        , market:       obj.attributes.market
+        , sale:         obj.attributes.sale
+        , sold:         obj.attributes.sold
         , categoryid:   obj.item_categoryid
         , explanation:  obj.explanation
         , payment:      obj.payment
         , shipping:     obj.shipping
         , ship_price:   obj.ship_price
         , ship_buynow:  obj.ship_buynow
-        , asins:        setAsins(obj.asins)
+        , asins:        setAsins(obj.attributes.asins)
         , date:         obj.pubDate
         }));
         break;

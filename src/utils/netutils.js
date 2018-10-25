@@ -19,10 +19,19 @@ const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
 
 const throttle = (url, options) => promiseThrottle.add(promise.bind(this, url, options));
-
 const promise = (url, options) => {
   return new Promise((resolve, reject) => {
     fetch(url, options, (error, result) => {
+      if(error) return reject(error);
+      resolve(result);
+    });
+  });
+};
+
+const gthrottle = (url, options) => promiseThrottle.add(gpromise.bind(this, url, options));
+const gpromise = (url, options) => {
+  return new Promise((resolve, reject) => {
+    get(url, options, (error, result) => {
       if(error) return reject(error);
       resolve(result);
     });
@@ -132,16 +141,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
   req.end();
 };
 
-const get = (url, options) => {
-  return new Promise((resolve, reject) => {
-    _get(url, options, (error, result) => {
-      if(error) return reject(error);
-      resolve(result);
-    });
-  });
-};
-
-const _get = (url, { search, operator, filename }, callback) => {  
+const get = (url, { search, operator, filename }, callback) => {  
   const api       = std.parse_url(url);
   const hostname  = api.hostname;
   const protocol  = api.protocol;
@@ -195,4 +195,4 @@ const _get = (url, { search, operator, filename }, callback) => {
   req.on('error', err => callback({ name: err.code, message: err.message }));
 };
 
-export default { throttle, promise, fetch, get };
+export default { throttle, promise, gthrottle, gpromise, fetch, get };

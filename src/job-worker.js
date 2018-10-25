@@ -77,6 +77,13 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
           );
       }
+    case 'archives':
+      {
+        const conditions = { user, id };
+        return feed.fetchJobNote(conditions).pipe(
+            flatMap(obj => feed.createArchives({ items: obj.items, key }))
+          );
+      }
     case 'attribute':
       {
         const conditions = { user, id };
@@ -102,13 +109,6 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
         const conditions = { user };
         return feed.garbageCollection(conditions);
       }
-    case 'archives':
-      {
-        const conditions = { user, id };
-        return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => feed.createArchives({ items: obj.items, key }))
-          );
-      }
     default:
       return throwError('Unknown operation!');
   }
@@ -133,16 +133,20 @@ const main = () => {
   const wait        = () => queue.length();
   const runs        = () => queue.running();
   const idle        = () => queue.idle() ? '[idle]' : '[busy]';
-  //const paused      = () => queue.paused ? '[paused]' : '[resume]';
-  //const started     = () => queue.stated ? '[start]'  : '[stop]';
-  //const list        = () => queue.workersList();
+  const paused      = () => queue.paused ? '[paused]' : '[resume]';
+  const started     = () => queue.stated ? '[start]'  : '[stop]';
+  const list        = () => queue.workersList();
   queue.concurrency = 1;
   queue.buffer      = 1;
   queue.saturated   = () => log.debug(displayName, '== Saturated.   wait/runs:', wait(), runs(), idle());
   queue.unsaturated = () => log.debug(displayName, '== Unsaturated. wait/runs:', wait(), runs(), idle());
   queue.empty       = () => log.debug(displayName, '== Last.        wait/runs:', wait(), runs(), idle());
   queue.drain       = () => log.debug(displayName, '== Drain.       wait/runs:', wait(), runs(), idle());
-  queue.error       = (err, task) => log.error(displayName, err.name, err.message, task);
+  queue.error       = (err, task) => {
+    log.error(displayName, err.name, err.message, err.task);
+    log.debug(displayName, 'Task:', task);
+    log.debug(displayName, 'Queue list:', list(), paused(), started());
+  };
   process.on('disconnect', () => shutdown(null, process.exit));
   process.on('message', task => {
     if(task) {
