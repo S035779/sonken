@@ -158,10 +158,12 @@ class Yahoo {
           };
           const getDetail       = R.curry(_getDetail);
           const setDetail       = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
-          const setAuctionId    = _obj =>  !!_obj.property || !!_obj.details 
-            ? R.merge(_obj, 
-              { guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-                , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+          const setAuctionId    = _obj =>  _obj.property || _obj.details 
+            ? R.merge(_obj, {
+                guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+              , guid__: setDetail('オークションID', _obj)
+              , guid_isPermaLink: false
+              })
             : _obj;
           const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
           const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
@@ -305,9 +307,9 @@ class Yahoo {
         .data(data => {
           const setSize         = _obj => R.merge(_obj, { img_BORDER: 0, img_WIDTH:  134, img_HEIGHT: 100 });
           const setImage        = _obj => { 
-            _obj.description.DIV['A'] = R.merge(
-              { attr: { HREF: `https://page.auctions.yahoo.co.jp/jp/auction/${setDetail('オークションID', _obj)}#enlargeimg` } }
-            , _obj.description.DIV.A);
+            _obj.description.DIV['A'] = R.merge({
+              attr: { HREF: `https://page.auctions.yahoo.co.jp/jp/auction/${setDetail('オークションID', _obj)}#enlargeimg`
+            } }, _obj.description.DIV.A);
             _obj.description.DIV.A.IMG['attr'] = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
             return _obj;
           };
@@ -318,9 +320,12 @@ class Yahoo {
           };
           const getDetail       = R.curry(_getDetail);
           const setDetail       = (str, _obj) => R.compose(getDetail(str), zipDetail)(_obj);
-          const setAuctionId    = _obj => _obj.property || _obj.details 
-            ? R.merge(_obj, { guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
-                , guid__: setDetail('オークションID', _obj), guid_isPermaLink: false })
+          const setAuctionId    = _obj => _obj.property || _obj.details
+            ? R.merge(_obj, {
+              guid: { _: setDetail('オークションID', _obj), attr: { isPermaLink: false } }
+            , guid__: setDetail('オークションID', _obj)
+            , guid_isPermaLink: false
+            })
             : _obj;
           const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
           const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
@@ -471,9 +476,13 @@ class Yahoo {
             _obj.description.DIV.A.IMG['attr'] = R.merge({ BORDER: 0, WIDTH: 134, HEIGHT: 100 }, _obj.description.DIV.A.IMG.attr);
             return _obj;
           };
-          const setAuctionId    = _obj => R.merge(_obj, {
-            guid: { _: _obj.details[10], attr: { isPermaLink: false } }, guid__: _obj.details[10] , guid_isPermaLink: false 
-          });
+          const setAuctionId    = _obj => _obj.details 
+            ? R.merge(_obj, {
+                guid:               { _: _obj.details[10], attr: { isPermaLink: false } }
+              , guid__:             _obj.details[10]
+              , guid_isPermaLink:   false 
+              })
+            : _obj;
           const setPubDate      = _obj => R.merge(_obj, { pubDate: std.formatDate(new Date(), 'YYYY/MM/DD hh:mm') });
           const _setPrice       = _obj => R.replace(/円|,|\s/g, '', _obj);
           const setBuyNow       = _obj => _obj.buynow 
@@ -518,7 +527,6 @@ class Yahoo {
           , R.map(setPubDate)
           , R.filter(isGuid)
           , R.map(setAuctionId)
-          , R.tap(console.log)
           , R.map(setSize)
           , R.map(setImage)
           , R.filter(R.is(Object))

@@ -58,98 +58,111 @@ export default class UserProfiler {
         }
       case 'signin/user':
         {
-          const conditions = { user: options.user, salt: options.salt, hash: options.hash };
+          const { user, salt, hash } = options;
+          const conditions = { user, salt, hash };
           const update = { isAuthenticated: true };
-          return User.update(conditions, update).exec()
+          return User.update(conditions, { $set: update }).exec()
         }
       case 'signout/user':
         {
-          const conditions = { user: options.user };
+          const { user } = options;
+          const conditions = { user };
           const update = { isAuthenticated: false };
-          return User.update(conditions, update).exec();
+          return User.update(conditions, { $set: update }).exec();
         }
       case 'fetch/user':
         {
-          const isUser = options.user !=='';
-          const isEmail = !!options.email;
+          const { user, email, phone } = options;
+          const isUser = user !=='';
+          const isEmail = email;
           const conditions = isEmail
-            ? { email: options.email, phone: new RegExp(options.phone + '$') }
-            : (isUser ? { user: options.user } : null);
+            ? { email, phone: new RegExp(phone + '$') }
+            : (isUser ? { user } : null);
           return User.findOne(conditions).exec();
         }
       case 'create/user':
         {
-          const isAdmin = !!options.admin;
+          const { user, admin, salt, hash, data } = options;
+          const isAdmin = admin;
           const docs = isAdmin ? {
-              user:   options.admin
+              user:     admin
             , isAdmin:  true
-            , salt:   options.salt
-            , hash:   options.hash
-            , name:   options.data.name
-            , kana:   options.data.kana
-            , email:  options.data.email
-            , phone:  options.data.phone
-            , plan:   options.data.plan
+            , salt:     salt
+            , hash:     hash
+            , name:     data.name
+            , kana:     data.kana
+            , email:    data.email
+            , phone:    data.phone
+            , plan:     data.plan
             } : {
-              user:   options.user
+              user:     user
             , isAdmin:  false
-            , salt:   options.salt
-            , hash:   options.hash
-            , name:   options.data.name
-            , kana:   options.data.kana
-            , email:  options.data.email
-            , phone:  options.data.phone
-            , plan:   options.data.plan
+            , salt:     salt
+            , hash:     hash
+            , name:     data.name
+            , kana:     data.kana
+            , email:    data.email
+            , phone:    data.phone
+            , plan:     data.plan
             };
           return User.create(docs);
         }
       case 'update/user':
         {
-          const isAdmin = !!options.admin;
-          const isData = !!options.data;
-          const isPass = !!options.hash && !!options.salt;
-          let conditions = isAdmin ? { user: options.data.user } : { user: options.user };
-          let update = isAdmin && isData ? {
-              isAdmin:  options.data.isAdmin
-            , name:     options.data.name
-            , kana:     options.data.kana
-            , email:    options.data.email
-            , phone:    options.data.phone
-            , plan:     options.data.plan
+          const { user, admin, data, hash, salt } = options;
+          const isAdmin = admin;
+          const isData = data;
+          const isPass = hash && salt;
+          let conditions = isAdmin
+            ? { user: data.user }
+            : { user: user };
+          let update = isAdmin && isData
+            ? {
+              isAdmin:  data.isAdmin
+            , name:     data.name
+            , kana:     data.kana
+            , email:    data.email
+            , phone:    data.phone
+            , plan:     data.plan
             , updated:  new Date
-            } : isData && isPass 
+            }
+            : isData && isPass
               ? {
-                name:   options.data.name
-              , kana:   options.data.kana
-              , email:  options.data.email
-              , phone:  options.data.phone
-              , plan:   options.data.plan
-              , salt:   options.salt
-              , hash:   options.hash
+                name:   data.name
+              , kana:   data.kana
+              , email:  data.email
+              , phone:  data.phone
+              , plan:   data.plan
+              , salt:   salt
+              , hash:   hash
               , updated: new Date
-              } : isData
+              }
+              : isData
                 ? {
-                  name:   options.data.name
-                , kana:   options.data.kana
-                , email:  options.data.email
-                , phone:  options.data.phone
-                , plan:   options.data.plan
+                  name:   data.name
+                , kana:   data.kana
+                , email:  data.email
+                , phone:  data.phone
+                , plan:   data.plan
                 , updated: new Date
-                } : {
-                  salt:   options.salt
-                , hash:   options.hash
+                }
+                : {
+                  salt:   salt
+                , hash:   hash
                 , updated: new Date
                 };
-         return User.update(conditions, update).exec();
+         return User.update(conditions, { $set: update }).exec();
         }
       case 'delete/user':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return User.remove(conditions).exec();
         }
       case 'mail/address':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return User.findOne(conditions).exec()
             .then(obj => obj ? obj.email : null);
         }
@@ -160,42 +173,51 @@ export default class UserProfiler {
         }
       case 'mail/message':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return Mail.findOne(conditions).exec();
         }
       case 'create/approval':
         {
-          const conditions  = { approved: options.id };
-          const update = { approved: options.id, updated: new Date };
+          const { id } = options;
+          const conditions  = { approved: id };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Approved.update(conditions, update, params).exec();
+          return Approved.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/approval':
         {
-          const conditions = { approved: options.id };
+          const { id } = options;
+          const conditions = { approved: id };
           return Approved.remove(conditions).exec();
         }
       case 'fetch/approval':
         {
-          const conditions = options.id ? { approved: options.id } : {};
+          const { id } = options;
+          const conditions = id ? { approved: id } : {};
           return Approved.find(conditions).exec();
         }
       case 'signin/admin':
         {
+          const { admin, salt, hash } = options;
           const conditions = {
-            user: options.admin
-          , salt: options.salt
-          , hash: options.hash
-          , isAdmin: true
+            user:     admin
+          , salt:     salt
+          , hash:     hash
+          , isAdmin:  true
           };
           const update = { isAuthenticated: true };
-          return User.update(conditions, update).exec();
+          return User.update(conditions, { $set: update }).exec();
         }
       case 'signout/admin':
         {
-          const conditions = { user: options.admin, isAdmin: true };
+          const { admin } = options;
+          const conditions = {
+            user: admin
+          , isAdmin: true
+          };
           const update = { isAuthenticated: false };
-          return User.update(conditions, update).exec();
+          return User.update(conditions, { $set: update }).exec();
         }
       case 'fetch/preference':
         {
@@ -204,25 +226,27 @@ export default class UserProfiler {
         }
       case 'create/preference':
         {
+          const { data } = options;
           const docs = {
-            appname:        options.data.appname
-          , from:           options.data.from
-          , menu:           options.data.menu
-          , advertisement:  options.data.advertisement
+            appname:        data.appname
+          , from:           data.from
+          , menu:           data.menu
+          , advertisement:  data.advertisement
           };
           return Admin.create(docs);
         }
       case 'update/preference':
         {
-          const conditions = { _id: options.data._id };
+          const { data } = options;
+          const conditions = {};
           const update = {
-            appname:        options.data.appname
-          , from:           options.data.from
-          , menu:           options.data.menu
-          , advertisement:  options.data.advertisement
+            appname:        data.appname
+          , from:           data.from
+          , menu:           data.menu
+          , advertisement:  data.advertisement
           , updated:        new Date
           };
-          return Admin.update(conditions, update).exec();
+          return Admin.update(conditions, { $set: update }).exec();
         }
       default:
         return new Promise((resolve, reject) => reject({ name: 'Error', message: 'request: ' + request }));

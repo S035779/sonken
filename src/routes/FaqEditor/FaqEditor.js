@@ -22,44 +22,50 @@ export default class FaqEditor {
         }
       case 'fetch/faq':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return Faq.findOne(conditions).exec();
         }
       case 'create/faq':
         {
+          const { admin, data } = options;
           const docs = { 
-            user: options.admin
-          , title: options.data.title
-          , body: options.data.body
+            user:   admin
+          , title:  data.title
+          , body:   data.body
           };
           return Faq.create(docs);
         }
       case 'update/faq':
         {
-          const conditions = { _id: options.id };
+          const { id, admin, data } = options;
+          const conditions = { _id: id };
           const update = {
-            user: options.admin
-          , title: options.data.title
-          , body: options.data.body
-          , updated: new Date
+            user:     admin
+          , title:    data.title
+          , body:     data.body
+          , updated:  new Date
           };
-          return Faq.findOneAndUpdate(conditions, update).exec();
+          return Faq.findOneAndUpdate(conditions, { $set: update }).exec();
         }
       case 'delete/faq':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return Faq.findOneAndRemove(conditions).exec();
         }
       case 'create/post':
         {
-          const conditions = { posted: options.id };
-          const update = { posted: options.id, updated: new Date };
+          const { id } = options;
+          const conditions = { posted: id };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Posted.update(conditions, update, params).exec();
+          return Posted.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/post':
         {
-          const conditions = { posted: options.id };
+          const { id } = options;
+          const conditions = { posted: id };
           return Posted.remove(conditions).exec();
         }
       case 'fetch/post':
@@ -69,8 +75,13 @@ export default class FaqEditor {
         }
       case 'upload/file':
         {
-          const conditions = { _id: options.id };
-          const update = { user: options.admin, file: options.file, updated: new Date };
+          const { id, admin, file } = options;
+          const conditions = { _id: id };
+          const update = {
+            user:     admin
+          , file:     file
+          , updated:  new Date
+          };
           return Faq.findOneAndUpdate(conditions, update).exec();
         }
       default:

@@ -22,40 +22,50 @@ export default class MailEditor {
         }
       case 'fetch/mail':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return Mail.findOne(conditions).exec();
         }
       case 'create/mail':
         {
-          const docs = { user: options.admin, title: options.data.title, body: options.data.body };
+          const { admin, data } = options;
+          const docs = { 
+            user:   admin
+          , title:  data.title
+          , body:   data.body
+          };
           return Mail.create(docs);
         }
       case 'update/mail':
         {
-          const conditions = { _id: options.id };
+          const { id, admin, data } = options;
+          const conditions = { _id: id };
           const update = { 
-            user: options.admin
-          , title: options.data.title
-          , body: options.data.body
-          , updated: new Date
+            user:     admin
+          , title:    data.title
+          , body:     data.body
+          , updated:  new Date
           };
           return Mail.findOneAndUpdate(conditions, update).exec();
         }
       case 'delete/mail':
         {
-          const conditions = { _id: options.id };
+          const { id } = options;
+          const conditions = { _id: id };
           return Mail.findOneAndRemove(conditions).exec();
         }
       case 'create/select':
         {
-          const conditions = { selected: options.id };
-          const update = { selected: options.id, updated: new Date };
+          const { id } = options;
+          const conditions = { selected: id };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Selected.update(conditions, update, params).exec();
+          return Selected.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/select':
         {
-          const conditions = { selected: options.id };
+          const { id } = options;
+          const conditions = { selected: id };
           return Selected.remove(conditions).exec();
         }
       case 'fetch/select':
@@ -65,8 +75,13 @@ export default class MailEditor {
         }
       case 'upload/file':
         {
-          const conditions = { _id: options.id };
-          const update = { user: options.admin, file: options.file, updated: new Date };
+          const { id, admin, file } = options;
+          const conditions = { _id: id };
+          const update = { 
+            user: admin
+          , file: file
+          , updated: new Date
+          };
           return Mail.findOneAndUpdate(conditions, update).exec();
         }
       default:

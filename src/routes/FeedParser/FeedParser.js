@@ -151,18 +151,19 @@ export default class FeedParser {
           }
 
           const params = match
-            ? { path: 'items', options: { sort: { bidStopTime: 'desc' } }, match }
-            : { path: 'items', options: { sort: { bidStopTime: 'desc' } } };
+            ? { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' }, match }
+            : { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' } };
 
           const setCount = doc => isCount ? [{ _id: doc._id, counts: doc.items.length }] : doc;
           const sliItems = doc => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), doc) : doc;
-          const hasItems = R.filter(obj => obj.sold ? R.lte(sold, obj.sold) : R.lte(sold, 0));
+          const hasItems = R.filter(obj => obj.attributes ? R.lte(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           return query.populate(params).exec()
             .then(doc => doc.toObject())
             .then(setNote)
-            .then(setCount);
+            .then(setCount)
+            .then(R.tap(console.log));
         }
       case 'count/traded':
       case 'fetch/traded':
@@ -345,7 +346,7 @@ export default class FeedParser {
           const { id, user, data } = options;
           const isAsin = data.asin !== '';
           const conditions = { _id: id, user };
-          const docs = data.items
+          const update = data.items
           ? { updated:      new Date }
           : isAsin
             ? {
@@ -374,7 +375,7 @@ export default class FeedParser {
           const oldItems    = objs => R.filter(obj => isItems(obj, objs[0]), objs[1].items);
           const conItems    = objs => ([R.concat(objs[0], newItems(objs)),  oldItems(objs)]);
           const getItemIds  = objs => ([R.map(obj => obj._id, objs[0]),     R.map(obj => obj._id, objs[1])]);
-          const setItemIds  = objs => ([R.merge(docs, { items: objs[0] }),  objs[1]]);
+          const setItemIds  = objs => ([R.merge(update, { items: objs[0] }),  objs[1]]);
           return data.items
             ? Promise.all([
                 Item.insertMany(data.items)
@@ -384,10 +385,10 @@ export default class FeedParser {
               .then(getItemIds)
               .then(setItemIds)
               .then(objs => Promise.all([
-                Note.update(conditions, objs[0]).exec()
+                Note.update(conditions, { $set: objs[0] }).exec()
               , Item.remove({ _id: { $in: objs[1] }}).exec()
               ]))
-            : Note.update(conditions, docs).exec();
+            : Note.update(conditions, { $set: update }).exec();
         }
       case 'delete/note':
         {
@@ -424,7 +425,7 @@ export default class FeedParser {
           const { id, user, data } = options;
           const conditions = { _id: id, user };
           const update = { category: data.category, subcategory: data.subcategory, subcategoryId: ObjectId(data.subcategoryId) };
-          return Category.update(conditions, update).exec();
+          return Category.update(conditions, { $set: update }).exec();
         }
       case 'delete/category':
         {
@@ -436,9 +437,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { added: id, user };
-          const update = { added: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Added.update(conditions, update, params).exec();
+          return Added.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/added':
         {
@@ -450,9 +451,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { deleted: id, user };
-          const update = { deleted: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Deleted.update(conditions, update, params).exec();
+          return Deleted.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/deleted':
         {
@@ -464,9 +465,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { readed: id, user };
-          const update = { readed: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Readed.update(conditions, update, params).exec();
+          return Readed.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/readed':
         {
@@ -478,9 +479,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { traded: id, user };
-          const update = { traded: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Traded.update(conditions, update, params).exec();
+          return Traded.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/traded':
         {
@@ -492,9 +493,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { bided: id, user };
-          const update = { bided: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Bided.update(conditions, update, params).exec();
+          return Bided.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/bided':
         {
@@ -506,9 +507,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { starred: id, user };
-          const update = { starred: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Starred.update(conditions, update, params).exec();
+          return Starred.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/starred':
         {
@@ -520,9 +521,9 @@ export default class FeedParser {
         {
           const { id, user } = options;
           const conditions = { listed: id, user };
-          const update = { listed: id, user, updated: new Date };
+          const update = { updated: new Date };
           const params = { upsert: true };
-          return Listed.update(conditions, update, params).exec();
+          return Listed.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/listed':
         {
@@ -536,20 +537,16 @@ export default class FeedParser {
           const isAsins = data.asins;
           const conditions = { guid: id, user };
           const update = isAsins ? { 
-            user
-          , guid: id
-          , asins: data.asins
+            asins: data.asins
           , updated: new Date
           } : {
-            user
-          , guid: id
-          , sale: data.sale
+            sale: data.sale
           , sold: data.sold
           , market: data.market
           , updated: new Date
           };
           const params = { upsert: true };
-          return Attribute.update(conditions, update, params).exec();
+          return Attribute.update(conditions, { $set: update }, params).exec();
         }
       case 'delete/attribute':
         {
