@@ -166,7 +166,9 @@ const attributeSchema = new mongoose.Schema({
 , sale:             Number
 , sold:             Number
 , market:           String
-, asins:            Array
+, asins:            [String]
+, images:           [String]
+, archive:          String
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'attributes' });
 attributeSchema.index({ user: 1, guid: 1 }, { unique: true });

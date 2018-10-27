@@ -40,7 +40,7 @@ class Yahoo {
     this.redirect_url = redirect_url;
     this.tokens = [];
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
-    this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 5, promiseImplementation: Promise });
+    this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 2, promiseImplementation: Promise });
     this.AMZ = Amazon.of(amz_keyset);
   }
 
@@ -581,8 +581,8 @@ class Yahoo {
     return this.request('parse/xml/item', { xml });
   }
 
-  getImage(operator, aid,  url) {
-    const filename    = std.crypto_sha256(url, aid, 'hex') + '.img';
+  getImage(operator, guid,  url) {
+    const filename    = std.crypto_sha256(url, guid, 'hex') + '.img';
     operator = operator(STORAGE, filename);
     return this.request('fetch/file', { url, operator, filename });
   }
@@ -597,6 +597,13 @@ class Yahoo {
 
   getHtml(url, pages, skip, limit) {
     return this.request('fetch/html', { url, pages, skip, limit });
+  }
+
+  jobImage(operator, { guid__, images }) {
+    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
+    return forkJoin(promises(images)).pipe(
+      map(objs => ({ guid__, images: objs }))
+    );
   }
   
   jobClosedMerchant({ url, pages, skip, limit }) {
@@ -616,11 +623,6 @@ class Yahoo {
     return from(items).pipe(
       flatMap(getImage)
     );
-  }
-
-  jobImage(operator, { guid__, images }) {
-    const promises    = R.map(obj => this.getImage(operator, guid__, obj));
-    return forkJoin(promises(images));
   }
 
   fetchClosedMerchant({ url, pages, skip, limit }) {

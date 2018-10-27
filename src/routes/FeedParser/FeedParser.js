@@ -534,16 +534,22 @@ export default class FeedParser {
         {
           const { id, user, data } = options;
           const isAsins = data.asins;
+          const isImages = data.images;
           const conditions = { guid: id, user };
-          const update = isAsins ? { 
+          const update = isAsins
+          ? { 
             asins: data.asins
           , updated: new Date
-          } : {
-            sale: data.sale
-          , sold: data.sold
-          , market: data.market
-          , updated: new Date
-          };
+          } : isImages
+            ? {
+              images: data.images
+            , updated: new Date
+            } : {
+              sale: data.sale
+            , sold: data.sold
+            , market: data.market
+            , updated: new Date
+            };
           const params = { upsert: true };
           return Attribute.update(conditions, { $set: update }, params).exec();
         }
@@ -1843,8 +1849,11 @@ export default class FeedParser {
     , dupItems
     , setItems
     )(items);
+    const setAttributes = obj => R.map(item => ({ guid__: item.guid__, archive: obj.Key }), items);
     log.info(FeedParser.displayName, 'Items:', R.length(files));
-    return from(putArchives(files));
+    return from(putArchives(files)).pipe(
+      map(setAttributes)
+    );
   }
 
 }

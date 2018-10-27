@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
-import { throwError, forkJoin }   from 'rxjs';
+import { throwError, forkJoin, from }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
@@ -73,15 +73,21 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
       {
         const conditions = { user, id };
         const operator = (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename);
+        const setAttribute = obj => ({ user, id: obj.guid__, data: { images: obj.images } });
+        const observable = obj => feed.createAttribute(setAttribute(obj));
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
+          , flatMap(obj => from(observable(obj)))
           );
       }
     case 'archives':
       {
         const conditions = { user, id };
+        const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
+        const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => feed.createArchives({ items: obj.items, key }))
+          , flatMap(objs => forkJoin(observables(objs)))
           );
       }
     case 'attribute':
