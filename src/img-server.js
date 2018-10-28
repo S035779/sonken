@@ -71,7 +71,7 @@ const request = queue => {
       , categorys: ['closedsellers', 'closedmarchant']
       , interval: updatedInterval * 60 * 1000
       , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 270))
-      , items: { $ne: [] }
+      , filter: { isItems: true }
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

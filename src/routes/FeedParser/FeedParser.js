@@ -44,117 +44,53 @@ export default class FeedParser {
     switch(request) {
       case 'job/notes':
         {
-          const { users, categorys, items, isImages, skip, limit, interval } = options;
-          const isPaginate = skip && limit;
-          const conditions = items ? { 
+          const { users, categorys, filter, skip, limit, interval } = options;
+          const isItems = filter && filter.isItems;
+          const isImages = filter && filter.isImages;
+          const conditions = isItems
+          ? { 
             user:     { $in: users }
           , category: { $in: categorys }
-          , items
           , updated:  { $lt: Date.now() - interval }
+          , items:    { $ne: null, $exists: true }
           } : {
             user:     { $in: users }
           , category: { $in: categorys }
           , updated:  { $lt: Date.now() - interval }
           };
-          const query = Note.find(conditions);
-          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' } };
-          const hasImage = R.filter(obj => obj.attributes && obj.attributes.images)
-          const setItems = R.map(obj => hasImage(obj.items))
-          const setNote  = obj => R.merge(obj, { items: setItems(obj) })
-          const setNotes = docs => isImages ? R.map(setNote, docs) : docs;
-          const sliNotes = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          return query.populate(params).sort('-updated').exec()
-            .then(setNotes)
-            .then(sliNotes);
+          const select = { user: 1, category: 1, url: 1 };
+          const params = {
+            path:     'items'
+          , select:   { guid__: 1 }
+          , options:  { sort: { bidStopTime: 'desc' } }
+          , populate: { path: 'attributes', select: { images: 1 } }
+          };
+          const hasImages = R.filter(obj => obj.attributes && obj.attributes.images)
+          const setItems = R.map(obj => isImages ? R.merge(obj, { items: hasImages(obj.items) }) : obj);
+          const hasItems = R.filter(obj => obj.items);
+          const hasNotes = R.compose(setItems, hasItems);
+          const setNotes = objs => isItems ? hasNotes(objs) : objs;
+          const setObject = R.map(doc => doc.toObject());
+          const query = Note.find(conditions).select(select);
+          return query.populate(params).sort('-updated').skip(Number(skip)).limit(Number(limit)).exec()
+            .then(setObject)
+            .then(setNotes);
         }
-        //{
-        //  const { users, categorys, items, skip, limit, interval } = options;
-        //  const conditions = items ? { 
-        //    user:     { $in: users }
-        //  , category: { $in: categorys }
-        //  , items
-        //  , updated:  { $lt: new Date(Date.now() - interval) }
-        //  } : {
-        //    user:     { $in: users }
-        //  , category: { $in: categorys }
-        //  , updated:  { $lt: new Date(Date.now() - interval) }
-        //  };
-        //  const query = Note.aggregate()
-        //    //.allowDiskUse(true)
-        //    .match(conditions)
-        //    .lookup({ from: 'items', localField: 'items', foreignField: '_id', as: 'items' })
-        //    .unwind({ path: '$items', preserveNullAndEmptyArrays: true })
-        //    .lookup({ from: 'attributes', localField: 'guid', foreignField: 'items.guid__', as: 'items.attributes' })
-        //    .unwind({ path: '$items.attributes', preserveNullAndEmptyArrays: true })
-        //    .match({ 'items.attributes': { $exists: true } } )
-        //    .sort({ 'items.attributes.updated': -1 })
-        //    .project({ 
-        //        user: 1
-        //      , category: 1
-        //      , url: 1
-        //      , updated: 1
-        //      , 'items._id': 1
-        //      , 'items.guid__': 1
-        //      , 'items.updated': 1
-        //      , 'items.attributes._id': 1
-        //      , 'items.attributes.guid': 1
-        //      , 'items.attributes.images': 1
-        //      , 'items.attributes.updated': 1
-        //      })
-        //    .group({ 
-        //        _id: {
-        //          _id:        '$_id'
-        //        , user:       '$user'
-        //        , category:   '$category'
-        //        , url:        '$url'
-        //        , updated:    '$updated'
-        //        , item_id:    '$items._id'
-        //        }
-        //      , item_id:    { $first: '$items._id' }
-        //      , guid:       { $first: '$items.guid__' } 
-        //      , updated:    { $first: '$items.updated' }
-        //      , attributes: { $push: '$items.attributes' } 
-        //      })
-        //    .sort({ updated: -1 })
-        //    .group({
-        //        _id:        '$_id._id'
-        //      , user:       { $first: '$_id.user'     }
-        //      , category:   { $first: '$_id.category' }
-        //      , url:        { $first: '$_id.url'      }
-        //      , updated:    { $first: '$_id.updated'  }
-        //      , attributed: { 
-        //          $push: {
-        //            _id:        '$item_id'
-        //          , guid:       '$guid'
-        //          , updated:    '$updated'
-        //          , attributes: '$attributes'
-        //          }
-        //        }
-        //      })
-        //    .sort({ updated: -1 })
-        //    .skip(Number(skip))
-        //    .limit(Number(limit))
-        //  ;
-        //  return query.exec()
-        //    .then(R.tap(log.trace.bind(this)));
-        //}
       case 'job/note':
         {
           const { user, id } = options;
           const conditions = { user, _id: id };
-          const query = Note.findOne(conditions);
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
-          return query
-            .populate(params)
-            .exec()
+          const query = Note.findOne(conditions);
+          return query.populate(params).exec()
             .then(doc => doc.toObject());
         }
       case 'count/notes':
         {
           const { user } = options;
           const conditions = { user };
-          const query = Note.find(conditions);
           const setIds = R.map(doc => doc._id);
+          const query = Note.find(conditions);
           return query.exec()
             .then(docs => setIds(docs))
             .then(docs =>  Note.aggregate()
@@ -167,26 +103,17 @@ export default class FeedParser {
         {
           const { user } = options;
           const conditions = { user };
-          const query = Note.find(conditions);
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
-          return query
-            .populate(params)
-            .sort('updated')
-            .countDocuments()
-            .exec();
+          const query = Note.find(conditions);
+          return query.populate(params).sort('updated').countDocuments().exec();
         }
       case 'fetch/notes':
         {
           const { user, category, skip, limit } = options;
           const conditions = category ? { user, category } : { user };
-          const query = Note.find(conditions);
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }};
-          return query
-            .populate(params)
-            .sort('-updated')
-            .skip(Number(skip))
-            .limit(Number(limit))
-            .exec();
+          const query = Note.find(conditions);
+          return query.populate(params).sort('-updated').skip(Number(skip)).limit(Number(limit)).exec();
         }
       case 'count/note':
       case 'fetch/note':
@@ -743,8 +670,8 @@ export default class FeedParser {
     }
   }
 
-  getJobNotes(users, categorys, items, skip, limit, interval) {
-    return this.request('job/notes', { users, categorys, items, skip, limit, interval });
+  getJobNotes(users, categorys, filter, skip, limit, interval) {
+    return this.request('job/notes', { users, categorys, filter, skip, limit, interval });
   }
 
   getJobNote(user, id) {
@@ -1075,8 +1002,8 @@ export default class FeedParser {
     );
   }
 
-  fetchJobNotes({ users, categorys, items, skip, limit, interval }) {
-    return from(this.getJobNotes(users, categorys, items, skip, limit, interval));
+  fetchJobNotes({ users, categorys, filter, skip, limit, interval }) {
+    return from(this.getJobNotes(users, categorys, filter, skip, limit, interval));
   }
 
   fetchJobNote({ user, id }) {
@@ -1933,19 +1860,19 @@ export default class FeedParser {
 
   createArchives({ _id, url, items }) {
     const AWS         = aws.of(aws_keyset);
-    const setArcKey   = (id, url) => std.crypto_sha256(url, id, 'hex') + '.zip';
-    const putArchives = objs => AWS.createArchives(STORAGE, { key: setArcKey(_id.toString(), url), files: objs });
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
     const setImages   = R.map(obj => setImage(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
-    const files = R.compose(R.flatten, setImages, dupItems, setItems)(items);
-    const setGuids = R.map(obj => obj.guid__);
-    log.info(FeedParser.displayName, 'images:', R.length(files));
-    return from(putArchives(files)).pipe(
-      map(obj => ({ guid__: { $in: setGuids(items) }, archive: obj.Key }))
+    const files       = R.compose(R.flatten, setImages, dupItems, setItems)(items);
+    //log.info(FeedParser.displayName, 'images:', R.length(files));
+    const setArchive  = obj => ({ guid__: { $in: R.map(obj => obj.guid__, items) }, archive: obj.Key }); 
+    const setZipKey   = (id, url) => std.crypto_sha256(url, id, 'hex') + '.zip';
+    const observable  = from(AWS.createArchives(STORAGE, { key: setZipKey(_id.toString(), url), files }));
+    return observable.pipe(
+      map(setArchive)
     );
   }
 
