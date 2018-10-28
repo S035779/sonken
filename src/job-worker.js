@@ -31,7 +31,7 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const request = (operation, { url, user, id, skip, limit, key }) => {
+const request = (operation, { url, user, id, skip, limit }) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   switch(operation) {
@@ -84,10 +84,10 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
       {
         const conditions = { user, id };
         const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
-        const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
+        const observable = obj => feed.createAttribute(setAttribute(obj));
         return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => feed.createArchives({ items: obj.items, key }))
-          , flatMap(objs => forkJoin(observables(objs)))
+            flatMap(obj => feed.createArchives(obj))
+          , flatMap(obj => from(observable(obj)))
           );
       }
     case 'attribute':
@@ -120,10 +120,10 @@ const request = (operation, { url, user, id, skip, limit, key }) => {
   }
 };
 
-const worker = ({ url, user, id, operation, skip, limit, key }, callback) => {
+const worker = ({ url, user, id, operation, skip, limit }, callback) => {
   log.info(displayName, 'Started. _id/ope:', id, operation);
   const start = new Date();
-  request(operation, { url, user, id, skip, limit, key }).subscribe(
+  request(operation, { url, user, id, skip, limit }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => {

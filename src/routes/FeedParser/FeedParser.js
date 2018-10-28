@@ -44,7 +44,8 @@ export default class FeedParser {
     switch(request) {
       case 'job/notes':
         {
-          const { users, categorys, items, skip, limit, interval } = options;
+          const { users, categorys, items, isImages, skip, limit, interval } = options;
+          const isPaginate = skip && limit;
           const conditions = items ? { 
             user:     { $in: users }
           , category: { $in: categorys }
@@ -56,11 +57,87 @@ export default class FeedParser {
           , updated:  { $lt: Date.now() - interval }
           };
           const query = Note.find(conditions);
-          return query
-            .sort('-updated')
-            .skip(Number(skip)).limit(Number(limit))
-            .exec();
+          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' } };
+          const hasImage = R.filter(obj => obj.attributes && obj.attributes.images)
+          const setItems = R.map(obj => hasImage(obj.items))
+          const setNote  = obj => R.merge(obj, { items: setItems(obj) })
+          const setNotes = docs => isImages ? R.map(setNote, docs) : docs;
+          const sliNotes = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
+          return query.populate(params).sort('-updated').exec()
+            .then(setNotes)
+            .then(sliNotes);
         }
+        //{
+        //  const { users, categorys, items, skip, limit, interval } = options;
+        //  const conditions = items ? { 
+        //    user:     { $in: users }
+        //  , category: { $in: categorys }
+        //  , items
+        //  , updated:  { $lt: new Date(Date.now() - interval) }
+        //  } : {
+        //    user:     { $in: users }
+        //  , category: { $in: categorys }
+        //  , updated:  { $lt: new Date(Date.now() - interval) }
+        //  };
+        //  const query = Note.aggregate()
+        //    //.allowDiskUse(true)
+        //    .match(conditions)
+        //    .lookup({ from: 'items', localField: 'items', foreignField: '_id', as: 'items' })
+        //    .unwind({ path: '$items', preserveNullAndEmptyArrays: true })
+        //    .lookup({ from: 'attributes', localField: 'guid', foreignField: 'items.guid__', as: 'items.attributes' })
+        //    .unwind({ path: '$items.attributes', preserveNullAndEmptyArrays: true })
+        //    .match({ 'items.attributes': { $exists: true } } )
+        //    .sort({ 'items.attributes.updated': -1 })
+        //    .project({ 
+        //        user: 1
+        //      , category: 1
+        //      , url: 1
+        //      , updated: 1
+        //      , 'items._id': 1
+        //      , 'items.guid__': 1
+        //      , 'items.updated': 1
+        //      , 'items.attributes._id': 1
+        //      , 'items.attributes.guid': 1
+        //      , 'items.attributes.images': 1
+        //      , 'items.attributes.updated': 1
+        //      })
+        //    .group({ 
+        //        _id: {
+        //          _id:        '$_id'
+        //        , user:       '$user'
+        //        , category:   '$category'
+        //        , url:        '$url'
+        //        , updated:    '$updated'
+        //        , item_id:    '$items._id'
+        //        }
+        //      , item_id:    { $first: '$items._id' }
+        //      , guid:       { $first: '$items.guid__' } 
+        //      , updated:    { $first: '$items.updated' }
+        //      , attributes: { $push: '$items.attributes' } 
+        //      })
+        //    .sort({ updated: -1 })
+        //    .group({
+        //        _id:        '$_id._id'
+        //      , user:       { $first: '$_id.user'     }
+        //      , category:   { $first: '$_id.category' }
+        //      , url:        { $first: '$_id.url'      }
+        //      , updated:    { $first: '$_id.updated'  }
+        //      , attributed: { 
+        //          $push: {
+        //            _id:        '$item_id'
+        //          , guid:       '$guid'
+        //          , updated:    '$updated'
+        //          , attributes: '$attributes'
+        //          }
+        //        }
+        //      })
+        //    .sort({ updated: -1 })
+        //    .skip(Number(skip))
+        //    .limit(Number(limit))
+        //  ;
+        //  return query.exec()
+        //    .then(R.tap(log.trace.bind(this)));
+        //}
       case 'job/note':
         {
           const { user, id } = options;
@@ -107,7 +184,8 @@ export default class FeedParser {
           return query
             .populate(params)
             .sort('-updated')
-            .skip(Number(skip)).limit(Number(limit))
+            .skip(Number(skip))
+            .limit(Number(limit))
             .exec();
         }
       case 'count/note':
@@ -149,13 +227,12 @@ export default class FeedParser {
               sold  = Number(filter.sold);
             }
           }
-
           const params = match
             ? { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' }, match }
             : { path: 'items', options: { sort: { bidStopTime: 'desc' } }, populate: { path: 'attributes' } };
 
           const setCount = doc => isCount ? [{ _id: doc._id, counts: doc.items.length }] : doc;
-          const sliItems = doc => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), doc) : doc;
+          const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
           const hasItems = R.filter(obj => obj.attributes ? R.lte(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
@@ -359,7 +436,8 @@ export default class FeedParser {
             , AmazonUrl:    data.AmazonUrl
             , AmazonImg:    data.AmazonImg
             , updated:      new Date
-            } : {
+            }
+            : {
               categoryIds:  data.categoryIds
             , title:        data.title
             , asin:         data.asin
@@ -422,8 +500,13 @@ export default class FeedParser {
       case 'update/category':
         {
           const { id, user, data } = options;
+          const { category, subcategory, subcategoryId } = data;
           const conditions = { _id: id, user };
-          const update = { category: data.category, subcategory: data.subcategory, subcategoryId: ObjectId(data.subcategoryId) };
+          const update = {
+            category:       category
+          , subcategory:    subcategory
+          , subcategoryId:  ObjectId(subcategoryId)
+          };
           return Category.update(conditions, { $set: update }).exec();
         }
       case 'delete/category':
@@ -533,25 +616,39 @@ export default class FeedParser {
       case 'create/attribute':
         {
           const { id, user, data } = options;
-          const isAsins = data.asins;
-          const isImages = data.images;
+          const { sale, sold, market, asins, images, archive } = data;
+          const isAsins = asins;
+          const isImages = images;
+          const isArchive = archive;
+          const isPerformance = sale && sold && market;
           const conditions = { guid: id, user };
           const update = isAsins
           ? { 
-            asins: data.asins
+            asins: asins
           , updated: new Date
-          } : isImages
+          }
+          : isImages
             ? {
-              images: data.images
+              images: images
             , updated: new Date
-            } : {
-              sale: data.sale
-            , sold: data.sold
-            , market: data.market
-            , updated: new Date
-            };
-          const params = { upsert: true };
-          return Attribute.update(conditions, { $set: update }, params).exec();
+            }
+            : isArchive
+              ? {
+                archive: archive
+              , updated: new Date
+              }
+              : isPerformance 
+                ? {
+                  sale: sale
+                , sold: sold
+                , market: market
+                , updated: new Date
+                }
+                : null;
+          const params = { upsert: true, multi: !!isArchive };
+          return update
+            ? Attribute.update(conditions, { $set: update }, params).exec()
+            : Promise.reject(new Error(`Error ${request}.`));
         }
       case 'delete/attribute':
         {
@@ -1834,25 +1931,21 @@ export default class FeedParser {
     );
   }
 
-  createArchives({ key, items }) {
+  createArchives({ _id, url, items }) {
     const AWS         = aws.of(aws_keyset);
-    const putArchives = objs => AWS.createArchives(STORAGE, { key, files: objs });
+    const setArcKey   = (id, url) => std.crypto_sha256(url, id, 'hex') + '.zip';
+    const putArchives = objs => AWS.createArchives(STORAGE, { key: setArcKey(_id.toString(), url), files: objs });
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
     const setImages   = R.map(obj => setImage(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
-    const files = R.compose(
-      R.flatten
-    , setImages
-    , dupItems
-    , setItems
-    )(items);
-    const setAttributes = obj => R.map(item => ({ guid__: item.guid__, archive: obj.Key }), items);
-    log.info(FeedParser.displayName, 'Items:', R.length(files));
+    const files = R.compose(R.flatten, setImages, dupItems, setItems)(items);
+    const setGuids = R.map(obj => obj.guid__);
+    log.info(FeedParser.displayName, 'images:', R.length(files));
     return from(putArchives(files)).pipe(
-      map(setAttributes)
+      map(obj => ({ guid__: { $in: setGuids(items) }, archive: obj.Key }))
     );
   }
 

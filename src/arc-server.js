@@ -59,12 +59,11 @@ const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
-  const setKey      = (id, url) => std.crypto_sha256(url, id, 'hex') + '.zip';
   const setQueue    = obj => ({
     operation:  'archives'
   , user:       obj.user
   , id:         obj._id
-  , key:        setKey(obj._id.toString(), obj.url)
+  , url:        obj.url
   , created:    Date.now()
   });
   return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
@@ -73,7 +72,8 @@ const request = queue => {
       , categorys: ['closedmarchant', 'closedsellers']
       , interval: updatedInterval * 60 * 1000
       , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 150))
-      , items: { $ne: [] }
+      , items: { $ne: [], $exists: true }
+      , isImages: true
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
