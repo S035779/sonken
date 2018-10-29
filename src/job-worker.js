@@ -125,7 +125,10 @@ const worker = ({ url, user, id, operation, skip, limit }, callback) => {
   const start = new Date();
   request(operation, { url, user, id, skip, limit }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
-  , err => log.error(displayName, err.name, err.message, err.stack)
+  , err => {
+      log.warn(displayName, err.name, err.message, err.stack);
+      callback();
+    }
   , ()  => {
       const end = new Date();
       const seconds = Math.floor((end.getTime() - start.getTime()) / 1000);

@@ -69,6 +69,16 @@ class awsutils {
     return promise;
   }
 
+  checkObjectList(bucket, files) {
+    const _isFiles  = (objs, file) => R.contains(file.key, objs);
+    const isFiles   = R.curry(_isFiles);
+    const hasFiles  = objs => R.filter(isFiles(objs), files);
+    const setKeys   = obj  => R.map(obj => obj.Key, obj.Contents);
+    return this.fetchObjectList(bucket)
+      .then(setKeys)
+      .then(hasFiles);
+  }
+
   fetchBucketWebsite(bucket) {
     const params = { Bucket: bucket };
     const promise = this.s3.getBucketWebsite(params).promise();
@@ -124,8 +134,8 @@ class awsutils {
   }
 
   createArchives(bucket, { key, files }) {
-    const putObject =  body => this.createObject(bucket, { key, body })
-    const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
+    const putObject = buf => this.createObject(bucket, { key, body: buf })
+    const promises  = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
     return Promise.all(promises(files))
       .then(this.createArchive)
       .then(putObject);
@@ -133,7 +143,7 @@ class awsutils {
 
   createArchive(files) {
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Error', message: 'File not found.', stack: files });
+      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.', stack: files });
       const output = new bufferStream.WritableStreamBuffer();
       const archive = archiver('zip', { zlib: { level: 9 } });
       output.on('finish', () => resolve(output.getContents()));

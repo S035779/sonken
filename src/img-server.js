@@ -70,7 +70,7 @@ const request = queue => {
         users: objs
       , categorys: ['closedsellers', 'closedmarchant']
       , interval: updatedInterval * 60 * 1000
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 270))
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 60))
       , filter: { isItems: true }
       }))
     , map(R.map(setQueue))

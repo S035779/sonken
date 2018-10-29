@@ -52,7 +52,7 @@ export default class FeedParser {
             user:     { $in: users }
           , category: { $in: categorys }
           , updated:  { $lt: Date.now() - interval }
-          , items:    { $ne: null, $exists: true }
+          , items:    { $ne: [], $exists: true }
           } : {
             user:     { $in: users }
           , category: { $in: categorys }
@@ -80,7 +80,11 @@ export default class FeedParser {
         {
           const { user, id } = options;
           const conditions = { user, _id: id };
-          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
+          const params = {
+            path: 'items'
+          , options: { sort: { bidStopTime: 'desc' }}
+          , populate: { path: 'attributes', select: { images: 1 } }
+          };
           const query = Note.findOne(conditions);
           return query.populate(params).exec()
             .then(doc => doc.toObject());
@@ -544,38 +548,25 @@ export default class FeedParser {
         {
           const { id, user, data } = options;
           const { sale, sold, market, asins, images, archive } = data;
-          const isAsins = asins;
-          const isImages = images;
-          const isArchive = archive;
-          const isPerformance = sale && sold && market;
+          const isAsins = !R.isNil(asins);
+          const isImages = !R.isNil(images);
+          const isArchive = !R.isNil(archive);
+          const isPerformance = !R.isNil(sale) && !R.isNil(sold) && !R.isNil(market);
           const conditions = { guid: id, user };
           const update = isAsins
-          ? { 
-            asins: asins
-          , updated: new Date
-          }
+          ? { asins: asins, updated: new Date }
           : isImages
-            ? {
-              images: images
-            , updated: new Date
-            }
+            ? { images: images, updated: new Date }
             : isArchive
-              ? {
-                archive: archive
-              , updated: new Date
-              }
+              ? { archive: archive, updated: new Date }
               : isPerformance 
-                ? {
-                  sale: sale
-                , sold: sold
-                , market: market
-                , updated: new Date
-                }
+                ? { sale: sale, sold: sold, market: market, updated: new Date }
                 : null;
           const params = { upsert: true, multi: !!isArchive };
+          //log.trace(FeedParser.displayName, 'options', options, { isPerformance, isArchive, isImages, isAsins });
           return update
             ? Attribute.update(conditions, { $set: update }, params).exec()
-            : Promise.reject(new Error(`Error ${request}.`));
+            : Promise.reject(new Error(`request ${request}.`));
         }
       case 'delete/attribute':
         {
@@ -1866,15 +1857,17 @@ export default class FeedParser {
     const setImages   = R.map(obj => setImage(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
-    const files       = R.compose(R.flatten, setImages, dupItems, setItems)(items);
-    //log.info(FeedParser.displayName, 'images:', R.length(files));
-    const setArchive  = obj => ({ guid__: { $in: R.map(obj => obj.guid__, items) }, archive: obj.Key }); 
-    const setZipKey   = (id, url) => std.crypto_sha256(url, id, 'hex') + '.zip';
-    const observable  = from(AWS.createArchives(STORAGE, { key: setZipKey(_id.toString(), url), files }));
+    const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
+    const setGuids    = R.map(obj => obj.guid__);
+    const files       = R.compose(R.flatten, setImages, dupItems, setItems, hasImages)(items);
+    const guids       = R.compose(setGuids, hasImages)(items);
+    const zipkey      = std.crypto_sha256(url, _id.toString(), 'hex') + '.zip';
+    const setArchive  = obj => ({ guid__: { $in: guids }, archive: obj.Key }); 
+    const observable  = from(AWS.createArchives(STORAGE, { key: zipkey, files }));
+    //log.trace(FeedParser.displayName, 'files/guids:', R.length(files), R.length(guids));
     return observable.pipe(
       map(setArchive)
     );
   }
-
 }
 FeedParser.displayName = 'FeedParser';

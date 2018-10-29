@@ -703,8 +703,10 @@ class Yahoo {
       ? R.map(Item => Item.ASIN, _obj.Item)
       : [ _obj.Item.ASIN ];
     const setASINs  = _objs => R.merge(item, { asins: _objs });
+    const setASIN   = _objs => _objs ? _objs : [];
     return R.compose(
       setASINs 
+    , setASIN
     , R.head
     , R.map(getASIN)
     , R.filter(isValid)

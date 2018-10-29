@@ -71,7 +71,7 @@ const request = queue => {
         users: objs
       , categorys: ['closedmarchant', 'closedsellers']
       , interval: updatedInterval * 60 * 1000
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 150))
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 60))
       , filter: { isItems: true, isImages: true }
       }))
     , map(R.map(setQueue))
