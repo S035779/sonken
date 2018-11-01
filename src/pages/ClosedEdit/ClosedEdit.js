@@ -1,14 +1,11 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
-//import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
 import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedEdit extends React.Component {
   render() {
-    //std.logInfo(ClosedEdit.displayName, 'State', this.state);
-    //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
     const { classes, user, note, category, filter, file, images } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.attributes ? note.attributes.item.total : 0;

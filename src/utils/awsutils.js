@@ -1,9 +1,16 @@
+import dotenv           from 'dotenv';
+import fs               from 'fs';
+import path             from 'path';
 import AWS              from 'aws-sdk';
 import * as R           from 'ramda';
 import archiver         from 'archiver';
-import bufferStream     from 'stream-buffers';
 import stream           from 'stream';
 import log              from 'Utilities/logutils';
+
+const config = dotenv.config();
+if(config.error) throw config.error;
+
+const CACHE = process.env.CACHE;
 
 class awsutils {
   constructor({ access_key, secret_key, region }) {
@@ -120,11 +127,16 @@ class awsutils {
   createWriteStream(bucket, key) {
     const passStream = new stream.PassThrough();
     const params = { Bucket: bucket, Key: key, Body: passStream };
-    const promise = this.s3.upload(params).promise();
-    promise
-      //.then(data => log.trace(awsutils.displayName, '[UPLOAD]', data))
-      .catch(err => log.error(awsutils.displayName, err.name, err.message, err.stack));
+    this.s3.upload(params, (err, data) => {
+      if(err) log.error(awsutils.displayName, err.name, err.message, err.stack);
+      log.trace(awsutils.displayName, '[UPLOAD]', data);
+    });
     return passStream;
+  }
+
+  createReadStream(bucket, key) {
+    const params = { Bucket: bucket, Key: key };
+    return this.s3.getObject(params).createReadStream();
   }
 
   createObject(bucket, { key, body }) {
@@ -133,24 +145,27 @@ class awsutils {
     return promise;
   }
 
-  createArchives(bucket, { key, files }) {
-    const putObject = buf => this.createObject(bucket, { key, body: buf })
-    const promises  = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files))
-      .then(this.createArchive)
-      .then(putObject);
-  }
-
-  createArchive(files) {
+  createArchive(bucket, { key, files }) {
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.', stack: files });
-      const output = new bufferStream.WritableStreamBuffer();
+      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
       const archive = archiver('zip', { zlib: { level: 9 } });
-      output.on('finish', () => resolve(output.getContents()));
+      const cachefile = path.resolve(__dirname, '../', CACHE, `cachefile_${Date.now()}.tmp`);
+      const dst = fs.createWriteStream(cachefile);
+      dst.on('finish', () => {
+        log.trace(awsutils.displayName, 'finish:', cachefile);
+        const src = fs.createReadStream(cachefile);
+        src.pipe(this.createWriteStream(bucket, key));
+        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
+        src.on('close', () => {
+          log.trace(awsutils.displayName, 'close', key);
+          fs.unlink(cachefile, err => reject(err));
+          resolve({ Bucket: bucket, Key: key });
+        });
+      });
       archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       archive.on('error', err => reject(err));
-      archive.pipe(output);
-      R.map(obj => archive.append(obj.buffer, { name: obj.name }), files);
+      archive.pipe(dst);
+      R.map(obj => archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
       archive.finalize();
     });
   }

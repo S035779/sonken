@@ -10,6 +10,7 @@ import { Input, Button, Typography, TextField, FormControl, InputLabel } from '@
 import RssButton        from 'Components/RssButton/RssButton';
 import RssDialog        from 'Components/RssDialog/RssDialog';
 import RssItemList      from 'Components/RssItemList/RssItemList';
+import RssDownloadItemsDialog from 'Components/RssDownloadItemsDialog/RssDownloadItemsDialog';
 
 const isAlpha = process.env.NODE_ENV !== 'production';
 const mon = '//www.mnrate.com/item/aid/';
@@ -27,6 +28,7 @@ class RssForms extends React.Component {
     , isSuccess: false
     , isNotValid: false
     , isRequest: false
+    , isDownload: false
     , page: 1
     , prevPage: 1
     };
@@ -128,23 +130,41 @@ class RssForms extends React.Component {
     }
   }
 
-  handleCloseDialog(name) {
-    this.setState({ [name]: false });
+  //handleDownload() {
+  //  const { user, note } = this.props;
+  //  //std.logInfo(RssForms.displayName, 'handleDownload', user);
+  //  this.spn.start();
+  //  NoteAction.downloadItems(user, note._id)
+  //    .then(() => this.setState({ isSuccess: true }))
+  //    .then(() => this.downloadFile(this.props.file))
+  //    .then(() => this.spn.stop())
+  //    .catch(err => {
+  //      std.logError(RssForms.displayName, err.name, err.message);
+  //      this.setState({ isNotValid: true });
+  //      this.spn.stop();
+  //    });
+  //}
+
+  //downloadFile(blob) {
+  //  //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
+  //  const anchor = document.createElement('a');
+  //  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  //  const fileReader = new FileReader();
+  //  fileReader.onload = function() {
+  //    anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+  //    anchor.target = '_blank';
+  //    anchor.download = 'download.csv';
+  //    anchor.click();
+  //  }
+  //  fileReader.readAsArrayBuffer(blob);
+  //}
+
+  handleOpenDialog(name) {
+    this.setState({ [name]: true });
   }
 
-  handleDownload() {
-    const { user, note } = this.props;
-    //std.logInfo(RssForms.displayName, 'handleDownload', user);
-    this.spn.start();
-    NoteAction.downloadItems(user, note._id)
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.downloadFile(this.props.file))
-      .then(() => this.spn.stop())
-      .catch(err => {
-        std.logError(RssForms.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        this.spn.stop();
-      });
+  handleCloseDialog(name) {
+    this.setState({ [name]: false });
   }
 
   fetch(page) {
@@ -155,20 +175,6 @@ class RssForms extends React.Component {
     //std.logInfo(RssForms.displayName, 'fetch', { id, page });
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, id, skip, limit);
-  }
-
-  downloadFile(blob) {
-    //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
-    const anchor = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-      anchor.target = '_blank';
-      anchor.download = 'download.csv';
-      anchor.click();
-    }
-    fileReader.readAsArrayBuffer(blob);
   }
 
   isValidate() {
@@ -206,8 +212,8 @@ class RssForms extends React.Component {
 
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
-    const { classes, user, note, category } = this.props;
-    const { page, isNotValid, isSuccess } = this.state;
+    const { classes, itemNumber, user, note, category, file } = this.props;
+    const { page, isNotValid, isSuccess, isDownload } = this.state;
     const { items, asin, price, bidsprice, body} = this.state.note;
     const isChanged = this.isChanged();
     const link_mon = mon + asin;
@@ -219,9 +225,19 @@ class RssForms extends React.Component {
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-        { isAlpha ? (<RssButton color={color} 
-          onClick={this.handleDownload.bind(this)}
-          classes={classes.button}>ダウンロード</RssButton>) : null }
+          { isAlpha 
+            ? ( <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
+                ダウンロード
+              </RssButton> )
+            : null }
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber}
+            name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
+          </RssDialog>
+          <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+            要求を受け付けました。
+          </RssDialog>
         </div>
       </div>
       <div className={classes.edit}>
@@ -230,53 +246,36 @@ class RssForms extends React.Component {
           <Input id="asin" value={asin} onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
         <div className={classes.buttons}>
-          <Button variant="raised" size="medium"
-            onClick={this.handleSave.bind(this)}
-            className={classes.button}>{isChanged ? '*' : ''}登録</Button>
-          <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-            内容に不備があります。もう一度確認してください。
-          </RssDialog>
-          <RssDialog open={isSuccess} title={'送信完了'}
-            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-            要求を受け付けました。
-          </RssDialog>
+          <Button variant="raised" size="medium" onClick={this.handleSave.bind(this)} className={classes.button}>
+            {isChanged ? '*' : ''}登録
+          </Button>
         </div>
         <div className={classes.buttons}>
-          <Button color="primary" size="large" href={link_mon} target="_blank"
-            className={classes.link}>モノレート</Button>
-          <Button color="primary" size="large" href={link_fba} target="_blank"
-            className={classes.link}>FBA料金シュミレーター</Button>
+          <Button color="primary" size="large" href={link_mon} target="_blank" className={classes.link}>モノレート</Button>
+          <Button color="primary" size="large" href={link_fba} target="_blank" className={classes.link}>FBA料金シュミレーター</Button>
         </div>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap
-          className={classes.label}>Amazon商品名：</Typography>
-        <Button color="primary" size="large" fullWidth
-          href={link_amz} target="_blank"
-          className={classes.name}>{name}</Button>
+        <Typography variant="subheading" noWrap className={classes.label}>Amazon商品名：</Typography>
+        <Button color="primary" size="large" fullWidth href={link_amz} target="_blank" className={classes.name}>{name}</Button>
       </div>
       {this.props.children}
       <div className={classes.memo}>
         <div className={classes.texts}>
           <div className={classes.edit}>
-            <TextField id="number" label="想定売値" value={price}
-              onChange={this.handleChangeInput.bind(this, 'price')}
-              onBlur={this.handleAutoSave.bind(this)}
-              type="number" className={classes.text} InputLabelProps={{ shrink: true }} margin="none" />
+            <TextField id="number" label="想定売値" value={price} onChange={this.handleChangeInput.bind(this, 'price')}
+              onBlur={this.handleAutoSave.bind(this)} type="number" className={classes.text} InputLabelProps={{ shrink: true }} 
+              margin="none" />
           </div>
           <div className={classes.edit}>
-            <TextField id="number" label="最高入札額" value={bidsprice}
-              onChange={this.handleChangeInput.bind(this, 'bidsprice')}
-              onBlur={this.handleAutoSave.bind(this)}
-              type="number" className={classes.text} InputLabelProps={{ shrink: true }} margin="none" />
+            <TextField id="number" label="最高入札額" value={bidsprice} onChange={this.handleChangeInput.bind(this, 'bidsprice')}
+              onBlur={this.handleAutoSave.bind(this)} type="number" className={classes.text} InputLabelProps={{ shrink: true }} 
+              margin="none" />
           </div>
         </div>
         <div className={classes.textarea}>
-        <TextField id="body" label="自由入力欄" multiline rows="4" fullWidth margin="none" value={body}
-          onChange={this.handleChangeInput.bind(this, 'body')}
-          onBlur={this.handleAutoSave.bind(this)}
-          className={classes.field}/>
+        <TextField id="body" label="自由入力欄" multiline rows="4" fullWidth margin="none" value={body} 
+          onChange={this.handleChangeInput.bind(this, 'body')} onBlur={this.handleAutoSave.bind(this)} className={classes.field}/>
         </div>
       </div>
       <div className={classes.noteList}>
@@ -289,9 +288,10 @@ RssForms.displayName = 'RssForms';
 RssForms.defaultProps = { note: null };
 RssForms.propTypes = {
   classes: PropTypes.object.isRequired
-, note: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
+, note: PropTypes.object.isRequired
 , file: PropTypes.object
+, itemNumber: PropTypes.number.isRequired
 , category: PropTypes.string.isRequired
 , children: PropTypes.object.isRequired
 };

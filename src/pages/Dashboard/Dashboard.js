@@ -101,8 +101,7 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference }
-      = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;
     const category = match.params.category || 'marchant';
     const title = this.getTitleName(category);

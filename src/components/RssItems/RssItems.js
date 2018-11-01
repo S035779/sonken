@@ -1,15 +1,16 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import * as R         from 'ramda';
-import NoteAction     from 'Actions/NoteAction';
-import std            from 'Utilities/stdutils';
-import Spinner        from 'Utilities/Spinner';
+import React                  from 'react';
+import PropTypes              from 'prop-types';
+import * as R                 from 'ramda';
+import NoteAction             from 'Actions/NoteAction';
+import std                    from 'Utilities/stdutils';
+import Spinner                from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core';
-import RssButton      from 'Components/RssButton/RssButton';
-import RssDialog      from 'Components/RssDialog/RssDialog';
-import RssItemList    from 'Components/RssItemList/RssItemList';
+import { withStyles }         from '@material-ui/core/styles';
+import { Typography }         from '@material-ui/core';
+import RssButton              from 'Components/RssButton/RssButton';
+import RssDialog              from 'Components/RssDialog/RssDialog';
+import RssItemList            from 'Components/RssItemList/RssItemList';
+import RssDownloadItemsDialog from 'Components/RssDownloadItemsDialog/RssDownloadItemsDialog';
 
 const isAlpha = process.env.NODE_ENV !== 'production';
 
@@ -21,6 +22,7 @@ class RssItems extends React.Component {
     , isSuccess: false
     , isNotValid: false
     , isRequest: false
+    , isDownload: false
     , page: 1
     , prevPage: 1
     };
@@ -68,20 +70,38 @@ class RssItems extends React.Component {
     }
   }
 
-  handleDownload() {
-    const { user, note } = this.props;
-    //std.logInfo(RssItems.displayName, 'handleDownload', user);
-    this.spn.start();
-    NoteAction.downloadItems(user, note._id)
-      .then(() => this.setState({ isSuccess: true }))
-      .then(() => this.downloadFile(this.props.file))
-      .then(() => this.spn.stop())
-      .catch(err => {
-        std.logError(RssItems.displayName, err.name, err.message);
-        this.setState({ isNotValid: true });
-        this.spn.stop();
-      })
-    ;
+  //handleDownload() {
+  //  const { user, note } = this.props;
+  //  //std.logInfo(RssItems.displayName, 'handleDownload', user);
+  //  this.spn.start();
+  //  NoteAction.downloadItems(user, note._id)
+  //    .then(() => this.setState({ isSuccess: true }))
+  //    .then(() => this.downloadFile(this.props.file))
+  //    .then(() => this.spn.stop())
+  //    .catch(err => {
+  //      std.logError(RssItems.displayName, err.name, err.message);
+  //      this.setState({ isNotValid: true });
+  //      this.spn.stop();
+  //    })
+  //  ;
+  //}
+
+  //downloadFile(blob) {
+  //  //std.logInfo(RssItems.displayName, 'downloadFile', blob);
+  //  const a = document.createElement('a');
+  //  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  //  const fileReader = new FileReader();
+  //  fileReader.onload = function() {
+  //    a.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+  //    a.target = '_blank';
+  //    a.download = 'download.csv';
+  //    a.click();
+  //  };
+  //  fileReader.readAsArrayBuffer(blob);
+  //}
+  
+  handleOpenDialog(name) {
+    this.setState({ [name]: true });
   }
 
   handleCloseDialog(name) {
@@ -98,20 +118,6 @@ class RssItems extends React.Component {
     return NoteAction.fetch(user, id, skip, limit);
   }
 
-  downloadFile(blob) {
-    //std.logInfo(RssItems.displayName, 'downloadFile', blob);
-    const a = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      a.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-      a.target = '_blank';
-      a.download = 'download.csv';
-      a.click();
-    };
-    fileReader.readAsArrayBuffer(blob);
-  }
-  
   getColor(category) {
     switch(category) {
       case 'marchant':
@@ -126,23 +132,25 @@ class RssItems extends React.Component {
   }
 
   render() {
-    const { classes, user, note, category } = this.props;
-    const { page, isNotValid, isSuccess } = this.state;
+    const { classes, itemNumber, user, note, category, file } = this.props;
+    const { page, isNotValid, isSuccess, isDownload } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
-          { isAlpha ? (<RssButton color={color}
-            onClick={this.handleDownload.bind(this)}
-            classes={classes.button}>ダウンロード</RssButton>) : null }
-          <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          { isAlpha 
+            ? ( <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
+                ダウンロード
+              </RssButton> )
+            : null }
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber}
+            name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssDialog open={isSuccess} title={'送信完了'}
-            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
             要求を受け付けました。
           </RssDialog>
         </div>
@@ -160,6 +168,7 @@ RssItems.propTypes = {
 , user: PropTypes.string.isRequired
 , note: PropTypes.object.isRequired
 , file: PropTypes.object
+, itemNumber: PropTypes.number.isRequired
 , category: PropTypes.string.isRequired
 };
 

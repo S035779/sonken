@@ -34,13 +34,13 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload() {
-    const { user, id, filter, itemNumber } = this.props;
+    const { user, ids, filter, itemNumber } = this.props;
     //std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', user);
     const { name } = this.state;
     const spn = Spinner.of('app');
     if(itemNumber !== 0) {
       spn.start();
-      NoteAction.downloadItems(user, id, filter, name)
+      NoteAction.downloadItems(user, ids, filter, name)
         .then(() => this.setState({ isSuccess: true }))
         .then(() => this.downloadFile(this.props.file))
         .then(() => spn.stop())
@@ -117,8 +117,8 @@ RssDownloadItemsDialog.propTypes = {
 , onClose: PropTypes.func.isRequired
 , title: PropTypes.string.isRequired
 , user: PropTypes.string.isRequired
-, id: PropTypes.string.isRequired
-, filter: PropTypes.object.isRequired
+, ids: PropTypes.array.isRequired
+, filter: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired

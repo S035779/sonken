@@ -113,17 +113,22 @@ export default class FeedParser {
         }
       case 'fetch/notes':
         {
-          const { user, category, skip, limit } = options;
-          const conditions = category ? { user, category } : { user };
+          const { user, category, skip, limit, filter } = options;
+          const isCSV      = !R.isNil(filter) && filter.isCSV;
+          const isPaginate = !R.isNil(skip) && !R.isNil(limit);
+          const isCategory = !R.isNil(category);
+          const conditions = isCategory ? { user, category } : { user };
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }};
           const query = Note.find(conditions);
-          return query.populate(params).sort('-updated').skip(Number(skip)).limit(Number(limit)).exec();
+          if(!isCSV) query.populate(params);
+          if(isPaginate) query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          return query.exec();
         }
       case 'count/note':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
-          const isPaginate = skip && limit;
+          const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCount = request === 'count/note';
           const conditions = { user, _id: id };
           const query = Note.findOne(conditions);
@@ -757,8 +762,8 @@ export default class FeedParser {
     return this.request('create/category', { user, data });
   }
 
-  getNotes(user, category, skip, limit) {
-    return this.request('fetch/notes', { user, category, skip, limit });
+  getNotes(user, category, skip, limit, filter) {
+    return this.request('fetch/notes', { user, category, skip, limit, filter });
   }
 
   getCategorys(user) {
@@ -1639,16 +1644,16 @@ export default class FeedParser {
         , image9:       setImage(obj.images, 9)
         , image10:      setImage(obj.images, 10)
         , offers:       obj.offers
-        , market:       obj.attributes.market
-        , sale:         obj.attributes.sale
-        , sold:         obj.attributes.sold
+        , market:       obj.attributes ? obj.attributes.market : '-'
+        , sale:         obj.attributes ? obj.attributes.sale : '-'
+        , sold:         obj.attributes ? obj.attributes.sold : '-'
         , categoryid:   obj.item_categoryid
         , explanation:  obj.explanation
         , payment:      obj.payment
         , shipping:     obj.shipping
         , ship_price:   obj.ship_price
         , ship_buynow:  obj.ship_buynow
-        , asins:        setAsins(obj.attributes.asins)
+        , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         , date:         obj.pubDate
         }));
         break;
@@ -1715,7 +1720,7 @@ export default class FeedParser {
         , 'parent_asin', 'child_asin', 'upc', 'ean', 'prime', 'affiliate_link'
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'];
         map = R.map(obj => ({
-          asin:           setAsin(obj.asins)
+          asin:           obj.attributes ? setAsin(obj.attributes.asins) : '-'
         , title:          obj.title
         , brand:          '-'
         , category:       obj.item_categoryid
@@ -1760,7 +1765,9 @@ export default class FeedParser {
     const CSV = this.setCsvNotes(category);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const setNotesCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
-    return this.fetchNotes({ user, category }).pipe(
+    const filter = { isCSV: true };
+    const observable = from(this.getNotes(user, category, null, null, filter));
+    return observable.pipe(
       map(CSV.map)
     , map(setNotesCsv)
     , map(setBuffer)
@@ -1768,14 +1775,15 @@ export default class FeedParser {
   }
   
   downloadItems({ user, ids, filter, type }) {
+    log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
     const CSV = this.setCsvItems(type);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
-    const getItems = obj => obj.items ? obj.items : [];
+    const setItems = obj => obj.items ? obj.items : [];
     const dupItems = objs => std.dupObj(objs, 'title');
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
     return forkJoin(observables(ids)).pipe(
-      map(R.map(getItems))
+      map(R.map(setItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)
@@ -1863,7 +1871,7 @@ export default class FeedParser {
     const guids       = R.compose(setGuids, hasImages)(items);
     const zipkey      = std.crypto_sha256(url, _id.toString(), 'hex') + '.zip';
     const setArchive  = obj => ({ guid__: { $in: guids }, archive: obj.Key }); 
-    const observable  = from(AWS.createArchives(STORAGE, { key: zipkey, files }));
+    const observable  = from(AWS.createArchive(STORAGE, { key: zipkey, files }));
     //log.trace(FeedParser.displayName, 'files/guids:', R.length(files), R.length(guids));
     return observable.pipe(
       map(setArchive)
