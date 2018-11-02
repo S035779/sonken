@@ -28,6 +28,10 @@ spec:
         volumeMounts:
           - mountPath: /app/assets
             name: assets
+        resources:
+          requests:
+            cpu: 32m
+            memory: 128Mi
       - name: node-ssr
         image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
         lifecycle:
@@ -39,7 +43,7 @@ spec:
                 - /app/sonken/docker/staging/install.sh
         resources:
           requests:
-            cpu: 128m
+            cpu: 96m
             memory: 384Mi
         ports:
           - containerPort: 8081
@@ -59,7 +63,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 128m
+            cpu: 96m
             memory: 256Mi
         ports:
           - containerPort: 8082

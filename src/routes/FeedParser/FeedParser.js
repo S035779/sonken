@@ -593,7 +593,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
-          return Added.find({ user }).populate('items').exec()
+          return Added.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -602,7 +602,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
-          return  Deleted.find({ user }).populate('items').exec()
+          return  Deleted.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -611,7 +611,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
-          return Readed.find({ user }).populate('items').exec()
+          return Readed.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -620,7 +620,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
-          return Starred.find({ user }).populate('items').exec()
+          return Starred.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -629,7 +629,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
-          return Bided.find({ user }).populate('items').exec()
+          return Bided.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -638,7 +638,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
-          return Traded.find({ user }).populate('items').exec()
+          return Traded.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -647,7 +647,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
-          return Listed.find({ user }).populate('items').exec()
+          return Listed.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
@@ -656,7 +656,7 @@ export default class FeedParser {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
           const promises = R.map(obj => Attribute.remove({ guid: obj.guid }).exec());
-          return Attribute.find({ user }).populate('items').exec()
+          return Attribute.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
         }
