@@ -23,10 +23,6 @@ spec:
       containers:
       - name: nginx
         image: asia.gcr.io/feedparser-217913/feedparser/nginx:latest
-        resources:
-          requests:
-            cpu: 64m
-            memory: 32Mi
         ports:
           - containerPort: 8080
         volumeMounts:
@@ -44,7 +40,7 @@ spec:
         resources:
           requests:
             cpu: 128m
-            memory: 256Mi
+            memory: 384Mi
         ports:
           - containerPort: 8081
         volumeMounts:

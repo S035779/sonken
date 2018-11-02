@@ -23,5 +23,5 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_img:latest
         resources:
           requests:
-            cpu: 96m
-            memory: 448Mi
+            cpu: 32m
+            memory: 320Mi
