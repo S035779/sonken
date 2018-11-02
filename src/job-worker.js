@@ -112,7 +112,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'defrag':
       {
-        const conditions = { user };
+        const conditions = { user, id };
         return feed.garbageCollection(conditions);
       }
     default:

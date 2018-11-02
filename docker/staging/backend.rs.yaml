@@ -25,8 +25,8 @@ spec:
           - containerPort: 27017
           resources:
             requests:
-              cpu: "128m"
-              memory: "2176Mi"
+              cpu: "512m"
+              memory: "512Mi"
           volumeMounts:
             - name: mongo-persistent-storage
               mountPath: /data/db

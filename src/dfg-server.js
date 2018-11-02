@@ -70,7 +70,7 @@ const request = queue => {
         users: objs
       , categorys: ['sellers', 'marchant', 'closedsellers', 'closedmarchant' ]
       , interval: updatedInterval * 60 * 1000
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 20) * 1))
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 12))
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

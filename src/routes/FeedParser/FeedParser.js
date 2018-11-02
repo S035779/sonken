@@ -581,13 +581,12 @@ export default class FeedParser {
         }
       case 'defrag/items':
         {
-          const date      = new Date();
-          const year      = date.getFullYear();
-          const month     = date.getMonth();
-          const day       = date.getDate();
-          const lastWeek  = new Date(year, month, day - 7);
-          const conditions = { pubDate: { $lt: lastWeek }};
-          return Item.remove(conditions).exec();
+          const { user, id } = options;
+          const conditions = { user, _id: id };
+          const setIds = R.map(obj => obj._id);
+          return Note.findOne(conditions, 'items').exec()
+            .then(obj => Item.find({ _id: { $in: obj.items } }, '_id').exec())
+            .then(objs => Note.update(conditions, { $set: { items: setIds(objs) } }).exec())
         }
       case 'defrag/added':
         {
@@ -826,8 +825,8 @@ export default class FeedParser {
     return this.request('count/traded', { user, skip, limit, filter });
   }
 
-  dfgItems() {
-    return this.request('defrag/items', {});
+  dfgItems(user, id) {
+    return this.request('defrag/items', { user, id });
   }
 
   dfgAdded(user) {
@@ -862,9 +861,9 @@ export default class FeedParser {
     return this.request('defrag/attribute', { user });
   }
 
-  garbageCollection({ user }) {
+  garbageCollection({ user, id }) {
     const observables = forkJoin([
-      this.dfgItems()
+      this.dfgItems(user, id)
     , this.dfgAdded(user)
     , this.dfgDeleted(user)
     , this.dfgReaded(user)
