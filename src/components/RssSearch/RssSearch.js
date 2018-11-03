@@ -173,7 +173,6 @@ class RssSearch extends React.Component {
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
         <Select value={perPage} onChange={this.handleChangeSelect.bind(this, 'perPage')}>
-          <MenuItem value={9999}><em>All</em></MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>

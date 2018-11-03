@@ -8,7 +8,7 @@
     "start:all": "npm-run-all -p start:job start:api start:ssr start:mms start:dev",
     "start:web": "npm-run-all -p start:mms start:dev",
     "start:ssr": "cross-env NODE_ENV=development API_URL=http://localhost:8080/api ASSET_URL=http://localhost:8080 APP_NAME=\"RSS Reader!!\" supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
-    "start:api": "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
+    "start:api": "cross-env NODE_OPTIONS=--max_old_space_size=2048 supervisor -q -n error -w dist -i node_modules dist/api.node.js",
     "start:job": "supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:itm": "supervisor -q -n error -w dist -i node_modules dist/itm.node.js",
     "start:img": "supervisor -q -n error -w dist -i node_modules dist/img.node.js",

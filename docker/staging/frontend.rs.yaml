@@ -65,5 +65,8 @@ spec:
           requests:
             cpu: 96m
             memory: 256Mi
+        env:
+          - name: NODE_OPTIONS
+            value: "--max_old_space_size=2048"
         ports:
           - containerPort: 8082

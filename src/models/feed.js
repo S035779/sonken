@@ -40,10 +40,14 @@ const itemSchema = new mongoose.Schema({
 , pubDate:          { type: Date, required: true, default: Date.now }
 }, { collection: 'items' });
 itemSchema.index({ bidStopTime: 1, guid__: 1 });
-itemSchema.virtual('listed',    { ref: 'Listed',      localField: 'guid__', foreignField: 'listed', justOne: true });
-itemSchema.virtual('bided',     { ref: 'Bided',       localField: 'guid__', foreignField: 'bided',  justOne: true });
-itemSchema.virtual('traded',    { ref: 'Traded',      localField: 'guid__', foreignField: 'traded', justOne: true });
-itemSchema.virtual('attributes',{ ref: 'Attribute',   localField: 'guid__', foreignField: 'guid',   justOne: true });
+itemSchema.virtual('added',     { ref: 'Added',       localField: 'guid__', foreignField: 'added',    justOne: true });
+itemSchema.virtual('deleted',   { ref: 'Deleted',     localField: 'guid__', foreignField: 'deleted',  justOne: true });
+itemSchema.virtual('readed',    { ref: 'Readed',      localField: 'guid__', foreignField: 'readed',   justOne: true });
+itemSchema.virtual('starred',   { ref: 'Starred',     localField: 'guid__', foreignField: 'starred',  justOne: true });
+itemSchema.virtual('listed',    { ref: 'Listed',      localField: 'guid__', foreignField: 'listed',   justOne: true });
+itemSchema.virtual('bided',     { ref: 'Bided',       localField: 'guid__', foreignField: 'bided',    justOne: true });
+itemSchema.virtual('traded',    { ref: 'Traded',      localField: 'guid__', foreignField: 'traded',   justOne: true });
+itemSchema.virtual('attributes',{ ref: 'Attribute',   localField: 'guid__', foreignField: 'guid',     justOne: true });
 itemSchema.set('toObject', { virtuals: true });
 
 // Notes model.
