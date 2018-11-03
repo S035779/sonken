@@ -14,8 +14,8 @@ class AdminButtons extends React.Component {
     super(props);
     this.state = {
       checked: false
-    , isSuccess:          false
-    , isNotValid:         false
+    , isSuccess: false
+    , isNotValid: false
     };
   }
 
@@ -26,7 +26,6 @@ class AdminButtons extends React.Component {
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });
-
     const { admin, users } = this.props;
     const ids = checked ? users.map(user => user._id) : [];
     std.logInfo(AdminButtons.displayName, 'handleChangeCheckbox', ids);
@@ -58,8 +57,9 @@ class AdminButtons extends React.Component {
     if(window.confirm('Are you sure?')) {
       spn.start();
       UserAction.createApproval(admin, selectedUserId)
-        .then(() => this.setState({ isSuccess: true }))
-        .catch(err => {
+        .then(()    => this.setState({ isSuccess: true }))
+        .then(()    => spn.stop())
+        .catch(err  => {
           std.logError(AdminButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true })
           spn.stop();
@@ -76,24 +76,16 @@ class AdminButtons extends React.Component {
     const { classes } = this.props;
     const { checked, isNotValid, isSuccess } = this.state;
     return <div className={classes.userButtons}>
-      <Checkbox checked={checked}
-        className={classes.checkbox}
-        onChange={this.handleChangeCheckbox.bind(this)}
-        tabIndex={-1} disableRipple />
+      <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)} tabIndex={-1} 
+        disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleSendmail.bind(this)}>メール配信</Button>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleApproval.bind(this)}>開始承認</Button>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+        <Button variant="raised" className={classes.button} onClick={this.handleSendmail.bind(this)}>メール配信</Button>
+        <Button variant="raised" className={classes.button} onClick={this.handleApproval.bind(this)}>開始承認</Button>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
       </div>
     </div>;

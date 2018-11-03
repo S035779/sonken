@@ -12,12 +12,13 @@ class EditButtons extends React.Component {
     this.state = {
       changed: props.changed
     , attached: props.attached
+    , value: props.value
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { changed, attached } = nextProps;
-    this.setState({ changed, attached });
+    const { changed, attached, value } = nextProps;
+    this.setState({ changed, attached, value });
   }
 
   handleSave() {
@@ -43,35 +44,25 @@ class EditButtons extends React.Component {
 
   render() {
     //std.logInfo(EditButtons.displayName, 'Props', this.props);
-    const { classes, value } = this.props;
-    const { changed, attached } = this.state;
+    const { classes } = this.props;
+    const { changed, attached, value } = this.state;
     const primary = 'skyblue';
     const secondary = 'orange';
     return <div className={classes.edit}>
       <FormControl className={classes.inputText}>
         <InputLabel htmlFor="name-simple">タイトル</InputLabel>
-        <Input id="name-simple" value={value}
-          onChange={this.handleChangeInput.bind(this)}/>
+        <Input id="name-simple" value={value} onChange={this.handleChangeInput.bind(this)}/>
       </FormControl>
       <div className={classes.buttons}>
-        <RssButton color={primary}
-          onClick={this.handleDraft.bind(this)}
-          className={classes.button}>下書き</RssButton>
-        <RssButton color={primary}
-          onClick={this.handleSave.bind(this)}
-          className={classes.button}>
-        {changed ? '*' : ''}変更する</RssButton>
-        <input type="file" id="file" accept="application/zip"
-          onChange={this.handleChangeFile.bind(this)}
-          className={classes.input}/>
+        <RssButton color={primary} onClick={this.handleDraft.bind(this)} className={classes.button}>下書き</RssButton>
+        <RssButton color={primary} onClick={this.handleSave.bind(this)} className={classes.button}>
+          {changed ? '*' : ''}変更する
+        </RssButton>
+        <input type="file" id="file" accept="application/zip" onChange={this.handleChangeFile.bind(this)} className={classes.input}/>
         <label htmlFor="file">
-          <RssButton color={primary} component="span"
-            className={classes.button}>
-        {attached ? '*' : ''}添付する</RssButton>
+          <RssButton color={primary} component="span" className={classes.button}>{attached ? '*' : ''}添付する</RssButton>
         </label>
-        <RssButton color={secondary}
-          onClick={this.handleDelete.bind(this)}
-          className={classes.button}>削除</RssButton>
+        <RssButton color={secondary} onClick={this.handleDelete.bind(this)} className={classes.button}>削除</RssButton>
       </div>
     </div>;
   }

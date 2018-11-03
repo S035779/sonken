@@ -91,7 +91,7 @@ class AdminMenu extends React.Component {
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => {
         std.logError(AdminMenu.displayName, err.name, err.message);
-        this.setState({ isNotValid: true })
+        this.setState({ isNotValid: true });
       });
   }
   
@@ -194,99 +194,54 @@ class AdminMenu extends React.Component {
   render() {
     //std.logInfo(AdminMenu.displayName, 'State', this.state);
     const { auth, classes } = this.props;
-    const { isNotValid, isSuccess, anchorEl, isProfile, isPreference
-      , password, confirm_password, preference, profile } = this.state;
+    const { isNotValid, isSuccess, anchorEl, isProfile, isPreference, password, confirm_password, preference, profile } = this.state;
     const { from, menu, advertisement } = preference;
     const { name, kana, email, phone, user } = profile;
     const { url1, url2, url3, url4 } = advertisement;
-    const renderMenu = menu
-      ? menu.map((obj, idx) => this.renderMenu(obj, idx)) : []; 
+    const renderMenu = menu ? menu.map((obj, idx) => this.renderMenu(obj, idx)) : []; 
     const open = Boolean(anchorEl);
     return auth && (<div>
-      <IconButton
-        aria-owns={open ? 'menu-appbar' : null}
-        aria-haspopup="true"
-        onClick={this.handleMenu.bind(this)}
-        color="inherit" ><AccountCircle /></IconButton>
-      <Menu id="menu-appbar"
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right'}}
-        open={open}
-        onClose={this.handleClose.bind(this)}>
-        <MenuItem
-          onClick={this.handleOpenDialog.bind(this, 'isProfile')}>
-        プロファイル
-        </MenuItem>
-        <MenuItem
-          onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
-        設定内容変更
-        </MenuItem>
-        <MenuItem
-          onClick={this.handleInitialize.bind(this)}>
-        初期化処理
-        </MenuItem>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+      <IconButton aria-owns={open ? 'menu-appbar' : null} aria-haspopup="true" onClick={this.handleMenu.bind(this)} color="inherit" >
+        <AccountCircle />
+      </IconButton>
+      <Menu id="menu-appbar" anchorEl={anchorEl} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} 
+        transformOrigin={{ vertical: 'top', horizontal: 'right'}} open={open} onClose={this.handleClose.bind(this)}>
+        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isProfile')}>プロファイル</MenuItem>
+        <MenuItem onClick={this.handleOpenDialog.bind(this, 'isPreference')}>設定内容変更</MenuItem>
+        <MenuItem onClick={this.handleInitialize.bind(this)}>初期化処理</MenuItem>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
-        <LoginFormDialog isSubmit open={isProfile} title={'プロファイル'}
-          onClose={this.handleCloseDialog.bind(this, 'isProfile')}
+        <LoginFormDialog isSubmit open={isProfile} title={'プロファイル'} onClose={this.handleCloseDialog.bind(this, 'isProfile')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
-          <Typography variant="title" noWrap
-            className={classes.title}>{name}（{user}）</Typography>
-          <TextField autoFocus margin="dense"
-            value={name}
-            onChange={this.handleChangeProfile.bind(this, 'name')}
+          <Typography variant="title" noWrap className={classes.title}>{name}（{user}）</Typography>
+          <TextField autoFocus margin="dense" value={name} onChange={this.handleChangeProfile.bind(this, 'name')}
             label="氏名" type="text" fullWidth />
-          <TextField margin="dense"
-            value={kana}
-            onChange={this.handleChangeProfile.bind(this, 'kana')}
+          <TextField margin="dense" value={kana} onChange={this.handleChangeProfile.bind(this, 'kana')}
             label="氏名（カナ）" type="text" fullWidth />
-          <TextField margin="dense"
-            value={email}
-            onChange={this.handleChangeProfile.bind(this, 'email')}
+          <TextField margin="dense" value={email} onChange={this.handleChangeProfile.bind(this, 'email')}
             label="連絡先メールアドレス" type="email" fullWidth />
-          <TextField margin="dense"
-            value={phone}
-            onChange={this.handleChangeProfile.bind(this, 'phone')}
+          <TextField margin="dense" value={phone} onChange={this.handleChangeProfile.bind(this, 'phone')}
             label="連絡先電話番号" type="text" fullWidth />
-          <TextField margin="dense"
-            value={password}
-            onChange={this.handleChangeProfile.bind(this, 'password')}
+          <TextField margin="dense" value={password} onChange={this.handleChangeProfile.bind(this, 'password')}
             label="ユーザＰＷ" type="password" fullWidth />
-          <TextField margin="dense"
-            value={confirm_password}
-            onChange={
-              this.handleChangeProfile.bind(this,'confirm_password')}
+          <TextField margin="dense" value={confirm_password} onChange={this.handleChangeProfile.bind(this,'confirm_password')}
             label="ユーザＰＷ（確認）" type="password" fullWidth/>
         </LoginFormDialog>
-        <LoginFormDialog isSubmit open={isPreference} title={'設定内容変更'}
-          onClose={this.handleCloseDialog.bind(this, 'isPreference')}
+        <LoginFormDialog isSubmit open={isPreference} title={'設定内容変更'} onClose={this.handleCloseDialog.bind(this, 'isPreference')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
-          <TextField autoFocus margin="dense"
-            value={from}
-            onChange={this.handleChangePreference.bind(this, 'from')}
+          <TextField autoFocus margin="dense" value={from} onChange={this.handleChangePreference.bind(this, 'from')}
             label="問合せ先メールアドレス" type="text" fullWidth />
-          <TextField margin="dense"
-            value={url1}
-            onChange={this.handleChangePreference.bind(this, 'url1')}
+          <TextField margin="dense" value={url1} onChange={this.handleChangePreference.bind(this, 'url1')}
             label="広告１URL" type="text" fullWidth />
-          <TextField margin="dense"
-            value={url2}
-            onChange={this.handleChangePreference.bind(this, 'url2')}
+          <TextField margin="dense" value={url2} onChange={this.handleChangePreference.bind(this, 'url2')}
             label="広告２URL" type="text" fullWidth />
-          <TextField margin="dense"
-            value={url3}
-            onChange={this.handleChangePreference.bind(this, 'url3')}
+          <TextField margin="dense" value={url3} onChange={this.handleChangePreference.bind(this, 'url3')}
             label="広告３URL" type="text" fullWidth />
-          <TextField margin="dense"
-            value={url4}
-            onChange={this.handleChangePreference.bind(this, 'url4')}
+          <TextField margin="dense" value={url4} onChange={this.handleChangePreference.bind(this, 'url4')}
             label="広告４URL" type="text" fullWidth />
           {renderMenu}
         </LoginFormDialog>

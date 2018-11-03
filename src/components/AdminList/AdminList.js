@@ -43,22 +43,16 @@ class AdminList extends React.Component {
     const linkTo = `/admin/${category}/${user._id}/edit`;
     const notice = user.approved ? '承認済み' : '';
     const name = user.name;
-    const updated =
-      std.formatDate(new Date(user.updated), 'YYYY/MM/DD hh:mm');
+    const updated = std.formatDate(new Date(user.updated), 'YYYY/MM/DD hh:mm');
     return <div key={index} className={classes.userItem}>
-      <Checkbox className={classes.checkbox}
-        onClick={this.handleChangeCheckbox.bind(this, user._id)}
-        checked={checked.indexOf(user._id) !== -1}
-        tabIndex={-1} disableRipple />
+      <Checkbox className={classes.checkbox} onClick={this.handleChangeCheckbox.bind(this, user._id)} 
+        checked={checked.indexOf(user._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters
-          component={Link} to={linkTo}
-          className={classes.listItem}>
+        <ListItem dense button disableGutters component={Link} to={linkTo} className={classes.listItem}>
           <Avatar className={classes.pinkAvatar}>
             <Pageview />
           </Avatar>
-          <ListItemText
-            primary={name} secondary={updated} classes={textClass} />
+          <ListItemText primary={name} secondary={updated} classes={textClass} />
         </ListItem>
       </Paper>
       <div className={classes.notice}>

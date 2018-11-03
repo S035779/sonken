@@ -276,7 +276,7 @@ const putJSON = function(url, data, resolve, reject) {
           resolve(request.responseText);
         }
       } else {
-        reject(request.responseText); //
+        reject(JSON.parse(request.responseText));
       }
     }
   };

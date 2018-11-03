@@ -27,11 +27,7 @@ class AdminSearch extends React.Component {
     switch(name) {
       case 'perPage':
         this.setState({ perPage: value });
-        UserAction.pagenation(admin, {
-          maxNumber: Math.ceil(userNumber / value)
-        , number: 1
-        , perPage: value
-        });
+        UserAction.pagenation(admin, { maxNumber: Math.ceil(userNumber / value), number: 1, perPage: value });
         break;
     }
   }
@@ -43,15 +39,11 @@ class AdminSearch extends React.Component {
     const { perPage } = this.state;
     return <div className={classes.userSearchs}>
       <div className={classes.results}>
-        <Typography className={classes.title}>
-          全{userNumber}件中 {perPage > userNumber ? userNumber : perPage}件表示
-        </Typography>
+        <Typography className={classes.title}>全{userNumber}件中 {perPage > userNumber ? userNumber : perPage}件表示</Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
-        <Select value={perPage}
-          onChange={this.handleChangeSelect.bind(this, 'perPage')}>
-          <MenuItem value={9999}><em>All</em></MenuItem>
+        <Select value={perPage} onChange={this.handleChangeSelect.bind(this, 'perPage')}>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>

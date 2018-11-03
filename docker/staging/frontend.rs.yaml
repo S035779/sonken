@@ -23,15 +23,15 @@ spec:
       containers:
       - name: nginx
         image: asia.gcr.io/feedparser-217913/feedparser/nginx:latest
+        resources:
+          requests:
+            cpu: 160m
+            memory: 192Mi
         ports:
           - containerPort: 8080
         volumeMounts:
           - mountPath: /app/assets
             name: assets
-        resources:
-          requests:
-            cpu: 32m
-            memory: 128Mi
       - name: node-ssr
         image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
         lifecycle:
@@ -41,10 +41,6 @@ spec:
                 - sh
                 - -c
                 - /app/sonken/docker/staging/install.sh
-        resources:
-          requests:
-            cpu: 96m
-            memory: 384Mi
         ports:
           - containerPort: 8081
         volumeMounts:
@@ -63,7 +59,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 96m
+            cpu: 160m
             memory: 256Mi
         env:
           - name: NODE_OPTIONS

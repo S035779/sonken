@@ -25,7 +25,6 @@ class MailButtons extends React.Component {
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });
-
     const { admin, mails } = this.props;
     const ids = checked ? mails.map(mail => mail._id) : [];
     std.logInfo(MailButtons.displayName, 'handleChangeCheckbox', ids);
@@ -34,8 +33,7 @@ class MailButtons extends React.Component {
 
   handleNew() {
     const { admin, selectedMailId } = this.props;
-    std.logInfo(MailButtons.displayName
-      , 'handleNew', selectedMailId);
+    std.logInfo(MailButtons.displayName, 'handleNew', selectedMailId);
     MailAction.create(admin, selectedMailId)
       .catch(err => {
         std.logError(MailButtons.displayName, err.name, err.message);
@@ -46,8 +44,7 @@ class MailButtons extends React.Component {
 
   handleSelect() {
     const { admin, selectedMailId } = this.props;
-    std.logInfo(MailButtons.displayName
-      , 'handleSelected', selectedMailId);
+    std.logInfo(MailButtons.displayName, 'handleSelected', selectedMailId);
     if(window.confirm('Are you sure?')) {
       MailAction.createSelect(admin, selectedMailId)
         .then(() => this.setState({ isSuccess: true }))
@@ -67,24 +64,16 @@ class MailButtons extends React.Component {
     const { classes } = this.props;
     const { checked, isNotValid, isSuccess } = this.state;
     return <div className={classes.mailButtons}>
-      <Checkbox checked={checked}
-        className={classes.checkbox}
-        onChange={this.handleChangeCheckbox.bind(this)}
+      <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleNew.bind(this)}>新規作成</Button>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleSelect.bind(this)}>Mail選択</Button>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+        <Button variant="raised" className={classes.button} onClick={this.handleNew.bind(this)}>新規作成</Button>
+        <Button variant="raised" className={classes.button} onClick={this.handleSelect.bind(this)}>Mail選択</Button>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
       </div>
     </div>;

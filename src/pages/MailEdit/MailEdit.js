@@ -27,7 +27,7 @@ class MailEdit extends React.Component {
   }
 
   handleChangeTitle(title) {
-    //std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
+    std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
     const { mail } = this.state;
     this.setState({ mail: Object.assign({}, mail, { title }) });
   }
@@ -35,14 +35,14 @@ class MailEdit extends React.Component {
   handleChangeBody(event) {
     const { mail } = this.state;
     const body = event.target.value;
-    //std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
+    std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
     this.setState({ mail: Object.assign({}, mail, { body }) });
   }
 
   handleDraft() {
     const { admin } = this.props;
     const { _id } = this.state.mail;
-    std.logInfo(MailEdit.displayName, 'handleDraft', _id);
+    //std.logInfo(MailEdit.displayName, 'handleDraft', _id);
     MailAction.deleteSelect(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => {
@@ -121,25 +121,17 @@ class MailEdit extends React.Component {
     if(!mail || !mail._id) return null;
     const isChanged = this.isChanged();
     return <div className={classes.mailEdit}>
-      <EditButtons value={mail.title}
-        chenged={isChanged} attached={isAttached}
-        onChange={this.handleChangeTitle.bind(this)}
-        onUpload={this.handleChangeFile.bind(this)}
-        onDraft={this.handleDraft.bind(this)}
-        onSave={this.handleSave.bind(this)}
+      <EditButtons value={mail.title} chenged={isChanged} attached={isAttached} onChange={this.handleChangeTitle.bind(this)}
+        onUpload={this.handleChangeFile.bind(this)} onDraft={this.handleDraft.bind(this)} onSave={this.handleSave.bind(this)}
         onDelete={this.handleDelete.bind(this)} />
-      <RssDialog open={isNotValid} title={'送信エラー'}
-        onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-      内容に不備があります。もう一度確認してください。
+      <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+        内容に不備があります。もう一度確認してください。
       </RssDialog>
-      <RssDialog open={isSuccess} title={'送信完了'}
-        onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-      要求を受け付けました。
+      <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+        要求を受け付けました。
       </RssDialog>
       <div className={classes.editBody}>
-        <textarea className={classes.inputArea}
-          id="note-body" value={mail.body}
-          onChange={this.handleChangeBody.bind(this)}/>
+        <textarea className={classes.inputArea} id="note-body" value={mail.body} onChange={this.handleChangeBody.bind(this)}/>
       </div>
       <div className={classes.editView}>
         <EditBody body={mail.body} />
@@ -158,19 +150,12 @@ MailEdit.propTypes = {
 const barHeightSmDown   = 104;
 const barHeightSmUp     = 112;
 const rowHeight         = 62
-const editHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
-const editHeightSmUp    =
-  `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
+const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
+const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  mailEdit:    { display: 'flex', flexDirection: 'column'
-              , height: editHeightSmDown
-              , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, editBody:   {
-                borderBottom: '1px solid #CCC'
-              , borderLeft: '1px solid #CCC'
-              , borderRight: '1px solid #CCC'
-              }
+  mailEdit:   { display: 'flex', flexDirection: 'column', height: editHeightSmDown
+                , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
+, editBody:   { borderBottom: '1px solid #CCC', borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC' }
 , inputArea:  { display: 'block', resize: 'none' 
               , height: '260px'
               , width: '100%',    boxSizing: 'border-box'
@@ -179,19 +164,11 @@ const styles = theme => ({
               , maxHeight: editHeightSmDown
               , [theme.breakpoints.up('sm')]: {
                 maxHeight: editHeightSmUp }}
-, editView:   { flex: '1 1 auto', overflow: 'auto'
-              , position: 'relative'
-              , padding: '20px 10px 10px 10px'
-              , borderBottom: '1px solid #CCC'
-              , borderLeft: '1px solid #CCC'
-              , borderRight: '1px solid #CCC'
+, editView:   { flex: '1 1 auto', overflow: 'auto', position: 'relative', padding: '20px 10px 10px 10px', borderBottom: '1px solid #CCC'
+              , borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC'
               , '&:before': {
-                content: '"Preview"', display: 'inline-block'
-                , position: 'absolute', top: 0, left: 0
-                , backgroundColor: '#F5F5F5'
-                , padding: '5px 10px', fontSize: '12px'
-                , borderRight: '1px solid #CCC'
-                , borderBottom: '1px solid #CCC'
-              }}
+                content: '"Preview"', display: 'inline-block', position: 'absolute', top: 0, left: 0, backgroundColor: '#F5F5F5'
+                , padding: '5px 10px', fontSize: '12px', borderRight: '1px solid #CCC', borderBottom: '1px solid #CCC'
+                }}
 });
 export default withStyles(styles)(MailEdit);

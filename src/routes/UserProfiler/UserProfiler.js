@@ -10,6 +10,7 @@ import log                        from 'Utilities/logutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
+
 const node_env    = process.env.NODE_ENV;
 const app_name    = process.env.APP_NAME;
 const admin_user  = process.env.ADMIN_USER;
@@ -17,6 +18,7 @@ const admin_pass  = process.env.ADMIN_PASS;
 const mms_from    = process.env.MMS_FROM;
 const smtp_port   = process.env.MMS_PORT;
 const ssmtp_port  = process.env.MMS_SSL;
+
 const isSSL       = ssmtp_port ? true : false;
 const mail_keyset = {
   host:   process.env.MMS_HOST
@@ -355,16 +357,13 @@ export default class UserProfiler {
     const isAdmin = admin !== '';
     const options = isAdmin ? { user: admin } : { user: user };
     return this.fetchUser(options).pipe(
-      map(R.tap(log.trace.bind(this)))
-    , map(obj => obj.isAuthenticated)
+      map(obj => obj.isAuthenticated)
     );
   }
 
   signout({ admin, user }) {
     const isAdmin = admin !== '';
-    const observable = isAdmin 
-      ? from(this.signoutAdmin(admin))
-      : from(this.signoutUser(user));
+    const observable = isAdmin ? from(this.signoutAdmin(admin)) : from(this.signoutUser(user));
     const options = isAdmin ? { user: admin } : { user: user };
     return observable.pipe(
       flatMap(() => this.fetchUser(options))
@@ -433,8 +432,7 @@ export default class UserProfiler {
   }
 
   createUser({ user, password, data }) {
-    const setUser = obj => 
-      this._createUser({ user, salt: obj.salt, hash: obj.hash, data })
+    const setUser = obj => this._createUser({ user, salt: obj.salt, hash: obj.hash, data })
     return this.createSaltAndHash(password).pipe(
       flatMap(setUser)
     );
@@ -448,14 +446,12 @@ export default class UserProfiler {
     const isPass = !!password;
     const isAdmin = !!admin;
     const isData = !!data;
-    //log.debug(isAdmin, isData, isPass);
     if(isPass && isData) return this.createSaltAndHash(password).pipe(
-        flatMap(obj => 
-          this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
+        flatMap(obj => this._updateUser({ user, salt: obj.salt, hash: obj.hash, data}))
       , flatMap(() => this.fetchUser({ user }))
       );
 
-    if(isAdmin && isData) return this._updateUser({ admin, data }).pipt(
+    if(isAdmin && isData) return this._updateUser({ admin, data }).pipe(
         flatMap(() => this.fetchUser({ user: data.user }))
       );
     
@@ -464,8 +460,7 @@ export default class UserProfiler {
       );
     
     if(isPass) return this.createSaltAndHash(password).pipe(
-        flatMap(obj => 
-          this._updateUser({ user, salt: obj.salt, hash: obj.hash}))
+        flatMap(obj => this._updateUser({ user, salt: obj.salt, hash: obj.hash}))
       , flatMap(() => this.fetchUser({ user }))
       );
   }
@@ -566,11 +561,8 @@ export default class UserProfiler {
         , subject:  obj.title
         , text:     obj.body
       };
-      const attachments = obj.file
-        ? [{ filename: 'content.zip', content: Buffer.from(obj.file) }]
-        : null;
-      return attachments
-        ? Object.assign({}, message, { attachments }) : message;
+      const attachments = obj.file ? [{ filename: 'content.zip', content: Buffer.from(obj.file) }] : null;
+      return attachments ? Object.assign({}, message, { attachments }) : message;
     }
     return R.compose(R.map(setMessage), R.filter(obj => !!obj))(messages);
   }
@@ -689,7 +681,6 @@ export default class UserProfiler {
     return observable1.pipe(
       map(objs => ([setPlans(objs), setMenu(objs[1])]))
     , flatMap(objs => observable2(objs))
-    //, map(R.tap(log.debug.bind(this)))
     );
   }
 

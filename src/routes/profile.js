@@ -10,24 +10,26 @@ export default {
     return (req, res) => {
       const { admin } = req.body;
       profile.fetchUsers({ admin }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , ()  => { log.info('Complete to fetch Users.'); });
+      , ()  => log.info('Complete to fetch Users.')
+      );
     };
   },
 
   fetchPreference() {
     return (req, res) => {
       profile.fetchPreference().subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to fetch Preference.'); });
+      , () => log.info('Complete to fetch Preference.')
+      );
     };
   },
 
@@ -35,12 +37,13 @@ export default {
     return (req, res) => {
       const { admin, data } = req.body;
       profile.createPreference({ admin, data }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to create Preference.'); });
+      , () => log.info('Complete to create Preference.')
+      );
     };
   },
 
@@ -48,12 +51,13 @@ export default {
     return (req, res) => {
       const { admin, data } = req.body;
       profile.updatePreference({ admin, data }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to update Preference.'); });
+      , () => log.info('Complete to update Preference.')
+      );
     };
   },
 
@@ -61,12 +65,13 @@ export default {
     return (req, res) => {
       const { admin, id } = req.query;
       profile.deletePreference({ admin, id }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to delete Preference.'); });
+      , () => log.info('Complete to delete Preference.')
+      );
     };
   },
 
@@ -74,12 +79,13 @@ export default {
     return (req, res) => {
       const { user, email, phone } = req.query;
       profile.fetchUser({ user, email, phone }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to fetch User.'); });
+      , () => log.info('Complete to fetch User.')
+      );
     };
   },
 
@@ -87,12 +93,13 @@ export default {
     return (req, res) => {
       const { user, password, data } = req.body;
       profile.createUser({ user, password, data }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to create User.'); });
+      , () => log.info('Complete to create User.')
+      );
     };
   },
 
@@ -100,12 +107,13 @@ export default {
     return (req, res) => {
       const { admin, user, password, data } = req.body;
       profile.updateUser({ admin, user, password, data }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to update User.'); });
+      , () => log.info('Complete to update User.')
+      );
     };
   },
 
@@ -113,12 +121,13 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.query;
       profile.deleteUser({ admin, ids }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to delete User.'); });
+      , () => log.info('Complete to delete User.')
+      );
     };
   },
 
@@ -150,7 +159,8 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info('Complete to Authenticate.'));
+      , () => log.info('Complete to Authenticate.')
+      );
     };
   },
 
@@ -180,7 +190,8 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info('Complete to Auto login.'));
+      , () => log.info('Complete to Auto login.')
+      );
     };
   },
 
@@ -204,7 +215,8 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info('Complete to Sign out.'));
+      , () => log.info('Complete to Sign out.')
+      );
     };
   },
 
@@ -212,12 +224,13 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.body;
       profile.sendmail({ admin, ids }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Sendmail.'); });
+      , () => log.info('Complete to Sendmail.')
+      );
     };
   },
 
@@ -225,12 +238,13 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.body;
       profile.createApproval({ admin, ids }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to create Approval.'); });
+      , () => log.info('Complete to create Approval.')
+      );
     };
   },
 
@@ -238,12 +252,13 @@ export default {
     return (req, res) => {
       const { admin, ids } = req.query;
       profile.deleteApproval({ admin, ids }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to delete Approval.'); });
+      , () => log.info('Complete to delete Approval.')
+      );
     };
   },
 
@@ -251,12 +266,13 @@ export default {
     return (req, res) => {
       const { user, data } = req.body;
       profile.inquiry({ user, data }).subscribe(
-        obj => { res.status(200).send(obj); }
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => { log.info('Complete to Inquiry.'); });
+      , () => log.info('Complete to Inquiry.')
+      );
     };
   },
 
