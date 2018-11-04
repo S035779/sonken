@@ -64,7 +64,7 @@ class FaqList extends React.Component {
         </ListItem>
       </Paper>
       <div className={classes.notice}>
-        <Typography noWrap>{notice}</Typography>
+        <Typography variant="body2" noWrap>{notice}</Typography>
       </div>
     </div>;
   }

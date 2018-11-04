@@ -14,25 +14,14 @@ class RssFullDialog extends React.Component {
 
   render() {
     const { classes, open, children, title } = this.props;
-    return <Dialog
-      fullScreen
-      TransitionComponent={Transition}
-      open={open}
-      onClose={this.handleClose.bind(this)}>
+    return <Dialog fullScreen TransitionComponent={Transition} open={open} onClose={this.handleClose.bind(this)}>
         <AppBar className={classes.appBar}>
           <Toolbar>
-            <IconButton color="inherit"
-              onClick={this.handleClose.bind(this)}>
+            <IconButton color="inherit" onClick={this.handleClose.bind(this)}>
               <Close />
             </IconButton>
-            <Typography variant="title" color="inherit"
-              className={classes.flex}>
-              {title}
-            </Typography>
-            <Button color="inherit"
-              onClick={this.handleClose.bind(this)}>
-              Close
-            </Button>
+            <Typography variant="h6" color="inherit" className={classes.flex}>{title}</Typography>
+            <Button color="inherit" onClick={this.handleClose.bind(this)}>Close</Button>
           </Toolbar>
         </AppBar>
         {children}

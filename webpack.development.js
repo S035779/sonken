@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const merge   = require('webpack-merge');
 const bundle  = require('./webpack.bundle.js');
 
-var development = {
+const development = {
   mode: 'development'
 , devtool: 'inline-source-map'
 , plugins: [

@@ -68,12 +68,12 @@ class LoginAuth extends React.Component {
     //std.logInfo(LoginAuth.displayName, 'Props', this.props);
     const { classes, location } = this.props;
     const { redirectToRefferer, username, password, checked, isNotValid } = this.state;
-    if(redirectToRefferer) 
-      return <Redirect to={ location.state || { pathname: isBeta ? '/marchant' : '/sellers' }} />;
-    return <div className={classes.container}>
+    return redirectToRefferer
+      ? ( <Redirect to={ location.state || { pathname: isBeta ? '/marchant' : '/sellers' }} /> )
+      : ( <div className={classes.container}>
         <form ref={this.formRef} className={classes.loginForms} onSubmit={this.handleLogin.bind(this)}>
           <div className={classes.space}/>
-          <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
+          <Typography variant="h5" align="center" className={classes.title}>Login</Typography>
           <div className={classes.space}/>
           <div className={classes.form}>
             <RssInput label="USER ID" value={username} placeholder="Enter User ID" 
@@ -93,8 +93,7 @@ class LoginAuth extends React.Component {
           </div>
           <div className={classes.buttons}>
             <div className={classes.space}/>
-            <RssButton type="submit" color="warning" onClick={this.handleChangeButton.bind(this)} 
-              className={classes.button}>
+            <RssButton type="submit" color="warning" onClick={this.handleChangeButton.bind(this)} className={classes.button}>
               Login
             </RssButton>
             <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
@@ -104,7 +103,7 @@ class LoginAuth extends React.Component {
           </div>
           <div className={classes.space}/>
         </form>
-      </div>;
+      </div> );
   }
 }
 LoginAuth.displayName = 'LoginAuth';

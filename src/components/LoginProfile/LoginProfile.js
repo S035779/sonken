@@ -103,42 +103,25 @@ class LoginProfile extends React.Component {
       isNotValid, isSuccess
     , name, user, kana, email, phone, password, confirm_password
     } = this.state;
-    return <LoginFormDialog isSubmit open={open} title={'プロファイル'}
-        onClose={this.handleCloseDialog.bind(this, 'isProfile')}
+    return <LoginFormDialog isSubmit open={open} title={'プロファイル'} onClose={this.handleCloseDialog.bind(this, 'isProfile')}
         onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{name}（{user}）</Typography>
-        <TextField autoFocus margin="dense"
-          value={name}
-          onChange={this.handleChangeText.bind(this, 'name')}
+        <Typography variant="h6" noWrap className={classes.title}>{name}（{user}）</Typography>
+        <TextField autoFocus margin="dense" value={name} onChange={this.handleChangeText.bind(this, 'name')}
           label="氏名" type="text" fullWidth />
-        <TextField margin="dense"
-          value={kana}
-          onChange={this.handleChangeText.bind(this, 'kana')}
+        <TextField margin="dense" value={kana} onChange={this.handleChangeText.bind(this, 'kana')}
           label="氏名（カナ）" type="text" fullWidth />
-        <TextField margin="dense"
-          value={email}
-          onChange={this.handleChangeText.bind(this, 'email')}
+        <TextField margin="dense" value={email} onChange={this.handleChangeText.bind(this, 'email')}
           label="連絡先メールアドレス" type="email" fullWidth />
-        <TextField margin="dense"
-          value={phone}
-          onChange={this.handleChangeText.bind(this, 'phone')}
+        <TextField margin="dense" value={phone} onChange={this.handleChangeText.bind(this, 'phone')}
           label="連絡先電話番号" type="text" fullWidth />
-        <TextField margin="dense"
-          value={password}
-          onChange={this.handleChangeText.bind(this, 'password')}
+        <TextField margin="dense" value={password} onChange={this.handleChangeText.bind(this, 'password')}
           label="ユーザＰＷ" type="password" fullWidth />
-        <TextField margin="dense"
-          value={confirm_password}
-          onChange={
-            this.handleChangeText.bind(this, 'confirm_password')}
+        <TextField margin="dense" value={confirm_password} onChange={this.handleChangeText.bind(this, 'confirm_password')}
           label="ユーザＰＷ（確認）" type="password" fullWidth />
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleClose.bind(this, 'isNotValid')}>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleClose.bind(this, 'isSuccess')}>
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
       </LoginFormDialog>

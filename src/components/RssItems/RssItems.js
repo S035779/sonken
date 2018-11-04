@@ -138,7 +138,7 @@ class RssItems extends React.Component {
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           { isAlpha 
             ? ( <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>

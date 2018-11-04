@@ -227,8 +227,7 @@ class DrawerList extends React.Component {
     , colorError: classes.badgeError
     , badge: classNames(!isRelease && classes.nonbadge)
     };
-    return <ListItem dense button key={index}
-        onClick={this.handleCategoryList.bind(this, category, 'favorite')} >
+    return <ListItem dense button key={index} onClick={this.handleCategoryList.bind(this, category, 'favorite')} >
         <ListItemIcon>
           <Badge badgeContent={release} color="error" classes={badgeClass} >
             <Avatar className={classes.avatar}>{subcategory.substr(0,1)}</Avatar>
@@ -267,34 +266,42 @@ class DrawerList extends React.Component {
       .map((obj, index) => this.renderFavoriteList(index, category, obj.subcategory
         , obj.newRelease && obj.newRelease.true ? obj.newRelease.true : 0 ) ) : null;
     return <div>
-      { isBeta ? (<ListItem button onClick={this.handleClickButton.bind(this, 'marchant')}>
-        <ListItemIcon><LocalMall className={classes.icon} /></ListItemIcon>
-        <ListItemText primary="商品RSS" classes={textClass} />
-        {openMarchant ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
-        {open ? <ListItemSecondaryAction>
-          <IconButton onClick={this.handleClickButton.bind(this, 'isEditMarchant')}>
-          <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
-        </ListItem>) : null }
-      { isBeta ? (<RssEditDialog title={'商品RSS'} user={profile.user} category="marchant"
-        categorys={categoryList('marchant')} open={isEditMarchant}
-        onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')} />) : null }
-      { isBeta ? (<Collapse in={openMarchant} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {renderFavoriteList('marchant')}
-          {renderCategoryList('marchant')}
-          {renderNonCategoryList('marchant')}
-        </List>
-        </Collapse>) : null }
+      { isBeta 
+        ? ( <ListItem button onClick={this.handleClickButton.bind(this, 'marchant')}>
+          <ListItemIcon><Avatar className={classes.avatar}><LocalMall /></Avatar></ListItemIcon>
+          <ListItemText primary="商品RSS" classes={textClass} />
+          { openMarchant ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} /> }
+          { open
+            ? <ListItemSecondaryAction>
+              <IconButton onClick={this.handleClickButton.bind(this, 'isEditMarchant')}>
+              <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
+            : null }
+          </ListItem> )
+        : null }
+      { isBeta
+        ? ( <RssEditDialog title={'商品RSS'} user={profile.user} category="marchant" categorys={categoryList('marchant')}
+          open={isEditMarchant} onClose={this.handleCloseDialog.bind(this, 'isEditMarchant')} /> )
+        : null }
+      { isBeta 
+        ? ( <Collapse in={openMarchant} timeout="auto" unmountOnExit><List component="div" disablePadding>
+            {renderFavoriteList('marchant')}
+            {renderCategoryList('marchant')}
+            {renderNonCategoryList('marchant')}
+          </List></Collapse>)
+        : null }
       <ListItem button onClick={this.handleClickButton.bind(this, 'sellers')}>
-        <ListItemIcon><People className={classes.icon} /></ListItemIcon>
+        <ListItemIcon><Avatar className={classes.avatar}><People /></Avatar></ListItemIcon>
         <ListItemText primary="出品者RSS" classes={textClass} />
-        {openSellers ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
-        {open ? <ListItemSecondaryAction>
-          <IconButton onClick={this.handleClickButton.bind(this, 'isEditSellers')}>
-          <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction> : null}
+        { openSellers
+          ? <ArrowDropUp className={classes.icon} />
+          : <ArrowDropDown className={classes.icon} /> }
+        { open
+          ? <ListItemSecondaryAction><IconButton onClick={this.handleClickButton.bind(this, 'isEditSellers')}>
+              <SettingsApplications className={classes.setting} />
+            </IconButton></ListItemSecondaryAction>
+          : null }
       </ListItem>
-      <RssEditDialog title={'出品者RSS'} user={profile.user} category="sellers"
-        categorys={categoryList('sellers')} open={isEditSellers}
+      <RssEditDialog title={'出品者RSS'} user={profile.user} category="sellers" categorys={categoryList('sellers')} open={isEditSellers}
         onClose={this.handleCloseDialog.bind(this, 'isEditSellers')} />
       <Collapse in={openSellers} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -303,53 +310,58 @@ class DrawerList extends React.Component {
           {renderNonCategoryList('sellers')}
         </List>
       </Collapse>
-      { isBeta ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedmarchant') }>
-          <ListItemIcon><NotificationsActive  className={classes.icon} /></ListItemIcon>
+      { isBeta
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedmarchant') }>
+          <ListItemIcon><Avatar className={classes.avatar}><NotificationsActive /></Avatar></ListItemIcon>
           <ListItemText primary="落札相場" classes={textClass} />
-            {openClosedMarchant
-              ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
-            {open
-              ? <ListItemSecondaryAction>
-                <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedMarchant')}>
-                <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
-              : null}
-          </ListItem>) : null }
-      { isBeta ? (<RssEditDialog title={'落札相場'} user={profile.user} category="closedmarchant"
-            categorys={categoryList('closedmarchant')} open={isEditClosedMarchant}
-            onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} />) : null }
-      { isBeta ? (<Collapse in={openClosedMarchant} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
+            { openClosedMarchant ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} /> }
+            { open
+              ? <ListItemSecondaryAction><IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedMarchant')}>
+                  <SettingsApplications className={classes.setting} />
+                </IconButton></ListItemSecondaryAction>
+              : null }
+          </ListItem> ) 
+        : null }
+      { isBeta
+        ? ( <RssEditDialog title={'落札相場'} user={profile.user} category="closedmarchant" categorys={categoryList('closedmarchant')}
+          open={isEditClosedMarchant} onClose={this.handleCloseDialog.bind(this, 'isEditClosedMarchant')} /> )
+        : null }
+      { isBeta
+        ? ( <Collapse in={openClosedMarchant} timeout="auto" unmountOnExit><List component="div" disablePadding>
               {renderFavoriteList('closedmarchant')}
               {renderCategoryList('closedmarchant')}
               {renderNonCategoryList('closedmarchant')}
-            </List>
-          </Collapse>) : null }
-      { isAlpha ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedsellers')  }>
-          <ListItemIcon><PeopleOutline className={classes.icon}/></ListItemIcon>
+            </List></Collapse>)
+        : null }
+      { isAlpha
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'closedsellers')}>
+          <ListItemIcon><Avatar className={classes.avatar}><PeopleOutline /></Avatar></ListItemIcon>
           <ListItemText primary="落札履歴" classes={textClass}/>
-            {openClosedSellers
-              ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
-            {open ? <ListItemSecondaryAction>
-                <IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedSellers')}>
-                <SettingsApplications className={classes.setting} /></IconButton></ListItemSecondaryAction>
-                : null}
-          </ListItem>) : null }
-      { isAlpha ? (<RssEditDialog title={'落札履歴'} user={profile.user} category="closedsellers"
-            categorys={categoryList('closedsellers')} open={isEditClosedSellers}
-            onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} />) : null }
-      { isAlpha ? (<Collapse in={openClosedSellers} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {renderFavoriteList('closedsellers')}
-              {renderCategoryList('closedsellers')}
-              {renderNonCategoryList('closedsellers')}
-            </List>
-          </Collapse>) : null }
+            { openClosedSellers ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} /> }
+            { open
+              ? <ListItemSecondaryAction><IconButton onClick={this.handleClickButton.bind(this, 'isEditClosedSellers')}>
+                  <SettingsApplications className={classes.setting} />
+                </IconButton></ListItemSecondaryAction>
+              : null}
+          </ListItem>)
+        : null }
+      { isAlpha
+        ? ( <RssEditDialog title={'落札履歴'} user={profile.user} category="closedsellers" categorys={categoryList('closedsellers')}
+          open={isEditClosedSellers} onClose={this.handleCloseDialog.bind(this, 'isEditClosedSellers')} /> )
+        : null }
+      { isAlpha
+        ? ( <Collapse in={openClosedSellers} timeout="auto" unmountOnExit><List component="div" disablePadding>
+            {renderFavoriteList('closedsellers')}
+            {renderCategoryList('closedsellers')}
+            {renderNonCategoryList('closedsellers')}
+          </List></Collapse> )
+        : null }
       <ListItem button onClick={this.handleClickButton.bind(this, 'bids')}>
-        <ListItemIcon><Timeline className={classes.icon} /></ListItemIcon>
+        <ListItemIcon><Avatar className={classes.avatar}><Timeline /></Avatar></ListItemIcon>
         <ListItemText primary="入札リスト" classes={textClass} />
       </ListItem>
       <ListItem button onClick={this.handleClickButton.bind(this, 'trade')}>
-        <ListItemIcon><Gavel className={classes.icon} /></ListItemIcon>
+        <ListItemIcon><Avatar className={classes.avatar}><Gavel /></Avatar></ListItemIcon>
         <ListItemText primary="取引チェック" classes={textClass} />
       </ListItem>
     </div>;
@@ -362,7 +374,7 @@ class DrawerList extends React.Component {
     const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     return <div>
         <ListItem button onClick={this.handleClickButton.bind(this, 'user')}>
-          <ListItemIcon><AccountBox className={classes.icon} /></ListItemIcon>
+          <ListItemIcon><Avatar className={classes.avatar}><AccountBox /></Avatar></ListItemIcon>
           <ListItemText primary={user} classes={textClass} />
           {openUser ? <ArrowDropUp className={classes.icon} /> : <ArrowDropDown className={classes.icon} />}
         </ListItem>
@@ -394,7 +406,7 @@ class DrawerList extends React.Component {
     const textClass = { primary: classes.title, secondary: classes.textSecondary };
     return <div>
       <ListItem button onClick={this.handleClickButton.bind(this, 'title')}>
-        <ListItemIcon><BlurOn className={classes.icon} /></ListItemIcon>
+        <ListItemIcon><Avatar className={classes.avatar}><BlurOn /></Avatar></ListItemIcon>
         <ListItemText primary={app_name} classes={textClass}/>
       </ListItem>
     </div>;

@@ -18,9 +18,7 @@ class FaqsList extends React.Component {
           <span className={classes.author}>
             <AccountCircle className={classes.icon} />{faq.user}
           </span>
-          <span className={classes.updated}>
-          {std.getLocalTimeStamp(faq.updated)}
-          </span>
+          <span className={classes.updated}>{std.getLocalTimeStamp(faq.updated)}</span>
         </div>
         <EditBody body={faq.body} />
       </Link>
@@ -31,7 +29,7 @@ class FaqsList extends React.Component {
     const { classes, faqs } = this.props;
     const renderList = faqs.map(faq => this.renderList(faq, classes));
     return <div className={classes.container}>
-      <Typography variant="display1">FAQ</Typography>
+      <Typography variant="h4">FAQ</Typography>
       <ul className={classes.list}>{renderList}</ul>
     </div>;
   }

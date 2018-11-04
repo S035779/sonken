@@ -59,11 +59,12 @@ class LoginMgmt extends React.Component {
     //std.logInfo(LoginMgmt.displayName, 'Props', this.props);
     const { classes } = this.props;
     const { redirectToManagement, username, password, checked, isNotValid } = this.state;
-    if(redirectToManagement) return <Redirect to={{ pathname: '/admin/users' }} />;
-    return <div className={classes.container}>
+    return redirectToManagement
+      ? ( <Redirect to={{ pathname: '/admin/users' }} /> )
+      : ( <div className={classes.container}>
         <form className={classes.loginForms} onSubmit={this.handleLogin.bind(this)}>
           <div className={classes.space}/>
-          <Typography variant="headline" align="center" className={classes.title}>Login</Typography>
+          <Typography variant="h5" align="center" className={classes.title}>Login</Typography>
           <div className={classes.space}/>
           <div className={classes.form}>
             <RssInput type="text" label="USER ID" value={username} placeholder="Enter User ID"
@@ -91,7 +92,7 @@ class LoginMgmt extends React.Component {
           </div>
           <div className={classes.space}/>
         </form>
-      </div>;
+      </div> );
   }
 }
 LoginMgmt.displayName = 'LoginMgmt';

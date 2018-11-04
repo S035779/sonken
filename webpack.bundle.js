@@ -5,10 +5,15 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const common = require('./webpack.common.js');
 
-var bundle = {
+const bundle = {
   target: "web"
 , entry: {
     app: [ 'react-hot-loader/patch', './main.js' ]
+  }
+, output: {
+    filename: '[name].bundle.js'
+  , path: path.resolve(__dirname, 'dist')
+  , publicPath: '/'
   }
 , optimization: {
     splitChunks: {
@@ -32,15 +37,7 @@ var bundle = {
     new ManifestPlugin({ fileName: 'manifest.bundle.json' })
   , new webpack.NamedModulesPlugin()
   , new webpack.HotModuleReplacementPlugin()
-  , new CleanWebpackPlugin([
-      'dist/*.bundle.*'
-    , 'dist/*.jpg'
-    ], { verbose: false })
+  , new CleanWebpackPlugin([ 'dist/*.bundle.*', 'dist/*.jpg' ], { verbose: false })
   ]
-, output: {
-    filename: '[name].bundle.js'
-  , path: path.resolve(__dirname, 'dist')
-  , publicPath: '/'
-  }
 };
 module.exports = merge(common, bundle);

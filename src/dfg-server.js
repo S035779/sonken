@@ -98,7 +98,7 @@ const main = () => {
   const queue = async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all defrag have been processed.');
   std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding image...', obj)
+    obj => log.debug(displayName, 'finished proceeding garbage...', obj)
   , err => log.error(displayName, err.name, err.message, err.stack)
   , ()  => log.info(displayName, 'post defrag completed.')
   ), 0, 1000 * 60 * monitorInterval);

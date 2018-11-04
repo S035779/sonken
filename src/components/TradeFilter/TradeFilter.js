@@ -189,17 +189,17 @@ class TradeFilter extends React.Component {
     return <div className={classes.forms}>
         <div className={classes.edit}>
           <div className={classes.space}/>
-          <Typography variant="subheading" noWrap className={classes.title}>絞込件数：</Typography>
+          <Typography variant="subtitle1" noWrap className={classes.title}>絞込件数：</Typography>
           <Checkbox color="primary" className={classes.checkbox} checked={endTrading}
             onChange={this.handleChangeCheckbox.bind(this, 'endTrading')} tabIndex={-1} disableRipple />
-          <Typography variant="subheading" noWrap className={classes.title}>取引完了済み</Typography>
+          <Typography variant="subtitle1" noWrap className={classes.title}>取引完了済み</Typography>
           <Checkbox color="primary" className={classes.checkbox} checked={allTrading}
             onChange={this.handleChangeCheckbox.bind(this, 'allTrading')} tabIndex={-1} disableRipple />
-          <Typography variant="subheading" noWrap className={classes.title}>取引未完了</Typography>
+          <Typography variant="subtitle1" noWrap className={classes.title}>取引未完了</Typography>
           <div className={classes.datetimes}>
             <Checkbox color="primary" tabIndex={-1} disableRipple checked={inBidding}
               onChange={this.handleChangeCheckbox.bind(this, 'inBidding')} className={classes.checkbox}/>
-            <Typography variant="subheading" noWrap className={classes.title}>入札終了時期：</Typography>
+            <Typography variant="subtitle1" noWrap className={classes.title}>入札終了時期：</Typography>
             <form className={classes.inputText} noValidate>
               <TextField id="start-time" label="始め" type="datetime-local" InputLabelProps={{shrink: true}}
                 value={bidStartTime} onChange={this.handleChangeText.bind(this, 'bidStartTime')}
@@ -214,7 +214,7 @@ class TradeFilter extends React.Component {
           <div className={classes.space}/>
           <div className={classes.buttons}>
             <div className={classes.buttons}>
-              <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
+              <Button variant="contained" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
               <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
                 要求を受け付けました。
               </RssDialog>
@@ -232,7 +232,7 @@ class TradeFilter extends React.Component {
             <Checkbox checked={checked} onChange={this.handleChangeCheckbox.bind(this, 'checked')}
               tabIndex={-1} disableRipple className={classes.checkbox}/>
             <div className={classes.buttons}>
-              <Button variant="raised" onClick={this.handleDelete.bind(this)} className={classes.button}>削除</Button>
+              <Button variant="contained" onClick={this.handleDelete.bind(this)} className={classes.button}>削除</Button>
             </div>
           </div>
         </div>

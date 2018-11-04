@@ -3,7 +3,7 @@ const merge          = require('webpack-merge');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const bundle         = require('./webpack.bundle.js');
 
-var production = {
+const production = {
   mode: 'none'
 , devtool: 'source-map'
 , optimization: { nodeEnv: false }

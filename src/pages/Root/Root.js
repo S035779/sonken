@@ -7,19 +7,10 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette:{
-    primary: {
-      main: '#ffa726'
-    , light: '#ffd95b'
-    , dark: '#c77800'
-    , contrastText: '#fff'
-    }
-  , secondary: {
-      main: '#e65100'
-    , light: '#ff833a'
-    , dark: '#ac1900'
-    , contrastText: '#fff'
-    }
+    primary: { main: '#ffa726', light: '#ffd95b', dark: '#c77800', contrastText: '#fff' }
+  , secondary: { main: '#e65100', light: '#ff833a', dark: '#ac1900', contrastText: '#fff' }
   }
+, typography: { useNextVariants: true }
 });
 
 export default class Root extends React.Component {
@@ -33,9 +24,7 @@ export default class Root extends React.Component {
   render() {
     const routes = getRoutes();
     return <MuiThemeProvider theme={theme}>
-      <BrowserRouter>
-        {renderRoutes(routes)}
-      </BrowserRouter>
+      <BrowserRouter>{renderRoutes(routes)}</BrowserRouter>
     </MuiThemeProvider>;
   }
 }

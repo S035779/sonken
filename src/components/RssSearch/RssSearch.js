@@ -168,7 +168,9 @@ class RssSearch extends React.Component {
     const downloadFormat = '0001';
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
-        <Typography className={classes.title}>全{noteNumber}件中 {perPage > noteNumber ? noteNumber : perPage}件表示</Typography>
+        <Typography variant="body2" className={classes.title}>
+          全{noteNumber}件中 {perPage > noteNumber ? noteNumber : perPage}件表示
+        </Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
@@ -183,7 +185,7 @@ class RssSearch extends React.Component {
         <Input id="url" value={url} onChange={this.handleChangeText.bind(this, 'url')}/>
       </FormControl>
       <div className={classes.buttons}>
-        <Button variant="raised" className={classes.button} onClick={this.handleClickButton.bind(this)}>
+        <Button variant="contained" className={classes.button} onClick={this.handleClickButton.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録
         </Button>
         <div className={classes.space} />

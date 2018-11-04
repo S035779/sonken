@@ -127,8 +127,8 @@ class RssButtons extends React.Component {
       <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised" className={classes.button} onClick={this.handleReaded.bind(this)}>既読にする</Button>
-        <Button variant="raised" className={classes.button} onClick={this.handleDelete.bind(this)}>削除</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleReaded.bind(this)}>既読にする</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleDelete.bind(this)}>削除</Button>
       { isAlpha
         ? <RssButton color={color} className={classes.button} onClick={this.handleOpenDialog.bind(this, 'isDownload')}>
             ダウンロード

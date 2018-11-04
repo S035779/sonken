@@ -81,7 +81,7 @@ class LoginPreference extends React.Component {
     const renderMenu = preference.menu ? preference.menu.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     return <LoginFormDialog isSubmit open={open} title={'契約内容変更'} onClose={this.handleCloseDialog.bind(this, 'isPreference')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isPreference')}>
-        <Typography variant="title" noWrap className={classes.title}>{name}（{user}）</Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{name}（{user}）</Typography>
         <TextField select autoFocus margin="dense" value={plan} onChange={this.handleChangeSelect.bind(this, 'plan')}
           label="契約プラン" fullWidth>
           {renderMenu}

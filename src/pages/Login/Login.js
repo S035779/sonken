@@ -37,9 +37,11 @@ class Login extends React.Component {
 }
 Login.displayName = 'Login';
 Login.defaultProps = {};
-Login.propTypes = { classes: PropTypes.object.isRequired, route: PropTypes.object.isRequired };
+Login.propTypes = {
+  classes: PropTypes.object.isRequired
+, route: PropTypes.object.isRequired 
+};
 const styles = {
-  loginFrame: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
-              , height: '100%' }
+  loginFrame: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }
 };
 export default withStyles(styles)(Container.create(Login));

@@ -119,71 +119,41 @@ class LoginRegist extends React.Component {
     return <div className={classes.container}>
       <div className={classes.loginForms}>
       <div className={classes.space} />
-      <Typography variant="display1" align="center"
-        className={classes.title}>新規ご利用申し込み</Typography>
-      <Typography variant="headline" align="center"
-        className={classes.title}>
-      Register for free and experience the RSS reader today
+      <Typography variant="h4" align="center" className={classes.title}>新規ご利用申し込み</Typography>
+      <Typography variant="h5" align="center" className={classes.title}>
+        Register for free and experience the RSS reader today
       </Typography>
       <Divider light className={classes.divider}/>
       <div className={classes.space} />
       <div className={classes.column}>
       <div className={classes.description}>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            氏名
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>氏名</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            氏名（カナ）
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>氏名（カナ）</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            連絡先メールアドレス
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>連絡先メールアドレス</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            連絡先電話番号
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>連絡先電話番号</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            ログインＩＤ
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>ログインＩＤ</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            ログインＰＷ
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>ログインＰＷ</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            ログインＰＷ（確認）
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>ログインＰＷ（確認）</Typography>
         </div>
         <div className={classes.form}>
-          <Typography variant="subheading" align="center"
-            className={classes.title}>
-            申し込みプラン
-          </Typography>
+          <Typography variant="subtitle1" align="center" className={classes.title}>申し込みプラン</Typography>
         </div>
         <div className={classes.form}>
-          <RssButton color="flatWhite"
-            onClick={this.handleClickButton.bind(this, 'planlist')}
-          >プラン表を表示</RssButton>
-          <RssButton color="flatWhite"
-            onClick={this.handleClickButton.bind(this, 'agreement')}
-          >利用規約を表示</RssButton>
+          <RssButton color="flatWhite" onClick={this.handleClickButton.bind(this, 'planlist')} >プラン表を表示</RssButton>
+          <RssButton color="flatWhite" onClick={this.handleClickButton.bind(this, 'agreement')} >利用規約を表示</RssButton>
         </div>
       {/*
         <div className={classes.media}>

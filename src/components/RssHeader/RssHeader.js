@@ -54,7 +54,7 @@ class RssHeader extends React.Component {
       <Toolbar>
         <Button mini variant="fab" color="primary" onClick={this.handleToggle.bind(this)}
           className={classes.navIcon}>{open ? <MoreVert /> : <Menu />}</Button>
-        <Typography variant="title" color="inherit" className={classes.title}>{title}</Typography>
+        <Typography variant="h6" color="inherit" className={classes.title}>{title}</Typography>
         <div className={classes.loginIcon}>
           <RssMenu isAuthenticated={isAuthenticated} user={user} preference={preference} profile={profile} />
         </div>

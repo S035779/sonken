@@ -9,13 +9,10 @@ import green      from '@material-ui/core/colors/green';
 import blue       from '@material-ui/core/colors/blue';
 import yellow     from '@material-ui/core/colors/yellow';
 
-const thm = createMuiTheme({ overrides: { MuiButton: {
-  root: {
-    background: blue[500]
-    , margin: '0 8px', height: 40
-    , boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)'
-  }
-}}});
+const thm = createMuiTheme({
+  overrides: { MuiButton: { root: { background: blue[500], margin: '0 8px', height: 40, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, .35)' } }}
+, typography: { useNextVariants: true }
+});
 
 const thm1 = outerThm => ({ ...outerThm, overrides: { MuiButton: {
   root: {

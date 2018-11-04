@@ -246,7 +246,7 @@ class ClosedForms extends React.Component {
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           <RssButton color={color} onClick={this.handleImages.bind(this)} classes={classes.button}>
             画像保存
@@ -268,28 +268,30 @@ class ClosedForms extends React.Component {
         </div>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.column}>絞込件数：</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>絞込件数：</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={lastWeekAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'lastWeekAuction')} tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap className={classes.column}>終了後１週間</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>終了後１週間</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={twoWeeksAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'twoWeeksAuction')} tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap className={classes.column}>終了後２週間</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>終了後２週間</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={lastMonthAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'lastMonthAuction')} tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap className={classes.column}>終了後１ヶ月</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>終了後１ヶ月</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={allAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'allAuction')} tabIndex={-1} disableRipple />
-        <Typography variant="subheading" noWrap className={classes.column}>全て表示</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>全て表示</Typography>
       </div>
       <div className={classes.edit}>
         <div className={classes.column}>
-          <Typography className={classes.title}>全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示</Typography>
+          <Typography variant="body2" className={classes.title}>
+            全{itemNumber}件中 {perPage > itemNumber ? itemNumber : perPage}件表示
+          </Typography>
         </div>
         <div className={classes.datetimes}>
           <Checkbox color="primary" tabIndex={-1} disableRipple checked={inAuction}
             onChange={this.handleChangeCheckbox.bind(this, 'inAuction')} className={classes.checkbox}/>
-          <Typography variant="subheading" noWrap className={classes.column}>入札終了時期：</Typography>
+          <Typography variant="subtitle1" noWrap className={classes.column}>入札終了時期：</Typography>
           <form className={classes.inputText} noValidate>
             <TextField id="start-time" label="始め" type="datetime-local" InputLabelProps={{shrink: true}} value={aucStartTime}
               onChange={this.handleChangeText.bind(this, 'aucStartTime')} className={classes.text}/>
@@ -311,7 +313,7 @@ class ClosedForms extends React.Component {
       <div className={classes.edit}>
         <div className={classes.buttons}>
           <div className={classes.buttons}>
-            <Button variant="raised" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
+            <Button variant="contained" onClick={this.handleFilter.bind(this)} className={classes.button}>絞り込み</Button>
           </div>
         </div>
       </div>

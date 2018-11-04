@@ -6,7 +6,7 @@ import std                  from 'Utilities/stdutils';
 import { withStyles }       from '@material-ui/core/styles';
 import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
                             from '@material-ui/core';
-import { Star, StarBorder, Delete, FiberNew } from '@material-ui/icons';
+import { Star, StarBorder, Delete, FiberNew, Done } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
 class RssItemList extends React.Component {
@@ -125,6 +125,10 @@ class RssItemList extends React.Component {
     return <FiberNew color="error"/>
   }
 
+  renderDone() {
+    return <Done color="action"/>
+  }
+
   renderItem(index, item) {
     //std.logInfo(RssItemList.displayName, 'Item', { index, item });
     const { classes } = this.props;
@@ -142,36 +146,31 @@ class RssItemList extends React.Component {
     + `AuctionID：${item.guid__}、`
     + `Seller：${item.seller}`;
     const renderStar = starred.indexOf(item.guid__) === -1 ? this.renderUnStar() : this.renderStar();
-    const renderNewAdded = added.indexOf(item.guid__) === -1 ? this.renderNewAdded() : null;
+    const renderNewAdded = added.indexOf(item.guid__) === -1 ? this.renderNewAdded() : this.renderDone();
     if(deleted.indexOf(item.guid__) !== -1) return;
-    return item.description ? (<div key={index} className={classes.noteItem}>
-      <Paper className={classes.paper}>
-        <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
-          className={classes.listItem}>
-          <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>
-            {renderStar}
-          </IconButton>
-          <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>
-            {renderNewAdded}
-          </IconButton>
-          <div className={classes.description}>
-            <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-            <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT}
-              className={classes.image} />
-            </a>
-          </div>
-          <ListItemText classes={textClass} className={classes.listItemText} primary={title}
-            secondary={description}/>
-          <ListItemSecondaryAction>
-            <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)}
-              classes={classes.button}>{buttonText}</RssButton>
-            <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}>
-              <Delete />
-            </IconButton>
-          </ListItemSecondaryAction>
-        </ListItem>
-      </Paper>
-    </div>) : null;
+    return item.description
+      ? ( <div key={index} className={classes.noteItem}>
+        <Paper className={classes.paper}>
+          <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
+            className={classes.listItem}>
+            <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>{renderStar}</IconButton>
+            <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>{renderNewAdded}</IconButton>
+            <div className={classes.description}>
+              <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
+              <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT} className={classes.image} />
+              </a>
+            </div>
+            <ListItemText classes={textClass} className={classes.listItemText} primary={title} secondary={description}/>
+            <ListItemSecondaryAction>
+              <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)} classes={classes.button}>
+                {buttonText}
+              </RssButton>
+              <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}><Delete /></IconButton>
+            </ListItemSecondaryAction>
+          </ListItem>
+        </Paper>
+      </div> )
+    : null;
   }
 
   render() {

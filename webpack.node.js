@@ -5,10 +5,10 @@ const nodeExternals = require('webpack-node-externals');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const common = require('./webpack.common.js');
 
-var node = {
+const node = {
   target: "node"
 , externals: [ nodeExternals() ]
-, devtool: 'inline-source-map'
+, mode: 'none'
 , entry: {
     ssr: ['./ssr-server.js']
   , api: ['./api-server.js']
@@ -21,25 +21,16 @@ var node = {
   , its: ['./its-server.js']
   , arc: ['./arc-server.js']
   }
-, optimization: {
-    nodeEnv: false
-  }
-, plugins: [
-    new webpack.DefinePlugin({ 
-      'process.env.PLATFORM': JSON.stringify('local') 
-    })
-  , new ManifestPlugin({ 
-      fileName: 'manifest.node.json' 
-    }),
-  ],
-  output: {
+, output: {
     filename: '[name].node.js'
   , path: path.resolve(__dirname, 'dist')
   }
-, node: {
-    __dirname: true
-  , __filename: true
-  }
-, mode: 'none'
+, optimization: { nodeEnv: false }
+, plugins: [
+    new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('local') })
+  , new ManifestPlugin({ fileName: 'manifest.node.json' }),
+  ]
+, node: { __dirname: true, __filename: true }
+, devtool: 'inline-source-map'
 };
 module.exports = merge(common, node);

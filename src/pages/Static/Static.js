@@ -9,19 +9,10 @@ import { createGenerateClassName, MuiThemeProvider, createMuiTheme } from '@mate
 
 const theme = createMuiTheme({
   palette: {
-    primary: {
-      main: '#ffa726'
-    , light: '#ffd95b'
-    , dark: '#c77800'
-    , contrastText: '#fff'
-    }
-  , secondary: {
-      main: '#e65100'
-    , light: '#ff833a'
-    , dark: '#ac1900'
-    , contrastText: '#fff'
-    }  
+    primary: { main: '#ffa726', light: '#ffd95b', dark: '#c77800', contrastText: '#fff' }
+  , secondary: { main: '#e65100', light: '#ff833a', dark: '#ac1900', contrastText: '#fff' }  
   }
+, typography: { useNextVariants: true }
 });
 
 export default class Static extends React.Component {
@@ -32,9 +23,7 @@ export default class Static extends React.Component {
     const classname = createGenerateClassName();
     return <JssProvider registry={sheets} generateClassName={classname}>
       <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
-        <StaticRouter location={location} context={context}>
-          {renderRoutes(routes)}
-        </StaticRouter>
+        <StaticRouter location={location} context={context}>{renderRoutes(routes)}</StaticRouter>
       </MuiThemeProvider>
     </JssProvider>;
   }

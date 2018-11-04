@@ -2,7 +2,7 @@ import React          from 'react';
 import PropTypes      from 'prop-types'
 
 import { withStyles } from '@material-ui/core/styles';
-import { Switch, FormControlLabel, FormGroup }     from '@material-ui/core';
+import { Switch, FormControlLabel, FormGroup } from '@material-ui/core';
 
 class LoginSwitch extends React.Component {
   handleChange(event, checked) {
@@ -10,19 +10,13 @@ class LoginSwitch extends React.Component {
   }
 
   renderSwitch(auth) {
-    return <Switch checked={auth} color="primary"
-      onChange={this.handleChange.bind(this)}
-      aria-label="LoginSwitch" />;
+    return <Switch checked={auth} color="primary" onChange={this.handleChange.bind(this)} aria-label="LoginSwitch" />;
   }
 
   render() {
     const {auth} = this.props;
     const renderSwitch = this.renderSwitch(auth);
-    return <FormGroup>
-      <FormControlLabel
-        control={renderSwitch}
-        label={auth ? 'Logout' : 'Login'} />
-    </FormGroup>;
+    return <FormGroup><FormControlLabel control={renderSwitch} label={auth ? 'Logout' : 'Login'} /></FormGroup>;
   }
 }
 LoginSwitch.displayName = 'LoginSwitch';

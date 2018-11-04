@@ -223,7 +223,7 @@ class RssForms extends React.Component {
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
-        <Typography variant="title" noWrap className={classes.title}>{note.title}</Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           { isAlpha 
             ? ( <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
@@ -246,7 +246,7 @@ class RssForms extends React.Component {
           <Input id="asin" value={asin} onChange={this.handleChangeInput.bind(this, 'asin')}/>
         </FormControl>
         <div className={classes.buttons}>
-          <Button variant="raised" size="medium" onClick={this.handleSave.bind(this)} className={classes.button}>
+          <Button variant="contained" size="medium" onClick={this.handleSave.bind(this)} className={classes.button}>
             {isChanged ? '*' : ''}登録
           </Button>
         </div>
@@ -256,7 +256,7 @@ class RssForms extends React.Component {
         </div>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.label}>Amazon商品名：</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.label}>Amazon商品名：</Typography>
         <Button color="primary" size="large" fullWidth href={link_amz} target="_blank" className={classes.name}>{name}</Button>
       </div>
       {this.props.children}

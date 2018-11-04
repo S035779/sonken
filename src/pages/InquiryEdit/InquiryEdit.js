@@ -75,41 +75,29 @@ class InquiryEdit extends React.Component {
     return <div className={classes.container}>
       <div className={classes.inquiryForms}>
         <div className={classes.space} />
-        <Typography variant="display1" align="center"
-          className={classes.title}>Inquiry</Typography>
-        <Typography variant="headline" align="center"
-          className={classes.title}>
+        <Typography variant="h4" align="center" className={classes.title}>Inquiry</Typography>
+        <Typography variant="h5" align="center" className={classes.title}>
           Please list the contents of your inquiries below.
         </Typography>
         <Divider light className={classes.divider}/>
         <div className={classes.space} />
         <div className={classes.forms}>
           <div className={classes.form}>
-            <TextField
-              value={title} InputProps={inputText}
-              placeholder="Title"
-              onChange={this.handleChangeText.bind(this, 'title')}
+            <TextField value={title} InputProps={inputText} placeholder="Title" onChange={this.handleChangeText.bind(this, 'title')}
               className={classes.input} />
           </div>
           <div className={classes.textArea}>
-            <TextField multiline rows="10"
-              value={body} InputProps={inputText}
-              placeholder="Message"
-              onChange={this.handleChangeText.bind(this, 'body')}
-              className={classes.input} />
+            <TextField multiline rows="10" value={body} InputProps={inputText} placeholder="Message"
+              onChange={this.handleChangeText.bind(this, 'body')} className={classes.input} />
           </div>
           <div className={classes.buttons}>
-            <RssButton color="white"
-              onClick={this.handleInquiry.bind(this)}
-              classes={classes.button}>Send Inquiry</RssButton>
-            <RssDialog open={isNotValid} title={'送信エラー'}
-              onClose={this.handleCloseDialog.bind(this)}>
-            内容に不備があります。もう一度確認してください。
+            <RssButton color="white" onClick={this.handleInquiry.bind(this)} classes={classes.button}>Send Inquiry</RssButton>
+            <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this)}>
+              内容に不備があります。もう一度確認してください。
             </RssDialog>
           </div>
           <div className={classes.notice}>
-            <Typography variant="caption" align="center"
-              className={classes.notes}>
+            <Typography variant="caption" align="center" className={classes.notes}>
               お問い合わせ：{preference.from}（営業時間９時〜１８時）
             </Typography>
           </div>

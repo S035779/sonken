@@ -29,9 +29,7 @@ class Html extends React.Component {
   render() {
     const { initialData, location } = this.props;
     const sheets = new SheetsRegistry();
-    const content = ReactDOMServer.renderToString(
-      <Static location={location} sheets={sheets}/>
-    );
+    const content = ReactDOMServer.renderToString(<Static location={location} sheets={sheets}/>);
     const initialStyles = sheets.toString();
     return <html>
       <head>
@@ -44,8 +42,7 @@ class Html extends React.Component {
       <body style={styles}>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>
       <style id="jss-server-side">{initialStyles}</style>
-      <script id="initial-data" type="text/plain"
-        data-init={initialData}></script>
+      <script id="initial-data" type="text/plain" data-init={initialData}></script>
       <script src={ path_to_js + "icon.bundle.js" }></script>
       <script src={ path_to_js + "view.bundle.js" }></script>
       <script src={ path_to_js + "app.bundle.js" }></script>

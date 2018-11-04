@@ -1,7 +1,6 @@
 import React      from 'react';
 import PropTypes  from 'prop-types';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, withMobileDialog, Slide } 
-                  from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, withMobileDialog, Slide } from '@material-ui/core';
 
 const Transition =  props => <Slide direction="up" {...props} />;
 

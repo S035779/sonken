@@ -121,7 +121,7 @@ class LoginConfirm extends React.Component {
     return <div className={classes.container}>
       <div className={classes.loginForms}>
       <div className={classes.space} />
-      <Typography variant="title" align="center" className={classes.title}>Unlock</Typography>
+      <Typography variant="h6" align="center" className={classes.title}>Unlock</Typography>
       <div className={classes.form}>
         <RssInput label="E-MAIL ADDRESS" value={email} placeholder="Enter E-mail address"
           onChange={this.handleChangeText.bind(this, 'email')} className={classes.input} />
