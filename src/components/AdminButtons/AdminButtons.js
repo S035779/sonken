@@ -79,8 +79,8 @@ class AdminButtons extends React.Component {
       <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)} tabIndex={-1} 
         disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised" className={classes.button} onClick={this.handleSendmail.bind(this)}>メール配信</Button>
-        <Button variant="raised" className={classes.button} onClick={this.handleApproval.bind(this)}>開始承認</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleSendmail.bind(this)}>メール配信</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleApproval.bind(this)}>開始承認</Button>
         <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>

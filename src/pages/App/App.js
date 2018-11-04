@@ -30,8 +30,7 @@ class App extends React.Component {
       <ErrorBoundary>
       <CssBaseline />
       <div className={classes.appFrame}>
-        <RssDrawer user={user} isAuthenticated={isAuthenticated} profile={profile} preference={preference}
-          categorys={categorys} >
+        <RssDrawer user={user} isAuthenticated={isAuthenticated} profile={profile} preference={preference} categorys={categorys}>
           {renderRoutes(route.routes)}
         </RssDrawer>
       </div>

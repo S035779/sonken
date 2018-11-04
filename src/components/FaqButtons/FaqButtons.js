@@ -68,24 +68,16 @@ class FaqButtons extends React.Component {
     const { classes } = this.props;
     const { checked, isNotValid, isSuccess } = this.state;
     return <div className={classes.faqButtons}>
-      <Checkbox checked={checked}
-        className={classes.checkbox}
-        onChange={this.handleChangeCheckbox.bind(this)}
+      <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)} 
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handleNew.bind(this)}>新規作成</Button>
-        <Button variant="raised"
-          className={classes.button}
-          onClick={this.handlePost.bind(this)}>FAQ掲載</Button>
-        <RssDialog open={isNotValid} title={'送信エラー'}
-          onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
+        <Button variant="contained" className={classes.button} onClick={this.handleNew.bind(this)}>新規作成</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handlePost.bind(this)}>FAQ掲載</Button>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
         </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'}
-          onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
         </RssDialog>
       </div>
     </div>;

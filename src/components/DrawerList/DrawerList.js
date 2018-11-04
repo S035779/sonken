@@ -6,14 +6,10 @@ import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { 
-  Divider, List, Avatar, IconButton, Badge
-, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Collapse
-}                       from '@material-ui/core';
-import { 
-  LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown, AccountBox, BlurOn
-, SettingsApplications, PeopleOutline, NotificationsActive
-}                       from '@material-ui/icons';
+import { Divider, List, Avatar, IconButton, Badge, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Collapse }
+                        from '@material-ui/core';
+import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown, AccountBox, BlurOn, SettingsApplications, PeopleOutline
+, NotificationsActive } from '@material-ui/icons';
 import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
@@ -418,14 +414,12 @@ class DrawerList extends React.Component {
     const renderListItems = this.renderListItems();
     const renderUserListItems = this.renderUserListItems();
     return <div>
-      <div className={classes.header}>
-        <List>{renderTitleListItems}</List>
-      </div>
-      <Divider />
-      <List>{renderListItems}</List>
-      <Divider />
-      <List>{renderUserListItems}</List>
-    </div>;
+        <div className={classes.header}><List>{renderTitleListItems}</List></div>
+        <Divider />
+        <List>{renderListItems}</List>
+        <Divider />
+        <List>{renderUserListItems}</List>
+      </div>;
   }
 }
 DrawerList.displayName = 'DrawerList';

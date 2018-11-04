@@ -95,25 +95,19 @@ class RssList extends React.Component {
       <Checkbox className={classes.checkbox} onClick={this.handleChangeCheckbox.bind(this, note._id)}
         checked={checked.indexOf(note._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
-        <ListItem dense button disableGutters className={classes.listItem}
-          onClick={this.handleReaded.bind(this, note)} component={Link} to={linkTo}>
-            <ListItemText classes={textClass} primary={noteTitle} secondary={updated}/>
-            <ListItemSecondaryAction>
-              <Button className={classes.button} 
-                onClick={this.handleChangeDialog.bind(this, note._id)} color="primary">
-                編集
-              </Button>
-              <RssFormDialog user={user} selectedNoteId={note._id} noteTitle={note.title} title={title}
-                category={note.category} categorys={categoryList(note.category)} categoryIds={note.categoryIds}
-                open={this.state.opened.indexOf(note._id) !== -1}
-                onClose={this.handleChangeDialog.bind(this, note._id)}
-                onSubmit={this.handleChangeTitle.bind(this)} />
+        <ListItem dense button disableGutters className={classes.listItem} onClick={this.handleReaded.bind(this, note)}
+          component={Link} to={linkTo}>
+          <ListItemText classes={textClass} primary={noteTitle} secondary={updated}/>
+          <ListItemSecondaryAction>
+            <Button className={classes.button} onClick={this.handleChangeDialog.bind(this, note._id)} color="primary">編集</Button>
+            <RssFormDialog user={user} selectedNoteId={note._id} noteTitle={note.title} title={title}
+              category={note.category} categorys={categoryList(note.category)} categoryIds={note.categoryIds}
+              open={this.state.opened.indexOf(note._id) !== -1} onClose={this.handleChangeDialog.bind(this, note._id)}
+              onSubmit={this.handleChangeTitle.bind(this)} />
             </ListItemSecondaryAction>
         </ListItem>
       </Paper>
-      <div className={classes.notice}>
-        <Typography color="secondary" noWrap>{notice}</Typography>
-      </div>
+      <div className={classes.notice}><Typography color="secondary" noWrap>{notice}</Typography></div>
     </div>;
   }
 

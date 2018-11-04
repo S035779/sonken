@@ -13,8 +13,8 @@ class MailButtons extends React.Component {
     super(props);
     this.state = {
       checked: false
-    , isSuccess:          false
-    , isNotValid:         false
+    , isSuccess: false
+    , isNotValid: false
     };
   }
 
@@ -67,8 +67,8 @@ class MailButtons extends React.Component {
       <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
       <div className={classes.buttons}>
-        <Button variant="raised" className={classes.button} onClick={this.handleNew.bind(this)}>新規作成</Button>
-        <Button variant="raised" className={classes.button} onClick={this.handleSelect.bind(this)}>Mail選択</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleNew.bind(this)}>新規作成</Button>
+        <Button variant="contained" className={classes.button} onClick={this.handleSelect.bind(this)}>Mail選択</Button>
         <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
           内容に不備があります。もう一度確認してください。
         </RssDialog>

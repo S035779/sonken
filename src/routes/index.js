@@ -66,12 +66,12 @@ export default function getRoutes() {
         path: '/admin/faq/:id'
       , component: Faq
       , loadData: getUserData
-      , routes: [{ path: '/admin/faq/:id/edit',      component: FaqEdit }]
+      , routes: [{ path: '/admin/faq/:id/edit',  component: FaqEdit }]
       }, {
         path: '/admin/mail/:id'
       , component: Mail
       , loadData: getUserData
-      , routes: [{ path: '/admin/mail/:id/edit',     component: MailEdit }]
+      , routes: [{ path: '/admin/mail/:id/edit', component: MailEdit }]
       }, {
         path: '/admin/:category/:id'
       , component: Management

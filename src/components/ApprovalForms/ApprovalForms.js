@@ -68,67 +68,37 @@ class ApprovalForms extends React.Component {
     const planName = menu ? menu.find(obj => obj.id === plan).name : 'N/A';
     return <div className={classes.forms}>
       <div className={classes.edit}>
-        <Typography variant="title" noWrap className={classes.title}>
-        {title}
-        </Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={primary}
-            onClick={this.handleApproval.bind(this)}
-            classes={classes.button}>
-          承認する</RssButton>
-          <RssButton color={secondary}
-            onClick={this.handleNotApproval.bind(this)}
-            classes={classes.button}>
-          非承認</RssButton>
-          <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
+          <RssButton color={primary} onClick={this.handleApproval.bind(this)} classes={classes.button}>承認する</RssButton>
+          <RssButton color={secondary} onClick={this.handleNotApproval.bind(this)} classes={classes.button}>非承認</RssButton>
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
           </RssDialog>
-          <RssDialog open={isSuccess} title={'送信完了'}
-            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-          要求を受け付けました。
+          <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+            要求を受け付けました。
           </RssDialog>
         </div>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        氏名
-        </Typography>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        {name}
-        </Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>氏名</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>{name}</Typography>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        氏名（カナ）
-        </Typography>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        {kana}
-        </Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>氏名（カナ）</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>{kana}</Typography>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        連絡先メールアドレス
-        </Typography>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        {email}
-        </Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>連絡先メールアドレス</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>{email}</Typography>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        連絡先電話番号
-        </Typography>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        {phone}
-        </Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>連絡先電話番号</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>{phone}</Typography>
       </div>
       <div className={classes.edit}>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        申し込みプラン
-        </Typography>
-        <Typography variant="subheading" noWrap className={classes.title}>
-        {planName}
-        </Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>申し込みプラン</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.title}>{planName}</Typography>
       </div>
     </div>;
   }

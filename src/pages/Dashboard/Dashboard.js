@@ -26,9 +26,11 @@ class Dashboard extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Dashboard.displayName, 'prefetch', category);
-    return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchNotes(user, category, 0, 20))
-      .then(() => NoteAction.prefetchCategorys(user, category, 0, 20));
+    return Promise.all([
+        NoteAction.presetUser(user)
+      , NoteAction.prefetchNotes(user, category, 0, 20)
+      , NoteAction.prefetchCategorys(user, category, 0, 20)
+      ]);
   }
 
   componentDidMount() {
@@ -41,9 +43,10 @@ class Dashboard extends React.Component {
       const spn = Spinner.of('app');
       spn.start();
       std.logInfo(Dashboard.displayName, 'fetch', category);
-      NoteAction.fetchNotes(user, category, skip, limit)
-        .then(() => NoteAction.fetchCategorys(user, category, skip, limit))
-        .then(() => spn.stop());
+      Promise.all([
+        NoteAction.fetchNotes(user, category, skip, limit)
+      , NoteAction.fetchCategorys(user, category, skip, limit)
+      ]).then(() => spn.stop());
     }
   }
 
@@ -56,9 +59,11 @@ class Dashboard extends React.Component {
       const limit = page.perPage;
       const spn = Spinner.of('app');
       spn.start();
-      NoteAction.fetchNotes(user, nextCategory, skip, limit)
-        .then(() => NoteAction.fetchCategorys(user, nextCategory, skip, limit))
-        .then(() => spn.stop());
+      std.logInfo(Dashboard.displayName, 'update', nextCategory);
+      Promise.all([
+        NoteAction.fetchNotes(user, nextCategory, skip, limit)
+      , NoteAction.fetchCategorys(user, nextCategory, skip, limit)
+      ]).then(() => spn.stop());
     }
   }
 

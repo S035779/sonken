@@ -25,8 +25,10 @@ class Bids extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Bids.displayName, 'prefetch', category);
-    return BidsAction.presetUser(user)
-      .then(() => BidsAction.prefetchBided(user, 0, 20));
+    return Promise.all([
+      BidsAction.presetUser(user)
+    , BidsAction.prefetchBided(user, 0, 20)
+    ]);
   }
 
   componentDidMount() {
@@ -51,10 +53,8 @@ class Bids extends React.Component {
     const number = note && note.attributes ? note.attributes.item.total : 0;
     return isAuthenticated 
       ? ( <div className={classes.root}>
-            <BidsSearch 
-              user={user} items={items} itemFilter={filter} itemNumber={number} itemPage={page} file={file}/>
-            <BidsFilter 
-              user={user} items={items} itemFilter={filter} itemNumber={number} selectedItemId={ids}/>
+            <BidsSearch user={user} items={items} itemFilter={filter} itemNumber={number} itemPage={page} file={file}/>
+            <BidsFilter user={user} items={items} itemFilter={filter} itemNumber={number} selectedItemId={ids}/>
           </div> )
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );
   }

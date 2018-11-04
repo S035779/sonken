@@ -25,13 +25,10 @@ class RssDrawer extends React.Component {
     const { open } = this.state;
     return <div className={classes.root}>
       <RssHeader open={open} user={user} isAuthenticated={isAuthenticated} preference={preference}
-        profile={profile} onClick={this.handleToggle.bind(this)} >
-        {children}
-      </RssHeader>
-      <DrawerTemporary open={open} user={user} preference={preference} profile={profile}
-        categorys={categorys} onClose={this.handleToggle.bind(this)} />
-      <DrawerPermanent open={open} user={user} preference={preference} profile={profile}
-        categorys={categorys} />
+        profile={profile} onClick={this.handleToggle.bind(this)}>{children}</RssHeader>
+      <DrawerTemporary open={open} user={user} preference={preference} profile={profile} categorys={categorys}
+        onClose={this.handleToggle.bind(this)} />
+      <DrawerPermanent open={open} user={user} preference={preference} profile={profile} categorys={categorys} />
     </div>;
   }
 }

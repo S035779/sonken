@@ -26,24 +26,12 @@ class DrawerTemporary extends React.Component {
   render() {
     //std.logInfo(DrawerTemporary.displayName, 'Props', this.props);
     //std.logInfo(DrawerTemporary.displayName, 'State', this.state);
-    const { classes, user, profile, preference, open, categorys }
-      = this.props;
+    const { classes, user, profile, preference, open, categorys } = this.props;
     const modalProps = { keepMounted: true };
     const paperClass = { paper: classes.paper };
     return <Hidden mdUp>
-      <Drawer
-        variant="temporary"
-        open={open}
-        onClose={this.handleToggle.bind(this)}
-        classes={paperClass}
-        ModalProps={modalProps}>
-        <DrawerList
-          open={open}
-          user={user}
-          profile={profile}
-          preference={preference}
-          categorys={categorys}
-        />
+      <Drawer variant="temporary" open={open} onClose={this.handleToggle.bind(this)} classes={paperClass} ModalProps={modalProps}>
+        <DrawerList open={open} user={user} profile={profile} preference={preference} categorys={categorys} />
       </Drawer>
     </Hidden>;
   }
@@ -65,12 +53,9 @@ const drawerWidthMdDown = 250;
 const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
-  paper:{
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`
-  , width: drawerWidthMdDown
-  , [theme.breakpoints.up('md')]: {
-      position: 'relative', width: drawerWidthMdUp, height: '100%'
-    }
+  paper: {
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`, width: drawerWidthMdDown
+  , [theme.breakpoints.up('md')]: { position: 'relative', width: drawerWidthMdUp, height: '100%' }
   }
 });
 export default withStyles(styles)(DrawerTemporary);

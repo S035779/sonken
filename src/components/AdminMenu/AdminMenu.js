@@ -39,21 +39,23 @@ class AdminMenu extends React.Component {
   }
 
   handleChangeProfile(name, event) {
-    std.logInfo(AdminMenu.displayName, 'handleChangeProfile', name);
+    //std.logInfo(AdminMenu.displayName, 'handleChangeProfile', name);
     const { profile } = this.state;
     switch(name) {
-      case 'password': case 'confirm_password':
-        this.setState({ [name]: event.target.value });
-        break;
-      default:
-        this.setState({ profile: Object.assign({}, profile
-        , { [name]: event.target.value }) });
-        break;
+      case 'password':
+      case 'confirm_password': {
+          this.setState({ [name]: event.target.value });
+          break;
+        }
+      default: {
+          this.setState({ profile: Object.assign({}, profile, { [name]: event.target.value }) });
+          break;
+        }
     }
   }
 
   handleChangePreference(name, event) {
-    std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
+    //std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
     const { preference } = this.state;
     switch(name) {
       case 'url1': case 'url2': case 'url3': case 'url4': {
@@ -61,9 +63,10 @@ class AdminMenu extends React.Component {
           this.setState({ preference: Object.assign({}, preference, { advertisement }) });
         }
         break;
-      case 'from':
-        this.setState({ preference: Object.assign({}, preference, { [name]: event.target.value }) });
-        break;
+      case 'from': {
+          this.setState({ preference: Object.assign({}, preference, { [name]: event.target.value }) });
+          break;
+        }
       default: {
           const number = Number(event.target.value);
           const menu = preference.menu
@@ -75,17 +78,17 @@ class AdminMenu extends React.Component {
   }
 
   handleMenu(event) {
-    std.logInfo(AdminMenu.displayName, 'handleMenu', event.currentTarget);
+    //std.logInfo(AdminMenu.displayName, 'handleMenu', event.currentTarget);
     this.setState({ anchorEl: event.currentTarget });
   }
 
-  handleClose(name) {
-    std.logInfo(AdminMenu.displayName, 'handleClose', name);
-    this.setState({ anchorEl: null});
+  handleClose() {
+    //std.logInfo(AdminMenu.displayName, 'handleClose', name);
+    this.setState({ anchorEl: null });
   }
 
-  handleInitialize(name) {
-    std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
+  handleInitialize() {
+    //std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
     const { admin } = this.props;
     LoginAction.createPreference(admin)
       .then(() => this.setState({ isSuccess: true }))
@@ -96,17 +99,17 @@ class AdminMenu extends React.Component {
   }
   
   handleOpenDialog(name) {
-    std.logInfo(AdminMenu.displayName, 'handleOpenDialog', name);
+    //std.logInfo(AdminMenu.displayName, 'handleOpenDialog', name);
     this.setState({ [name]: true });
   }
 
   handleCloseDialog(name) {
-    std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
+    //std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
   handleSubmitDialog(name) {
-    std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
+    //std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
     const { profile, preference, password } = this.state;
     const { admin } = this.props;
     switch(name) {
@@ -217,7 +220,7 @@ class AdminMenu extends React.Component {
         </RssDialog>
         <LoginFormDialog isSubmit open={isProfile} title={'プロファイル'} onClose={this.handleCloseDialog.bind(this, 'isProfile')}
           onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
-          <Typography variant="title" noWrap className={classes.title}>{name}（{user}）</Typography>
+          <Typography variant="h6" noWrap className={classes.title}>{name}（{user}）</Typography>
           <TextField autoFocus margin="dense" value={name} onChange={this.handleChangeProfile.bind(this, 'name')}
             label="氏名" type="text" fullWidth />
           <TextField margin="dense" value={kana} onChange={this.handleChangeProfile.bind(this, 'kana')}

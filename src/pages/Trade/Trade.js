@@ -25,8 +25,10 @@ class Trade extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Trade.displayName, 'prefetch', category);
-    return TradeAction.presetUser(user)
-      .then(() => TradeAction.prefetchTraded(user, 0, 20));
+    return Promise.all([
+        TradeAction.presetUser(user)
+      , TradeAction.prefetchTraded(user, 0, 20)
+      ]);
   }
 
   componentDidMount() {
@@ -51,10 +53,8 @@ class Trade extends React.Component {
     const number = note && note.attributes ? note.attributes.item.total : 0;
     return isAuthenticated
       ? ( <div className={classes.root}>
-            <TradeSearch 
-              user={user} items={items} itemFilter={filter} itemNumber={number} itemPage={page} file={file}/>
-            <TradeFilter 
-              user={user} items={items} itemFilter={filter} itemNumber={number} selectedItemId={ids}/>
+            <TradeSearch user={user} items={items} itemFilter={filter} itemNumber={number} itemPage={page} file={file}/>
+            <TradeFilter user={user} items={items} itemFilter={filter} itemNumber={number} selectedItemId={ids}/>
           </div> )
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );
   }

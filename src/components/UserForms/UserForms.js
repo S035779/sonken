@@ -116,75 +116,52 @@ class UserForms extends React.Component {
     if(redirectToRss) return <Redirect to={rss} />;
     return <div className={classes.forms}>
       <div className={classes.edit}>
-        <Typography variant="title" noWrap
-          className={classes.title}>{title}</Typography>
+        <Typography variant="h6" noWrap className={classes.title}>{title}</Typography>
         <div className={classes.buttons}>
-          <RssButton color={primary}
-            onClick={this.handleRSS.bind(this)}
-            classes={classes.button}>
-          ユーザRSS</RssButton>
-          <RssButton color={primary}
-            onClick={this.handleSave.bind(this)}
-            classes={classes.button}>
-          {isChanged ? '*' : ''}変更する</RssButton>
-          <RssButton color={secondary}
-            onClick={this.handleDelete.bind(this)}
-            classes={classes.button}>
-          削除</RssButton>
-          <RssDialog open={isNotValid} title={'送信エラー'}
-            onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
-          </RssDialog>
-          <RssDialog open={isSuccess} title={'送信完了'}
-            onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-          要求を受け付けました。
+          <RssButton color={primary} onClick={this.handleRSS.bind(this)} classes={classes.button}>ユーザRSS</RssButton>
+          <RssButton color={primary} onClick={this.handleSave.bind(this)} classes={classes.button}>
+            {isChanged ? '*' : ''}変更する</RssButton>
+          <RssButton color={secondary} onClick={this.handleDelete.bind(this)} classes={classes.button}>削除</RssButton>
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
+          </RssDialog> <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+            要求を受け付けました。
           </RssDialog>
         </div>
       </div>
       <div className={classes.edit}>
-        <FormControlLabel className={classes.checkbox}
-          control={<Checkbox
-            checked={isAdmin}
-            onChange={this.handleChangeCheckbox.bind(this, 'isAdmin')}
-            value="admin"
-            color="primary" />}
-          label="管理者権限を付与する" />
+        <FormControlLabel className={classes.checkbox} control={
+          <Checkbox checked={isAdmin} onChange={this.handleChangeCheckbox.bind(this, 'isAdmin')} value="admin" color="primary" />
+        } label="管理者権限を付与する" />
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="name">氏名</InputLabel>
-          <Input id="name" value={name}
-            onChange={this.handleChangeInput.bind(this, 'name')}/>
+          <Input id="name" value={name} onChange={this.handleChangeInput.bind(this, 'name')}/>
         </FormControl>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="kana">氏名（カナ）</InputLabel>
-          <Input id="kana" value={kana}
-            onChange={this.handleChangeInput.bind(this, 'kana')}/>
+          <Input id="kana" value={kana} onChange={this.handleChangeInput.bind(this, 'kana')}/>
         </FormControl>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="email">連絡先メールアドレス</InputLabel>
-          <Input id="email" value={email}
-            onChange={this.handleChangeInput.bind(this, 'email')}/>
+          <Input id="email" value={email} onChange={this.handleChangeInput.bind(this, 'email')}/>
         </FormControl>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="phone">連絡先電話番号</InputLabel>
-          <Input id="phone" value={phone}
-            onChange={this.handleChangeInput.bind(this, 'phone')}/>
+          <Input id="phone" value={phone} onChange={this.handleChangeInput.bind(this, 'phone')}/>
         </FormControl>
       </div>
       <div className={classes.edit}>
         <FormControl className={classes.text}>
           <InputLabel htmlFor="plan">申し込みプラン</InputLabel>
-          <Select value={plan}
-            onChange={this.handleChangeInput.bind(this, 'plan')}>
-            {renderMenu}
-          </Select>
+          <Select value={plan} onChange={this.handleChangeInput.bind(this, 'plan')}>{renderMenu}</Select>
         </FormControl>
       </div>
     </div>;

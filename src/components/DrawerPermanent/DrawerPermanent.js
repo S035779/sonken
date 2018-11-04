@@ -25,13 +25,8 @@ class DrawerPermanent extends React.Component {
     const { classes, user, profile, preference, open, categorys } = this.props;
     const paperClass = { paper: classNames(classes.paper, !open && classes.paperClose) };
     return <Hidden smDown implementation="css">
-      <Drawer variant="permanent" open={open} classes={paperClass} >
-        <DrawerList
-          open={open}
-          user={user}
-          profile={profile}
-          preference={preference}
-          categorys={categorys} />
+      <Drawer variant="permanent" open={open} classes={paperClass}>
+        <DrawerList open={open} user={user} profile={profile} preference={preference} categorys={categorys} />
       </Drawer>
     </Hidden>
   }
@@ -52,28 +47,16 @@ const drawerWidthMdDown = 250;
 const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
-  paper:{
+  paper: {
     background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`
-  , backgroundSize: 'cover'
-  , width: drawerWidthMdDown
-  , [theme.breakpoints.up('md')]: {
-      width: drawerWidthMdUp, height: '100%'
-    }
+  , backgroundSize: 'cover', width: drawerWidthMdDown, [theme.breakpoints.up('md')]: { width: drawerWidthMdUp, height: '100%' }
   , transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp
-    , duration: theme.transitions.duration.enteringScreen
-    })
+      easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }) 
   }
 , paperClose: {
-    overflowX: 'hidden'
-  , transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp
-    , duration: theme.transitions.duration.leavingScreen
-    })
-  , width: theme.spacing.unit *7
-  , [theme.breakpoints.up('sm')]: {
-      width: theme.spacing.unit *9
-    }
+    overflowX: 'hidden', transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen })
+  , width: theme.spacing.unit *7, [theme.breakpoints.up('sm')]: { width: theme.spacing.unit *9 }
   }
 });
 export default withStyles(styles)(DrawerPermanent);
