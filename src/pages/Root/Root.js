@@ -2,6 +2,7 @@ import React              from 'react';
 import { BrowserRouter }  from 'react-router-dom';
 import { renderRoutes }   from 'react-router-config';
 import getRoutes          from 'Routes';
+import 'typeface-roboto';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 

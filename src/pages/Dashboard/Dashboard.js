@@ -25,7 +25,7 @@ class Dashboard extends React.Component {
   static prefetch(options) {
     const { user, category } = options;
     if(!user) return null;
-    std.logInfo(Dashboard.displayName, 'prefetch', category);
+    std.logInfo(Dashboard.displayName, 'prefetch', options);
     return Promise.all([
         NoteAction.presetUser(user)
       , NoteAction.prefetchNotes(user, category, 0, 20)
@@ -148,16 +148,12 @@ const barHeightSmUp     = 64;
 const barHeightSmDown   = 56;
 const listWidth         = 400;
 const searchHeight      = 62;
-const noteHeightSmUp    = 
-  `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`;
-const noteHeightSmDown  =
-  `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`;
+const noteHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${searchHeight}px)`;
+const noteHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${searchHeight}px)`;
 const styles = theme => ({
   root:     { display: 'flex', flexDirection: 'column' }
 , body:     { display: 'flex', flexDirection: 'row' }
-, noteList: { width: listWidth, minWidth: listWidth
-            , height: noteHeightSmDown
-            , [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
+, noteList: { width: listWidth, minWidth: listWidth, height: noteHeightSmDown, [theme.breakpoints.up('sm')]: { height: noteHeightSmUp }}
 , noteEdit: { flex: 1 }
 });
 export default withStyles(styles)(Container.create(Dashboard));

@@ -23,8 +23,8 @@ const bundle = {
         , test: /react|react-dom|react-router|react-router-dom|react-router-config|flux|@material-ui[\\/]core/
         , chunks: 'initial'
         , enforce: true
-        },
-        icon: {
+        }
+      , icon: {
           name: 'icon'
         , test: /@material-ui[\\/]icons/
         , chunks: 'initial'

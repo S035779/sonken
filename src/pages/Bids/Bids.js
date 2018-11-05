@@ -26,9 +26,9 @@ class Bids extends React.Component {
     if(!user) return null;
     std.logInfo(Bids.displayName, 'prefetch', category);
     return Promise.all([
-      BidsAction.presetUser(user)
-    , BidsAction.prefetchBided(user, 0, 20)
-    ]);
+        BidsAction.presetUser(user)
+      , BidsAction.prefetchBided(user, 0, 20)
+      ]);
   }
 
   componentDidMount() {

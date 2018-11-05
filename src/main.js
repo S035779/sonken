@@ -5,6 +5,7 @@ import { createDispatcher } from './dispatcher';
 import { rehydrateState } from './actions';
 import { createStores } from './stores';
 import Root from './pages/Root/Root';
+import 'typeface-roboto';
 
 const dispatcher = createDispatcher();
 createStores(dispatcher);

@@ -14,8 +14,8 @@ const production = {
     , 'process.env.API_URL':   JSON.stringify('http://35.227.255.168/api')
     , 'process.env.ASSET_URL': JSON.stringify('http://35.227.255.168/assets')
     , 'process.env.APP_NAME':  JSON.stringify('SellerSearch!')
-    }),
-    new UglifyJSPlugin({ cache: false, parallel: true })
+    })
+  , new UglifyJSPlugin({ cache: true, parallel: true, sourceMap: true })
   ]
 , performance: {
     hints: "warning"

@@ -13,17 +13,20 @@ const app_name    = process.env.APP_NAME;
 const env         = process.env.NODE_ENV;
 const host        = process.env.TOP_URL;
 const assets      = process.env.ASSET_PATH;
-let path_to_js, path_to_img;
+let path_to_js, path_to_img, path_to_css;
 if (env === 'development') {
+  path_to_css = '/';
   path_to_js = '/'; 
   path_to_img = '/';
 } else if (env === 'staging' || env === 'production') {
+  path_to_css = host + assets + '/css/';
   path_to_js  = host + assets + '/js/';
   path_to_img = host + assets + '/image/';
 }
 
-const roboto_font = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
-const noto_font   = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
+const roboto_font = path_to_css + 'app.bundle.css';
+//const roboto_font = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+//const noto_font   = 'https://fonts.googleapis.com/earlyaccess/notosansjp.css';
 
 class Html extends React.Component {
   render() {
@@ -37,7 +40,6 @@ class Html extends React.Component {
       <title>{app_name}</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
       <link rel="stylesheet"    href={ roboto_font }/>
-      <link rel="stylesheet"    href={ noto_font }/>
       </head>
       <body style={styles}>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>

@@ -28,7 +28,7 @@ const node = {
 , optimization: { nodeEnv: false }
 , plugins: [
     new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('local') })
-  , new ManifestPlugin({ fileName: 'manifest.node.json' }),
+  , new ManifestPlugin({ fileName: 'manifest.node.json' })
   ]
 , node: { __dirname: true, __filename: true }
 , devtool: 'inline-source-map'
