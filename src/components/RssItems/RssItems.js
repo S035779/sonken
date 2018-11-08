@@ -6,7 +6,8 @@ import std                    from 'Utilities/stdutils';
 import Spinner                from 'Utilities/Spinner';
 
 import { withStyles }         from '@material-ui/core/styles';
-import { Typography }         from '@material-ui/core';
+import { Typography, CircularProgress }
+                              from '@material-ui/core';
 import RssButton              from 'Components/RssButton/RssButton';
 import RssDialog              from 'Components/RssDialog/RssDialog';
 import RssItemList            from 'Components/RssItemList/RssItemList';
@@ -23,6 +24,7 @@ class RssItems extends React.Component {
     , isNotValid: false
     , isRequest: false
     , isDownload: false
+    , loadingDownload: false
     , page: 1
     , prevPage: 1
     };
@@ -133,7 +135,7 @@ class RssItems extends React.Component {
 
   render() {
     const { classes, itemNumber, user, note, category, file } = this.props;
-    const { page, isNotValid, isSuccess, isDownload } = this.state;
+    const { page, isNotValid, isSuccess, isDownload, loadingDownload } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
     return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
@@ -141,9 +143,11 @@ class RssItems extends React.Component {
         <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           { isAlpha 
-            ? ( <RssButton color={color} onClick={this.handleOpenDialog.bind(this, 'isDownload')} classes={classes.button}>
-                ダウンロード
-              </RssButton> )
+            ? ( <div className={classes.wrapper}>
+              <RssButton color={color} disabled={loadingDownload} onClick={this.handleOpenDialog.bind(this, 'isDownload')}
+                classes={classes.button}>ダウンロード</RssButton>
+              {loadingDownload && <CircularProgress size={24} className={classes.btnProgress} />}
+              </div> )
             : null }
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber}
             name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
@@ -189,5 +193,7 @@ const styles = theme => ({
 , title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
 , buttons:      { display: 'flex', flexDirection: 'row' }
 , button:       { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all'  }
+, wrapper:      { position: 'relative' }
+, btnProgress:  { position: 'absolute', color: theme.palette.common.white, top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
 });
 export default withStyles(styles)(RssItems);

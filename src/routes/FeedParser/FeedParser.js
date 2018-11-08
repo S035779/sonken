@@ -50,17 +50,18 @@ export default class FeedParser {
           const { users, categorys, filter, skip, limit, sort } = options;
           const isItems = filter && filter.isItems;
           const isImages = filter && filter.isImages;
+          const create = filter && !R.isNil(filter.create) ? filter.create : Date.now();
           const expire = filter && !R.isNil(filter.expire) ? filter.expire : Date.now();
           const conditions = isItems
           ? { 
             user:     { $in: users }
           , category: { $in: categorys }
-          , updated:  { $lt: expire }
           , items:    { $ne: [], $exists: true }
+          , $or:      [{ created: { $gt: create }}, { updated: { $lt: expire } }]
           } : {
             user:     { $in: users }
           , category: { $in: categorys }
-          , updated:  { $lt: expire }
+          , $or:      [{ created: { $gt: create }}, { updated: { $lt: expire } }]
           };
           const select = { user: 1, category: 1, url: 1 };
           const params = {
@@ -93,7 +94,7 @@ export default class FeedParser {
           return query.populate(params).exec()
             .then(doc => doc.toObject());
         }
-      case 'count/notes':
+      case 'count/items':
         {
           const { user } = options;
           const conditions = { user };
@@ -107,7 +108,7 @@ export default class FeedParser {
               .group({ _id: "$_id", counts: { $sum: "$item_size" } })
               .exec());
         }
-      case 'counts/notes':
+      case 'count/note':
         {
           const { user } = options;
           const conditions = { user };
@@ -138,12 +139,12 @@ export default class FeedParser {
           if(isPaginate) query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
           return query.exec();
         }
-      case 'count/note':
+      case 'count/item':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
-          const isCount = request === 'count/note';
+          const isCount = request === 'count/item';
           const conditions = { user, _id: id };
           const query = Note.findOne(conditions);
           let match = null;
@@ -832,16 +833,16 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  cntsNotes(user) {
-    return this.request('counts/notes', { user });
+  cntNote(user) {
+    return this.request('count/note', { user });
   }
 
-  cntNotes(user) {
-    return this.request('count/notes', { user });
+  cntItems(user) {
+    return this.request('count/items', { user });
   }
 
-  cntNote(user, id, filter) { 
-    return this.request('count/note', { user, id, filter });
+  cntItem(user, id, filter) { 
+    return this.request('count/item', { user, id, filter });
   }
 
   cntBided(user, skip, limit, filter) {
@@ -1038,8 +1039,8 @@ export default class FeedParser {
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntNotes(user, category)
-    , this.cntsNotes(user, category)
+      this.cntItems(user, category)
+    , this.cntNote(user, category)
     , this.getNotes(user, category, skip, limit)
     ]);
     const setAttribute = objs => R.compose(
@@ -1168,7 +1169,7 @@ export default class FeedParser {
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntNote(user, id, filter)
+      this.cntItem(user, id, filter)
     , this.getNote(user, id, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(

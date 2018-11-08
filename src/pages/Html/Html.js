@@ -13,7 +13,9 @@ const app_name    = process.env.APP_NAME;
 const env         = process.env.NODE_ENV;
 const host        = process.env.TOP_URL;
 const assets      = process.env.ASSET_PATH;
-let path_to_js, path_to_img, path_to_css;
+let path_to_js;
+let path_to_img;
+let path_to_css;
 if (env === 'development') {
   path_to_css = '/';
   path_to_js = '/'; 
