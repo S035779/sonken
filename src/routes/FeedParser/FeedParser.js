@@ -47,19 +47,20 @@ export default class FeedParser {
     switch(request) {
       case 'job/notes':
         {
-          const { users, categorys, filter, skip, limit, interval } = options;
+          const { users, categorys, filter, skip, limit, sort } = options;
           const isItems = filter && filter.isItems;
           const isImages = filter && filter.isImages;
+          const expire = filter && !R.isNil(filter.expire) ? filter.expire : Date.now();
           const conditions = isItems
           ? { 
             user:     { $in: users }
           , category: { $in: categorys }
-          , updated:  { $lt: Date.now() - interval }
+          , updated:  { $lt: expire }
           , items:    { $ne: [], $exists: true }
           } : {
             user:     { $in: users }
           , category: { $in: categorys }
-          , updated:  { $lt: Date.now() - interval }
+          , updated:  { $lt: expire }
           };
           const select = { user: 1, category: 1, url: 1 };
           const params = {
@@ -75,7 +76,7 @@ export default class FeedParser {
           const setNotes = objs => isItems ? hasNotes(objs) : objs;
           const setObject = R.map(doc => doc.toObject());
           const query = Note.find(conditions).select(select);
-          return query.populate(params).sort('-updated').skip(Number(skip)).limit(Number(limit)).exec()
+          return query.populate(params).sort({ updated: sort }).skip(Number(skip)).limit(Number(limit)).exec()
             .then(setObject)
             .then(setNotes);
         }
@@ -691,8 +692,8 @@ export default class FeedParser {
     }
   }
 
-  getJobNotes(users, categorys, filter, skip, limit, interval) {
-    return this.request('job/notes', { users, categorys, filter, skip, limit, interval });
+  getJobNotes(users, categorys, filter, skip, limit, sort) {
+    return this.request('job/notes', { users, categorys, filter, skip, limit, sort });
   }
 
   getJobNote(user, id) {
@@ -1056,8 +1057,8 @@ export default class FeedParser {
     );
   }
 
-  fetchJobNotes({ users, categorys, filter, skip, limit, interval }) {
-    return from(this.getJobNotes(users, categorys, filter, skip, limit, interval));
+  fetchJobNotes({ users, categorys, filter, skip, limit, sort }) {
+    return from(this.getJobNotes(users, categorys, filter, skip, limit, sort));
   }
 
   fetchJobNote({ user, id }) {

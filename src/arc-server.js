@@ -70,8 +70,7 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['closedmarchant', 'closedsellers']
-      , interval: updatedInterval * 60 * 1000
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 60))
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 60)), sort: 'desc'
       , filter: { isItems: true, isImages: true }
       }))
     , map(R.map(setQueue))
