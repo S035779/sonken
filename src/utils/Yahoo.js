@@ -748,7 +748,7 @@ class Yahoo {
   }
 
   setPerformance(items, obj) {
-    const isSeller  = _obj  => obj.title === _obj.title && obj.seller === _obj.seller;
+    const isSeller  = _obj  => obj.title === _obj.title;// && obj.seller === _obj.seller;
     const isSolds   = _objs => R.filter(_obj => isSeller(_obj), _objs);
     const getSolds  = _objs => _objs.length !== 0
       ? { sold: _objs.length }
