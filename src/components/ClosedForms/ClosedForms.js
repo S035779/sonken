@@ -35,8 +35,8 @@ class ClosedForms extends React.Component {
     , isRequest: false
     , isNotResult: false
     , isDownload: false
-    , loadingImages: false
-    , loadingDownload: false
+    , loadingImages: props.loadingImages
+    , loadingDownload: props.loadingDownload
     };
     this.formsRef = React.createRef();
     this.spn = Spinner.of('app');
@@ -56,15 +56,20 @@ class ClosedForms extends React.Component {
     const nextFilter      = nextProps.itemFilter;
     const nextNote        = nextProps.note;
     const nextPage        = this.state.page;
+    const nextLoadingDownload = nextProps.loadingDownload;
+    const nextLoadingImages   = nextProps.loadingImages;
     const prevAllAuction  = this.state.prevAllAuction;
     const prevNote        = this.state.note;
     const prevPage        = this.state.prevPage;
+    const prevLoadingDownload = this.state.loadingDownload;
+    const prevLoadingImages   = this.state.loadingImages;
     let newState;
     if(prevNote && (nextNote.items.length !== 0)) {
       if(nextNote._id !== prevNote._id) {
         //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage, resetFilter });
         this.formsRef.current.scrollTop = 0;
-        newState = R.merge({ note: nextNote, page: 1, prevPage: 1 }, resetFilter);
+        newState = R.merge({ note: nextNote, page: 1, prevPage: 1, loadingDownload: nextLoadingDownload
+        , loadingImages: nextLoadingImages }, resetFilter);
         this.setState(newState);
       } else if(prevPage !== nextPage) {
         //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
@@ -72,17 +77,23 @@ class ClosedForms extends React.Component {
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
-        newState = { note: setNote(nextNote), prevPage: nextPage };
+        newState = { note: setNote(nextNote), prevPage: nextPage, loadingDownload: nextLoadingDownload
+        , loadingImages: nextLoadingImages };
         this.setState(newState);
       } else if(!nextFilter.allAuction) {
         //std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
         this.formsRef.current.scrollTop = 0;
-        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: false };
+        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: false, loadingDownload: nextLoadingDownload
+        , loadingImages: nextLoadingImages };
         this.setState(newState);
       } else if(nextFilter.allAuction !== prevAllAuction) {
         //std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
         this.formsRef.current.scrollTop = 0;
-        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: true };
+        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: true, loadingDownload: nextLoadingDownload
+        , loadingImages: nextLoadingImages };
+        this.setState(newState);
+      } else if(nextLoadingDownload !== prevLoadingDownload || nextLoadingImages !== prevLoadingImages) {
+        newState = { loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages };
         this.setState(newState);
       }
     }
@@ -253,12 +264,12 @@ class ClosedForms extends React.Component {
           <div className={classes.wrapper}>
             <RssButton color={color} disabled={loadingImages} onClick={this.handleImages.bind(this)}
               classes={classes.button}>画像保存</RssButton>
-            {loadingImages && <CircularProgress size={24} className={classes.btnProgress} />}
+            {loadingImages && <CircularProgress color="inherit" size={24} className={classes.btnProgress} />}
           </div>
           <div className={classes.wrapper}>
             <RssButton color={color} disabled={loadingDownload} onClick={this.handleOpenDialog.bind(this, 'isDownload')}
               classes={classes.button}>ダウンロード</RssButton>
-            {loadingDownload && <CircularProgress size={24} className={classes.btnProgress} />}
+            {loadingDownload && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
           </div>
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber} 
             filter={filter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
@@ -340,6 +351,8 @@ ClosedForms.propTypes = {
 , images: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
+, loadingImages: PropTypes.bool.isRequired
+, loadingDownload: PropTypes.bool.isRequired
 , category: PropTypes.string.isRequired
 };
 
@@ -382,6 +395,6 @@ const styles = theme => ({
                 , wordBreak: 'keep-all' }
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 , wrapper:      { position: 'relative' }
-, btnProgress:  { position: 'absolute', color: theme.palette.common.white, top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
+, btnProgress:  { position: 'absolute', top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
 });
 export default withStyles(styles)(ClosedForms);

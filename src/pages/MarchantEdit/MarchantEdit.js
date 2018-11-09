@@ -10,8 +10,10 @@ class MarchantEdit extends React.Component {
     const { classes, user, note, category, file } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.attributes ? note.attributes.item.total : 0;
+    const cntSold = note.attributes ? note.attributes.sold.total : 0;
+    const loadingDownload = itemNumber !== cntSold;
     return <div className={classes.noteEdit}>
-      <RssForms user={user} note={note} category={category} itemNumber={itemNumber} file={file}>
+      <RssForms user={user} note={note} category={category} itemNumber={itemNumber} loadingDownload={loadingDownload} file={file}>
         <div className={classes.view}>
           <RssView note={note}/>
         </div>

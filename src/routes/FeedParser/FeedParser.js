@@ -194,8 +194,14 @@ export default class FeedParser {
           if(match) {
             params = R.merge(params, { match });
           }
-
-          const setCount = doc => isCount ? [{ _id: doc._id, counts: doc.items.length }] : doc;
+          const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
+          const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
+          const hasSold  = R.filter(isSold);
+          const hasArch  = R.filter(isArch);
+          const setSold  = R.compose(R.length, hasSold);
+          const setArch  = R.compose(R.length, hasArch);
+          const setCount = doc => isCount
+            ? [{ _id: doc._id, counts: R.length(doc.items), sold: setSold(doc.items), archive: setArch(doc.items) }] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
           const hasItems = R.filter(obj => obj.attributes ? R.lte(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
@@ -1184,6 +1190,7 @@ export default class FeedParser {
     return observables.pipe(
       map(setAttribute)
     , map(R.head)
+    , map(R.tap(console.log))
     );
   }
 
@@ -1261,7 +1268,10 @@ export default class FeedParser {
     const setItem = num => ({ total: num, count: inCounts(num) ? Number(skip) + Number(limit) : num });
     const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
-    const setAttributes = obj => ({ item: setItem(obj.counts), page: setPage(obj.counts) });
+    const setSold = num => ({ total: num });
+    const setArch = num => ({ total: num });
+    const setAttributes 
+      = obj => ({ item: setItem(obj.counts), page: setPage(obj.counts), sold: setSold(obj.sold), archive: setArch(obj.archive) });
     const setCounts = obj => R.merge(obj, { attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
     return results;

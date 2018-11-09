@@ -29,7 +29,7 @@ class RssForms extends React.Component {
     , isNotValid: false
     , isRequest: false
     , isDownload: false
-    , loadingDownload: false
+    , loadingDownload: props.loadingDownload
     , page: 1
     , prevPage: 1
     };
@@ -40,20 +40,24 @@ class RssForms extends React.Component {
   componentWillReceiveProps(nextProps) {
     const nextNote = nextProps.note;
     const nextPage = this.state.page
+    const nextLoadingDownload = nextProps.loadingDownload;
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
+    const prevLoadingDownload = this.state.loadingDownload;
     if(nextNote && (nextNote.items.length > 0)) {
       if(nextNote._id !== prevNote._id) {
         //std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.current.scrollTop = 0;
-        this.setState({ note: nextNote, page: 1, prevPage: 1 });
+        this.setState({ note: nextNote, page: 1, prevPage: 1, loadingDownload: nextLoadingDownload });
       } else if(prevPage !== nextPage) {
         //std.logInfo(RssForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
-        this.setState({ note: setNote(nextNote), prevPage: nextPage });
+        this.setState({ note: setNote(nextNote), prevPage: nextPage, loadingDownload: nextLoadingDownload });
+      } else if(prevLoadingDownload !== nextLoadingDownload) {
+        this.setState({ loadingDownload: nextLoadingDownload })
       }
     }
   }
@@ -230,7 +234,7 @@ class RssForms extends React.Component {
             ? ( <div className={classes.wrapper}>
               <RssButton color={color} disabled={loadingDownload} onClick={this.handleOpenDialog.bind(this, 'isDownload')}
                 classes={classes.button}>ダウンロード</RssButton>
-              {loadingDownload && <CircularProgress size={24} className={classes.btnProgress} />}
+              {loadingDownload && <CircularProgress color="inherit" size={24} className={classes.btnProgress} />}
               </div> )
             : null }
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber}
@@ -295,6 +299,7 @@ RssForms.propTypes = {
 , note: PropTypes.object.isRequired
 , file: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
+, loadingDownload: PropTypes.bool.isRequired
 , category: PropTypes.string.isRequired
 , children: PropTypes.object.isRequired
 };
@@ -334,7 +339,7 @@ const styles = theme => ({
                 , wordBreak: 'keep-all' }
 , text:         { marginLeft: theme.spacing.unit * 1.75 }
 , wrapper:      { position: 'relative' }
-, btnProgress:  { position: 'absolute', color: theme.palette.common.white, top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
+, btnProgress:  { position: 'absolute', top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
 , memo:         { display: 'flex', flexDirection: 'row'
                 , alignItems: 'stretch'
                 , height: columnHeight * 2, minHeight: columnHeight * 2

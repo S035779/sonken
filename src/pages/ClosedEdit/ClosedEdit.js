@@ -1,18 +1,24 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
+//import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
 import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedEdit extends React.Component {
   render() {
+    //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
     const { classes, user, note, category, filter, file, images } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.attributes ? note.attributes.item.total : 0;
     const perPage = note.attributes ? note.attributes.item.count : 0;
+    const cntSold = note.attributes ? note.attributes.sold.total : 0;
+    const cntArchive = note.attributes ? note.attributes.archive.total : 0;
+    const loadingDownload = itemNumber !== cntSold;
+    const loadingImages = itemNumber !== cntArchive;
     return <div className={classes.noteEdit}>
         <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}
-          perPage={perPage} file={file} images={images}/>
+          perPage={perPage} loadingImages={loadingImages} loadingDownload={loadingDownload} file={file} images={images}/>
       </div>;
   }
 }
