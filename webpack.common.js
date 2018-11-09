@@ -3,44 +3,66 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const common = {
   context: path.resolve(__dirname, 'src')
-, module: { rules: [{
-      enforce: 'pre'
-    , test: /\.js$/
-    , exclude: /node_modules/
-    , use: [{ loader: 'eslint-loader' }]
-    }
-  , {
-      test: /\.js$/
-    , exclude: /node_modules/
-    , use: [{
-        loader: 'babel-loader'
-      , options: { babelrc: false, presets: [
-            '@babel/preset-react', [ '@babel/preset-env', { 'modules': false
-          , 'targets': { 'ie': '11', 'chrome': '68', 'firefox': '61', 'edge': '42', 'node': '10' }
-          , 'useBuiltIns': 'usage'
-          }]]
-        , plugins: [
-            'react-hot-loader/babel'
-          , '@babel/proposal-object-rest-spread'
-          , '@babel/transform-member-expression-literals'
-          , '@babel/transform-property-literals' ]
-        , compact: true
-        }
-      }]
-    }
-  , { 
-      test: /\.css$/
-    , use: [{ loader: MiniCssExtractPlugin.loader }, { loader: 'css-loader' }]
-    }
-  , {
-      test: /\.(gif|jpg|png|ico)$/
-    , use: [{ loader: 'url-loader', options: { name: '[name].[ext]', limit: 10000 } }]
-    }
-  , {
-      test: /\.(eot|svg|ttf|woff|woff2)$/
-    , use: [{ loader: 'url-loader', options: { name: 'fonts/[name].[ext]', limit: 10000 } }]
-    }
-  ]}
+, module: {
+    rules: [
+      {
+        enforce: 'pre'
+      , test: /\.js$/
+      , exclude: /node_modules/
+      , use: [{ loader: 'eslint-loader' }]
+      }
+    , {
+        test: /\.js$/
+      , exclude: /node_modules/
+      , use: [{
+          loader: 'babel-loader'
+        , options: { 
+            babelrc: false
+          , presets: [
+              '@babel/preset-react'
+            , [
+                '@babel/preset-env'
+              , {
+                  'modules': false
+                , 'targets':
+                  { 'ie': '11', 'chrome': '68', 'firefox': '61', 'edge': '42', 'node': '10' }
+                , 'useBuiltIns': 'usage' 
+                }
+              ]
+            ]
+          , plugins: [
+              'react-hot-loader/babel'
+            , '@babel/proposal-object-rest-spread'
+            , '@babel/transform-member-expression-literals'
+            , '@babel/transform-property-literals'
+            ]
+          , compact: true
+          }
+        }]
+      }
+    , { 
+        test: /\.css$/
+      , use: [
+          { loader: MiniCssExtractPlugin.loader }
+        , { loader: 'css-loader' }
+        ]
+      }
+    , {
+        test: /\.(gif|jpe?g|png|ico|svg)$/
+      , use: [{
+          loader: 'url-loader'
+        , options: { name: '[name].[ext]', limit: 8192 }
+        }]
+      }
+    , {
+        test: /\.(eot|otf|svg|ttf|woff2?)$/
+      , use: [{
+          loader: 'file-loader'
+        , options: { name: '[name].[ext]', outputPath: 'assets/fonts/' }
+        }]
+      }
+    ]
+  }
 , plugins: [ new MiniCssExtractPlugin({ filename: '[name].bundle.css' }) ]
 , resolve: { alias: {
     Main:       path.resolve(__dirname, 'src'           )

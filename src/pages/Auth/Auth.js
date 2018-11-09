@@ -59,19 +59,19 @@ const barHeightSmDown = 56;
 const root =  { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh' };
 const styles = theme => ({
   authenticate: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}/${authImg})`
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}${authImg})`
   , backgroundSize: 'cover'
   })
 , management: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}/${mgmtImg})`
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}${mgmtImg})`
   , backgroundSize: 'cover'
   })
 , registration: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}${rgstImg})`
   , backgroundSize: 'cover'
   })
 , confirmation: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${image}/${cnfmImg})`
+    background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${image}${cnfmImg})`
   , backgroundSize: 'cover'
   })
 , authFrame:  { position: 'relative', height: '100%' } 

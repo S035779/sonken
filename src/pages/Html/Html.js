@@ -13,16 +13,15 @@ const app_name    = process.env.APP_NAME;
 const env         = process.env.NODE_ENV;
 const host        = process.env.TOP_URL;
 const assets      = process.env.ASSET_PATH;
-let path_to_js, path_to_img, path_to_css, roboto_font;
+let path_to_js, path_to_img, path_to_css;
 if (env === 'development') {
   path_to_js = '/'; 
   path_to_img = '/';
   path_to_css = '/';
-  roboto_font = path_to_css + 'app.bundle.css';
 } else if (env === 'staging' || env === 'production') {
   path_to_js  = host + assets + '/js/';
   path_to_img = host + assets + '/image/';
-  roboto_font = 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+  path_to_css = host + assets + '/css/';
 }
 
 class Html extends React.Component {
@@ -36,9 +35,9 @@ class Html extends React.Component {
       <meta charSet="utf-8" />
       <title>{app_name}</title>
       <link rel="shortcut icon" href={ path_to_img + Icon}/>
-      <link rel="stylesheet"    href={ roboto_font }/>
+      <link rel="stylesheet"    href={ path_to_css + 'app.bundle.css'}/>
       </head>
-      <body style={styles}>
+      <body>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>
       <style id="jss-server-side">{initialStyles}</style>
       <script id="initial-data" type="text/plain" data-init={initialData}></script>
@@ -54,9 +53,5 @@ Html.defaultProps = {};
 Html.propTypes = {
   initialData: PropTypes.string.isRequired
 , location: PropTypes.string.isRequired
-};
-
-const styles = {
-  fontFamily: 'Noto Sans JP, sans-serif'
 };
 export default Html;

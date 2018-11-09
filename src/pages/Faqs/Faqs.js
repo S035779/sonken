@@ -76,9 +76,11 @@ const faqs_btm = std.toRGBa('#4091ff', 0.8);
 const barHeightSmUp   = 64;
 const barHeightSmDown = 56;
 const styles = theme => ({
-  root:       { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
-              , background: `linear-gradient(180deg, ${faqs_top}, ${faqs_btm})` + `, url(${image + faqsImg})`
-              , backgroundSize: 'cover' }
+  root: {
+    width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
+  , background: `linear-gradient(180deg, ${faqs_top}, ${faqs_btm}), url(${image}${faqsImg})`
+  , backgroundSize: 'cover'
+  }
 , faqsFrame:  { position: 'relative', height: '100%' }
 , content:    { position: 'absolute', width: '100%', zIndex: 500, display: 'flex', flexDirection: 'column'
               , justifyContent: 'center', alignItems: 'center', height: `calc(100vh - ${barHeightSmDown}px)`

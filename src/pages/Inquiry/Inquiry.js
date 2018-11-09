@@ -70,9 +70,11 @@ const iqry_btm = std.toRGBa('#e4b1db', 0.8);
 const barHeightSmUp   = 64;
 const barHeightSmDown = 56;
 const styles = theme => ({
-  root:         { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
-                , background: `linear-gradient(315deg, ${iqry_top}, ${iqry_btm})` + `, url(${image + iqryImg})`
-                , backgroundSize: 'cover' }
+  root: {
+    width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
+  , background: `linear-gradient(315deg, ${iqry_top}, ${iqry_btm}), url(${image}${iqryImg})`
+  , backgroundSize: 'cover'
+  }
 , inquiryFrame: { position: 'relative', height: '100%' }
 , content:      { position: 'absolute', width: '100%' , display: 'flex', flexDirection: 'column'
                 , justifyContent: 'center', alignItems: 'center', height: `calc(100vh - ${barHeightSmDown}px)`
