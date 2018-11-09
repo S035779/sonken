@@ -1061,6 +1061,7 @@ export default class FeedParser {
     )(objs[2]);
     return observables.pipe(
       map(setAttribute)
+    //, map(R.tap(console.log))
     );
   }
 

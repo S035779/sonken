@@ -198,11 +198,9 @@ class RssSearch extends React.Component {
         <RssAddDialog title={title} open={isAddNote} user={user} category={category} categorys={categoryList(category)}
           onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
         <RssUploadDialog open={isUpload} title={'カテゴリ名'} user={user} category={category} 
-          name={newSubCategory} perPage={perPage} 
-          onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
+          name={newSubCategory} perPage={perPage} onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
         <RssDownloadDialog open={isDownload} title={'フォーマット'} user={user} category={category} 
-          name={downloadFormat} file={file}
-          onClose={this.handleCloseDialog.bind(this, 'isDownload')}/>
+          name={downloadFormat} file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')}/>
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
