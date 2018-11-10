@@ -1,19 +1,24 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { Redirect }     from 'react-router-dom';
-import { renderRoutes } from 'react-router-config';
-import { Container }    from 'flux/utils';
-import FaqAction        from 'Actions/FaqAction';
-import { getStores, getState }
-                        from 'Stores';
-import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { Redirect }             from 'react-router-dom';
+import { renderRoutes }         from 'react-router-config';
+import { Container }            from 'flux/utils';
+import FaqAction                from 'Actions/FaqAction';
+import { getStores, getState }  from 'Stores';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
-import FaqSearch        from 'Components/FaqSearch/FaqSearch';
-import FaqButtons       from 'Components/FaqButtons/FaqButtons';
-import FaqList          from 'Components/FaqList/FaqList';
+import { withStyles }           from '@material-ui/core/styles';
+import FaqSearch                from 'Components/FaqSearch/FaqSearch';
+import FaqButtons               from 'Components/FaqButtons/FaqButtons';
+import FaqList                  from 'Components/FaqList/FaqList';
 
 class Faq extends React.Component {
+  constructor(props) {
+    super(props);
+    this.spn = Spinner.of('app');
+  }
+
   static getStores() {
     return getStores(['faqStore']);
   }
@@ -23,14 +28,23 @@ class Faq extends React.Component {
   }
 
   static prefetch(options) {
+    const { admin } = options;
+    if(!admin) return null;
     std.logInfo(Faq.displayName, 'prefetch', options);
-    return FaqAction.presetAdmin(options.admin)
-      .then(() => FaqAction.prefetchFaqs());
+    return Promise.all([
+        FaqAction.presetAdmin(admin)
+      , FaqAction.prefetchFaqs()
+      ]);
   }
 
   componentDidMount() {
-    std.logInfo(Faq.displayName, 'fetch', 'Faq');
-    FaqAction.fetchFaqs(this.state.admin);
+    const { isAuthenticated, admin } = this.state;
+    if(isAuthenticated) {
+      this.spn.start();
+      std.logInfo(Faq.displayName, 'fetch', 'Faq');
+      FaqAction.fetchFaqs(admin)
+        .then(() => this.spn.stop());
+    }
   }
 
   faqPage(number, page) {
@@ -54,9 +68,7 @@ class Faq extends React.Component {
               <FaqButtons admin={admin} faqs={faqs} selectedFaqId={ids} />
               <FaqList admin={admin} faqs={faqs} selectedFaqId={ids} faqPage={page}/>
             </div>
-            <div className={classes.faqEdit}>
-              {route.routes ? renderRoutes(route.routes,{ admin, faq }) : null}
-            </div>
+            <div className={classes.faqEdit}>{route.routes ? renderRoutes(route.routes,{ admin, faq }) : null}</div>
           </div>
         </div> ) 
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} /> );

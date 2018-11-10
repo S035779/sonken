@@ -1,12 +1,12 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import FaqAction      from 'Actions/FaqAction';
-import std            from 'Utilities/stdutils';
+import React                from 'react';
+import PropTypes            from 'prop-types';
+import FaqAction            from 'Actions/FaqAction';
+import std                  from 'Utilities/stdutils';
+import Spinner              from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Button, Checkbox }
-                      from '@material-ui/core';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { withStyles }       from '@material-ui/core/styles';
+import { Button, Checkbox } from '@material-ui/core';
+import RssDialog            from 'Components/RssDialog/RssDialog';
 
 class FaqButtons extends React.Component {
   constructor(props) {
@@ -16,6 +16,7 @@ class FaqButtons extends React.Component {
     , isSuccess:          false
     , isNotValid:         false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
@@ -34,27 +35,31 @@ class FaqButtons extends React.Component {
 
   handleNew() {
     const { admin, selectedFaqId } = this.props;
-    std.logInfo(FaqButtons.displayName
-      , 'handleNew', selectedFaqId);
+    this.spn.start();
+    std.logInfo(FaqButtons.displayName, 'handleNew', selectedFaqId);
     FaqAction.create(admin, selectedFaqId)
       .then(() => this.setState({ isSuccess: true }))
+      .then(()    => this.spn.stop())
       .catch(err => {
         std.logError(FaqButtons.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
     this.setState({ checked: false });
   }
 
   handlePost() {
     const { admin, selectedFaqId } = this.props;
-    std.logInfo(FaqButtons.displayName
-      , 'handlePosted', selectedFaqId);
     if(window.confirm('Are you sure?')) {
+      this.spn.start();
+      std.logInfo(FaqButtons.displayName, 'handlePosted', selectedFaqId);
       FaqAction.createPost(admin, selectedFaqId)
         .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(FaqButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
       this.setState({ checked: false });
     }

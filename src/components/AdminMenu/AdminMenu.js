@@ -1,7 +1,9 @@
+import * as R           from 'ramda';
 import React            from 'react';
 import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { IconButton, Menu, TextField, Typography, MenuItem } from '@material-ui/core';
@@ -23,13 +25,16 @@ class AdminMenu extends React.Component {
     , preference:         props.preference
     , profile:            props.profile
     };
+    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
-    //std.logInfo(AdminMenu.displayName, 'fetch', 'Preference');
-    //std.logInfo(AdminMenu.displayName, 'fetch', 'Profile');
-    LoginAction.fetchPreference();
-    LoginAction.fetchProfile(this.props.admin);
+    std.logInfo(AdminMenu.displayName, 'fetch', 'Preference');
+    std.logInfo(AdminMenu.displayName, 'fetch', 'Profile');
+    Promise.all([
+      LoginAction.fetchPreference()
+    , LoginAction.fetchProfile(this.props.admin)
+    ]);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -39,115 +44,133 @@ class AdminMenu extends React.Component {
   }
 
   handleChangeProfile(name, event) {
-    //std.logInfo(AdminMenu.displayName, 'handleChangeProfile', name);
+    std.logInfo(AdminMenu.displayName, 'handleChangeProfile', name);
     const { profile } = this.state;
     switch(name) {
       case 'password':
-      case 'confirm_password': {
+      case 'confirm_password':
+        {
           this.setState({ [name]: event.target.value });
           break;
         }
-      default: {
-          this.setState({ profile: Object.assign({}, profile, { [name]: event.target.value }) });
+      default:
+        {
+          this.setState({ profile: R.merge(profile, { [name]: event.target.value }) });
           break;
         }
     }
   }
 
   handleChangePreference(name, event) {
-    //std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
+    std.logInfo(AdminMenu.displayName, 'handleChangePreference', name);
     const { preference } = this.state;
     switch(name) {
-      case 'url1': case 'url2': case 'url3': case 'url4': {
-          const advertisement = Object.assign({}, preference.advertisement, { [name]: event.target.value });
-          this.setState({ preference: Object.assign({}, preference, { advertisement }) });
+      case 'url1':
+      case 'url2':
+      case 'url3':
+      case 'url4':
+        {
+          const advertisement = R.merge(preference.advertisement, { [name]: event.target.value });
+          this.setState({ preference: R.merge(preference, { advertisement }) });
         }
         break;
-      case 'from': {
-          this.setState({ preference: Object.assign({}, preference, { [name]: event.target.value }) });
+      case 'from':
+        {
+          this.setState({ preference: R.merge(preference, { [name]: event.target.value }) });
           break;
         }
-      default: {
+      default:
+        {
           const number = Number(event.target.value);
-          const menu = preference.menu
-            .map(item => item.name === name ? Object.assign({}, item, { name, number }) : item );
-          this.setState({ preference: Object.assign({}, preference, { menu }) } );
+          const menu = preference.menu.map(item => item.name === name ? R.merge(item, { name, number }) : item );
+          this.setState({ preference: R.merge(preference, { menu }) } );
         }
         break;
     }
   }
 
   handleMenu(event) {
-    //std.logInfo(AdminMenu.displayName, 'handleMenu', event.currentTarget);
+    std.logInfo(AdminMenu.displayName, 'handleMenu', event.currentTarget);
     this.setState({ anchorEl: event.currentTarget });
   }
 
-  handleClose() {
-    //std.logInfo(AdminMenu.displayName, 'handleClose', name);
+  handleClose(name) {
+    std.logInfo(AdminMenu.displayName, 'handleClose', name);
     this.setState({ anchorEl: null });
   }
 
-  handleInitialize() {
-    //std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
+  handleInitialize(name) {
     const { admin } = this.props;
+    this.spn.start();
+    std.logInfo(AdminMenu.displayName, 'handleInitialize', name);
     LoginAction.createPreference(admin)
       .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(AdminMenu.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
   }
   
   handleOpenDialog(name) {
-    //std.logInfo(AdminMenu.displayName, 'handleOpenDialog', name);
+    std.logInfo(AdminMenu.displayName, 'handleOpenDialog', name);
     this.setState({ [name]: true });
   }
 
   handleCloseDialog(name) {
-    //std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
+    std.logInfo(AdminMenu.displayName, 'handleCloseDialog', name);
     this.setState({ [name]: false });
   }
 
   handleSubmitDialog(name) {
-    //std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
     const { profile, preference, password } = this.state;
     const { admin } = this.props;
     switch(name) {
       case 'isProfile':
-        if(this.isValidateProfile() && this.isChanged()) {
-          LoginAction.updateProfile(admin, password, profile)
-            .then(() => this.setState({ isSuccess: true }))
-            .catch(err => {
-              std.logError(AdminMenu.displayName, err.name, err.message);
-              this.setState({ isNotValid: true })
-            });
-        } else {
-          this.setState({ isNotValid: true });
+        {
+          if(this.isValidateProfile() && this.isChanged()) {
+            this.spn.start();
+            std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
+            LoginAction.updateProfile(admin, password, profile)
+              .then(() => this.setState({ isSuccess: true }))
+              .then(() => this.spn.stop())
+              .catch(err => {
+                std.logError(AdminMenu.displayName, err.name, err.message);
+                this.setState({ isNotValid: true });
+                this.spn.stop();
+              });
+          } else {
+            this.setState({ isNotValid: true });
+          }
+          break;
         }
-        break;
       case 'isPreference':
-        if(this.isValidatePreference() && this.isChanged()) {
-          LoginAction.updatePreference(admin, preference)
-            .then(() => this.setState({ isSuccess: true }))
-            .catch(err => {
-              std.logError(AdminMenu.displayName, err.name, err.message);
-              this.setState({ isNotValid: true })
-            });
-        } else {
-          this.setState({ isNotValid: true });
+        {
+          if(this.isValidatePreference() && this.isChanged()) {
+            this.spn.start();
+            std.logInfo(AdminMenu.displayName, 'handleSubmitDialog', name);
+            LoginAction.updatePreference(admin, preference)
+              .then(() => this.setState({ isSuccess: true }))
+              .then(() => this.spn.stop())
+              .catch(err => {
+                std.logError(AdminMenu.displayName, err.name, err.message);
+                this.setState({ isNotValid: true })
+                this.spn.stop();
+              });
+          } else {
+            this.setState({ isNotValid: true });
+          }
+          break;
         }
-        break;
     }
-    this.setState({ [name]: false });
   }
 
   isValidateProfile() {
     const { profile, password, confirm_password } = this.state;
     const { name, kana, email, phone } = profile;
-    return (password === confirm_password
-      && password !== '' && name !== '' && kana !== ''
-      && std.regexEmail(email) && std.regexNumber(phone)
-    );
+    return (password === confirm_password && password !== '' && name !== '' && kana !== '' && std.regexEmail(email)
+      && std.regexNumber(phone));
   }
 
   isValidatePreference() {
@@ -155,10 +178,7 @@ class AdminMenu extends React.Component {
     const { from, advertisement, menu } = preference;
     const { url1, url2, url3, url4 } = advertisement;
     const isNumber = menu.every(item => std.regexNumber(item.number));
-    return (std.regexEmail(from) 
-      && url1 !== '' && url2 !== '' && url3 !== '' && url4 !== ''
-      && isNumber
-    );
+    return (std.regexEmail(from) && url1 !== '' && url2 !== '' && url3 !== '' && url4 !== '' && isNumber);
   }
 
   isChanged() {
@@ -169,28 +189,16 @@ class AdminMenu extends React.Component {
     const { num1, num2, num3, num4 } = menu;
     const { preference } = this.props;
     const { profile } = this.props;
-    return (password === confirm_password
-      || profile.name !== name
-      || profile.kana !== kana
-      || profile.email !== email
-      || profile.phone !== phone
-      || preference.from !== from
-      || preference.advertisement.url1 !== url1
-      || preference.advertisement.url2 !== url2
-      || preference.advertisement.url3 !== url3
-      || preference.advertisement.url4 !== url4
-      || preference.menu.num1 !== num1
-      || preference.menu.num2 !== num2
-      || preference.menu.num3 !== num3
-      || preference.menu.num4 !== num4
-    );
+    return (password === confirm_password || profile.name !== name || profile.kana !== kana || profile.email !== email
+      || profile.phone !== phone || preference.from !== from || preference.advertisement.url1 !== url1
+      || preference.advertisement.url2 !== url2 || preference.advertisement.url3 !== url3 || preference.advertisement.url4 !== url4
+      || preference.menu.num1 !== num1 || preference.menu.num2 !== num2 || preference.menu.num3 !== num3
+      || preference.menu.num4 !== num4);
   }
 
   renderMenu(item, idx) {
     const title = `${item.name}登録数上限`;
-    return <TextField margin="dense"
-      value={Number(item.number)} key={idx}
-      onChange={this.handleChangePreference.bind(this, item.name)}
+    return <TextField margin="dense" value={Number(item.number)} key={idx} onChange={this.handleChangePreference.bind(this, item.name)}
       label={title} type="number" fullWidth />;
   }
 

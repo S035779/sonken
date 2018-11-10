@@ -87,17 +87,17 @@ class RssDownloadDialog extends React.Component {
     return <LoginFormDialog open={open} title={'ダウンロード'} onClose={this.handleCloseDialog.bind(this, 'isDownload')} >
         <FormControl component="fieldset" className={classes.column}>
           <TextField select autoFocus margin="dense" value={name} onChange={this.handleChangeSelect.bind(this, 'name')}
-            label={title} fullWidth>
-            {renderMenu}
-          </TextField>
+            label={title} fullWidth>{renderMenu}</TextField>
         </FormControl>
-        <RssButton color="success" onClick={this.handleDownload.bind(this)} classes={classes.button}>ダウンロード</RssButton>
-        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
-          内容に不備があります。もう一度確認してください。
-        </RssDialog>
-        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
-          要求を受け付けました。
-        </RssDialog>
+        <div className={classes.buttons}>
+          <RssButton color="success" onClick={this.handleDownload.bind(this)} classes={classes.button}>ダウンロード</RssButton>
+          <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
+            内容に不備があります。もう一度確認してください。
+          </RssDialog>
+          <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
+            要求を受け付けました。
+          </RssDialog>
+        </div>
       </LoginFormDialog>;
   }
 }
@@ -119,7 +119,10 @@ RssDownloadDialog.propTypes = {
 , file: PropTypes.object
 };
 
-const styles = {
-  input:      { display: 'none' }
-};
+const buttonWidth = 88;
+const styles = theme => ({
+  input:   { display: 'none' }
+, buttons: { flex: 0, display: 'flex', flexDirection: 'row' }
+, button:  { flex: 1, width: buttonWidth, margin: theme.spacing.unit /2, textAlign: 'center', wordBreak: 'keep-all', padding: 4 }
+});
 export default withStyles(styles)(RssDownloadDialog);

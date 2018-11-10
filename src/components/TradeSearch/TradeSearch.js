@@ -18,6 +18,7 @@ class TradeSearch extends React.Component {
     , isSuccess:  false
     , isNotValid: false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -44,18 +45,17 @@ class TradeSearch extends React.Component {
 
   handleDownload() {
     const { user, itemFilter, itemNumber } = this.props;
-    const spn = Spinner.of('app');
     if(itemNumber !== 0) {
-      spn.start();
+      this.spn.start();
       std.logInfo(TradeSearch.displayName, 'handleDownload', user);
       TradeAction.download(user, itemFilter)
         .then(() => this.downloadFile(this.props.file))
         .then(() => this.setState({ isSuccess: true }))
-        .then(() => spn.stop())
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(TradeSearch.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-          spn.stop();
+          this.spn.stop();
         });
     }
   }
@@ -65,17 +65,16 @@ class TradeSearch extends React.Component {
     const perPage = event.target.value;
     const maxNumber = Math.ceil(itemNumber / perPage);
     const number = 1;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(TradeSearch.displayName, 'handleChangeSelet', perPage);
     TradeAction.pagenation(user, { maxNumber, number, perPage })
       .then(() => NoteAction.fetchTraded(user, (number - 1) * perPage, perPage))
       .then(() => this.setState({ perPage }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(TradeSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
+        this.spn.stop();
       });
   }
 

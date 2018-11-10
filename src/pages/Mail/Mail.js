@@ -6,6 +6,7 @@ import { Container }            from 'flux/utils';
 import MailAction               from 'Actions/MailAction';
 import { getStores, getState }  from 'Stores';
 import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
 import MailSearch               from 'Components/MailSearch/MailSearch';
@@ -13,6 +14,11 @@ import MailButtons              from 'Components/MailButtons/MailButtons';
 import MailList                 from 'Components/MailList/MailList';
 
 class Mail extends React.Component {
+  constructor(props) {
+    super(props);
+    this.spn = Spinner.of('app');
+  }
+
   static getStores() {
     return getStores(['mailStore']);
   }
@@ -22,14 +28,23 @@ class Mail extends React.Component {
   }
 
   static prefetch(options) {
+    const { admin } = options;
+    if(!admin) return null;
     std.logInfo(Mail.displayName, 'prefetch', options);
-    return MailAction.presetAdmin(options.admin)
-      .then(() => MailAction.prefetchMails());
+    return Promise.all([
+        MailAction.presetAdmin(options.admin)
+      , MailAction.prefetchMails()
+      ]);
   }
 
   componentDidMount() {
-    std.logInfo(Mail.displayName, 'fetch', 'Mail');
-    MailAction.fetchMails(this.state.admin);
+    const { isAuthenticated, admin } = this.state;
+    if(isAuthenticated) {
+      this.spn.start();
+      std.logInfo(Mail.displayName, 'fetch', 'Mail');
+      MailAction.fetchMails(admin)
+        .then(() => this.spn.stop());
+    }
   }
 
   mailPage(number, page) {
@@ -53,9 +68,7 @@ class Mail extends React.Component {
               <MailButtons admin={admin} mails={mails} selectedMailId={ids} />
               <MailList admin={admin} mails={mails} selectedMailId={ids} mailPage={page}/>
             </div>
-            <div className={classes.mailEdit}>
-              {route.routes ? renderRoutes(route.routes,{ admin, mail }) : null}
-            </div>
+            <div className={classes.mailEdit}>{route.routes ? renderRoutes(route.routes,{ admin, mail }) : null}</div>
           </div>
         </div> )
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location } }} /> );

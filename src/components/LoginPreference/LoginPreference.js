@@ -41,11 +41,11 @@ class LoginPreference extends React.Component {
   }
 
   handleSubmitDialog(name) {
-    std.logInfo(LoginPreference.displayName, 'handleSubmitDialog', name);
     const { user } = this.props;
     const { profile } = this.state;
     if(name === 'isPreference') {
       if(this.isValidate() && this.isChanged()) {
+        std.logInfo(LoginPreference.displayName, 'handleSubmitDialog', name);
         LoginAction.updateProfile(user, null, profile)
           .then(() => this.setState({ isSuccess: true }))
           .catch(err => {

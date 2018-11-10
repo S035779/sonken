@@ -14,6 +14,11 @@ import RssButtons               from 'Components/RssButtons/RssButtons';
 import RssList                  from 'Components/RssList/RssList';
 
 class Dashboard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.spn = Spinner.of('app');
+  }
+
   static getStores() {
     return getStores(['dashboardStore']);
   }
@@ -40,13 +45,12 @@ class Dashboard extends React.Component {
       const skip = (page.number - 1) * page.perPage;
       const limit = page.perPage;
       const category = match.params.category || 'marchant';
-      const spn = Spinner.of('app');
-      spn.start();
+      this.spn.start();
       std.logInfo(Dashboard.displayName, 'fetch', category);
       Promise.all([
         NoteAction.fetchNotes(user, category, skip, limit)
       , NoteAction.fetchCategorys(user, category, skip, limit)
-      ]).then(() => spn.stop());
+      ]).then(() => this.spn.stop());
     }
   }
 
@@ -57,13 +61,12 @@ class Dashboard extends React.Component {
     if(user && (nextCategory !== prevCategory)) {
       const skip = (page.number - 1) * page.perPage;
       const limit = page.perPage;
-      const spn = Spinner.of('app');
-      spn.start();
+      this.spn.start();
       std.logInfo(Dashboard.displayName, 'update', nextCategory);
       Promise.all([
         NoteAction.fetchNotes(user, nextCategory, skip, limit)
       , NoteAction.fetchCategorys(user, nextCategory, skip, limit)
-      ]).then(() => spn.stop());
+      ]).then(() => this.spn.stop());
     }
   }
 

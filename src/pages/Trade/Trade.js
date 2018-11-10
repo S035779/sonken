@@ -13,6 +13,11 @@ import TradeSearch              from 'Components/TradeSearch/TradeSearch';
 import TradeFilter              from 'Components/TradeFilter/TradeFilter';
 
 class Trade extends React.Component {
+  constructor(props) {
+    super(props);
+    this.spn = Spinner.of('app');
+  }
+
   static getStores() {
     return getStores(['tradedNotesStore']);
   }
@@ -36,11 +41,10 @@ class Trade extends React.Component {
     if(!user) return;
     const skip = (page.number - 1) * page.perPage;
     const limit = page.perPage;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(Trade.displayName, 'fetch', 'trade');
     TradeAction.fetchTraded(user, skip, limit)
-      .then(() => spn.stop());
+      .then(() => this.spn.stop());
   }
 
   render() {

@@ -49,15 +49,11 @@ class AdminList extends React.Component {
         checked={checked.indexOf(user._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
         <ListItem dense button disableGutters component={Link} to={linkTo} className={classes.listItem}>
-          <Avatar className={classes.pinkAvatar}>
-            <Pageview />
-          </Avatar>
+          <Avatar className={classes.pinkAvatar}><Pageview /></Avatar>
           <ListItemText primary={name} secondary={updated} classes={textClass} />
         </ListItem>
       </Paper>
-      <div className={classes.notice}>
-        <Typography noWrap>{notice}</Typography>
-      </div>
+      <div className={classes.notice}><Typography noWrap>{notice}</Typography></div>
     </div>;
   }
 

@@ -1,7 +1,9 @@
+import * as R           from 'ramda';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import UserAction       from 'Actions/UserAction';
 import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { Typography }   from '@material-ui/core';
@@ -16,6 +18,7 @@ class ApprovalForms extends React.Component {
     , isSuccess:          false
     , isNotValid:         false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -25,30 +28,36 @@ class ApprovalForms extends React.Component {
 
   handleChangeInput(name, event) {
     const { user } = this.state;
-    this.setState({
-      user:   Object.assign({}, user, { [name]: event.target.value })
-    });
+    this.setState({ user: R.merge(user, { [name]: event.target.value }) });
   }
 
   handleApproval() {
     const { admin } = this.props;
     const { user } = this.state;
+    this.spn.start();
+    std.logInfo(ApprovalForms.displayName, 'handleApproval', user.user);
     UserAction.createApproval(admin, [user._id])
       .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(ApprovalForms.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
   }
 
   handleNotApproval() {
     const { admin } = this.props;
     const { user } = this.state;
+    this.spn.start();
+    std.logInfo(ApprovalForms.displayName, 'handleNotApproval', user.user);
     UserAction.deleteApproval(admin, [user._id])
       .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(ApprovalForms.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
   }
 

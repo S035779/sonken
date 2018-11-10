@@ -26,6 +26,7 @@ class RssSearch extends React.Component {
     , isUpload:     false
     , isDownload:   false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -37,16 +38,15 @@ class RssSearch extends React.Component {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
     if(request) {
-      const spn = Spinner.of('app');
-      spn.start();
+      this.spn.start();
       std.logInfo(RssSearch.displayName, 'Request', this.state.url);
       NoteAction.create(user, { url: request.url, category: request.category, title, categoryIds })
         .then(() => this.setState({ isSuccess: true, url: '' }))
-        .then(() => spn.stop())
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssSearch.displayName, err.name, err.message);
           this.setState({ isNotValid: true, url: '' });
-          spn.stop();
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });
@@ -71,17 +71,16 @@ class RssSearch extends React.Component {
     const perPage = event.target.value;
     const maxNumber = Math.ceil(noteNumber / perPage);
     const number = 1;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(RssSearch.displayName, 'handleChangeSelect', perPage);
     NoteAction.pagenation(user, { maxNumber, number, perPage })
       .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage))
       .then(() => this.setState({ perPage }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(RssSearch.displayName, err.name, err.message);
         this.setState({ isNotValid:  true });
-        spn.stop();
+        this.spn.stop();
       });
   }
 

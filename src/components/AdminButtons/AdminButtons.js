@@ -1,13 +1,12 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import UserAction     from 'Actions/UserAction';
-import std            from 'Utilities/stdutils';
-import Spinner        from 'Utilities/Spinner';
+import React                from 'react';
+import PropTypes            from 'prop-types';
+import UserAction           from 'Actions/UserAction';
+import std                  from 'Utilities/stdutils';
+import Spinner              from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Button, Checkbox }
-                      from '@material-ui/core';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { withStyles }       from '@material-ui/core/styles';
+import { Button, Checkbox } from '@material-ui/core';
+import RssDialog            from 'Components/RssDialog/RssDialog';
 
 class AdminButtons extends React.Component {
   constructor(props) {
@@ -17,6 +16,7 @@ class AdminButtons extends React.Component {
     , isSuccess: false
     , isNotValid: false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
@@ -34,17 +34,16 @@ class AdminButtons extends React.Component {
 
   handleSendmail() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName, 'handleSendmail', selectedUserId);
-    const spn = Spinner.of('app');
     if(window.confirm('Are you sure?')) {
-      spn.start();
+      this.spn.start();
+      std.logInfo(AdminButtons.displayName, 'handleSendmail', selectedUserId);
       UserAction.sendmail(admin, selectedUserId)
-        .then(()    => this.setState({ isSuccess: true }))
-        .then(()    => spn.stop())
-        .catch(err  => {
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
+        .catch(err => {
           std.logError(AdminButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-          spn.stop();
+          this.spn.stop();
         });
       this.setState({ checked: false });
     }
@@ -52,17 +51,16 @@ class AdminButtons extends React.Component {
 
   handleApproval() {
     const { admin, selectedUserId } = this.props;
-    std.logInfo(AdminButtons.displayName, 'handleApproval', selectedUserId);
-    const spn = Spinner.of('app');
     if(window.confirm('Are you sure?')) {
-      spn.start();
+      this.spn.start();
+      std.logInfo(AdminButtons.displayName, 'handleApproval', selectedUserId);
       UserAction.createApproval(admin, selectedUserId)
-        .then(()    => this.setState({ isSuccess: true }))
-        .then(()    => spn.stop())
-        .catch(err  => {
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
+        .catch(err => {
           std.logError(AdminButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true })
-          spn.stop();
+          this.spn.stop();
         });
       this.setState({ checked: false });
     }

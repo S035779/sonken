@@ -21,6 +21,7 @@ class RssButtons extends React.Component {
     , isNotValid: false
     , isDownload: false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
@@ -48,16 +49,15 @@ class RssButtons extends React.Component {
     const { user, selectedNoteId } = this.props;
     std.logInfo(RssButtons.displayName, 'handleDelete', selectedNoteId);
     if(window.confirm('Are you sure?')) {
-      const spn = Spinner.of('app');
-      spn.start();
+      this.spn.start();
       NoteAction.delete(user, selectedNoteId)
-        .then(()    => this.setState({ isSuccess: true }) )
-        .then(()    => this.setState({ checked: false })  )
-        .then(()    => spn.stop()                         )
+        .then(()    => this.setState({ isSuccess: true }))
+        .then(()    => this.setState({ checked: false }))
+        .then(()    => this.spn.stop())
         .catch(err  => {
           std.logError(RssButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-          spn.stop();
+          this.spn.stop();
         })
       ;
     }
@@ -66,17 +66,16 @@ class RssButtons extends React.Component {
   //handleDownload() {
   //  const { user, selectedNoteId, itemFilter } = this.props;
   //  std.logInfo(RssButtons.displayName, 'handleDownload', user);
-  //  const spn = Spinner.of('app');
   //  if(selectedNoteId.length) {
-  //    spn.start();
+  //    this.spn.start();
   //    NoteAction.downloadItems(user, selectedNoteId, itemFilter)
   //      .then(() => this.setState({ isSuccess: true }))
   //      .then(() => this.downloadFile(this.props.file))
-  //      .then(() => spn.stop())
+  //      .then(() => this.spn.stop())
   //      .catch(err => {
   //        std.logError(RssButtons.displayName, err.name, err.message);
   //        this.setState({ isNotValid: true });
-  //        spn.stop();
+  //        this.spn.stop();
   //      });
   //  }
   //}

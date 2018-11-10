@@ -12,10 +12,49 @@ export default class Spinner {
 
   start() {
     this.Spinner.spin(this.target);
+    this.el = document.createElement('div');
+    this.css(this.el, {
+      display: 'block' /* Hidden by default */
+    , position: 'fixed' /* Stay in place */
+    , zIndex: 2000 /* Sit on top */
+    , left: 0
+    , top: 0
+    , width: '100%' /* Full width */
+    , height: '100%' /* Full height */
+    , backgroundColor: 'rgba(0,0,0,0.2)' /* Black w/ opacity */
+    });
+    if(this.target) {
+      this.target.insertBefore(this.el, this.target.firstChild || null);
+    }
   }
 
   stop() {
     this.Spinner.stop();
+    if(this.el) {
+      if(this.el.parentNode) {
+        this.el.parentNode.removeChild(this.el);
+      }
+      this.el = undefined;
+    }
+  }
+
+  css(el, props) {
+    for (let prop in props) {
+      el.style[this.vendor(el, prop) || prop] = props[prop];
+    }
+    return el;
+  }
+
+  vendor(el, prop) {
+    if (el.style[prop] !== undefined) {
+      return prop;
+    }
+    // needed for transform properties in IE 9
+    const prefixed = 'ms' + prop.charAt(0).toUpperCase() + prop.slice(1);
+    if (el.style[prefixed] !== undefined) {
+      return prefixed;
+    }
+    return '';
   }
 }
 

@@ -53,56 +53,41 @@ class LoginProfile extends React.Component {
   }
 
   handleSubmitDialog(name) {
-    std.logInfo(LoginProfile.displayName, 'handleSubmitDialog', name);
     const { profile, password } = this.state;
     const { user } = this.props;
-    switch(name) {
-      case 'isProfile':
-        if(this.isValidate() && this.isChanged()) {
-          LoginAction.updateProfile(user, password, profile)
-            .then(() => this.setState({ isSuccess: true }))
-            .catch(err => {
-              std.logError(LoginProfile.displayName, err.name, err.message);
-              this.setState({ isNotValid: true });
-            });
-        } else {
-          this.setState({ isNotValid: true });
-        }
-        break;
+    if(name === 'isProfile') {
+      if(this.isValidate() && this.isChanged()) {
+        std.logInfo(LoginProfile.displayName, 'handleSubmitDialog', name);
+        LoginAction.updateProfile(user, password, profile)
+          .then(() => this.setState({ isSuccess: true }))
+          .catch(err => {
+            std.logError(LoginProfile.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+          });
+      } else {
+        this.setState({ isNotValid: true });
+      }
     }
-    this.setState({ [name]: false });
   }
 
   isValidate() {
-    const { name, kana, email, phone, password, confirm_password }
-      = this.state;
-    return (password === confirm_password
-      && password !== '' && name !== '' && kana !== ''
-      && std.regexEmail(email) && std.regexNumber(phone)
-    );
+    const { name, kana, email, phone, password, confirm_password } = this.state;
+    return (password === confirm_password && password !== '' && name !== '' && kana !== '' && std.regexEmail(email)
+      && std.regexNumber(phone));
   }
 
   isChanged() {
-    const { name, kana, email, phone, plan, password, confirm_password }
-      = this.state;
+    const { name, kana, email, phone, plan, password, confirm_password } = this.state;
     const { profile } = this.props;
-    return (password === confirm_password
-      || profile.name !== name
-      || profile.kana !== kana
-      || profile.email !== email
-      || profile.phone !== phone
-      || profile.plan !== plan
-    );
+    return (password === confirm_password || profile.name !== name || profile.kana !== kana || profile.email !== email
+      || profile.phone !== phone || profile.plan !== plan);
   }
 
   render() {
     //std.logInfo(LoginProfile.displayName, 'Props', this.props);
     //std.logInfo(LoginProfile.displayName, 'State', this.state);
     const { classes, open } = this.props;
-    const {
-      isNotValid, isSuccess
-    , name, user, kana, email, phone, password, confirm_password
-    } = this.state;
+    const { isNotValid, isSuccess, name, user, kana, email, phone, password, confirm_password } = this.state;
     return <LoginFormDialog isSubmit open={open} title={'プロファイル'} onClose={this.handleCloseDialog.bind(this, 'isProfile')}
         onSubmit={this.handleSubmitDialog.bind(this, 'isProfile')}>
         <Typography variant="h6" noWrap className={classes.title}>{name}（{user}）</Typography>

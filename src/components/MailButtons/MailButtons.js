@@ -1,12 +1,12 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import MailAction     from 'Actions/MailAction';
-import std            from 'Utilities/stdutils';
+import React                from 'react';
+import PropTypes            from 'prop-types';
+import MailAction           from 'Actions/MailAction';
+import std                  from 'Utilities/stdutils';
+import Spinner              from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Button, Checkbox }
-                      from '@material-ui/core';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { withStyles }       from '@material-ui/core/styles';
+import { Button, Checkbox } from '@material-ui/core';
+import RssDialog            from 'Components/RssDialog/RssDialog';
 
 class MailButtons extends React.Component {
   constructor(props) {
@@ -16,6 +16,7 @@ class MailButtons extends React.Component {
     , isSuccess: false
     , isNotValid: false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
@@ -33,24 +34,30 @@ class MailButtons extends React.Component {
 
   handleNew() {
     const { admin, selectedMailId } = this.props;
+    this.spn.start();
     std.logInfo(MailButtons.displayName, 'handleNew', selectedMailId);
     MailAction.create(admin, selectedMailId)
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(MailButtons.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
     this.setState({ checked: false });
   }
 
   handleSelect() {
     const { admin, selectedMailId } = this.props;
-    std.logInfo(MailButtons.displayName, 'handleSelected', selectedMailId);
     if(window.confirm('Are you sure?')) {
+      this.spn.start();
+      std.logInfo(MailButtons.displayName, 'handleSelected', selectedMailId);
       MailAction.createSelect(admin, selectedMailId)
         .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(MailButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
       this.setState({ checked: false });
     }

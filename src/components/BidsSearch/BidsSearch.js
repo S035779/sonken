@@ -18,6 +18,7 @@ class BidsSearch extends React.Component {
     , isSuccess:  false
     , isNotValid: false
     };
+    this.spn = Spinner.of('app');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -43,18 +44,17 @@ class BidsSearch extends React.Component {
 
   handleDownload() {
     const { user, itemFilter, itemNumber } = this.props;
-    const spn = Spinner.of('app');
     if(itemNumber !== 0) {
-      spn.start();
+      this.spn.start();
       std.logInfo(BidsSearch.displayName, 'handleDownload', user);
       BidsAction.download(user, itemFilter)
         .then(() => this.downloadFile(this.props.file))
         .then(() => this.setState({ isSuccess: true }))
-        .then(() => spn.stop())
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(BidsSearch.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-          spn.stop();
+          this.spn.stop();
         });
     }
   }
@@ -64,17 +64,16 @@ class BidsSearch extends React.Component {
     const perPage = event.target.value;
     const maxNumber = Math.ceil(itemNumber / perPage);
     const number = 1;
-    const spn = Spinner.of('app');
-    spn.start();
+    this.spn.start();
     std.logInfo(BidsSearch.displayName, 'handleChangeSelet', perPage);
     BidsAction.pagenation(user, { maxNumber, number, perPage })
       .then(() => NoteAction.fetchBided(user, (number - 1) * perPage, perPage))
       .then(() => this.setState({ perPage }))
-      .then(() => spn.stop())
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(BidsSearch.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
-        spn.stop();
+        this.spn.stop();
       });
   }
 

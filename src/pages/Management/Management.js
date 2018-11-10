@@ -6,6 +6,7 @@ import { Container }            from 'flux/utils';
 import UserAction               from 'Actions/UserAction';
 import { getStores, getState }  from 'Stores';
 import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
 import AdminSearch              from 'Components/AdminSearch/AdminSearch';
@@ -13,6 +14,11 @@ import AdminButtons             from 'Components/AdminButtons/AdminButtons';
 import AdminList                from 'Components/AdminList/AdminList';
 
 class Management extends React.Component {
+  constructor(props) {
+    super(props);
+    this.spn = Spinner.of('app');
+  }
+
   static getStores() {
     return getStores(['managementStore']);
   }
@@ -22,14 +28,22 @@ class Management extends React.Component {
   }
 
   static prefetch(options) {
+    const { admin } = options;
+    if(!admin) return null;
     std.logInfo(Management.displayName, 'prefetch', options);
-    return UserAction.presetAdmin(options.admin)
-      .then(() => UserAction.prefetchUsers());
+    return Promise.all([
+      UserAction.presetAdmin(admin)
+    , UserAction.prefetchUsers()
+    ]);
   }
 
   componentDidMount() {
-    std.logInfo(Management.displayName, 'fetch', 'Management');
-    UserAction.fetchUsers(this.state.admin);
+    const { isAuthenticated, admin } = this.state;
+    if(isAuthenticated) {
+      this.spn.start();
+      std.logInfo(Management.displayName, 'fetch', 'Management');
+      UserAction.fetchUsers(admin).then(() => this.spn.stop());
+    }
   }
 
   userPage(number, page) {

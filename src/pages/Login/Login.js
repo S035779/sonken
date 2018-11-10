@@ -1,13 +1,12 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { renderRoutes } from 'react-router-config';
-import { Container }    from 'flux/utils';
-import { getStores, getState }
-                        from 'Stores';
-import LoginAction      from 'Actions/LoginAction';
-//import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { renderRoutes }         from 'react-router-config';
+import { Container }            from 'flux/utils';
+import { getStores, getState }  from 'Stores';
+import LoginAction              from 'Actions/LoginAction';
+import std                      from 'Utilities/stdutils';
 
-import { withStyles }   from '@material-ui/core/styles';
+import { withStyles }           from '@material-ui/core/styles';
 
 class Login extends React.Component {
   static getStores() {
@@ -20,7 +19,7 @@ class Login extends React.Component {
 
   static prefetch(options) {
     const { user, admin } = options;
-    //std.logInfo(Login.displayName, 'prefetch', options);
+    std.logInfo(Login.displayName, 'prefetch', options);
     if(user) return LoginAction.presetUser(user);
     if(admin) return LoginAction.presetAdmin(admin);
   }
