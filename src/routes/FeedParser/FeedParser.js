@@ -96,8 +96,8 @@ export default class FeedParser {
         }
       case 'count/items':
         {
-          const { user } = options;
-          const conditions = { user };
+          const { user, category } = options;
+          const conditions = { user, category };
           const setIds = R.map(doc => doc._id);
           const query = Note.find(conditions);
           return query.exec()
@@ -110,8 +110,8 @@ export default class FeedParser {
         }
       case 'count/note':
         {
-          const { user } = options;
-          const conditions = { user };
+          const { user, category } = options;
+          const conditions = { user, category };
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
           const query = Note.find(conditions);
           return query.populate(params).sort('updated').countDocuments().exec();
@@ -839,12 +839,12 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  cntNote(user) {
-    return this.request('count/note', { user });
+  cntNote(user, category) {
+    return this.request('count/note', { user, category });
   }
 
-  cntItems(user) {
-    return this.request('count/items', { user });
+  cntItems(user, category) {
+    return this.request('count/items', { user, category });
   }
 
   cntItem(user, id, filter) { 
@@ -1061,7 +1061,7 @@ export default class FeedParser {
     )(objs[2]);
     return observables.pipe(
       map(setAttribute)
-    //, map(R.tap(console.log))
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -1191,7 +1191,7 @@ export default class FeedParser {
     return observables.pipe(
       map(setAttribute)
     , map(R.head)
-    //, map(R.tap(console.log))
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -1269,11 +1269,11 @@ export default class FeedParser {
     const setItem = num => ({ total: num, count: inCounts(num) ? Number(skip) + Number(limit) : num });
     const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
-    const setSold = num => ({ total: num });
-    const setArch = num => ({ total: num });
-    const setAttributes 
-      = obj => ({ item: setItem(obj.counts), page: setPage(obj.counts), sold: setSold(obj.sold), archive: setArch(obj.archive) });
-    const setCounts = obj => R.merge(obj, { attributes: setAttributes(_counts(obj._id)) });
+    const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts) });
+    const setPerfCount = obj => ({ sold: { total: obj.sold }, archive: { total: obj.archive } });
+    const setAttributes = obj => !R.isNil(obj.sold) || !R.isNil(obj.archive)
+      ? R.merge(setItemCount(obj), setPerfCount(obj)) : setItemCount(obj);
+    const setCounts = obj => R.merge(obj, { item_attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
     return results;
   }
@@ -1296,7 +1296,7 @@ export default class FeedParser {
     const page = { total: Math.ceil(counts / Number(limit)), count: inCounts
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(counts / Number(limit)) };
     const setItems = R.map(obj => obj.items);
-    const setNotes = objs => ([{ attributes: { item, page }, items: setItems(objs) }]);
+    const setNotes = objs => ([{ items_attributes: { item, page }, items: setItems(objs) }]);
     const results = objs => R.isNil(objs) ? [] : setNotes(objs);
     return results;
   }

@@ -85,6 +85,7 @@ class RssDownloadDialog extends React.Component {
     ];
     const renderMenu = formats ? formats.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     return <LoginFormDialog open={open} title={'ダウンロード'} onClose={this.handleCloseDialog.bind(this, 'isDownload')} >
+        <div className={classes.dialog}>
         <FormControl component="fieldset" className={classes.column}>
           <TextField select autoFocus margin="dense" value={name} onChange={this.handleChangeSelect.bind(this, 'name')}
             label={title} fullWidth>{renderMenu}</TextField>
@@ -97,6 +98,7 @@ class RssDownloadDialog extends React.Component {
           <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
             要求を受け付けました。
           </RssDialog>
+        </div>
         </div>
       </LoginFormDialog>;
   }
@@ -119,10 +121,12 @@ RssDownloadDialog.propTypes = {
 , file: PropTypes.object
 };
 
-const buttonWidth = 88;
+const columnHeight = 62;
 const styles = theme => ({
-  input:   { display: 'none' }
-, buttons: { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:  { flex: 1, width: buttonWidth, margin: theme.spacing.unit /2, textAlign: 'center', wordBreak: 'keep-all', padding: 4 }
+  input:    { display: 'none' }
+, dialog:   { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start'
+            , height: columnHeight, minHeight: columnHeight, boxSizing: 'border-box', padding: 5 }
+, buttons:  { flex: 0, display: 'flex', flexDirection: 'row' }
+, button:   { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all' }
 });
 export default withStyles(styles)(RssDownloadDialog);

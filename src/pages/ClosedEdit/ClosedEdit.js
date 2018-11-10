@@ -10,12 +10,12 @@ class ClosedEdit extends React.Component {
     //std.logInfo(ClosedEdit.displayName, 'Props', this.props);
     const { classes, user, note, category, filter, file, images } = this.props
     if(!note || !note._id) return null;
-    const itemNumber = note.attributes ? note.attributes.item.total : 0;
-    const perPage = note.attributes ? note.attributes.item.count : 0;
-    const cntSold = note.attributes ? note.attributes.sold.total : 0;
-    const cntArchive = note.attributes ? note.attributes.archive.total : 0;
-    const loadingDownload = itemNumber !== cntSold;
-    const loadingImages = itemNumber !== cntArchive;
+    const itemNumber = note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
+    const attrNumber = note.item_attributes && note.item_attributes.sold ? note.item_attributes.sold.total : 0;
+    const archNumber = note.item_attributes && note.item_attributes.archive ? note.item_attributes.archive.total : 0;
+    const loadingDownload = itemNumber !== attrNumber;
+    const loadingImages = itemNumber !== archNumber;
+    const perPage = note.item_attributes ? note.item_attributes.item.count : 0;
     return <div className={classes.noteEdit}>
         <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}
           perPage={perPage} loadingImages={loadingImages} loadingDownload={loadingDownload} file={file} images={images}/>

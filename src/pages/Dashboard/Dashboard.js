@@ -67,6 +67,8 @@ class Dashboard extends React.Component {
         NoteAction.fetchNotes(user, nextCategory, skip, limit)
       , NoteAction.fetchCategorys(user, nextCategory, skip, limit)
       ]).then(() => this.spn.stop());
+    } else {
+      this.setState({});
     }
   }
 
@@ -116,23 +118,20 @@ class Dashboard extends React.Component {
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const _note = _notes.find(obj => obj._id === _id);
-    const noteNumber = _notes.length;
+    const noteNumber = _note && _note.note_attributes && _note.note_attributes.note ? _note.note_attributes.note.total : 0; 
     return isAuthenticated
       ? ( <div className={classes.root}>
-          <RssSearch user={user} 
-            title={title} category={category} categorys={categorys} note={_note} file={file}
+          <RssSearch user={user} title={title} category={category} categorys={categorys} note={_note} file={file}
             notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
           <div className={classes.body}>
             <div className={classes.noteList}>
-              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids}
-                itemFilter={filter} />
-              <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId}
-                selectedNoteId={ids} notePage={page}/>
+              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} itemFilter={filter} />
+              <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
+                notePage={page}/>
             </div>
-            <div className={classes.noteEdit}>{ route.routes 
-              ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images })
-              : null
-            }</div>
+            <div className={classes.noteEdit}>
+              { route.routes ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images }) : null }
+            </div>
           </div>
         </div> )
       : ( <Redirect to={{ pathname: '/login/authenticate', state: { from: location }}}/> );

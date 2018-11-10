@@ -38,7 +38,7 @@ LoginFormDialog.propTypes = {
 , onClose: PropTypes.func.isRequired
 , onSubmit: PropTypes.func
 , open: PropTypes.bool.isRequired
-, children: PropTypes.array.isRequired
+, children: PropTypes.node.isRequired
 , title: PropTypes.string.isRequired
 , isSubmit: PropTypes.bool
 , classes: PropTypes.object

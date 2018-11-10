@@ -160,14 +160,10 @@ RssButtons.propTypes = {
 const titleHeight   = 62;
 const checkboxWidth = 38;
 const styles = theme => ({
-  noteButtons:  { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch', justifyContent: 'flex-start' 
-                , height: titleHeight, minHeight: titleHeight
-                , boxSizing: 'border-box'
-                , padding: '5px' }
+  noteButtons:  { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start'
+                , height: titleHeight, minHeight: titleHeight, boxSizing: 'border-box', padding: 5 }
 , checkbox:     { flex: 0, minWidth: checkboxWidth }
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:       { flex: 1, margin: theme.spacing.unit
-                , wordBreak: 'keep-all' }
+, button:       { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all' }
 });
 export default withStyles(styles)(RssButtons);
