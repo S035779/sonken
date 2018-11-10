@@ -1,3 +1,4 @@
+import * as R                   from 'ramda';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -67,8 +68,6 @@ class Dashboard extends React.Component {
         NoteAction.fetchNotes(user, nextCategory, skip, limit)
       , NoteAction.fetchCategorys(user, nextCategory, skip, limit)
       ]).then(() => this.spn.stop());
-    } else {
-      this.setState({});
     }
   }
 
@@ -118,7 +117,8 @@ class Dashboard extends React.Component {
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const _note = _notes.find(obj => obj._id === _id);
-    const noteNumber = _note && _note.note_attributes && _note.note_attributes.note ? _note.note_attributes.note.total : 0; 
+    const __note = R.head(_notes);
+    const noteNumber = __note && __note.note_attributes && __note.note_attributes.note ? __note.note_attributes.note.total : 0; 
     return isAuthenticated
       ? ( <div className={classes.root}>
           <RssSearch user={user} title={title} category={category} categorys={categorys} note={_note} file={file}

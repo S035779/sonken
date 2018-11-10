@@ -30,6 +30,7 @@ class RssSearch extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    //std.logInfo(RssSearch.displayName, 'Props', nextProps);
     const { notePage } = nextProps;
     this.setState({ perPage: notePage.perPage });
   }
