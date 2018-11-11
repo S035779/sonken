@@ -12,14 +12,15 @@ import mgmtImg          from 'Assets/image/full-screen-image-1.jpg';
 import rgstImg          from 'Assets/image/bg5.jpg';
 import cnfmImg          from 'Assets/image/bg4.jpg';
 
-const env = process.env.NODE_ENV || 'development';
-const assets = process.env.ASSET_URL;
+const node_env  = process.env.NODE_ENV || 'development';
+const asetPath  = process.env.ASSET_URL;
+const rootPath  = process.env.PLATFORM === 'local' ? '/' : '';
 let image;
-if(env === 'development') {
-  image = assets + '/';
+if(node_env === 'development') {
+  image = asetPath + rootPath;
 } else 
-if(env === 'production' || env === 'staging') {
-  image = assets + '/image/';
+if(node_env === 'production' || node_env === 'staging') {
+  image = asetPath + '/image' + rootPath;
 }
 
 class Auth extends React.Component {
@@ -32,9 +33,7 @@ class Auth extends React.Component {
       <CssBaseline />
       <div className={classes.authFrame}>
         <LoginHeader />
-        <div className={classes.content}>
-        { renderRoutes(route.routes) }
-        </div>
+        <div className={classes.content}>{ renderRoutes(route.routes) }</div>
       </div>
       </ErrorBoundary>
     </div>;

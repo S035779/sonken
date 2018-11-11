@@ -13,14 +13,15 @@ import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader              from 'Components/LoginHeader/LoginHeader';
 import iqryImg                  from 'Assets/image/bg6.jpg';
 
-const env = process.env.NODE_ENV || 'development';
-const assets = process.env.ASSET_URL;
+const node_env = process.env.NODE_ENV || 'development';
+const asetPath = process.env.ASSET_URL;
+const rootPath = process.env.PLATFORM === 'local' ? '/' : '';
 let image;
-if(env === 'development') {
-  image = assets + '/';
+if(node_env === 'development') {
+  image = asetPath + rootPath;
 } else
-if(env === 'production' || env === 'staging') {
-  image = assets + '/image/';
+if(node_env === 'production' || node_env === 'staging') {
+  image = asetPath + '/image' + rootPath;
 }
 
 class Inquiry extends React.Component {
