@@ -14,11 +14,6 @@ import MailButtons              from 'Components/MailButtons/MailButtons';
 import MailList                 from 'Components/MailList/MailList';
 
 class Mail extends React.Component {
-  constructor(props) {
-    super(props);
-    this.spn = Spinner.of('app');
-  }
-
   static getStores() {
     return getStores(['mailStore']);
   }
@@ -38,6 +33,7 @@ class Mail extends React.Component {
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
@@ -45,6 +41,10 @@ class Mail extends React.Component {
       MailAction.fetchMails(admin)
         .then(() => this.spn.stop());
     }
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   mailPage(number, page) {

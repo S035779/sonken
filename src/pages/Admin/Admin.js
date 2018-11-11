@@ -1,14 +1,13 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { renderRoutes } from 'react-router-config';
-import { Container }    from 'flux/utils';
-import { getStores, getState }
-                        from 'Stores';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { renderRoutes }         from 'react-router-config';
+import { Container }            from 'flux/utils';
+import { getStores, getState }  from 'Stores';
 
-import { withStyles }   from '@material-ui/core/styles';
-import { CssBaseline }  from '@material-ui/core';
-import AdminHeader      from 'Components/AdminHeader/AdminHeader';
-import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
+import { withStyles }           from '@material-ui/core/styles';
+import { CssBaseline }          from '@material-ui/core';
+import AdminHeader              from 'Components/AdminHeader/AdminHeader';
+import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
 
 class Admin extends React.Component {
   static getStores() {

@@ -14,11 +14,6 @@ import AdminButtons             from 'Components/AdminButtons/AdminButtons';
 import AdminList                from 'Components/AdminList/AdminList';
 
 class Management extends React.Component {
-  constructor(props) {
-    super(props);
-    this.spn = Spinner.of('app');
-  }
-
   static getStores() {
     return getStores(['managementStore']);
   }
@@ -38,12 +33,17 @@ class Management extends React.Component {
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
       std.logInfo(Management.displayName, 'fetch', 'Management');
       UserAction.fetchUsers(admin).then(() => this.spn.stop());
     }
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   userPage(number, page) {

@@ -20,7 +20,8 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(!this.state.isAuthenticated) LoginAction.autologin();
+    const { isAuthenticated } = this.state;
+    if(!isAuthenticated) LoginAction.autologin();
   }
 
   render() {

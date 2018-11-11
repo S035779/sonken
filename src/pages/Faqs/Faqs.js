@@ -1,18 +1,18 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { renderRoutes } from 'react-router-config';
-import { Redirect }     from 'react-router-dom';
-import { Container }    from 'flux/utils';
-import { getStores, getState }
-                        from 'Stores';
-import FaqAction        from 'Actions/FaqAction';
-import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { renderRoutes }         from 'react-router-config';
+import { Redirect }             from 'react-router-dom';
+import { Container }            from 'flux/utils';
+import { getStores, getState }  from 'Stores';
+import FaqAction                from 'Actions/FaqAction';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
-import { CssBaseline }  from '@material-ui/core';
-import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
-import LoginHeader      from 'Components/LoginHeader/LoginHeader';
-import faqsImg          from 'Assets/image/bg7.jpg';
+import { withStyles }           from '@material-ui/core/styles';
+import { CssBaseline }          from '@material-ui/core';
+import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
+import LoginHeader              from 'Components/LoginHeader/LoginHeader';
+import faqsImg                  from 'Assets/image/bg7.jpg';
 
 const env = process.env.NODE_ENV || 'development';
 const assets = process.env.ASSET_URL;
@@ -34,16 +34,30 @@ class Faqs extends React.Component {
   }
 
   static prefetch(options) {
+    const { user } = options;
+    if(!user) return null;
     std.logInfo(Faqs.displayName, 'prefetch', options)
-    return FaqAction.presetUser(options.user)
-      .then(() => FaqAction.prefetchPostedFaqs());
+    return Promise.all([
+        FaqAction.presetUser(user)
+      , FaqAction.prefetchPostedFaqs()
+      ]);
   }
 
   componentDidMount() {
-    std.logInfo(Faqs.displayName, 'fetch', 'Faqs');
-    FaqAction.fetchPostedFaqs();
+    this.spn = Spinner.of('app');
+    const { isAuthenticated } = this.state;
+    if(isAuthenticated) {
+      this.spn.start();
+      std.logInfo(Faqs.displayName, 'fetch', 'Faqs');
+      FaqAction.fetchPostedFaqs()
+        .then(() => this.spn.stop());
+    }
   }
 
+  componentWillUnmount() {
+    this.spn.stop();
+  }
+  
   render() {
     //std.logInfo(Faqs.displayName, 'State', this.state);
     //std.logInfo(Faqs.displayName, 'Props', this.props);

@@ -28,14 +28,8 @@ class LoginMgmt extends React.Component {
     event.preventDefault();
     const { username, password, checked } = this.state;
     LoginAction.authenticate(username, password, true, checked)
-      .then(() => {
-        if(this.props.isAuthenticated) return LoginAction.presetAdmin(username);
-        this.setState({ isNotValid: true });
-        return null;
-      })
-      .then(() => {
-        if(this.props.isAuthenticated) this.setState({ redirectToManagement: true });
-      })
+      .then(() => this.props.isAuthenticated ? LoginAction.presetAdmin(username) : this.setState({ isNotValid: true }))
+      .then(() => this.props.isAuthenticated ? this.setState({ redirectToManagement: true }) : null)
       .catch(err => {
         std.logError(LoginMgmt.displayName, err.name, err.message);
         this.setState({ isNotValid: true });

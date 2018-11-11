@@ -15,11 +15,6 @@ import RssButtons               from 'Components/RssButtons/RssButtons';
 import RssList                  from 'Components/RssList/RssList';
 
 class Dashboard extends React.Component {
-  constructor(props) {
-    super(props);
-    this.spn = Spinner.of('app');
-  }
-
   static getStores() {
     return getStores(['dashboardStore']);
   }
@@ -40,6 +35,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     const { match } = this.props;
     const { isAuthenticated, user, page } = this.state;
     if(isAuthenticated) {
@@ -53,6 +49,10 @@ class Dashboard extends React.Component {
       , NoteAction.fetchCategorys(user, category, skip, limit)
       ]).then(() => this.spn.stop());
     }
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {

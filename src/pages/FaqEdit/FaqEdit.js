@@ -1,12 +1,13 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import std            from 'Utilities/stdutils';
-import FaqAction      from 'Actions/FaqAction';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import FaqAction                from 'Actions/FaqAction';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import EditBody       from 'Components/EditBody/EditBody';
-import EditButtons    from 'Components/EditButtons/EditButtons';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { withStyles }           from '@material-ui/core/styles';
+import EditBody                 from 'Components/EditBody/EditBody';
+import EditButtons              from 'Components/EditButtons/EditButtons';
+import RssDialog                from 'Components/RssDialog/RssDialog';
 
 class FaqEdit extends React.Component {
   constructor(props) {
@@ -18,6 +19,14 @@ class FaqEdit extends React.Component {
     , isSuccess:  false
     , isNotValid: false
     };
+  }
+
+  componentDidMount() {
+    this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -42,25 +51,31 @@ class FaqEdit extends React.Component {
   handleDraft() {
     const { admin } = this.props;
     const { _id } = this.state.faq;
+    this.spn.start();
     std.logInfo(FaqEdit.displayName, 'handleDraft', _id);
     FaqAction.deletePost(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(FaqEdit.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
   }
 
   handleSave() {
-    std.logInfo(FaqEdit.displayName, 'handleSave', this.state.faq);
     const { admin } = this.props;
     const { _id, title, body } = this.state.faq;
     if(this.isValidate() && this.isChanged()) {
+      this.spn.start();
+      std.logInfo(FaqEdit.displayName, 'handleSave', this.state.faq);
       FaqAction.update(admin, _id, { title, body })
         .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(FaqEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });
@@ -68,30 +83,36 @@ class FaqEdit extends React.Component {
   }
 
   handleDelete() {
-    std.logInfo(FaqEdit.displayName, 'handleDelete', this.state.faq);
     const { admin } = this.props;
     const { _id } = this.state.faq;
     if(window.confirm('Are you sure?')) {
+      this.spn.start();
+      std.logInfo(FaqEdit.displayName, 'handleDelete', this.state.faq);
       FaqAction.delete(admin, [_id])
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(FaqEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     }
   }
 
   handleChangeFile(file) {
-    std.logInfo(FaqEdit.displayName, 'handleChangeFile', file);
-    if(!file) return;
     const { admin } = this.props;
     const { _id, title, body } = this.state.faq;
+    if(!file) return;
     if(this.isValidate()) {
+      this.spn.start();
+      std.logInfo(FaqEdit.displayName, 'handleChangeFile', file);
       FaqAction.update(admin, _id, { title, body })
         .then(() => FaqAction.upload(admin, _id, file))
         .then(() => this.setState({ isSuccess: true, isAttached: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(FaqEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });

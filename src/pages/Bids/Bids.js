@@ -13,11 +13,6 @@ import BidsSearch               from 'Components/BidsSearch/BidsSearch';
 import BidsFilter               from 'Components/BidsFilter/BidsFilter';
 
 class Bids extends React.Component {
-  constructor(props) {
-    super(props);
-    this.spn = Spinner.of('app');
-  }
-
   static getStores() {
     return getStores(['bidedNotesStore']);
   }
@@ -37,6 +32,7 @@ class Bids extends React.Component {
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     const { user, page } = this.state;
     if(!user) return;
     const skip = (page.number - 1) * page.perPage;
@@ -45,6 +41,10 @@ class Bids extends React.Component {
     std.logInfo(Bids.displayName, 'fetch', 'bids');
     BidsAction.fetchBided(user, skip, limit)
       .then(() => this.spn.stop());
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   render() {

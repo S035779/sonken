@@ -14,11 +14,6 @@ import FaqButtons               from 'Components/FaqButtons/FaqButtons';
 import FaqList                  from 'Components/FaqList/FaqList';
 
 class Faq extends React.Component {
-  constructor(props) {
-    super(props);
-    this.spn = Spinner.of('app');
-  }
-
   static getStores() {
     return getStores(['faqStore']);
   }
@@ -38,6 +33,7 @@ class Faq extends React.Component {
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
@@ -45,6 +41,10 @@ class Faq extends React.Component {
       FaqAction.fetchFaqs(admin)
         .then(() => this.spn.stop());
     }
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   faqPage(number, page) {

@@ -1,18 +1,17 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { renderRoutes } from 'react-router-config';
-import { Redirect }     from 'react-router-dom';
-import { Container }    from 'flux/utils';
-import { getStores, getState }
-                        from 'Stores';
-import LoginAction      from 'Actions/LoginAction';
-import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { renderRoutes }         from 'react-router-config';
+import { Redirect }             from 'react-router-dom';
+import { Container }            from 'flux/utils';
+import { getStores, getState }  from 'Stores';
+import LoginAction              from 'Actions/LoginAction';
+import std                      from 'Utilities/stdutils';
 
-import { withStyles }   from '@material-ui/core/styles';
-import { CssBaseline }  from '@material-ui/core';
-import ErrorBoundary    from 'Components/ErrorBoundary/ErrorBoundary';
-import LoginHeader      from 'Components/LoginHeader/LoginHeader';
-import iqryImg          from 'Assets/image/bg6.jpg';
+import { withStyles }           from '@material-ui/core/styles';
+import { CssBaseline }          from '@material-ui/core';
+import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
+import LoginHeader              from 'Components/LoginHeader/LoginHeader';
+import iqryImg                  from 'Assets/image/bg6.jpg';
 
 const env = process.env.NODE_ENV || 'development';
 const assets = process.env.ASSET_URL;
@@ -34,8 +33,10 @@ class Inquiry extends React.Component {
   }
 
   static prefetch(options) {
+    const { user } = options;
+    if(!user) return null;
     std.logInfo(Inquiry.displayName, 'prefetch', options);
-    return LoginAction.presetUser(options.user);
+    return LoginAction.presetUser(user);
   }
 
   render() {

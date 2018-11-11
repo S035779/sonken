@@ -1,12 +1,13 @@
-import React          from 'react';
-import PropTypes      from 'prop-types';
-import std            from 'Utilities/stdutils';
-import MailAction     from 'Actions/MailAction';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import MailAction               from 'Actions/MailAction';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles } from '@material-ui/core/styles';
-import EditBody       from 'Components/EditBody/EditBody';
-import EditButtons    from 'Components/EditButtons/EditButtons';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { withStyles }           from '@material-ui/core/styles';
+import EditBody                 from 'Components/EditBody/EditBody';
+import EditButtons              from 'Components/EditButtons/EditButtons';
+import RssDialog                from 'Components/RssDialog/RssDialog';
 
 class MailEdit extends React.Component {
   constructor(props) {
@@ -20,6 +21,14 @@ class MailEdit extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
+  }
+
   componentWillReceiveProps(nextProps) {
     //std.logInfo(MailEdit.displayName, 'Props', nextProps);
     const { mail } = nextProps;
@@ -27,7 +36,7 @@ class MailEdit extends React.Component {
   }
 
   handleChangeTitle(title) {
-    std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
+    //std.logInfo(MailEdit.displayName, 'handleChangeTitle', title);
     const { mail } = this.state;
     this.setState({ mail: Object.assign({}, mail, { title }) });
   }
@@ -35,32 +44,38 @@ class MailEdit extends React.Component {
   handleChangeBody(event) {
     const { mail } = this.state;
     const body = event.target.value;
-    std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
+    //std.logInfo(MailEdit.displayName, 'handleChangeBody', body);
     this.setState({ mail: Object.assign({}, mail, { body }) });
   }
 
   handleDraft() {
     const { admin } = this.props;
     const { _id } = this.state.mail;
-    //std.logInfo(MailEdit.displayName, 'handleDraft', _id);
+    this.spn.start();
+    std.logInfo(MailEdit.displayName, 'handleDraft', _id);
     MailAction.deleteSelect(admin, [_id])
       .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
       .catch(err => {
         std.logError(MailEdit.displayName, err.name, err.message);
         this.setState({ isNotValid: true });
+        this.spn.stop();
       });
   }
 
   handleSave() {
-    std.logInfo(MailEdit.displayName, 'handleSave', this.state.mail);
     const { admin } = this.props;
     const { _id, title, body } = this.state.mail;
     if(this.isValidate() && this.isChanged()) {
+      this.spn.start();
+      std.logInfo(MailEdit.displayName, 'handleSave', this.state.mail);
       MailAction.update(admin, _id, { title, body })
         .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(MailEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });
@@ -68,30 +83,36 @@ class MailEdit extends React.Component {
   }
 
   handleDelete() {
-    std.logInfo(MailEdit.displayName, 'handleDelete', this.state.mail);
     const { admin } = this.props;
     const { _id } = this.state.mail;
     if(window.confirm('Are you sure?')) {
+      this.spn.start();
+      std.logInfo(MailEdit.displayName, 'handleDelete', this.state.mail);
       MailAction.delete(admin, [_id])
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(MailEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     }
   }
 
   handleChangeFile(file) {
-    std.logInfo(MailEdit.displayName, 'handleChangeFile', file);
     if(!file) return;
     const { admin } = this.props;
     const { _id, title, body } = this.state.mail;
     if(this.isValidate()) {
+      this.spn.start();
+      std.logInfo(MailEdit.displayName, 'handleChangeFile', file);
       MailAction.update(admin, _id, { title, body })
         .then(() => MailAction.upload(admin, _id, file))
         .then(() => this.setState({ isSuccess: true, isAttached: true }))
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(MailEdit.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
+          this.spn.stop();
         });
     } else {
       this.setState({ isNotValid: true });

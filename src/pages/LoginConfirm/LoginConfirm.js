@@ -1,14 +1,15 @@
-import React            from 'react';
-import PropTypes        from 'prop-types';
-import { withRouter }   from 'react-router-dom';
-import LoginAction      from 'Actions/LoginAction';
-import std              from 'Utilities/stdutils';
+import React                    from 'react';
+import PropTypes                from 'prop-types';
+import { withRouter }           from 'react-router-dom';
+import LoginAction              from 'Actions/LoginAction';
+import std                      from 'Utilities/stdutils';
+import Spinner                  from 'Utilities/Spinner';
 
-import { withStyles }   from '@material-ui/core/styles';
+import { withStyles }           from '@material-ui/core/styles';
 import { Typography, Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle }
-                        from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssInput         from 'Components/RssInput/RssInput';
+                                from '@material-ui/core';
+import RssButton                from 'Components/RssButton/RssButton';
+import RssInput                 from 'Components/RssInput/RssInput';
 
 class LoginConfirm extends React.Component {
   constructor(props) {
@@ -23,8 +24,11 @@ class LoginConfirm extends React.Component {
   }
 
   comopnentDidMount() {
+    this.spn = Spinner.of('app');
+    this.spn.start();
     std.logInfo(LoginConfirm.displayName, 'fetch', 'Preference');
-    LoginAction.fetchPreference();
+    LoginAction.fetchPreference()
+      .then(() => this.spn.stop());
   }
 
   handleClose(name) {
@@ -43,9 +47,10 @@ class LoginConfirm extends React.Component {
   }
 
   handleSubmit() {
-    std.logInfo(LoginConfirm.displayName, 'handleSubmit', this.state);
     const { email, phone } = this.state;
     const newPassword = std.rndPassword(16);
+    this.spn.start()
+    std.logInfo(LoginConfirm.displayName, 'handleSubmit', this.state);
     LoginAction.confirmation(email, phone)
     .then(() => {
       if(this.props.user) {
@@ -55,9 +60,11 @@ class LoginConfirm extends React.Component {
         this.setState({ openedIncorrect: true });
       }
     })
+    .then(() => this.spn.stop())
     .catch(err => {
       std.logError(LoginConfirm.displayName, err.name, err.message);
       this.setState({ openedIncorrect: true });
+      this.spn.stop();
     });
   }
 
@@ -68,23 +75,14 @@ class LoginConfirm extends React.Component {
   renderCorrect() {
     const { user } = this.props;
     const { openedCorrect, newPassword } = this.state;
-    return <Dialog open={openedCorrect} onClose={this.handleClose.bind(this, 'authenticate')}
-      area-labelledby="responsive-dialog-title">
-      <DialogTitle id="responsive-dialog-title">
-        ログインＩＤ・ＰＷは以下のとおりです。
-      </DialogTitle>
+    return <Dialog open={openedCorrect} onClose={this.handleClose.bind(this, 'authenticate')} area-labelledby="responsive-dialog-title">
+      <DialogTitle id="responsive-dialog-title">ログインＩＤ・ＰＷは以下のとおりです。</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          ログインＩＤ：{user}
-        </DialogContentText>
-        <DialogContentText>
-          ログインＰＷ：{newPassword}
-        </DialogContentText>
+        <DialogContentText>ログインＩＤ：{user}</DialogContentText>
+        <DialogContentText>ログインＰＷ：{newPassword}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={this.handleClose.bind(this, 'authenticate')} color="primary">
-          ログイン画面に戻る
-        </Button>
+        <Button onClick={this.handleClose.bind(this, 'authenticate')} color="primary">ログイン画面に戻る</Button>
       </DialogActions>
     </Dialog>;
   }
@@ -92,21 +90,13 @@ class LoginConfirm extends React.Component {
   renderIncorrect() {
     const { preference } = this.props;
     const { openedIncorrect } = this.state;
-    return <Dialog open={openedIncorrect} onClose={this.handleClose.bind(this, 'confirmation')}
-      area-labelledby="responsive-dialog-title">
-      <DialogTitle id="responsive-dialog-title">
-        合言葉が間違っています。再度ご確認ください。
-      </DialogTitle>
+    return <Dialog open={openedIncorrect} onClose={this.handleClose.bind(this,'confirmation')} area-labelledby="responsive-dialog-title">
+      <DialogTitle id="responsive-dialog-title">合言葉が間違っています。再度ご確認ください。</DialogTitle>
       <DialogActions>
-        <Button onClick={this.handleClose.bind(this, 'confirmation')}
-          color="primary">
-          ログインＩＤ・ＰＷ確認フォームに戻る
-        </Button>
+        <Button onClick={this.handleClose.bind(this, 'confirmation')} color="primary">ログインＩＤ・ＰＷ確認フォームに戻る</Button>
       </DialogActions>
       <DialogContent>
-        <DialogContentText>
-          お問い合わせ：{preference.from}（営業時間９時〜１８時）
-        </DialogContentText>
+        <DialogContentText>お問い合わせ：{preference.from}（営業時間９時〜１８時）</DialogContentText>
       </DialogContent>
     </Dialog>;
   }
