@@ -175,21 +175,15 @@ const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
 const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
   mailEdit:   { display: 'flex', flexDirection: 'column', height: editHeightSmDown
-                , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
+              , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
 , editBody:   { borderBottom: '1px solid #CCC', borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC' }
-, inputArea:  { display: 'block', resize: 'none' 
-              , height: '260px'
-              , width: '100%',    boxSizing: 'border-box'
-              , border: 'none',   padding: '10px'
-              , fontSize: '16px', outline: 'none'
-              , maxHeight: editHeightSmDown
-              , [theme.breakpoints.up('sm')]: {
-                maxHeight: editHeightSmUp }}
+, inputArea:  { display: 'block', resize: 'none', height: '260px', width: '100%', boxSizing: 'border-box', border: 'none'
+              , padding: '10px', fontSize: '16px', outline: 'none', maxHeight: editHeightSmDown
+              , [theme.breakpoints.up('sm')]: { maxHeight: editHeightSmUp }}
 , editView:   { flex: '1 1 auto', overflow: 'auto', position: 'relative', padding: '20px 10px 10px 10px', borderBottom: '1px solid #CCC'
               , borderLeft: '1px solid #CCC', borderRight: '1px solid #CCC'
-              , '&:before': {
-                content: '"Preview"', display: 'inline-block', position: 'absolute', top: 0, left: 0, backgroundColor: '#F5F5F5'
-                , padding: '5px 10px', fontSize: '12px', borderRight: '1px solid #CCC', borderBottom: '1px solid #CCC'
-                }}
+              , '&:before':
+                { content: '"Preview"', display: 'inline-block', position: 'absolute', top: 0, left: 0, backgroundColor: '#F5F5F5'
+                , padding: '5px 10px', fontSize: '12px', borderRight: '1px solid #CCC', borderBottom: '1px solid #CCC' }}
 });
 export default withStyles(styles)(MailEdit);

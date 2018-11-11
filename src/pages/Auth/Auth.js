@@ -16,10 +16,10 @@ const env = process.env.NODE_ENV || 'development';
 const assets = process.env.ASSET_URL;
 let image;
 if(env === 'development') {
-  image = assets;
+  image = assets + '/';
 } else 
 if(env === 'production' || env === 'staging') {
-  image = assets + '/image';
+  image = assets + '/image/';
 }
 
 class Auth extends React.Component {

@@ -9,9 +9,7 @@ class UserEdit extends React.Component {
     const { classes, admin, user, preference } = this.props
     if(!user || !user._id) return null;
     return <div className={classes.userEdit}>
-      <div className={classes.forms}>
-        <UserForms admin={admin} user={user} preference={preference} />
-      </div>
+      <div className={classes.forms}><UserForms admin={admin} user={user} preference={preference} /></div>
     </div>;
   }
 }
@@ -31,6 +29,6 @@ const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
   userEdit: { display: 'flex', flexDirection: 'column', height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, forms:    { overflow: 'scroll' }
+, forms:    { overflow: 'auto' }
 });
 export default withStyles(styles)(UserEdit);

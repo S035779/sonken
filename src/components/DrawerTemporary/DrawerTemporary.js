@@ -12,10 +12,10 @@ const env = process.env.NODE_ENV || 'development';
 const assets = process.env.ASSET_URL;
 let image;
 if(env === 'development') {
-  image = assets;
+  image = assets + '/';
 } else
 if(env === 'production' || env === 'staging') {
-  image = assets + '/image';
+  image = assets + '/image/';
 }
 
 class DrawerTemporary extends React.Component {
@@ -54,7 +54,7 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper: {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}/${rgstImg})`, width: drawerWidthMdDown
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}${rgstImg})`, width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: { position: 'relative', width: drawerWidthMdUp, height: '100%' }
   }
 });

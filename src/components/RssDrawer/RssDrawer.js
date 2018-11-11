@@ -1,6 +1,5 @@
 import React            from 'react';
 import PropTypes        from 'prop-types';
-//import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import RssHeader        from 'Components/RssHeader/RssHeader';
@@ -19,8 +18,6 @@ class RssDrawer extends React.Component {
   }
 
   render() {
-    //std.logInfo(RssDrawer.displayName, 'Props', this.props);
-    //std.logInfo(RssDrawer.displayName, 'State', this.state);
     const { classes, user, isAuthenticated, profile, preference, categorys, children } = this.props;
     const { open } = this.state;
     return <div className={classes.root}>
