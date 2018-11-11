@@ -142,6 +142,7 @@ export default class FeedParser {
       case 'count/item':
       case 'fetch/note':
         {
+          //log.trace(FeedParser.displayName, 'Request', request, options);
           const { user, id, skip, limit, filter } = options;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCount = request === 'count/item';
@@ -203,7 +204,7 @@ export default class FeedParser {
           const setCount = doc => isCount
             ? [{ _id: doc._id, counts: R.length(doc.items), sold: setSold(doc.items), archive: setArch(doc.items) }] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          const hasItems = R.filter(obj => obj.attributes ? R.equals(sold, obj.attributes.sold) : R.equals(sold, 0));
+          const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           return query.populate(params).exec()
