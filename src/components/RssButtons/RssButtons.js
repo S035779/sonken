@@ -21,11 +21,15 @@ class RssButtons extends React.Component {
     , isNotValid: false
     , isDownload: false
     };
-    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     NoteAction.select(this.props.user, []);
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   handleChangeCheckbox(event) {

@@ -39,7 +39,14 @@ class ClosedForms extends React.Component {
     , loadingDownload: props.loadingDownload
     };
     this.formsRef = React.createRef();
+  }
+
+  componentDidMount() {
     this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {

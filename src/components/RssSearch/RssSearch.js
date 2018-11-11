@@ -26,7 +26,14 @@ class RssSearch extends React.Component {
     , isUpload:     false
     , isDownload:   false
     };
+  }
+
+  componentDidMount() {
     this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {

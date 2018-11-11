@@ -16,11 +16,15 @@ class AdminButtons extends React.Component {
     , isSuccess: false
     , isNotValid: false
     };
-    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     UserAction.select(this.props.admin, []);
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   handleChangeCheckbox(event) {

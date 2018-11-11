@@ -29,7 +29,14 @@ class RssItems extends React.Component {
     , prevPage: 1
     };
     this.formsRef = React.createRef();
+  }
+
+  componentDidMount() {
     this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {
