@@ -321,9 +321,8 @@ class ClosedForms extends React.Component {
           <Select value={sold} onChange={this.handleChangeSelect.bind(this, 'sold')}>
             <MenuItem value={0}>0</MenuItem>
             <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={2}>2</MenuItem>
             <MenuItem value={3}>3</MenuItem>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
           </Select>
         </FormControl>
       </div>

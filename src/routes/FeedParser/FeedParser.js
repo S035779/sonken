@@ -203,7 +203,7 @@ export default class FeedParser {
           const setCount = doc => isCount
             ? [{ _id: doc._id, counts: R.length(doc.items), sold: setSold(doc.items), archive: setArch(doc.items) }] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          const hasItems = R.filter(obj => obj.attributes ? R.lte(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const hasItems = R.filter(obj => obj.attributes ? R.equals(sold, obj.attributes.sold) : R.equals(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           return query.populate(params).exec()
