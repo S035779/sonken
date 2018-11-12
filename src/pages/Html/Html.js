@@ -11,17 +11,14 @@ const config = dotenv.config();
 if(config.error) throw config.error;
 const app_name = process.env.APP_NAME;
 const node_env = process.env.NODE_ENV;
-const host_url = process.env.TOP_URL;
 const asetPath = process.env.ASSET_PATH;
-let path_to_js, path_to_img, path_to_css;
+let path_to_js, path_to_css;
 if (node_env === 'development') {
   path_to_js = ''; 
-  path_to_img = '';
   path_to_css = '';
 } else if (node_env === 'staging' || node_env === 'production') {
-  path_to_js  = host_url + asetPath + '/js';
-  path_to_img = host_url + asetPath + '/image';
-  path_to_css = host_url + asetPath + '/css';
+  path_to_js  = asetPath + '/js';
+  path_to_css = asetPath + '/css';
 }
 
 class Html extends React.Component {
@@ -34,7 +31,7 @@ class Html extends React.Component {
       <head>
       <meta charSet="utf-8" />
       <title>{app_name}</title>
-      <link rel="shortcut icon" href={ path_to_img + Icon}/>
+      <link rel="shortcut icon" href={ Icon }/>
       <link rel="stylesheet"    href={ path_to_css + '/app.bundle.css'}/>
       </head>
       <body>
