@@ -44,6 +44,7 @@ export default class FeedParser {
   }
 
   request(request, options) {
+    //log.trace(FeedParser.displayName, 'Request', request, options);
     switch(request) {
       case 'job/notes':
         {
@@ -114,7 +115,7 @@ export default class FeedParser {
           const conditions = { user, category };
           const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
           const query = Note.find(conditions);
-          return query.populate(params).sort('updated').countDocuments().exec();
+          return query.populate(params).countDocuments().exec();
         }
       case 'fetch/notes':
         {
@@ -135,14 +136,13 @@ export default class FeedParser {
             ]
           };
           const query = Note.find(conditions);
-          if(!isCSV) query.populate(params);
           if(isPaginate) query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          if(!isCSV) query.populate(params);
           return query.exec();
         }
       case 'count/item':
       case 'fetch/note':
         {
-          //log.trace(FeedParser.displayName, 'Request', request, options);
           const { user, id, skip, limit, filter } = options;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCount = request === 'count/item';
@@ -1440,7 +1440,7 @@ export default class FeedParser {
       map(R.filter(obj => obj.items))
     , map(R.map(obj => obj.items))
     , map(R.flatten)
-    , map(R.map(obj => obj.guid._))
+    , map(R.map(obj => obj.guid__))
     , flatMap(setRead)
     );
   }

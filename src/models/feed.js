@@ -68,7 +68,7 @@ const noteSchema = new mongoose.Schema({
 , created:          { type: Date, required: true, default: Date.now } 
 , updated:          { type: Date, required: true, default: Date.now } 
 }, { collection: 'notes' });
-noteSchema.index({ user: 1, updated: 1 });
+noteSchema.index({ user: 1, category: 1, updated: -1 });
 
 // Categorys model.
 const categorySchema = new mongoose.Schema({
