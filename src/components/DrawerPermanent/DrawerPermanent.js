@@ -10,13 +10,12 @@ import rgstImg            from 'Assets/image/sidebar-5.jpg';
 
 const node_env = process.env.NODE_ENV || 'development';
 const asetPath = process.env.ASSET_URL;
-const rootPath = process.env.PLATFORM === 'local' ? '/' : '';
 let image;
 if(node_env === 'development') {
-  image = asetPath + rootPath;
+  image = asetPath;
 } else
 if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image' + rootPath;
+  image = asetPath + '/image';
 }
 
 class DrawerPermanent extends React.Component {

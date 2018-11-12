@@ -24,6 +24,7 @@ const node = {
 , output: {
     filename: '[name].node.js'
   , path: path.resolve(__dirname, 'dist')
+  , publicPath: '/'
   }
 , optimization: { nodeEnv: false }
 , plugins: [
