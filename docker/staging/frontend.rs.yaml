@@ -23,10 +23,6 @@ spec:
       containers:
       - name: nginx
         image: asia.gcr.io/feedparser-217913/feedparser/nginx:latest
-        resources:
-          requests:
-            cpu: 160m
-            memory: 192Mi
         ports:
           - containerPort: 8080
         volumeMounts:
@@ -34,6 +30,10 @@ spec:
             name: assets
       - name: node-ssr
         image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
+        resources:
+          requests:
+            cpu: 320m
+            memory: 1024Mi
         lifecycle:
           postStart:
             exec:
@@ -59,8 +59,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 160m
-            memory: 256Mi
+            cpu: 320m
+            memory: 512Mi
         env:
           - name: NODE_OPTIONS
             value: "--max_old_space_size=2048"

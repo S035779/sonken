@@ -1193,7 +1193,7 @@ export default class FeedParser {
     return observables.pipe(
       map(setAttribute)
     , map(R.head)
-    //, map(R.tap(log.trace.bind(this)))
+    , map(R.tap(log.trace.bind(this)))
     );
   }
 

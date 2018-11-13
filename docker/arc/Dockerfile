@@ -82,7 +82,7 @@ RUN buildDeps='git' \
   && apt-get update && apt-get install -y $buildDeps \
   && rm -rf /var/lib/apt/list/* \
 # install applications
-  &&cd /app \
+  && cd /app \
   && git clone https://github.com/S035779/sonken.git \
   && apt-get purge -y --auto-remove $buildDeps
 
@@ -96,6 +96,7 @@ RUN buildDeps='python build-essential' \
   && yarn install \
   #&& yarn run build:pro:node \
   && yarn run build:stg:node \
+  && mkdir /app/sonken/storage \
   && chown -R app:app /app \
   && apt-get purge -y --auto-remove $buildDeps
 
