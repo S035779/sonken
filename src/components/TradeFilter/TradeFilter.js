@@ -31,11 +31,15 @@ class TradeFilter extends React.Component {
     , isNotResult: false
     };
     this.formsRef = React.createRef();
-    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     TradeAction.select(this.props.user, []);
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -45,27 +49,33 @@ class TradeFilter extends React.Component {
     const prevAllTrading = this.state.prevAllTrading;
     const prevItems = this.state.items;
     const prevPage = this.state.prevPage;
-    if(prevItems && (nextItems.length !== 0)) {
+    if(prevItems && nextItems.length !== 0) {
       if(prevItems.length === 0) {
-        //std.logInfo(TradeFilter.displayName, 'Init', nextProps);
+        std.logInfo(TradeFilter.displayName, 'Init', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
-        //std.logInfo(TradeFilter.displayName, 'Update', nextProps);
+        std.logInfo(TradeFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
         this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter })
       } else if(!itemFilter.allTrading) {
-        //std.logInfo(TradeFilter.displayName, 'Filter', nextProps);
+        std.logInfo(TradeFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter
-        , prevAllTrading: false });
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllTrading: false });
       } else if(itemFilter.allTrading !== prevAllTrading) {
-        //std.logInfo(TradeFilter.displayName, 'Normal', nextProps);
+        std.logInfo(TradeFilter.displayName, 'Normal', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllTrading: true });
       } else {
-        //std.logInfo(TradeFilter.displayName, 'All', nextProps);
+        std.logInfo(TradeFilter.displayName, 'All', nextProps);
         this.setState({ items: nextItems });
+      }
+    } else if(prevItems && prevItems.length !== 0){
+      if(prevPage === nextPage) {
+        std.logInfo(TradeFilter.displayName, 'Prev', { prevPage, nextPage, prevItems, nextItems });
+        this.setState({ items: [], page: 1, prevPage: 1 });
+      } else {
+        std.logInfo(TradeFilter.displayName, 'Next', { prevPage, nextPage, prevItems, nextItems });
       }
     }
   }
@@ -116,7 +126,8 @@ class TradeFilter extends React.Component {
       case 'checked':
         {
           this.setState({ checked: checked });
-          const { user, items } = this.props;
+          const { user } = this.props;
+          const { items } = this.state;
           const ids = checked ? items.map(item => item.guid__) : [];
           TradeAction.select(user, ids);
           break;

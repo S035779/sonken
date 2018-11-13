@@ -35,7 +35,6 @@ class RssButtons extends React.Component {
   handleChangeCheckbox(event) {
     const checked = event.target.checked;
     this.setState({ checked });
-
     const { user, notes } = this.props;
     const ids = checked ? notes.map(note => note._id) : [];
     std.logInfo(RssButtons.displayName, 'handleChangeCheckbox', ids);
@@ -46,7 +45,6 @@ class RssButtons extends React.Component {
     const { user, selectedNoteId } = this.props;
     std.logInfo(RssButtons.displayName, 'handleReaded', selectedNoteId);
     NoteAction.createRead(user, selectedNoteId);
-    this.setState({ checked: false });
   }
 
   handleDelete() {
@@ -55,10 +53,9 @@ class RssButtons extends React.Component {
     if(window.confirm('Are you sure?')) {
       this.spn.start();
       NoteAction.delete(user, selectedNoteId)
-        .then(()    => this.setState({ isSuccess: true }))
-        .then(()    => this.setState({ checked: false }))
-        .then(()    => this.spn.stop())
-        .catch(err  => {
+        .then(() => this.setState({ isSuccess: true }))
+        .then(() => this.spn.stop())
+        .catch(err => {
           std.logError(RssButtons.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
           this.spn.stop();

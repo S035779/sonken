@@ -51,20 +51,41 @@ class RssForms extends React.Component {
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
-    if(nextNote && (nextNote.items.length > 0)) {
+    if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
-        //std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.current.scrollTop = 0;
-        this.setState({ note: nextNote, page: 1, prevPage: 1, loadingDownload: nextLoadingDownload });
+        this.setState({
+          note: nextNote, page: 1, prevPage: 1
+        , loadingDownload: nextLoadingDownload
+        });
       } else if(prevPage !== nextPage) {
-        //std.logInfo(RssForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        std.logInfo(RssForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
-        this.setState({ note: setNote(nextNote), prevPage: nextPage, loadingDownload: nextLoadingDownload });
+        this.setState({
+          note: setNote(nextNote), prevPage: nextPage
+        , loadingDownload: nextLoadingDownload
+        });
       } else if(prevLoadingDownload !== nextLoadingDownload) {
-        this.setState({ loadingDownload: nextLoadingDownload })
+        std.logInfo(RssForms.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
+        this.setState({
+          loadingDownload: nextLoadingDownload
+        });
+      }
+    } else if(prevNote && prevNote.items.length !== 0) {
+      if(nextNote._id !== prevNote._id) {
+        std.logInfo(RssForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({
+          note: nextNote, page: 1, prevPage: 1
+        , loadingDownload: true
+        });
+      } else if(nextNote._id === prevNote._id) {
+        std.logInfo(RssForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
+        this.setState({ note: prevNote });
       }
     }
   }

@@ -34,9 +34,7 @@ spec:
           postStart:
             exec:
               command:
-                - sh
-                - -c
-                - /app/sonken/docker/production/install.sh
+                - "/app/sonken/docker/install.sh"
         resources:
           requests:
             cpu: 100m
@@ -47,12 +45,10 @@ spec:
           - mountPath: /app/assets
             name: assets
         env:
-          - name: NODE_ENV
-            value: "production"
           - name: API_URL
             value: "https://feedparser.alpha-one-rss.jp/api"
           - name: ASSET_URL
-            value: "https://feedparser.alpha-one-rss.jp/assets"
+            value: "https://feedparser.alpha-one-rss.jp"
           - name: APP_NAME
             value: "アルファOne"
       - name: node-api

@@ -42,7 +42,7 @@ class RssSearch extends React.Component {
     this.setState({ perPage: notePage.perPage });
   }
 
-  handleSubmit(title, categoryIds) {
+  handleDetailSubmit(title, categoryIds) {
     const { user } = this.props;
     const request = this.getCategory(this.state.url);
     if(request) {
@@ -61,12 +61,15 @@ class RssSearch extends React.Component {
     }
   }
 
-  handleClickButton() {
+  handleURLSubmit() {
     const { noteNumber, profile, preference } = this.props;
     const menu = R.find(obj => obj.id === profile.plan)(preference.menu)
-    //std.logInfo(RssSearch.displayName, 'handleClickButton', noteNumber);
-    if(menu.number > noteNumber) this.setState({ isAddNote: true });
-    else this.setState({ isLimit: true });
+    std.logInfo(RssSearch.displayName, 'handleURLSubmit', menu);
+    if(menu && menu.number >= noteNumber + 1) {
+      this.setState({ isAddNote: true });
+    } else {
+      this.setState({ isLimit: true });
+    }
   }
 
   handleChangeText(name, event) {
@@ -192,7 +195,7 @@ class RssSearch extends React.Component {
         <Input id="url" value={url} onChange={this.handleChangeText.bind(this, 'url')}/>
       </FormControl>
       <div className={classes.buttons}>
-        <Button variant="contained" className={classes.button} onClick={this.handleClickButton.bind(this)}>
+        <Button variant="contained" className={classes.button} onClick={this.handleURLSubmit.bind(this)}>
           {this.props.changed ? '*' : ''}URL登録
         </Button>
         <div className={classes.space} />
@@ -203,7 +206,7 @@ class RssSearch extends React.Component {
           アップロード
         </RssButton>
         <RssAddDialog title={title} open={isAddNote} user={user} category={category} categorys={categoryList(category)}
-          onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleSubmit.bind(this)} />
+          onClose={this.handleCloseDialog.bind(this, 'isAddNote')} onSubmit={this.handleDetailSubmit.bind(this)} />
         <RssUploadDialog open={isUpload} title={'カテゴリ名'} user={user} category={category} 
           name={newSubCategory} perPage={perPage} onClose={this.handleCloseDialog.bind(this, 'isUpload')} />
         <RssDownloadDialog open={isDownload} title={'フォーマット'} user={user} category={category} 

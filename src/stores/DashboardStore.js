@@ -1,5 +1,5 @@
-import { ReduceStore }  from 'flux/utils';
 import * as R           from 'ramda';
+import { ReduceStore }  from 'flux/utils';
 import std              from 'Utilities/stdutils';
 
 export default class DashboardStore extends ReduceStore {
@@ -9,7 +9,7 @@ export default class DashboardStore extends ReduceStore {
     , isAuthenticated: false
     , notes: []
     , page: { maxNumer: 0, number: 1, perPage: 20 }
-    , selected:false
+    , selected: false
     , ids: []
     , filter: {
         lastWeekAuction: true
@@ -192,7 +192,7 @@ export default class DashboardStore extends ReduceStore {
       case 'note/update': 
         return R.merge(state, { notes: this.fetchNote(state, action) });
       case 'note/delete':
-        return R.merge(state, { notes: this.deleteNote(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteNote(state, action) });
       case 'note/pagenation':
         return R.merge(state, { page: action.page });
       case 'note/select':
@@ -208,25 +208,25 @@ export default class DashboardStore extends ReduceStore {
       case 'note/download/images':
         return R.merge(state, { images: action.images });
       case 'add/create':
-        return R.merge(state, { notes: this.createAdd(state, action), ids: [] });
+        return R.merge(state, { notes: this.createAdd(state, action) });
       case 'add/delete':
-        return R.merge(state, { notes: this.deleteAdd(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteAdd(state, action) });
       case 'delete/create':
-        return R.merge(state, { notes: this.createDelete(state, action), ids: [] });
+        return R.merge(state, { notes: this.createDelete(state, action) });
       case 'delete/delete':
-        return R.merge(state, { notes: this.deleteDelete(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteDelete(state, action) });
       case 'read/create':
-        return R.merge(state, { notes: this.createRead(state, action), ids: [] });
+        return R.merge(state, { notes: this.createRead(state, action) });
       case 'read/delete':
-        return R.merge(state, { notes: this.deleteRead(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteRead(state, action) });
       case 'star/create':
-        return R.merge(state, { notes: this.createStar(state, action), ids: [] });
+        return R.merge(state, { notes: this.createStar(state, action) });
       case 'star/delete':
-        return R.merge(state, { notes: this.deleteStar(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteStar(state, action) });
       case 'list/create':
-        return R.merge(state, { notes: this.createList(state, action), ids: [] });
+        return R.merge(state, { notes: this.createList(state, action) });
       case 'list/delete':
-        return R.merge(state, { notes: this.deleteList(state, action), ids: [] });
+        return R.merge(state, { notes: this.deleteList(state, action) });
       case 'note/rehydrate/my':
         return action.state;
       default: 

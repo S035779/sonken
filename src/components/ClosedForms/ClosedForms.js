@@ -50,58 +50,73 @@ class ClosedForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const resetFilter = {
-      lastWeekAuction: true
-    , twoWeeksAuction: true
-    , lastMonthAuction: true
-    , allAuction: true
-    , inAuction: false
-    , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , sold: 0
-    }
-    const nextFilter      = nextProps.itemFilter;
-    const nextNote        = nextProps.note;
-    const nextPage        = this.state.page;
+    const nextFilter = nextProps.itemFilter;
+    const nextNote = nextProps.note;
+    const nextPage = this.state.page;
     const nextLoadingDownload = nextProps.loadingDownload;
-    const nextLoadingImages   = nextProps.loadingImages;
-    const prevAllAuction  = this.state.prevAllAuction;
-    const prevNote        = this.state.note;
-    const prevPage        = this.state.prevPage;
+    const nextLoadingImages = nextProps.loadingImages;
+    const prevAllAuction = this.state.prevAllAuction;
+    const prevNote = this.state.note;
+    const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
-    const prevLoadingImages   = this.state.loadingImages;
-    let newState;
-    if(prevNote && (nextNote.items.length !== 0)) {
+    const prevLoadingImages = this.state.loadingImages;
+    if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
-        //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage, resetFilter });
+        std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.current.scrollTop = 0;
-        newState = R.merge({ note: nextNote, page: 1, prevPage: 1, loadingDownload: nextLoadingDownload
-        , loadingImages: nextLoadingImages }, resetFilter);
-        this.setState(newState);
+        this.setState({
+          note: nextNote, page: 1, prevPage: 1
+        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        , lastWeekAuction: true, twoWeeksAuction: true, lastMonthAuction: true
+        , allAuction: true, inAuction: false
+        , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , sold: 0
+        });
       } else if(prevPage !== nextPage) {
-        //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
-        newState = { note: setNote(nextNote), prevPage: nextPage, loadingDownload: nextLoadingDownload
-        , loadingImages: nextLoadingImages };
-        this.setState(newState);
+        this.setState({
+          note: setNote(nextNote), prevPage: nextPage
+        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        });
       } else if(!nextFilter.allAuction) {
-        //std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
+        std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
         this.formsRef.current.scrollTop = 0;
-        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: false, loadingDownload: nextLoadingDownload
-        , loadingImages: nextLoadingImages };
-        this.setState(newState);
+        this.setState({
+          note: nextNote, page: 1, prevPage: 1
+        , prevAllAuction: false
+        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        });
       } else if(nextFilter.allAuction !== prevAllAuction) {
-        //std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
+        std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
         this.formsRef.current.scrollTop = 0;
-        newState = { note: nextNote, page: 1, prevPage: 1, prevAllAuction: true, loadingDownload: nextLoadingDownload
-        , loadingImages: nextLoadingImages };
-        this.setState(newState);
+        this.setState({
+          note: nextNote, page: 1, prevPage: 1
+        , prevAllAuction: true
+        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        });
       } else if(nextLoadingDownload !== prevLoadingDownload || nextLoadingImages !== prevLoadingImages) {
-        newState = { loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages };
-        this.setState(newState);
+        std.logInfo(ClosedForms.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
+        this.setState({
+          loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        });
+      }
+    } else if(prevNote && prevNote.items.length !== 0) {
+      if(nextNote._id !== prevNote._id) {
+        std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
+        this.formsRef.current.scrollTop = 0;
+        this.setState({ 
+          note: nextNote, page: 1, prevPage: 1
+        , prevAllAuction: true
+        , loadingDownload: true, loadingImages: true
+        });
+      } else if(nextNote._id === prevNote._id) {
+        std.logInfo(ClosedForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
+        this.setState({ note: prevNote });
       }
     }
   }

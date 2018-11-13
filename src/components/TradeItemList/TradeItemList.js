@@ -31,7 +31,7 @@ class TradeItemList extends React.Component {
       //std.logInfo(TradeItemList.displayName, 'Props', { nextItems, nextPage, prevItems, prevPage });
       let traded = [];
       nextItems.forEach(item => {
-        if(item.traded) traded.push(item.guid__);
+        if(item && item.traded) traded.push(item.guid__);
       });
       this.setState({ selectedItemId, traded });
     } else {

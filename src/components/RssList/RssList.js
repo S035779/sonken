@@ -23,7 +23,8 @@ class RssList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { selectedNoteId: checked, notes } = nextProps;
+    const checked = nextProps.selectedNoteId;
+    const notes = nextProps.notes;
     this.setState({ checked, notes });
   }
 
@@ -124,12 +125,10 @@ class RssList extends React.Component {
       .map(note => this.renderItem(note));
     return <List className={classes.noteList}>
       {renderItems}
-      <RssDialog open={isSuccess} title={'送信完了'}
-        onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+      <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
         要求を受け付けました。
       </RssDialog>
-      <RssDialog open={isNotValid} title={'送信エラー'}
-        onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+      <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
         内容に不備があります。もう一度確認してください。
       </RssDialog>
     </List>;

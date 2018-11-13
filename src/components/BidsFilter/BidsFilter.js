@@ -31,11 +31,15 @@ class BidsFilter extends React.Component {
     , isNotResult: false
     };
     this.formsRef = React.createRef();
-    this.spn = Spinner.of('app');
   }
 
   componentDidMount() {
+    this.spn = Spinner.of('app');
     BidsAction.select(this.props.user, []);
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -45,27 +49,33 @@ class BidsFilter extends React.Component {
     const prevAllBidding = this.state.prevAllBidding;
     const prevItems = this.state.items; 
     const prevPage = this.state.prevPage;
-    if(prevItems && (nextItems.length !== 0)) {
+    if(prevItems && nextItems.length !== 0) {
       if(prevItems.length === 0) {
-        //std.logInfo(BidsFilter.displayName, 'Init', nextProps);
+        std.logInfo(BidsFilter.displayName, 'Init', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
-        //std.logInfo(BidsFilter.displayName, 'Update', nextProps);
+        std.logInfo(BidsFilter.displayName, 'Update', nextProps);
         const catItems = R.concat(prevItems);
         this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter });
       } else if(!itemFilter.allBidding) {
-        //std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
+        std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
         this.formsRef.current.scrollTop = 0;
-        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter
-        , prevAllBidding: false });
+        this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllBidding: false });
       } else if(itemFilter.allBidding !== prevAllBidding) {
-        //std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
+        std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
         this.formsRef.current.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllBidding: true });
       } else {
-        //std.logInfo(BidsFilter.displayName, 'All', nextProps);
+        std.logInfo(BidsFilter.displayName, 'All', nextProps);
         this.setState({ items: nextItems });
+      }
+    } else if(prevItems && prevItems.length !== 0){
+      if(prevPage === nextPage) {
+        std.logInfo(BidsFilter.displayName, 'prev', { prevPage, nextPage, prevItems, nextItems });
+        this.setState({ items: [], page: 1, prevPage: 1 });
+      } else {
+        std.logInfo(BidsFilter.displayName, 'Next', { prevPage, nextPage, prevItems, nextItems });
       }
     }
   }
@@ -116,7 +126,8 @@ class BidsFilter extends React.Component {
       case 'checked':
         {
           this.setState({ checked });
-          const { user, items } = this.props;
+          const { user } = this.props;
+          const { items } = this.state;
           const ids = checked ? items.map(item => item.guid__) : [];
           BidsAction.select(user, ids);
           break;

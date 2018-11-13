@@ -49,7 +49,6 @@ class AdminButtons extends React.Component {
           this.setState({ isNotValid: true });
           this.spn.stop();
         });
-      this.setState({ checked: false });
     }
   }
 
@@ -66,7 +65,6 @@ class AdminButtons extends React.Component {
           this.setState({ isNotValid: true })
           this.spn.stop();
         });
-      this.setState({ checked: false });
     }
   }
 

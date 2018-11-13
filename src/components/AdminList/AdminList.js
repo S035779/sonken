@@ -19,7 +19,6 @@ class AdminList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    //std.logInfo(AdminList.displayName, 'Props', nextProps);
     const checked = nextProps.selectedUserId;
     const users = nextProps.users;
     this.setState({ checked, users });
