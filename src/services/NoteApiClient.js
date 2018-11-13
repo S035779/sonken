@@ -188,11 +188,11 @@ export default {
   downloadNotes(user, category, type) {
     return this.request('download/notes', { user, category, type });
   },
-  downloadItems(user, ids, filter, type) {
-    const _ids = ids 
-      ? (Array.isArray(ids) ? ids : [ids]) 
-      : [];
-    const params = filter ? R.merge({ user, ids: _ids, type }, filter) : { user, ids: _ids, type };
+  downloadItems(user, category, ids, filter, type) {
+    const setIds = _ids => ({ ids: Array.isArray(_ids) ? _ids : [_ids] });
+    let params = { user, category, type };
+    params = ids    ? R.merge(params, setIds(ids))  : params;
+    params = filter ? R.merge(params, filter)       : params;
     return this.request('download/items', params);
   },
   downloadImages(user, id, filter) {

@@ -134,7 +134,7 @@ class RssButtons extends React.Component {
             ダウンロード
           </RssButton>
         : null }
-        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={selectedNoteId} itemNumber={itemNumber}
+        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} ids={selectedNoteId} itemNumber={itemNumber}
           filter={itemFilter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。

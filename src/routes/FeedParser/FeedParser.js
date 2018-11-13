@@ -19,6 +19,7 @@ import aws                        from 'Utilities/awsutils';
 const config = dotenv.config();
 if(config.error) throw config.error();
 
+const NODE_ENV        = process.env.NODE_ENV || 'development';
 const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
 const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
 const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
@@ -1684,9 +1685,12 @@ export default class FeedParser {
   }
 
   setCsvItems(type) {
+    const urlpath = NODE_ENV !== 'staging';
     const setAsins = R.join(':');
     const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
-    const setImage = (img, idx) => img[idx-1] ? img[idx-1] : '-';
+    const setName = (guid, url) => 
+      urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage = (guid, img, idx) => img[idx-1] ? setName(guid, img[idx-1]) : '-';
     let map, keys;
     switch(type) {
       case '0001':
@@ -1705,16 +1709,16 @@ export default class FeedParser {
         , categorys:    obj.item_categorys
         , bids:         obj.bids
         , countdown:    obj.countdown
-        , image1:       setImage(obj.images, 1)
-        , image2:       setImage(obj.images, 2)
-        , image3:       setImage(obj.images, 3)
-        , image4:       setImage(obj.images, 4)
-        , image5:       setImage(obj.images, 5)
-        , image6:       setImage(obj.images, 6)
-        , image7:       setImage(obj.images, 7)
-        , image8:       setImage(obj.images, 8)
-        , image9:       setImage(obj.images, 9)
-        , image10:      setImage(obj.images, 10)
+        , image1:       setImage(obj.guid__, obj.images, 1)
+        , image2:       setImage(obj.guid__, obj.images, 2)
+        , image3:       setImage(obj.guid__, obj.images, 3)
+        , image4:       setImage(obj.guid__, obj.images, 4)
+        , image5:       setImage(obj.guid__, obj.images, 5)
+        , image6:       setImage(obj.guid__, obj.images, 6)
+        , image7:       setImage(obj.guid__, obj.images, 7)
+        , image8:       setImage(obj.guid__, obj.images, 8)
+        , image9:       setImage(obj.guid__, obj.images, 9)
+        , image10:      setImage(obj.guid__, obj.images, 10)
         , offers:       obj.offers
         , market:       obj.attributes ? obj.attributes.market : '-'
         , sale:         obj.attributes ? obj.attributes.sale : '-'
@@ -1758,10 +1762,16 @@ export default class FeedParser {
         map = R.map(obj => ({
           filename: '-', category_id: obj.item_categoryid, title: obj.title, input_method_of_description: '-'
         , description: obj.explanation
-        , image1: setImage(obj.images, 1), image2: setImage(obj.images, 2), image3: setImage(obj.images, 3)
-        , image4: setImage(obj.images, 4), image5: setImage(obj.images, 5), image6: setImage(obj.images, 6)
-        , image7: setImage(obj.images, 7), image8: setImage(obj.images, 8), image9: setImage(obj.images, 9)
-        , image10: setImage(obj.images, 10)
+        , image1:   setImage(obj.guid__, obj.images, 1)
+        , image2:   setImage(obj.guid__, obj.images, 2)
+        , image3:   setImage(obj.guid__, obj.images, 3)
+        , image4:   setImage(obj.guid__, obj.images, 4)
+        , image5:   setImage(obj.guid__, obj.images, 5)
+        , image6:   setImage(obj.guid__, obj.images, 6)
+        , image7:   setImage(obj.guid__, obj.images, 7)
+        , image8:   setImage(obj.guid__, obj.images, 8)
+        , image9:   setImage(obj.guid__, obj.images, 9)
+        , image10:  setImage(obj.guid__, obj.images, 10)
         , coments1: '-', coments2:  '-', coments3: '-', coments4: '-'
         , coments5: '-', coments6:  '-', coments7: '-', coments8: '-'
         , coments9: '-', coments10: '-'
@@ -1817,16 +1827,16 @@ export default class FeedParser {
         , ean:            '-'
         , prime:          '-'
         , affiliate_link: '-'
-        , image1:         setImage(obj.images, 1)
-        , image2:         setImage(obj.images, 2)
-        , image3:         setImage(obj.images, 3)
-        , image4:         setImage(obj.images, 4)
-        , image5:         setImage(obj.images, 5)
-        , image6:         setImage(obj.images, 6)
-        , image7:         setImage(obj.images, 7)
-        , image8:         setImage(obj.images, 8)
-        , image9:         setImage(obj.images, 9)
-        , image10:        setImage(obj.images, 10)
+        , image1:         setImage(obj.guid__, obj.images, 1)
+        , image2:         setImage(obj.guid__, obj.images, 2)
+        , image3:         setImage(obj.guid__, obj.images, 3)
+        , image4:         setImage(obj.guid__, obj.images, 4)
+        , image5:         setImage(obj.guid__, obj.images, 5)
+        , image6:         setImage(obj.guid__, obj.images, 6)
+        , image7:         setImage(obj.guid__, obj.images, 7)
+        , image8:         setImage(obj.guid__, obj.images, 8)
+        , image9:         setImage(obj.guid__, obj.images, 9)
+        , image10:        setImage(obj.guid__, obj.images, 10)
         }));
         break;
     }
@@ -1846,16 +1856,20 @@ export default class FeedParser {
     );
   }
   
-  downloadItems({ user, ids, filter, type }) {
-    log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
+  downloadItems({ user, category, ids, filter, type }) {
+    //log.trace(FeedParser.displayName, 'downloadItems', { user, category, ids, filter, type });
     const CSV = this.setCsvItems(type);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const setItems = obj => obj.items ? obj.items : [];
     const dupItems = objs => std.dupObj(objs, 'title');
+    const promise = this.getNotes(user, category)
+      .then(R.map(obj => obj._id));
+    const observable = !R.isNil(ids) ? from([ids]) : from(promise);
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
-      map(R.map(setItems))
+    return observable.pipe(
+      flatMap(objs => forkJoin(observables(objs)))
+    , map(R.map(setItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)

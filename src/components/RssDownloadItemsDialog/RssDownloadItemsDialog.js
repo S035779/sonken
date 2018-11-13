@@ -20,6 +20,14 @@ class RssDownloadItemsDialog extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
+  }
+
   handleClose(name) {
     this.setState({ [name]: false });
   }
@@ -34,20 +42,20 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload() {
-    const { user, ids, filter, itemNumber } = this.props;
-    //std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', user);
+    const { user, ids, filter, itemNumber, category, checked } = this.props;
     const { name } = this.state;
-    const spn = Spinner.of('app');
+    const _ids = checked ? null : ids;
     if(itemNumber !== 0) {
-      spn.start();
-      NoteAction.downloadItems(user, ids, filter, name)
+      this.spn.start();
+      //std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', user);
+      NoteAction.downloadItems(user, category, _ids, filter, name)
         .then(() => this.setState({ isSuccess: true }))
         .then(() => this.downloadFile(this.props.file))
-        .then(() => spn.stop())
+        .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
-          spn.stop();
+          this.spn.stop();
         });
     }
   }
@@ -119,6 +127,8 @@ RssDownloadItemsDialog.propTypes = {
 , onClose: PropTypes.func.isRequired
 , title: PropTypes.string.isRequired
 , user: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
+, checked: PropTypes.bool.isRequired
 , ids: PropTypes.array.isRequired
 , filter: PropTypes.object
 , itemNumber: PropTypes.number.isRequired

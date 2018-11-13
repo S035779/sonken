@@ -293,7 +293,7 @@ class ClosedForms extends React.Component {
               classes={classes.button}>ダウンロード</RssButton>
             {loadingDownload && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
           </div>
-          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} ids={[note._id]} itemNumber={itemNumber} 
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} ids={[note._id]} itemNumber={itemNumber} 
             filter={filter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
