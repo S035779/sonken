@@ -4,6 +4,7 @@ import * as R           from 'ramda';
 import { throwError, forkJoin, from }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
+import Agenda           from 'agenda';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
 import log              from 'Utilities/logutils';
@@ -31,13 +32,18 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
-const request = (operation, { url, user, id, skip, limit }) => {
+const jobName = 'job-worker';
+const params = { db: { address: 'localhost:27017/agenda_20181114' , collection: 'agendaJobs' , options: { useNewUrlParser: true } } };
+const agenda = new Agenda(params);
+
+const request = (operation, options) => {
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   switch(operation) {
     case 'marchant':
     case 'sellers':
       {
+        const { url, user, id, skip, limit } = options;
         const conditions = { url, skip, limit };
         return yahoo.jobHtml(conditions).pipe( 
             map(obj => ({ items: obj.item }))
@@ -46,6 +52,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'closedmarchant':
       {
+        const { url, user, id, skip, limit } = options;
         const conditions = { url, skip, limit };
         return yahoo.jobClosedMerchant(conditions).pipe(
             map(obj => ({ items: obj.item }))
@@ -54,6 +61,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'closedsellers':
       {
+        const { url, user, id, skip, limit } = options;
         const conditions = { url, skip, limit };
         return yahoo.jobClosedSellers(conditions).pipe(
             map(obj => ({ items: obj.item }))
@@ -62,6 +70,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     //case 'rss':
     //  {
+    //    const { url, user, id } = options;
     //    const putRss  = obj => feed.updateRss({ user, id, rss: obj });
     //    const conditions = { url };
     //    return yahoo.jobRss(conditions).pipe(
@@ -71,6 +80,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
     //  }
     case 'images':
       {
+        const { user, id } = options;
         const conditions = { user, id };
         const operator = (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename);
         const setAttribute = obj => ({ user, id: obj.guid__, data: { images: obj.images } });
@@ -82,6 +92,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'archives':
       {
+        const { user, id } = options;
         const conditions = { user, id };
         const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
         const observable = obj => feed.createAttribute(setAttribute(obj));
@@ -92,6 +103,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'attribute':
       {
+        const { user, id } = options;
         const conditions = { user, id };
         const setAttribute = obj => ({ user, id: obj.guid__, data: { sale: obj.sale, sold: obj.sold, market: obj.market } });
         const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
@@ -102,6 +114,7 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'itemsearch':
       {
+        const { user, id } = options;
         const conditions = { user, id };
         const setAttribute = obj => ({ user, id: obj.guid__, data: { asins: obj.asins } });
         const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
@@ -112,18 +125,27 @@ const request = (operation, { url, user, id, skip, limit }) => {
       }
     case 'defrag':
       {
+        const { user, id } = options;
         const conditions = { user, id };
         return feed.garbageCollection(conditions);
+      }
+    case 'download/items':
+      {
+        const { user, params } = options;
+        const { category, ids, filter, type } = params;
+        const conditions = { user, category, ids, filter, type };
+        return feed.downloadItems(conditions);
       }
     default:
       return throwError('Unknown operation!');
   }
 };
 
-const worker = ({ url, user, id, operation, skip, limit }, callback) => {
+const worker = (options, callback) => {
+  const { operation, url, user, id, skip, limit, params } = options;
   log.info(displayName, 'Started. _id/ope:', id, operation);
   const start = new Date();
-  request(operation, { url, user, id, skip, limit }).subscribe(
+  request(operation, { url, user, id, skip, limit, params }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => {
       log.warn(displayName, err.name, err.message, err.stack);
@@ -138,6 +160,8 @@ const worker = ({ url, user, id, operation, skip, limit }, callback) => {
 };
 
 const main = () => {
+  agenda.define(jobName, worker);
+  agenda.start();
   const queue = async.queue(worker);
   const wait        = () => queue.length();
   const runs        = () => queue.running();
@@ -195,9 +219,17 @@ const shutdown = (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
   log.info(displayName, 'worker terminated.');
   log.info(displayName, 'log4js #4 terminated.');
-  log.close(() => cbk());
+  agenda.stop(() => log.close(() => cbk()));
 };
 
+agenda.on('ready',    () =>   log.info(displayName, 'mongo connection successfully.'));
+agenda.on('error',    err =>  log.error(displayName, 'mongo connection error.', err));
+agenda.on('ready',    () =>   log.info('ready: mongo connection successfully.'));
+agenda.on('error',    err =>  log.error('error: mongo connection error.', err));
+agenda.on('start',    job =>  log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
+agenda.on('complete', job =>  log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
+agenda.on('success',  job =>  log.info('success:',    job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
+agenda.on('fail',     (err, job) => log.error('fail:', err, job.attrs.data));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));

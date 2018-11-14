@@ -20,6 +20,7 @@ const node = {
   , att: ['./att-server.js']
   , its: ['./its-server.js']
   , arc: ['./arc-server.js']
+  , wks: ['./wks-server.js']
   }
 , output: {
     filename: '[name].node.js'
