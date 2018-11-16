@@ -266,7 +266,7 @@ const putJSON = function(url, data, resolve, reject) {
   request.open("PUT", url);
   request.onreadystatechange = function() {
     if (request.readyState === 4) {
-      if (request.status === 200) {
+      if (request.status === 200 || request.status === 201) {
         const type = request.getResponseHeader("Content-Type");
         if (type === "text/xml; charset=utf-8") {
           resolve(request.responseXML);

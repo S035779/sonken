@@ -127,6 +127,16 @@ export default {
         dispatch({ type: 'add/create', ids });
       });
   },
+
+  /*
+   * jobQueue
+   */
+  createJob(operation, params) {
+    return NoteApiClient.createJob(operation, params).then(status => {
+      dispatch({ type: 'job/create', status })
+    });
+  },
+
   deleteAdd(user, ids) {
     return NoteApiClient.deleteAdd(user, ids).then(() => {
         dispatch({ type: 'add/delete', ids });

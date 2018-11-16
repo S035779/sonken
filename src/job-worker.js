@@ -1,23 +1,30 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
+import fs               from 'fs';
+import path             from 'path';
 import * as R           from 'ramda';
 import { throwError, forkJoin, from }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
+import archiver         from 'archiver';
 import async            from 'async';
-import Agenda           from 'agenda';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
 import log              from 'Utilities/logutils';
 import aws              from 'Utilities/awsutils';
+import job              from 'Utilities/jobutils';
+import std              from 'Utilities/stdutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error();
+
 const node_env  = process.env.NODE_ENV    || 'development';
+const CACHE = process.env.CACHE;
 const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+const worker_name = process.env.WORKER_NAME || 'empty';
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = `[WRK] (${process.pid})`;
@@ -31,10 +38,6 @@ if (node_env === 'staging') {
 if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
-
-const jobName = 'job-worker';
-const params = { db: { address: 'localhost:27017/agenda_20181114' , collection: 'agendaJobs' , options: { useNewUrlParser: true } } };
-const agenda = new Agenda(params);
 
 const request = (operation, options) => {
   const yahoo = Yahoo.of();
@@ -131,15 +134,65 @@ const request = (operation, options) => {
       }
     case 'download/items':
       {
-        const { user, params } = options;
-        const { category, ids, filter, type } = params;
-        const conditions = { user, category, ids, filter, type };
-        return feed.downloadItems(conditions);
+        const { params } = options;
+        const { user, category, ids, filter, type } = params;
+        const header = user + '-' + category;
+        const setFile = buf => ({ name: header + '-' + std.rndInteger(8) + '.csv', dir: header, buffer: buf });
+        return feed.downloadItems({ user, ids, filter, type }).pipe(
+          map(setFile)
+        , flatMap(obj => createDir(obj))
+        , flatMap(obj => createFile(obj))
+        , flatMap(obj => createZip(obj))
+        );
       }
     default:
       return throwError('Unknown operation!');
   }
 };
+
+const createDir = file => {
+  const dir = path.resolve(__dirname, CACHE, file.dir);
+  return new Promise((resolve, reject) => {
+    fs.access(dir, err => {
+      if(err) {
+        if(err.code === 'ENOENT') {
+          fs.mkdir(dir, err => {
+            if(err) return reject(err);
+            return resolve(file);
+          });
+        } else {
+          return reject(err);
+        }
+      }
+      resolve(file);
+    });
+  });
+}
+
+const createFile = file => {
+  const dir = path.resolve(__dirname, CACHE, file.dir);
+  return new Promise((resolve, reject) => {
+    fs.writeFile(dir + '/' + file.name, file.buffer, err => {
+      if(err) return reject(err);
+      resolve(file);
+    });
+  });
+}
+
+const createZip = file => {
+  const dir = path.resolve(__dirname, CACHE, file.dir);
+  const zip = path.resolve(__dirname, CACHE, `${file.dir}-${Date.now()}.zip`);
+  return new Promise((resolve, reject) => {
+    const dst = fs.createWriteStream(zip);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    dst.on('finish', () => log.trace(displayName, 'finish:', zip));
+    archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+    archive.on('error', err => reject(err));
+    archive.pipe(dst);
+    archive.directory(dir, false);
+    archive.finalize();
+  });
+}
 
 const worker = (options, callback) => {
   const { operation, url, user, id, skip, limit, params } = options;
@@ -159,9 +212,28 @@ const worker = (options, callback) => {
   });
 };
 
+const queue = (name) => {
+  return job.queue(displayName)
+    .then(queue => {
+
+      queue.define(name, (job, done) => {
+        //log.info('Request ID/Data:', job.attrs._id, '/', job.attrs.data);
+        worker(job.attrs.data, done);
+      });
+      
+      log.warn(displayName, 'WORKER_NAME', worker_name);
+      queue.start();
+
+      queue.on('start',    job =>  log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
+      queue.on('complete', job =>  log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
+      queue.on('success',  job =>  log.info('success:',    job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
+      queue.on('fail',     (err, job) => log.error('fail:', err.message, job.attrs.data));
+      return queue;
+    });
+}
+const jobQueue = queue(worker_name);
+
 const main = () => {
-  agenda.define(jobName, worker);
-  agenda.start();
   const queue = async.queue(worker);
   const wait        = () => queue.length();
   const runs        = () => queue.running();
@@ -219,17 +291,9 @@ const shutdown = (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
   log.info(displayName, 'worker terminated.');
   log.info(displayName, 'log4js #4 terminated.');
-  agenda.stop(() => log.close(() => cbk()));
+  jobQueue.stop(() => log.close(() => cbk()));
 };
 
-agenda.on('ready',    () =>   log.info(displayName, 'mongo connection successfully.'));
-agenda.on('error',    err =>  log.error(displayName, 'mongo connection error.', err));
-agenda.on('ready',    () =>   log.info('ready: mongo connection successfully.'));
-agenda.on('error',    err =>  log.error('error: mongo connection error.', err));
-agenda.on('start',    job =>  log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
-agenda.on('complete', job =>  log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
-agenda.on('success',  job =>  log.info('success:',    job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
-agenda.on('fail',     (err, job) => log.error('fail:', err, job.attrs.data));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));

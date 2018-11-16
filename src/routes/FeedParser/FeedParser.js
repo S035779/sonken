@@ -50,6 +50,7 @@ export default class FeedParser {
       case 'job/notes':
         {
           const { users, categorys, filter, skip, limit, sort } = options;
+          const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isItems = filter && filter.isItems;
           const isImages = filter && filter.isImages;
           const create = filter && !R.isNil(filter.create) ? filter.create : Date.now();
@@ -79,7 +80,10 @@ export default class FeedParser {
           const setNotes = objs => isItems ? hasNotes(objs) : objs;
           const setObject = R.map(doc => doc.toObject());
           const query = Note.find(conditions).select(select);
-          return query.populate(params).sort({ updated: sort }).skip(Number(skip)).limit(Number(limit)).exec()
+          if(isPaginate) {
+            query.populate(params).sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
+          }
+          return query.exec()
             .then(setObject)
             .then(setNotes);
         }
@@ -1856,20 +1860,16 @@ export default class FeedParser {
     );
   }
   
-  downloadItems({ user, category, ids, filter, type }) {
-    //log.trace(FeedParser.displayName, 'downloadItems', { user, category, ids, filter, type });
+  downloadItems({ user, ids, filter, type }) {
+    //log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
     const CSV = this.setCsvItems(type);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const setItems = obj => obj.items ? obj.items : [];
     const dupItems = objs => std.dupObj(objs, 'title');
-    const promise = this.getNotes(user, category)
-      .then(R.map(obj => obj._id));
-    const observable = !R.isNil(ids) ? from([ids]) : from(promise);
     const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return observable.pipe(
-      flatMap(objs => forkJoin(observables(objs)))
-    , map(R.map(setItems))
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(setItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
     , map(dupItems)

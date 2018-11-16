@@ -1,3 +1,4 @@
+import * as R                     from 'ramda';
 import React                      from 'react';
 import PropTypes                  from 'prop-types';
 import NoteAction                 from 'Actions/NoteAction';
@@ -44,19 +45,32 @@ class RssDownloadItemsDialog extends React.Component {
   handleDownload() {
     const { user, ids, filter, itemNumber, category, checked } = this.props;
     const { name } = this.state;
-    const _ids = checked ? null : ids;
     if(itemNumber !== 0) {
-      this.spn.start();
-      //std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', user);
-      NoteAction.downloadItems(user, category, _ids, filter, name)
-        .then(() => this.setState({ isSuccess: true }))
-        .then(() => this.downloadFile(this.props.file))
-        .then(() => this.spn.stop())
-        .catch(err => {
-          std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-          this.setState({ isNotValid: true });
-          this.spn.stop();
-        });
+      if(checked) {
+        this.spn.start();
+        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, category, filter, name });
+        NoteAction.createJob('download/items', { user, category, filter, type: name })
+          .then(() => R.tap(console.log))
+          .then(() => this.setState({ isSuccess: true }))
+          .then(() => this.spn.stop())
+          .catch(err => {
+            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+            this.spn.stop();
+          });
+      } else {
+        this.spn.start();
+        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, ids, filter, name });
+        NoteAction.downloadItems(user, category, ids, filter, name)
+          .then(() => this.setState({ isSuccess: true }))
+          .then(() => this.downloadFile(this.props.file))
+          .then(() => this.spn.stop())
+          .catch(err => {
+            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+            this.spn.stop();
+          });
+      }
     }
   }
 

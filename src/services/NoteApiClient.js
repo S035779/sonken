@@ -81,6 +81,8 @@ export default {
         return new Promise((resolve, reject) => xhr.postFile(   api + '/traded',    options, resolve, reject));
       case 'download/bided':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
+      case 'create/job':
+        return new Promise((resolve, reject) => xhr.putJSON(    api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -198,6 +200,13 @@ export default {
   downloadImages(user, id, filter) {
     const params = filter ? R.merge({ user, id }, filter) : { user, id };
     return this.request('download/images', params);
+  },
+
+  /*
+   *  jobQueue
+   */
+  createJob(operation, params) {
+    return this.request('create/job', { operation, params });
   },
 
   /*

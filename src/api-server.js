@@ -7,6 +7,7 @@ import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import bodyParser       from 'body-parser';
 import cookieParser     from 'cookie-parser';
+import job              from 'Routes/job';
 import feed             from 'Routes/feed';
 import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
@@ -180,6 +181,12 @@ router.route('/file')
 .put(feed.uploadNotes())
 .post(feed.downloadItems())
 .delete(feed.notImplemented());
+
+router.route('/worker')
+.get(job.notImplemented())
+.put(job.download())
+.post(job.notImplemented())
+.delete(job.notImplemented());
 
 router.route('/notes')
 .get(feed.fetchNotes())
