@@ -352,14 +352,18 @@ class DrawerList extends React.Component {
             {renderNonCategoryList('closedsellers')}
           </List></Collapse> )
         : null }
-      <ListItem button onClick={this.handleClickButton.bind(this, 'bids')}>
-        <ListItemIcon><Avatar className={classes.avatar}><Timeline /></Avatar></ListItemIcon>
-        <ListItemText primary="入札リスト" classes={textClass} />
-      </ListItem>
-      <ListItem button onClick={this.handleClickButton.bind(this, 'trade')}>
-        <ListItemIcon><Avatar className={classes.avatar}><Gavel /></Avatar></ListItemIcon>
-        <ListItemText primary="取引チェック" classes={textClass} />
-      </ListItem>
+      { isBeta
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'bids')}>
+            <ListItemIcon><Avatar className={classes.avatar}><Timeline /></Avatar></ListItemIcon>
+            <ListItemText primary="入札リスト" classes={textClass} />
+          </ListItem>)
+        : null }
+      { isBeta
+        ? (<ListItem button onClick={this.handleClickButton.bind(this, 'trade')}>
+            <ListItemIcon><Avatar className={classes.avatar}><Gavel /></Avatar></ListItemIcon>
+            <ListItemText primary="取引チェック" classes={textClass} />
+          </ListItem>)
+        : null }
     </div>;
   }
 
