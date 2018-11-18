@@ -1690,7 +1690,7 @@ export default class FeedParser {
 
   setCsvItems(type) {
     const urlpath = NODE_ENV !== 'staging';
-    const setAsins = R.join(':');
+    //const setAsins = R.join(':');
     const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
     const setName = (guid, url) => 
       urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
@@ -1698,21 +1698,43 @@ export default class FeedParser {
     let map, keys;
     switch(type) {
       case '0001':
-        keys = [ 'auid', 'title', 'categorys', 'price', 'ship_price', 'buynow', 'ship_buynow', 'condition', 'bids', 'countdown'
-        , 'seller', 'link'
+        keys = [
+          'auid'
+        , 'title'
+        , 'categorys'
+        , 'price'
+        , 'ship_price'
+        , 'buynow'
+        , 'ship_buynow'
+        , 'condition'
+        , 'bids'
+        , 'countdown'
+        , 'seller'
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
-        , 'offers', 'market', 'sale', 'sold', 'categoryid', 'explanation', 'payment', 'shipping', 'asins', 'date'];
+        , 'link'
+        , 'date'
+        //, 'offers'
+        //, 'market'
+        //, 'sale'
+        //, 'sold'
+        //, 'categoryid'
+        //, 'explanation'
+        //, 'payment'
+        //, 'shipping'
+        //, 'asins'
+        ];
         map = R.map(obj => ({
-          title:        obj.title
-        , seller:       obj.seller
-        , auid:         obj.guid__
-        , link:         obj.link
-        , price:        obj.price
-        , buynow:       obj.buynow
-        , condition:    obj.item_condition
+          auid:         obj.guid__
+        , title:        obj.title
         , categorys:    obj.item_categorys
+        , price:        obj.price
+        , ship_price:   obj.ship_price
+        , buynow:       obj.buynow
+        , ship_buynow:  obj.ship_buynow
+        , condition:    obj.item_condition
         , bids:         obj.bids
         , countdown:    obj.countdown
+        , seller:       obj.seller
         , image1:       setImage(obj.guid__, obj.images, 1)
         , image2:       setImage(obj.guid__, obj.images, 2)
         , image3:       setImage(obj.guid__, obj.images, 3)
@@ -1723,33 +1745,77 @@ export default class FeedParser {
         , image8:       setImage(obj.guid__, obj.images, 8)
         , image9:       setImage(obj.guid__, obj.images, 9)
         , image10:      setImage(obj.guid__, obj.images, 10)
-        , offers:       obj.offers
-        , market:       obj.attributes ? obj.attributes.market : '-'
-        , sale:         obj.attributes ? obj.attributes.sale : '-'
-        , sold:         obj.attributes ? obj.attributes.sold : '-'
-        , categoryid:   obj.item_categoryid
-        , explanation:  obj.explanation
-        , payment:      obj.payment
-        , shipping:     obj.shipping
-        , ship_price:   obj.ship_price
-        , ship_buynow:  obj.ship_buynow
-        , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
+        , link:         obj.link
         , date:         obj.pubDate
+        //, offers:       obj.offers
+        //, market:       obj.attributes ? obj.attributes.market : '-'
+        //, sale:         obj.attributes ? obj.attributes.sale : '-'
+        //, sold:         obj.attributes ? obj.attributes.sold : '-'
+        //, categoryid:   obj.item_categoryid
+        //, explanation:  obj.explanation
+        //, payment:      obj.payment
+        //, shipping:     obj.shipping
+        //, asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         }));
         break;
-      case '0002':
+      case '0002': // Format A
         keys = [
-          'filename', 'category_id', 'title', 'input_method_of_description', 'description'
-        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'
-        , 'coment1', 'coment2', 'coment3', 'coment4', 'coment5', 'coment6', 'coment7', 'coment8', 'coment9'
-        , 'coment10', 'number', 'start_price', 'buynow_price'
-        , 'negotiation', 'duration', 'end_time', 'auto_re_sale', 'auto_price_cut', 'auto_extension'
-        , 'early_termination', 'bidder_limit', 'bad_evaluation', 'identification', 'condition'
+          'filename'
+        , 'category_id'
+        , 'title'
+        , 'input_method_of_description'
+        , 'description'
+        , 'image1'
+        , 'image2'
+        , 'image3'
+        , 'coment1'
+        , 'coment2'
+        , 'coment3'
+        , 'number'
+        , 'start_price'
+        , 'buynow_price'
+        , 'negotiation'
+        , 'duration'
+        , 'end_time'
+        , 'auto_re_sale'
+        , 'auto_price_cut'
+        , 'auto_extension'
+        , 'early_termination'
+        , 'bidder_limit'
+        , 'bad_evaluation'
+        , 'identification'
+        , 'condition'
         , 'remarks_on_condition'
-        , 'returns', 'remarks_on_returns', 'yahoo_easy_settlement', 'check_seller_information'
-        , 'region', 'municipality', 'shipping_charge_borne', 'shipping_input_method', 'delivaly_days'
-        , 'yafuneko', 'yafuneko_compact', 'yafuneko_post', 'jpp_pack'
-        , 'jpp_packet', 'unused1', 'unused2', 'size', 'weight'
+        , 'returns'
+        , 'remarks_on_returns'
+        , 'yahoo_easy_settlement'
+        , 'bank_account1'
+        , 'bank_account2'
+        , 'bank_account3'
+        , 'bank_account4'
+        , 'bank_account5'
+        , 'bank_account6'
+        , 'bank_account7'
+        , 'bank_account8'
+        , 'bank_account9'
+        , 'bank_account10'
+        , 'check_seller_information'
+        //////////
+        , 'region'
+        , 'municipality'
+        , 'shipping_charge_borne'
+        , 'shipping_input_method'
+        , 'delivaly_days'
+        , 'yafuneko'
+        , 'yafuneko_compact'
+        , 'yafuneko_post'
+        , 'jpp_pack'
+        , 'jpp_packet'
+        , 'hako_boon'
+        , 'hako_boon_mini'
+        , 'size'
+        , 'weight'
+        //////////
         , 'shipping_method1',   'domestic1',  'hokkaido1',  'okinawa1',   'remote1'
         , 'shipping_method2',   'domestic2',  'hokkaido2',  'okinawa2',   'remote2'
         , 'shipping_method3',   'domestic3',  'hokkaido3',  'okinawa3',   'remote3'
@@ -1764,73 +1830,131 @@ export default class FeedParser {
         , 'arrival_seino', 'oversea', 'options', 'bold', 'background', 'affiliate'
         ];
         map = R.map(obj => ({
-          filename: '-', category_id: obj.item_categoryid, title: obj.title, input_method_of_description: '-'
-        , description: obj.explanation
-        , image1:   setImage(obj.guid__, obj.images, 1)
-        , image2:   setImage(obj.guid__, obj.images, 2)
-        , image3:   setImage(obj.guid__, obj.images, 3)
-        , image4:   setImage(obj.guid__, obj.images, 4)
-        , image5:   setImage(obj.guid__, obj.images, 5)
-        , image6:   setImage(obj.guid__, obj.images, 6)
-        , image7:   setImage(obj.guid__, obj.images, 7)
-        , image8:   setImage(obj.guid__, obj.images, 8)
-        , image9:   setImage(obj.guid__, obj.images, 9)
-        , image10:  setImage(obj.guid__, obj.images, 10)
-        , coments1: '-', coments2:  '-', coments3: '-', coments4: '-'
-        , coments5: '-', coments6:  '-', coments7: '-', coments8: '-'
-        , coments9: '-', coments10: '-'
-        , number: '-', start_price: '-', buynow_price: obj.buynow, negotiation: '-', duration: obj.countdown
-        , end_time: '-', auto_re_sale: '-', auto_price_cut: '-', auto_extension: '-', early_termination: '-'
-        , bidder_limit: '-', bad_evaluation: '-', identification: '-', condition: obj.item_condition
-        , remarks_on_condition: '-', returns: '-', remarks_on_returns: '-', yahoo_easy_settlement: '-'
-        , check_seller_information: '-', region: '-', municipality: '-', shipping_charge_borne: '-'
-        , shipping_input_method: '-', delivaly_days: '-', yafuneko: '-', yafuneko_compact: '-'
-        , yafuneko_post: '-', jpp_pack: '-', jpp_packet: '-', unused1: '-', unused2: '-', size: '-', weight: '-'
-        , shipping_method1:  '-', domestic1:    '-', hokkaido1:    '-', okinawa1:       '-', remote1: '-'
-        , shipping_method2:  '-', domestic2:    '-', hokkaido2:    '-', okinawa2:       '-', remote2: '-'
-        , shipping_method3:  '-', domestic3:    '-', hokkaido3:    '-', okinawa3:       '-', remote3: '-'
-        , shipping_method4:  '-', domestic4:    '-', hokkaido4:    '-', okinawa4:       '-', remote4: '-'
-        , shipping_method5:  '-', domestic5:    '-', hokkaido5:    '-', okinawa5:       '-', remote5: '-'
-        , shipping_method6:  '-', domestic6:    '-', hokkaido6:    '-', okinawa6:       '-', remote6: '-'
-        , shipping_method7:  '-', domestic7:    '-', hokkaido7:    '-', okinawa7:       '-', remote7: '-'
-        , shipping_method8:  '-', domestic8:    '-', hokkaido8:    '-', okinawa8:       '-', remote8: '-'
-        , shipping_method9:  '-', domestic9:    '-', hokkaido9:    '-', okinawa9:       '-', remote9: '-'
-        , shipping_method10: '-', domestic10:   '-', hokkaido10:   '-', okinawa10:      '-', remote10: '-'
-        , arrival_jpp_pack:  '-', arrival_mail: '-', arrival_neko: '-', arrival_sagawa: '-', arrival_seino: '-'
-        , oversea: '-',           options:      '-', bold:         '-', background:     '-', affiliate: '-'
+          filename: ''
+        , category_id:  obj.item_categoryid
+        , title: obj.title
+        , input_method_of_description: ''
+        , description:  obj.explanation
+        , image1: setImage(obj.guid__, obj.images, 1)
+        , image2: setImage(obj.guid__, obj.images, 2)
+        , image3: setImage(obj.guid__, obj.images, 3)
+        , coments1: ''
+        , coments2:  ''
+        , coments3: ''
+        , number: ''
+        , start_price: ''
+        , buynow_price: obj.buynow
+        , negotiation: 0
+        , duration: 1
+        , end_time: 23
+        , auto_re_sale: 3
+        , auto_price_cut: 0
+        , auto_extension: 1
+        , early_termination: 1
+        , bidder_limit: 1
+        , bad_evaluation: 1
+        , identification: 1
+        , condition: 1
+        , remarks_on_condition: ''
+        , returns: 1
+        , remarks_on_returns: '到着後２日'
+        , yahoo_easy_settlement: 1
+        , bank_account1: ''
+        , bank_account2: ''
+        , bank_account3: ''
+        , bank_account4: ''
+        , bank_account5: ''
+        , bank_account6: ''
+        , bank_account7: ''
+        , bank_account8: ''
+        , bank_account9: ''
+        , bank_account10: ''
+        , check_seller_information: 0
+        /////////
+        , region: 1
+        , municipality: ''
+        , shipping_charge_borne: 0 
+        , shipping_input_method: 1
+        , delivaly_days: 2
+        , yafuneko: 0
+        , yafuneko_compact: 0
+        , yafuneko_post: 0
+        , jpp_pack: 0
+        , jpp_packet: 0
+        , hako_boon: 0
+        , hako_boon_mini: 0
+        , size: 1
+        , weight: 0
+        //////////
+        , shipping_method1:  '郵便局またはヤマト運輸',  domestic1:  1000,  hokkaido1:   '', okinawa1:   '', remote1:  ''
+        , shipping_method2:  '',                        domestic2:  '',    hokkaido2:   '', okinawa2:   '', remote2:  ''
+        , shipping_method3:  '',                        domestic3:  '',    hokkaido3:   '', okinawa3:   '', remote3:  ''
+        , shipping_method4:  '',                        domestic4:  '',    hokkaido4:   '', okinawa4:   '', remote4:  ''
+        , shipping_method5:  '',                        domestic5:  '',    hokkaido5:   '', okinawa5:   '', remote5:  ''
+        , shipping_method6:  '',                        domestic6:  '',    hokkaido6:   '', okinawa6:   '', remote6:  ''
+        , shipping_method7:  '',                        domestic7:  '',    hokkaido7:   '', okinawa7:   '', remote7:  ''
+        , shipping_method8:  '',                        domestic8:  '',    hokkaido8:   '', okinawa8:   '', remote8:  ''
+        , shipping_method9:  '',                        domestic9:  '',    hokkaido9:   '', okinawa9:   '', remote9:  ''
+        , shipping_method10: '',                        domestic10: '',    hokkaido10:  '', okinawa10:  '', remote10: ''
+        , arrival_jpp_pack:  '', arrival_mail: '', arrival_neko: '', arrival_sagawa: '', arrival_seino: ''
+        , oversea: 0, options: 0, bold: 0, background: 0, affiliate: 1
         }));
         break;
-      case '0003':
-        keys = [ 'asin', 'title', 'brand', 'category', 'description', 'word_count', 'rating', 'review', 'list_price', 'price'
-        , 'discount', 'commision', 'sales_rank', 'available', 'thumbnail', 'product_url', 'fullfilled', 'ship_price', 'total_price'
-        , 'parent_asin', 'child_asin', 'upc', 'ean', 'prime', 'affiliate_link'
-        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'];
+      case '0003': // Format C
+        keys = [
+          'asin'
+        , 'title'
+        , 'brand'
+        , 'category'
+        , 'description'
+        , 'word_count'
+        , 'rating'
+        , 'review'
+        , 'list_price'
+        , 'price'
+        , 'discount'
+        , 'commision'
+        , 'sales_rank'
+        , 'available'
+        , 'thumbnail'
+        , 'product_url'
+        , 'fullfilled'
+        , 'ship_price'
+        , 'total_price'
+        , 'parent_asin'
+        , 'child_asin'
+        , 'upc'
+        , 'ean'
+        , 'prime'
+        , 'affiliate_link'
+        , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'
+        ];
         map = R.map(obj => ({
           asin:           obj.attributes ? setAsin(obj.attributes.asins) : '-'
         , title:          obj.title
-        , brand:          '-'
-        , category:       obj.item_categoryid
-        , description:    obj.explanation
-        , word_count:     '-'
-        , rating:         '-'
-        , review:         '-'
-        , list_price:     '-'
+        , brand:          ''
+        , category:       ''
+        , description:    ''
+        , word_count:     0
+        , rating:         0
+        , review:         0
+        , list_price:     0
         , price:          obj.price
-        , discount:       '-'
-        , commision:      '-'
-        , sales_rank:     '-'
-        , available:      '-'
-        , thumbnail:      '-'
-        , product_url:    '-'
-        , fullfilled:     '-'
-        , ship_price:     '-'
-        , total_price:    '-'
-        , parent_asin:    '-'
-        , child_asin:     '-'
-        , upc:            '-'
-        , ean:            '-'
-        , prime:          '-'
-        , affiliate_link: '-'
+        , discount:       0
+        , commision:      ''
+        , sales_rank:     0
+        , available:      'N'
+        , thumbnail:      ''
+        , product_url:    ''
+        , fullfilled:     'N'
+        , ship_price:     0
+        , total_price:    0
+        , parent_asin:    ''
+        , child_asin:     ''
+        , upc:            ''
+        , ean:            ''
+        , prime:          ''
+        , affiliate_link: ''
         , image1:         setImage(obj.guid__, obj.images, 1)
         , image2:         setImage(obj.guid__, obj.images, 2)
         , image3:         setImage(obj.guid__, obj.images, 3)
@@ -1841,6 +1965,159 @@ export default class FeedParser {
         , image8:         setImage(obj.guid__, obj.images, 8)
         , image9:         setImage(obj.guid__, obj.images, 9)
         , image10:        setImage(obj.guid__, obj.images, 10)
+        }));
+        break;
+      case '0004': // Format B
+        keys = [
+          'filename'
+        , 'category_id'
+        , 'title'
+        , 'input_method_of_description'
+        , 'description'
+        , 'image1'
+        , 'image2'
+        , 'image3'
+        , 'image4'
+        , 'image5'
+        , 'image6'
+        , 'image7'
+        , 'image8'
+        , 'image9'
+        , 'image10'
+        , 'coment1'
+        , 'coment2'
+        , 'coment3'
+        , 'coment4'
+        , 'coment5'
+        , 'coment6'
+        , 'coment7'
+        , 'coment8'
+        , 'coment9'
+        , 'coment10'
+        , 'number'
+        , 'start_price'
+        , 'buynow_price'
+        , 'negotiation'
+        , 'duration'
+        , 'end_time'
+        , 'auto_re_sale'
+        , 'auto_price_cut'
+        , 'auto_extension'
+        , 'early_termination'
+        , 'bidder_limit'
+        , 'bad_evaluation'
+        , 'identification'
+        , 'condition'
+        , 'remarks_on_condition'
+        , 'returns'
+        , 'remarks_on_returns'
+        , 'yahoo_easy_settlement'
+        //////////
+        , 'check_seller_information'
+        //////////
+        , 'region'
+        , 'municipality'
+        , 'shipping_charge_borne'
+        , 'shipping_input_method'
+        , 'delivaly_days'
+        , 'yafuneko'
+        , 'yafuneko_compact'
+        , 'yafuneko_post'
+        , 'jpp_pack'
+        , 'jpp_packet'
+        , 'unused1'
+        , 'unused2'
+        , 'size'
+        , 'weight'
+        //////////
+        , 'shipping_method1',   'domestic1',  'hokkaido1',  'okinawa1',   'remote1'
+        , 'shipping_method2',   'domestic2',  'hokkaido2',  'okinawa2',   'remote2'
+        , 'shipping_method3',   'domestic3',  'hokkaido3',  'okinawa3',   'remote3'
+        , 'shipping_method4',   'domestic4',  'hokkaido4',  'okinawa4',   'remote4'
+        , 'shipping_method5',   'domestic5',  'hokkaido5',  'okinawa5',   'remote5'
+        , 'shipping_method6',   'domestic6',  'hokkaido6',  'okinawa6',   'remote6'
+        , 'shipping_method7',   'domestic7',  'hokkaido7',  'okinawa7',   'remote7'
+        , 'shipping_method8',   'domestic8',  'hokkaido8',  'okinawa8',   'remote8'
+        , 'shipping_method9',   'domestic9',  'hokkaido9',  'okinawa9',   'remote9'
+        , 'shipping_method10',  'domestic10', 'hokkaido10', 'okinawa10',  'remote10'
+        , 'arrival_jpp_pack', 'arrival_mail', 'arrival_neko', 'arrival_sagawa'
+        , 'arrival_seino', 'oversea', 'options', 'bold', 'background', 'affiliate'
+        ];
+        map = R.map(obj => ({
+          filename: ''
+        , category_id:  obj.item_categoryid
+        , title: obj.title
+        , input_method_of_description: ''
+        , description:  obj.explanation
+        , image1: setImage(obj.guid__, obj.images, 1)
+        , image2: setImage(obj.guid__, obj.images, 2)
+        , image3: setImage(obj.guid__, obj.images, 3)
+        , image4: setImage(obj.guid__, obj.images, 4)
+        , image5: setImage(obj.guid__, obj.images, 5)
+        , image6: setImage(obj.guid__, obj.images, 6)
+        , image7: setImage(obj.guid__, obj.images, 7)
+        , image8: setImage(obj.guid__, obj.images, 8)
+        , image9: setImage(obj.guid__, obj.images, 9)
+        , image10: setImage(obj.guid__, obj.images, 10)
+        , coments1: ''
+        , coments2:  ''
+        , coments3: ''
+        , coments4: ''
+        , coments5: ''
+        , coments6: ''
+        , coments7: ''
+        , coments8: ''
+        , coments9: ''
+        , coments10: ''
+        , number: 1
+        //////////
+        , start_price: ''
+        , buynow_price: obj.buynow
+        , negotiation: 0
+        , duration: 1
+        , end_time: 23
+        , auto_re_sale: 2
+        , auto_price_cut: 0
+        , auto_extension: 1
+        , early_termination: 1
+        , bidder_limit: 1
+        , bad_evaluation: 1
+        , identification: 1
+        , condition: 1
+        , remarks_on_condition: ''
+        , returns: 1
+        , remarks_on_returns: '到着後２日'
+        , yahoo_easy_settlement: 1
+        //////////
+        , check_seller_information: 0
+        /////////
+        , region: 40
+        , municipality: ''
+        , shipping_charge_borne: 0 
+        , shipping_input_method: 1
+        , delivaly_days: 2
+        , yafuneko: 0
+        , yafuneko_compact: 0
+        , yafuneko_post: 0
+        , jpp_pack: 0
+        , jpp_packet: 0
+        , unused1: 0
+        , unused2: 0
+        , size: 1
+        , weight: 0
+        //////////
+        , shipping_method1:  '郵便局またはヤマト運輸',  domestic1:  1000,  hokkaido1:   '', okinawa1:   '', remote1:  ''
+        , shipping_method2:  '',                        domestic2:  '',    hokkaido2:   '', okinawa2:   '', remote2:  ''
+        , shipping_method3:  '',                        domestic3:  '',    hokkaido3:   '', okinawa3:   '', remote3:  ''
+        , shipping_method4:  '',                        domestic4:  '',    hokkaido4:   '', okinawa4:   '', remote4:  ''
+        , shipping_method5:  '',                        domestic5:  '',    hokkaido5:   '', okinawa5:   '', remote5:  ''
+        , shipping_method6:  '',                        domestic6:  '',    hokkaido6:   '', okinawa6:   '', remote6:  ''
+        , shipping_method7:  '',                        domestic7:  '',    hokkaido7:   '', okinawa7:   '', remote7:  ''
+        , shipping_method8:  '',                        domestic8:  '',    hokkaido8:   '', okinawa8:   '', remote8:  ''
+        , shipping_method9:  '',                        domestic9:  '',    hokkaido9:   '', okinawa9:   '', remote9:  ''
+        , shipping_method10: '',                        domestic10: '',    hokkaido10:  '', okinawa10:  '', remote10: ''
+        , arrival_jpp_pack:  '', arrival_mail: '', arrival_neko: '', arrival_sagawa: '', arrival_seino: ''
+        , oversea: 0, options: 0, bold: 0, background: 0, affiliate: 1
         }));
         break;
     }
