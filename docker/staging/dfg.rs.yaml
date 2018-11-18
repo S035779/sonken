@@ -25,3 +25,6 @@ spec:
           requests:
             cpu: 16m
             memory: 320Mi
+        env:
+          - name: WORKER_NAME
+            value: "dfg-worker"

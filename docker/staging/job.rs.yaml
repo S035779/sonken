@@ -25,3 +25,6 @@ spec:
           requests:
             cpu: 96m
             memory: 320Mi
+        env:
+          - name: WORKER_NAME
+            value: "job-worker"

@@ -25,3 +25,6 @@ spec:
           requests:
             cpu: 32m
             memory: 256Mi
+        env:
+          - name: WORKER_NAME
+            value: "img-worker"

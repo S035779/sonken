@@ -219,8 +219,9 @@ class Yahoo {
             const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
             const setExplan     = __obj => __obj ? __obj.string : '';
             const isExplan      = __obj => __obj.name === '商品詳細';
-            const explanation = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
-            return R.merge(_obj, { explanation }); 
+            const explanation   = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
+            const str2none      = R.replace(/支払詳細|商品詳細|発送詳細|注意事項/g, '');
+            return R.merge(_obj, { explanation: str2none(explanation) }); 
           };
           const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const isGuid          = _obj => _obj.guid__;
@@ -381,8 +382,9 @@ class Yahoo {
             const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
             const setExplan     = __obj => __obj ? __obj.string : '';
             const isExplan      = __obj => __obj.name === '商品詳細';
-            const explanation = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
-            return R.merge(_obj, { explanation }); 
+            const explanation = R.compose(str2none, setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
+            const str2none      = R.replace(/支払詳細|商品詳細|発送詳細|注意事項/g, '');
+            return R.merge(_obj, { explanation: str2none(explanation) }); 
           };
           const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const isGuid          = _obj => _obj.guid__;
