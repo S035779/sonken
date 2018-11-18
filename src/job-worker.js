@@ -19,12 +19,12 @@ const config = dotenv.config();
 if(config.error) throw config.error();
 
 const node_env  = process.env.NODE_ENV    || 'development';
+const workerName = process.env.WORKER_NAME || 'empty';
 const CACHE = process.env.CACHE;
 const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const aws_keyset = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
-const worker_name = process.env.WORKER_NAME || 'empty';
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = `[WRK] (${process.pid})`;
@@ -135,13 +135,15 @@ const request = (operation, options) => {
     case 'download/items':
       {
         const { params } = options;
-        const { user, category, ids, filter, type } = params;
+        const { user, category, ids, filter, type, number } = params;
         const header = user + '-' + category;
         const setFile = buf => ({ name: header + '-' + std.rndInteger(8) + '.csv', dir: header, buffer: buf });
         return feed.downloadItems({ user, ids, filter, type }).pipe(
           map(setFile)
         , flatMap(obj => createDir(obj))
+        , flatMap(obj => createBom(obj))
         , flatMap(obj => createFile(obj))
+        , flatMap(obj => listFile(number, obj))
         , flatMap(obj => createZip(obj))
         );
       }
@@ -149,6 +151,19 @@ const request = (operation, options) => {
       return throwError('Unknown operation!');
   }
 };
+
+const listFile = (number, file) => {
+  const dir = path.resolve(__dirname, CACHE, file.dir);
+  return new Promise((resolve, reject) => {
+    fs.readdir(dir, (err, files) => {
+      if(err) return reject(err);
+      const fileList = files.filter(obj => fs.statSync(dir + '/' + obj).isFile() && /.*\.csv$/.test(obj));
+      const result = number < fileList.length * 20 ? file : null
+      log.debug(displayName, 'listFile', { number, files: fileList.length * 20 });
+      resolve(result);
+    });
+  });
+}
 
 const createDir = file => {
   const dir = path.resolve(__dirname, CACHE, file.dir);
@@ -169,10 +184,20 @@ const createDir = file => {
   });
 }
 
+const createBom = file => {
+  const dir = path.resolve(__dirname, CACHE, file.dir);
+  return new Promise((resolve, reject) => {
+    fs.writeFile(dir + '/' + file.name, '\uFEFF', err => {
+      if(err) return reject(err);
+      resolve(file);
+    });
+  });
+}
+
 const createFile = file => {
   const dir = path.resolve(__dirname, CACHE, file.dir);
   return new Promise((resolve, reject) => {
-    fs.writeFile(dir + '/' + file.name, file.buffer, err => {
+    fs.appendFile(dir + '/' + file.name, file.buffer, err => {
       if(err) return reject(err);
       resolve(file);
     });
@@ -180,12 +205,17 @@ const createFile = file => {
 }
 
 const createZip = file => {
+  const isFile = !R.isNil(file);
+  if(!isFile) return Promise.resolve(null);
   const dir = path.resolve(__dirname, CACHE, file.dir);
   const zip = path.resolve(__dirname, CACHE, `${file.dir}-${Date.now()}.zip`);
   return new Promise((resolve, reject) => {
     const dst = fs.createWriteStream(zip);
     const archive = archiver('zip', { zlib: { level: 9 } });
-    dst.on('finish', () => log.trace(displayName, 'finish:', zip));
+    dst.on('finish', () => {
+      log.trace(displayName, 'finish:', zip)
+      resolve(zip);
+    });
     archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
     archive.on('error', err => reject(err));
     archive.pipe(dst);
@@ -212,26 +242,7 @@ const worker = (options, callback) => {
   });
 };
 
-const queue = (name) => {
-  return job.queue(displayName)
-    .then(queue => {
-
-      queue.define(name, (job, done) => {
-        //log.info('Request ID/Data:', job.attrs._id, '/', job.attrs.data);
-        worker(job.attrs.data, done);
-      });
-      
-      log.warn(displayName, 'WORKER_NAME', worker_name);
-      queue.start();
-
-      queue.on('start',    job =>  log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
-      queue.on('complete', job =>  log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
-      queue.on('success',  job =>  log.info('success:',    job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
-      queue.on('fail',     (err, job) => log.error('fail:', err.message, job.attrs.data));
-      return queue;
-    });
-}
-const jobQueue = queue(worker_name);
+const jobQueue = job.dequeue(workerName, 'download/items', 5, worker);
 
 const main = () => {
   const queue = async.queue(worker);

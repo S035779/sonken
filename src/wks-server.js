@@ -4,13 +4,11 @@ import path             from 'path';
 import os               from 'os';
 import child_process    from 'child_process';
 import log              from 'Utilities/logutils';
-import job              from 'Utilities/jobutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error;
 
-const worker_name     = 'wks-worker';
 const node_env        = process.env.NODE_ENV    || 'development';
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 process.env.NODE_PENDING_DEPRECATION = 0;
@@ -56,19 +54,6 @@ const worker = () => {
   idx = idx + 1;
 };
 
-const queue = (name) => {
-  const query = { name: name };
-  return job.queue(displayName)
-    .then(async queue => {
-      await queue.start();
-      await queue.cancel(query);
-      const jobs = await queue.jobs(query);
-      await log.debug(displayName, 'jobs length', jobs.length)
-      return queue;
-    })
-}
-const jobQueue = queue(worker_name);
-
 const main = () => {
   log.info(displayName, 'start fetch works server.')
   worker();
@@ -95,7 +80,7 @@ const shutdown = (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
   log.info(displayName, 'scheduler terminated.');
   log.info(displayName, 'log4js #3 terminated.');
-  jobQueue.stop(log.close(() => cbk()));
+  log.close(() => cbk());
 };
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));

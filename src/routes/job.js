@@ -9,7 +9,7 @@ export default {
     return (req, res) => {
       const { operation, params } = req.body;
       job.download({ operation, params }).subscribe(
-        obj => res.status(201).send(obj)
+        obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);

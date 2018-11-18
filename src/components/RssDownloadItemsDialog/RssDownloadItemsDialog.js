@@ -1,4 +1,3 @@
-import * as R                     from 'ramda';
 import React                      from 'react';
 import PropTypes                  from 'prop-types';
 import NoteAction                 from 'Actions/NoteAction';
@@ -43,15 +42,17 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload() {
-    const { user, ids, filter, itemNumber, category, checked } = this.props;
+    std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
+    const { user, ids, filter, itemNumber, category, checked, noteNumber } = this.props;
     const { name } = this.state;
+    NoteAction.deleteCache();
     if(itemNumber !== 0) {
       if(checked) {
         this.spn.start();
         std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, category, filter, name });
-        NoteAction.createJob('download/items', { user, category, filter, type: name })
-          .then(() => R.tap(console.log))
+        NoteAction.createJob('download/items', { user, category, filter, type: name, number: noteNumber })
           .then(() => this.setState({ isSuccess: true }))
+          .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
           .then(() => this.spn.stop())
           .catch(err => {
             std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
@@ -63,7 +64,7 @@ class RssDownloadItemsDialog extends React.Component {
         std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, ids, filter, name });
         NoteAction.downloadItems(user, category, ids, filter, name)
           .then(() => this.setState({ isSuccess: true }))
-          .then(() => this.downloadFile(this.props.file))
+          .then(() => this.downloadFile(this.props.file, { type: 'text/csv' }))
           .then(() => this.spn.stop())
           .catch(err => {
             std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
@@ -74,16 +75,17 @@ class RssDownloadItemsDialog extends React.Component {
     }
   }
 
-  downloadFile(blob) {
+  downloadFile(blob, mime) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);
+    const isCSV = mime.type === 'text/csv';
     const anchor = document.createElement('a');
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      const url = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
+      const url = isCSV ? URL.createObjectURL(new Blob([bom, this.result], mime)) : URL.createObjectURL(new Blob([this.result], mime));
       anchor.href = url;
       anchor.target = '_blank';
-      anchor.download = 'download.csv';
+      anchor.download = isCSV ? 'download.csv' : 'download.zip';
       anchor.click();
       URL.revokeObjectURL(url);
     }
@@ -149,6 +151,7 @@ RssDownloadItemsDialog.propTypes = {
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired
 , file: PropTypes.object
+, noteNumber: PropTypes.number
 };
 
 const columnHeight = 62;

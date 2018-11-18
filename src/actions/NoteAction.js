@@ -132,9 +132,12 @@ export default {
    * jobQueue
    */
   createJob(operation, params) {
-    return NoteApiClient.createJob(operation, params).then(status => {
-      dispatch({ type: 'job/create', status })
+    return NoteApiClient.createJob(operation, params).then(file => {
+      dispatch({ type: 'job/create', file });
     });
+  },
+  deleteCache() {
+    dispatch({ type: 'job/create', file: null });
   },
 
   deleteAdd(user, ids) {

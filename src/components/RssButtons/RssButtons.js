@@ -119,7 +119,7 @@ class RssButtons extends React.Component {
   }
 
   render() {
-    const { classes, category, user, notes, selectedNoteId, itemFilter, file } = this.props;
+    const { classes, category, user, notes, selectedNoteId, itemFilter, file, noteNumber } = this.props;
     const { isSuccess, isNotValid, isDownload, checked } = this.state;
     const color = this.getColor(category);
     const itemNumber = notes.length;
@@ -134,7 +134,7 @@ class RssButtons extends React.Component {
             ダウンロード
           </RssButton>
         : null }
-        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} ids={selectedNoteId} itemNumber={itemNumber}
+        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} ids={selectedNoteId} itemNumber={itemNumber} noteNumber={noteNumber}
           filter={itemFilter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
@@ -156,6 +156,7 @@ RssButtons.propTypes = {
 , file: PropTypes.object
 , category: PropTypes.string.isRequired
 , itemFilter: PropTypes.object.isRequired
+, noteNumber: PropTypes.number.isRequired
 };
 
 const titleHeight   = 62;

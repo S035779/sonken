@@ -206,7 +206,7 @@ export default class FeedParser {
           const hasArch  = R.filter(isArch);
           const setSold  = R.compose(R.length, hasSold);
           const setArch  = R.compose(R.length, hasArch);
-          const setCount = doc => isCount
+          const setCount = doc => isCount 
             ? [{ _id: doc._id, counts: R.length(doc.items), sold: setSold(doc.items), archive: setArch(doc.items) }] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
           const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
