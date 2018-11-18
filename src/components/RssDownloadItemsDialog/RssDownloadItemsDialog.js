@@ -110,6 +110,7 @@ class RssDownloadItemsDialog extends React.Component {
       { id: '0001', name: 'デフォルト', type: 'text/csv' }
     , { id: '0002', name: 'フォーマット１', type: 'text/csv' }
     , { id: '0003', name: 'フォーマット２', type: 'text/csv' }
+    , { id: '0004', name: 'フォーマット３', type: 'text/csv' }
     ];
     const renderMenu = formats ? formats.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     return <LoginFormDialog open={open} title={'ダウンロード'} onClose={this.handleCloseDialog.bind(this, 'isDownload')} >
