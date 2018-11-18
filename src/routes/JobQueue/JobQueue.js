@@ -1,5 +1,6 @@
 import dotenv           from 'dotenv';
 import fs               from 'fs';
+import fsExtra          from 'fs-extra';
 import path             from 'path';
 import * as R           from 'ramda';
 import { from }         from 'rxjs';
@@ -94,12 +95,17 @@ export default class JobQueue {
 
   fetchFile(filename) {
     const file = path.resolve(__dirname, '../../', CACHE, filename);
+    const dir = path.resolve(__dirname, '../../', CACHE);
     return new Promise((resolve, reject) => {
       fs.readFile(file, (err, buffer) => {
         if(err) return reject(err);
         fs.unlink(file, err => {
           if(err) return reject(err);
-          resolve(buffer);
+          fsExtra.emptyDir(dir, err => {
+            if(err) return reject(err);
+            console.log(dir);
+            resolve(buffer);
+          });
         });
       });
     });
