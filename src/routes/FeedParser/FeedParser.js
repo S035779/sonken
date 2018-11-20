@@ -1,7 +1,7 @@
 import path                       from 'path';
 import dotenv                     from 'dotenv';
 import * as R                     from 'ramda';
-import { from, forkJoin }         from 'rxjs';
+import { from, forkJoin, defer, of } from 'rxjs';
 import { map, flatMap }           from 'rxjs/operators';
 import { parseString }            from 'xml2js';
 import mongoose                   from 'mongoose';
@@ -2239,6 +2239,23 @@ export default class FeedParser {
     return observable.pipe(
       map(setArchive)
     );
+  }
+
+  createCSVs(user, category, total, limit, data) {
+    const AWS         = aws.of(aws_keyset);
+    const setFile     = name => ({ name });
+    const setFiles    = obj => R.map(_file => setFile(_file), obj.files);
+    const files       = setFiles(data);
+    const zipkey      = std.crypto_sha256(user, category, 'hex') + '.zip';
+    const numTotal    = Number(total);
+    const numLimit    = Number(limit);
+    const numFiles    = R.length(files);
+    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
+    const observable = defer(() => {
+      //console.log(numTotal, numLimit, numFiles, subscribeToFirst);
+      return subscribeToFirst ? AWS.createCSV(STORAGE, { key: zipkey, files, subpath: data.subpath }) : of({ data });
+    });
+    return observable;
   }
 }
 FeedParser.displayName = 'FeedParser';

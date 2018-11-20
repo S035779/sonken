@@ -43,16 +43,18 @@ class RssDownloadItemsDialog extends React.Component {
 
   handleDownload() {
     std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-    const { user, ids, filter, itemNumber, category, checked, noteNumber } = this.props;
+    const { user, ids, filter, itemNumber, category, checked } = this.props;
     const { name } = this.state;
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
       if(checked) {
         this.spn.start();
         std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, category, filter, name });
-        NoteAction.createJob('download/items', { user, category, filter, type: name, number: noteNumber })
+        NoteAction.createJob('download/items', { user, category, filter, type: name })
           .then(() => this.setState({ isSuccess: true }))
-          .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
+          //.then(() => this.props.file && this.props.file.size !== 0
+          //  ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
+          .then(() => this.props.signedlink ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
           .then(() => this.spn.stop())
           .catch(err => {
             std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
@@ -73,6 +75,16 @@ class RssDownloadItemsDialog extends React.Component {
           });
       }
     }
+  }
+
+  downloadLink(link, mime) {
+    std.logInfo(RssDownloadItemsDialog.displayName, 'downloadLink', link);
+    const isCSV = mime.type === 'text/csv';
+    const anchor = document.createElement('a');
+    anchor.href = link;
+    anchor.target = '_blank';
+    anchor.download = isCSV ? 'download.csv' : 'download.zip';
+    anchor.click();
   }
 
   downloadFile(blob, mime) {
@@ -152,7 +164,7 @@ RssDownloadItemsDialog.propTypes = {
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired
 , file: PropTypes.object
-, noteNumber: PropTypes.number
+, signedlink: PropTypes.string
 };
 
 const columnHeight = 62;

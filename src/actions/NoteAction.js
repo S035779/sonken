@@ -132,8 +132,8 @@ export default {
    * jobQueue
    */
   createJob(operation, params) {
-    return NoteApiClient.createJob(operation, params).then(file => {
-      dispatch({ type: 'job/create', file });
+    return NoteApiClient.createJob(operation, params).then(signedlink => {
+      dispatch({ type: 'job/create', signedlink });
     });
   },
   deleteCache() {

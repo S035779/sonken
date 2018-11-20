@@ -1,11 +1,8 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
-import fs               from 'fs';
-import path             from 'path';
 import * as R           from 'ramda';
 import { throwError, forkJoin, from }   from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
-import archiver         from 'archiver';
+import { flatMap, map, catchError } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
@@ -13,6 +10,7 @@ import log              from 'Utilities/logutils';
 import aws              from 'Utilities/awsutils';
 import job              from 'Utilities/jobutils';
 import std              from 'Utilities/stdutils';
+import fss              from 'Utilities/fssutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -51,6 +49,7 @@ const request = (operation, options) => {
         return yahoo.jobHtml(conditions).pipe( 
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
+          , catchError(err => throwError(err))
           );
       }
     case 'closedmarchant':
@@ -60,6 +59,7 @@ const request = (operation, options) => {
         return yahoo.jobClosedMerchant(conditions).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
+          , catchError(err => throwError(err))
           );
       }
     case 'closedsellers':
@@ -69,6 +69,7 @@ const request = (operation, options) => {
         return yahoo.jobClosedSellers(conditions).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
+          , catchError(err => throwError(err))
           );
       }
     //case 'rss':
@@ -91,6 +92,7 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
           , flatMap(obj => from(observable(obj)))
+          , catchError(err => throwError(err))
           );
       }
     case 'archives':
@@ -102,6 +104,7 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => feed.createArchives(obj))
           , flatMap(obj => from(observable(obj)))
+          , catchError(err => throwError(err))
           );
       }
     case 'attribute':
@@ -113,6 +116,7 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobAttribute(obj))
           , flatMap(objs => forkJoin(observables(objs)))
+          , catchError(err => throwError(err))
           );
       }
     case 'itemsearch':
@@ -124,105 +128,42 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobItemSearch(obj))
           , flatMap(objs => forkJoin(observables(objs)))
+          , catchError(err => throwError(err))
           );
       }
     case 'defrag':
       {
         const { user, id } = options;
         const conditions = { user, id };
-        return feed.garbageCollection(conditions);
+        return feed.garbageCollection(conditions).pipe(
+            catchError(err => throwError(err))
+          );
       }
     case 'download/items':
       {
         const { params } = options;
         const { user, category, ids, filter, type, number } = params;
         const header = user + '-' + category;
-        const setFile = buf => ({ name: header + '-' + std.rndInteger(8) + '.csv', dir: header, buffer: buf });
+        const setFile = buffer => ({ subpath: header, data: { name: header + '-' + std.rndInteger(8) + '.csv', buffer } });
+        const hasCSV = obj => R.filter(_file => FSS.isSubFile(obj.subpath, _file) && /.*\.csv$/.test(_file), obj.files);
+        const setFiles = obj => R.merge(obj, { files: hasCSV(obj) });
+        const FSS = fss.of({ dirpath: '../', dirname: CACHE });
         return feed.downloadItems({ user, ids, filter, type }).pipe(
-          map(setFile)
-        , flatMap(obj => createDir(obj))
-        , flatMap(obj => createBom(obj))
-        , flatMap(obj => createFile(obj))
-        , flatMap(obj => listFile(number, obj))
-        , flatMap(obj => createZip(obj))
-        );
+            map(setFile)
+          , flatMap(obj => FSS.createDirectory(obj))
+          , flatMap(obj => FSS.createBom(obj))
+          , flatMap(obj => FSS.createFile(obj))
+          , flatMap(obj => FSS.fetchSubFileList(obj))
+          , map(setFiles)
+          //, flatMap(obj => FSS.createArchive(number, 20, obj))
+          , flatMap(obj => feed.createCSVs(user, category, number, 20, obj))
+          , catchError(err => throwError(err))
+          );
       }
     default:
       return throwError('Unknown operation!');
   }
 };
-
-const listFile = (number, file) => {
-  const dir = path.resolve(__dirname, CACHE, file.dir);
-  return new Promise((resolve, reject) => {
-    fs.readdir(dir, (err, files) => {
-      if(err) return reject(err);
-      const fileList = files.filter(obj => fs.statSync(dir + '/' + obj).isFile() && /.*\.csv$/.test(obj));
-      const result = number < fileList.length * 20 ? file : null
-      log.debug(displayName, 'listFile', { number, files: fileList.length * 20 });
-      resolve(result);
-    });
-  });
-}
-
-const createDir = file => {
-  const dir = path.resolve(__dirname, CACHE, file.dir);
-  return new Promise((resolve, reject) => {
-    fs.access(dir, err => {
-      if(err) {
-        if(err.code === 'ENOENT') {
-          fs.mkdir(dir, err => {
-            if(err) return reject(err);
-            return resolve(file);
-          });
-        } else {
-          return reject(err);
-        }
-      }
-      resolve(file);
-    });
-  });
-}
-
-const createBom = file => {
-  const dir = path.resolve(__dirname, CACHE, file.dir);
-  return new Promise((resolve, reject) => {
-    fs.writeFile(dir + '/' + file.name, '\uFEFF', err => {
-      if(err) return reject(err);
-      resolve(file);
-    });
-  });
-}
-
-const createFile = file => {
-  const dir = path.resolve(__dirname, CACHE, file.dir);
-  return new Promise((resolve, reject) => {
-    fs.appendFile(dir + '/' + file.name, file.buffer, err => {
-      if(err) return reject(err);
-      resolve(file);
-    });
-  });
-}
-
-const createZip = file => {
-  const isFile = !R.isNil(file);
-  if(!isFile) return Promise.resolve(null);
-  const dir = path.resolve(__dirname, CACHE, file.dir);
-  const zip = path.resolve(__dirname, CACHE, `${file.dir}-${Date.now()}.zip`);
-  return new Promise((resolve, reject) => {
-    const dst = fs.createWriteStream(zip);
-    const archive = archiver('zip', { zlib: { level: 9 } });
-    dst.on('finish', () => {
-      log.trace(displayName, 'finish:', zip)
-      resolve(zip);
-    });
-    archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-    archive.on('error', err => reject(err));
-    archive.pipe(dst);
-    archive.directory(dir, false);
-    archive.finalize();
-  });
-}
 
 const worker = (options, callback) => {
   const { operation, url, user, id, skip, limit, params } = options;
@@ -242,7 +183,13 @@ const worker = (options, callback) => {
   });
 };
 
-const jobQueue = job.dequeue(workerName, 'download/items', 5, worker);
+let jobName;
+if(workerName === 'wks-worker') {
+  jobName = 'download/items';
+} else {
+  jobName = 'none';
+}
+const jobQueue = job.dequeue(workerName, jobName, 1, worker);
 
 const main = () => {
   const queue = async.queue(worker);
@@ -285,7 +232,7 @@ main();
 
 const rejections = new Map();
 const reject = (err, promise) => {
-  log.warn(displayName, 'unhandledRejection', err.name, err.message, err.stack || promise);
+  log.warn(displayName, 'unhandledRejection', err.name. err.message, promise);
   rejections.set(promise, err);
 };
 const shrink = promise => {

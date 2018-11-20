@@ -96,6 +96,7 @@ RUN buildDeps='build-essential python' \
   && yarn install \
   #&& yarn run build:pro:node \
   && yarn run build:stg:node \
+  && mkdir /app/sonken/storage \
   && chown -R app:app /app \
   && chmod 755 /app/sonken/docker/staging/install.sh \
   && apt-get purge -y --auto-remove $buildDeps

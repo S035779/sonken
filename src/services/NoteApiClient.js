@@ -82,7 +82,7 @@ export default {
       case 'download/bided':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
       case 'create/job':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(   api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':

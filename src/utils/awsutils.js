@@ -1,5 +1,5 @@
 import dotenv           from 'dotenv';
-import fs               from 'fs';
+import fs               from 'fs-extra';
 import path             from 'path';
 import AWS              from 'aws-sdk';
 import * as R           from 'ramda';
@@ -77,12 +77,18 @@ class awsutils {
   }
 
   checkObjectList(bucket, files) {
-    const _isFiles  = (objs, file) => R.contains(file.key, objs);
+    const _isFiles  = (objs, file) => {
+      //console.log(file.key, R.contains(file.key, objs))
+      return R.contains(file.key, objs);
+    };
     const isFiles   = R.curry(_isFiles);
-    const hasFiles  = objs => R.filter(isFiles(objs), files);
+    const hasFiles  = objs => R.filter(_file => isFiles(objs, _file), files);
+    //const hasZip    = objs => R.filter(obj => R.test(/.*\.zip$/, obj), objs);
     const setKeys   = obj  => R.map(obj => obj.Key, obj.Contents);
     return this.fetchObjectList(bucket)
       .then(setKeys)
+      //.then(hasZip)
+      //.then(R.tap(console.log))
       .then(hasFiles);
   }
 
@@ -95,8 +101,12 @@ class awsutils {
   fetchSignedUrl(bucket, { key, name }) {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
     const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
-    const promise = this.s3.getSignedUrl('getObject', params).promise();
-    return promise;
+    return new Promise((resolve, reject) => {
+      this.s3.getSignedUrl('getObject', params, (err, url) => {
+        if(err) return reject(err);
+        resolve(url);
+      });
+    });
   }
 
   fetchObject(bucket, { key, name }) {
@@ -166,6 +176,39 @@ class awsutils {
       archive.on('error', err => reject(err));
       archive.pipe(dst);
       R.map(obj => archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
+      archive.finalize();
+    });
+  }
+
+  createCSV(bucket, { key, files, subpath }) {
+    return new Promise((resolve, reject) => {
+      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      const cachefile = path.resolve(__dirname, '../', CACHE, `cachefile_${Date.now()}.tmp`);
+      const subdir    = path.resolve(__dirname, '../', CACHE, subpath);
+      const dst = fs.createWriteStream(cachefile);
+      dst.on('finish', () => {
+        log.trace(awsutils.displayName, 'finish:', cachefile);
+        const src = fs.createReadStream(cachefile);
+        src.pipe(this.createWriteStream(bucket, key));
+        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
+        src.on('close', () => {
+          log.trace(awsutils.displayName, 'close', key);
+          fs.remove(subdir, err => {
+            if(err) return reject(err);
+            fs.unlink(cachefile, reject);
+            resolve({ Bucket: bucket, Key: key });
+          });
+        });
+      });
+      archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      archive.on('error', err => reject(err));
+      archive.pipe(dst);
+      R.map(obj => {
+        const filename = path.resolve(subdir, obj.name);
+        archive.append(fs.createReadStream(filename), { name: obj.name });
+        log.trace(awsutils.displayName, 'filename:', filename);
+      }, files);
       archive.finalize();
     });
   }

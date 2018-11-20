@@ -23,8 +23,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_wks:latest
         resources:
           requests:
-            cpu: 96m
-            memory: 320Mi
+            cpu: 256m
+            memory: 640Mi
         env:
           - name: WORKER_NAME
             value: "wks-worker"
