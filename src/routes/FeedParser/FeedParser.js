@@ -2241,8 +2241,8 @@ export default class FeedParser {
     );
   }
 
-  createCSVs({ user, category, type, total, limit }, data) {
-    const { subpath, files } = data;
+  createCSVs({ user, category, type, total, limit }, file) {
+    const { subpath, files } = file;
     const AWS         = aws.of(aws_keyset);
     const _files      = R.map(file => ({ name: file }), files)
     const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
@@ -2251,7 +2251,7 @@ export default class FeedParser {
     const numFiles    = R.length(_files);
     const isSubscribe = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
     //log.trace(FeedParser.displayName. 'createCSVs', { numTotal, numLimit, numFiles, subscribeToFirst });
-    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ data }));
+    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ file }));
   }
 }
 FeedParser.displayName = 'FeedParser';

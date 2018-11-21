@@ -137,7 +137,7 @@ export default {
     });
   },
   deleteCache() {
-    dispatch({ type: 'job/create', file: null });
+    dispatch({ type: 'job/create', file: null, signedlink: '' });
   },
 
   deleteAdd(user, ids) {

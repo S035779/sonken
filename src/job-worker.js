@@ -1,8 +1,8 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
-import { throwError, forkJoin, from }   from 'rxjs';
-import { flatMap, map, catchError } from 'rxjs/operators';
+import { forkJoin, from, throwError }   from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Utilities/Yahoo';
@@ -48,7 +48,6 @@ const request = (operation, options) => {
         return yahoo.jobHtml(conditions).pipe( 
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
-          , catchError(err => throwError(err))
           );
       }
     case 'closedmarchant':
@@ -58,7 +57,6 @@ const request = (operation, options) => {
         return yahoo.jobClosedMerchant(conditions).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
-          , catchError(err => throwError(err))
           );
       }
     case 'closedsellers':
@@ -68,7 +66,6 @@ const request = (operation, options) => {
         return yahoo.jobClosedSellers(conditions).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
-          , catchError(err => throwError(err))
           );
       }
     //case 'rss':
@@ -91,7 +88,6 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
           , flatMap(obj => from(observable(obj)))
-          , catchError(err => throwError(err))
           );
       }
     case 'archives':
@@ -103,7 +99,6 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => feed.createArchives(obj))
           , flatMap(obj => from(observable(obj)))
-          , catchError(err => throwError(err))
           );
       }
     case 'attribute':
@@ -115,7 +110,6 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobAttribute(obj))
           , flatMap(objs => forkJoin(observables(objs)))
-          , catchError(err => throwError(err))
           );
       }
     case 'itemsearch':
@@ -127,16 +121,13 @@ const request = (operation, options) => {
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobItemSearch(obj))
           , flatMap(objs => forkJoin(observables(objs)))
-          , catchError(err => throwError(err))
           );
       }
     case 'defrag':
       {
         const { user, id } = options;
         const conditions = { user, id };
-        return feed.garbageCollection(conditions).pipe(
-            catchError(err => throwError(err))
-          );
+        return feed.garbageCollection(conditions);
       }
     case 'download/items':
       {
@@ -144,20 +135,20 @@ const request = (operation, options) => {
         const { user, category, ids, filter, type, number } = params;
         const header = user + '-' + category + '-' + type;
         const setFile = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
-        const hasFile = obj => R.filter(_file => FSS.isSubFile(obj.subpath, _file) && R.test(/.*\.csv$/, _file), obj.files);
+        const hasFile =  
+          obj => R.filter(filename => FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.csv$/, filename), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
         const conditions = { user, category, type, total: number, limit: 20 };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             map(setFile)
-          , flatMap(obj => FSS.createDirectory(obj))
-          , flatMap(obj => FSS.createBom(obj))
-          , flatMap(obj => FSS.createFile(obj))
-          , flatMap(obj => FSS.fetchSubFileList(obj))
+          , flatMap(file => FSS.createDirectory(file))
+          , flatMap(file => FSS.createBom(file))
+          , flatMap(file => FSS.createFile(file))
+          , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          //, flatMap(obj => FSS.createArchive(number, 20, obj))
-          , flatMap(obj => feed.createCSVs(conditions, obj))
-          , catchError(err => throwError(err))
+          //, flatMap(file => FSS.createArchive(conditions, file)) // does not work.
+          , flatMap(file => feed.createCSVs(conditions, file))
           );
       }
     default:

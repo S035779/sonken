@@ -92,13 +92,14 @@ class awsutils {
     return promise;
   }
 
-  fetchSignedUrl(bucket, { key, name }) {
+  fetchSignedUrl(bucket, { key, name, file }) {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
     const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
     return new Promise((resolve, reject) => {
       this.s3.getSignedUrl('getObject', params, (err, url) => {
         if(err) return reject(err);
-        resolve(url);
+        const result = file ? R.merge(file, { url }) : { url };
+        resolve(result);
       });
     });
   }

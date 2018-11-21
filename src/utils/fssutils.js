@@ -65,7 +65,8 @@ export default class FSSupport {
       case 'create/file':
         {
           const { subpath, data } = options;
-          const file = path.resolve(this.dir, subpath, data.name);
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, data.name);
           return new Promise((resolve, reject) => {
             fs.appendFile(file, data.buffer, err => {
               if(err) return reject(err);
@@ -76,7 +77,8 @@ export default class FSSupport {
       case 'create/bom':
         {
           const { subpath, data } = options;
-          const file = path.resolve(this.dir, subpath, data.name);
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, data.name);
           return new Promise((resolve, reject) => {
             fs.writeFile(file, '\uFEFF', err => {
               if(err) return reject(err);
@@ -87,79 +89,53 @@ export default class FSSupport {
       case 'create/directory':
         {
           const { subpath } = options;
-          const subdir = path.resolve(this.dir, subpath);
+          const dir = path.resolve(this.dir, subpath);
           return new Promise(resolve => {
-            fs.mkdir(subdir, () => {
+            fs.mkdir(dir, () => {
               return resolve(options);
             });
           });
         } 
-      case 'remove/directory':
+      case 'finalize/file':
         {
-          const { subpath } = options;
-          const subdir = path.resolve(this.dir, subpath);
-          return new Promise((resolve, reject) => {
-            fs.remove(subdir, err => {
-              if(err) return reject(err);
-              resolve(options);
-            });
-          });
-        }
-      case 'remove/file':
-        {
-          const { subpath, data } = options;
-          const file = path.resolve(this.dir, subpath, data.name);
+          const { subpath, filename, data, url } = options;
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, filename);
           return new Promise((resolve, reject) => {
             fs.remove(file, err => {
               if(err) return reject(err);
-              resolve(options);
+              resolve({ subpath, filename, data, url });
             });
           });
         }
       case 'fetch/file':
         {
-          const { filename } = options;
-          const file = path.resolve(this.dir, filename);
+          const { subpath, filename } = options;
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, filename);
           return new Promise((resolve, reject) => {
             fs.readFile(file, (err, buffer) => {
               if(err) return reject(err);
-              fs.unlink(file, err => {
-                if(err) return reject(err);
-                resolve(buffer);
-              });
+              resolve({ subpath, filename, data: { name: filename, buffer }});
             });
           });
         }
-      case 'fetch/filelist/root':
-        {
-          return new Promise((resolve, reject) => {
-            fs.readdir(this.dir, (err, files) => {
-              if(err) return reject(err);
-              resolve(files);
-            });
-          });
-        }
-      case 'fetch/filelist/sub':
+      case 'fetch/filelist':
         {
           const { subpath } = options;
-          const dir = path.resolve(this.dir, subpath);
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
           return new Promise((resolve, reject) => {
             fs.readdir(dir, (err, files) => {
               if(err) return reject(err);
               resolve({ subpath, files });
             });
-          })
+          });
         }
-      case 'is/file/root':
-        {
-          const { filename } = options;
-          const file = path.resolve(this.dir, filename);
-          return fs.statSync(file).isFile();
-        }
-      case 'is/file/sub':
+      case 'is/file':
         {
           const { subpath, filename } = options;
-          const file = path.resolve(this.dir, subpath, filename);
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, filename);
           return fs.statSync(file).isFile();
         }
       default:
@@ -167,14 +143,6 @@ export default class FSSupport {
           return new Promise((resolve, reject) => reject({ name: 'Error', message: request }));
         }
     }
-  }
-
-  deleteDirectory(subpath, files) {
-    this.request('remove/directory', { subpath, files });
-  }
-
-  deleteFile(subpath, data) {
-    this.request('remove/file', { subpath, data });
   }
 
   addArchive(subpath, files) {
@@ -193,84 +161,58 @@ export default class FSSupport {
     return this.request('create/directory', { subpath, data });
   }
 
-  getFile(filename) {
-    return this.request('fetch/file', { filename });
+  getFile(subpath, filename) {
+    return this.request('fetch/file', { subpath, filename });
   }
 
-  getFileList() {
-    return this.request('fetch/filelist/root', {});
+  getFileList(subpath) {
+    return this.request('fetch/filelist', { subpath });
   }
 
-  getSubFileList(subpath) {
-    return this.request('fetch/filelist/sub', { subpath });
+  deleteFile(subpath, filename, data, url) {
+    return this.request('finalize/file', { subpath, filename, data, url });
   }
 
-  existFile(filename) {
-    return this.request('is/file/root', { filename });
+  existFile(subpath, filename) {
+    return this.request('is/file', { subpath, filename });
   }
 
-  existSubFile(subpath, filename) {
-    return this.request('is/file/sub', { subpath, filename });
+  createArchive(conditions, { subpath, files }) { // does not work.
+    const { total, limit } = conditions;
+    const numTotal = Number(total);
+    const numLimit = Number(limit);
+    const numFiles = R.length(files);
+    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
+    const observable = defer(() => subscribeToFirst ? this.addArchive(subpath, files) : of({ subpath, files }));
+    return observable;
   }
 
-  fetchFile({ filename }) {
-    return from(this.getFile(filename));
+  fetchFile({ subpath, filename }) {
+    return from(this.getFile(subpath, filename));
   }
 
-  fetchFileList() {
-    return from(this.getFileList());
-  }
-
-  isFile(filename) {
-    return this.existFile(filename);
-  }
-
-  isSubFile(subpath, filename) {
-    return this.existSubFile(subpath, filename);
+  fetchFileList({ subpath }) {
+    return from(this.getFileList(subpath));
   }
 
   createDirectory({ subpath, data }) {
     return from(this.addDirectory(subpath, data));
   }
 
-  createBom({ subpath, data }) {
-    return from(this.addBom(subpath, data));
-  }
-
   createFile({ subpath, data }) {
     return from(this.addFile(subpath, data));
   }
 
-  fetchSubFileList({ subpath }) {
-    return from(this.getSubFileList(subpath));
+  createBom({ subpath, data }) {
+    return from(this.addBom(subpath, data));
   }
 
-  createArchive(total, limit, { subpath, files }) {
-    const numTotal = Number(total);
-    const numLimit = Number(limit);
-    const numFiles = R.length(files);
-    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    const observable = defer(() => {
-      console.log(numTotal, numLimit, numFiles, subscribeToFirst);
-      return subscribeToFirst ? this.addArchive(subpath, files) : of({ subpath, files });
-    });
-    return observable;
+  finalize({ subpath, filename, data, url }) {
+    return from(this.deleteFile(subpath, filename, data, url));
   }
 
-  removeDirectory(total, limit, { subpath, files }) {
-    const numTotal = Number(total);
-    const numLimit = Number(limit);
-    const numFiles = R.length(files);
-    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    const observable = defer(() => {
-      console.log(numTotal, numLimit, numFiles, subscribeToFirst);
-      return subscribeToFirst ? this.addArchive(subpath, files) : of({ subpath, files });
-    });
-    return observable;
-  }
-
-  remoeveFile({ subpath, data }) {
-    return from(this.deleteFile(subpath, data));
+  isFile({ subpath, filename }) {
+    return this.existFile(subpath, filename);
   }
 }
 FSSupport.displayName = 'fssutils';

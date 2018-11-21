@@ -1,6 +1,7 @@
 import Agenda from 'agenda';
 import log    from 'Utilities/logutils';
 
+const displayName = 'jobutils';
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 const params = {
   db: { address: mdb_url + '/queue', collection: 'jobs', options: { useNewUrlParser: true } }
@@ -74,12 +75,16 @@ const dequeue = (workerName, jobName, concurrent, callback) => {
 }
 
 const queueList = (workerName, conditions) => {
+  log.info(displayName, 'QueueList', { workerName, conditions });
   return queue(workerName)
     .then(async queue => {
       await queue.start();
-      await queue.jobs(conditions);
-      return queue;
-    }).then(queue => queue.stop());
+      const jobs = await queue.jobs(conditions);
+      return { queue, data: jobs }; 
+    }).then(obj => {
+      obj.queue.stop();
+      return obj.data;
+    });
 };
 
 const queueDelete = (workerName, conditions) => {

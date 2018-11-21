@@ -16,6 +16,7 @@ class RssDownloadItemsDialog extends React.Component {
     this.state = {
       isSuccess:  false
     , isNotValid: false
+    , isQueued: false
     , name: props.name
     };
   }
@@ -42,19 +43,19 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload() {
-    std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-    const { user, ids, filter, itemNumber, category, checked } = this.props;
+    const { user, ids, filter, itemNumber, category, checked, signedlink } = this.props;
     const { name } = this.state;
+    const isSignedlink = signedlink !== '';
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
       if(checked) {
         this.spn.start();
-        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, category, filter, name });
+        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
         NoteAction.createJob('download/items', { user, category, filter, type: name })
-          .then(() => this.setState({ isSuccess: true }))
+          .then(() => this.setState({ isSuccess: isSignedlink, isQueued: !isSignedlink }))
           //.then(() => this.props.file && this.props.file.size !== 0
           //  ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
-          .then(() => this.props.signedlink ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
+          .then(() => this.props.signedlink !== '' ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
           .then(() => this.spn.stop())
           .catch(err => {
             std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
@@ -63,7 +64,7 @@ class RssDownloadItemsDialog extends React.Component {
           });
       } else {
         this.spn.start();
-        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', { user, ids, filter, name });
+        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
         NoteAction.downloadItems(user, category, ids, filter, name)
           .then(() => this.setState({ isSuccess: true }))
           .then(() => this.downloadFile(this.props.file, { type: 'text/csv' }))
@@ -117,7 +118,7 @@ class RssDownloadItemsDialog extends React.Component {
     //std.logInfo(RssDownloadItemsDialog.displayName, 'Props', this.props);
     //std.logInfo(RssDownloadItemsDialog.displayName, 'State', this.state);
     const { classes, title, open } = this.props;
-    const { isNotValid, isSuccess, name } = this.state;
+    const { isNotValid, isSuccess, isQueued, name } = this.state;
     const formats = [
       { id: '0001', name: 'デフォルト', type: 'text/csv' }
     , { id: '0002', name: 'フォーマット１', type: 'text/csv' }
@@ -138,6 +139,9 @@ class RssDownloadItemsDialog extends React.Component {
           </RssDialog>
           <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleClose.bind(this, 'isSuccess')}>
             要求を受け付けました。
+          </RssDialog>
+          <RssDialog open={isQueued} title={'送信処理中'} onClose={this.handleClose.bind(this, 'isQueued')}>
+            ジョブを処理中です。
           </RssDialog>
         </div>
         </div>
