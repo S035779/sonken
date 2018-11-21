@@ -2234,28 +2234,24 @@ export default class FeedParser {
     const guids       = R.compose(setGuids, hasImages)(items);
     const zipkey      = std.crypto_sha256(url, _id.toString(), 'hex') + '.zip';
     const setArchive  = obj => ({ guid__: { $in: guids }, archive: obj.Key }); 
-    const observable  = from(AWS.createArchive(STORAGE, { key: zipkey, files }));
+    const observable  = from(AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }));
     //log.trace(FeedParser.displayName, 'files/guids:', R.length(files), R.length(guids));
     return observable.pipe(
       map(setArchive)
     );
   }
 
-  createCSVs(user, category, total, limit, data) {
+  createCSVs({ user, category, type, total, limit }, data) {
+    const { subpath, files } = data;
     const AWS         = aws.of(aws_keyset);
-    const setFile     = name => ({ name });
-    const setFiles    = obj => R.map(_file => setFile(_file), obj.files);
-    const files       = setFiles(data);
-    const zipkey      = std.crypto_sha256(user, category, 'hex') + '.zip';
+    const _files      = R.map(file => ({ name: file }), files)
+    const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
     const numTotal    = Number(total);
     const numLimit    = Number(limit);
-    const numFiles    = R.length(files);
-    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    const observable = defer(() => {
-      //console.log(numTotal, numLimit, numFiles, subscribeToFirst);
-      return subscribeToFirst ? AWS.createCSV(STORAGE, { key: zipkey, files, subpath: data.subpath }) : of({ data });
-    });
-    return observable;
+    const numFiles    = R.length(_files);
+    const isSubscribe = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
+    //log.trace(FeedParser.displayName. 'createCSVs', { numTotal, numLimit, numFiles, subscribeToFirst });
+    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ data }));
   }
 }
 FeedParser.displayName = 'FeedParser';

@@ -77,18 +77,12 @@ class awsutils {
   }
 
   checkObjectList(bucket, files) {
-    const _isFiles  = (objs, file) => {
-      //console.log(file.key, R.contains(file.key, objs))
-      return R.contains(file.key, objs);
-    };
+    const _isFiles  = (objs, file) => R.contains(file.key, objs);
     const isFiles   = R.curry(_isFiles);
     const hasFiles  = objs => R.filter(_file => isFiles(objs, _file), files);
-    //const hasZip    = objs => R.filter(obj => R.test(/.*\.zip$/, obj), objs);
     const setKeys   = obj  => R.map(obj => obj.Key, obj.Contents);
     return this.fetchObjectList(bucket)
       .then(setKeys)
-      //.then(hasZip)
-      //.then(R.tap(console.log))
       .then(hasFiles);
   }
 
@@ -155,7 +149,7 @@ class awsutils {
     return promise;
   }
 
-  createArchive(bucket, { key, files }) {
+  createArchiveFromS3(bucket, { key, files }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
       const archive = archiver('zip', { zlib: { level: 9 } });
@@ -180,7 +174,7 @@ class awsutils {
     });
   }
 
-  createCSV(bucket, { key, files, subpath }) {
+  createArchiveFromFS(bucket, { key, files, subpath }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
       const archive = archiver('zip', { zlib: { level: 9 } });
@@ -204,11 +198,7 @@ class awsutils {
       archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       archive.on('error', err => reject(err));
       archive.pipe(dst);
-      R.map(obj => {
-        const filename = path.resolve(subdir, obj.name);
-        archive.append(fs.createReadStream(filename), { name: obj.name });
-        log.trace(awsutils.displayName, 'filename:', filename);
-      }, files);
+      R.map(obj => archive.append(fs.createReadStream(path.resolve(subdir, obj.name)), { name: obj.name }), files);
       archive.finalize();
     });
   }

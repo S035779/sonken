@@ -184,8 +184,8 @@ router.route('/file')
 
 router.route('/worker')
 .get(job.notImplemented())
-.put(job.notImplemented())
-.post(job.download())
+.put(job.downloadLink())
+.post(job.downloadFile())
 .delete(job.notImplemented());
 
 router.route('/notes')

@@ -82,7 +82,7 @@ export default {
       case 'download/bided':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
       case 'create/job':
-        return new Promise((resolve, reject) => xhr.postJSON(   api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -206,7 +206,8 @@ export default {
    *  jobQueue
    */
   createJob(operation, params) {
-    return this.request('create/job', { operation, params });
+    const { user, category, type, filter } = params;
+    return this.request('create/job', { operation, user, category, type, filter});
   },
 
   /*

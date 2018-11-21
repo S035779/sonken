@@ -1,18 +1,18 @@
-import dotenv           from 'dotenv';
-import * as R           from 'ramda';
-import { from }         from 'rxjs';
-import { map, flatMap } from 'rxjs/operators';
-import FeedParser       from 'Routes/FeedParser/FeedParser';
-import job              from 'Utilities/jobutils';
-import log              from 'Utilities/logutils';
-//import fss              from 'Utilities/fssutils';
-import aws              from 'Utilities/awsutils';
-import std              from 'Utilities/stdutils';
+import dotenv                       from 'dotenv';
+import * as R                       from 'ramda';
+import { from, throwError }         from 'rxjs';
+import { map, flatMap, catchError } from 'rxjs/operators';
+import FeedParser                   from 'Routes/FeedParser/FeedParser';
+import job                          from 'Utilities/jobutils';
+import log                          from 'Utilities/logutils';
+import fss                          from 'Utilities/fssutils';
+import aws                          from 'Utilities/awsutils';
+import std                          from 'Utilities/stdutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-//const CACHE = process.env.CACHE;
+const CACHE = process.env.CACHE;
 const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
@@ -27,128 +27,128 @@ const aws_keyset  = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, re
 export default class JobQueue {
   constructor() {
     this.feed = FeedParser.of();
+    this.FSS = fss.of({ dirpath: '../', dirname: CACHE });
+    this.AWS = aws.of(aws_keyset);
   }
 
   static of() {
     return new JobQueue();
   }
 
-  request(request, options) {
-    log.info(JobQueue.displayName, 'Request', { request, options });
-    switch(request) {
+  request(operation, options) {
+    log.info(JobQueue.displayName, 'Request', { operation, options });
+    switch(operation) {
       case 'fetch/jobs':
         {
-          const { jobname } = options;
-          const conditions = { name: jobname };
+          const { operation } = options;
+          const conditions = { name: operation };
           return job.queueList(JobQueue.displayName, conditions);
         }
       case 'create/jobs':
         {
-          const { jobname, idss, data } = options;
-          const { operation, params } = data;
+          const { operation, idss, data } = options;
           const { ids , number } = idss;
-          const setParam = obj => R.merge(params, { ids: obj, number, created: new Date });
-          const setData  = obj => ({ operation, params: obj });
-          const datas = R.compose(R.map(setData), R.map(setParam))(ids);
-          return job.enqueue(JobQueue.displayName, jobname, datas);
+          const { user, category, type, filter} = data;
+          const setData = obj => ({ operation, params: { user, category, type, filter, ids: obj, number, created: new Date } });
+          const datas = R.map(setData, ids);
+          return job.enqueue(JobQueue.displayName, operation, datas);
         }
       case 'create/job':
         {
-          const { jobname, data } = options;
-          return job.enqueue(JobQueue.displayName, jobname, [ data ]);
+          const { operation, data } = options;
+          return job.enqueue(JobQueue.displayName, operation, [ data ]);
         }
       case 'defrag/jobs':
         {
-          const { jobname } = options;
-          const conditions = { name: jobname };
+          const { operation } = options;
+          const conditions = { name: operation };
           return job.queueDelete(JobQueue.displayName, conditions);
         }
       default:
-        return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
+        return new Promise((resolve, reject) => reject({ name: 'error', message: 'operation: ' + operation }));
     }
   }
 
-  addJobs(jobname, idss, data) {
-    return this.request('create/jobs', { jobname, idss, data });
+  addJobs(operation, idss, data) {
+    return this.request('create/jobs', { operation, idss, data });
   }
 
-  addJob(jobname, data) {
-    return this.request('create/job', { jobname, data });
+  addJob(operation, data) {
+    return this.request('create/job', { operation, data });
   }
 
-  getJobs(jobname) {
-    return this.request('fetch/jobs', { jobname });
+  getJobs(operation) {
+    return this.request('fetch/jobs', { operation });
   }
 
-  garbageJobs(jobname) {
-    return this.request('defrag/jobs', { jobname });
+  garbageJobs(operation) {
+    return this.request('defrag/jobs', { operation });
   }
 
-  cancel(data) {
-    return from(this.garbageJobs(data.operation));
+  cancel({ operation }) {
+    return from(this.garbageJobs(operation));
   }
 
-  createJobs(data, url) {
-    const { user, category } = data.params;
-    const observable = obj => this.addJobs(data.operation, obj, data);
+  createJobs(operation, { user, category, type, filter }) {
+    const setIds = R.map(obj => obj._id);
+    const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
     return this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(
-      map(R.map(obj => obj._id))
-    , map(objs => ({ ids: objs, number: R.length(objs) }))
-    , map(obj => ({ ids: R.splitEvery(20, obj.ids), number: obj.number }))
-    , flatMap(obj => from(observable(obj)))
-    , map(() => url)
+      map(setIds)
+    , map(setParams)
+    , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
     );
   }
 
-  download(data) {
-    log.info(JobQueue.displayName, 'Download', data);
-    const { user, category } = data.params;
-    //return from(this.checkObjectList(user, category)).pipe(
-    //  map(R.tap(console.log))
-    //, flatMap(obj => !R.isEmpty(obj) ? from(this.downloadCSVs(user, category)) : this.createJobs(data))
-    return from(this.downloadCSVs(user, category)).pipe(
-      flatMap(obj => this.createJobs(data, obj))
-    );
+  downloadLink(operation, { user, category, type, filter }) {
+    const params = this.setAWSParams(user, category, type);
+    log.info(JobQueue.displayName, 'DownloadLink', { operation, params });
+    return from(this.AWS.fetchObject(STORAGE, params)).pipe(
+        flatMap(obj => from(this.FSS.createFile({ subpath: '', data: obj })))
+      , flatMap(()  => from(this.FSS.fetchFileList()))
+      , map(objs    => this.setFSSParams({ user, category, type }, objs))
+      , flatMap(obj => !R.isNil(obj) ? from(this.AWS.fetchSignedUrl(STORAGE, params)) : throwError('File not found.'))
+      , map(R.tap(console.log))
+      , flatMap(obj => from(this.FSS.removeFile({ subpath: '', data: { name: obj } })))
+      , catchError(() => this.createJobs(operation, { user, category, type, filter }))
+      );
   }
   
-  //_download(data) {
-  //  log.info(JobQueue.displayName, 'Download', data);
-  //  const { user, category } = data.params;
-  //  const FSS = fss.of({ dirpath: '../', dirname: CACHE });
-  //  const maxValue = array => !R.isEmpty(array) ? Math.max(...array) : null;
-  //  const setFilename = num => !R.isNil(num) ? ({ filename: user + '-' + category + '-' + num + '.zip' }) : null;
-  //  const hasArchive = R.filter(obj => FSS.isFile(obj) && /.*\.zip$/.test(obj));
-  //  const getFilename = R.compose(
-  //    setFilename
-  //  , maxValue
-  //  , R.map(objs => objs[3])
-  //  , R.filter(objs => objs[1] === user && objs[2] === category)
-  //  , R.map(R.match(/(.*)-(.*)-(.*)\.zip$/))
-  //  );
-  //  return from(FSS.fetchFileList()).pipe(
-  //      map(obj => hasArchive(obj))
-  //    , map(obj => !R.isEmpty(obj) ? getFilename(obj) : null)
-  //    , flatMap(obj => !R.isNil(obj) ? from(FSS.fetchFile(obj)) : this.createJobs(data))
-  //    , map(R.tap(console.log))
-  //    );
-  //}
+  downloadFile(operation, { user, category, type, filter }) {
+    const params = this.setAWSParams(user, category, type);
+    log.info(JobQueue.displayName, 'DownloadFile', { operation, params });
+    return from(this.AWS.fetchObject(STORAGE, params)).pipe(
+        flatMap(obj => from(this.FSS.createFile({ subpath: '', data: obj })))
+      , flatMap(()  => from(this.FSS.fetchFileList()))
+      , map(objs    => this.setFSSParams({ user, category, type }, objs))
+      , flatMap(obj => !R.isNil(obj) ? from(this.FSS.fetchFile(obj)) : throwError('File not found.'))
+      , map(R.tap(console.log))
+      , flatMap(obj => from(this.FSS.removeFile({ subpath: '', data: { name: obj } })))
+      , catchError(() => this.createJobs(operation, { user, category, type, filter }))
+      );
+  }
   
-  checkObjectList(user, category) {
-    const AWS             = aws.of(aws_keyset);
-    const checkObjectList = objs => AWS.checkObjectList(STORAGE, objs);
-    const setKey          = (_user, _category) => std.crypto_sha256(_user, _category, 'hex') + '.zip';
-    const setName         = (_user, _category) => _user + '-' + _category + '-' + std.rndInteger(8) + '.zip' ;
-    const setParams       = (_user, _category) => ({ key: setKey(_user, _category), name: setName(_user, _category) });
-    return from(checkObjectList([setParams(user, category)]));
+  setFSSParams({ user, category, type }, filelist) {
+    const hasArchive  = R.filter(obj => this.FSS.isFile(obj) && /.*\.zip$/.test(obj));
+    const maxValue    = array => !R.isEmpty(array) ? Math.max(...array) : null;
+    const setFilename = num => !R.isNil(num) ? ({ filename: user + '-' + category + '-' + type + '-' + num + '.zip' }) : null;
+    const getFilename = obj => !R.isEmpty(obj) ? R.compose(
+      setFilename
+    , maxValue
+    , R.map(objs => objs[4])
+    , R.filter(objs => objs[1] === user && objs[2] === category && objs[3] === type)
+    , R.map(R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/))
+    )(obj) : null;
+    return R.compose(
+      getFilename
+    , hasArchive
+    )(filelist);
   }
 
-  downloadCSVs(user, category) {
-    const AWS           = aws.of(aws_keyset);
-    const getSignedURL  = obj => AWS.fetchSignedUrl(STORAGE, obj);
-    const setKey        = (_user, _category) => std.crypto_sha256(_user, _category, 'hex') + '.zip';
-    const setName       = (_user, _category) => _user + '-' + _category + '-' + std.rndInteger(8) + '.zip' ;
-    const setParams     = (_user, _category) => ({ key: setKey(_user, _category), name: setName(_user, _category) });
-    return from(getSignedURL(setParams(user, category)));
+  setAWSParams(user, category, type) {
+    const setKey    = (_user, _category, _type) => std.crypto_sha256(_user + '-' + _category, _type, 'hex') + '.zip';
+    const setName   = (_user, _category, _type) => _user + '-' + _category + '-' + _type + '-' + Date.now() + '.zip' ;
+    const setParams = (_user, _category, _type) => ({ key: setKey(_user, _category, _type), name: setName(_user, _category, _type) });
+    return setParams(user, category, type);
   }
 }
 JobQueue.displayName = 'JobQueue';

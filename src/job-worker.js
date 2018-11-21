@@ -9,7 +9,6 @@ import Yahoo            from 'Utilities/Yahoo';
 import log              from 'Utilities/logutils';
 import aws              from 'Utilities/awsutils';
 import job              from 'Utilities/jobutils';
-import std              from 'Utilities/stdutils';
 import fss              from 'Utilities/fssutils';
 
 sourceMapSupport.install();
@@ -143,11 +142,12 @@ const request = (operation, options) => {
       {
         const { params } = options;
         const { user, category, ids, filter, type, number } = params;
-        const header = user + '-' + category;
-        const setFile = buffer => ({ subpath: header, data: { name: header + '-' + std.rndInteger(8) + '.csv', buffer } });
-        const hasCSV = obj => R.filter(_file => FSS.isSubFile(obj.subpath, _file) && /.*\.csv$/.test(_file), obj.files);
-        const setFiles = obj => R.merge(obj, { files: hasCSV(obj) });
+        const header = user + '-' + category + '-' + type;
+        const setFile = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
+        const hasFile = obj => R.filter(_file => FSS.isSubFile(obj.subpath, _file) && R.test(/.*\.csv$/, _file), obj.files);
+        const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
+        const conditions = { user, category, type, total: number, limit: 20 };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             map(setFile)
           , flatMap(obj => FSS.createDirectory(obj))
@@ -156,7 +156,7 @@ const request = (operation, options) => {
           , flatMap(obj => FSS.fetchSubFileList(obj))
           , map(setFiles)
           //, flatMap(obj => FSS.createArchive(number, 20, obj))
-          , flatMap(obj => feed.createCSVs(user, category, number, 20, obj))
+          , flatMap(obj => feed.createCSVs(conditions, obj))
           , catchError(err => throwError(err))
           );
       }

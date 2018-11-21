@@ -105,6 +105,17 @@ export default class FSSupport {
             });
           });
         }
+      case 'remove/file':
+        {
+          const { subpath, data } = options;
+          const file = path.resolve(this.dir, subpath, data.name);
+          return new Promise((resolve, reject) => {
+            fs.remove(file, err => {
+              if(err) return reject(err);
+              resolve(options);
+            });
+          });
+        }
       case 'fetch/file':
         {
           const { filename } = options;
@@ -160,6 +171,10 @@ export default class FSSupport {
 
   deleteDirectory(subpath, files) {
     this.request('remove/directory', { subpath, files });
+  }
+
+  deleteFile(subpath, data) {
+    this.request('remove/file', { subpath, data });
   }
 
   addArchive(subpath, files) {
@@ -252,6 +267,10 @@ export default class FSSupport {
       return subscribeToFirst ? this.addArchive(subpath, files) : of({ subpath, files });
     });
     return observable;
+  }
+
+  remoeveFile({ subpath, data }) {
+    return from(this.deleteFile(subpath, data));
   }
 }
 FSSupport.displayName = 'fssutils';
