@@ -23,8 +23,8 @@ spec:
           image: asia.gcr.io/feedparser-217913/feedparser/mongodb:latest
           resources:
             requests:
-              cpu: 784m
-              memory: 2480Mi
+              cpu: 832m
+              memory: 2600Mi
           ports:
           - containerPort: 27017
           volumeMounts:

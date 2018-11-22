@@ -93,7 +93,12 @@ export default class JobQueue {
     log.info(JobQueue.displayName, 'CreateJOB', operation);
     const setIds = R.map(obj => obj._id);
     const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
-    const conditions = { lastFinishedAt: { $exists: false } };
+    const conditions = { 
+      lastFinishedAt: { $exists: false }
+    , 'data.params.user': user
+    , 'data.params.category': category
+    , 'data.params.type': type
+    };
     return from(this.getJobs(operation, conditions)).pipe(
         flatMap(objs => R.isEmpty(objs) 
           ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }) : throwError('Proceeding job...'))
@@ -109,12 +114,12 @@ export default class JobQueue {
     const params = { user, category, type, filter };
     return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
-      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
       , map(file => this.setFSSParams(params, file))
       , flatMap(file => !R.isNil(file) 
           ? from(this.AWS.fetchSignedUrl(STORAGE, this.setAWSParams(params, file))) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
+      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , map(file => file.url)
       , catchError(() => this.createJobs(operation, params))
       );
@@ -125,12 +130,12 @@ export default class JobQueue {
     const params = { user, category, type, filter };
     return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
-      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
       , map(file => this.setFSSParams(params, file))
       , flatMap(file => !R.isNil(file) 
           ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
+      , flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , map(file => file.data.buffer)
       , catchError(() => this.createJobs(operation, params))
       );

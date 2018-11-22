@@ -43,19 +43,25 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload() {
-    const { user, ids, filter, itemNumber, category, checked, signedlink } = this.props;
+    const { user, ids, filter, itemNumber, category, checked } = this.props;
     const { name } = this.state;
-    const isSignedlink = signedlink !== '';
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
       if(checked) {
         this.spn.start();
         std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
         NoteAction.createJob('download/items', { user, category, filter, type: name })
-          .then(() => this.setState({ isSuccess: isSignedlink, isQueued: !isSignedlink }))
-          //.then(() => this.props.file && this.props.file.size !== 0
-          //  ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
-          .then(() => this.props.signedlink !== '' ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
+          //.then(() => {
+          //  const isSignedlink = this.props.signedlink !== '';
+          //  this.setState({ isSuccess: isSignedlink, isQueued: !isSignedlink });
+          //})
+          //.then(() => this.props.signedlink !== '' ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
+          .then(() => {
+            const isFile = this.props.file && this.props.file.size !== 0;
+            this.setState({ isSuccess: isFile, isQueued: !isFile });
+          })
+          .then(() => 
+            this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
           .then(() => this.spn.stop())
           .catch(err => {
             std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);

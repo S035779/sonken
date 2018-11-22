@@ -209,7 +209,7 @@ export default class DashboardStore extends ReduceStore {
       case 'note/download/images':
         return R.merge(state, { images: action.images });
       case 'job/create':
-        return R.merge(state, { signedlink: action.signedlink });
+        return R.merge(state, { file: action.file });
       case 'add/create':
         return R.merge(state, { notes: this.createAdd(state, action) });
       case 'add/delete':
