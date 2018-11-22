@@ -150,6 +150,13 @@ class awsutils {
     return promise;
   }
 
+  deleteObject(bucket, { key, file }) {
+    const params = { Bucket: bucket, Key: key };
+    const promise = this.s3.deleteObject(params).promise();
+    const setFile = obj => R.merge(file, { response: obj });
+    return promise.then(setFile);
+  }
+
   createArchiveFromS3(bucket, { key, files }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });

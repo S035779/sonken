@@ -40,12 +40,12 @@ RUN buildDeps='xz-utils' \
     77984A986EBC2AA786BC0F66B01FBB92821C587A \
     8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
   ; do \
-     gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver keyserver.pgp.com --recv-keys "$key" \
-    || gpg --keyserver pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver pgp.mit.edu --recv-keys "$key" \
-    || gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
+       gpg --no-tty --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver keyserver.pgp.com --recv-keys "$key" \
+    || gpg --no-tty --keyserver pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver pgp.mit.edu --recv-keys "$key" \
+    || gpg --no-tty --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
   ; done \
     && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
     && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
@@ -62,12 +62,12 @@ RUN set -ex \
   && for key in \
     6A010C5166006599AA17F08146C2130DFD2497F5 \
   ; do \
-     gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver keyserver.pgp.com --recv-keys "$key" \
-    || gpg --keyserver pool.sks-keyservers.net --recv-keys "$key" \
-    || gpg --keyserver pgp.mit.edu --recv-keys "$key" \
-    || gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
+       gpg --no-tty --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver keyserver.pgp.com --recv-keys "$key" \
+    || gpg --no-tty --keyserver pool.sks-keyservers.net --recv-keys "$key" \
+    || gpg --no-tty --keyserver pgp.mit.edu --recv-keys "$key" \
+    || gpg --no-tty --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" \
   ; done \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \

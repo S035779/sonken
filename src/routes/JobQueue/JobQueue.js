@@ -40,8 +40,8 @@ export default class JobQueue {
     switch(operation) {
       case 'fetch/jobs':
         {
-          const { operation } = options;
-          const conditions = { name: operation };
+          const { operation, data } = options;
+          const conditions = R.merge(data, { name: operation });
           return job.queueList(JobQueue.displayName, conditions);
         }
       case 'create/jobs':
@@ -77,8 +77,8 @@ export default class JobQueue {
     return this.request('create/job', { operation, data });
   }
 
-  getJobs(operation) {
-    return this.request('fetch/jobs', { operation });
+  getJobs(operation, data) {
+    return this.request('fetch/jobs', { operation, data });
   }
 
   garbageJobs(operation) {
@@ -93,43 +93,46 @@ export default class JobQueue {
     log.info(JobQueue.displayName, 'CreateJOB', operation);
     const setIds = R.map(obj => obj._id);
     const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
-    return from(this.getJobs(operation)).pipe(
-        flatMap(objs => R.isEmpty(objs)
-          ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }) : throwError('Proceeding job....'))
+    const conditions = { lastFinishedAt: { $exists: false } };
+    return from(this.getJobs(operation, conditions)).pipe(
+        flatMap(objs => R.isEmpty(objs) 
+          ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }) : throwError('Proceeding job...'))
       , map(setIds)
       , map(setParams)
       , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
-      , catchError(status => {
-          log.info(JobQueue.displayName, 'resume', { operation, status });
-          return of('');
-        })
+      , catchError(() => of(''))
       );
   }
 
   downloadLink(operation, { user, category, type, filter }) {
     log.info(JobQueue.displayName, 'DownloadLink', operation);
-    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams({ user, category, type }))).pipe(
+    const params = { user, category, type, filter };
+    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
+      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams({ user, category, type }, file))
+      , map(file => this.setFSSParams(params, file))
       , flatMap(file => !R.isNil(file) 
-          ? from(this.AWS.fetchSignedUrl(STORAGE, this.setAWSParams({ user, category, type }, file))) : throwError('File not found.'))
+          ? from(this.AWS.fetchSignedUrl(STORAGE, this.setAWSParams(params, file))) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
       , map(file => file.url)
-      , catchError(() => this.createJobs(operation, { user, category, type, filter }))
+      , catchError(() => this.createJobs(operation, params))
       );
   }
   
   downloadFile(operation, { user, category, type, filter }) {
     log.info(JobQueue.displayName, 'DownloadFile', operation);
-    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams({ user, category, type }))).pipe(
+    const params = { user, category, type, filter };
+    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
+      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams({ user, category, type }, file))
-      , flatMap(file => !R.isNil(file) ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
+      , map(file => this.setFSSParams(params, file))
+      , flatMap(file => !R.isNil(file) 
+          ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
       , map(file => file.data.buffer)
-      , catchError(() => this.createJobs(operation, { user, category, type, filter }))
+      , catchError(() => this.createJobs(operation, params))
       );
   }
   
