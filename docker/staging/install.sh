@@ -1,4 +1,5 @@
 #!/bin/sh
+ROOT=/app
 ASSET=/app/assets
 WORKDIR=/app/sonken
 
@@ -18,14 +19,11 @@ fi
 cp $WORKDIR/dist/app.bundle.css     $ASSET/css/
 cp $WORKDIR/dist/app.bundle.css.map $ASSET/css/
 
-if [ ! -d $ASSET/fonts ]; then
-    mkdir $ASSET/fonts
-fi
-cp $WORKDIR/dist/assets/fonts/*.woff  $ASSET/fonts/
-cp $WORKDIR/dist/assets/fonts/*.woff2 $ASSET/fonts/
-
 if [ ! -d $ASSET/image ]; then
     mkdir $ASSET/image
 fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
+
+cp $WORKDIR/dist/*.woff             $ROOT/
+cp $WORKDIR/dist/*.woff2            $ROOT/
