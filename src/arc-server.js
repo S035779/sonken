@@ -3,12 +3,6 @@ import dotenv           from 'dotenv';
 import path             from 'path';
 import os               from 'os';
 import child_process    from 'child_process';
-import * as R           from 'ramda';
-import { map, flatMap } from 'rxjs/operators';
-import async            from 'async';
-import FeedParser       from 'Routes/FeedParser/FeedParser';
-import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
-import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
@@ -16,11 +10,7 @@ const config = dotenv.config();
 if(config.error) throw config.error;
 
 const node_env        = process.env.NODE_ENV    || 'development';
-const monitorInterval = process.env.JOB_MON_MIN || 5;
-const executeInterval = process.env.JOB_EXE_SEC || 1;
-const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
-const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[ARC]';
@@ -35,8 +25,6 @@ if(node_env === 'production') {
   log.config('file', 'json',  'arc-server', 'INFO');
 }
 
-const feed = FeedParser.of();
-const profile = UserProfiler.of();
 const cpu_num = os.cpus().length;
 const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
 const job = path.resolve(__dirname, 'dist', 'wrk.node.js');
@@ -55,53 +43,20 @@ const fork = () => {
   return cps;
 };
 
-const request = queue => {
-  const queuePush = obj => {
-    if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
-  }; 
-  const setQueue    = obj => ({
-    operation:  'archives'
-  , user:       obj.user
-  , id:         obj._id
-  , url:        obj.url
-  , created:    Date.now()
-  });
-  return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
-      flatMap(objs => feed.fetchJobNotes({
-        users: objs
-      , categorys: ['closedmarchant', 'closedsellers']
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 2)), sort: 'desc'
-      , filter: { isItems: true, isImages: true, expire: Date.now() - numUpdatedItems * 60 * 1000 }
-      }))
-    , map(R.map(setQueue))
-    , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
-    );
-};
-
 let idx=0, pids=[];
-const worker = (task, callback) => {
+const worker = () => {
   idx = idx < job_num ? idx : 0;
-  log.info(displayName, 'Process is fork. _id/idx:', task.id, idx);
+  log.info(displayName, 'Process is fork. idx:', idx);
   if(pids[idx] === undefined || !pids[idx].connected) {
-    log.info(displayName, 'Process is forked. _id/idx:', task.id, idx);
+    log.info(displayName, 'Process is forked. idx:', idx);
     pids[idx] = fork();
   }
-  pids[idx].send(task, err => {
-    if(err) log.error(displayName, err.name, err.message, err.stack);
-    callback();
-  });
   idx = idx + 1;
 };
 
 const main = () => {
   log.info(displayName, 'start fetch archives server.')
-  const queue = async.queue(worker, cpu_num);
-  queue.drain = () => log.info(displayName, 'all archives have been processed.');
-  std.invoke(() => request(queue).subscribe(
-    obj => log.debug(displayName, 'finished proceeding archives...', obj)
-  , err => log.error(displayName, err.name, err.message, err.stack)
-  , ()  => log.info(displayName, 'post archives completed.')
-  ), 0, 1000 * 60 * monitorInterval);
+  worker();
 };
 main();
 

@@ -181,12 +181,9 @@ const worker = (options, callback) => {
   });
 };
 
-let jobName;
-if(workerName === 'wks-worker') {
-  jobName = 'download/items';
-} else {
-  jobName = 'none';
-}
+let jobName = 'none';
+if(workerName === 'wks-worker') { jobName = 'download/items'; }
+if(workerName === 'arc-worker') { jobName = 'download/images'; }
 const jobQueue = job.dequeue(workerName, jobName, 1, worker);
 
 const main = () => {
