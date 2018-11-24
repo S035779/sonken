@@ -152,10 +152,13 @@ const request = (operation, options) => {
       }
     case 'download/images':
       {
-        const { user, id, filter, number } = options;
+        const { params } = options;
+        const { user, id, filter, number } = params;
+        const setFile = files => ({ files });
         const conditions = { user, id, total: number, limit: 1 };
         return feed.downloadImages({ user, id, filter }).pipe(
-            flatMap(obj => feed.createImages(conditions, obj))
+            map(setFile)
+          , flatMap(file => feed.createImages(conditions, file))
           );
       }
     default:

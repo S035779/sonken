@@ -2228,10 +2228,15 @@ export default class FeedParser {
     );
   }
 
-  createImages({ user, id }, files) {
+  createImages({ user, id, total, limit }, file) {
+    const { files } = file;
     const AWS = aws.of(aws_keyset);
-    const key = std.crypto_sha256(user, id, 'hex') + '.zip';
-    return from(AWS.createArchiveFromS3(STORAGE, { key, files }));
+    const zipkey = std.crypto_sha256(user, id.toString(), 'hex') + '.zip';
+    const numTotal    = Number(total);
+    const numLimit    = Number(limit);
+    const numFiles    = R.length(files);
+    const isSubscribe = ((numTotal <= numLimit) && (numFiles !==0 )) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
+    return defer(() => isSubscribe ? AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }) : of({ file }));
   }
 
   createCSVs({ user, category, type, total, limit }, file) {
@@ -2242,7 +2247,7 @@ export default class FeedParser {
     const numTotal    = Number(total);
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
-    const isSubscribe = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
+    const isSubscribe = ((numTotal <= numLimit) && (numFiles !== 0)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
     return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ file }));
   }
 }

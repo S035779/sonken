@@ -207,22 +207,21 @@ class ClosedForms extends React.Component {
   }
 
   handleImages() {
-    const { user, category, note, itemNumber } = this.props;
+    const { user, note, itemNumber } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
+    const filter = { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold };
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
       this.spn.start();
       std.logInfo(ClosedForms.displayName, 'handleImages', this.props);
-      NoteAction.createJob('download/images', { id, user, category
-      , filter: { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold }})
-      //NoteAction.downloadImages(user, id
-      //  , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
+      NoteAction.createJob('download/images', { id, user, filter})
+      //NoteAction.downloadImages(user, id, filter)
         .then(() => {
           const isFile = this.props.file && this.props.file.size !== 0;
           this.setState({ isSuccess: isFile, isQueued: !isFile });
         })
-        .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadImages(this.props.images) : null)
+        .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadImages(this.props.file) : null)
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(ClosedForms.displayName, err.name, err.message);
@@ -256,12 +255,16 @@ class ClosedForms extends React.Component {
   downloadImages(blob) {
     std.logInfo(ClosedForms.displayName, 'downloadImages', blob);
     const anchor = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    anchor.href = url;
-    anchor.target = '_blank';
-    anchor.download = 'download.zip';
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+      const url = URL.createObjectURL(new Blob([this.result], { type: 'application/zip' }));
+      anchor.href = url;
+      anchor.target = '_blank';
+      anchor.download = 'download.zip';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+    fileReader.readAsArrayBuffer(blob);
   }
 
   getColor(category) {

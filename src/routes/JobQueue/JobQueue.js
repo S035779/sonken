@@ -55,8 +55,11 @@ export default class JobQueue {
         }
       case 'create/job':
         {
-          const { operation, data } = options;
-          return job.enqueue(JobQueue.displayName, operation, [ data ]);
+          const { operation, ids, data } = options;
+          const { id, number } = ids;
+          const params = R.merge(data, { id, number, created: new Date })
+          const datas = [{ operation, params }];
+          return job.enqueue(JobQueue.displayName, operation, datas);
         }
       case 'defrag/jobs':
         {
@@ -73,8 +76,8 @@ export default class JobQueue {
     return this.request('create/jobs', { operation, idss, data });
   }
 
-  addJob(operation, data) {
-    return this.request('create/job', { operation, data });
+  addJob(operation, ids, data) {
+    return this.request('create/job', { operation, ids, data });
   }
 
   getJobs(operation, data) {
@@ -104,11 +107,14 @@ export default class JobQueue {
           const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
           const observable = this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] });
           return from(this.getJobs(operation, conditions)).pipe(
-            flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+              flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
             , map(setIds)
             , map(setParams)
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
-            , catchError(() => of(''))
+            , catchError(err => {
+                if(err) log.warn(JobQueue.displayName, 'Warning', operation, err);
+                return of('');
+              })
             );
         }
       case 'download/images':
@@ -118,15 +124,18 @@ export default class JobQueue {
           , 'data.params.user': user
           , 'data.params.id': id
           };
-          const setIds = R.map(obj => obj._id);
-          const setParams = obj => ({ id: obj, number: 1 });
+          const setId = obj => obj._id;
+          const setParam = obj => ({ id: obj, number: 1 });
           const observable = this.feed.fetchJobNote({ user, id });
           return from(this.getJobs(operation, conditions)).pipe(
-            flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
-            , map(setIds)
-            , map(setParams)
-            , flatMap(obj => from(this.addJobs(operation, obj, { id, user, filter })))
-            , catchError(() => of(''))
+              flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+            , map(setId)
+            , map(setParam)
+            , flatMap(obj => from(this.addJob(operation, obj, { user, filter })))
+            , catchError(err => {
+                if(err) log.warn(JobQueue.displayName, 'Warning', operation, err);
+                return of('');
+              })
             );
         }
       default:

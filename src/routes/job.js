@@ -8,7 +8,6 @@ export default {
   download() {
     return (req, res) => {
       const { operation, id, user, category, type, filter } = req.body;
-      console.log(req.body);
       job.download(operation, { id, user, category, type, filter }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
