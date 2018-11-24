@@ -1,5 +1,4 @@
 #!/bin/sh
-ROOT=/app
 ASSET=/app/assets
 WORKDIR=/app/sonken
 
@@ -25,5 +24,5 @@ fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
 
-cp $WORKDIR/dist/*.woff             $ROOT/
-cp $WORKDIR/dist/*.woff2            $ROOT/
+cp $WORKDIR/dist/assets/*.woff      $ASSET/
+cp $WORKDIR/dist/assets/*.woff2     $ASSET/
