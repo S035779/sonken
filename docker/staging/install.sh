@@ -24,5 +24,8 @@ fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
 
-cp $WORKDIR/dist/assets/*.woff      $ASSET/
-cp $WORKDIR/dist/assets/*.woff2     $ASSET/
+if [ ! -d $ASSET/fonts ]; then
+    mkdir $ASSET/fonts
+fi
+cp $WORKDIR/dist/assets/fonts/*.woff      $ASSET/fonts/
+cp $WORKDIR/dist/assets/fonts/*.woff2     $ASSET/fonts/
