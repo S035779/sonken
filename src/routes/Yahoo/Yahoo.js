@@ -5,25 +5,26 @@ import { map, flatMap }   from 'rxjs/operators';
 import osmosis            from 'osmosis';
 import PromiseThrottle    from 'promise-throttle';
 import { parseString }    from 'xml2js';
+import Amazon             from 'Routes/Amazon/Amazon';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
-import Amazon             from 'Utilities/Amazon';
+//import yho                from 'Utilities/yhoutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const STORAGE   = process.env.STORAGE;
-const AMZ_ACCESS_KEY = process.env.AMZ_ACCESS_KEY;
-const AMZ_SECRET_KEY = process.env.AMZ_SECRET_KEY;
-const AMZ_ASSOCI_TAG = process.env.AMZ_ASSOCI_TAG;
-const amz_keyset = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
-const searchurl = 'https://auctions.yahoo.co.jp/search/search';
-const baseurl   = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
-const authurl   = baseurl + '.well-known/openid-configuration';
-const jwksurl   = baseurl + 'jwks';
-const keyurl    = baseurl + 'public-keys';
-const tokenurl  = baseurl + 'token';
+const STORAGE         = process.env.STORAGE;
+const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset      = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
+const searchurl       = 'https://auctions.yahoo.co.jp/search/search';
+const baseurl         = 'https://auth.login.yahoo.co.jp/yconnect/v2/';
+const authurl         = baseurl + '.well-known/openid-configuration';
+const jwksurl         = baseurl + 'jwks';
+const keyurl          = baseurl + 'public-keys';
+const tokenurl        = baseurl + 'token';
 
 /**
  * Yahoo Api Client class.
@@ -229,6 +230,7 @@ class Yahoo {
           const result = R.compose(
             setItems
           , R.map(setImages)
+          //, R.tap(log.trace.bind(this))
           , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
@@ -393,6 +395,7 @@ class Yahoo {
           const result          = R.compose(
             setItems
           , R.map(setImages)
+          //, R.tap(log.trace.bind(this))
           , R.map(setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)

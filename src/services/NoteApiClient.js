@@ -75,8 +75,8 @@ export default {
         return new Promise((resolve, reject) => xhr.getFile(    api + '/file',      options, resolve, reject));
       case 'download/items':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/file',      options, resolve, reject));
-      case 'download/images':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/image',     options, resolve, reject));
+      //case 'download/images':
+      //  return new Promise((resolve, reject) => xhr.postFile(   api + '/image',     options, resolve, reject));
       case 'download/traded':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/traded',    options, resolve, reject));
       case 'download/bided':
@@ -197,17 +197,17 @@ export default {
     params = filter ? R.merge(params, filter)       : params;
     return this.request('download/items', params);
   },
-  downloadImages(user, id, filter) {
-    const params = filter ? R.merge({ user, id }, filter) : { user, id };
-    return this.request('download/images', params);
-  },
+  //downloadImages(user, id, filter) {
+  //  const params = filter ? R.merge({ user, id }, filter) : { user, id };
+  //  return this.request('download/images', params);
+  //},
 
   /*
    *  jobQueue
    */
   createJob(operation, params) {
-    const { user, category, type, filter } = params;
-    return this.request('create/job', { operation, user, category, type, filter});
+    const { id, user, category, type, filter } = params
+    return this.request('create/job', { operation, id, user, category, type, filter });
   },
 
   /*

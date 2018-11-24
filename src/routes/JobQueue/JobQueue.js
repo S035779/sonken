@@ -48,8 +48,8 @@ export default class JobQueue {
         {
           const { operation, idss, data } = options;
           const { ids , number } = idss;
-          const { user, category, type, filter} = data;
-          const setData = obj => ({ operation, params: { user, category, type, filter, ids: obj, number, created: new Date } });
+          const setParam = obj => R.merge(data, { ids: obj, number, created: new Date });
+          const setData = obj => ({ operation, params: setParam(obj) });
           const datas = R.map(setData, ids);
           return job.enqueue(JobQueue.displayName, operation, datas);
         }
@@ -89,78 +89,131 @@ export default class JobQueue {
     return from(this.garbageJobs(operation));
   }
 
-  createJobs(operation, { user, category, type, filter }) {
-    log.info(JobQueue.displayName, 'CreateJOB', operation);
-    const setIds = R.map(obj => obj._id);
-    const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
-    const conditions = { 
-      lastFinishedAt: { $exists: false }
-    , 'data.params.user': user
-    , 'data.params.category': category
-    , 'data.params.type': type
-    };
-    return from(this.getJobs(operation, conditions)).pipe(
-        flatMap(objs => R.isEmpty(objs) 
-          ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }) : throwError('Proceeding job...'))
-      , map(setIds)
-      , map(setParams)
-      , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
-      , catchError(() => of(''))
-      );
+  createJobs(operation, { id, user, category, type, filter }) {
+    log.info(JobQueue.displayName, 'createjobs', operation);
+    switch(operation) {
+      case 'download/items':
+        {
+          const conditions = { 
+            lastFinishedAt: { $exists: false }
+          , 'data.params.user': user
+          , 'data.params.category': category
+          , 'data.params.type': type
+          };
+          const setIds = R.map(obj => obj._id);
+          const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
+          const observable = this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] });
+          return from(this.getJobs(operation, conditions)).pipe(
+            flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+            , map(setIds)
+            , map(setParams)
+            , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
+            , catchError(() => of(''))
+            );
+        }
+      case 'download/images':
+        {
+          const conditions = {
+            lastFinishedAt: { $exists: false }
+          , 'data.params.user': user
+          , 'data.params.id': id
+          };
+          const setIds = R.map(obj => obj._id);
+          const setParams = obj => ({ id: obj, number: 1 });
+          const observable = this.feed.fetchJobNote({ user, id });
+          return from(this.getJobs(operation, conditions)).pipe(
+            flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+            , map(setIds)
+            , map(setParams)
+            , flatMap(obj => from(this.addJobs(operation, obj, { id, user, filter })))
+            , catchError(() => of(''))
+            );
+        }
+      default:
+        return throwError('not Implemented.');
+    }
   }
 
-  downloadLink(operation, { user, category, type, filter }) {
-    log.info(JobQueue.displayName, 'DownloadLink', operation);
-    const params = { user, category, type, filter };
-    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
+  signedlink(operation, { id, user, category, type, filter }) {
+    log.info(JobQueue.displayName, 'signedlink', operation);
+    const params = { id, user, category, type, filter };
+    const setParam = file => this.setAWSParams(operation, params, file);
+    return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams(params, file))
+      , map(file => this.setFSSParams(operation, params, file))
       , flatMap(file => !R.isNil(file) 
-          ? from(this.AWS.fetchSignedUrl(STORAGE, this.setAWSParams(params, file))) : throwError('File not found.'))
+          ? from(this.AWS.fetchSignedUrl(STORAGE, setParam(file))) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
-      //, flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
       , map(file => file.url)
       , catchError(() => this.createJobs(operation, params))
       );
   }
   
-  downloadFile(operation, { user, category, type, filter }) {
-    log.info(JobQueue.displayName, 'DownloadFile', operation);
-    const params = { user, category, type, filter };
-    return from(this.AWS.fetchObject(STORAGE, this.setAWSParams(params))).pipe(
+  download(operation, { id, user, category, type, filter }) {
+    log.info(JobQueue.displayName, 'download', operation);
+    const params = { id, user, category, type, filter };
+    const setParam = file => this.setAWSParams(operation, params, file);
+    return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams(params, file))
-      , flatMap(file => !R.isNil(file) 
-          ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
+      , map(file => this.setFSSParams(operation, params, file))
+      , flatMap(file => !R.isNil(file) ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
       , flatMap(file => from(this.FSS.finalize(file)))
-      , flatMap(file => from(this.AWS.deleteObject(STORAGE, this.setAWSParams(params, file))))
+      , flatMap(file => from(this.AWS.deleteObject(STORAGE, setParam(file))))
       , map(file => file.data.buffer)
       , catchError(() => this.createJobs(operation, params))
       );
   }
   
-  setFSSParams({ user, category, type }, file) {
+  setFSSParams(operation, { id, user, category, type }, file) {
     const { subpath, files } = file;
-    const hasArchive  = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename));
+    const _files  = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename), files);
     const maxValue    = array => !R.isEmpty(array) ? Math.max(...array) : null;
-    const setFile = num => !R.isNil(num) ? ({ subpath, filename: user + '-' + category + '-' + type + '-' + num + '.zip' }) : null;
-    const getFile = obj => !R.isEmpty(obj) ? R.compose(
-      setFile
-    , maxValue
-    , R.map(objs => objs[4])
-    , R.filter(objs => objs[1] === user && objs[2] === category && objs[3] === type)
-    , R.map(R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/))
-    )(obj) : null;
-    return R.compose(getFile, hasArchive)(files);
+    let setFile, setVal, isFile, regZip;
+    switch(operation) {
+      case 'download/items':
+        {
+          setFile = num => !R.isNil(num) ? ({ subpath, filename: user + '-' + category + '-' + type + '-' + num + '.zip' }) : null;
+          setVal = objs => objs[4];
+          isFile = objs => objs[1] === user && objs[2] === category && objs[3] === type;
+          regZip = R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/);
+          break;
+        }
+      case 'download/images':
+        {
+          setFile = num => !R.isNil(num) ? ({ subpath, filename: user + '-' + id + '-' + num + '.zip' }) : null;
+          setVal = objs => objs[3];
+          isFile = objs => objs[1] === user && objs[2] === id;
+          regZip = R.match(/(.*)-(.*)-(.*)\.zip$/);
+          break;
+        }
+      default:
+        return null;
+    }
+    const getFile = R.compose(setFile, maxValue, R.map(setVal), R.filter(isFile), R.map(regZip));
+    return !R.isEmpty(_files) ? getFile(_files) : null;
   }
 
-  setAWSParams({ user, category, type }, file) {
-    const key    = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
-    const name   = user + '-' + category + '-' + type + '-' + Date.now() + '.zip' ;
-    const result = file ? { key, name, file } : { key, name };
-    return result;
+  setAWSParams(operation, { id, user, category, type }, file) {
+    let key, name;
+    switch(operation) {
+      case 'download/items':
+        {
+          key    = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
+          name   = user + '-' + category + '-' + type + '-' + Date.now() + '.zip' ;
+          break;
+        }
+      case 'download/images':
+        {
+          key    = std.crypto_sha256(user, id, 'hex') + '.zip';
+          name   = user + '-' + id + '-' + Date.now() + '.zip' ;
+          break;
+        }
+      default:
+        return null;
+    }
+    return !R.isNil(file) ? { key, name, file } : { key, name };
   }
 }
 JobQueue.displayName = 'JobQueue';

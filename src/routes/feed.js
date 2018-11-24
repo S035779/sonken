@@ -69,30 +69,30 @@ export default {
     };
   },
 
-  downloadImages() {
-    return (req, res) => {
-      const { user, id, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-      , aucStartTime, aucStopTime, sold } = req.body;
-      const filter = allAuction === false ? {
-        lastWeekAuction
-      , twoWeeksAuction
-      , lastMonthAuction
-      , allAuction
-      , inAuction
-      , aucStartTime
-      , aucStopTime
-      , sold
-      } : null;
-      feed.downloadImages({ user, id, filter }).subscribe(
-        obj => { res.status(200).send(obj); }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message, ':', err.stack);
-        }
-      , () => { log.info('Complete to download Images.'); }  
-      );
-    };
-  },
+  //downloadImages() {
+  //  return (req, res) => {
+  //    const { user, id, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+  //    , aucStartTime, aucStopTime, sold } = req.body;
+  //    const filter = allAuction === false ? {
+  //      lastWeekAuction
+  //    , twoWeeksAuction
+  //    , lastMonthAuction
+  //    , allAuction
+  //    , inAuction
+  //    , aucStartTime
+  //    , aucStopTime
+  //    , sold
+  //    } : null;
+  //    feed.downloadImages({ user, id, filter }).subscribe(
+  //      obj => { res.status(200).send(obj); }
+  //    , err => {
+  //        res.status(500).send({ name: err.name, message: err.message });
+  //        log.error(displayName, err.name, ':', err.message, ':', err.stack);
+  //      }
+  //    , () => { log.info('Complete to download Images.'); }  
+  //    );
+  //  };
+  //},
 
   downloadTrade() {
     return (req, res) => {

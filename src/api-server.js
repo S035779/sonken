@@ -184,8 +184,8 @@ router.route('/file')
 
 router.route('/worker')
 .get(job.notImplemented())
-.put(job.downloadLink())
-.post(job.downloadFile())
+.put(job.signedlink())
+.post(job.download())
 .delete(job.notImplemented());
 
 router.route('/notes')
@@ -194,11 +194,11 @@ router.route('/notes')
 .post(feed.notImplemented())
 .delete(feed.notImplemented());
 
-router.route('/image')
-.get(feed.notImplemented())
-.put(feed.notImplemented())
-.post(feed.downloadImages())
-.delete(feed.notImplemented())
+//router.route('/image')
+//.get(feed.notImplemented())
+//.put(feed.notImplemented())
+//.post(feed.downloadImages())
+//.delete(feed.notImplemented())
 
 router.route('/categorys')
 .get(feed.fetchCategorys())

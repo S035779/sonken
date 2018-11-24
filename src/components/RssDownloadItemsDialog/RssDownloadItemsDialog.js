@@ -84,15 +84,15 @@ class RssDownloadItemsDialog extends React.Component {
     }
   }
 
-  downloadLink(link, mime) {
-    std.logInfo(RssDownloadItemsDialog.displayName, 'downloadLink', link);
-    const isCSV = mime.type === 'text/csv';
-    const anchor = document.createElement('a');
-    anchor.href = link;
-    anchor.target = '_blank';
-    anchor.download = isCSV ? 'download.csv' : 'download.zip';
-    anchor.click();
-  }
+  //downloadLink(link, mime) {
+  //  std.logInfo(RssDownloadItemsDialog.displayName, 'downloadLink', link);
+  //  const isCSV = mime.type === 'text/csv';
+  //  const anchor = document.createElement('a');
+  //  anchor.href = link;
+  //  anchor.target = '_blank';
+  //  anchor.download = isCSV ? 'download.csv' : 'download.zip';
+  //  anchor.click();
+  //}
 
   downloadFile(blob, mime) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);

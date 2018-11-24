@@ -5,29 +5,30 @@ const displayName = 'job';
 const job = JobQueue.of();
 
 export default {
-  downloadFile() {
+  download() {
     return (req, res) => {
-      const { operation, user, category, type, filter } = req.body;
-      job.downloadFile(operation, { user, category, type, filter }).subscribe(
+      const { operation, id, user, category, type, filter } = req.body;
+      console.log(req.body);
+      job.download(operation, { id, user, category, type, filter }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info('Queue to download file.'));
+      , () => log.info(displayName, 'download', 'Queue to download file.'));
     };
   },
 
-  downloadLink() {
+  signedlink() {
     return (req, res) => {
-      const { operation, user, category, type, filter } = req.body;
-      job.downloadLink(operation, { user, category, type, filter }).subscribe(
+      const { operation, id, user, category, type, filter } = req.body;
+      job.signedlink(operation, { id, user, category, type, filter }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info('Queue to download link.'));
+      , () => log.info(displayName, 'signedlink', 'Queue to signed link.'));
     };
   },
 

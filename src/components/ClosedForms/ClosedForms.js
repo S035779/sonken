@@ -35,6 +35,7 @@ class ClosedForms extends React.Component {
     , isRequest: false
     , isNotResult: false
     , isDownload: false
+    , isQueued: false
     , loadingImages: props.loadingImages
     , loadingDownload: props.loadingDownload
     };
@@ -206,16 +207,22 @@ class ClosedForms extends React.Component {
   }
 
   handleImages() {
-    const { user, note, itemNumber } = this.props;
-    //std.logInfo(ClosedForms.displayName, 'handleImages', user);
+    const { user, category, note, itemNumber } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
+    NoteAction.deleteCache();
     if(itemNumber !== 0) {
       this.spn.start();
-      NoteAction.downloadImages(user, id
-        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
-        .then(() => this.setState({ isSuccess: true }))
-        .then(() => this.downloadImages(this.props.images))
+      std.logInfo(ClosedForms.displayName, 'handleImages', this.props);
+      NoteAction.createJob('download/images', { id, user, category
+      , filter: { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold }})
+      //NoteAction.downloadImages(user, id
+      //  , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold })
+        .then(() => {
+          const isFile = this.props.file && this.props.file.size !== 0;
+          this.setState({ isSuccess: isFile, isQueued: !isFile });
+        })
+        .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadImages(this.props.images) : null)
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(ClosedForms.displayName, err.name, err.message);
@@ -275,7 +282,7 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, perPage, user, note, category, file } = this.props;
     const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold, page, isNotValid
-      , isSuccess, isNotResult, isDownload, loadingDownload, loadingImages } = this.state;
+      , isSuccess, isNotResult, isDownload, isQueued, loadingDownload, loadingImages } = this.state;
     const { items } = this.state.note;
     const filter = { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold };
     const color = this.getColor(category);
@@ -293,7 +300,8 @@ class ClosedForms extends React.Component {
               classes={classes.button}>ダウンロード</RssButton>
             {loadingDownload && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
           </div>
-          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} ids={[note._id]} itemNumber={itemNumber} 
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} 
+            ids={[note._id]} itemNumber={itemNumber} 
             filter={filter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -303,6 +311,9 @@ class ClosedForms extends React.Component {
           </RssDialog>
           <RssDialog open={isNotResult} title={'検索結果なし'} onClose={this.handleCloseDialog.bind(this, 'isNotResult')}>
             検索条件を見直してください。
+          </RssDialog>
+          <RssDialog open={isQueued} title={'送信処理中'} onClose={this.handleCloseDialog.bind(this, 'isQueued')}>
+            ジョブを処理中です。
           </RssDialog>
         </div>
       </div>

@@ -10,8 +10,8 @@ import { Iconv }                  from 'iconv';
 import { Item, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed, Attribute } 
                                   from 'Models/feed';
 import std                        from 'Utilities/stdutils';
-import Amazon                     from 'Utilities/Amazon';
-import Yahoo                      from 'Utilities/Yahoo';
+import Amazon                     from 'Routes/Amazon/Amazon';
+import Yahoo                      from 'Routes/Yahoo/Yahoo';
 import log                        from 'Utilities/logutils';
 import js2Csv                     from 'Utilities/js2Csv';
 import aws                        from 'Utilities/awsutils';
@@ -201,13 +201,21 @@ export default class FeedParser {
             params = R.merge(params, { match });
           }
           const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
+          const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
           const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
           const hasSold  = R.filter(isSold);
+          const hasImgs  = R.filter(isImgs);
           const hasArch  = R.filter(isArch);
           const setSold  = R.compose(R.length, hasSold);
+          const setImgs  = R.compose(R.length, hasImgs);
           const setArch  = R.compose(R.length, hasArch);
-          const setCount = doc => isCount 
-            ? [{ _id: doc._id, counts: R.length(doc.items), sold: setSold(doc.items), archive: setArch(doc.items) }] : doc;
+          const setCount = doc => isCount ? [{ 
+            _id:      doc._id
+          , counts:   R.length(doc.items)
+          , sold:     setSold(doc.items)
+          , images:   setImgs(doc.items)
+          , archive:  setArch(doc.items)
+          }] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
           const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
@@ -1276,8 +1284,8 @@ export default class FeedParser {
     const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
     const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts) });
-    const setPerfCount = obj => ({ sold: { total: obj.sold }, archive: { total: obj.archive } });
-    const setAttributes = obj => !R.isNil(obj.sold) || !R.isNil(obj.archive)
+    const setPerfCount = obj => ({ sold: { total: obj.sold }, images: { total: obj.images }, archive: { total: obj.archive } });
+    const setAttributes = obj => !R.isNil(obj.sold) || !R.isNil(obj.images) || !R.isNil(obj.archive)
       ? R.merge(setItemCount(obj), setPerfCount(obj)) : setItemCount(obj);
     const setCounts = obj => R.merge(obj, { item_attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
@@ -2187,41 +2195,20 @@ export default class FeedParser {
     );
   }
 
-  //downloadImages({ user, id, filter }) {
+  //downloadImages({ user, id }) {
   //  const AWS         = aws.of(aws_keyset);
-  //  const getObjects  = objs => AWS.fetchObjects(STORAGE, objs);
-  //  const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
-  //  const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
-  //  const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
-  //  const setImages   = R.map(obj => setImage(obj.guid, obj.images));
-  //  const dupItems    = objs => std.dupObj(objs, 'title');
-  //  const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
-  //  const getItems    = obj => obj.items;
-  //  return this.fetchNote({ user, id, filter }).pipe(
-  //    map(getItems)
-  //  , map(setItems)
-  //  , map(dupItems)
-  //  , map(setImages)
-  //  , map(R.flatten)
-  //  , flatMap(objs => from(getObjects(objs)))
+  //  const getObject   = obj => AWS.fetchObject(STORAGE, obj);
+  //  const setKey      = (_id, url) => std.crypto_sha256(url, _id, 'hex') + '.zip';
+  //  const setName     = (_id, url) => _id + '_' + path.basename(std.parse_url(url).pathname);
+  //  const setArchives = obj => ({ key: setKey(obj._id.toString(), obj.url), name: setName(obj._id.toString(), obj.url) });
+  //  return this.fetchNote({ user, id }).pipe(
+  //    map(setArchives)
+  //  , flatMap(obj => from(getObject(obj)))
+  //  , map(obj => obj.buffer)
   //  );
   //}
 
-  downloadImages({ user, id }) {
-    const AWS         = aws.of(aws_keyset);
-    const getObject   = obj => AWS.fetchObject(STORAGE, obj);
-    const setKey      = (_id, url) => std.crypto_sha256(url, _id, 'hex') + '.zip';
-    const setName     = (_id, url) => _id + '_' + path.basename(std.parse_url(url).pathname);
-    const setArchives = obj => ({ key: setKey(obj._id.toString(), obj.url), name: setName(obj._id.toString(), obj.url) });
-    return this.fetchNote({ user, id }).pipe(
-      map(setArchives)
-    , flatMap(obj => from(getObject(obj)))
-    , map(obj => obj.buffer)
-    );
-  }
-
-  createArchives({ _id, url, items }) {
-    const AWS         = aws.of(aws_keyset);
+  downloadImages({ user, id, filter }) {
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
@@ -2229,16 +2216,22 @@ export default class FeedParser {
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
-    const setGuids    = R.map(obj => obj.guid__);
-    const files       = R.compose(R.flatten, setImages, dupItems, setItems, hasImages)(items);
-    const guids       = R.compose(setGuids, hasImages)(items);
-    const zipkey      = std.crypto_sha256(url, _id.toString(), 'hex') + '.zip';
-    const setArchive  = obj => ({ guid__: { $in: guids }, archive: obj.Key }); 
-    const observable  = from(AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }));
-    //log.trace(FeedParser.displayName, 'files/guids:', R.length(files), R.length(guids));
+    const getItems    = obj => obj.items;
+    const observable = this.fetchNote({ user, id, filter });
     return observable.pipe(
-      map(setArchive)
+      map(getItems)
+    , map(hasImages)
+    , map(setItems)
+    , map(dupItems)
+    , map(setImages)
+    , map(R.flatten)
     );
+  }
+
+  createImages({ user, id }, files) {
+    const AWS = aws.of(aws_keyset);
+    const key = std.crypto_sha256(user, id, 'hex') + '.zip';
+    return from(AWS.createArchiveFromS3(STORAGE, { key, files }));
   }
 
   createCSVs({ user, category, type, total, limit }, file) {
@@ -2250,7 +2243,6 @@ export default class FeedParser {
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
     const isSubscribe = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    //log.trace(FeedParser.displayName. 'createCSVs', { numTotal, numLimit, numFiles, subscribeToFirst });
     return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ file }));
   }
 }

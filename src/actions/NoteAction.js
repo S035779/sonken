@@ -117,11 +117,11 @@ export default {
         dispatch({ type: 'note/download/items', file });
       });
   },
-  downloadImages(user, id, filter) {
-    return NoteApiClient.downloadImages(user, id, filter).then(images => {
-        dispatch({ type: 'note/download/images', images });
-      });
-  },
+  //downloadImages(user, id, filter) {
+  //  return NoteApiClient.downloadImages(user, id, filter).then(images => {
+  //      dispatch({ type: 'note/download/images', images });
+  //    });
+  //},
   createAdd(user, ids) {
     return NoteApiClient.createAdd(user, ids).then(() => {
         dispatch({ type: 'add/create', ids });

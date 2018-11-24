@@ -5,6 +5,7 @@ import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import searchIndex        from 'Utilities/amzindex';
+//import amz                from 'Utilities/amzutils';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 /**

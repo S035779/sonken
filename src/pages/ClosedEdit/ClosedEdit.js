@@ -10,9 +10,9 @@ class ClosedEdit extends React.Component {
     if(!note || !note._id) return null;
     const itemNumber = note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
     const attrNumber = note.item_attributes && note.item_attributes.sold ? note.item_attributes.sold.total : 0;
-    const archNumber = note.item_attributes && note.item_attributes.archive ? note.item_attributes.archive.total : 0;
-    const loadingDownload = itemNumber !== attrNumber;
-    const loadingImages = itemNumber !== archNumber;
+    const imgsNumber = note.item_attributes && note.item_attributes.images ? note.item_attributes.images.total : 0;
+    const loadingDownload = itemNumber !== attrNumber || attrNumber === 0;
+    const loadingImages   = itemNumber !== imgsNumber || imgsNumber === 0;
     const perPage = note.item_attributes ? note.item_attributes.item.count : 0;
     return <div className={classes.noteEdit}>
         <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}

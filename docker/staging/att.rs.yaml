@@ -23,8 +23,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_att:latest
         resources:
           requests:
-            cpu: 256m
-            memory: 1280Mi
+            cpu: 128m
+            memory: 512Mi
         env:
           - name: WORKER_NAME
             value: "att-worker"

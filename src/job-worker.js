@@ -5,7 +5,7 @@ import { forkJoin, from, throwError }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
-import Yahoo            from 'Utilities/Yahoo';
+import Yahoo            from 'Routes/Yahoo/Yahoo';
 import log              from 'Utilities/logutils';
 import aws              from 'Utilities/awsutils';
 import job              from 'Utilities/jobutils';
@@ -15,13 +15,13 @@ sourceMapSupport.install();
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const node_env  = process.env.NODE_ENV    || 'development';
-const workerName = process.env.WORKER_NAME || 'empty';
-const CACHE = process.env.CACHE;
-const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
-const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+const node_env        = process.env.NODE_ENV    || 'development';
+const workerName      = process.env.WORKER_NAME || 'empty';
+const CACHE           = process.env.CACHE;
+const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
+const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
-const aws_keyset = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = `[WRK] (${process.pid})`;
@@ -90,17 +90,17 @@ const request = (operation, options) => {
           , flatMap(obj => from(observable(obj)))
           );
       }
-    case 'archives':
-      {
-        const { user, id } = options;
-        const conditions = { user, id };
-        const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
-        const observable = obj => feed.createAttribute(setAttribute(obj));
-        return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => feed.createArchives(obj))
-          , flatMap(obj => from(observable(obj)))
-          );
-      }
+    //case 'archives':
+    //  {
+    //    const { user, id } = options;
+    //    const conditions = { user, id };
+    //    const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
+    //    const observable = obj => feed.createAttribute(setAttribute(obj));
+    //    return feed.fetchJobNote(conditions).pipe(
+    //        flatMap(obj => feed.createArchives(obj))
+    //      , flatMap(obj => from(observable(obj)))
+    //      );
+    //  }
     case 'attribute':
       {
         const { user, id } = options;
@@ -147,12 +147,19 @@ const request = (operation, options) => {
           , flatMap(file => FSS.createFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          //, flatMap(file => FSS.createArchive(conditions, file)) // does not work.
           , flatMap(file => feed.createCSVs(conditions, file))
           );
       }
+    case 'download/images':
+      {
+        const { user, id, filter, number } = options;
+        const conditions = { user, id, total: number, limit: 1 };
+        return feed.downloadImages({ user, id, filter }).pipe(
+            flatMap(obj => feed.createImages(conditions, obj))
+          );
+      }
     default:
-      return throwError('Unknown operation!');
+      return throwError('not Implemented.');
   }
 };
 

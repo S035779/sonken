@@ -23,8 +23,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_dfg:latest
         resources:
           requests:
-            cpu: 16m
-            memory: 320Mi
+            cpu: 8m
+            memory: 480Mi
         env:
           - name: WORKER_NAME
             value: "dfg-worker"
