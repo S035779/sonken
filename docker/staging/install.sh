@@ -17,6 +17,8 @@ if [ ! -d $ASSET/css ]; then
 fi
 cp $WORKDIR/dist/app.bundle.css     $ASSET/css/
 cp $WORKDIR/dist/app.bundle.css.map $ASSET/css/
+cp $WORKDIR/dist/*.woff             $ASSET/css/
+cp $WORKDIR/dist/*.woff2            $ASSET/css/
 
 if [ ! -d $ASSET/image ]; then
     mkdir $ASSET/image
@@ -24,8 +26,3 @@ fi
 cp $WORKDIR/dist/favicon.ico        $ASSET/image/
 cp $WORKDIR/dist/*.jpg              $ASSET/image/
 
-if [ ! -d $ASSET/fonts ]; then
-    mkdir $ASSET/fonts
-fi
-cp $WORKDIR/dist/assets/fonts/*.woff      $ASSET/fonts/
-cp $WORKDIR/dist/assets/fonts/*.woff2     $ASSET/fonts/

@@ -69,7 +69,7 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['sellers', 'marchant', 'closedsellers', 'closedmarchant' ]
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 12)), sort: 'desc'
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 35)), sort: 'desc'
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

@@ -16,7 +16,7 @@ const config = dotenv.config();
 if(config.error) throw config.error();
 
 const node_env        = process.env.NODE_ENV    || 'development';
-const workerName      = process.env.WORKER_NAME || 'empty';
+const workername      = process.env.WORKER_NAME || 'empty';
 const CACHE           = process.env.CACHE;
 const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
@@ -147,22 +147,22 @@ const request = (operation, options) => {
           , flatMap(file => FSS.createFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createCSVs(conditions, file))
+          , flatMap(file => feed.createItems(conditions, file))
           );
       }
-    case 'download/images':
+    case 'download/image':
       {
         const { params } = options;
-        const { user, id, filter, number } = params;
-        const setFile = files => ({ files });
-        const conditions = { user, id, total: number, limit: 1 };
-        return feed.downloadImages({ user, id, filter }).pipe(
-            map(setFile)
+        const { user, category, id, filter, number } = params;
+        const setFiles = files => ({ files });
+        const conditions = { user, category, id, total: number, limit: 1 };
+        return feed.downloadImage({ user, id, filter }).pipe(
+            map(setFiles)
           , flatMap(file => feed.createImages(conditions, file))
           );
       }
     default:
-      return throwError('not Implemented.');
+      return throwError({ name: 'Invalid request:', message: 'Request is not Implemented.', stack: operation });
   }
 };
 
@@ -173,7 +173,7 @@ const worker = (options, callback) => {
   request(operation, { url, user, id, skip, limit, params }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => {
-      log.warn(displayName, err.name, err.message, err.stack);
+      log.error(displayName, err.name, err.message, err.stack);
       callback();
     }
   , ()  => {
@@ -184,10 +184,25 @@ const worker = (options, callback) => {
   });
 };
 
-let jobName = 'none';
-if(workerName === 'wks-worker') { jobName = 'download/items'; }
-if(workerName === 'arc-worker') { jobName = 'download/images'; }
-const jobQueue = job.dequeue(workerName, jobName, 1, worker);
+let jobs;
+switch(workername) {
+  case 'wks-worker':
+    jobs = [  'download/items',   'download/item'   ];
+    break;
+  case 'arc-worker':
+    jobs = [  'download/images',  'download/image'  ];
+    break;
+  default:
+    jobs = [  'notImplemented'  ];
+    break;
+}
+
+const jobqueues = new Map();
+let jobqueue;
+for(let jobname of jobs) {
+  jobqueue = job.dequeue(workername, jobname, 1, worker);
+  jobqueues.set(jobqueue, jobname);
+}
 
 const main = () => {
   const queue = async.queue(worker);
@@ -245,9 +260,12 @@ const message = (err, code, signal) => {
 
 const shutdown = (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
-  log.info(displayName, 'worker terminated.');
   log.info(displayName, 'log4js #4 terminated.');
-  jobQueue.stop(() => log.close(() => cbk()));
+  for(let [ jobqueue, jobname ] of jobqueues.entries()) {
+    log.info(displayName, jobname, 'terminated.');
+    jobqueue.stop();
+  }
+  log.close(() => cbk());
 };
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));

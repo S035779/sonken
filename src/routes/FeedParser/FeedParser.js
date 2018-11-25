@@ -2208,7 +2208,7 @@ export default class FeedParser {
   //  );
   //}
 
-  downloadImages({ user, id, filter }) {
+  downloadImage({ user, id, filter }) {
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
@@ -2228,10 +2228,10 @@ export default class FeedParser {
     );
   }
 
-  createImages({ user, id, total, limit }, file) {
+  createImages({ user, category, id, total, limit }, file) {
     const { files } = file;
     const AWS = aws.of(aws_keyset);
-    const zipkey = std.crypto_sha256(user, id.toString(), 'hex') + '.zip';
+    const zipkey = std.crypto_sha256(user + '-' + category, id.toString(), 'hex') + '.zip';
     const numTotal    = Number(total);
     const numLimit    = Number(limit);
     const numFiles    = R.length(files);
@@ -2239,7 +2239,7 @@ export default class FeedParser {
     return defer(() => isSubscribe ? AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }) : of({ file }));
   }
 
-  createCSVs({ user, category, type, total, limit }, file) {
+  createItems({ user, category, type, total, limit }, file) {
     const { subpath, files } = file;
     const AWS         = aws.of(aws_keyset);
     const _files      = R.map(file => ({ name: file }), files)

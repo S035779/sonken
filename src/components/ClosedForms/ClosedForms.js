@@ -207,16 +207,15 @@ class ClosedForms extends React.Component {
   }
 
   handleImages() {
-    const { user, note, itemNumber } = this.props;
+    const { user, category, note, itemNumber } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
-    const id = note._id;
     const filter = { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold };
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
       this.spn.start();
       std.logInfo(ClosedForms.displayName, 'handleImages', this.props);
-      NoteAction.createJob('download/images', { id, user, filter})
-      //NoteAction.downloadImages(user, id, filter)
+      NoteAction.createJob('download/image', { id: note._id, user, category, filter})
+      //NoteAction.downloadImages(user, id: note._id, filter)
         .then(() => {
           const isFile = this.props.file && this.props.file.size !== 0;
           this.setState({ isSuccess: isFile, isQueued: !isFile });

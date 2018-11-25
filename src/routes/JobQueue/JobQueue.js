@@ -92,11 +92,13 @@ export default class JobQueue {
     return from(this.garbageJobs(operation));
   }
 
-  createJobs(operation, { id, user, category, type, filter }) {
+  createJobs(operation, options) {
     log.info(JobQueue.displayName, 'createjobs', operation);
     switch(operation) {
+      case 'download/images':
       case 'download/items':
         {
+          const { user, category, type, filter } = options;
           const conditions = { 
             lastFinishedAt: { $exists: false }
           , 'data.params.user': user
@@ -104,36 +106,43 @@ export default class JobQueue {
           , 'data.params.type': type
           };
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: R.splitEvery(20, objs), number: R.length(objs) });
-          const observable = this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] });
+          const splitIds = R.splitEvery(20);
+          const setLen = R.length;
+          const setParams = objs => ({ ids: splitIds(objs), number: setLen(objs) });
           return from(this.getJobs(operation, conditions)).pipe(
-              flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+              flatMap(objs => R.isEmpty(objs) 
+                ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] })
+                : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
             , map(setIds)
             , map(setParams)
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
-                if(err) log.warn(JobQueue.displayName, 'Warning', operation, err);
+                if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
                 return of('');
               })
             );
         }
-      case 'download/images':
+      case 'download/item':
+      case 'download/image':
         {
+          const { user, category, id, filter } = options;
           const conditions = {
             lastFinishedAt: { $exists: false }
           , 'data.params.user': user
+          , 'data.params.category': category
           , 'data.params.id': id
           };
           const setId = obj => obj._id;
           const setParam = obj => ({ id: obj, number: 1 });
-          const observable = this.feed.fetchJobNote({ user, id });
           return from(this.getJobs(operation, conditions)).pipe(
-              flatMap(objs => R.isEmpty(objs) ? observable : throwError('Proceeding job...'))
+              flatMap(objs => R.isEmpty(objs) 
+                ? this.feed.fetchJobNote({ user, id })
+                : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
             , map(setId)
             , map(setParam)
-            , flatMap(obj => from(this.addJob(operation, obj, { user, filter })))
+            , flatMap(obj => from(this.addJob(operation, obj, { user, category, filter })))
             , catchError(err => {
-                if(err) log.warn(JobQueue.displayName, 'Warning', operation, err);
+                if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
                 return of('');
               })
             );
@@ -152,10 +161,14 @@ export default class JobQueue {
       , flatMap(file => from(this.FSS.fetchFileList(file)))
       , map(file => this.setFSSParams(operation, params, file))
       , flatMap(file => !R.isNil(file) 
-          ? from(this.AWS.fetchSignedUrl(STORAGE, setParam(file))) : throwError('File not found.'))
+          ? from(this.AWS.fetchSignedUrl(STORAGE, setParam(file))) 
+          : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
       , flatMap(file => from(this.FSS.finalize(file)))
       , map(file => file.url)
-      , catchError(() => this.createJobs(operation, params))
+      , catchError(err => {
+          if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+          return this.createJobs(operation, params);
+        })
       );
   }
   
@@ -167,61 +180,62 @@ export default class JobQueue {
         flatMap(data => from(this.FSS.createFile({ data })))
       , flatMap(file => from(this.FSS.fetchFileList(file)))
       , map(file => this.setFSSParams(operation, params, file))
-      , flatMap(file => !R.isNil(file) ? from(this.FSS.fetchFile(file)) : throwError('File not found.'))
+      , flatMap(file => !R.isNil(file) 
+          ? from(this.FSS.fetchFile(file)) 
+          : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
       , flatMap(file => from(this.FSS.finalize(file)))
       , flatMap(file => from(this.AWS.deleteObject(STORAGE, setParam(file))))
       , map(file => file.data.buffer)
-      , catchError(() => this.createJobs(operation, params))
+      , catchError(err => {
+          if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+          return this.createJobs(operation, params);
+        })
       );
   }
   
   setFSSParams(operation, { id, user, category, type }, file) {
     const { subpath, files } = file;
-    const _files  = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename), files);
-    const maxValue    = array => !R.isEmpty(array) ? Math.max(...array) : null;
-    let setFile, setVal, isFile, regZip;
+    const header    = user + '-' + category;
+    let   __id__;
     switch(operation) {
       case 'download/items':
-        {
-          setFile = num => !R.isNil(num) ? ({ subpath, filename: user + '-' + category + '-' + type + '-' + num + '.zip' }) : null;
-          setVal = objs => objs[4];
-          isFile = objs => objs[1] === user && objs[2] === category && objs[3] === type;
-          regZip = R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/);
-          break;
-        }
       case 'download/images':
-        {
-          setFile = num => !R.isNil(num) ? ({ subpath, filename: user + '-' + id + '-' + num + '.zip' }) : null;
-          setVal = objs => objs[3];
-          isFile = objs => objs[1] === user && objs[2] === id;
-          regZip = R.match(/(.*)-(.*)-(.*)\.zip$/);
-          break;
-        }
+        __id__ = type;
+        break;
+      case 'download/item':
+      case 'download/image':
+        __id__ = id;
+        break;
       default:
         return null;
     }
-    const getFile = R.compose(setFile, maxValue, R.map(setVal), R.filter(isFile), R.map(regZip));
+    const _files    = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename), files);
+    const maxValue  = array => !R.isEmpty(array) ? Math.max(...array) : null;
+    const setFile   = num => !R.isNil(num) ? ({ subpath, filename: header + '-' + __id__ + '-' + num + '.zip' }) : null;
+    const setVal    = objs => objs[4];
+    const isFile    = objs => objs[1] === user && objs[2] === category && objs[3] === __id__;
+    const regZip    = R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/);
+    const getFile   = R.compose(setFile, maxValue, R.map(setVal), R.filter(isFile), R.map(regZip));
     return !R.isEmpty(_files) ? getFile(_files) : null;
   }
 
   setAWSParams(operation, { id, user, category, type }, file) {
-    let key, name;
+    const header    = user + '-' + category;
+    let __id__;
     switch(operation) {
       case 'download/items':
-        {
-          key    = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
-          name   = user + '-' + category + '-' + type + '-' + Date.now() + '.zip' ;
-          break;
-        }
       case 'download/images':
-        {
-          key    = std.crypto_sha256(user, id, 'hex') + '.zip';
-          name   = user + '-' + id + '-' + Date.now() + '.zip' ;
+          __id__ = type;
           break;
-        }
+      case 'download/item':
+      case 'download/image':
+          __id__ = id;
+          break;
       default:
         return null;
     }
+    const key  = std.crypto_sha256(header, __id__, 'hex') + '.zip';
+    const name = header + '-' + __id__ + '-' + Date.now() + '.zip' ;
     return !R.isNil(file) ? { key, name, file } : { key, name };
   }
 }
