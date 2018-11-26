@@ -17,8 +17,8 @@ if [ ! -d $ASSET/css ]; then
 fi
 cp $WORKDIR/dist/app.bundle.css     $ASSET/css/
 cp $WORKDIR/dist/app.bundle.css.map $ASSET/css/
-cp $WORKDIR/dist/*.woff             $ASSET/css/
-cp $WORKDIR/dist/*.woff2            $ASSET/css/
+cp $WORKDIR/dist/assets/css/*.woff  $ASSET/css/
+cp $WORKDIR/dist/assets/css/*.woff2 $ASSET/css/
 
 if [ ! -d $ASSET/image ]; then
     mkdir $ASSET/image
