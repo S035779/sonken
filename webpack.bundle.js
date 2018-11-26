@@ -37,7 +37,13 @@ const bundle = {
     new ManifestPlugin({ fileName: 'manifest.bundle.json' })
   , new webpack.NamedModulesPlugin()
   , new webpack.HotModuleReplacementPlugin()
-  , new CleanWebpackPlugin([ 'dist/*.bundle.*', 'dist/*.jpg', 'dist/assets' ], { verbose: false })
+  , new CleanWebpackPlugin([
+      'dist/*.bundle.*'
+    , 'dist/*.jpg'
+    , 'dist/*.ico'
+    , 'dist/*.woff'
+    , 'dist/*.woff2'
+    ], { verbose: false })
   ]
 };
 module.exports = merge(common, bundle);

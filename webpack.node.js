@@ -3,6 +3,7 @@ const merge = require('webpack-merge');
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 const common = require('./webpack.common.js');
 
 const node = {
@@ -31,6 +32,9 @@ const node = {
 , plugins: [
     new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('local') })
   , new ManifestPlugin({ fileName: 'manifest.node.json' })
+  , new CleanWebpackPlugin([
+      'dist/*.node.*'
+    ], { verbose: false })
   ]
 , node: { __dirname: true, __filename: true }
 , devtool: 'inline-source-map'
