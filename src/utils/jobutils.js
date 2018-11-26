@@ -68,7 +68,7 @@ const dequeue = (workerName, jobName, concurrent, callback) => {
       queue.on('start:'     + jobName, job =>         log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
       queue.on('complete:'  + jobName, job =>         log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
       queue.on('success:'   + jobName, job =>         log.info( 'success:',   job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
-      queue.on('fail:'      + jobName, (err, job) =>  log.error('fail:',      err,                  job.attrs.data));
+      queue.on('fail:'      + jobName, (err, job) =>  log.error('fail:',      job.attrs.failedAt,   job.attrs.failReason));
 
       return queue;
     });

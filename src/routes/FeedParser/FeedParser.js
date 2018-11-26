@@ -2145,24 +2145,6 @@ export default class FeedParser {
     );
   }
   
-  downloadItems({ user, ids, filter, type }) {
-    //log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
-    const CSV = this.setCsvItems(type);
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
-    const setItems = obj => obj.items ? obj.items : [];
-    const dupItems = objs => std.dupObj(objs, 'title');
-    const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
-      map(R.map(setItems))
-    , map(R.map(CSV.map))
-    , map(R.flatten)
-    , map(dupItems)
-    , map(setItemsCsv)
-    , map(setBuffer)
-    );
-  }
-
   downloadTrade({ user, filter }) {
     const CSV = this.setCsvItems('0001');
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
@@ -2208,7 +2190,25 @@ export default class FeedParser {
   //  );
   //}
 
-  downloadImage({ user, id, filter }) {
+  downloadItems({ user, ids, filter, type }) {
+    //log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
+    const CSV = this.setCsvItems(type);
+    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
+    const dupItems = objs => std.dupObj(objs, 'title');
+    const getItems = obj => obj.items ? obj.items : [];
+    const observables = R.map(id => this.fetchNote({ user, id, filter }));
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(getItems))
+    , map(R.map(CSV.map))
+    , map(R.flatten)
+    , map(dupItems)
+    , map(setItemsCsv)
+    , map(setBuffer)
+    );
+  }
+
+  downloadImage({ user, ids, filter }) {
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
@@ -2216,22 +2216,23 @@ export default class FeedParser {
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
-    const getItems    = obj => obj.items;
-    const observable = this.fetchNote({ user, id, filter });
-    return observable.pipe(
-      map(getItems)
-    , map(hasImages)
-    , map(setItems)
+    const getItems    = obj => obj.items ? obj.items: [];
+    const observables = R.map(id => this.fetchNote({ user, id, filter }));
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(getItems))
+    , map(R.map(hasImages))
+    , map(R.map(setItems))
+    , map(R.flatten)
     , map(dupItems)
     , map(setImages)
     , map(R.flatten)
     );
   }
 
-  createImages({ user, category, id, total, limit }, file) {
+  createImages({ user, category, type, total, limit }, file) {
     const { files } = file;
-    const AWS = aws.of(aws_keyset);
-    const zipkey = std.crypto_sha256(user + '-' + category, id.toString(), 'hex') + '.zip';
+    const AWS         = aws.of(aws_keyset);
+    const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
     const numTotal    = Number(total);
     const numLimit    = Number(limit);
     const numFiles    = R.length(files);

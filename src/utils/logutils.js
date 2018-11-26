@@ -22,6 +22,9 @@ const logs = {
   close: function(cb) {
     close(cb);
   },
+  exit: function(cb) {
+    exit(cb);
+  },
   fatal: function() {
     const args = Array.prototype.slice.call(arguments);
     logger(this.app, 'FATAL', args);
@@ -158,6 +161,15 @@ const connect = function(nam, mlv) {
  * @param callback {function} - log4js is shutdown by callback
  *                              function.
  */
+const exit = function() {
+  return new Promise((resolve, reject) => {
+    log4js.shutdown(err => {
+      if(err) return reject(err);
+      resolve();
+    });
+  });
+};
+
 const close = function(callback) {
   log4js.shutdown(function() {
     if(callback) callback();

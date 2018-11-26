@@ -7,8 +7,8 @@ const job = JobQueue.of();
 export default {
   download() {
     return (req, res) => {
-      const { operation, id, user, category, type, filter } = req.body;
-      job.download(operation, { id, user, category, type, filter }).subscribe(
+      const { operation, ids, user, category, type, filter } = req.body;
+      job.download(operation, { ids, user, category, type, filter }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -20,8 +20,8 @@ export default {
 
   signedlink() {
     return (req, res) => {
-      const { operation, id, user, category, type, filter } = req.body;
-      job.signedlink(operation, { id, user, category, type, filter }).subscribe(
+      const { operation, ids, user, category, type, filter } = req.body;
+      job.signedlink(operation, { ids, user, category, type, filter }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

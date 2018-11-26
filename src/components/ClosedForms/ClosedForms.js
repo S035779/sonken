@@ -206,30 +206,6 @@ class ClosedForms extends React.Component {
     this.setState({ sold, allAuction: false  })
   }
 
-  handleImages() {
-    const { user, category, note, itemNumber } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
-    const filter = { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold };
-    NoteAction.deleteCache();
-    if(itemNumber !== 0) {
-      this.spn.start();
-      std.logInfo(ClosedForms.displayName, 'handleImages', this.props);
-      NoteAction.createJob('download/image', { id: note._id, user, category, filter})
-      //NoteAction.downloadImages(user, id: note._id, filter)
-        .then(() => {
-          const isFile = this.props.file && this.props.file.size !== 0;
-          this.setState({ isSuccess: isFile, isQueued: !isFile });
-        })
-        .then(() => this.props.file && this.props.file.size !== 0 ? this.downloadImages(this.props.file) : null)
-        .then(() => this.spn.stop())
-        .catch(err => {
-          std.logError(ClosedForms.displayName, err.name, err.message);
-          this.setState({ isNotValid: true });
-          this.spn.stop();
-        });
-    }
-  }
-
   handleOpenDialog(name) {
     this.setState({ [name]: true });
   }
@@ -249,21 +225,6 @@ class ClosedForms extends React.Component {
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, id, skip, limit
       , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold });
-  }
-
-  downloadImages(blob) {
-    std.logInfo(ClosedForms.displayName, 'downloadImages', blob);
-    const anchor = document.createElement('a');
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      const url = URL.createObjectURL(new Blob([this.result], { type: 'application/zip' }));
-      anchor.href = url;
-      anchor.target = '_blank';
-      anchor.download = 'download.zip';
-      anchor.click();
-      URL.revokeObjectURL(url);
-    }
-    fileReader.readAsArrayBuffer(blob);
   }
 
   getColor(category) {
@@ -293,14 +254,9 @@ class ClosedForms extends React.Component {
         <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
           <div className={classes.wrapper}>
-            <RssButton color={color} disabled={loadingImages} onClick={this.handleImages.bind(this)}
-              classes={classes.button}>画像保存</RssButton>
-            {loadingImages && <CircularProgress color="inherit" size={24} className={classes.btnProgress} />}
-          </div>
-          <div className={classes.wrapper}>
-            <RssButton color={color} disabled={loadingDownload} onClick={this.handleOpenDialog.bind(this, 'isDownload')}
+            <RssButton color={color} disabled={loadingDownload || loadingImages} onClick={this.handleOpenDialog.bind(this, 'isDownload')}
               classes={classes.button}>ダウンロード</RssButton>
-            {loadingDownload && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
+            {(loadingDownload || loadingImages) && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
           </div>
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} 
             ids={[note._id]} itemNumber={itemNumber} 

@@ -42,69 +42,45 @@ class RssDownloadItemsDialog extends React.Component {
     this.props.onClose(name, event);
   }
 
-  handleDownload() {
+  handleDownload(operation) {
     const { user, ids, filter, itemNumber, category, checked } = this.props;
-    const { name } = this.state;
+    const type = operation === 'download/items' ? this.state.name : '9999';
+    const params = checked ? { user, category, filter, type } : { user, category, filter, ids, type };
     NoteAction.deleteCache();
     if(itemNumber !== 0) {
-      if(checked) {
-        this.spn.start();
-        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-        NoteAction.createJob('download/items', { user, category, filter, type: name })
-          //.then(() => {
-          //  const isSignedlink = this.props.signedlink !== '';
-          //  this.setState({ isSuccess: isSignedlink, isQueued: !isSignedlink });
-          //})
-          //.then(() => this.props.signedlink !== '' ? this.downloadLink(this.props.signedlink, { type: 'application/zip' }) : null)
-          .then(() => {
-            const isFile = this.props.file && this.props.file.size !== 0;
-            this.setState({ isSuccess: isFile, isQueued: !isFile });
-          })
-          .then(() => 
-            this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
-          .then(() => this.spn.stop())
-          .catch(err => {
-            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-            this.setState({ isNotValid: true });
-            this.spn.stop();
-          });
-      } else {
-        this.spn.start();
-        std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-        NoteAction.downloadItems(user, category, ids, filter, name)
-          .then(() => this.setState({ isSuccess: true }))
-          .then(() => this.downloadFile(this.props.file, { type: 'text/csv' }))
-          .then(() => this.spn.stop())
-          .catch(err => {
-            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-            this.setState({ isNotValid: true });
-            this.spn.stop();
-          });
-      }
+      this.spn.start();
+      std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
+      //NoteAction.downloadItems(user, category, ids, filter, name)
+      //NoteAction.downloadImages(user, id: note._id, filter)
+      NoteAction.createJob(operation, params)
+        .then(() => {
+          const isFile = this.props.file && this.props.file.size !== 0;
+          this.setState({ isSuccess: isFile, isQueued: !isFile });
+        })
+        .then(() => 
+          this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+          this.setState({ isNotValid: true });
+          this.spn.stop();
+        });
     }
   }
 
-  //downloadLink(link, mime) {
-  //  std.logInfo(RssDownloadItemsDialog.displayName, 'downloadLink', link);
-  //  const isCSV = mime.type === 'text/csv';
-  //  const anchor = document.createElement('a');
-  //  anchor.href = link;
-  //  anchor.target = '_blank';
-  //  anchor.download = isCSV ? 'download.csv' : 'download.zip';
-  //  anchor.click();
-  //}
-
   downloadFile(blob, mime) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);
-    const isCSV = mime.type === 'text/csv';
-    const anchor = document.createElement('a');
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      const url = isCSV ? URL.createObjectURL(new Blob([bom, this.result], mime)) : URL.createObjectURL(new Blob([this.result], mime));
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const isCSV = mime.type === 'text/csv';
+      const _file = isCSV ? 'download.csv' : 'download.zip';
+      const _blob = isCSV ? new Blob([bom, this.result], mime) : new Blob([this.result], mime);
+      const url = URL.createObjectURL(_blob);
+      const anchor = document.createElement('a');
       anchor.href = url;
       anchor.target = '_blank';
-      anchor.download = isCSV ? 'download.csv' : 'download.zip';
+      anchor.download = _file;
       anchor.click();
       URL.revokeObjectURL(url);
     }
@@ -139,7 +115,12 @@ class RssDownloadItemsDialog extends React.Component {
             label={title} fullWidth>{renderMenu}</TextField>
         </FormControl>
         <div className={classes.buttons}>
-          <RssButton color="success" onClick={this.handleDownload.bind(this)} classes={classes.button}>ダウンロード</RssButton>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/images')} classes={classes.button}>
+            画像保存
+          </RssButton>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/items')} classes={classes.button}>
+            リスト保存
+          </RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>

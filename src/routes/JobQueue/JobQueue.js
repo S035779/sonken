@@ -1,6 +1,6 @@
 import dotenv                       from 'dotenv';
 import * as R                       from 'ramda';
-import { from, throwError, of }     from 'rxjs';
+import { from, throwError, of, defer }     from 'rxjs';
 import { map, flatMap, catchError } from 'rxjs/operators';
 import FeedParser                   from 'Routes/FeedParser/FeedParser';
 import job                          from 'Utilities/jobutils';
@@ -95,10 +95,9 @@ export default class JobQueue {
   createJobs(operation, options) {
     log.info(JobQueue.displayName, 'createjobs', operation);
     switch(operation) {
-      case 'download/images':
       case 'download/items':
         {
-          const { user, category, type, filter } = options;
+          const { user, category, ids, type, filter } = options;
           const conditions = { 
             lastFinishedAt: { $exists: false }
           , 'data.params.user': user
@@ -109,11 +108,13 @@ export default class JobQueue {
           const splitIds = R.splitEvery(20);
           const setLen = R.length;
           const setParams = objs => ({ ids: splitIds(objs), number: setLen(objs) });
+          const observable = defer(() => R.isNil(ids) 
+              ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds))
+              : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
-                ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] })
+                ? observable
                 : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
-            , map(setIds)
             , map(setParams)
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
@@ -122,25 +123,26 @@ export default class JobQueue {
               })
             );
         }
-      case 'download/item':
-      case 'download/image':
+      case 'download/images':
         {
-          const { user, category, id, filter } = options;
+          const { user, category, ids, type, filter } = options;
           const conditions = {
             lastFinishedAt: { $exists: false }
           , 'data.params.user': user
           , 'data.params.category': category
-          , 'data.params.id': id
+          , 'data.params.type': type
           };
-          const setId = obj => obj._id;
-          const setParam = obj => ({ id: obj, number: 1 });
+          const setIds = R.map(obj => obj._id);
+          const setParams = objs => ({ ids: [objs], number: 1 });
+          const observable = defer(() => R.isNil(ids)
+            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds))
+            : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
-                ? this.feed.fetchJobNote({ user, id })
+                ? observable
                 : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
-            , map(setId)
-            , map(setParam)
-            , flatMap(obj => from(this.addJob(operation, obj, { user, category, filter })))
+            , map(setParams)
+            , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
                 if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
                 return of('');
@@ -148,13 +150,13 @@ export default class JobQueue {
             );
         }
       default:
-        return throwError('not Implemented.');
+        return throwError({ name: 'Invalid request:', message: 'Request is not implemented.', stack: operation });
     }
   }
 
-  signedlink(operation, { id, user, category, type, filter }) {
+  signedlink(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'signedlink', operation);
-    const params = { id, user, category, type, filter };
+    const params = { ids, user, category, type, filter };
     const setParam = file => this.setAWSParams(operation, params, file);
     return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
@@ -172,9 +174,9 @@ export default class JobQueue {
       );
   }
   
-  download(operation, { id, user, category, type, filter }) {
+  download(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'download', operation);
-    const params = { id, user, category, type, filter };
+    const params = { ids, user, category, type, filter };
     const setParam = file => this.setAWSParams(operation, params, file);
     return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
         flatMap(data => from(this.FSS.createFile({ data })))
@@ -193,49 +195,23 @@ export default class JobQueue {
       );
   }
   
-  setFSSParams(operation, { id, user, category, type }, file) {
+  setFSSParams(operation, { user, category, type }, file) {
     const { subpath, files } = file;
     const header    = user + '-' + category;
-    let   __id__;
-    switch(operation) {
-      case 'download/items':
-      case 'download/images':
-        __id__ = type;
-        break;
-      case 'download/item':
-      case 'download/image':
-        __id__ = id;
-        break;
-      default:
-        return null;
-    }
     const _files    = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename), files);
     const maxValue  = array => !R.isEmpty(array) ? Math.max(...array) : null;
-    const setFile   = num => !R.isNil(num) ? ({ subpath, filename: header + '-' + __id__ + '-' + num + '.zip' }) : null;
+    const setFile   = num => !R.isNil(num) ? ({ subpath, filename: header + '-' + type + '-' + num + '.zip' }) : null;
     const setVal    = objs => objs[4];
-    const isFile    = objs => objs[1] === user && objs[2] === category && objs[3] === __id__;
+    const isFile    = objs => objs[1] === user && objs[2] === category && objs[3] === type;
     const regZip    = R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/);
     const getFile   = R.compose(setFile, maxValue, R.map(setVal), R.filter(isFile), R.map(regZip));
     return !R.isEmpty(_files) ? getFile(_files) : null;
   }
 
-  setAWSParams(operation, { id, user, category, type }, file) {
+  setAWSParams(operation, { user, category, type }, file) {
     const header    = user + '-' + category;
-    let __id__;
-    switch(operation) {
-      case 'download/items':
-      case 'download/images':
-          __id__ = type;
-          break;
-      case 'download/item':
-      case 'download/image':
-          __id__ = id;
-          break;
-      default:
-        return null;
-    }
-    const key  = std.crypto_sha256(header, __id__, 'hex') + '.zip';
-    const name = header + '-' + __id__ + '-' + Date.now() + '.zip' ;
+    const key  = std.crypto_sha256(header, type, 'hex') + '.zip';
+    const name = header + '-' + type + '-' + Date.now() + '.zip' ;
     return !R.isNil(file) ? { key, name, file } : { key, name };
   }
 }

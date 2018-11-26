@@ -206,8 +206,8 @@ export default {
    *  jobQueue
    */
   createJob(operation, params) {
-    const { id, user, category, type, filter } = params
-    return this.request('create/job', { operation, id, user, category, type, filter });
+    const { ids, user, category, type, filter } = params
+    return this.request('create/job', { operation, ids, user, category, type, filter });
   },
 
   /*

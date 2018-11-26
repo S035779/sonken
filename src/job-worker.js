@@ -3,7 +3,7 @@ import dotenv           from 'dotenv';
 import * as R           from 'ramda';
 import { forkJoin, from, throwError }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
-import async            from 'async';
+import _async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Routes/Yahoo/Yahoo';
 import log              from 'Utilities/logutils';
@@ -150,19 +150,19 @@ const request = (operation, options) => {
           , flatMap(file => feed.createItems(conditions, file))
           );
       }
-    case 'download/image':
+    case 'download/images':
       {
         const { params } = options;
-        const { user, category, id, filter, number } = params;
+        const { user, category, ids, filter, type, number } = params;
         const setFiles = files => ({ files });
-        const conditions = { user, category, id, total: number, limit: 1 };
-        return feed.downloadImage({ user, id, filter }).pipe(
+        const conditions = { user, category, type, total: number, limit: 1 };
+        return feed.downloadImage({ user, ids, filter, type }).pipe(
             map(setFiles)
           , flatMap(file => feed.createImages(conditions, file))
           );
       }
     default:
-      return throwError({ name: 'Invalid request:', message: 'Request is not Implemented.', stack: operation });
+      return throwError({ name: 'Invalid request:', message: 'Request is not implemented.', stack: operation });
   }
 };
 
@@ -187,25 +187,26 @@ const worker = (options, callback) => {
 let jobs;
 switch(workername) {
   case 'wks-worker':
-    jobs = [  'download/items',   'download/item'   ];
+    jobs = ['download/items'];
     break;
   case 'arc-worker':
-    jobs = [  'download/images',  'download/image'  ];
+    jobs = ['download/images'];
     break;
   default:
-    jobs = [  'notImplemented'  ];
+    jobs = ['notImplemented'];
     break;
 }
 
 const jobqueues = new Map();
 let jobqueue;
 for(let jobname of jobs) {
+  log.info(displayName, 'start:', jobname);
   jobqueue = job.dequeue(workername, jobname, 1, worker);
   jobqueues.set(jobqueue, jobname);
 }
 
 const main = () => {
-  const queue = async.queue(worker);
+  const queue = _async.queue(worker);
   const wait        = () => queue.length();
   const runs        = () => queue.running();
   const idle        = () => queue.idle() ? '[idle]' : '[busy]';
@@ -258,14 +259,15 @@ const message = (err, code, signal) => {
   else    log.info(displayName, `worker exit. (s/c): ${signal || code}`);
 };
 
-const shutdown = (err, cbk) => {
+const shutdown = async (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
-  log.info(displayName, 'log4js #4 terminated.');
   for(let [ jobqueue, jobname ] of jobqueues.entries()) {
     log.info(displayName, jobname, 'terminated.');
-    jobqueue.stop();
+    await jobqueue.stop();
   }
-  log.close(() => cbk());
+
+  log.info(displayName, 'log4js #4 terminated.');
+  await log.exit().then(() => cbk());
 };
 
 process.on('SIGUSR2', () => shutdown(null, process.exit));
