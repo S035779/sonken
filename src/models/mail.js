@@ -26,7 +26,11 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( displayName,'mail connected.'));
 db.on('close', () => log.info( displayName,'mail disconnected.'));
 db.on('error', () => log.error(displayName,'mail connection error.'));
-db.openUri(mdb_url + '/mail', { useNewUrlParser: true });
+db.openUri(mdb_url + '/mail', {
+  useNewUrlParser: true
+, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+, reconnectInterval: 500            // Reconnect every 500ms
+});
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info(displayName, 'mail terminated.')));

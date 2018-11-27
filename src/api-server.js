@@ -42,7 +42,11 @@ const SessionStore  = connect(session);
 db.on('open',  () => log.info( '[MDB]', 'session #2 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #2 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #2 connection error.'));
-db.openUri(mdb_url + '/session', { useNewUrlParser: true });
+db.openUri(mdb_url + '/session', {
+  useNewUrlParser: true
+, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+, reconnectInterval: 500            // Reconnect every 500ms
+});
 
 app.use(log.connect());
 app.use(bodyParser.urlencoded({ extended: true }));

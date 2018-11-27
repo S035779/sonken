@@ -51,7 +51,11 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( displayName,'profile connected.'));
 db.on('close', () => log.info( displayName,'profile disconnected.'));
 db.on('error', () => log.error(displayName,'profile connection error.'));
-db.openUri(mdb_url + '/profile', { useNewUrlParser: true });
+db.openUri(mdb_url + '/profile', {
+  useNewUrlParser: true
+, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+, reconnectInterval: 500            // Reconnect every 500ms
+});
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info(displayName, 'profile terminated.')));

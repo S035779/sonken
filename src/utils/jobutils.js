@@ -4,7 +4,15 @@ import log    from 'Utilities/logutils';
 const displayName = 'jobutils';
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 const params = {
-  db: { address: mdb_url + '/queue', collection: 'jobs', options: { useNewUrlParser: true } }
+  db: { 
+    address: mdb_url + '/queue'
+  , collection: 'jobs'
+  , options: {
+      useNewUrlParser: true
+    , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+    , reconnectInterval: 500            // Reconnect every 500ms
+    }
+  }
 , processEvery: '10 seconds'
 , maxConcurrency: 100
 , lockLimit: 100

@@ -14,11 +14,11 @@ const node_env = process.env.NODE_ENV;
 const asetPath = process.env.ASSET_PATH;
 let path_to_js, path_to_css;
 if (node_env === 'development') {
-  path_to_js = ''; 
-  path_to_css = '';
+  path_to_js = ""; 
+  path_to_css = "/app.bundle.css";
 } else if (node_env === 'staging' || node_env === 'production') {
-  path_to_js  = asetPath + '/js';
-  path_to_css = asetPath + '/css';
+  path_to_js  = asetPath + "/js";
+  path_to_css = "https://fonts.googleapis.com/css?family=Roboto:300,400,500";
 }
 
 class Html extends React.Component {
@@ -32,7 +32,7 @@ class Html extends React.Component {
       <meta charSet="utf-8" />
       <title>{app_name}</title>
       <link rel="shortcut icon" href={ Icon }/>
-      <link rel="stylesheet"    href={ path_to_css + '/app.bundle.css'}/>
+      <link rel="stylesheet"    href={ path_to_css }/>
       </head>
       <body>
       <div id="app" dangerouslySetInnerHTML={{ __html: content }}></div>

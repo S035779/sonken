@@ -26,7 +26,11 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( displayName,'faq connected.'));
 db.on('close', () => log.info( displayName,'faq disconnected.'));
 db.on('error', () => log.error(displayName,'faq connection error.'));
-db.openUri(mdb_url + '/faq', { useNewUrlParser: true });
+db.openUri(mdb_url + '/faq', {
+  useNewUrlParser: true
+, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+, reconnectInterval: 500            // Reconnect every 500ms
+});
 
 process.on('SIGINT', () =>
   mongoose.disconnect(() => log.info(displayName, 'faq terminated.')));
