@@ -26,14 +26,13 @@ class App extends React.Component {
 
   render() {
     const { classes, route } = this.props;
-    const { user, isAuthenticated, profile, preference, categorys } = this.state;
+    const { user, isAuthenticated, profile, preference, categorys, jobs } = this.state;
     return <div className={classes.root}>
       <ErrorBoundary>
       <CssBaseline />
       <div className={classes.appFrame}>
-        <RssDrawer user={user} isAuthenticated={isAuthenticated} profile={profile} preference={preference} categorys={categorys}>
-          {renderRoutes(route.routes)}
-        </RssDrawer>
+        <RssDrawer user={user} isAuthenticated={isAuthenticated} profile={profile} preference={preference} categorys={categorys} 
+          jobs={jobs}>{renderRoutes(route.routes)}</RssDrawer>
       </div>
       </ErrorBoundary>
     </div>;

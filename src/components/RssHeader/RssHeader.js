@@ -1,17 +1,31 @@
-import React          from 'react';
-import { withRouter } from 'react-router-dom';
-import PropTypes      from 'prop-types'
-import classNames     from 'classnames';
-//import std            from 'Utilities/stdutils';
+import * as R             from 'ramda';
+import React              from 'react';
+import { withRouter }     from 'react-router-dom';
+import PropTypes          from 'prop-types'
+import classNames         from 'classnames';
+//import std                from 'Utilities/stdutils';
 
-import { withStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, Button }
-                      from '@material-ui/core';
-import { Menu, MoreVert }
-                      from '@material-ui/icons';
-import RssMenu        from 'Components/RssMenu/RssMenu';
+import { withStyles }     from '@material-ui/core/styles';
+import { AppBar, Toolbar, Typography, Fab, LinearProgress }
+                          from '@material-ui/core';
+import { Menu, MoreVert } from '@material-ui/icons';
+import RssMenu            from 'Components/RssMenu/RssMenu';
 
 class RssHeader extends React.Component {
+  constructor(props) {
+    super(props);
+    const loadingDownload = !R.isEmpty(props.jobs);
+    this.state = { loadingDownload };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const nextJobs = !R.isEmpty(nextProps.jobs);
+    const prevJobs = this.state.loadingDownload;
+    if(nextJobs !== prevJobs) {
+      this.setState({ loadingDownload: nextJobs });
+    }
+  }
+
   handleToggle() {
     this.props.onClick();
   }
@@ -45,24 +59,25 @@ class RssHeader extends React.Component {
   }
 
   render() {
-    //std.logInfo(RssHeader.displayName, 'Props', this.props);
     //std.logInfo(RssHeader.displayName, 'State', this.state);
+    //std.logInfo(RssHeader.displayName, 'Props', this.props);
     const { classes, user, preference, profile, open, children, location, isAuthenticated } = this.props;
+    const { loadingDownload } = this.state;
     const title = this.getTitleName(location);
     return <div className={classNames(classes.navHeader, open && classes.navHeaderShift)}>
       <AppBar color="default" position="static" className={classes.navBar}>
       <Toolbar>
-        <Button mini variant="fab" color="primary" onClick={this.handleToggle.bind(this)}
-          className={classes.navIcon}>{open ? <MoreVert /> : <Menu />}</Button>
+        <Fab size="small" color="primary" onClick={this.handleToggle.bind(this)} className={classes.navIcon}>
+          { open ? <MoreVert /> : <Menu /> }
+        </Fab>
         <Typography variant="h6" color="inherit" className={classes.title}>{title}</Typography>
         <div className={classes.loginIcon}>
           <RssMenu isAuthenticated={isAuthenticated} user={user} preference={preference} profile={profile} />
         </div>
       </Toolbar>
       </AppBar>
-      <div className={classes.content}>
-        {children}
-      </div>
+      { loadingDownload ? <LinearProgress color="secondary" /> : null }
+      <div className={classes.content}>{children}</div>
     </div>;
   }
 }
@@ -78,6 +93,7 @@ RssHeader.propTypes = {
 , open: PropTypes.bool.isRequired
 , children: PropTypes.object.isRequired
 , location: PropTypes.object.isRequired
+, jobs: PropTypes.array.isRequired
 };
 
 const drawerMinWidthMdUp    = 72;
@@ -85,52 +101,21 @@ const drawerMinWidthMdDown  = 0;
 const drawerWidth           = 240;
 const navHeightSmUp         = 64;
 const navHeightSmDown       = 56;
-const barHeightSmUp         = 64;//112;
-const barHeightSmDown       = 56;//104;
+const barHeightSmUp         = 64;
+const barHeightSmDown       = 56;
 const styles = theme => ({
-  navHeader:  {
-    marginLeft: drawerMinWidthMdDown
-  , [theme.breakpoints.up('md')]: {
-      marginLeft: drawerMinWidthMdUp
-    }
-  , transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp
-    , duration: theme.transitions.duration.leavingScreen
-    })
-  }
-, navHeaderShift:{
-    marginLeft: drawerMinWidthMdDown
-  , [theme.breakpoints.up('md')]: {
-      marginLeft: drawerWidth
-    , width: `calc(100% - ${drawerWidth}px)`
-    }
-  , transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp
-    , duration: theme.transitions.duration.enteringScreen
-    })
-  }
-, navBar:     {
-//    display: 'flex', flexDirection: 'row'
-//  , wordBreak: 'keep-all', overflow: 'scroll' 
-    height: navHeightSmDown, padding: 2
-  , [theme.breakpoints.up('sm')]: {
-      height: navHeightSmUp, padding: 6
-    }
-  }
-, navIcon:    {
-  //margin: theme.spacing.unit
-  marginLeft: -12, marginRight: 20
-}
-, title: {
-    flex: 1, color: '#888888'
-  }
-, loginIcon:  { marginLeft: 'auto' }
-, content:  {
-    width: '100%'
-  , height: `calc(100vh - ${barHeightSmDown}px)`
-  , [theme.breakpoints.up('sm')]: {
-      height: `calc(100vh - ${barHeightSmUp}px)`
-    }
-  }
+  navHeader:        { marginLeft: drawerMinWidthMdDown, [theme.breakpoints.up('md')]: { marginLeft: drawerMinWidthMdUp }
+, transition:       theme.transitions.create(['width', 'margin']
+                  , { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen }) }
+, navHeaderShift:   { marginLeft: drawerMinWidthMdDown
+                    , [theme.breakpoints.up('md')]: { marginLeft: drawerWidth, width: `calc(100% - ${drawerWidth}px)` }
+                    , transition: theme.transitions.create(['width', 'margin']
+                    , { easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }) }
+, navBar:           { height: navHeightSmDown, padding: 2, [theme.breakpoints.up('sm')]: { height: navHeightSmUp, padding: 6 } }
+, navIcon:          { marginLeft: -12, marginRight: 20 }
+, title:            { flex: 1, color: '#888888' }
+, loginIcon:        { marginLeft: 'auto' }
+, content:          { width: '100%', height: `calc(100vh - ${barHeightSmDown}px)`
+                    , [theme.breakpoints.up('sm')]: { height: `calc(100vh - ${barHeightSmUp}px)` } }
 });
 export default withStyles(styles)(withRouter(RssHeader));

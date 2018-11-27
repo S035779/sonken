@@ -110,7 +110,7 @@ class Dashboard extends React.Component {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference, signedlink } = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;
     const category = match.params.category || 'marchant';
     const title = this.getTitleName(category);
@@ -125,7 +125,7 @@ class Dashboard extends React.Component {
             notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
           <div className={classes.body}>
             <div className={classes.noteList}>
-              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} itemFilter={filter} signedlink={signedlink} />
+              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
                 notePage={page}/>
             </div>

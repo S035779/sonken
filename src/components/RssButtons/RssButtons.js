@@ -119,7 +119,7 @@ class RssButtons extends React.Component {
   }
 
   render() {
-    const { classes, category, user, notes, selectedNoteId, itemFilter, file, signedlink } = this.props;
+    const { classes, category, user, notes, selectedNoteId, itemFilter, file } = this.props;
     const { isSuccess, isNotValid, isDownload, checked } = this.state;
     const color = this.getColor(category);
     const itemNumber = notes.length;
@@ -129,13 +129,11 @@ class RssButtons extends React.Component {
       <div className={classes.buttons}>
         <Button variant="contained" className={classes.button} onClick={this.handleReaded.bind(this)}>既読にする</Button>
         <Button variant="contained" className={classes.button} onClick={this.handleDelete.bind(this)}>削除</Button>
-      { isAlpha
-        ? <RssButton color={color} className={classes.button} onClick={this.handleOpenDialog.bind(this, 'isDownload')}>
-            ダウンロード
-          </RssButton>
-        : null }
-        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} ids={selectedNoteId} itemNumber={itemNumber} signedlink={signedlink}
-          filter={itemFilter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+      { isAlpha ? ( <RssButton color={color} className={classes.button} onClick={this.handleOpenDialog.bind(this, 'isDownload')}>
+        ダウンロード</RssButton> ) : null }
+        <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} 
+          ids={selectedNoteId} itemNumber={itemNumber} filter={itemFilter} name="0001" file={file}
+          onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
@@ -156,7 +154,6 @@ RssButtons.propTypes = {
 , file: PropTypes.object
 , category: PropTypes.string.isRequired
 , itemFilter: PropTypes.object.isRequired
-, signedlink: PropTypes.string
 };
 
 const titleHeight   = 62;

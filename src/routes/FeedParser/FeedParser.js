@@ -2191,7 +2191,6 @@ export default class FeedParser {
   //}
 
   downloadItems({ user, ids, filter, type }) {
-    //log.trace(FeedParser.displayName, 'downloadItems', { user, ids, filter, type });
     const CSV = this.setCsvItems(type);
     const setBuffer = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
@@ -2253,27 +2252,24 @@ export default class FeedParser {
     );
   }
 
-  createArchiveFromS3({ user, category, type, total, limit }, file) {
+  createArchive({ user, category, type }, file) {
     const { files } = file;
     const AWS         = aws.of(aws_keyset);
-    const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
-    const numTotal    = Number(total);
-    const numLimit    = Number(limit);
-    const numFiles    = R.length(files);
-    const isSubscribe = ((numTotal <= numLimit) && (numFiles !==0 )) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    return defer(() => isSubscribe ? AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }) : of({ file }));
+    const key         = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
+    return AWS.createArchiveFromS3(STORAGE, { key, files });
   }
 
-  createArchiveFromFS({ user, category, type, total, limit }, file) {
+  createArchives({ user, category, type, total, index, limit }, file) {
     const { subpath, files } = file;
-    const AWS         = aws.of(aws_keyset);
     const _files      = R.map(file => ({ name: file }), files)
-    const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
+    const AWS         = aws.of(aws_keyset);
+    const key         = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
     const numTotal    = Number(total);
+    const numIndex    = Number(index);
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
-    const isSubscribe = ((numTotal <= numLimit) && (numFiles !== 0)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key: zipkey, files: _files, subpath }) : of({ file }));
+    const isSubscribe = ((numTotal <= numLimit) && (numFiles !== 0)) || ((numTotal > numLimit) && (numTotal <= numIndex + 1));
+    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key, files: _files, subpath }) : of({ file }));
   }
 }
 FeedParser.displayName = 'FeedParser';

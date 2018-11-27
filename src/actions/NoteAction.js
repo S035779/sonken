@@ -112,11 +112,11 @@ export default {
         dispatch({ type: 'note/download/my', file });
       });
   },
-  downloadItems(user, category, ids, filter, type) {
-    return NoteApiClient.downloadItems(user, category, ids, filter, type).then(file => {
-        dispatch({ type: 'note/download/items', file });
-      });
-  },
+  //downloadItems(user, category, ids, filter, type) {
+  //  return NoteApiClient.downloadItems(user, category, ids, filter, type).then(file => {
+  //      dispatch({ type: 'note/download/items', file });
+  //    });
+  //},
   //downloadImages(user, id, filter) {
   //  return NoteApiClient.downloadImages(user, id, filter).then(images => {
   //      dispatch({ type: 'note/download/images', images });
@@ -127,10 +127,11 @@ export default {
         dispatch({ type: 'add/create', ids });
       });
   },
-
-  /*
-   * jobQueue
-   */
+  fetchJobs(params) {
+    return NoteApiClient.fetchJobs(params).then(jobs=> {
+      dispatch({ type: 'jobs/fetch', jobs});
+    });
+  },
   createJob(operation, params) {
     return NoteApiClient.createJob(operation, params).then(file => {
       dispatch({ type: 'job/create', file });
@@ -139,7 +140,6 @@ export default {
   deleteCache() {
     dispatch({ type: 'job/create', file: null, signedlink: '' });
   },
-
   deleteAdd(user, ids) {
     return NoteApiClient.deleteAdd(user, ids).then(() => {
         dispatch({ type: 'add/delete', ids });

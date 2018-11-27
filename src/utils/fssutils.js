@@ -3,6 +3,7 @@ import fs               from 'fs-extra';
 import path             from 'path';
 import * as R           from 'ramda';
 import { from, forkJoin } from 'rxjs';
+import { map }          from 'rxjs/operators';
 import log              from 'Utilities/logutils';
 
 /**
@@ -62,13 +63,25 @@ export default class FSSupport {
             archive.finalize();
           });
         }
-      case 'create/file':
+      case 'append/file':
         {
           const { subpath, data } = options;
           const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
           const file = path.resolve(dir, data.name);
           return new Promise((resolve, reject) => {
             fs.appendFile(file, data.buffer, err => {
+              if(err) return reject(err);
+              resolve(options);
+            });
+          });
+        }
+      case 'create/file':
+        {
+          const { subpath, data } = options;
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, data.name);
+          return new Promise((resolve, reject) => {
+            fs.writeFile(file, data.buffer, err => {
               if(err) return reject(err);
               resolve(options);
             });
@@ -150,6 +163,10 @@ export default class FSSupport {
   }
 
   addFile(subpath, data) {
+    return this.request('append/file', { subpath, data });
+  }
+
+  newFile(subpath, data) {
     return this.request('create/file', { subpath, data });
   }
 
@@ -190,12 +207,18 @@ export default class FSSupport {
   }
 
   createFile({ subpath, data }) {
+    return from(this.newFile(subpath, data));
+  }
+
+  appendFile({ subpath, data }) {
     return from(this.addFile(subpath, data));
   }
 
   createFiles({ subpath, data }) {
-    const observables = R.map(obj => this.createFile({ subpath, data: obj }));
-    return forkJoin(observables(data));
+    const promises = R.map(obj => this.newFile(subpath, obj));
+    return forkJoin(promises(data)).pipe(
+        map(() => ({ subpath }))
+      );
   }
 
   createBom({ subpath, data }) {

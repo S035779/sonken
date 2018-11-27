@@ -5,6 +5,19 @@ const displayName = 'job';
 const job = JobQueue.of();
 
 export default {
+  fetchJobs() {
+    return (req, res) => {
+      const { user } = req.query;
+      job.fetchJobs({ user }).subscribe(
+        obj => res.status(200).send(obj)
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => log.info(displayName, 'download', 'Query to job Queue.'));
+    };
+  },
+
   download() {
     return (req, res) => {
       const { operation, ids, user, category, type, filter } = req.body;
@@ -28,7 +41,7 @@ export default {
           log.error(displayName, err.name, ':', err.message);
         }
       , () => log.info(displayName, 'signedlink', 'Queue to signed link.'));
-    };
+      };
   },
 
   notImplemented() {

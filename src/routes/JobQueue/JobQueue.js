@@ -47,17 +47,17 @@ export default class JobQueue {
       case 'create/jobs':
         {
           const { operation, idss, data } = options;
-          const { ids , number } = idss;
-          const setParam = obj => R.merge(data, { ids: obj, number, created: new Date });
-          const setData = obj => ({ operation, params: setParam(obj) });
-          const datas = R.map(setData, ids);
+          const { ids, limit } = idss;
+          const setParam = (idx, obj) => R.merge(data, { ids: obj, limit, index: idx, total: R.length(ids), created: new Date });
+          const mapIndex = R.addIndex(R.map);
+          const datas = mapIndex((obj, idx) => ({ operation, params: setParam(idx, obj) }), ids);
           return job.enqueue(JobQueue.displayName, operation, datas);
         }
       case 'create/job':
         {
           const { operation, ids, data } = options;
-          const { id, number } = ids;
-          const params = R.merge(data, { id, number, created: new Date })
+          const { id } = ids;
+          const params = R.merge(data, { id, created: new Date })
           const datas = [{ operation, params }];
           return job.enqueue(JobQueue.displayName, operation, datas);
         }
@@ -92,10 +92,19 @@ export default class JobQueue {
     return from(this.garbageJobs(operation));
   }
 
+  fetchJobs({ user }) { 
+    const conditions = { 
+      lastFinishedAt: { $exists: false }
+    , 'data.params.user': user
+    };
+    const operation = { $in: ['download/items', 'download/images', 'download/image'] };
+    const setAttrs = R.map(obj => obj && obj.attrs ? obj.attrs : null);
+    return from(this.getJobs(operation, conditions)).pipe(map(setAttrs));
+  }
+
   createJobs(operation, options) {
     log.info(JobQueue.displayName, 'createjobs', operation);
     switch(operation) {
-      case 'download/images':
       case 'download/items':
         {
           const { user, category, ids, type, filter } = options;
@@ -105,17 +114,39 @@ export default class JobQueue {
           , 'data.params.category': category
           , 'data.params.type': type
           };
+          const limit = 20;
           const setIds = R.map(obj => obj._id);
-          const splitIds = R.splitEvery(20);
-          const setLen = R.length;
-          const setParams = objs => ({ ids: splitIds(objs), number: setLen(objs) });
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit });
           const observable = defer(() => R.isNil(ids) 
-              ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds))
-              : of(ids));
+            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
-                ? observable
-                : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
+                ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
+            , map(setParams)
+            , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
+            , catchError(err => {
+                if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+                return of('');
+              })
+            );
+        }
+      case 'download/images':
+        {
+          const { user, category, ids, type, filter } = options;
+          const conditions = { 
+            lastFinishedAt: { $exists: false }
+          , 'data.params.user': user
+          , 'data.params.category': category
+          , 'data.params.type': type
+          };
+          const limit = 1;
+          const setIds = R.map(obj => obj._id);
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit });
+          const observable = defer(() => R.isNil(ids) 
+            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
+          return from(this.getJobs(operation, conditions)).pipe(
+              flatMap(objs => R.isEmpty(objs) 
+                ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
             , map(setParams)
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
@@ -134,14 +165,12 @@ export default class JobQueue {
           , 'data.params.type': type
           };
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: [objs], number: 1 });
+          const setParams = objs => ({ ids: [objs] });
           const observable = defer(() => R.isNil(ids)
-            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds))
-            : of(ids));
+            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
-                ? observable
-                : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
+                ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
             , map(setParams)
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {

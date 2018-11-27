@@ -418,10 +418,12 @@ class DrawerList extends React.Component {
     const renderListItems = this.renderListItems();
     const renderUserListItems = this.renderUserListItems();
     return <div>
-        <div className={classes.header}><List>{renderTitleListItems}</List></div>
+        <div className={classes.header}>
+          <List>{renderTitleListItems}</List>
+        </div>
         <Divider />
         <List>{renderListItems}</List>
-        <Divider />
+        <Divider variant="inset" />
         <List>{renderUserListItems}</List>
       </div>;
   }

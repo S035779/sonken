@@ -22,6 +22,7 @@ export default class LoginStore extends ReduceStore {
       , advertisement:  { url1: '', url2: '', url3: '', url4: '' }
       }
     , categorys:        []
+    , jobs:             []
     };
   }
   
@@ -73,6 +74,8 @@ export default class LoginStore extends ReduceStore {
         return R.merge(state, { user: action.user });
       case 'login/rehydrate/my':
         return action.state;
+      case 'jobs/fetch':
+        return R.merge(state, { jobs: action.jobs });
       default: 
         return state; 
     } 

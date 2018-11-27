@@ -132,54 +132,53 @@ const request = (operation, options) => {
     case 'download/items':
       {
         const { params } = options;
-        const { user, category, ids, filter, type, number } = params;
+        const { user, category, ids, filter, type, limit, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setData = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
         const hasFile =  
           obj => R.filter(filename => FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.csv$/, filename), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
-        const conditions = { user, category, type, total: number, limit: 20 };
+        const conditions = { user, category, type, total, index, limit };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             map(setData)
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createBom(file))
-          , flatMap(file => FSS.createFile(file))
+          , flatMap(file => FSS.appendFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createArchiveFromFS(conditions, file))
+          , flatMap(file => feed.createArchives(conditions, file))
           );
       }
     case 'download/images':
       {
         const { params } = options;
-        const { user, category, ids, filter, type, number } = params;
+        const { user, category, ids, filter, type, limit, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setDatas = objs => ({ subpath: header, data: objs });
         const hasFile = obj => R.filter(filename => 
           FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.(gif|jpe?g|png)$/, filename), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
-        const conditions = { user, category, type, total: number, limit: 20 };
+        const conditions = { user, category, type, total, index, limit };
         return feed.downloadImages({ user, ids, filter, type }).pipe(
             map(setDatas)
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))
-          , map(R.tap(console.log))
           , map(setFiles)
-          , flatMap(file => feed.createArchiveFromFS(conditions, file))
+          , flatMap(file => feed.createArchives(conditions, file))
           );
       }
     case 'download/image':
       {
         const { params } = options;
-        const { user, category, ids, filter, type, number } = params;
+        const { user, category, ids, filter, type } = params;
         const setFiles = files => ({ files });
-        const conditions = { user, category, type, total: number, limit: 1 };
+        const conditions = { user, category, type };
         return feed.downloadImage({ user, ids, filter, type }).pipe(
             map(setFiles)
-          , flatMap(file => feed.createArchiveFromS3(conditions, file))
+          , flatMap(file => feed.createArchive(conditions, file))
           );
       }
     default:

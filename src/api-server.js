@@ -183,8 +183,8 @@ router.route('/file')
 .delete(feed.notImplemented());
 
 router.route('/worker')
-.get(job.notImplemented())
-.put(job.signedlink())
+.get(job.fetchJobs())
+.put(job.notImplemented())
 .post(job.download())
 .delete(job.notImplemented());
 

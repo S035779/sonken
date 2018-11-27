@@ -73,8 +73,8 @@ export default {
         return new Promise((resolve, reject) => xhr.putFile(    api + '/file',      options, resolve, reject));
       case 'download/notes':
         return new Promise((resolve, reject) => xhr.getFile(    api + '/file',      options, resolve, reject));
-      case 'download/items':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/file',      options, resolve, reject));
+      //case 'download/items':
+      //  return new Promise((resolve, reject) => xhr.postFile(   api + '/file',      options, resolve, reject));
       //case 'download/images':
       //  return new Promise((resolve, reject) => xhr.postFile(   api + '/image',     options, resolve, reject));
       case 'download/traded':
@@ -83,6 +83,8 @@ export default {
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
       case 'create/job':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/worker',    options, resolve, reject));
+      case 'fetch/jobs':
+        return new Promise((resolve, reject) => xhr.getJSON(    api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -190,13 +192,13 @@ export default {
   downloadNotes(user, category, type) {
     return this.request('download/notes', { user, category, type });
   },
-  downloadItems(user, category, ids, filter, type) {
-    const setIds = _ids => ({ ids: Array.isArray(_ids) ? _ids : [_ids] });
-    let params = { user, category, type };
-    params = ids    ? R.merge(params, setIds(ids))  : params;
-    params = filter ? R.merge(params, filter)       : params;
-    return this.request('download/items', params);
-  },
+  //downloadItems(user, category, ids, filter, type) {
+  //  const setIds = _ids => ({ ids: Array.isArray(_ids) ? _ids : [_ids] });
+  //  let params = { user, category, type };
+  //  params = ids    ? R.merge(params, setIds(ids))  : params;
+  //  params = filter ? R.merge(params, filter)       : params;
+  //  return this.request('download/items', params);
+  //},
   //downloadImages(user, id, filter) {
   //  const params = filter ? R.merge({ user, id }, filter) : { user, id };
   //  return this.request('download/images', params);
@@ -206,8 +208,11 @@ export default {
    *  jobQueue
    */
   createJob(operation, params) {
-    const { ids, user, category, type, filter } = params
+    const { ids, user, category, type, filter } = params;
     return this.request('create/job', { operation, ids, user, category, type, filter });
+  },
+  fetchJobs(params) {
+    return this.request('fetch/jobs', params);
   },
 
   /*

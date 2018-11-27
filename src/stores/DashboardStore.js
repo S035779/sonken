@@ -38,7 +38,6 @@ export default class DashboardStore extends ReduceStore {
       }
     , categorys: []
     , images: null
-    , signedlink: ''
     };
   }
   
@@ -204,10 +203,10 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { notes: action.notes });
       case 'note/download/my':
         return R.merge(state, { file: action.file });
-      case 'note/download/items':
-        return R.merge(state, { file: action.file });
-      case 'note/download/images':
-        return R.merge(state, { images: action.images });
+      //case 'note/download/items':
+      //  return R.merge(state, { file: action.file });
+      //case 'note/download/images':
+      //  return R.merge(state, { images: action.images });
       case 'job/create':
         return R.merge(state, { file: action.file });
       case 'add/create':

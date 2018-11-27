@@ -60,6 +60,7 @@ class RssDownloadItemsDialog extends React.Component {
         .then(() => 
           this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
         .then(() => this.spn.stop())
+        .then(() => NoteAction.fetchJobs({ user }))
         .catch(err => {
           std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });
@@ -155,7 +156,6 @@ RssDownloadItemsDialog.propTypes = {
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired
 , file: PropTypes.object
-, signedlink: PropTypes.string
 };
 
 const columnHeight = 62;
