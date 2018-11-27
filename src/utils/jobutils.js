@@ -9,6 +9,7 @@ const params = {
   , collection: 'jobs'
   , options: {
       useNewUrlParser: true
+    , useCreateIndex: true
     , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
     , reconnectInterval: 500            // Reconnect every 500ms
     }

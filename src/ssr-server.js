@@ -38,6 +38,7 @@ db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
 db.on('error', () => log.error('[MDB]', 'session #1 connection error.'));
 db.openUri(mdb_url + '/session', {
   useNewUrlParser: true
+, useCreateIndex: true
 , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });

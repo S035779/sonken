@@ -60,13 +60,13 @@ export default class MailEditor {
           const conditions = { selected: id };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Selected.update(conditions, { $set: update }, params).exec();
+          return Selected.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/select':
         {
           const { id } = options;
           const conditions = { selected: id };
-          return Selected.remove(conditions).exec();
+          return Selected.deleteMany(conditions).exec();
         }
       case 'fetch/select':
         {

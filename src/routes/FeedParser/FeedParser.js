@@ -447,10 +447,10 @@ export default class FeedParser {
               .then(getItemIds)
               .then(setItemIds)
               .then(objs => Promise.all([
-                Note.update(conditions, { $set: objs[0] }).exec()
-              , Item.remove({ _id: { $in: objs[1] }}).exec()
+                Note.updateMany(conditions, { $set: objs[0] }).exec()
+              , Item.deleteMany({ _id: { $in: objs[1] }}).exec()
               ]))
-            : Note.update(conditions, { $set: update }).exec();
+            : Note.updateMany(conditions, { $set: update }).exec();
         }
       case 'delete/note':
         {
@@ -461,15 +461,15 @@ export default class FeedParser {
           const setItems = obj => obj.items;
           const getItems = objs => Item.find({ _id: { $in: setIds(objs) }});
           const delItems = objs => Promise.all([
-            Item.remove({       _id: { $in: setIds(objs) }})
-          , Listed.remove({     user, listed:  { $in: setGuids(objs) }}).exec()
-          , Traded.remove({     user, traded:  { $in: setGuids(objs) }}).exec()
-          , Bided.remove({      user, bided:   { $in: setGuids(objs) }}).exec()
-          , Added.remove({      user, added:   { $in: setGuids(objs) }}).exec()
-          , Deleted.remove({    user, deleted: { $in: setGuids(objs) }}).exec()
-          , Readed.remove({     user, readed:  { $in: setGuids(objs) }}).exec()
-          , Starred.remove({    user, starred: { $in: setGuids(objs) }}).exec()
-          , Attribute.remove({  user, guid:    { $in: setGuids(objs) }}).exec()
+            Item.deleteMany({       _id: { $in: setIds(objs) }})
+          , Listed.deleteMany({     user, listed:  { $in: setGuids(objs) }}).exec()
+          , Traded.deleteMany({     user, traded:  { $in: setGuids(objs) }}).exec()
+          , Bided.deleteMany({      user, bided:   { $in: setGuids(objs) }}).exec()
+          , Added.deleteMany({      user, added:   { $in: setGuids(objs) }}).exec()
+          , Deleted.deleteMany({    user, deleted: { $in: setGuids(objs) }}).exec()
+          , Readed.deleteMany({     user, readed:  { $in: setGuids(objs) }}).exec()
+          , Starred.deleteMany({    user, starred: { $in: setGuids(objs) }}).exec()
+          , Attribute.deleteMany({  user, guid:    { $in: setGuids(objs) }}).exec()
           ]);
           return Note.findOneAndDelete(conditions).exec()
             .then(setItems)
@@ -492,13 +492,13 @@ export default class FeedParser {
           , subcategory:    subcategory
           , subcategoryId:  ObjectId(subcategoryId)
           };
-          return Category.update(conditions, { $set: update }).exec();
+          return Category.updateMany(conditions, { $set: update }).exec();
         }
       case 'delete/category':
         {
           const { id, user } = options;
           const conditions = { _id: id, user };
-          return Category.remove(conditions).exec();
+          return Category.deleteMany(conditions).exec();
         }
       case 'create/added':
         {
@@ -506,13 +506,13 @@ export default class FeedParser {
           const conditions = { added: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Added.update(conditions, { $set: update }, params).exec();
+          return Added.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/added':
         {
           const { id, user } = options;
           const conditions = { added: id, user };
-          return Added.remove(conditions).exec();
+          return Added.deleteMany(conditions).exec();
         }
       case 'create/deleted':
         {
@@ -520,13 +520,13 @@ export default class FeedParser {
           const conditions = { deleted: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Deleted.update(conditions, { $set: update }, params).exec();
+          return Deleted.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/deleted':
         {
           const { id, user } = options;
           const conditions = { deleted: id, user };
-          return Deleted.remove(conditions).exec();
+          return Deleted.deleteMany(conditions).exec();
         }
       case 'create/readed':
         {
@@ -534,13 +534,13 @@ export default class FeedParser {
           const conditions = { readed: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Readed.update(conditions, { $set: update }, params).exec();
+          return Readed.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/readed':
         {
           const { id, user } = options;
           const conditions = { readed: id, user };
-          return Readed.remove(conditions).exec();
+          return Readed.deleteMany(conditions).exec();
         }
       case 'create/traded':
         {
@@ -548,13 +548,13 @@ export default class FeedParser {
           const conditions = { traded: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Traded.update(conditions, { $set: update }, params).exec();
+          return Traded.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/traded':
         {
           const { id, user } = options;
           const conditions = { traded: id, user };
-          return Traded.remove(conditions).exec();
+          return Traded.deleteMany(conditions).exec();
         }
       case 'create/bided':
         {
@@ -562,13 +562,13 @@ export default class FeedParser {
           const conditions = { bided: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Bided.update(conditions, { $set: update }, params).exec();
+          return Bided.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/bided':
         {
           const { id, user } = options;
           const conditions = { bided: id, user };
-          return Bided.remove(conditions).exec();
+          return Bided.deleteMany(conditions).exec();
         }
       case 'create/starred':
         {
@@ -576,13 +576,13 @@ export default class FeedParser {
           const conditions = { starred: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Starred.update(conditions, { $set: update }, params).exec();
+          return Starred.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/starred':
         {
           const { id, user } = options;
           const conditions = { starred: id, user };
-          return Starred.remove(conditions).exec();
+          return Starred.deleteMany(conditions).exec();
         }
       case 'create/listed':
         {
@@ -590,13 +590,13 @@ export default class FeedParser {
           const conditions = { listed: id, user };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Listed.update(conditions, { $set: update }, params).exec();
+          return Listed.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/listed':
         {
           const { id, user } = options;
           const conditions = { listed: id, user };
-          return Listed.remove(conditions).exec();
+          return Listed.deleteMany(conditions).exec();
         }
       case 'create/attribute':
         {
@@ -619,14 +619,14 @@ export default class FeedParser {
           const params = { upsert: true, multi: !!isArchive };
           //log.trace(FeedParser.displayName, 'options', options, { isPerformance, isArchive, isImages, isAsins });
           return update
-            ? Attribute.update(conditions, { $set: update }, params).exec()
+            ? Attribute.updateMany(conditions, { $set: update }, params).exec()
             : Promise.reject(new Error(`request ${request}.`));
         }
       case 'delete/attribute':
         {
           const { id, user } = options;
           const conditions = { guid: id, user };
-          return Attribute.remove(conditions).exec();
+          return Attribute.deleteMany(conditions).exec();
         }
       case 'defrag/items':
         {
@@ -635,13 +635,13 @@ export default class FeedParser {
           const setIds = R.map(obj => obj._id);
           return Note.findOne(conditions, 'items').exec()
             .then(obj => Item.find({ _id: { $in: obj.items } }, '_id').exec())
-            .then(objs => Note.update(conditions, { $set: { items: setIds(objs) } }).exec())
+            .then(objs => Note.updateMany(conditions, { $set: { items: setIds(objs) } }).exec())
         }
       case 'defrag/added':
         {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Added.remove({ added: obj.added }).exec());
+          const promises = R.map(obj => Added.deleteMany({ added: obj.added }).exec());
           return Added.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -650,7 +650,7 @@ export default class FeedParser {
         {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Deleted.remove({ deleted: obj.deleted }).exec());
+          const promises = R.map(obj => Deleted.deleteMany({ deleted: obj.deleted }).exec());
           return  Deleted.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -659,7 +659,7 @@ export default class FeedParser {
         { 
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Readed.remove({ readed: obj.readed }).exec());
+          const promises = R.map(obj => Readed.deleteMany({ readed: obj.readed }).exec());
           return Readed.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -668,7 +668,7 @@ export default class FeedParser {
         {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Starred.remove({ starred: obj.starred }).exec());
+          const promises = R.map(obj => Starred.deleteMany({ starred: obj.starred }).exec());
           return Starred.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -677,7 +677,7 @@ export default class FeedParser {
         { 
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Bided.remove({ bided: obj.bided }).exec());
+          const promises = R.map(obj => Bided.deleteMany({ bided: obj.bided }).exec());
           return Bided.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -686,7 +686,7 @@ export default class FeedParser {
         { 
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Traded.remove({ traded: obj.traded }).exec());
+          const promises = R.map(obj => Traded.deleteMany({ traded: obj.traded }).exec());
           return Traded.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -695,7 +695,7 @@ export default class FeedParser {
         {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Listed.remove({ listed: obj.listed }).exec());
+          const promises = R.map(obj => Listed.deleteMany({ listed: obj.listed }).exec());
           return Listed.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));
@@ -704,7 +704,7 @@ export default class FeedParser {
         {
           const { user } = options;
           const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Attribute.remove({ guid: obj.guid }).exec());
+          const promises = R.map(obj => Attribute.deleteMany({ guid: obj.guid }).exec());
           return Attribute.find({ user }).populate('items', '_id').exec()
             .then(docs => hasNotItems(docs))
             .then(docs => Promise.all(promises(docs)));

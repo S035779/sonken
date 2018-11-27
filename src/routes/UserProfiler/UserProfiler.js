@@ -63,14 +63,14 @@ export default class UserProfiler {
           const { user, salt, hash } = options;
           const conditions = { user, salt, hash };
           const update = { isAuthenticated: true };
-          return User.update(conditions, { $set: update }).exec()
+          return User.updateMany(conditions, { $set: update }).exec()
         }
       case 'signout/user':
         {
           const { user } = options;
           const conditions = { user };
           const update = { isAuthenticated: false };
-          return User.update(conditions, { $set: update }).exec();
+          return User.updateMany(conditions, { $set: update }).exec();
         }
       case 'fetch/user':
         {
@@ -153,13 +153,13 @@ export default class UserProfiler {
                 , hash:   hash
                 , updated: new Date
                 };
-         return User.update(conditions, { $set: update }).exec();
+         return User.updateMany(conditions, { $set: update }).exec();
         }
       case 'delete/user':
         {
           const { id } = options;
           const conditions = { _id: id };
-          return User.remove(conditions).exec();
+          return User.deleteMany(conditions).exec();
         }
       case 'mail/address':
         {
@@ -185,13 +185,13 @@ export default class UserProfiler {
           const conditions  = { approved: id };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Approved.update(conditions, { $set: update }, params).exec();
+          return Approved.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/approval':
         {
           const { id } = options;
           const conditions = { approved: id };
-          return Approved.remove(conditions).exec();
+          return Approved.deleteMany(conditions).exec();
         }
       case 'fetch/approval':
         {
@@ -209,7 +209,7 @@ export default class UserProfiler {
           , isAdmin:  true
           };
           const update = { isAuthenticated: true };
-          return User.update(conditions, { $set: update }).exec();
+          return User.updateMany(conditions, { $set: update }).exec();
         }
       case 'signout/admin':
         {
@@ -219,7 +219,7 @@ export default class UserProfiler {
           , isAdmin: true
           };
           const update = { isAuthenticated: false };
-          return User.update(conditions, { $set: update }).exec();
+          return User.updateMany(conditions, { $set: update }).exec();
         }
       case 'fetch/preference':
         {
@@ -248,7 +248,7 @@ export default class UserProfiler {
           , advertisement:  data.advertisement
           , updated:        new Date
           };
-          return Admin.update(conditions, { $set: update }).exec();
+          return Admin.updateMany(conditions, { $set: update }).exec();
         }
       default:
         return new Promise((resolve, reject) => reject({ name: 'Error', message: 'request: ' + request }));

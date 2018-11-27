@@ -28,6 +28,7 @@ db.on('close', () => log.info( displayName,'faq disconnected.'));
 db.on('error', () => log.error(displayName,'faq connection error.'));
 db.openUri(mdb_url + '/faq', {
   useNewUrlParser: true
+, useCreateIndex: true
 , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });

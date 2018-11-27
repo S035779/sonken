@@ -60,13 +60,13 @@ export default class FaqEditor {
           const conditions = { posted: id };
           const update = { updated: new Date };
           const params = { upsert: true };
-          return Posted.update(conditions, { $set: update }, params).exec();
+          return Posted.updateMany(conditions, { $set: update }, params).exec();
         }
       case 'delete/post':
         {
           const { id } = options;
           const conditions = { posted: id };
-          return Posted.remove(conditions).exec();
+          return Posted.deleteMany(conditions).exec();
         }
       case 'fetch/post':
         {

@@ -188,6 +188,7 @@ db.on('close', () => log.info( displayName,'feed disconnected.'));
 db.on('error', () => log.error(displayName,'feed connection error.'));
 db.openUri(mdb_url + '/feed', {
   useNewUrlParser: true 
+, useCreateIndex: true
 , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });

@@ -28,6 +28,7 @@ db.on('close', () => log.info( displayName,'mail disconnected.'));
 db.on('error', () => log.error(displayName,'mail connection error.'));
 db.openUri(mdb_url + '/mail', {
   useNewUrlParser: true
+, useCreateIndex: true
 , reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });
