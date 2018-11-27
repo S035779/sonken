@@ -131,7 +131,7 @@ export default class FeedParser {
           const conditions = isCategory ? { user, category } : { user };
           const params = { 
             path:     'items'
-          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 10 }
+          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }

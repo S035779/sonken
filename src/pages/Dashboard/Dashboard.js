@@ -26,12 +26,13 @@ class Dashboard extends React.Component {
   static prefetch(options) {
     const { user, category } = options;
     if(!user) return null;
-    std.logInfo(Dashboard.displayName, 'prefetch', options);
-    return Promise.all([
-        NoteAction.presetUser(user)
-      , NoteAction.prefetchNotes(user, category, 0, 20)
-      , NoteAction.prefetchCategorys(user, category, 0, 20)
-      ]);
+    std.logInfo(Dashboard.displayName, 'prefetch', { user, category });
+    return NoteAction.presetUser(user)
+    //return Promise.all([
+    //    NoteAction.presetUser(user)
+    //  , NoteAction.prefetchNotes(user, category, 0, 20)
+    //  , NoteAction.prefetchCategorys(user, category, 0, 20)
+    //  ]);
   }
 
   componentDidMount() {
