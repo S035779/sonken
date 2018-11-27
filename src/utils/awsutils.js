@@ -114,7 +114,7 @@ class awsutils {
 
   fetchObjects(bucket, files) {
     const promises = R.map(obj => this.fetchObject(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files)).then(this.createArchive);
+    return Promise.all(promises(files));
   }
 
   fetchTorrent(bucket, { key, name }) {
@@ -126,7 +126,7 @@ class awsutils {
 
   fetchTorrents(bucket, files) {
     const promises = R.map(obj => this.fetchTorrent(bucket, { key: obj.key, name: obj.name }));
-    return Promise.all(promises(files)).then(this.createArchive);
+    return Promise.all(promises(files));
   }
 
   createWriteStream(bucket, key) {

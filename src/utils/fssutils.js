@@ -2,7 +2,7 @@ import archiver         from 'archiver';
 import fs               from 'fs-extra';
 import path             from 'path';
 import * as R           from 'ramda';
-import { from, of, defer } from 'rxjs';
+import { from, forkJoin } from 'rxjs';
 import log              from 'Utilities/logutils';
 
 /**
@@ -177,16 +177,6 @@ export default class FSSupport {
     return this.request('is/file', { subpath, filename });
   }
 
-  createArchive(conditions, { subpath, files }) { // does not work.
-    const { total, limit } = conditions;
-    const numTotal = Number(total);
-    const numLimit = Number(limit);
-    const numFiles = R.length(files);
-    const subscribeToFirst = ((numTotal < numLimit) && (numFiles >= 1)) || ((numTotal > numLimit) && (numTotal <= numFiles * numLimit));
-    const observable = defer(() => subscribeToFirst ? this.addArchive(subpath, files) : of({ subpath, files }));
-    return observable;
-  }
-
   fetchFile({ subpath, filename }) {
     return from(this.getFile(subpath, filename));
   }
@@ -201,6 +191,11 @@ export default class FSSupport {
 
   createFile({ subpath, data }) {
     return from(this.addFile(subpath, data));
+  }
+
+  createFiles({ subpath, data }) {
+    const observables = R.map(obj => this.createFile({ subpath, data: obj }));
+    return forkJoin(observables(data));
   }
 
   createBom({ subpath, data }) {

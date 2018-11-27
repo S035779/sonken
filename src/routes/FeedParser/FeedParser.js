@@ -2208,6 +2208,30 @@ export default class FeedParser {
     );
   }
 
+  downloadImages({ user, ids, filter }) {
+    const AWS         = aws.of(aws_keyset);
+    const getobjects  = objs => AWS.fetchObjects(STORAGE, objs);
+    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
+    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
+    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
+    const dupItems    = objs => std.dupObj(objs, 'title');
+    const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
+    const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
+    const getItems    = obj => obj.items ? obj.items: [];
+    const observables = R.map(id => this.fetchNote({ user, id, filter }));
+    return forkJoin(observables(ids)).pipe(
+      map(R.map(getItems))
+    , map(R.map(hasImages))
+    , map(R.map(setItems))
+    , map(R.flatten)
+    , map(dupItems)
+    , map(setImages)
+    , map(R.flatten)
+    , flatMap(objs => getobjects(objs))
+    );
+  }
+
   downloadImage({ user, ids, filter }) {
     const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
     const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
@@ -2229,7 +2253,7 @@ export default class FeedParser {
     );
   }
 
-  createImages({ user, category, type, total, limit }, file) {
+  createArchiveFromS3({ user, category, type, total, limit }, file) {
     const { files } = file;
     const AWS         = aws.of(aws_keyset);
     const zipkey      = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
@@ -2240,7 +2264,7 @@ export default class FeedParser {
     return defer(() => isSubscribe ? AWS.createArchiveFromS3(STORAGE, { key: zipkey, files }) : of({ file }));
   }
 
-  createItems({ user, category, type, total, limit }, file) {
+  createArchiveFromFS({ user, category, type, total, limit }, file) {
     const { subpath, files } = file;
     const AWS         = aws.of(aws_keyset);
     const _files      = R.map(file => ({ name: file }), files)

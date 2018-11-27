@@ -95,6 +95,7 @@ export default class JobQueue {
   createJobs(operation, options) {
     log.info(JobQueue.displayName, 'createjobs', operation);
     switch(operation) {
+      case 'download/images':
       case 'download/items':
         {
           const { user, category, ids, type, filter } = options;
@@ -123,7 +124,7 @@ export default class JobQueue {
               })
             );
         }
-      case 'download/images':
+      case 'download/image':
         {
           const { user, category, ids, type, filter } = options;
           const conditions = {
