@@ -40,7 +40,6 @@ const bundle = {
   , new CleanWebpackPlugin([
       'dist/*.bundle.*'
     , 'dist/*.jpg'
-    , 'dist/*.ico'
     , 'dist/*.woff'
     , 'dist/*.woff2'
     ], { verbose: false })

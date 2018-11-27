@@ -58,7 +58,7 @@ const common = {
         test: /\.(eot|otf|svg|ttf|woff2?)$/
       , use: [{
           loader: 'file-loader'
-        , options: { publicPath: 'http://35.227.255.168/assets/fonts/', name: '[name].[ext]' }
+        , options: { name: '[name].[ext]' }
         }]
       }
     ]
