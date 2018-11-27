@@ -59,7 +59,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 272m
+            cpu: 256m
             memory: 1440Mi
         ports:
           - containerPort: 8082
