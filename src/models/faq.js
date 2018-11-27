@@ -26,10 +26,10 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( displayName,'faq connected.'));
 db.on('close', () => log.info( displayName,'faq disconnected.'));
 db.on('error', () => log.error(displayName,'faq connection error.'));
+mongoose.set('useCreateIndex', true);
+mongoose.set('useNewUrlParser', true);
 db.openUri(mdb_url + '/faq', {
-  useNewUrlParser: true
-, useCreateIndex: true
-, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+  reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 

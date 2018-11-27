@@ -186,10 +186,10 @@ const db = mongoose.createConnection();
 db.on('open',  () => log.info( displayName,'feed connected.'));
 db.on('close', () => log.info( displayName,'feed disconnected.'));
 db.on('error', () => log.error(displayName,'feed connection error.'));
+mongoose.set('useCreateIndex', true);
+mongoose.set('useNewUrlParser', true);
 db.openUri(mdb_url + '/feed', {
-  useNewUrlParser: true 
-, useCreateIndex: true
-, reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
+  reconnectTries: Number.MAX_VALUE  // Never stop trying to reconnect
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 
