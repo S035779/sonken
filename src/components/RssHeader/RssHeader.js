@@ -3,7 +3,7 @@ import React              from 'react';
 import { withRouter }     from 'react-router-dom';
 import PropTypes          from 'prop-types'
 import classNames         from 'classnames';
-import NoteAction         from 'Actions/NoteAction';
+//import NoteAction         from 'Actions/NoteAction';
 //import std                from 'Utilities/stdutils';
 
 import { withStyles }     from '@material-ui/core/styles';
@@ -29,7 +29,7 @@ class RssHeader extends React.Component {
   //}
 
   componentWillReceiveProps(nextProps) {
-    const { user, location, jobs } = nextProps;
+    const { location, jobs } = nextProps;
     const nextJobs = !R.isEmpty(jobs);
     const prevJobs = this.state.loadingDownload;
     const nextCategory = location.pathname.split('/')[1];
@@ -38,7 +38,7 @@ class RssHeader extends React.Component {
       this.setState({ loadingDownload: nextJobs });
     }
     if(nextCategory !== prevCategory) {
-      NoteAction.fetchJobs({ user, category: nextCategory });
+      //NoteAction.fetchJobs({ user, category: nextCategory });
       this.setState({ category: nextCategory });
     }
   }
