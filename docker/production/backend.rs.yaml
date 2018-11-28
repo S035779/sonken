@@ -31,8 +31,8 @@ spec:
                   key: password
           resources:
             requests:
-              cpu: "256m"
-              memory: "500Mi"
+              cpu: "640m"
+              memory: "768Mi"
           volumeMounts:
             - name: mongo-persistent-storage
               mountPath: /data/db
