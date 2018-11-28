@@ -132,7 +132,7 @@ export default class FeedParser {
           const params = { 
             path:     'items'
           , select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 }
-          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 10 }
+          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 5 }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
