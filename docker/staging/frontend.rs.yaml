@@ -33,7 +33,7 @@ spec:
         resources:
           requests:
             cpu: 384m
-            memory: 1080Mi
+            memory: 1024Mi
         lifecycle:
           postStart:
             exec:

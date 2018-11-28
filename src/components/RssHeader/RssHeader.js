@@ -21,12 +21,12 @@ class RssHeader extends React.Component {
     };
   }
 
-  componentDidMount() {
-    const { user, location } = this.props;
-    const category = location.pathname.split('/')[1];
-    NoteAction.fetchJobs({ user, category });
-    this.setState({ category });
-  }
+  //componentDidMount() {
+  //  const { user, location } = this.props;
+  //  const category = location.pathname.split('/')[1];
+  //  NoteAction.fetchJobs({ user, category });
+  //  this.setState({ category });
+  //}
 
   componentWillReceiveProps(nextProps) {
     const { user, location, jobs } = nextProps;
