@@ -132,7 +132,7 @@ export default class FeedParser {
           const params = { 
             path:     'items'
           , select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 }
-          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }
+          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 10 }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
@@ -2177,19 +2177,6 @@ export default class FeedParser {
     , map(setBuffer)
     );
   }
-
-  //downloadImages({ user, id }) {
-  //  const AWS         = aws.of(aws_keyset);
-  //  const getObject   = obj => AWS.fetchObject(STORAGE, obj);
-  //  const setKey      = (_id, url) => std.crypto_sha256(url, _id, 'hex') + '.zip';
-  //  const setName     = (_id, url) => _id + '_' + path.basename(std.parse_url(url).pathname);
-  //  const setArchives = obj => ({ key: setKey(obj._id.toString(), obj.url), name: setName(obj._id.toString(), obj.url) });
-  //  return this.fetchNote({ user, id }).pipe(
-  //    map(setArchives)
-  //  , flatMap(obj => from(getObject(obj)))
-  //  , map(obj => obj.buffer)
-  //  );
-  //}
 
   downloadItems({ user, ids, filter, type }) {
     const CSV = this.setCsvItems(type);
