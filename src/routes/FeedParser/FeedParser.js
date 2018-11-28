@@ -126,12 +126,12 @@ export default class FeedParser {
         {
           const { user, category, skip, limit, filter } = options;
           const isCSV      = !R.isNil(filter) && filter.isCSV;
+          const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCategory = !R.isNil(category);
           const conditions = isCategory ? { user, category } : { user };
           const params = { 
             path:     'items'
-          , select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 }
           , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }
           , populate: [
               { path: 'added',   select: 'added'   }
@@ -143,6 +143,7 @@ export default class FeedParser {
           };
           const query = Note.find(conditions);
           if(isPaginate) query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          if(isProject) R.merge(params, { select: filter.select });
           if(!isCSV) query.populate(params);
           return query.exec();
         }
@@ -926,11 +927,12 @@ export default class FeedParser {
   }
 
   fetchCategorys({ user, category, skip, limit }) {
+    const filter = { select: { guid__: 1 } };
     const observables = forkJoin([
     //  this.getReaded(user)
     //, this.getStarred(user)
       this.getCategorys(user)
-    , this.getNotes(user, category, skip, limit)
+    , this.getNotes(user, category, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setCategorys(objs[0])
@@ -1054,6 +1056,7 @@ export default class FeedParser {
   }
 
   fetchNotes({ user, category, skip, limit }) {
+    const filter = { select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
     const observables = forkJoin([
     //  this.getStarred(user)
     //, this.getListed(user)
@@ -1062,7 +1065,7 @@ export default class FeedParser {
     //, this.getAdded(user)
       this.cntItems(user, category)
     , this.cntNote(user, category)
-    , this.getNotes(user, category, skip, limit)
+    , this.getNotes(user, category, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setNotePage(skip, limit, objs[1])
