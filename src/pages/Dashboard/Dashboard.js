@@ -45,8 +45,9 @@ class Dashboard extends React.Component {
       const category = match.params.category || 'marchant';
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'fetch', category);
-      NoteAction.fetchCategorys(user, category, skip, limit);
-      NoteAction.fetchNotes(user, category, skip, limit).then(() => this.spn.stop());
+      NoteAction.fetchCategorys(user, category, skip, limit)
+        .then(() => NoteAction.fetchNotes(user, category, skip, limit))
+        .then(() => this.spn.stop());
     }
   }
 
@@ -63,8 +64,8 @@ class Dashboard extends React.Component {
       const limit = page.perPage;
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'update', nextCategory);
-      NoteAction.fetchCategorys(user, nextCategory, skip, limit);
-      NoteAction.fetchNotes(user, nextCategory, skip, limit)
+      NoteAction.fetchCategorys(user, nextCategory, skip, limit)
+        .then(() => NoteAction.fetchNotes(user, nextCategory, skip, limit))
         .then(() => this.spn.stop());
     }
   }
