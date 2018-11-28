@@ -3,6 +3,7 @@ import React              from 'react';
 import { withRouter }     from 'react-router-dom';
 import PropTypes          from 'prop-types'
 import classNames         from 'classnames';
+import NoteAction         from 'Actions/NoteAction';
 //import std                from 'Utilities/stdutils';
 
 import { withStyles }     from '@material-ui/core/styles';
@@ -14,15 +15,31 @@ import RssMenu            from 'Components/RssMenu/RssMenu';
 class RssHeader extends React.Component {
   constructor(props) {
     super(props);
-    const loadingDownload = !R.isEmpty(props.jobs);
-    this.state = { loadingDownload };
+    this.state = { 
+      loadingDownload: false
+    , category: ''
+    };
+  }
+
+  componentDidMount() {
+    const { user, location } = this.props;
+    const category = location.pathname.split('/')[1];
+    NoteAction.fetchJobs({ user, category });
+    this.setState({ category });
   }
 
   componentWillReceiveProps(nextProps) {
-    const nextJobs = !R.isEmpty(nextProps.jobs);
+    const { user, location, jobs } = nextProps;
+    const nextJobs = !R.isEmpty(jobs);
     const prevJobs = this.state.loadingDownload;
+    const nextCategory = location.pathname.split('/')[1];
+    const prevCategory = this.state.category;
     if(nextJobs !== prevJobs) {
       this.setState({ loadingDownload: nextJobs });
+    }
+    if(nextCategory !== prevCategory) {
+      NoteAction.fetchJobs({ user, category: nextCategory });
+      this.setState({ category: nextCategory });
     }
   }
 

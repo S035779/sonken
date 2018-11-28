@@ -21,7 +21,7 @@ export default class FSSupport {
   }
 
   request(request, options) {
-    log.info(FSSupport.displayName, 'Request', request);
+    //log.info(FSSupport.displayName, 'Request', request);
     switch(request) {
       case 'create/archive':
         {

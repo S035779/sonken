@@ -92,10 +92,11 @@ export default class JobQueue {
     return from(this.garbageJobs(operation));
   }
 
-  fetchJobs({ user }) { 
+  fetchJobs({ user, category }) { 
     const conditions = { 
       lastFinishedAt: { $exists: false }
     , 'data.params.user': user
+    , 'data.params.category': category
     };
     const operation = { $in: ['download/items', 'download/images', 'download/image'] };
     const setAttrs = R.map(obj => obj && obj.attrs ? obj.attrs : null);

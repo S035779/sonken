@@ -60,7 +60,7 @@ class RssDownloadItemsDialog extends React.Component {
         .then(() => 
           this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
         .then(() => this.spn.stop())
-        .then(() => NoteAction.fetchJobs({ user }))
+        .then(() => NoteAction.fetchJobs({ user, category }))
         .catch(err => {
           std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
           this.setState({ isNotValid: true });

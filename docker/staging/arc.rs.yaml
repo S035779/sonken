@@ -23,7 +23,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_arc:latest
         resources:
           requests:
-            cpu: 8m
+            cpu: 384m
             memory: 320Mi
         env:
           - name: WORKER_NAME

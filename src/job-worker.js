@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
-import { forkJoin, from, throwError }   from 'rxjs';
+import { forkJoin, from, throwError, of }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import _async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
@@ -141,7 +141,9 @@ const request = (operation, options) => {
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
         const conditions = { user, category, type, total, index, limit };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
-            map(setData)
+            flatMap(obj => !R.isEmpty(obj) 
+              ? of(setData(obj)) 
+              : throwError({ name: 'Error:', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createBom(file))
           , flatMap(file => FSS.appendFile(file))
@@ -155,14 +157,16 @@ const request = (operation, options) => {
         const { params } = options;
         const { user, category, ids, filter, type, limit, total, index } = params;
         const header = user + '-' + category + '-' + type;
-        const setDatas = objs => ({ subpath: header, data: objs });
+        const setData = objs => ({ subpath: header, data: objs });
         const hasFile = obj => R.filter(filename => 
           FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.(gif|jpe?g|png)$/, filename), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
         const FSS = fss.of({ dirpath: '../', dirname: CACHE });
         const conditions = { user, category, type, total, index, limit };
         return feed.downloadImages({ user, ids, filter, type }).pipe(
-            map(setDatas)
+            flatMap(obj => !R.isEmpty(obj) 
+              ? of(setData(obj)) 
+              : throwError({ name: 'Error:', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))

@@ -132,10 +132,20 @@ class awsutils {
   createWriteStream(bucket, key) {
     const passStream = new stream.PassThrough();
     const params = { Bucket: bucket, Key: key, Body: passStream };
-    this.s3.upload(params, (err, data) => {
-      if(err) log.error(awsutils.displayName, err.name, err.message, err.stack);
+    const manager = this.s3.upload(params, (err, data) => {
+      if(err) {
+        log.error(awsutils.displayName, err.name, err.message, err.stack);
+        passStream.destroy(err);
+      }
       log.trace(awsutils.displayName, '[UPLOAD]', data);
     });
+    //passStream.on('error',  err => log.error(awsutils.displayName, err.name, err.message, err.stack));
+    //passStream.on('drain',  () => log.debug(awsutils.displayName, 'Drain:', 'it is drain.'));
+    //passStream.on('close',  () => log.debug(awsutils.displayName, 'Close:', 'it is close.'));
+    //passStream.on('finish', () => log.debug(awsutils.displayName, 'Finish:', 'it is finish.'));
+    //passStream.on('pipe',   src => log.debug(awsutils.displayName, 'Pipe:', src));
+    //passStream.on('unpipe', src => log.debug(awsutils.displayName, 'Unpipe:', src));
+    manager.on('httpUploadProgress', obj => log.trace(awsutils.displayName, 'Progress', obj));
     return passStream;
   }
 
@@ -192,7 +202,7 @@ class awsutils {
       dst.on('finish', () => {
         log.trace(awsutils.displayName, 'finish:', cachefile);
         const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key));
+        src.pipe(this.createWriteStream(bucket, key)).on('error', reject);
         src.on('end', () => log.trace(awsutils.displayName, 'end', key));
         src.on('close', () => {
           log.trace(awsutils.displayName, 'close', key);
@@ -204,7 +214,7 @@ class awsutils {
         });
       });
       archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      archive.on('error', err => reject(err));
+      archive.on('error', reject);
       archive.pipe(dst);
       R.map(obj => archive.append(fs.createReadStream(path.resolve(subdir, obj.name)), { name: obj.name }), files);
       archive.finalize();

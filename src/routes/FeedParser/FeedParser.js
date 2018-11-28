@@ -2266,11 +2266,12 @@ export default class FeedParser {
     const AWS         = aws.of(aws_keyset);
     const key         = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
     const numTotal    = Number(total);
-    const numIndex    = Number(index);
+    const numIndex    = Number(index) + 1;
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
-    const isSubscribe = ((numTotal <= numLimit) && (numFiles !== 0)) || ((numTotal > numLimit) && (numTotal <= numIndex + 1));
-    return defer(() => isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key, files: _files, subpath }) : of({ file }));
+    const isFiles     = numFiles !== 0;
+    const isSubscribe = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
+    return defer(() => isFiles && isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key, files: _files, subpath }) : of({ file }));
   }
 }
 FeedParser.displayName = 'FeedParser';

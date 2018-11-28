@@ -694,42 +694,24 @@ export default class UserProfiler {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: '0001', name: 'リスト  500（月払）（税込980 円）'
-        , number: 250
-        , price: 980,   link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
-      , { id: '0002', name: 'リスト 1000（月払）（税込1580 円）'
-        , number: 500
-        , price: 1580,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
-      , { id: '0003', name: 'リスト 2500（月払）（税込1980 円）'
-        , number: 1250
-        , price: 1980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
-      , { id: '0004', name: 'リスト 5000（月払）（税込3980 円）'
-        , number: 2500
-        , price: 3980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
-      , { id: '0005', name: 'リスト 7500（月払）（税込4980 円）'
-        , number: 3750
-        , price: 4980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
-      , { id: '0006', name: 'リスト10000（月払）（税込5980 円）'
-        , number: 5000
-        , price: 5980,  link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
-      , { id: '0007', name: 'リスト 5000（半年払）（税込19800 円）'
-        , number: 2500
-        , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
-      , { id: '0008', name: 'リスト 7500（半年払）（税込24800 円）'
-        , number: 3750
-        , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
-      , { id: '0009', name: 'リスト10000（半年払）（税込29800 円）'
-        , number: 5000
-        , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?'
-          + 'cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
+        { id: '0001', name: 'リスト  500（月払）（税込980 円）', number: 250
+        , price: 980,  link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GFG9P9PNRSKVS' }
+      , { id: '0002', name: 'リスト 1000（月払）（税込1580 円）', number: 500
+        , price: 1580, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VQCL9U88ZRX4S' }
+      , { id: '0003', name: 'リスト 2500（月払）（税込1980 円）', number: 1250
+        , price: 1980, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=58NFUNXEUKDJ2' }
+      , { id: '0004', name: 'リスト 5000（月払）（税込3980 円）', number: 2500
+        , price: 3980, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BFBCTGES3H5ME' }
+      , { id: '0005', name: 'リスト 7500（月払）（税込4980 円）', number: 3750
+        , price: 4980, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ATSKP3DRXKBCG' }
+      , { id: '0006', name: 'リスト10000（月払）（税込5980 円）', number: 5000
+        , price: 5980, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MWVH6EQRB7UP8' }
+      , { id: '0007', name: 'リスト 5000（半年払）（税込19800 円）', number: 2500
+        , price: 19800, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=K588XS2F9X8TG' }
+      , { id: '0008', name: 'リスト 7500（半年払）（税込24800 円）', number: 3750
+        , price: 24800, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XCEEMUTH5PLTS' }
+      , { id: '0009', name: 'リスト10000（半年払）（税込29800 円）', number: 5000
+        , price: 29800, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LZ6XDEFS76GV2' }
       ]
     , advertisement: {
         url1: '/advertisement1.html'
@@ -745,12 +727,8 @@ export default class UserProfiler {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: '0001', name: 'リスト  3（無料)',     number: 3
-        , price: 0,   link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
-      , { id: '0002', name: 'リスト  5（無料)',     number: 5
-        , price: 0,   link: 'https://www.paypal.com/cgi-bin/webscr?'
-            + 'cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+        { id: '0001', name: 'リスト 1000（無料)', number: 1000
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
       ]
     , advertisement: {
         url1: '/advertisement1.html'

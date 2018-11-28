@@ -7,8 +7,8 @@ const job = JobQueue.of();
 export default {
   fetchJobs() {
     return (req, res) => {
-      const { user } = req.query;
-      job.fetchJobs({ user }).subscribe(
+      const { user, category } = req.query;
+      job.fetchJobs({ user, category }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
