@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import net    from 'Utilities/netutils';
+//import net    from 'Utilities/netutils';
 import xhr    from 'Utilities/xhrutils';
 
 const api = process.env.API_URL;
@@ -9,16 +9,16 @@ export default {
     switch(request) {
       case 'preset/user':
         return new Promise(resolve => setTimeout(() => resolve(options.user !== ''), 200));
-      case 'prefetch/notes':
-        return net.promise(api + '/notes',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
-      case 'prefetch/categorys':
-        return net.promise(api +'/categorys', R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
-      case 'prefetch/traded':
-        return net.promise(api + '/traded',   R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
-      case 'prefetch/bided':
-        return net.promise(api + '/bided',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
-      case 'fetch/categorys':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/categorys', options, resolve, reject));
+      //case 'prefetch/notes':
+      //  return net.promise(api + '/notes',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
+      //case 'prefetch/categorys':
+      //  return net.promise(api +'/categorys', R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
+      //case 'prefetch/traded':
+      //  return net.promise(api + '/traded',   R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
+      //case 'prefetch/bided':
+      //  return net.promise(api + '/bided',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, options));
+      //case 'fetch/categorys':
+      //  return new Promise((resolve, reject) => xhr.getJSON(    api + '/categorys', options, resolve, reject));
       case 'fetch/notes':
         return new Promise((resolve, reject) => xhr.getJSON(    api + '/notes',     options, resolve, reject));
       case 'fetch/traded':
@@ -70,9 +70,9 @@ export default {
       case 'delete/listed':
         return new Promise((resolve, reject) => xhr.deleteJSON( api + '/listed',    options, resolve, reject));
       case 'upload/notes':
-        return new Promise((resolve, reject) => xhr.putFile(    api + '/file',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putFile(    api + '/notes',      options, resolve, reject));
       case 'download/notes':
-        return new Promise((resolve, reject) => xhr.getFile(    api + '/file',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postFile(    api + '/notes',      options, resolve, reject));
       //case 'download/items':
       //  return new Promise((resolve, reject) => xhr.postFile(   api + '/file',      options, resolve, reject));
       //case 'download/images':
@@ -104,18 +104,18 @@ export default {
   presetUser(user) {
     return this.request('preset/user', { user });
   },
-  prefetchNotes(user, category, skip, limit) {
-    return this.request('prefetch/notes', { user, category, skip, limit });
-  },
-  prefetchCategorys(user, category, skip, limit) {
-    return this.request('prefetch/categorys', { user, category, skip, limit });
-  },
-  prefetchTradedNotes(user, skip, limit) {
-    return this.request('prefetch/traded', { user, skip, limit });
-  },
-  prefetchBidedNotes(user, skip, limit) {
-    return this.request('prefetch/bided', { user, skip, limit });
-  },
+  //prefetchNotes(user, category, skip, limit) {
+  //  return this.request('prefetch/notes', { user, category, skip, limit });
+  //},
+  //prefetchCategorys(user, category, skip, limit) {
+  //  return this.request('prefetch/categorys', { user, category, skip, limit });
+  //},
+  //prefetchTradedNotes(user, skip, limit) {
+  //  return this.request('prefetch/traded', { user, skip, limit });
+  //},
+  //prefetchBidedNotes(user, skip, limit) {
+  //  return this.request('prefetch/bided', { user, skip, limit });
+  //},
 
   /*
    * Notes
@@ -135,9 +135,9 @@ export default {
   /*
    * Categorys
    */
-  fetchCategorys(user, category, skip, limit) {
-    return this.request('fetch/categorys', { user, category, skip, limit });
-  },
+  //fetchCategorys(user, category, skip, limit) {
+  //  return this.request('fetch/categorys', { user, category, skip, limit });
+  //},
 
   /*
    * Category

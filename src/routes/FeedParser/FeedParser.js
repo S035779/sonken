@@ -926,24 +926,24 @@ export default class FeedParser {
     return observables;
   }
 
-  fetchCategorys({ user, category, skip, limit }) {
-    const filter = { select: { guid__: 1 } };
-    const observables = forkJoin([
-    //  this.getReaded(user)
-    //, this.getStarred(user)
-      this.getCategorys(user)
-    , this.getNotes(user, category, skip, limit, filter)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setCategorys(objs[0])
-    //, this.setStarred(objs[1])
-    //  this.setReaded(objs[0])
-    , this.toObject
-    )(objs[1]);
-    return observables.pipe(
-      map(setAttribute)
-    );
-  }
+  //fetchCategorys({ user, category, skip, limit }) {
+  //  const filter = { select: { guid__: 1 } };
+  //  const observables = forkJoin([
+  //  //  this.getReaded(user)
+  //  //, this.getStarred(user)
+  //    this.getCategorys(user)
+  //  , this.getNotes(user, category, skip, limit, filter)
+  //  ]);
+  //  const setAttribute = objs => R.compose(
+  //    this.setCategorys(objs[0])
+  //  //, this.setStarred(objs[1])
+  //  //  this.setReaded(objs[0])
+  //  , this.toObject
+  //  )(objs[1]);
+  //  return observables.pipe(
+  //    map(setAttribute)
+  //  );
+  //}
 
   setCategorys(categorys) {
     const _categorys = this.toObject(categorys);
@@ -951,8 +951,9 @@ export default class FeedParser {
     const _hasNotCategorys = this.hasNotCategorys;
     const _hasFavorites = this.hasFavorites;
     const __categorys = objs => R.concat(_hasCategorys(objs), _hasNotCategorys(objs));
-    return objs => R.isNil(objs) ? _categorys : R.concat(__categorys(objs), _hasFavorites(objs))
-    ;
+    return objs => R.isNil(objs) 
+      ? { notes: [],    categorys: _categorys } 
+      : { notes: objs,  categorys: R.concat(__categorys(objs), _hasFavorites(objs)) };
   }
 
   hasCategorys(categorys, notes) {
@@ -1065,10 +1066,12 @@ export default class FeedParser {
     //, this.getAdded(user)
       this.cntItems(user, category)
     , this.cntNote(user, category)
+    , this.getCategorys(user)
     , this.getNotes(user, category, skip, limit, filter)
     ]);
     const setAttribute = objs => R.compose(
-      this.setNotePage(skip, limit, objs[1])
+      this.setCategorys(objs[2])
+    , this.setNotePage(skip, limit, objs[1])
     , this.setItemPage(   0,    20, objs[0])
     //, this.setAdded(objs[4])
     //, this.setDeleted(objs[3])
@@ -1076,10 +1079,9 @@ export default class FeedParser {
     //, this.setListed(objs[1])
     //, this.setStarred(objs[0])
     , this.toObject
-    )(objs[2]);
+    )(objs[3]);
     return observables.pipe(
       map(setAttribute)
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -1209,7 +1211,6 @@ export default class FeedParser {
     return observables.pipe(
       map(setAttribute)
     , map(R.head)
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -2137,12 +2138,12 @@ export default class FeedParser {
   }
 
   downloadNotes({ user, category }) {
-    const CSV = this.setCsvNotes(category);
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const CSV         = this.setCsvNotes(category);
+    const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setNotesCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
-    const filter = { isCSV: true };
-    const observable = from(this.getNotes(user, category, null, null, filter));
-    return observable.pipe(
+    const filter      = { isCSV: true };
+    const promise     = this.getNotes(user, category, null, null, filter);
+    return from(promise).pipe(
       map(CSV.map)
     , map(setNotesCsv)
     , map(setBuffer)
@@ -2151,11 +2152,11 @@ export default class FeedParser {
   
   downloadTrade({ user, filter }) {
     const CSV = this.setCsvItems('0001');
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     const dupItems    = objs => std.dupObj(objs, 'title');
-    return this.fetchTradedNotes({ user, filter }).pipe(
+    return this.getTraded(user, null, null, filter).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
@@ -2167,11 +2168,11 @@ export default class FeedParser {
   
   downloadBids({ user, filter }) {
     const CSV = this.setCsvItems('0001');
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     const dupItems    = objs => std.dupObj(objs, 'title');
-    return this.fetchBidedNotes({ user, filter }).pipe(
+    return this.getBided(user, null, null, filter).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
@@ -2182,13 +2183,13 @@ export default class FeedParser {
   }
 
   downloadItems({ user, ids, filter, type }) {
-    const CSV = this.setCsvItems(type);
-    const setBuffer = csv  => Buffer.from(csv, 'utf8');
+    const CSV         = this.setCsvItems(type);
+    const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
-    const dupItems = objs => std.dupObj(objs, 'title');
-    const getItems = obj => obj.items ? obj.items : [];
-    const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
+    const dupItems    = objs => std.dupObj(objs, 'title');
+    const getItems    = obj => obj.items ? obj.items : [];
+    const promises    = R.map(id => this.getNote(user, id, null, null, filter));
+    return forkJoin(promises(ids)).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
@@ -2209,8 +2210,8 @@ export default class FeedParser {
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
     const getItems    = obj => obj.items ? obj.items: [];
-    const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
+    const promises    = R.map(id => this.getNote(user, id, null, null, filter));
+    return forkJoin(promises(ids)).pipe(
       map(R.map(getItems))
     , map(R.map(hasImages))
     , map(R.map(setItems))
@@ -2231,8 +2232,8 @@ export default class FeedParser {
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
     const getItems    = obj => obj.items ? obj.items: [];
-    const observables = R.map(id => this.fetchNote({ user, id, filter }));
-    return forkJoin(observables(ids)).pipe(
+    const promises    = R.map(id => this.getNote(user, id, null, null, filter));
+    return forkJoin(promises(ids)).pipe(
       map(R.map(getItems))
     , map(R.map(hasImages))
     , map(R.map(setItems))

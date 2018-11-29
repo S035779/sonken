@@ -7,46 +7,47 @@ export default {
         dispatch({ type: 'user/preset', user, isAuthenticated });
       });
   },
-  prefetchNotes(user, category, skip, limit) {
-    return NoteApiClient.prefetchNotes(user, category, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/my', notes });
-      });
-  },
-  prefetchCategorys(user, category, skip, limit) {
-    return NoteApiClient.prefetchCategorys(user, category, skip, limit).then(categorys => {
-        dispatch({ type: 'category/prefetch/my', categorys });
-      });
-  },
-//  prefetchBided(user, skip, limit) {
-//    return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
-//        dispatch({ type: 'note/prefetch/bided', notes });
-//      });
-//  },
-//  prefetchTraded(user, skip, limit) {
-//    return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
-//        dispatch({ type: 'note/prefetch/traded', notes });
-//      });
-//  },
-  fetchCategorys(user, category, skip, limit) {
-    return NoteApiClient.fetchCategorys(user, category, skip, limit).then(categorys => {
+  //prefetchNotes(user, category, skip, limit) {
+  //  return NoteApiClient.prefetchNotes(user, category, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/my', notes });
+  //    });
+  //},
+  //prefetchCategorys(user, category, skip, limit) {
+  //  return NoteApiClient.prefetchCategorys(user, category, skip, limit).then(categorys => {
+  //      dispatch({ type: 'category/prefetch/my', categorys });
+  //    });
+  //},
+  //prefetchBided(user, skip, limit) {
+  //  return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/bided', notes });
+  //    });
+  //},
+  //prefetchTraded(user, skip, limit) {
+  //  return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/traded', notes });
+  //    });
+  //},
+  //fetchCategorys(user, category, skip, limit) {
+  //  return NoteApiClient.fetchCategorys(user, category, skip, limit).then(categorys => {
+  //      dispatch({ type: 'category/fetch/my', categorys });
+  //    });
+  //},
+  fetchNotes(user, category, skip, limit) {
+    return NoteApiClient.fetchNotes(user, category, skip, limit).then(({ notes, categorys }) => {
+        dispatch({ type: 'note/fetch/my', notes });
         dispatch({ type: 'category/fetch/my', categorys });
       });
   },
-  fetchNotes(user, category, skip, limit) {
-    return NoteApiClient.fetchNotes(user, category, skip, limit).then(notes => {
-        dispatch({ type: 'note/fetch/my', notes });
-      });
-  },
-//  fetchBided(user, skip, limit, filter) {
-//    return NoteApiClient.fetchBidedNotes(user, skip, limit, filter).then(notes => {
-//        dispatch({ type: 'note/fetch/bided', notes });
-//      });
-//  },
-//  fetchTraded(user, skip, limit, filter) {
-//    return NoteApiClient.fetchTradedNotes(user, skip, limit, filter).then(notes => {
-//        dispatch({ type: 'note/fetch/traded', notes });
-//      });
-//  },
+  //fetchBided(user, skip, limit, filter) {
+  //  return NoteApiClient.fetchBidedNotes(user, skip, limit, filter).then(notes => {
+  //      dispatch({ type: 'note/fetch/bided', notes });
+  //    });
+  //},
+  //fetchTraded(user, skip, limit, filter) {
+  //  return NoteApiClient.fetchTradedNotes(user, skip, limit, filter).then(notes => {
+  //      dispatch({ type: 'note/fetch/traded', notes });
+  //    });
+  //},
   fetchCategory(user, id) {
     return NoteApiClient.fetchCategory(user, id).then(category => {
         dispatch({ type: 'category/fetch', category });

@@ -32,7 +32,7 @@ export default {
 
   downloadNotes() {
     return (req, res) => {
-      const { user, category, type } = req.query;
+      const { user, category, type } = req.body;
       feed.downloadNotes({ user, category, type }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -44,30 +44,30 @@ export default {
     };
   },
 
-  downloadItems() {
-    return (req, res) => {
-      const { user, category, ids, type, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
-      , aucStartTime, aucStopTime, sold } = req.body;
-      const filter = allAuction === false ? {
-        lastWeekAuction
-      , twoWeeksAuction
-      , lastMonthAuction
-      , allAuction
-      , inAuction
-      , aucStartTime
-      , aucStopTime
-      , sold
-      } : null;
-      feed.downloadItems({ user, category, ids, filter, type }).subscribe(
-        obj => { res.status(200).send(obj); }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message, ':', err.stack);
-        }
-      , () => { log.info('Complete to download Items.'); }  
-      );
-    };
-  },
+  //downloadItems() {
+  //  return (req, res) => {
+  //    const { user, category, ids, type, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+  //    , aucStartTime, aucStopTime, sold } = req.body;
+  //    const filter = allAuction === false ? {
+  //      lastWeekAuction
+  //    , twoWeeksAuction
+  //    , lastMonthAuction
+  //    , allAuction
+  //    , inAuction
+  //    , aucStartTime
+  //    , aucStopTime
+  //    , sold
+  //    } : null;
+  //    feed.downloadItems({ user, category, ids, filter, type }).subscribe(
+  //      obj => { res.status(200).send(obj); }
+  //    , err => {
+  //        res.status(500).send({ name: err.name, message: err.message });
+  //        log.error(displayName, err.name, ':', err.message, ':', err.stack);
+  //      }
+  //    , () => { log.info('Complete to download Items.'); }  
+  //    );
+  //  };
+  //},
 
   //downloadImages() {
   //  return (req, res) => {
@@ -573,19 +573,19 @@ export default {
     };
   },
 
-  fetchCategorys() {
-    return (req, res) => {
-      const { user, category, skip, limit } = req.query;
-      feed.fetchCategorys({ user, category, skip, limit }).subscribe(
-        obj => { res.status(200).send(obj); }
-      , err => {
-          res.status(500).send({ name: err.name, message: err.message });
-          log.error(displayName, err.name, ':', err.message, ':', err.stack);
-        }
-      , () => { log.info('Complete to fetch Categorys.'); }  
-      );
-    };
-  },
+  //fetchCategorys() {
+  //  return (req, res) => {
+  //    const { user, category, skip, limit } = req.query;
+  //    feed.fetchCategorys({ user, category, skip, limit }).subscribe(
+  //      obj => { res.status(200).send(obj); }
+  //    , err => {
+  //        res.status(500).send({ name: err.name, message: err.message });
+  //        log.error(displayName, err.name, ':', err.message, ':', err.stack);
+  //      }
+  //    , () => { log.info('Complete to fetch Categorys.'); }  
+  //    );
+  //  };
+  //},
 
   notImplemented() {
     return (req, res, next) => {

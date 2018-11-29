@@ -181,11 +181,11 @@ router.route('/added')
 .post(feed.notImplemented())
 .delete(feed.deleteAdd());
 
-router.route('/file')
-.get(feed.downloadNotes())
-.put(feed.uploadNotes())
-.post(feed.downloadItems())
-.delete(feed.notImplemented());
+//router.route('/file')
+//.get(feed.downloadNotes())
+//.put(feed.uploadNotes())
+//.post(feed.downloadItems())
+//.delete(feed.notImplemented());
 
 router.route('/worker')
 .get(job.fetchJobs())
@@ -195,8 +195,8 @@ router.route('/worker')
 
 router.route('/notes')
 .get(feed.fetchNotes())
-.put(feed.notImplemented())
-.post(feed.notImplemented())
+.put(feed.uploadNotes())
+.post(feed.downloadNotes())
 .delete(feed.notImplemented());
 
 //router.route('/image')
@@ -205,11 +205,11 @@ router.route('/notes')
 //.post(feed.downloadImages())
 //.delete(feed.notImplemented())
 
-router.route('/categorys')
-.get(feed.fetchCategorys())
-.put(feed.notImplemented())
-.post(feed.notImplemented())
-.delete(feed.notImplemented());
+//router.route('/categorys')
+//.get(feed.fetchCategorys())
+//.put(feed.notImplemented())
+//.post(feed.notImplemented())
+//.delete(feed.notImplemented());
 
 router.route('/note')
 .get(feed.fetchNote())

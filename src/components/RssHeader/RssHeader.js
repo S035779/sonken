@@ -17,7 +17,7 @@ class RssHeader extends React.Component {
     super(props);
     this.state = { 
       loadingDownload: false
-    , category: ''
+    //, category: ''
     };
   }
 

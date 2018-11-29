@@ -45,7 +45,7 @@ class Dashboard extends React.Component {
       const category = match.params.category || 'marchant';
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'fetch', category);
-      NoteAction.fetchCategorys(user, category, skip, limit)
+      //NoteAction.fetchCategorys(user, category, skip, limit)
       NoteAction.fetchNotes(user, category, skip, limit)
         .then(() => this.spn.stop());
     }
@@ -56,6 +56,7 @@ class Dashboard extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    //std.logInfo(Dashboard.displayName, 'Props', { next: nextProps, prev: this.props });
     const { user, page } = this.state;
     const nextCategory = nextProps.match.params.category;
     const prevCategory = this.props.match.params.category;
@@ -64,7 +65,7 @@ class Dashboard extends React.Component {
       const limit = page.perPage;
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'update', nextCategory);
-      NoteAction.fetchCategorys(user, nextCategory, skip, limit)
+      //NoteAction.fetchCategorys(user, nextCategory, skip, limit)
       NoteAction.fetchNotes(user, nextCategory, skip, limit)
         .then(() => this.spn.stop());
     }
@@ -107,7 +108,6 @@ class Dashboard extends React.Component {
 
   render() {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
-    //std.logInfo(Dashboard.displayName, 'Props', this.props);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;
