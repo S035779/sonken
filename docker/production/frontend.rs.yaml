@@ -37,8 +37,8 @@ spec:
                 - "/app/sonken/docker/install.sh"
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 144m
+            memory: 192Mi
         ports:
           - containerPort: 8081
         volumeMounts:
@@ -55,7 +55,7 @@ spec:
         image: asia.gcr.io/feedparser-198104/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 144m
+            memory: 192Mi
         ports:
           - containerPort: 8082
