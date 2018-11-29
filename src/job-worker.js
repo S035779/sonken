@@ -270,7 +270,8 @@ main();
 
 const rejections = new Map();
 const reject = (err, promise) => {
-  log.warn(displayName, 'unhandledRejection', err.name. err.message, promise);
+  const { name, message, stack } = err;
+  log.error(displayName, 'unhandledRejection', name, message, stack || promise);
   rejections.set(promise, err);
 };
 const shrink = promise => {

@@ -13,7 +13,7 @@ import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
-if(config.error) throw config.error;
+if(config.error) throw new Error(config.error);
 
 const node_env = process.env.NODE_ENV    || 'development';
 const monitorInterval = process.env.JOB_MON_MIN || 5;

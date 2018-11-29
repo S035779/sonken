@@ -2,6 +2,7 @@ import React                from 'react';
 import PropTypes            from 'prop-types';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
+//import echo                 from 'Utilities/echo';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
@@ -20,6 +21,15 @@ class RssItemList extends React.Component {
       if(item.added)   added.push(item.guid__);
     });
     this.state = { listed, starred, added, deleted };
+    this.imageRef = React.createRef();
+  }
+
+  componentDidMount() {
+    //echo.init(this.imageRef);
+  }
+
+  componentWillUnmount() {
+    //echo.detach();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -157,7 +167,8 @@ class RssItemList extends React.Component {
             <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>{renderNewAdded}</IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-              <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT} className={classes.image} />
+              <img ref={this.imageRef} src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT} 
+                className={classes.image} />
               </a>
             </div>
             <ListItemText classes={textClass} className={classes.listItemText} primary={title} secondary={description}/>

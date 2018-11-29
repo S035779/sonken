@@ -16,7 +16,7 @@ import log              from 'Utilities/logutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
-if(config.error) throw config.error;
+if(config.error) throw new Error(config.error);
 
 const env           = process.env.NODE_ENV || 'development';
 const http_port     = process.env.API_PORT || 8082;

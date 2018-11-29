@@ -9,7 +9,7 @@ import Amazon             from 'Routes/Amazon/Amazon';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
-//import yho                from 'Utilities/yhoutils';
+import yho                from 'Utilities/yhoutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
@@ -200,30 +200,6 @@ class Yahoo {
           const setShipPrice    = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
           const setShipBuyNow   = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
           const setShipping     = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
-          const setExplanation  = _obj => { 
-            const input = R.replace(/\r?\n/g, '', _obj.explanation);
-            const len = R.length(input);
-            const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
-            let num1 = R.length(words), idx = 0, pairs = [];
-            while(num1--) {
-              idx = R.indexOf(words[num1], input);
-              if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
-            }
-            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(__obj => !R.isNil(__obj)))(pairs);
-            const max = R.length(pairs);
-            let num2 = max;
-            while(num2--) {
-              if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
-              else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
-            }
-            const subString     = __obj => input.substring(__obj.from, __obj.to);
-            const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
-            const setExplan     = __obj => __obj ? __obj.string : '';
-            const isExplan      = __obj => __obj.name === '商品詳細';
-            const explanation   = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
-            //const str2none      = R.replace(/支払詳細|商品詳細|発送詳細|注意事項/g, '');
-            return R.merge(_obj, { explanation }); 
-          };
           const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const isGuid          = _obj => _obj.guid__;
           const setItems        = _objs => ({ url, title: data.title, item: _objs });
@@ -231,7 +207,7 @@ class Yahoo {
             setItems
           , R.map(setImages)
           //, R.tap(log.trace.bind(this))
-          , R.map(setExplanation)
+          , R.map(yho.setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
@@ -364,30 +340,6 @@ class Yahoo {
           const setShipPrice    = _obj => R.merge(_obj, { ship_price: setHifn(_obj.ship_details[0]) });
           const setShipBuyNow   = _obj => R.merge(_obj, { ship_buynow: setHifn(_obj.ship_details[0]) });
           const setShipping     = _obj => R.merge(_obj, { shipping: setHifn(_obj.ship_details[6]) });
-          const setExplanation  = _obj => { 
-            const input = R.replace(/\r?\n/g, '', _obj.explanation);
-            const len = R.length(input);
-            const words = [ '支払詳細', '商品詳細', '発送詳細', '注意事項' ];
-            let num1 = R.length(words), idx = 0, pairs = [];
-            while(num1--) {
-              idx = R.indexOf(words[num1], input)
-              if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
-            }
-            pairs = R.compose(R.sortBy(R.prop('from')), R.filter(__obj => !R.isNil(__obj)))(pairs);
-            const max = R.length(pairs);
-            let num2 = max;
-            while(num2--) {
-              if(num2 === max - 1)  pairs[num2] = R.merge(pairs[num2], { to: len });
-              else                  pairs[num2] = R.merge(pairs[num2], { to: pairs[num2+1].from - 1 });
-            }
-            const subString     = __obj => input.substring(__obj.from, __obj.to);
-            const setSubStr     = __obj => R.merge(__obj, { string: subString(__obj) });
-            const setExplan     = __obj => __obj ? __obj.string : '';
-            const isExplan      = __obj => __obj.name === '商品詳細';
-            const explanation = R.compose(setExplan, R.find(isExplan), R.map(setSubStr))(pairs);
-            //const str2none      = R.replace(/支払詳細|商品詳細|発送詳細|注意事項/g, '');
-            return R.merge(_obj, { explanation }); 
-          };
           const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const isGuid          = _obj => _obj.guid__;
           const isDescription   = _obj => _obj.description;
@@ -396,7 +348,7 @@ class Yahoo {
             setItems
           , R.map(setImages)
           //, R.tap(log.trace.bind(this))
-          , R.map(setExplanation)
+          , R.map(yho.setExplanation)
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)

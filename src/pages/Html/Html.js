@@ -8,7 +8,8 @@ import Static             from 'Pages/Static/Static';
 import Icon               from 'Assets/image/favicon.ico';
 
 const config = dotenv.config();
-if(config.error) throw config.error;
+if(config.error) throw new Error(config.error);
+
 const app_name = process.env.APP_NAME;
 const node_env = process.env.NODE_ENV;
 const asetPath = process.env.ASSET_PATH;
