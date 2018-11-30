@@ -25,11 +25,8 @@ class Trade extends React.Component {
     const { user, category } = options;
     if(!user) return null;
     std.logInfo(Trade.displayName, 'prefetch', { user, category });
-    return TradeAction.presetUser(user);
-    //return Promise.all([
-    //    TradeAction.presetUser(user)
-    //  , TradeAction.prefetchTraded(user, 0, 20)
-    //  ]);
+    return TradeAction.presetUser(user)
+      .then(() => TradeAction.prefetchTraded(user, 0, 20));
   }
 
   componentDidMount() {

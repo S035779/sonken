@@ -105,7 +105,7 @@ export default class FeedParser {
           const { user, category } = options;
           const conditions = { user, category };
           const setIds = R.map(doc => doc._id);
-          const query = Note.find(conditions);
+          const query = Note.find(conditions, { _id: 1 });
           return query.exec()
             .then(docs => setIds(docs))
             .then(docs =>  Note.aggregate()
@@ -118,9 +118,11 @@ export default class FeedParser {
         {
           const { user, category } = options;
           const conditions = { user, category };
-          const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
+          //const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
           const query = Note.find(conditions);
-          return query.populate(params).countDocuments().exec();
+          return query
+            //.populate(params)
+            .countDocuments().exec();
         }
       case 'fetch/notes':
         {
