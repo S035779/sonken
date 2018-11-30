@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
-import { forkJoin, from, throwError, of }   from 'rxjs';
+import { forkJoin, throwError, of }   from 'rxjs';
 import { flatMap, map } from 'rxjs/operators';
 import _async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
@@ -13,7 +13,7 @@ import fss              from 'Utilities/fssutils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
-if(config.error) throw config.error();
+if(config.error) throw new Error(config.error);
 
 const node_env        = process.env.NODE_ENV    || 'development';
 const workername      = process.env.WORKER_NAME || 'empty';
@@ -37,6 +37,7 @@ if (node_env === 'production') {
 }
 
 const request = (operation, options) => {
+  const AWS = aws.of(aws_keyset);
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   switch(operation) {
@@ -82,23 +83,19 @@ const request = (operation, options) => {
       {
         const { user, id } = options;
         const conditions = { user, id };
-        const operator = (storage, filename) => aws.of(aws_keyset).createWriteStream(storage, filename);
-        const setAttribute = obj => ({ user, id: obj.guid__, data: { images: obj.images } });
-        const observable = obj => feed.createAttribute(setAttribute(obj));
+        const operator = (storage, filename) => AWS.createWriteStream(storage, filename);
         return feed.fetchJobNote(conditions).pipe(
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
-          , flatMap(obj => from(observable(obj)))
+          , flatMap(obj => feed.createAttribute({ user, id: obj.guid__, data: { images: obj.images } }))
           );
       }
     //case 'archives':
     //  {
     //    const { user, id } = options;
     //    const conditions = { user, id };
-    //    const setAttribute = obj => ({ user, id: obj.guid__, data: { archive: obj.archive } });
-    //    const observable = obj => feed.createAttribute(setAttribute(obj));
     //    return feed.fetchJobNote(conditions).pipe(
     //        flatMap(obj => feed.createArchives(obj))
-    //      , flatMap(obj => from(observable(obj)))
+    //      , flatMap(obj => feed.createAttribute({ user, id: obj.guid__, data: { archive: obj.archive } }))
     //      );
     //  }
     case 'attribute':

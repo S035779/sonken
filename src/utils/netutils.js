@@ -159,7 +159,7 @@ const get = (url, { search, operator, filename }, callback) => {
     let response = '';
     if(operator) {
       res.pipe(operator);
-      response = filename;
+      response = { src: url, key: filename };
     } else {
       res.setEncoding('utf8');
       res.on('data', chunk => response += chunk);

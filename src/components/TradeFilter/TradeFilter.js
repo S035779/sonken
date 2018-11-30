@@ -30,7 +30,6 @@ class TradeFilter extends React.Component {
     , isNotValid: false
     , isNotResult: false
     };
-    this.formsRef = React.createRef();
   }
 
   componentDidMount() {
@@ -52,7 +51,7 @@ class TradeFilter extends React.Component {
     if(prevItems && nextItems.length !== 0) {
       if(prevItems.length === 0) {
         std.logInfo(TradeFilter.displayName, 'Init', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
         std.logInfo(TradeFilter.displayName, 'Update', nextProps);
@@ -60,11 +59,11 @@ class TradeFilter extends React.Component {
         this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter })
       } else if(!itemFilter.allTrading) {
         std.logInfo(TradeFilter.displayName, 'Filter', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllTrading: false });
       } else if(itemFilter.allTrading !== prevAllTrading) {
         std.logInfo(TradeFilter.displayName, 'Normal', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllTrading: true });
       } else {
         std.logInfo(TradeFilter.displayName, 'All', nextProps);
@@ -82,10 +81,9 @@ class TradeFilter extends React.Component {
 
   handlePagination() {
     const { isRequest, page } = this.state;
-    const documentElement = this.formsRef.current;
-    const scrollTop = documentElement.scrollTop;
-    const scrollHeight = documentElement.scrollHeight;
-    const clientHeight = documentElement.clientHeight;
+    const scrollTop     = this.formsRef.scrollTop;
+    const scrollHeight  = this.formsRef.scrollHeight;
+    const clientHeight  = this.formsRef.clientHeight;
     const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
@@ -247,7 +245,7 @@ class TradeFilter extends React.Component {
             </div>
           </div>
         </div>
-        <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.noteList}>
+        <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.noteList}>
           <TradeItemList user={user} items={items} selectedItemId={selectedItemId} page={page} />
         </div>
       </div>;

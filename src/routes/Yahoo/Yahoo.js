@@ -559,7 +559,8 @@ class Yahoo {
   jobImage(operator, { guid__, images }) {
     const promises    = R.map(obj => this.getImage(operator, guid__, obj));
     return forkJoin(promises(images)).pipe(
-      map(objs => ({ guid__, images: objs }))
+      map(R.map(obj => ({ url: obj.src, archive: obj.key })))
+    , map(objs => ({ guid__, images: objs }))
     );
   }
   

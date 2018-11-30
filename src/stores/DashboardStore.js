@@ -37,7 +37,7 @@ export default class DashboardStore extends ReduceStore {
       , advertisement:  { url1: '', url2: '', url3: '', url4: '' }
       }
     , categorys: []
-    , images: null
+    //, images: null
     };
   }
   

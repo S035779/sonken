@@ -1,4 +1,3 @@
-import dotenv           from 'dotenv';
 import fs               from 'fs-extra';
 import path             from 'path';
 import AWS              from 'aws-sdk';
@@ -6,11 +5,6 @@ import * as R           from 'ramda';
 import archiver         from 'archiver';
 import stream           from 'stream';
 import log              from 'Utilities/logutils';
-
-const config = dotenv.config();
-if(config.error) throw config.error;
-
-const CACHE = process.env.CACHE;
 
 class awsutils {
   constructor({ access_key, secret_key, region }) {
@@ -94,7 +88,7 @@ class awsutils {
 
   fetchSignedUrl(bucket, { key, name, file }) {
     const ResponseContentDisposition = 'attachment; filename="' + name + '"';
-    const params = { Bucket: bucket, Key: key, Expires: 60, ResponseContentDisposition };
+    const params = { Bucket: bucket, Key: key, Expires: 60 * 60 * 24 * 180, ResponseContentDisposition };
     return new Promise((resolve, reject) => {
       this.s3.getSignedUrl('getObject', params, (err, url) => {
         if(err) return reject(err);
@@ -102,6 +96,11 @@ class awsutils {
         resolve(result);
       });
     });
+  }
+
+  fetchSignedUrls(bucket, files) {
+    const promises = R.map(file => this.fetchSignedUrl(bucket, file));
+    return Promise.all(promises(files));
   }
 
   fetchObject(bucket, { key, name }) {
@@ -131,7 +130,7 @@ class awsutils {
 
   createWriteStream(bucket, key) {
     const passStream = new stream.PassThrough();
-    const params = { Bucket: bucket, Key: key, Body: passStream };
+    const params = { Bucket: bucket, Key: key, Expires: 60 * 60 * 24 * 180, Body: passStream };
     const manager = this.s3.upload(params, (err, data) => {
       if(err) {
         log.error(awsutils.displayName, err.name, err.message, err.stack);
@@ -145,7 +144,7 @@ class awsutils {
     //passStream.on('finish', () => log.debug(awsutils.displayName, 'Finish:', 'it is finish.'));
     //passStream.on('pipe',   src => log.debug(awsutils.displayName, 'Pipe:', src));
     //passStream.on('unpipe', src => log.debug(awsutils.displayName, 'Unpipe:', src));
-    manager.on('httpUploadProgress', obj => log.trace(awsutils.displayName, 'Progress', obj));
+    manager.on('httpUploadProgress', obj => log.trace(awsutils.displayName, 'Progress:', obj));
     return passStream;
   }
 
@@ -167,11 +166,11 @@ class awsutils {
     return promise.then(setFile);
   }
 
-  createArchiveFromS3(bucket, { key, files }) {
+  createArchiveFromS3(bucket, cache, { key, files }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
       const archive = archiver('zip', { zlib: { level: 9 } });
-      const cachefile = path.resolve(__dirname, '../', CACHE, `cachefile_${Date.now()}.tmp`);
+      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const dst = fs.createWriteStream(cachefile);
       dst.on('finish', () => {
         log.trace(awsutils.displayName, 'finish:', cachefile);
@@ -192,12 +191,12 @@ class awsutils {
     });
   }
 
-  createArchiveFromFS(bucket, { key, files, subpath }) {
+  createArchiveFromFS(bucket, cache, { key, files, subpath }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
       const archive = archiver('zip', { zlib: { level: 9 } });
-      const cachefile = path.resolve(__dirname, '../', CACHE, `cachefile_${Date.now()}.tmp`);
-      const subdir    = path.resolve(__dirname, '../', CACHE, subpath);
+      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
       dst.on('finish', () => {
         log.trace(awsutils.displayName, 'finish:', cachefile);

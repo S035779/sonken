@@ -1,8 +1,8 @@
+import * as R               from 'ramda';
 import React                from 'react';
 import PropTypes            from 'prop-types';
 import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
-//import echo                 from 'Utilities/echo';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
@@ -21,15 +21,6 @@ class RssItemList extends React.Component {
       if(item.added)   added.push(item.guid__);
     });
     this.state = { listed, starred, added, deleted };
-    this.imageRef = React.createRef();
-  }
-
-  componentDidMount() {
-    //echo.init(this.imageRef);
-  }
-
-  componentWillUnmount() {
-    //echo.detach();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -141,6 +132,9 @@ class RssItemList extends React.Component {
 
   renderItem(index, item) {
     //std.logInfo(RssItemList.displayName, 'Item', { index, item });
+    //const _blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    const archive = item.attributes && item.attributes.images ? R.head(item.attributes.images) : null;
+    const image = archive && archive.signedlink ? archive.signedlink : item.description.DIV.A.IMG.attr.SRC;
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
     const textClass = { primary: classes.primary, secondary: classes.secondary };
@@ -167,8 +161,7 @@ class RssItemList extends React.Component {
             <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>{renderNewAdded}</IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-              <img ref={this.imageRef} src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT} 
-                className={classes.image} />
+              <img src={image} alt={item.description.DIV.A.IMG.attr.ALT} className={classes.image} />
               </a>
             </div>
             <ListItemText classes={textClass} className={classes.listItemText} primary={title} secondary={description}/>

@@ -37,18 +37,10 @@ const rowHeight         = 62
 const editHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${rowHeight}px)`;
 const editHeightSmUp    = `calc(100vh - ${barHeightSmUp  }px - ${rowHeight}px)`;
 const styles = theme => ({
-  noteEdit: { display: 'flex', flexDirection: 'column'
-            , height: editHeightSmDown
+  noteEdit: { display: 'flex', flexDirection: 'column', height: editHeightSmDown
             , [theme.breakpoints.up('sm')]: { height: editHeightSmUp }}
-, view:     { position: 'relative', height: rowHeight * 4
-            , overflow: 'auto'
-            , border: '1px solid #CCC', padding: '20px 10px 10px 10px'
-            , '&:before': { position: 'absolute', top: 0, left: 0
-              , display: 'inline-block'
-              , borderRight: '1px solid #CCC'
-              , borderBottom: '1px solid #CCC'
-              , padding: '5px 10px'
-              , content: '"Preview"', fontSize: '12px'
-              , backgroundColor: '#F5F5F5' }}
+, view:     { position: 'relative', height: rowHeight * 4, overflow: 'auto', border: '1px solid #CCC', padding: '20px 10px 10px 10px'
+            , '&:before': { position: 'absolute', top: 0, left: 0, display: 'inline-block', borderRight: '1px solid #CCC'
+              , borderBottom: '1px solid #CCC', padding: '5px 10px', content: '"Preview"', fontSize: '12px', backgroundColor: '#F5F5F5'}}
 });
 export default withStyles(styles)(MarchantEdit);

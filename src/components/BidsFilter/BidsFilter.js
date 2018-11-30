@@ -30,7 +30,6 @@ class BidsFilter extends React.Component {
     , isNotValid: false
     , isNotResult: false
     };
-    this.formsRef = React.createRef();
   }
 
   componentDidMount() {
@@ -52,7 +51,7 @@ class BidsFilter extends React.Component {
     if(prevItems && nextItems.length !== 0) {
       if(prevItems.length === 0) {
         std.logInfo(BidsFilter.displayName, 'Init', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter });
       } else if(prevPage !== nextPage) {
         std.logInfo(BidsFilter.displayName, 'Update', nextProps);
@@ -60,11 +59,11 @@ class BidsFilter extends React.Component {
         this.setState({ items: catItems(nextItems), prevPage: nextPage, itemFilter });
       } else if(!itemFilter.allBidding) {
         std.logInfo(BidsFilter.displayName, 'Filter', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllBidding: false });
       } else if(itemFilter.allBidding !== prevAllBidding) {
         std.logInfo(BidsFilter.displayName, 'Normal', nextProps);
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ items: nextItems, page: 1, prevPage: 1, itemFilter, prevAllBidding: true });
       } else {
         std.logInfo(BidsFilter.displayName, 'All', nextProps);
@@ -82,10 +81,9 @@ class BidsFilter extends React.Component {
 
   handlePagination() {
     const { isRequest, page } = this.state;
-    const documentElement = this.formsRef.current;
-    const scrollTop = documentElement.scrollTop;
-    const scrollHeight = documentElement.scrollHeight;
-    const clientHeight = documentElement.clientHeight;
+    const scrollTop     = this.formsRef.scrollTop;
+    const scrollHeight  = this.formsRef.scrollHeight;
+    const clientHeight  = this.formsRef.clientHeight;
     const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
@@ -247,7 +245,7 @@ class BidsFilter extends React.Component {
             </div>
           </div>
         </div>
-        <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.noteList}>
+        <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.noteList}>
           <BidsItemList user={user} items={items} selectedItemId={selectedItemId} page={page} />
         </div>
       </div>;

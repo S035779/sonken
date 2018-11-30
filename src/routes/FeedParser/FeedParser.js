@@ -27,6 +27,8 @@ const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const STORAGE         = process.env.STORAGE;
+const CACHE           = process.env.CACHE;
+
 
 const amz_keyset  = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 const aws_keyset  = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
@@ -40,6 +42,10 @@ const ObjectId = mongoose.Types.ObjectId;
  * @constructor
  */
 export default class FeedParser {
+  constructor() {
+    this.AWS = aws.of(aws_keyset);
+  }
+
   static of() {
     return new FeedParser();
   }
@@ -104,12 +110,10 @@ export default class FeedParser {
         {
           const { user, category } = options;
           const conditions = { user, category };
-          const setIds = R.map(doc => doc._id);
           const query = Note.find(conditions, { _id: 1 });
           return query.exec()
-            .then(docs => setIds(docs))
             .then(docs =>  Note.aggregate()
-              .match({ user, _id: { $in: docs.map(id => ObjectId(id)) } })
+              .match({ user, _id: { $in: docs.map(doc => ObjectId(doc._id)) } })
               .project({ item_size: { $size: "$items" }})
               .group({ _id: "$_id", counts: { $sum: "$item_size" } })
               .exec());
@@ -132,7 +136,7 @@ export default class FeedParser {
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCategory = !R.isNil(category);
           const conditions = isCategory ? { user, category } : { user };
-          const params = { 
+          let params = { 
             path:     'items'
           , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }
           , populate: [
@@ -141,18 +145,20 @@ export default class FeedParser {
             , { path: 'readed',  select: 'readed'  }
             , { path: 'starred', select: 'starred' }
             , { path: 'listed',  select: 'listed'  }
+            , { path: 'attributes' }
             ]
           };
+          if(isProject)   params = R.merge(params, { select: filter.select });
           const query = Note.find(conditions);
-          if(isPaginate) query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
-          if(isProject) R.merge(params, { select: filter.select });
-          if(!isCSV) query.populate(params);
+          if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          if(!isCSV)      query.populate(params);
           return query.exec();
         }
       case 'count/item':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
+          const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCount = request === 'count/item';
           const conditions = { user, _id: id };
@@ -201,9 +207,8 @@ export default class FeedParser {
             , { path: 'attributes' }
             ]
           };
-          if(match) {
-            params = R.merge(params, { match });
-          }
+          if(match)     params = R.merge(params, { match })
+          if(isProject) params = R.merge(params, { select: filter.select });
           const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
           const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
           const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
@@ -1192,6 +1197,8 @@ export default class FeedParser {
   }
 
   fetchNote({ user, id, skip, limit, filter }) {
+    const project = { select: { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
+    const _filter  = R.merge(filter, project);
     const observables = forkJoin([
     //  this.getStarred(user)
     //, this.getListed(user)
@@ -1199,7 +1206,7 @@ export default class FeedParser {
     //, this.getDeleted(user)
     //, this.getAdded(user)
       this.cntItem(user, id, filter)
-    , this.getNote(user, id, skip, limit, filter)
+    , this.getNote(user, id, skip, limit, _filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setItemPage(skip, limit, objs[0])
@@ -1521,7 +1528,22 @@ export default class FeedParser {
   }
 
   createAttribute({ user, id, data }) {
-    return from(this.addAttribute(user, id, data));
+    const { images } = data;
+    const setKey    = urls => this.setImageKey(id, urls);
+    const setUrls   = R.map(obj => obj.url);
+    const setFiles  = R.compose(setKey, setUrls);
+    const zipLinks  = R.zip(images)
+    const mrgLinks  = R.map(R.mergeAll);
+    const setLinks  = R.map(obj => ({ signedlink: obj.url }));
+    const setImages = objs => ({ images: objs });
+    const getLinks  = R.compose(setImages, mrgLinks, zipLinks, setLinks);
+    const observable = defer(() => !R.isNil(images) 
+      ? from(this.AWS.fetchSignedUrls(STORAGE, setFiles(images)))
+          .pipe(map(getLinks))
+      : from(data));
+    return observable.pipe(
+      flatMap(obj => this.addAttribute(user, id, obj))
+    );
   }
 
   deleteAttribute({ user, id }) {
@@ -1707,8 +1729,7 @@ export default class FeedParser {
     const urlpath = NODE_ENV !== 'staging';
     //const setAsins = R.join(':');
     const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
-    const setName = (guid, url) => 
-      urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setName = (guid, url) => urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage = (guid, img, idx) => img[idx-1] ? setName(guid, img[idx-1]) : '-';
     let map, keys;
     switch(type) {
@@ -2201,13 +2222,20 @@ export default class FeedParser {
     );
   }
 
+  setArchiveKey(key, value) {
+    return std.crypto_sha256(value, key, 'hex') + '.zip';
+  }
+
+  setImageKey(key, values) {
+    const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.img';
+    const setName     = (_key, _val) => _key + '_' + path.basename(std.parse_url(_val).pathname);
+    const setImage    = (_key, _vals) => R.map(_val => ({ key: setKey(_key, _val), name: setName(_key, _val) }), _vals);
+    return setImage(key, values);
+  }
+
   downloadImages({ user, ids, filter }) {
-    const AWS         = aws.of(aws_keyset);
-    const getobjects  = objs => AWS.fetchObjects(STORAGE, objs);
-    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
-    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
-    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
-    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
+    const getobjects  = objs => this.AWS.fetchObjects(STORAGE, objs);
+    const setImages   = R.map(obj => this.setImageKey(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
@@ -2226,10 +2254,7 @@ export default class FeedParser {
   }
 
   downloadImage({ user, ids, filter }) {
-    const setKey      = (guid, url) => std.crypto_sha256(url, guid, 'hex') + '.img';
-    const setName     = (guid, url) => guid + '_' + path.basename(std.parse_url(url).pathname);
-    const setImage    = (guid, urls) => R.map(url => ({ key: setKey(guid, url), name: setName(guid, url) }), urls);
-    const setImages   = R.map(obj => setImage(obj.guid, obj.images));
+    const setImages   = R.map(obj => this.setImageKey(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
@@ -2248,23 +2273,23 @@ export default class FeedParser {
 
   createArchive({ user, category, type }, file) {
     const { files } = file;
-    const AWS         = aws.of(aws_keyset);
-    const key         = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
-    return AWS.createArchiveFromS3(STORAGE, { key, files });
+    const key         = this.setArchiveKey(type, user + '-' + category);
+    return this.AWS.createArchiveFromS3(STORAGE, CACHE, { key, files });
   }
 
   createArchives({ user, category, type, total, index, limit }, file) {
     const { subpath, files } = file;
     const _files      = R.map(file => ({ name: file }), files)
-    const AWS         = aws.of(aws_keyset);
-    const key         = std.crypto_sha256(user + '-' + category, type, 'hex') + '.zip';
+    const key         = this.setArchiveKey(type, user + '-' + category);
     const numTotal    = Number(total);
     const numIndex    = Number(index) + 1;
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
     const isFiles     = numFiles !== 0;
     const isSubscribe = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
-    return defer(() => isFiles && isSubscribe ? AWS.createArchiveFromFS(STORAGE, { key, files: _files, subpath }) : of({ file }));
+    return defer(() => isFiles && isSubscribe 
+      ? this.AWS.createArchiveFromFS(STORAGE, CACHE, { key, files: _files, subpath }) 
+      : of({ file }));
   }
 }
 FeedParser.displayName = 'FeedParser';

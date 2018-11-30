@@ -4,6 +4,7 @@ import * as R                 from 'ramda';
 import NoteAction             from 'Actions/NoteAction';
 import std                    from 'Utilities/stdutils';
 import Spinner                from 'Utilities/Spinner';
+import echo                   from 'Utilities/echo';
 
 import { withStyles }         from '@material-ui/core/styles';
 import { Button, Checkbox, Typography, TextField, Select, InputLabel, FormControl, MenuItem, CircularProgress }
@@ -39,15 +40,16 @@ class ClosedForms extends React.Component {
     , loadingImages: props.loadingImages
     , loadingDownload: props.loadingDownload
     };
-    this.formsRef = React.createRef();
   }
 
   componentDidMount() {
     this.spn = Spinner.of('app');
+    echo.init(this.formsRef);
   }
 
   componentWillUnmount() {
     this.spn.stop();
+    echo.detach();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -64,7 +66,7 @@ class ClosedForms extends React.Component {
     if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
@@ -86,7 +88,7 @@ class ClosedForms extends React.Component {
         });
       } else if(!nextFilter.allAuction) {
         std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , prevAllAuction: false
@@ -94,7 +96,7 @@ class ClosedForms extends React.Component {
         });
       } else if(nextFilter.allAuction !== prevAllAuction) {
         std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , prevAllAuction: true
@@ -109,7 +111,7 @@ class ClosedForms extends React.Component {
     } else if(prevNote && prevNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({ 
           note: nextNote, page: 1, prevPage: 1
         , prevAllAuction: true
@@ -124,10 +126,9 @@ class ClosedForms extends React.Component {
 
   handlePagination() {
     const { isRequest, page } = this.state;
-    const documentElement   = this.formsRef.current;
-    const scrollTop         = documentElement.scrollTop;
-    const scrollHeight      = documentElement.scrollHeight;
-    const clientHeight      = documentElement.clientHeight;
+    const scrollTop         = this.formsRef.scrollTop;
+    const scrollHeight      = this.formsRef.scrollHeight;
+    const clientHeight      = this.formsRef.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
@@ -249,7 +250,7 @@ class ClosedForms extends React.Component {
     const { items } = this.state.note;
     const filter = { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold };
     const color = this.getColor(category);
-    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
+    return <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
@@ -338,7 +339,6 @@ ClosedForms.propTypes = {
 , itemFilter: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , file: PropTypes.object
-, images: PropTypes.object
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
 , loadingImages: PropTypes.bool.isRequired

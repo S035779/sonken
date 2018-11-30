@@ -33,7 +33,6 @@ class RssForms extends React.Component {
     , page: 1
     , prevPage: 1
     };
-    this.formsRef = React.createRef();
   }
 
   componentDidMount() {
@@ -54,7 +53,7 @@ class RssForms extends React.Component {
     if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: nextLoadingDownload
@@ -78,7 +77,7 @@ class RssForms extends React.Component {
     } else if(prevNote && prevNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(RssForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
-        this.formsRef.current.scrollTop = 0;
+        this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: true
@@ -92,10 +91,9 @@ class RssForms extends React.Component {
 
   handlePagination() {
     const { isRequest, page } = this.state;
-    const documentElement   = this.formsRef.current;
-    const scrollTop         = documentElement.scrollTop;
-    const scrollHeight      = documentElement.scrollHeight;
-    const clientHeight      = documentElement.clientHeight;
+    const scrollTop         = this.formsRef.scrollTop;
+    const scrollHeight      = this.formsRef.scrollHeight;
+    const clientHeight      = this.formsRef.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.spn.start();
@@ -254,7 +252,7 @@ class RssForms extends React.Component {
     const link_amz = note.AmazonUrl;
     const name = note.name;
     const color = this.getColor(category);
-    return <div ref={this.formsRef} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
+    return <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
         <Typography variant="h6" noWrap className={classes.title}>{note.title}</Typography>
         <div className={classes.buttons}>
