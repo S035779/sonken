@@ -133,9 +133,14 @@ export default {
       dispatch({ type: 'jobs/fetch', jobs});
     });
   },
-  createJob(operation, params) {
-    return NoteApiClient.createJob(operation, params).then(file => {
-      dispatch({ type: 'job/create', file });
+  downloadJob(operation, params) {
+    return NoteApiClient.downloadJob(operation, params).then(file => {
+      dispatch({ type: 'job/download', file });
+    });
+  },
+  signedlinkJob(operation, params) { 
+    return NoteApiClient.signedlinkJob(operation, params).then(images => {
+      dispatch({ type: 'job/signedlink', images });
     });
   },
   deleteCache() {

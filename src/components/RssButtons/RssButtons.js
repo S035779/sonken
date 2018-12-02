@@ -119,7 +119,8 @@ class RssButtons extends React.Component {
   }
 
   render() {
-    const { classes, category, user, notes, selectedNoteId, itemFilter, file } = this.props;
+    //std.logInfo(RssButtons.displayName, 'Props', this.props);
+    const { classes, category, user, notes, selectedNoteId, itemFilter, file, images } = this.props;
     const { isSuccess, isNotValid, isDownload, checked } = this.state;
     const color = this.getColor(category);
     const itemNumber = notes.length;
@@ -132,7 +133,7 @@ class RssButtons extends React.Component {
       { isAlpha ? ( <RssButton color={color} className={classes.button} onClick={this.handleOpenDialog.bind(this, 'isDownload')}>
         ダウンロード</RssButton> ) : null }
         <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} 
-          ids={selectedNoteId} itemNumber={itemNumber} filter={itemFilter} name="0001" file={file}
+          ids={selectedNoteId} itemNumber={itemNumber} filter={itemFilter} name="0001" file={file} images={images}
           onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
@@ -152,6 +153,7 @@ RssButtons.propTypes = {
 , notes: PropTypes.array.isRequired
 , selectedNoteId: PropTypes.array.isRequired
 , file: PropTypes.object
+, images: PropTypes.array
 , category: PropTypes.string.isRequired
 , itemFilter: PropTypes.object.isRequired
 };

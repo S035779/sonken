@@ -81,8 +81,10 @@ export default {
         return new Promise((resolve, reject) => xhr.postFile(   api + '/traded',    options, resolve, reject));
       case 'download/bided':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
-      case 'create/job':
+      case 'download/job':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/worker',    options, resolve, reject));
+      case 'signedlink/job':
+        return new Promise((resolve, reject) => xhr.putJSON(    api + '/worker',    options, resolve, reject));
       case 'fetch/jobs':
         return new Promise((resolve, reject) => xhr.getJSON(    api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
@@ -207,9 +209,13 @@ export default {
   /*
    *  jobQueue
    */
-  createJob(operation, params) {
+  downloadJob(operation, params) {
     const { ids, user, category, type, filter } = params;
-    return this.request('create/job', { operation, ids, user, category, type, filter });
+    return this.request('download/job', { operation, ids, user, category, type, filter });
+  },
+  signedlinkJob(operation, params) {
+    const { ids, user, category, type, filter } = params;
+    return this.request('signedlink/job', { operation, ids, user, category, type, filter });
   },
   fetchJobs(params) {
     return this.request('fetch/jobs', params);

@@ -103,7 +103,7 @@ class Dashboard extends React.Component {
   render() {
     //std.logInfo(Dashboard.displayName, 'State', this.state);
     const { classes, match, route, location } = this.props;
-    const { isAuthenticated, user, notes, page, ids, filter, file, categorys, profile, preference } = this.state;
+    const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;
     const category = match.params.category || 'marchant';
     const title = this.getTitleName(category);
@@ -112,18 +112,20 @@ class Dashboard extends React.Component {
     const _note = _notes.find(obj => obj._id === _id);
     const __note = R.head(_notes);
     const noteNumber = __note && __note.note_attributes && __note.note_attributes.note ? __note.note_attributes.note.total : 0; 
+    const _images = images === '' ? [] : images;
     return isAuthenticated
       ? ( <div className={classes.root}>
           <RssSearch user={user} title={title} category={category} categorys={categorys} note={_note} file={file}
             notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
           <div className={classes.body}>
             <div className={classes.noteList}>
-              <RssButtons user={user} category={category} notes={_notes} file={file} selectedNoteId={ids} itemFilter={filter} />
+              <RssButtons user={user} category={category} notes={_notes} file={file} images={_images} 
+                selectedNoteId={ids} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
                 notePage={page}/>
             </div>
             <div className={classes.noteEdit}>
-              { route.routes ? renderRoutes(route.routes, { user, note: _note, category, filter, file }) : null }
+              { route.routes ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images: _images }) : null }
             </div>
           </div>
         </div> )

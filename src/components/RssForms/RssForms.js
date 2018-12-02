@@ -243,7 +243,7 @@ class RssForms extends React.Component {
 
   render() {
     //std.logInfo(RssForms.displayName, 'State', this.state);
-    const { classes, itemNumber, user, note, category, file } = this.props;
+    const { classes, itemNumber, user, note, category, file, images } = this.props;
     const { page, isNotValid, isSuccess, isDownload, loadingDownload } = this.state;
     const { items, asin, price, bidsprice, body} = this.state.note;
     const isChanged = this.isChanged();
@@ -263,8 +263,9 @@ class RssForms extends React.Component {
               {loadingDownload && <CircularProgress color="inherit" size={24} className={classes.btnProgress} />}
               </div> )
             : null }
-          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} ids={[note._id]} itemNumber={itemNumber}
-            name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+          <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} 
+            ids={[note._id]} itemNumber={itemNumber} name="0001" file={file} images={images}
+            onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
@@ -324,6 +325,7 @@ RssForms.propTypes = {
 , user: PropTypes.string.isRequired
 , note: PropTypes.object.isRequired
 , file: PropTypes.object
+, images: PropTypes.array
 , itemNumber: PropTypes.number.isRequired
 , loadingDownload: PropTypes.bool.isRequired
 , category: PropTypes.string.isRequired

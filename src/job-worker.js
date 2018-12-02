@@ -151,6 +151,7 @@ const request = (operation, options) => {
           , flatMap(file => feed.createArchives(conditions, file))
           );
       }
+    case 'signedlink/images':
     case 'download/images':
       {
         const { params } = options;

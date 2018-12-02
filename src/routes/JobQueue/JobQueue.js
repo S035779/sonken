@@ -98,7 +98,7 @@ export default class JobQueue {
     , 'data.params.user': user
     , 'data.params.category': category
     };
-    const operation = { $in: ['download/items', 'download/images', 'download/image'] };
+    const operation = { $in: ['download/items', 'download/images', 'download/image', 'signedlink/images'] };
     const setAttrs = R.map(obj => obj && obj.attrs ? obj.attrs : null);
     return from(this.getJobs(operation, conditions)).pipe(map(setAttrs));
   }
@@ -127,10 +127,11 @@ export default class JobQueue {
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
                 if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
-                return of('');
+                return of(null);
               })
             );
         }
+      case 'signedlink/images':
       case 'download/images':
         {
           const { user, category, ids, type, filter } = options;
@@ -189,38 +190,37 @@ export default class JobQueue {
     log.info(JobQueue.displayName, 'signedlink', operation);
     const params = { ids, user, category, type, filter };
     return of(this.setAWSParams(operation, params, null)).pipe(
-        flatMap(obj   => from(this.AWS.fetchObject(STORAGE, obj)))
-      , flatMap(data  => from(this.FSS.createFile({ data })))
-      , flatMap(file  => from(this.FSS.fetchFileList(file)))
-      , map(file      => this.setFSSParams(operation, params, null, file))
-      , flatMap(file  => !R.isNil(file) 
-          ? of(this.setAWSParams(operation, params, null, file))
+        flatMap( obj    => from(this.AWS.fetchObject(STORAGE, obj)))
+      , flatMap( data   => from(this.FSS.createFile({ data })))
+      , flatMap( file   => from(this.FSS.fetchFileList(file)))
+      , map(     file   => this.setFSSParams(operation, params, null, file))
+      , flatMap( file   => !R.isNil(file) 
+          ? from(this.FSS.fetchFile(file)).pipe(flatMap(file  => from(this.FSS.finalize(file)))) 
           : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
-      , flatMap(obj   => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
-      , flatMap(file  => from(this.FSS.finalize(file)))
-      , map(file      => file.url)
-      , catchError(err => {
+      , map(     file   => this.setAWSParams(operation, params, null, file))
+      , flatMap( obj    => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
+      , map(     file   => [file.url])
+      , catchError(err  => {
           if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
         })
       );
   }
-  
+
   download(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'download', operation);
     const params = { ids, user, category, type, filter };
     return of(this.setAWSParams(operation, params, null)).pipe(
-        flatMap(obj   => from(this.AWS.fetchObject(STORAGE, obj)))
-      , flatMap(data  => from(this.FSS.createFile({ data })))
-      , flatMap(file  => from(this.FSS.fetchFileList(file)))
-      , map(file      => this.setFSSParams(operation, params, null, file))
-      , flatMap(file  => !R.isNil(file) 
-          ? from(this.FSS.fetchFile(file)) 
+        flatMap( obj   => from(this.AWS.fetchObject(STORAGE, obj)))
+      , flatMap( data  => from(this.FSS.createFile({ data })))
+      , flatMap( file  => from(this.FSS.fetchFileList(file)))
+      , map(     file  => this.setFSSParams(operation, params, null, file))
+      , flatMap( file  => !R.isNil(file) 
+          ? from(this.FSS.fetchFile(file)).pipe(flatMap(file  => from(this.FSS.finalize(file)))) 
           : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
-      , flatMap(file  => from(this.FSS.finalize(file)))
-      , map(file      => this.setAWSParams(operation, params, null, file))
-      , flatMap(obj   => from(this.AWS.deleteObject(STORAGE, obj)))
-      , map(file      => file.data.buffer)
+      , map(     file  => this.setAWSParams(operation, params, null, file))
+      , flatMap( obj   => from(this.AWS.deleteObject(STORAGE, obj)))
+      , map(     file  => file.data.buffer)
       , catchError(err => {
           if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
@@ -244,7 +244,7 @@ export default class JobQueue {
   }
 
   setAWSParams(operation, { user, category, type }, index, file) {
-    const _index    = !R.isNil(index) ? index : 0;
+    const _index    = !R.isNil(index) ? index.toString() : '0';
     const header    = user + '-' + category;
     const key       = std.crypto_sha256(header + '-' + _index, type, 'hex') + '.zip';
     const name      = header + '-' + type + '-' + _index + '-' + Date.now() + '.zip' ;

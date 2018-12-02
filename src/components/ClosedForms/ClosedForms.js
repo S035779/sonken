@@ -244,7 +244,7 @@ class ClosedForms extends React.Component {
   render() {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
-    const { classes, itemNumber, perPage, user, note, category, file } = this.props;
+    const { classes, itemNumber, perPage, user, note, category, file, images } = this.props;
     const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold, page, isNotValid
       , isSuccess, isNotResult, isDownload, isQueued, loadingDownload, loadingImages } = this.state;
     const { items } = this.state.note;
@@ -260,8 +260,8 @@ class ClosedForms extends React.Component {
             {(loadingDownload || loadingImages) && <CircularProgress color="inherit"  size={24} className={classes.btnProgress} />}
           </div>
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} 
-            ids={[note._id]} itemNumber={itemNumber} 
-            filter={filter} name="0001" file={file} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+            ids={[note._id]} itemNumber={itemNumber} filter={filter} name="0001" file={file} images={images}
+            onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
           </RssDialog>
@@ -339,6 +339,7 @@ ClosedForms.propTypes = {
 , itemFilter: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , file: PropTypes.object
+, images: PropTypes.array
 , itemNumber: PropTypes.number.isRequired
 , perPage: PropTypes.number.isRequired
 , loadingImages: PropTypes.bool.isRequired

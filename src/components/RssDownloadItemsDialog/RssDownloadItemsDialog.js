@@ -1,3 +1,4 @@
+import * as R                     from 'ramda';
 import React                      from 'react';
 import PropTypes                  from 'prop-types';
 import NoteAction                 from 'Actions/NoteAction';
@@ -43,57 +44,91 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload(operation) {
+    if(itemNumber === 0) return;
+    std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
     const { user, ids, filter, itemNumber, category, checked } = this.props;
     const type = operation === 'download/items' ? this.state.name : '9999';
     const params = checked ? { user, category, filter, type } : { user, category, filter, ids, type };
-    NoteAction.deleteCache();
-    if(itemNumber !== 0) {
-      this.spn.start();
-      std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-      //NoteAction.downloadItems(user, category, ids, filter, name)
-      //NoteAction.downloadImages(user, id: note._id, filter)
-      NoteAction.createJob(operation, params)
-        .then(() => this.props.file && this.props.file.size !== 0
-          ? this.setState({ isSuccess: true,  isQueued: false }) 
-          : this.setState({ isSuccess: false, isQueued: true  }))
-        .then(() => this.props.file && this.props.file.size !== 0
-          ? this.downloadFile(operation, this.props.file) : null)
-        .then(() => this.spn.stop())
-        .then(() => NoteAction.fetchJobs({ user, category }))
-        .catch(err => {
-          std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-          this.setState({ isNotValid: true });
-          this.spn.stop();
-        });
+    NoteAction.deleteCache()
+    switch(operation) { 
+      case 'download/items':
+      case 'download/images':
+        this.spn.start();
+        return NoteAction.downloadJob(operation, params) 
+          .then(() => this.props.file && this.props.file.size !== 0
+            ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+          .then(() => this.props.file && this.props.file.size !== 0
+            ? this.downloadFile(operation, { blob: this.props.file }) : null)
+          .then(() => this.spn.stop())
+          .then(() => NoteAction.fetchJobs({ user, category }))
+          .catch(err => {
+            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+            this.spn.stop();
+          });
+      case 'signedlink/images':
+        this.spn.start();
+        return NoteAction.signedlinkJob(operation, params)
+          .then(() => this.props.images && R.length(this.props.images) !== 0
+            ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+          .then(() => this.props.images && R.length(this.props.images) !== 0
+            ? this.downloadFile(operation, { urls: this.props.images }) : null)
+          .then(() => this.spn.stop())
+          .then(() => NoteAction.fetchJobs({ user, category }))
+          .catch(err => {
+            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+            this.setState({ isNotValid: true });
+            this.spn.stop();
+          });
     }
   }
 
-  downloadFile(operation, blob) {
+  downloadFile(operation, { blob, urls }) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);
-    const mime = { type: 'application/zip' };
-    let filename;
     switch(operation) {
       case 'download/items':
-        filename = 'LIST-' + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
-        break;
+        {
+          const fileReader = new FileReader();
+          fileReader.onload = function() {
+            const url       = URL.createObjectURL(new Blob([this.result], { type: 'application/zip' }));
+            const anchor    = document.createElement('a');
+            anchor.href     = url;
+            anchor.target   = '_blank';
+            anchor.download = 'LIST-' + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
+            anchor.click();
+            URL.revokeObjectURL(url);
+          }
+          fileReader.readAsArrayBuffer(blob);
+          break;
+        }
       case 'download/images':
-        filename = 'IMG-'  + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
-        break;
-      default:
-        filename = 'download.zip';
-        break;
+        {
+          const fileReader  = new FileReader();
+          fileReader.onload = function() {
+            const url       = URL.createObjectURL(new Blob([this.result], { type: 'application/zip' }));
+            const anchor    = document.createElement('a');
+            anchor.href     = url;
+            anchor.target   = '_blank';
+            anchor.download = 'IMG-'  + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
+            anchor.click();
+            URL.revokeObjectURL(url);
+          }
+          fileReader.readAsArrayBuffer(blob);
+          break;
+        }
+      case 'signedlink/images':
+        {
+          const setLinks    = R.map(url => {
+            const anchor    = document.createElement('a');
+            anchor.href     = url;
+            anchor.target   = '_blank';
+            anchor.download = 'IMG-'  + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
+            anchor.click();
+          });
+          setLinks(urls);
+          break;
+        }
     }
-    const fileReader = new FileReader();
-    fileReader.onload = function() {
-      const url = URL.createObjectURL(new Blob([this.result], mime));
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.target = '_blank';
-      anchor.download = filename;
-      anchor.click();
-      URL.revokeObjectURL(url);
-    }
-    fileReader.readAsArrayBuffer(blob);
   }
 
   renderMenu(obj, idx) {
@@ -124,6 +159,9 @@ class RssDownloadItemsDialog extends React.Component {
             label={title} fullWidth>{renderMenu}</TextField>
         </FormControl>
         <div className={classes.buttons}>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'signedlink/images')} classes={classes.button}>
+            リンク保存
+          </RssButton>
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/images')} classes={classes.button}>
             画像保存
           </RssButton>
@@ -164,6 +202,7 @@ RssDownloadItemsDialog.propTypes = {
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired
 , file: PropTypes.object
+, images: PropTypes.array
 };
 
 const columnHeight = 62;
