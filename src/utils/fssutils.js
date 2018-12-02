@@ -149,7 +149,16 @@ export default class FSSupport {
           const { subpath, filename } = options;
           const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
           const file = path.resolve(dir, filename);
-          return fs.statSync(file).isFile();
+          const stat = fs.statSync(file);
+          return stat.isFile();
+        }
+      case 'size/file':
+        {
+          const { subpath, filename } = options;
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const file = path.resolve(dir, filename);
+          const stat = fs.statSync(file);
+          return stat.size;
         }
       default:
         {
@@ -194,6 +203,10 @@ export default class FSSupport {
     return this.request('is/file', { subpath, filename });
   }
 
+  amountFile(subpath, filename) {
+    return this.request('size/file', { subpath, filename });
+  }
+
   fetchFile({ subpath, filename }) {
     return from(this.getFile(subpath, filename));
   }
@@ -232,5 +245,10 @@ export default class FSSupport {
   isFile({ subpath, filename }) {
     return this.existFile(subpath, filename);
   }
+
+  sizeFile({ subpath, filename }) {
+    return this.amountFile(subpath, filename);
+  }
+
 }
 FSSupport.displayName = 'fssutils';

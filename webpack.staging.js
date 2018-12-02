@@ -1,5 +1,6 @@
 const webpack        = require('webpack');
 const merge          = require('webpack-merge');
+const Dotenv         = require('dotenv-webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const bundle         = require('./webpack.bundle.js');
 
@@ -8,12 +9,11 @@ const production = {
 , devtool: 'source-map'
 , optimization: { nodeEnv: false }
 , plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV':  JSON.stringify('staging')
-    , 'process.env.PLATFORM':  JSON.stringify('web')
-    , 'process.env.API_URL':   JSON.stringify('http://35.227.255.168/api')
-    , 'process.env.ASSET_URL': JSON.stringify('http://35.227.255.168/assets')
-    , 'process.env.APP_NAME':  JSON.stringify('SellerSearch!')
+    new Dotenv({
+      path: './.env.staging'
+    , safe: false
+    , systemvars: false
+    , silent: false
     })
   , new UglifyJSPlugin({ cache: true, parallel: true, sourceMap: true })
   ]

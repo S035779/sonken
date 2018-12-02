@@ -1,7 +1,7 @@
 import path                       from 'path';
 import dotenv                     from 'dotenv';
 import * as R                     from 'ramda';
-import { from, forkJoin, defer, of } from 'rxjs';
+import { from, forkJoin, defer, of }  from 'rxjs';
 import { map, flatMap }           from 'rxjs/operators';
 import { parseString }            from 'xml2js';
 import mongoose                   from 'mongoose';
@@ -16,6 +16,7 @@ import log                        from 'Utilities/logutils';
 import js2Csv                     from 'Utilities/js2Csv';
 import aws                        from 'Utilities/awsutils';
 
+std.config();
 const config = dotenv.config();
 if(config.error) throw config.error();
 
@@ -1537,12 +1538,10 @@ export default class FeedParser {
     const setLinks  = R.map(obj => ({ signedlink: obj.url }));
     const setImages = objs => ({ images: objs });
     const getLinks  = R.compose(setImages, mrgLinks, zipLinks, setLinks);
-    const observable = defer(() => !R.isNil(images) 
+    return defer(() => !R.isNil(images) 
       ? from(this.AWS.fetchSignedUrls(STORAGE, setFiles(images)))
-          .pipe(map(getLinks))
-      : from(data));
-    return observable.pipe(
-      flatMap(obj => this.addAttribute(user, id, obj))
+          .pipe(map(getLinks), flatMap(obj => this.addAttribute(user, id, obj)))
+      : from(this.addAttribute(user, id, data))
     );
   }
 
@@ -2273,23 +2272,32 @@ export default class FeedParser {
 
   createArchive({ user, category, type }, file) {
     const { files } = file;
-    const key         = this.setArchiveKey(type, user + '-' + category);
-    return this.AWS.createArchiveFromS3(STORAGE, CACHE, { key, files });
+    const header      = user + '-' + category;
+    const _count      = std.countStart(header);
+    const count       = count >= 10 ? std.countStop(header) : _count;
+    const key         = this.setArchiveKey(type, header + '-' + count);
+    return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key, files }));
   }
 
-  createArchives({ user, category, type, total, index, limit }, file) {
+  createArchives({ user, category, type, total, index, limit, size }, file) {
     const { subpath, files } = file;
     const _files      = R.map(file => ({ name: file }), files)
-    const key         = this.setArchiveKey(type, user + '-' + category);
+    const header      = user + '-' + category;
+    const _count      = std.countStart(header);
+    const count       = count >= 10 ? std.countStop(header) : _count;
+    const key         = this.setArchiveKey(type, header + '-' + count);
+    const cachefile   = key;
     const numTotal    = Number(total);
     const numIndex    = Number(index) + 1;
     const numLimit    = Number(limit);
     const numFiles    = R.length(_files);
+    const isSize      = size > 500 * 1024 * 1024;
     const isFiles     = numFiles !== 0;
-    const isSubscribe = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
-    return defer(() => isFiles && isSubscribe 
-      ? this.AWS.createArchiveFromFS(STORAGE, CACHE, { key, files: _files, subpath }) 
-      : of({ file }));
+    const isFinalize  = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
+    return defer(() => isFiles && isFinalize || isSize
+      ? from(this.AWS.createZipArchive(STORAGE, CACHE, cachefile, { key, files: _files, subpath }))
+      : of({ file })
+    );
   }
 }
 FeedParser.displayName = 'FeedParser';

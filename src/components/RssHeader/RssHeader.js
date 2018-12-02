@@ -4,7 +4,7 @@ import { withRouter }     from 'react-router-dom';
 import PropTypes          from 'prop-types'
 import classNames         from 'classnames';
 import NoteAction         from 'Actions/NoteAction';
-//import std                from 'Utilities/stdutils';
+import std                from 'Utilities/stdutils';
 
 import { withStyles }     from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Fab, LinearProgress }
@@ -17,8 +17,19 @@ class RssHeader extends React.Component {
     super(props);
     this.state = { 
       loadingDownload: false
-    //, category: ''
+    , category: ''
     };
+  }
+
+  componentDidMount() {
+    const { user, location } = this.props;
+    const category = location.pathname.split('/')[1];
+    const interval = 1000 * 60 * 1;
+    this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category }), 0, interval);
+  }
+
+  componentWillUnmount() {
+    if(this.timer) clearInterval(this.timer);
   }
 
   componentWillReceiveProps(nextProps) {

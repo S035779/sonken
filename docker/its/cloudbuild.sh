@@ -1,3 +1,4 @@
 #!/bin/sh
-DATA=`cat ../staging/.env`
-gcloud builds submit --config=cloudbuild.yaml --substitutions=_DOTENV="$DATA" .
+DATA1=`cat ../staging/.env`
+DATA2=`cat ../staging/.env.wevpack`
+gcloud builds submit --config=cloudbuild.yaml --substitutions=_DOTENV="$DATA1",_DOTENV_WEBPACK="$DATA2" .

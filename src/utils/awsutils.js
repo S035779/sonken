@@ -3,6 +3,7 @@ import path             from 'path';
 import AWS              from 'aws-sdk';
 import * as R           from 'ramda';
 import archiver         from 'archiver';
+import yazl             from 'yazl';
 import stream           from 'stream';
 import log              from 'Utilities/logutils';
 
@@ -23,6 +24,8 @@ class awsutils {
     this.props = { config: { s3, rekognition } };
     this.rekognition = new AWS.Rekognition(rekognition);
     this.s3 = new AWS.S3(s3);
+    this.zip = new yazl.ZipFile();
+    this.archive = archiver('zip', { zlib: { level: 9 } });
   }
 
   static of(props) {
@@ -166,10 +169,9 @@ class awsutils {
     return promise.then(setFile);
   }
 
-  createArchiveFromS3(bucket, cache, { key, files }) {
+  createS3Archive(bucket, cache, { key, files }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
-      const archive = archiver('zip', { zlib: { level: 9 } });
       const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const dst = fs.createWriteStream(cachefile);
       dst.on('finish', () => {
@@ -183,19 +185,18 @@ class awsutils {
           resolve({ Bucket: bucket, Key: key });
         });
       });
-      archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      archive.on('error', err => reject(err));
-      archive.pipe(dst);
-      R.map(obj => archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
-      archive.finalize();
+      this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      this.archive.on('error', err => reject(err));
+      this.archive.pipe(dst);
+      R.map(obj => this.archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
+      this.archive.finalize();
     });
   }
 
-  createArchiveFromFS(bucket, cache, { key, files, subpath }) {
+  createArchive(bucket, cache, filename, { key, files, subpath }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
-      const archive = archiver('zip', { zlib: { level: 9 } });
-      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const cachefile = path.resolve(__dirname, '../', cache, filename);
       const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
       dst.on('finish', () => {
@@ -212,13 +213,40 @@ class awsutils {
           });
         });
       });
-      archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      archive.on('error', reject);
-      archive.pipe(dst);
-      R.map(obj => archive.append(fs.createReadStream(path.resolve(subdir, obj.name)), { name: obj.name }), files);
-      archive.finalize();
+      this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      this.archive.on('error', reject);
+      this.archive.pipe(dst);
+      R.map(obj => this.archive.append(fs.createReadStream(path.resolve(subdir, obj.name)), { name: obj.name }), files);
+      this.archive.finalize();
     });
   }
+
+  createZipArchive(bucket, cache, filename, { key, files, subpath }) {
+    return new Promise((resolve, reject) => {
+      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
+      const cachefile = path.resolve(__dirname, '../', cache, filename);
+      const subdir    = path.resolve(__dirname, '../', cache, subpath);
+      const dst = fs.createWriteStream(cachefile);
+      dst.on('close', () => {
+        log.trace(awsutils.displayName, 'close:', cachefile);
+        const src = fs.createReadStream(cachefile);
+        src.pipe(this.createWriteStream(bucket, key)).on('error', reject);
+        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
+        src.on('close', () => {
+          log.trace(awsutils.displayName, 'close', key);
+          fs.remove(subdir, err => {
+            if(err) return reject(err);
+            fs.unlink(cachefile, reject);
+            resolve({ Bucket: bucket, Key: key });
+          });
+        });
+      });
+      this.zip.outputStream.pipe(dst);
+      R.map(obj => this.zip.addReadStream(fs.createReadStream(path.resolve(subdir, obj.name)), obj.name), files);
+      this.zip.end();
+    });
+  }
+
 }
 awsutils.displayName = 'awsutils';
 export default awsutils;

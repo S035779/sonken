@@ -87,7 +87,9 @@ RUN buildDeps='git' \
   && apt-get purge -y --auto-remove $buildDeps
 
 ARG DOTENV
-RUN echo "$DOTENV" > /app/sonken/.env
+ARG DOTENV_WEBPACK
+RUN echo "$DOTENV" > /app/sonken/.env \
+  &&  echo "$DOTENV_WEBPACK" > /app/sonken/.env.webpack
 
 RUN buildDeps='build-essential python' \
   && apt-get update && apt-get install -y $buildDeps \

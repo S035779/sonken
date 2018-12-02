@@ -1,16 +1,17 @@
 const webpack = require('webpack');
 const merge   = require('webpack-merge');
+const Dotenv  = require('dotenv-webpack');
 const bundle  = require('./webpack.bundle.js');
 
 const production = {
   mode: 'production'
 , devtool: 'source-map'
 , plugins: [
-    new webpack.DefinePlugin({
-      'process.env.PLATFORM':  JSON.stringify('web')
-    , 'process.env.API_URL':   JSON.stringify('https://feedparser.alpha-one-rss.jp/api')
-    , 'process.env.ASSET_URL': JSON.stringify('https://feedparser.alpha-one-rss.jp/assets')
-    , 'process.env.APP_NAME':  JSON.stringify('アルファOne')
+    new Dotenv({
+      path: './.env.production'
+    , safe: false
+    , systemvars: false
+    , silent: false
     })
   ]
 , performance: {

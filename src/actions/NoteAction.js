@@ -139,7 +139,7 @@ export default {
     });
   },
   deleteCache() {
-    dispatch({ type: 'job/create', file: null, signedlink: '' });
+    dispatch({ type: 'job/create', file: null });
   },
   deleteAdd(user, ids) {
     return NoteApiClient.deleteAdd(user, ids).then(() => {

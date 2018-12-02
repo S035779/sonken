@@ -1,6 +1,6 @@
 import dotenv                       from 'dotenv';
 import * as R                       from 'ramda';
-import { from, throwError, of, defer }     from 'rxjs';
+import { from, throwError, of, defer } from 'rxjs';
 import { map, flatMap, catchError } from 'rxjs/operators';
 import FeedParser                   from 'Routes/FeedParser/FeedParser';
 import job                          from 'Utilities/jobutils';
@@ -152,7 +152,7 @@ export default class JobQueue {
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
                 if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
-                return of('');
+                return of(null);
               })
             );
         }
@@ -176,7 +176,7 @@ export default class JobQueue {
             , flatMap(obj => from(this.addJobs(operation, obj, { user, category, type, filter })))
             , catchError(err => {
                 if(err) log.warn(JobQueue.displayName, err.name, err.message, err.stack);
-                return of('');
+                return of(null);
               })
             );
         }
@@ -188,16 +188,17 @@ export default class JobQueue {
   signedlink(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'signedlink', operation);
     const params = { ids, user, category, type, filter };
-    const setParam = file => this.setAWSParams(operation, params, file);
-    return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
-        flatMap(data => from(this.FSS.createFile({ data })))
-      , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams(operation, params, file))
-      , flatMap(file => !R.isNil(file) 
-          ? from(this.AWS.fetchSignedUrl(STORAGE, setParam(file))) 
+    return of(this.setAWSParams(operation, params, null)).pipe(
+        flatMap(obj   => from(this.AWS.fetchObject(STORAGE, obj)))
+      , flatMap(data  => from(this.FSS.createFile({ data })))
+      , flatMap(file  => from(this.FSS.fetchFileList(file)))
+      , map(file      => this.setFSSParams(operation, params, null, file))
+      , flatMap(file  => !R.isNil(file) 
+          ? of(this.setAWSParams(operation, params, null, file))
           : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
-      , flatMap(file => from(this.FSS.finalize(file)))
-      , map(file => file.url)
+      , flatMap(obj   => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
+      , flatMap(file  => from(this.FSS.finalize(file)))
+      , map(file      => file.url)
       , catchError(err => {
           if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
@@ -208,17 +209,18 @@ export default class JobQueue {
   download(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'download', operation);
     const params = { ids, user, category, type, filter };
-    const setParam = file => this.setAWSParams(operation, params, file);
-    return from(this.AWS.fetchObject(STORAGE, setParam())).pipe(
-        flatMap(data => from(this.FSS.createFile({ data })))
-      , flatMap(file => from(this.FSS.fetchFileList(file)))
-      , map(file => this.setFSSParams(operation, params, file))
-      , flatMap(file => !R.isNil(file) 
+    return of(this.setAWSParams(operation, params, null)).pipe(
+        flatMap(obj   => from(this.AWS.fetchObject(STORAGE, obj)))
+      , flatMap(data  => from(this.FSS.createFile({ data })))
+      , flatMap(file  => from(this.FSS.fetchFileList(file)))
+      , map(file      => this.setFSSParams(operation, params, null, file))
+      , flatMap(file  => !R.isNil(file) 
           ? from(this.FSS.fetchFile(file)) 
           : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
-      , flatMap(file => from(this.FSS.finalize(file)))
-      , flatMap(file => from(this.AWS.deleteObject(STORAGE, setParam(file))))
-      , map(file => file.data.buffer)
+      , flatMap(file  => from(this.FSS.finalize(file)))
+      , map(file      => this.setAWSParams(operation, params, null, file))
+      , flatMap(obj   => from(this.AWS.deleteObject(STORAGE, obj)))
+      , map(file      => file.data.buffer)
       , catchError(err => {
           if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
@@ -226,23 +228,26 @@ export default class JobQueue {
       );
   }
   
-  setFSSParams(operation, { user, category, type }, file) {
+  setFSSParams(operation, { user, category, type }, index, file) {
     const { subpath, files } = file;
+    const _index    = !R.isNil(index) ? index.toString() : '0';
     const header    = user + '-' + category;
-    const _files    = R.filter(filename => this.FSS.isFile({ filename }) && R.test(/.*\.zip$/, filename), files);
+    const isZip     = R.test(/.*\.zip$/);
+    const _files    = R.filter(filename => isZip(filename) && this.FSS.isFile({ filename }), files);
+    const setFile   = num => !R.isNil(num) ? ({ subpath, filename: header + '-' + type + '-' + _index + '-' + num + '.zip' }) : null;
     const maxValue  = array => !R.isEmpty(array) ? Math.max(...array) : null;
-    const setFile   = num => !R.isNil(num) ? ({ subpath, filename: header + '-' + type + '-' + num + '.zip' }) : null;
-    const setVal    = objs => objs[4];
-    const isFile    = objs => objs[1] === user && objs[2] === category && objs[3] === type;
-    const regZip    = R.match(/(.*)-(.*)-(.*)-(.*)\.zip$/);
+    const setVal    = objs => objs[5];
+    const isFile    = objs => objs[1] === user && objs[2] === category && objs[3] === type && objs[4] === _index;
+    const regZip    = R.match(/(.*)-(.*)-(.*)-(.*)-(.*)\.zip$/);
     const getFile   = R.compose(setFile, maxValue, R.map(setVal), R.filter(isFile), R.map(regZip));
     return !R.isEmpty(_files) ? getFile(_files) : null;
   }
 
-  setAWSParams(operation, { user, category, type }, file) {
+  setAWSParams(operation, { user, category, type }, index, file) {
+    const _index    = !R.isNil(index) ? index : 0;
     const header    = user + '-' + category;
-    const key  = std.crypto_sha256(header, type, 'hex') + '.zip';
-    const name = header + '-' + type + '-' + Date.now() + '.zip' ;
+    const key       = std.crypto_sha256(header + '-' + _index, type, 'hex') + '.zip';
+    const name      = header + '-' + type + '-' + _index + '-' + Date.now() + '.zip' ;
     return !R.isNil(file) ? { key, name, file } : { key, name };
   }
 }

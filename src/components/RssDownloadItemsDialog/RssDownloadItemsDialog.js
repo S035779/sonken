@@ -53,12 +53,11 @@ class RssDownloadItemsDialog extends React.Component {
       //NoteAction.downloadItems(user, category, ids, filter, name)
       //NoteAction.downloadImages(user, id: note._id, filter)
       NoteAction.createJob(operation, params)
-        .then(() => {
-          const isFile = this.props.file && this.props.file.size !== 0;
-          this.setState({ isSuccess: isFile, isQueued: !isFile });
-        })
-        .then(() => 
-          this.props.file && this.props.file.size !== 0 ? this.downloadFile(this.props.file, { type: 'application/zip' }) : null)
+        .then(() => this.props.file && this.props.file.size !== 0
+          ? this.setState({ isSuccess: true,  isQueued: false }) 
+          : this.setState({ isSuccess: false, isQueued: true  }))
+        .then(() => this.props.file && this.props.file.size !== 0
+          ? this.downloadFile(operation, this.props.file) : null)
         .then(() => this.spn.stop())
         .then(() => NoteAction.fetchJobs({ user, category }))
         .catch(err => {
@@ -69,19 +68,28 @@ class RssDownloadItemsDialog extends React.Component {
     }
   }
 
-  downloadFile(blob, mime) {
+  downloadFile(operation, blob) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);
+    const mime = { type: 'application/zip' };
+    let filename;
+    switch(operation) {
+      case 'download/items':
+        filename = 'LIST-' + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
+        break;
+      case 'download/images':
+        filename = 'IMG-'  + std.formatDate(new Date(), 'YYYYMMDDhhmmss') + '.zip';
+        break;
+      default:
+        filename = 'download.zip';
+        break;
+    }
     const fileReader = new FileReader();
     fileReader.onload = function() {
-      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-      const isCSV = mime.type === 'text/csv';
-      const _file = isCSV ? 'download.csv' : 'download.zip';
-      const _blob = isCSV ? new Blob([bom, this.result], mime) : new Blob([this.result], mime);
-      const url = URL.createObjectURL(_blob);
+      const url = URL.createObjectURL(new Blob([this.result], mime));
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.target = '_blank';
-      anchor.download = _file;
+      anchor.download = filename;
       anchor.click();
       URL.revokeObjectURL(url);
     }

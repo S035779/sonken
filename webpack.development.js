@@ -1,16 +1,17 @@
 const webpack = require('webpack');
 const merge   = require('webpack-merge');
+const Dotenv  = require('dotenv-webpack');
 const bundle  = require('./webpack.bundle.js');
 
 const development = {
   mode: 'development'
 , devtool: 'inline-source-map'
 , plugins: [
-    new webpack.DefinePlugin({
-      'process.env.PLATFORM':  JSON.stringify('web')
-    , 'process.env.API_URL':   JSON.stringify('http://localhost:8080/api')
-    , 'process.env.ASSET_URL': JSON.stringify('http://localhost:8080')
-    , 'process.env.APP_NAME':  JSON.stringify('RSS Reader!!')
+    new Dotenv({ 
+      path: './.env.development' 
+    , safe: false
+    , systemvars: false
+    , silent: false
     })
   ]
 , devServer: {

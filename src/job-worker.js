@@ -38,6 +38,7 @@ if (node_env === 'production') {
 
 const request = (operation, options) => {
   const AWS = aws.of(aws_keyset);
+  const FSS = fss.of({ dirpath: '../', dirname: CACHE });
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   switch(operation) {
@@ -132,10 +133,11 @@ const request = (operation, options) => {
         const { user, category, ids, filter, type, limit, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setData = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
-        const hasFile =  
-          obj => R.filter(filename => FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.csv$/, filename), obj.files);
-        const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
-        const FSS = fss.of({ dirpath: '../', dirname: CACHE });
+        const isCSV = R.test(/.*\.csv$/);
+        const sizeFile = obj => R.map(filename => isCSV(filename) ? FSS.sizeFile({ subpath: obj.subpath, filename }) : 0, obj.files);
+        const sizeFiles = obj => R.sum(sizeFile(obj));
+        const hasFiles =  obj => R.filter(filename => isCSV(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
+        const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
         const conditions = { user, category, type, total, index, limit };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
@@ -155,10 +157,11 @@ const request = (operation, options) => {
         const { user, category, ids, filter, type, limit, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setData = objs => ({ subpath: header, data: objs });
-        const hasFile = obj => R.filter(filename => 
-          FSS.isFile({ subpath: obj.subpath, filename }) && R.test(/.*\.(gif|jpe?g|png)$/, filename), obj.files);
-        const setFiles = obj => R.merge(obj, { files: hasFile(obj) });
-        const FSS = fss.of({ dirpath: '../', dirname: CACHE });
+        const isImage = R.test(/.*\.(gif|jpe?g|png)$/);
+        const sizeFile = obj => R.map(filename => isImage(filename) ? FSS.sizeFile({ subpath: obj.subpath, filename }) : 0, obj.files);
+        const sizeFiles = obj => R.sum(sizeFile(obj));
+        const hasFiles = obj => R.filter(filename => isImage(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
+        const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
         const conditions = { user, category, type, total, index, limit };
         return feed.downloadImages({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
