@@ -2221,11 +2221,7 @@ export default class FeedParser {
     );
   }
 
-  setArchiveKey(key, value) {
-    return std.crypto_sha256(value, key, 'hex') + '.zip';
-  }
-
-  setImageKey(key, values) {
+  setImagesKey(key, values) {
     const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.img';
     const setName     = (_key, _val) => _key + '_' + path.basename(std.parse_url(_val).pathname);
     const setImage    = (_key, _vals) => R.map(_val => ({ key: setKey(_key, _val), name: setName(_key, _val) }), _vals);
@@ -2234,7 +2230,7 @@ export default class FeedParser {
 
   downloadImages({ user, ids, filter }) {
     const getobjects  = objs => this.AWS.fetchObjects(STORAGE, objs);
-    const setImages   = R.map(obj => this.setImageKey(obj.guid, obj.images));
+    const setImages   = R.map(obj => this.setImagesKey(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
@@ -2253,7 +2249,7 @@ export default class FeedParser {
   }
 
   downloadImage({ user, ids, filter }) {
-    const setImages   = R.map(obj => this.setImageKey(obj.guid, obj.images));
+    const setImages   = R.map(obj => this.setImagesKey(obj.guid, obj.images));
     const dupItems    = objs => std.dupObj(objs, 'title');
     const setItems    = R.map(obj => ({ guid: obj.guid__, title: obj.title, images: obj.images}));
     const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images && !R.isEmpty(obj.attributes.images));
@@ -2270,33 +2266,41 @@ export default class FeedParser {
     );
   }
 
+  setArchiveKey(key, value) {
+    const count       = std.count(value);
+    const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.zip';
+    console.log(count);
+    return setKey(key, value + '-' + count);
+  }
+
   createArchive({ user, category, type }, file) {
     const { files } = file;
     const header      = user + '-' + category;
-    const _count      = std.countStart(header);
-    const count       = count >= 10 ? std.countStop(header) : _count;
-    const key         = this.setArchiveKey(type, header + '-' + count);
-    return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key, files }));
+    const setKey      = () => this.setArchiveKey(type, header);
+    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: std.countStop(header) });
+    std.countStart(header); 
+    return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key: setKey(), files }))
+      .pipe(map(() => setDetail(file)));
   }
 
   createArchives({ user, category, type, total, index, limit, size }, file) {
     const { subpath, files } = file;
-    const _files      = R.map(file => ({ name: file }), files)
     const header      = user + '-' + category;
-    const _count      = std.countStart(header);
-    const count       = count >= 10 ? std.countStop(header) : _count;
-    const key         = this.setArchiveKey(type, header + '-' + count);
-    const cachefile   = key;
+    const setFiles    = R.map(file => ({ name: file }))
     const numTotal    = Number(total);
     const numIndex    = Number(index) + 1;
     const numLimit    = Number(limit);
-    const numFiles    = R.length(_files);
+    const numFiles    = R.length(files);
     const isSize      = size > 500 * 1024 * 1024;
     const isFiles     = numFiles !== 0;
     const isFinalize  = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
+    const setKey      = () => this.setArchiveKey(type, header);
+    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: std.countStop(header) });
+    if(index === 0) std.countStart(header); 
     return defer(() => isFiles && isFinalize || isSize
-      ? from(this.AWS.createZipArchive(STORAGE, CACHE, cachefile, { key, files: _files, subpath }))
-      : of({ file })
+      ? from(this.AWS.createZipArchive(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath }))
+          .pipe(map(() => setDetail(file)))
+      : of(setDetail(file))
     );
   }
 }

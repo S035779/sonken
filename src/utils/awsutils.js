@@ -193,10 +193,10 @@ class awsutils {
     });
   }
 
-  createArchive(bucket, cache, filename, { key, files, subpath }) {
+  createArchive(bucket, cache, { key, files, subpath }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
-      const cachefile = path.resolve(__dirname, '../', cache, filename);
+      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
       dst.on('finish', () => {
@@ -221,10 +221,10 @@ class awsutils {
     });
   }
 
-  createZipArchive(bucket, cache, filename, { key, files, subpath }) {
+  createZipArchive(bucket, cache, { key, files, subpath }) {
     return new Promise((resolve, reject) => {
       if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
-      const cachefile = path.resolve(__dirname, '../', cache, filename);
+      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
       dst.on('close', () => {

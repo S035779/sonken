@@ -11,12 +11,14 @@ const std = {
     this.cache['counter'] = counter();
   },
 
-  countStart: function(ttl) {
-    return this.cache.counter.count(ttl);
+  count: function(title) {
+    return this.cache.counter.count(title);
   },
-
-  countStop: function(ttl) {
-    return this.cache.counter.clear(ttl);
+  countStart: function(title) {
+    return this.cache.counter.reset(title);
+  },
+  countStop: function(title) {
+    return this.cache.counter.print(title);
   },
 
   toRGBa: function(str, a) {
@@ -802,10 +804,16 @@ const counter = function() {
       if(!_n.hasOwnProperty(_s))  _n[_s] = 0;
       return _n[_s]++;
     },
-    clear: function(s) {
+    reset: function(s) {
       _s = s || _s;
+      _n[_s] = 0;
+      return _n[_s];
+    },
+    print: function(s) {
+      _s = s || _s;
+      const msg =  `${_s}: ${_n[_s]}`;
       delete _n[_s];
-      return 0;
+      return msg;
     }
   }
 };
