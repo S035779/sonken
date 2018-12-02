@@ -1,4 +1,4 @@
-.env
+.env*
 yarn.lock
 *.log
 /node_modules/*

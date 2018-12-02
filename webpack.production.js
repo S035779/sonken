@@ -8,7 +8,7 @@ const production = {
 , devtool: 'source-map'
 , plugins: [
     new Dotenv({
-      path: './.env.production'
+      path: './.env.webpack'
     , safe: false
     , systemvars: false
     , silent: false

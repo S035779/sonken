@@ -10,7 +10,7 @@ const production = {
 , optimization: { nodeEnv: false }
 , plugins: [
     new Dotenv({
-      path: './.env.staging'
+      path: './.env.webpack'
     , safe: false
     , systemvars: false
     , silent: false

@@ -8,7 +8,7 @@ const development = {
 , devtool: 'inline-source-map'
 , plugins: [
     new Dotenv({ 
-      path: './.env.development' 
+      path: './.env.webpack' 
     , safe: false
     , systemvars: false
     , silent: false
