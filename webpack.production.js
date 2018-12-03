@@ -1,19 +1,10 @@
 const webpack = require('webpack');
 const merge   = require('webpack-merge');
-const Dotenv  = require('dotenv-webpack');
 const bundle  = require('./webpack.bundle.js');
 
 const production = {
   mode: 'production'
 , devtool: 'source-map'
-, plugins: [
-    new Dotenv({
-      path: './.env.webpack'
-    , safe: false
-    , systemvars: false
-    , silent: false
-    })
-  ]
 , performance: {
     hints: "warning"
   , maxAssetSize: 2560000

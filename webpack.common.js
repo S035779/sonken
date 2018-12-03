@@ -63,7 +63,6 @@ const common = {
       }
     ]
   }
-, plugins: [ new MiniCssExtractPlugin({ filename: '[name].bundle.css' }) ]
 , resolve: { alias: {
     Main:       path.resolve(__dirname, 'src'           )
   , Assets:     path.resolve(__dirname, 'src/assets'    )

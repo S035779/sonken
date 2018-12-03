@@ -44,42 +44,48 @@ class RssDownloadItemsDialog extends React.Component {
   }
 
   handleDownload(operation) {
-    if(itemNumber === 0) return;
     std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-    const { user, ids, filter, itemNumber, category, checked } = this.props;
+    const { user, ids, filter, noteNumber, itemNumber, category, checked } = this.props;
+    if(noteNumber === 0 || itemNumber === 0) return;
     const type = operation === 'download/items' ? this.state.name : '9999';
-    const params = checked ? { user, category, filter, type } : { user, category, filter, ids, type };
     NoteAction.deleteCache()
     switch(operation) { 
       case 'download/items':
       case 'download/images':
-        this.spn.start();
-        return NoteAction.downloadJob(operation, params) 
-          .then(() => this.props.file && this.props.file.size !== 0
-            ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
-          .then(() => this.props.file && this.props.file.size !== 0
-            ? this.downloadFile(operation, { blob: this.props.file }) : null)
-          .then(() => this.spn.stop())
-          .then(() => NoteAction.fetchJobs({ user, category }))
-          .catch(err => {
-            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-            this.setState({ isNotValid: true });
-            this.spn.stop();
-          });
+        {
+          const params = checked ? { user, category, filter, type } : { user, category, filter, ids, type };
+          this.spn.start();
+          return NoteAction.downloadJob(operation, params) 
+            .then(() => this.props.file && this.props.file.size !== 0
+              ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+            .then(() => this.props.file && this.props.file.size !== 0
+              ? this.downloadFile(operation, { blob: this.props.file }) : null)
+            .then(() => this.spn.stop())
+            .then(() => NoteAction.fetchJobs({ user, category }))
+            .catch(err => {
+              std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+              this.setState({ isNotValid: true });
+              this.spn.stop();
+            });
+        }
       case 'signedlink/images':
-        this.spn.start();
-        return NoteAction.signedlinkJob(operation, params)
-          .then(() => this.props.images && R.length(this.props.images) !== 0
-            ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
-          .then(() => this.props.images && R.length(this.props.images) !== 0
-            ? this.downloadFile(operation, { urls: this.props.images }) : null)
-          .then(() => this.spn.stop())
-          .then(() => NoteAction.fetchJobs({ user, category }))
-          .catch(err => {
-            std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-            this.setState({ isNotValid: true });
-            this.spn.stop();
-          });
+        {
+          const number = checked ? noteNumber : R.length(ids);
+          const params = checked ? { user, category, filter, type, number } : { user, category, filter, ids, type, number };
+          this.spn.start();
+          return NoteAction.signedlinkJob(operation, params)
+            .then(() => this.props.images && R.length(this.props.images) !== 0
+              ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+            .then(() => this.props.images && R.length(this.props.images) !== 0
+              ? this.downloadFile(operation, { urls: this.props.images }) : null)
+            .then(() => this.spn.stop())
+            .then(() => NoteAction.fetchJobs({ user, category }))
+            .catch(err => {
+              std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+              this.setState({ isNotValid: true });
+              this.spn.stop();
+            });
+        }
     }
   }
 
@@ -198,6 +204,7 @@ RssDownloadItemsDialog.propTypes = {
 , checked: PropTypes.bool.isRequired
 , ids: PropTypes.array.isRequired
 , filter: PropTypes.object
+, noteNumber: PropTypes.number.isRequired
 , itemNumber: PropTypes.number.isRequired
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired

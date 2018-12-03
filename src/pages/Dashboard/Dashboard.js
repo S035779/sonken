@@ -119,13 +119,15 @@ class Dashboard extends React.Component {
             notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
           <div className={classes.body}>
             <div className={classes.noteList}>
-              <RssButtons user={user} category={category} notes={_notes} file={file} images={_images} 
-                selectedNoteId={ids} itemFilter={filter} />
+              <RssButtons user={user} category={category} notes={_notes} note={_note} file={file} images={_images} 
+                selectedNoteId={ids} noteNumber={noteNumber} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
                 notePage={page}/>
             </div>
             <div className={classes.noteEdit}>
-              { route.routes ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images: _images }) : null }
+              { route.routes 
+                  ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images: _images, noteNumber }) 
+                  : null }
             </div>
           </div>
         </div> )

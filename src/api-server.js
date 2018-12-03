@@ -189,7 +189,7 @@ router.route('/added')
 
 router.route('/worker')
 .get(job.fetchJobs())
-.put(job.signedlink())
+.put(job.signedlinks())
 .post(job.download())
 .delete(job.notImplemented());
 

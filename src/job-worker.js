@@ -130,7 +130,7 @@ const request = (operation, options) => {
     case 'download/items':
       {
         const { params } = options;
-        const { user, category, ids, filter, type, limit, total, index } = params;
+        const { user, category, ids, filter, type, limit, count, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setData = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
         const isCSV = R.test(/.*\.csv$/);
@@ -138,7 +138,6 @@ const request = (operation, options) => {
         const sizeFiles = obj => R.sum(sizeFile(obj));
         const hasFiles =  obj => R.filter(filename => isCSV(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
-        const conditions = { user, category, type, total, index, limit };
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
               ? of(setData(obj)) 
@@ -148,14 +147,14 @@ const request = (operation, options) => {
           , flatMap(file => FSS.appendFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createArchives(conditions, file))
+          , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
           );
       }
     case 'signedlink/images':
     case 'download/images':
       {
         const { params } = options;
-        const { user, category, ids, filter, type, limit, total, index } = params;
+        const { user, category, ids, filter, type, limit, count, total, index } = params;
         const header = user + '-' + category + '-' + type;
         const setData = objs => ({ subpath: header, data: objs });
         const isImage = R.test(/.*\.(gif|jpe?g|png)$/);
@@ -163,7 +162,6 @@ const request = (operation, options) => {
         const sizeFiles = obj => R.sum(sizeFile(obj));
         const hasFiles = obj => R.filter(filename => isImage(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
-        const conditions = { user, category, type, total, index, limit };
         return feed.downloadImages({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
               ? of(setData(obj)) 
@@ -172,7 +170,7 @@ const request = (operation, options) => {
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createArchives(conditions, file))
+          , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
           );
       }
     case 'download/image':
@@ -180,10 +178,9 @@ const request = (operation, options) => {
         const { params } = options;
         const { user, category, ids, filter, type } = params;
         const setFiles = files => ({ files });
-        const conditions = { user, category, type };
         return feed.downloadImage({ user, ids, filter, type }).pipe(
             map(setFiles)
-          , flatMap(file => feed.createArchive(conditions, file))
+          , flatMap(file => feed.createArchive({ user, category, type }, file))
           );
       }
     default:
@@ -215,7 +212,7 @@ switch(workername) {
     jobs = ['download/items'];
     break;
   case 'arc-worker':
-    jobs = ['download/images'];
+    jobs = ['download/images', 'signedlink/images'];
     break;
   default:
     jobs = ['notImplemented'];

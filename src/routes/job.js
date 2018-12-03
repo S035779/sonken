@@ -31,10 +31,10 @@ export default {
     };
   },
 
-  signedlink() {
+  signedlinks() {
     return (req, res) => {
-      const { operation, ids, user, category, type, filter } = req.body;
-      job.signedlink(operation, { ids, user, category, type, filter }).subscribe(
+      const { operation, ids, user, category, type, filter, number } = req.body;
+      job.signedlinks(operation, { ids, user, category, type, filter, number }).subscribe(
         obj => res.status(200).send(obj)
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

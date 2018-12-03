@@ -1530,7 +1530,7 @@ export default class FeedParser {
 
   createAttribute({ user, id, data }) {
     const { images } = data;
-    const setKey    = urls => this.setImageKey(id, urls);
+    const setKey    = urls => this.setImagesKey(id, urls);
     const setUrls   = R.map(obj => obj.url);
     const setFiles  = R.compose(setKey, setUrls);
     const zipLinks  = R.zip(images)
@@ -2266,38 +2266,41 @@ export default class FeedParser {
     );
   }
 
-  setArchiveKey(key, value) {
-    const count       = std.count(value);
+  setArchiveKey(key, value, count) {
     const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.zip';
-    console.log(count);
     return setKey(key, value + '-' + count);
   }
 
   createArchive({ user, category, type }, file) {
+    log.info(FeedParser.displayName, 'createArchive', { user, category, type });
     const { files } = file;
     const header      = user + '-' + category;
-    const setKey      = () => this.setArchiveKey(type, header);
-    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: std.countStop(header) });
-    std.countStart(header); 
+    const setKey      = () => this.setArchiveKey(type, header, 0);
+    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size });
     return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key: setKey(), files }))
       .pipe(map(() => setDetail(file)));
   }
 
-  createArchives({ user, category, type, total, index, limit, size }, file) {
+  createArchives({ user, category, type, limit, count, total, index }, file) {
+    log.info(FeedParser.displayName, 'createArchives', { user, category, type, limit, count, total, index });
     const { subpath, files } = file;
     const header      = user + '-' + category;
     const setFiles    = R.map(file => ({ name: file }))
     const numTotal    = Number(total);
-    const numIndex    = Number(index) + 1;
+    const numIndex    = Number(index);
     const numLimit    = Number(limit);
+    const numCount    = Number(count);
     const numFiles    = R.length(files);
-    const isSize      = size > 500 * 1024 * 1024;
+    const numCounts   = numCount !== 0 ? Math.floor(numIndex / numCount) : 0;
+    const isCountUp   = numCount !== 0 && ((numIndex + 1) % numCount === 0);
     const isFiles     = numFiles !== 0;
-    const isFinalize  = (numTotal <= numLimit) ||  ((numTotal >  numLimit) && (numTotal <= numLimit * numIndex));
-    const setKey      = () => this.setArchiveKey(type, header);
-    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: std.countStop(header) });
-    if(index === 0) std.countStart(header); 
-    return defer(() => isFiles && isFinalize || isSize
+    const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
+    const setKey      = () => this.setArchiveKey(type, header, numCounts);
+    const setDetail   = obj => ({ 
+      subpath: obj.subpath, files: R.length(obj.files)
+    , size: obj.size, count: numCounts, countup: isCountUp
+    });
+    return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
       ? from(this.AWS.createZipArchive(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath }))
           .pipe(map(() => setDetail(file)))
       : of(setDetail(file))

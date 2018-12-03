@@ -1,19 +1,10 @@
 const webpack = require('webpack');
 const merge   = require('webpack-merge');
-const Dotenv  = require('dotenv-webpack');
 const bundle  = require('./webpack.bundle.js');
 
 const development = {
   mode: 'development'
 , devtool: 'inline-source-map'
-, plugins: [
-    new Dotenv({ 
-      path: './.env.webpack' 
-    , safe: false
-    , systemvars: false
-    , silent: false
-    })
-  ]
 , devServer: {
     contentBase: './dist'
   , hot:  true

@@ -1,6 +1,6 @@
 import dotenv                       from 'dotenv';
 import * as R                       from 'ramda';
-import { from, throwError, of, defer } from 'rxjs';
+import { from, throwError, of, defer, forkJoin } from 'rxjs';
 import { map, flatMap, catchError } from 'rxjs/operators';
 import FeedParser                   from 'Routes/FeedParser/FeedParser';
 import job                          from 'Utilities/jobutils';
@@ -12,7 +12,8 @@ import std                          from 'Utilities/stdutils';
 const config = dotenv.config();
 if(config.error) throw config.error();
 
-const CACHE = process.env.CACHE;
+const updatedInterval = process.env.JOB_UPD_MIN || 5;
+const CACHE           = process.env.CACHE;
 const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
@@ -47,8 +48,8 @@ export default class JobQueue {
       case 'create/jobs':
         {
           const { operation, idss, data } = options;
-          const { ids, limit } = idss;
-          const setParam = (idx, obj) => R.merge(data, { ids: obj, limit, index: idx, total: R.length(ids), created: new Date });
+          const { ids, limit, count } = idss;
+          const setParam = (idx, obj) => R.merge(data, { ids: obj, limit, count, index: idx, total: R.length(ids), created: new Date });
           const mapIndex = R.addIndex(R.map);
           const datas = mapIndex((obj, idx) => ({ operation, params: setParam(idx, obj) }), ids);
           return job.enqueue(JobQueue.displayName, operation, datas);
@@ -115,11 +116,16 @@ export default class JobQueue {
           , 'data.params.category': category
           , 'data.params.type': type
           };
-          const limit = 20;
+          const limit = 20; // seller count.
+          const count = 0;  // archive count.
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit });
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count });
           const observable = defer(() => R.isNil(ids) 
-            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
+            ? this.feed.fetchJobNotes({
+                users: [ user ], categorys: [ category ], skip: 0, limit: 1000, sort: 'desc'
+              , filter: { expire: Date.now() - 24 * 60 * 60 * 1000, create: Date.now() - updatedInterval * 60 * 1000 }
+              }).pipe(map(setIds))
+            : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
                 ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
@@ -141,11 +147,16 @@ export default class JobQueue {
           , 'data.params.category': category
           , 'data.params.type': type
           };
-          const limit = 1;
+          const limit = 1;  // seller count.
+          const count = 20; // archive count.
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit });
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count });
           const observable = defer(() => R.isNil(ids) 
-            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
+            ? this.feed.fetchJobNotes({
+              users: [ user ], categorys: [ category ], skip: 0, limit: 1000, sort: 'desc'
+              , filter: { isItems: true, isImages: true, expire: Date.now() - updatedInterval * 60 * 1000 }
+              }).pipe(map(setIds))
+            : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
                 ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
@@ -169,7 +180,11 @@ export default class JobQueue {
           const setIds = R.map(obj => obj._id);
           const setParams = objs => ({ ids: [objs] });
           const observable = defer(() => R.isNil(ids)
-            ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ] }).pipe(map(setIds)) : of(ids));
+            ? this.feed.fetchJobNotes({
+                users: [ user ], categorys: [ category ], skip: 0, limit: 1000, sort: 'desc'
+              , filter: { isItems: true, isImages: true, expire: Date.now() - updatedInterval * 60 * 1000 }
+              }).pipe(map(setIds))
+            : of(ids));
           return from(this.getJobs(operation, conditions)).pipe(
               flatMap(objs => R.isEmpty(objs) 
                 ? observable : throwError({ name: 'Exists job:', message: 'Proceeding job...', stack: operation }))
@@ -186,26 +201,63 @@ export default class JobQueue {
     }
   }
 
-  signedlink(operation, { ids, user, category, type, filter }) {
-    log.info(JobQueue.displayName, 'signedlink', operation);
-    const params = { ids, user, category, type, filter };
+  signedlinks(operation, params) {
+    const { number } = params;
+    const num = Math.ceil(number / 20);
+    const setRange = R.range(0);
+    const observables = R.map(idx => this.signedlink(operation, params, idx));
     return of(this.setAWSParams(operation, params, null)).pipe(
         flatMap( obj    => from(this.AWS.fetchObject(STORAGE, obj)))
-      , flatMap( data   => from(this.FSS.createFile({ data })))
-      , flatMap( file   => from(this.FSS.fetchFileList(file)))
-      , map(     file   => this.setFSSParams(operation, params, null, file))
-      , flatMap( file   => !R.isNil(file) 
-          ? from(this.FSS.fetchFile(file)).pipe(flatMap(file  => from(this.FSS.finalize(file)))) 
-          : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
-      , map(     file   => this.setAWSParams(operation, params, null, file))
-      , flatMap( obj    => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
-      , map(     file   => [file.url])
+      , map(     ()     => setRange(num))
+      , flatMap( nums   => forkJoin(observables(nums)))
       , catchError(err  => {
           if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
         })
       );
   }
+
+  signedlink(operation, { ids, user, category, type, filter }, index) {
+    log.info(JobQueue.displayName, 'signedlink', operation);
+    const params = { ids, user, category, type, filter };
+    return of(this.setAWSParams(operation, params, index)).pipe(
+        flatMap( obj    => from(this.AWS.fetchObject(STORAGE, obj)))
+      , flatMap( data   => from(this.FSS.createFile({ data })))
+      , flatMap( file   => from(this.FSS.fetchFileList(file)))
+      , map(     file   => this.setFSSParams(operation, params, index, file))
+      , flatMap( file   => !R.isNil(file) 
+          ? from(this.FSS.fetchFile(file)).pipe(flatMap(file  => from(this.FSS.finalize(file)))) 
+          : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
+      , map(     file   => this.setAWSParams(operation, params, index, file))
+      , flatMap( obj    => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
+      , map(     file   => file.url)
+      , catchError(err  => {
+          if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+          return this.createJobs(operation, params);
+        })
+      );
+  }
+
+  //signedlink(operation, { ids, user, category, type, filter }, index) {
+  //  log.info(JobQueue.displayName, 'signedlink', operation);
+  //  const params = { ids, user, category, type, filter };
+  //  return of(this.setAWSParams(operation, params, index)).pipe(
+  //      flatMap( obj    => from(this.AWS.fetchObject(STORAGE, obj)))
+  //    , flatMap( data   => from(this.FSS.createFile({ data })))
+  //    , flatMap( file   => from(this.FSS.fetchFileList(file)))
+  //    , map(     file   => this.setFSSParams(operation, params, index, file))
+  //    , flatMap( file   => !R.isNil(file) 
+  //        ? from(this.FSS.fetchFile(file)).pipe(flatMap(file  => from(this.FSS.finalize(file)))) 
+  //        : throwError({ name: 'Proceeding job:', message: 'File not found.', stack: operation }))
+  //    , map(     file   => this.setAWSParams(operation, params, index, file))
+  //    , flatMap( obj    => from(this.AWS.fetchSignedUrl(STORAGE, obj)))
+  //    , map(     file   => file.url)
+  //    , catchError(err  => {
+  //        if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+  //        return this.createJobs(operation, params);
+  //      })
+  //    );
+  //}
 
   download(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'download', operation);

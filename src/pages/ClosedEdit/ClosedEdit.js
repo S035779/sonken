@@ -6,7 +6,7 @@ import ClosedForms    from 'Components/ClosedForms/ClosedForms';
 
 class ClosedEdit extends React.Component {
   render() {
-    const { classes, user, note, category, filter, file, images } = this.props
+    const { classes, user, note, category, filter, file, images, noteNumber } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
     const attrNumber = note.item_attributes && note.item_attributes.sold ? note.item_attributes.sold.total : 0;
@@ -15,7 +15,7 @@ class ClosedEdit extends React.Component {
     const loadingImages   = itemNumber !== imgsNumber || imgsNumber === 0;
     const perPage = note.item_attributes ? note.item_attributes.item.count : 0;
     return <div className={classes.noteEdit}>
-        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber}
+        <ClosedForms user={user} note={note} category={category} itemFilter={filter} itemNumber={itemNumber} noteNumber={noteNumber}
           perPage={perPage} loadingImages={loadingImages} loadingDownload={loadingDownload} file={file} images={images} />
       </div>;
   }
@@ -30,6 +30,7 @@ ClosedEdit.propTypes = {
 , filter: PropTypes.object.isRequired
 , file: PropTypes.object
 , images: PropTypes.array
+, noteNumber: PropTypes.number.isRequired
 };
 
 const barHeightSmUp     = 64;

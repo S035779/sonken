@@ -164,7 +164,7 @@ class RssItems extends React.Component {
   }
 
   render() {
-    const { classes, itemNumber, user, note, category, file, images } = this.props;
+    const { classes, noteNumber, itemNumber, user, note, category, file, images } = this.props;
     const { page, isNotValid, isSuccess, isDownload, loadingDownload } = this.state;
     const { items } = this.state.note;
     const color = this.getColor(category);
@@ -180,7 +180,7 @@ class RssItems extends React.Component {
               </div> )
             : null }
           <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={false} 
-            ids={[note._id]} itemNumber={itemNumber} name="0001" file={file} images={images} 
+            ids={[note._id]} noteNumber={noteNumber} itemNumber={itemNumber} name="0001" file={file} images={images} 
             onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -204,6 +204,7 @@ RssItems.propTypes = {
 , note: PropTypes.object.isRequired
 , file: PropTypes.object
 , images: PropTypes.array
+, noteNumber: PropTypes.number.isRequired
 , itemNumber: PropTypes.number.isRequired
 , loadingDownload: PropTypes.bool.isRequired
 , category: PropTypes.string.isRequired

@@ -120,10 +120,10 @@ class RssButtons extends React.Component {
 
   render() {
     //std.logInfo(RssButtons.displayName, 'Props', this.props);
-    const { classes, category, user, notes, selectedNoteId, itemFilter, file, images } = this.props;
+    const { classes, category, user, note, selectedNoteId, itemFilter, file, images, noteNumber } = this.props;
     const { isSuccess, isNotValid, isDownload, checked } = this.state;
     const color = this.getColor(category);
-    const itemNumber = notes.length;
+    const itemNumber = note && note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
     return <div className={classes.noteButtons}>
       <Checkbox checked={checked} className={classes.checkbox} onChange={this.handleChangeCheckbox.bind(this)}
         tabIndex={-1} disableRipple />
@@ -133,8 +133,8 @@ class RssButtons extends React.Component {
       { isAlpha ? ( <RssButton color={color} className={classes.button} onClick={this.handleOpenDialog.bind(this, 'isDownload')}>
         ダウンロード</RssButton> ) : null }
         <RssDownloadItemsDialog open={isDownload} title={'フォーマット'} user={user} category={category} checked={checked} 
-          ids={selectedNoteId} itemNumber={itemNumber} filter={itemFilter} name="0001" file={file} images={images}
-          onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
+          ids={selectedNoteId} noteNumber={noteNumber} itemNumber={itemNumber} filter={itemFilter} name="0001" file={file} 
+          images={images} onClose={this.handleCloseDialog.bind(this, 'isDownload')} />
         <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
           要求を受け付けました。
         </RssDialog>
@@ -151,11 +151,13 @@ RssButtons.propTypes = {
   classes: PropTypes.object.isRequired
 , user: PropTypes.string.isRequired
 , notes: PropTypes.array.isRequired
+, note: PropTypes.object
 , selectedNoteId: PropTypes.array.isRequired
 , file: PropTypes.object
 , images: PropTypes.array
 , category: PropTypes.string.isRequired
 , itemFilter: PropTypes.object.isRequired
+, noteNumber: PropTypes.number.isRequired
 };
 
 const titleHeight   = 62;

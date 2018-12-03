@@ -24,7 +24,7 @@ class RssHeader extends React.Component {
   componentDidMount() {
     const { user, location } = this.props;
     const category = location.pathname.split('/')[1];
-    const interval = 1000 * 60 * 1;
+    const interval = 1000 * 60 * 3;
     this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category }), 0, interval);
   }
 

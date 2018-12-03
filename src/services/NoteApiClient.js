@@ -210,12 +210,12 @@ export default {
    *  jobQueue
    */
   downloadJob(operation, params) {
-    const { ids, user, category, type, filter } = params;
-    return this.request('download/job', { operation, ids, user, category, type, filter });
+    const { ids, user, category, type, filter, number } = params;
+    return this.request('download/job', { operation, ids, user, category, type, filter, number });
   },
   signedlinkJob(operation, params) {
-    const { ids, user, category, type, filter } = params;
-    return this.request('signedlink/job', { operation, ids, user, category, type, filter });
+    const { ids, user, category, type, filter, number } = params;
+    return this.request('signedlink/job', { operation, ids, user, category, type, filter, number });
   },
   fetchJobs(params) {
     return this.request('fetch/jobs', params);
