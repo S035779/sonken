@@ -2,7 +2,7 @@ import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
 import { forkJoin, throwError, of }   from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
+import { flatMap, map, catchError } from 'rxjs/operators';
 import _async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Routes/Yahoo/Yahoo';
@@ -141,7 +141,7 @@ const request = (operation, options) => {
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
               ? of(setData(obj)) 
-              : throwError({ name: 'Error:', message: 'File not found.', stack: operation }))
+              : throwError({ name: 'NotFound:', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createBom(file))
           , flatMap(file => FSS.appendFile(file))
@@ -163,14 +163,22 @@ const request = (operation, options) => {
         const hasFiles = obj => R.filter(filename => isImage(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
         return feed.downloadImages({ user, ids, filter, type }).pipe(
-            flatMap(obj => !R.isEmpty(obj) 
-              ? of(setData(obj)) 
-              : throwError({ name: 'Error:', message: 'File not found.', stack: operation }))
+            flatMap(objs => !R.isEmpty(objs) 
+              ? of(setData(objs)) 
+              : throwError({ name: 'NotFound:', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
           , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+          , catchError(err => {
+              if(err.name !== 'NotFound') return throwError(err);
+              return of(setData()).pipe(
+                  flatMap(file => FSS.fetchFileList(file))
+                , map(setFiles)
+                , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+                );
+            })
           );
       }
     case 'download/image':

@@ -67,9 +67,21 @@ class awsutils {
     return promise;
   }
 
-  fetchObjectList(bucket) {
+  fetchBucketWebsite(bucket) {
     const params = { Bucket: bucket };
-    const promise = this.s3.listObjects(params).promise();
+    const promise = this.s3.getBucketWebsite(params).promise();
+    return promise;
+  }
+
+  checkObjectExists(bucket, key) {
+    const params = { Bucket: bucket, Key: key };
+    const promise = this.s3.waitFor('objectExists', params).promise();
+    return promise;
+  }
+
+  checkObjectNotExists(bucket, key) {
+    const params = { Bucket: bucket, Key: key };
+    const promise = this.s3.waitFor('objectNotExists', params).promise();
     return promise;
   }
 
@@ -83,9 +95,15 @@ class awsutils {
       .then(hasFiles);
   }
 
-  fetchBucketWebsite(bucket) {
+  fetchObjectHead(bucket, key) {
+    const params = { Bucket: bucket, Key: key };
+    const promise = this.s3.headObject(params).promise();
+    return promise;
+  }
+
+  fetchObjectList(bucket) {
     const params = { Bucket: bucket };
-    const promise = this.s3.getBucketWebsite(params).promise();
+    const promise = this.s3.listObjects(params).promise();
     return promise;
   }
 

@@ -87,9 +87,8 @@ export default class FeedParser {
           const setNotes = objs => isItems ? hasNotes(objs) : objs;
           const setObject = R.map(doc => doc.toObject());
           const query = Note.find(conditions).select(select);
-          if(isPaginate) {
-            query.populate(params).sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
-          }
+          if(isItems || isImages) query.populate(params);
+          if(isPaginate)          query.sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
           return query.exec()
             .then(setObject)
             .then(setNotes);

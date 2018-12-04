@@ -188,6 +188,7 @@ class RssSearch extends React.Component {
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>
+          <MenuItem value={1000}>1000</MenuItem>
         </Select>
       </FormControl>
       <FormControl className={classes.inputText}>

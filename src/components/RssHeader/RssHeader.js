@@ -12,6 +12,8 @@ import { AppBar, Toolbar, Typography, Fab, LinearProgress }
 import { Menu, MoreVert } from '@material-ui/icons';
 import RssMenu            from 'Components/RssMenu/RssMenu';
 
+const interval = 1000 * 60 * 3;
+
 class RssHeader extends React.Component {
   constructor(props) {
     super(props);
@@ -24,7 +26,6 @@ class RssHeader extends React.Component {
   componentDidMount() {
     const { user, location } = this.props;
     const category = location.pathname.split('/')[1];
-    const interval = 1000 * 60 * 3;
     this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category }), 0, interval);
   }
 
@@ -44,6 +45,8 @@ class RssHeader extends React.Component {
     if(nextCategory !== prevCategory) {
       NoteAction.fetchJobs({ user, category: nextCategory });
       this.setState({ category: nextCategory });
+      if(this.timer) clearInterval(this.timer);
+      this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category: nextCategory }), 0, interval);
     }
   }
 
