@@ -141,13 +141,21 @@ const request = (operation, options) => {
         return feed.downloadItems({ user, ids, filter, type }).pipe(
             flatMap(obj => !R.isEmpty(obj) 
               ? of(setData(obj)) 
-              : throwError({ name: 'NotFound:', message: 'File not found.', stack: operation }))
+              : throwError({ name: 'NotFound', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createBom(file))
           , flatMap(file => FSS.appendFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
           , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+          , catchError(err => {
+              if(err.name !== 'NotFound') return throwError(err);
+              return of(setData()).pipe(
+                  flatMap(file => FSS.fetchFileList(file))
+                , map(setFiles)
+                , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+                );
+            })
           );
       }
     case 'signedlink/images':
@@ -165,7 +173,7 @@ const request = (operation, options) => {
         return feed.downloadImages({ user, ids, filter, type }).pipe(
             flatMap(objs => !R.isEmpty(objs) 
               ? of(setData(objs)) 
-              : throwError({ name: 'NotFound:', message: 'File not found.', stack: operation }))
+              : throwError({ name: 'NotFound', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))
