@@ -149,9 +149,10 @@ const request = (operation, options) => {
           , map(setFiles)
           , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
-              if(err.name !== 'NotFound') return throwError(err);
+              if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
-                  flatMap(file => FSS.fetchFileList(file))
+                  flatMap(file => FSS.createDirectory(file))
+                , flatMap(file => FSS.fetchFileList(file))
                 , map(setFiles)
                 , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
                 );
@@ -180,9 +181,10 @@ const request = (operation, options) => {
           , map(setFiles)
           , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
-              if(err.name !== 'NotFound') return throwError(err);
+              if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
-                  flatMap(file => FSS.fetchFileList(file))
+                  flatMap(file => FSS.createDirectory(file))
+                , flatMap(file => FSS.fetchFileList(file))
                 , map(setFiles)
                 , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
                 );

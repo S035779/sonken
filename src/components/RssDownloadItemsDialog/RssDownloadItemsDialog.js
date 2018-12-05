@@ -48,45 +48,66 @@ class RssDownloadItemsDialog extends React.Component {
     const { user, ids, filter, noteNumber, itemNumber, category, checked } = this.props;
     if(noteNumber === 0 || itemNumber === 0) return;
     const type = operation === 'download/items' ? this.state.name : '9999';
-    NoteAction.deleteCache()
+    const number = checked ? noteNumber : R.length(ids);
+    const params = checked ? { user, category, filter, type, number } : { user, category, filter, ids, type, number };
     switch(operation) { 
       case 'download/items':
       case 'download/images':
-        {
-          const params = checked ? { user, category, filter, type } : { user, category, filter, ids, type };
-          this.spn.start();
-          return NoteAction.downloadJob(operation, params) 
-            .then(() => this.props.file && this.props.file.size !== 0
-              ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
-            .then(() => this.props.file && this.props.file.size !== 0
-              ? this.downloadFile(operation, { blob: this.props.file }) : null)
-            .then(() => this.spn.stop())
-            .then(() => NoteAction.fetchJobs({ user, category }))
-            .catch(err => {
-              std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-              this.setState({ isNotValid: true });
-              this.spn.stop();
-            });
-        }
+        return this.download(operation, params);
       case 'signedlink/images':
-        {
-          const number = checked ? noteNumber : R.length(ids);
-          const params = checked ? { user, category, filter, type, number } : { user, category, filter, ids, type, number };
-          this.spn.start();
-          return NoteAction.signedlinkJob(operation, params)
-            .then(() => this.props.images && R.length(this.props.images) !== 0
-              ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
-            .then(() => this.props.images && R.length(this.props.images) !== 0
-              ? this.downloadFile(operation, { urls: this.props.images }) : null)
-            .then(() => this.spn.stop())
-            .then(() => NoteAction.fetchJobs({ user, category }))
-            .catch(err => {
-              std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
-              this.setState({ isNotValid: true });
-              this.spn.stop();
-            });
-        }
+        return this.signedlink(operation, params);
+      case 'clearcache/images':
+        return this.clearcache(operation, params);
     }
+  }
+
+  clearcache(operation, params) {
+    this.spn.start();
+    NoteAction.deleteCache()
+    return NoteAction.clearcacheJob(operation, params)
+      .then(() => this.setState({ isSuccess: true }))
+      .then(() => this.spn.stop())
+      .catch(err => {
+        std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      });
+  }
+
+  signedlink(operation, params) {
+    const { user, category } = params;
+    this.spn.start();
+    NoteAction.deleteCache()
+    return NoteAction.signedlinkJob(operation, params)
+      .then(() => this.props.images && R.length(this.props.images) !== 0
+        ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+      .then(() => this.props.images && R.length(this.props.images) !== 0
+        ? this.downloadFile(operation, { urls: this.props.images }) : null)
+      .then(() => this.spn.stop())
+      .then(() => NoteAction.fetchJobs({ user, category }))
+      .catch(err => {
+        std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      });
+  }
+
+  download(operation, params) {
+    const { user, category } = params;
+    this.spn.start();
+    NoteAction.deleteCache()
+    return NoteAction.downloadJob(operation, params) 
+      .then(() => this.props.file && this.props.file.size !== 0
+        ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+      .then(() => this.props.file && this.props.file.size !== 0
+        ? this.downloadFile(operation, { blob: this.props.file }) : null)
+      .then(() => this.spn.stop())
+      .then(() => NoteAction.fetchJobs({ user, category }))
+      .catch(err => {
+        std.logError(RssDownloadItemsDialog.displayName, err.name, err.message);
+        this.setState({ isNotValid: true });
+        this.spn.stop();
+      });
   }
 
   downloadFile(operation, { blob, urls }) {
@@ -166,10 +187,10 @@ class RssDownloadItemsDialog extends React.Component {
         </FormControl>
         <div className={classes.buttons}>
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'signedlink/images')} classes={classes.button}>
-            リンク保存
-          </RssButton>
-          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/images')} classes={classes.button}>
             画像保存
+          </RssButton>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'clearcache/images')} classes={classes.button}>
+            キャッシュ削除
           </RssButton>
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/items')} classes={classes.button}>
             リスト保存

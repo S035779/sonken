@@ -1,6 +1,7 @@
 import archiver         from 'archiver';
 import fs               from 'fs-extra';
 import path             from 'path';
+import { passThrough }  from 'stream';
 import * as R           from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map }          from 'rxjs/operators';
@@ -26,40 +27,30 @@ export default class FSSupport {
       case 'create/archive':
         {
           const { subpath } = options;
-          const subdir = path.resolve(this.dir, subpath);
+          const dir = path.resolve(this.dir, subpath);
           const zip = path.resolve(this.dir, `${subpath}-${Date.now()}.zip`);
           return new Promise((resolve, reject) => {
             const output = fs.createWriteStream(zip);
             const archive = archiver('zip', { zlib: { level: 9 } });
             output.on('close',  () => {
               log.info(FSSupport.displayName, 'close:', archive.pointer() + ' total bytes.');
-              fs.remove(subdir, err => {
+              fs.remove(dir, err => {
                 if(err) return reject(err);
                 resolve(options);
               });
             });
-            output.on('end',    () => {
-              log.trace(FSSupport.displayName, 'end:', 'data has been drained.');
-            });
-            output.on('finish', () => {
-              log.info(FSSupport.displayName, 'finish:', 'data archives has been finished.');
-            });
-            archive.on('warning', err => {
+            output.on('end',      ()  => log.trace(FSSupport.displayName, 'end:', 'data has been drained.'));
+            output.on('finish',   ()  => log.info(FSSupport.displayName, 'finish:', 'data archives has been finished.'));
+            archive.on('warning',   err   => {
               if(err.code === 'ENOENT')  log.warn(FSSupport.displayName, err.code, err.message, err.data);
               else reject(err)
             });
-            archive.on('error', err => {
-              log.error(FSSupport.displayName, err.code, err.message, err.data);
-              reject(err);
-            });
-            archive.on('progress', data => {
-              log.trace(FSSupport.displayName, 'progress(total/process):', data.entries.total, data.entries.processed);
-            });
-            archive.on('entry', data => {
-              log.trace(FSSupport.displayName, 'entry(date/name:', data.date, data.name);
-            });
+            archive.on('error', reject);
+            archive.on('progress',  data  => 
+              log.trace(FSSupport.displayName, 'progress(total/process):', data.entries.total, data.entries.processed));
+            archive.on('entry',     data  => log.trace(FSSupport.displayName, 'entry(date/name:', data.date, data.name));
             archive.pipe(output);
-            archive.directory(subdir, false);
+            archive.directory(dir, false);
             archive.finalize();
           });
         }
@@ -73,6 +64,48 @@ export default class FSSupport {
               if(err) return reject(err);
               resolve(options);
             });
+          });
+        }
+      case 'append/files':
+        {
+          const { subpath, data } = options;
+          const dir = subpath ? path.resolve(this.dir, subpath) : this.dir;
+          const csv = path.resolve(this.dir, `${subpath}-${Date.now()}.csv`);
+          const setFiles = R.map(obj => path.resolve(dir, obj.name));
+          const setReadStreams = R.map(file => fs.createReadStream(file));
+          const setPassStreams = streams => {
+            const passStream = new PassThrough();
+            const len = R.length(streams);
+            for(let stream of streams) {
+              passStream = stream.pipe(passStream, { end: false });
+              stream.once('end', () => --len === 0 && passStream.emit('end'));
+            }
+            return passStream;
+          };
+          const combinedStream = R.compose(setPassStreams, setReadStreams, setFiles);
+          return new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(csv);
+            const combined = combinedStream(data);
+            output.on('close',  () => {
+              log.info(FSSupport.displayName, 'close:', archive.pointer() + ' total bytes.');
+              fs.remove(dir, err => {
+                if(err) return reject(err);
+                resolve(options);
+              });
+            });
+            output.on('end',    () => log.trace(FSSupport.displayName, 'end:', 'data has been drained.'));
+            output.on('finish', () => log.info(FSSupport.displayName, 'finish:', 'data archives has been finished.'));
+            combined.on('warning',  err => {
+              if(err.code === 'ENOENT')  log.warn(FSSupport.displayName, err.code, err.message, err.data);
+              else reject(err)
+            });
+            combined.on('error',  reject);
+            combined.on('drain',  ()  => log.debug(FSSSupport.displayName, 'drain', 'it is drain.'));
+            combined.on('finish', ()  => log.debug(FSSSupport.displayName, 'finish', 'it is finish.'));
+            combined.on('pipe',   src => log.debug(FSSSupport.displayName, 'pipe', src));
+            combined.on('unpipe', src => log.debug(FSSSupport.displayName, 'unpipe', src));
+            combined.on('end',    ()  => log.info(FSSSupport.displayName,  'end', 'it is end.'));
+            combined.pipe(output);
           });
         }
       case 'create/file':
@@ -175,6 +208,10 @@ export default class FSSupport {
     return this.request('append/file', { subpath, data });
   }
 
+  addFiles(subpath, data) {
+    return this.request('append/files', { subpath, data });
+  }
+
   newFile(subpath, data) {
     return this.request('create/file', { subpath, data });
   }
@@ -250,5 +287,8 @@ export default class FSSupport {
     return this.amountFile(subpath, filename);
   }
 
+  mergeFiles({ subpath, data }) {
+    return this.addFiles(subpath, data);
+  }
 }
 FSSupport.displayName = 'fssutils';

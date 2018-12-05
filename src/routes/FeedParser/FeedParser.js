@@ -2203,10 +2203,10 @@ export default class FeedParser {
     );
   }
 
-  downloadItems({ user, ids, filter, type }) {
+  downloadItems({ user, ids, filter, type }, header) {
     const CSV         = this.setCsvItems(type);
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
-    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
+    const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys, header }).parse();
     const dupItems    = objs => std.dupObj(objs, 'title');
     const getItems    = obj => obj.items ? obj.items : [];
     const promises    = R.map(id => this.getNote(user, id, null, null, filter));
@@ -2277,7 +2277,7 @@ export default class FeedParser {
     const setKey      = () => this.setArchiveKey(type, header, 0);
     const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size });
     return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key: setKey(), files }))
-      .pipe(map(() => setDetail(file)));
+      .pipe(map(file => setDetail(file)));
   }
 
   createArchives({ user, category, type, limit, count, total, index }, file) {
@@ -2295,13 +2295,11 @@ export default class FeedParser {
     const isFiles     = numFiles !== 0;
     const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
     const setKey      = () => this.setArchiveKey(type, header, numCounts);
-    const setDetail   = obj => ({ 
-      subpath: obj.subpath, files: R.length(obj.files)
-    , size: obj.size, count: numCounts, countup: isCountUp
-    });
+    const setDetail   = 
+      obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: numCounts, countup: isCountUp });
     return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
       ? from(this.AWS.createZipArchive(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath }))
-          .pipe(map(() => setDetail(file)))
+          .pipe(map(file => setDetail(file)))
       : of(setDetail(file))
     );
   }

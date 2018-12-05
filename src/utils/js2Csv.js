@@ -2,35 +2,38 @@ import R from 'ramda';
 import std from 'Utilities/stdutils';
 
 class js2Csv {
-  constructor(data, keys = false) {
-    this.ARRAY  = Symbol('ARRAY')
-    this.OBJECT = Symbol('OBJECT')
-    this.data = data
+  constructor(data, keys, header) {
+    this.ARRAY  = Symbol('ARRAY');
+    this.OBJECT = Symbol('OBJECT');
+    this.data = data;
     if (js2Csv.isArray(data)) {
       if (0 === data.length) {
-        this.dataType = this.ARRAY
+        this.dataType = this.ARRAY;
       } else if (js2Csv.isObject(data[0])) {
-        this.dataType = this.OBJECT
+        this.dataType = this.OBJECT;
       } else if (js2Csv.isArray(data[0])) {
-        this.dataType = this.ARRAY
+        this.dataType = this.ARRAY;
       } else {
-        throw Error('Error: 未対応のデータ型です(0)')
+        throw Error('Error: 未対応のデータ型です(0)');
       }
     } else {
-      throw Error('Error: 未対応のデータ型です(1)')
+      throw Error('Error: 未対応のデータ型です(1)');
     }
-    this.keys = keys
+    this.keys = keys;
+    this.header = header;
   }
 
-  static of({ csv, keys }) {
-    return new js2Csv(csv, keys);
+  static of({ csv, keys, header }) {
+    const _keys = !R.isNil(keys) ? keys : false;
+    const _header = !R.isNil(header) ? header : true;
+    return new js2Csv(csv, _keys, _header);
   }
 
   toString() {
     const keys = this.keys || Array.from(this.extractKeys(this.data))
     const setRecrd = obj => R.map(key => obj[key], keys);
     const setBodys = R.map(setRecrd);
-    const setHeads = R.concat([keys]);
+    const setHeads = objs => this.header ? R.concat([keys], objs) : objs;
     const setQuota = R.map(R.map(js2Csv.prepare));
     const setSprta = R.map(R.join(','));
     const setEnter = R.join('\n');

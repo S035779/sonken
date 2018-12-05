@@ -1,7 +1,7 @@
 import dotenv                       from 'dotenv';
 import * as R                       from 'ramda';
-import { from, throwError, of, defer, forkJoin } from 'rxjs';
-import { map, flatMap, catchError } from 'rxjs/operators';
+import { from, throwError, of, defer, interval } from 'rxjs';
+import { take, map, flatMap, catchError, toArray } from 'rxjs/operators';
 import FeedParser                   from 'Routes/FeedParser/FeedParser';
 import job                          from 'Utilities/jobutils';
 import log                          from 'Utilities/logutils';
@@ -194,29 +194,56 @@ export default class JobQueue {
   signedlinks(operation, params) {
     const { number } = params;
     const num = Math.ceil(number / 20);
-    const setRange = R.range(0);
-    const observables = R.map(idx => this.signedlink(operation, params, idx));
     return of(this.setAWSParams(operation, params, null)).pipe(
         flatMap(    obj => from(this.AWS.fetchObjectHead(STORAGE, obj.key)))
-      , map(         () => setRange(num))
-      , flatMap(   nums => forkJoin(observables(nums)))
+      , flatMap(     () => interval(1000).pipe(take(num)))
+      , flatMap(    idx => this.signedlink(operation, params, idx))
+      , toArray()
       , catchError( err => {
-          if(err && err.name !== 'NotFound') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+          if(err && !(err.name === 'NoSuchKey' || err.name === 'NotFound'))
+            log.error(JobQueue.displayName, err.name, err.message, err.stack);
           return this.createJobs(operation, params);
         })
       );
   }
 
   signedlink(operation, { ids, user, category, type, filter }, index) {
-    log.info(JobQueue.displayName, 'signedlink', operation);
+    log.info(JobQueue.displayName, 'signedlinks', operation);
     const params = { ids, user, category, type, filter };
     const file   = this.setAWSParams(operation, params, index);
-    return from(this.AWS.fetchObjectHead(STORAGE, file.key)).pipe(
-        flatMap(      () => from(this.AWS.fetchSignedUrl(STORAGE, file)))
-      , map(        file => file.url)
-      , catchError( err  => {
-          if(err && err.name !== 'NotFound') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
-          return this.createJobs(operation, params);
+    return from(this.AWS.fetchSignedUrl(STORAGE, file)).pipe(
+        map(      file => file.url)
+      , catchError(err => {
+          if(err && err.name !== 'NoSuchKey') log.error(JobQueue.displayName, err.name, err.message, err.stack);
+          return of(null);
+        })
+      );
+  }
+
+  clearcaches(operation, params) {
+    const { number } = params;
+    const num = Math.ceil(number / 20);
+    return of(this.setAWSParams(operation, params, null)).pipe(
+      flatMap(obj => from(this.AWS.fetchObjectHead(STORAGE, obj.key)))
+    , flatMap(() => interval(1000).pipe(take(num)))
+    , flatMap(idx => this.clearcache(operation, params, idx))
+    , toArray()
+    , catchError(err => {
+        if(err && !(err.name === 'NoSuchKey' || err.name === 'NotFound'))
+          log.error(JobQueue.displayName, err.name, err.message, err.stack);
+        return of([]);
+      })
+    );
+  }
+
+  clearcache(operation, { user, category, type }, index) {
+    log.info(JobQueue.displayName, 'clearcaches', operation);
+    const params = { user, category, type };
+    const file = this.setAWSParams(operation, params, index);
+    return from(this.AWS.deleteObject(STORAGE, file)).pipe(
+        catchError( err => {
+          if(err && err.name !== 'NoSuchKey') log.warn(JobQueue.displayName, err.name, err.message, err.stack);
+          return of(null);
         })
       );
   }
@@ -241,6 +268,7 @@ export default class JobQueue {
   //      })
   //    );
   //}
+  
 
   download(operation, { ids, user, category, type, filter }) {
     log.info(JobQueue.displayName, 'download', operation);

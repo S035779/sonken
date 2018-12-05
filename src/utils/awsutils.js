@@ -159,13 +159,7 @@ class awsutils {
       }
       log.trace(awsutils.displayName, '[UPLOAD]', data);
     });
-    //passStream.on('error',  err => log.error(awsutils.displayName, err.name, err.message, err.stack));
-    //passStream.on('drain',  () => log.debug(awsutils.displayName, 'Drain:', 'it is drain.'));
-    //passStream.on('close',  () => log.debug(awsutils.displayName, 'Close:', 'it is close.'));
-    //passStream.on('finish', () => log.debug(awsutils.displayName, 'Finish:', 'it is finish.'));
-    //passStream.on('pipe',   src => log.debug(awsutils.displayName, 'Pipe:', src));
-    //passStream.on('unpipe', src => log.debug(awsutils.displayName, 'Unpipe:', src));
-    manager.on('httpUploadProgress', obj => log.trace(awsutils.displayName, 'Progress:', obj));
+    manager.on('httpUploadProgress', obj => log.trace(awsutils.displayName, 'aws:progress:', obj));
     return passStream;
   }
 
@@ -183,25 +177,34 @@ class awsutils {
   deleteObject(bucket, { key, file }) {
     const params = { Bucket: bucket, Key: key };
     const promise = this.s3.deleteObject(params).promise();
-    const setFile = obj => R.merge(file, { response: obj });
+    const setFile = obj => R.merge(file, { data: obj });
     return promise.then(setFile);
   }
 
-  createS3Archive(bucket, cache, { key, files }) {
+  createS3Archive(bucket, cache, params) {
+    const { key, files } = params;
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
+      if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
       const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const dst = fs.createWriteStream(cachefile);
+      dst.on('error', reject);
       dst.on('finish', () => {
-        log.trace(awsutils.displayName, 'finish:', cachefile);
+        log.trace(awsutils.displayName, 'dst:finish:', cachefile);
         const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key));
-        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
-        src.on('close', () => {
-          log.trace(awsutils.displayName, 'close', key);
-          fs.unlink(cachefile, err => reject(err));
-          resolve({ Bucket: bucket, Key: key });
-        });
+        src.pipe(this.createWriteStream(bucket, key))
+          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
+          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
+          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
+          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
+          .on('end',  ()  => {
+              log.info(awsutils.displayName, 'aws:end:', key);
+              fs.unlink(cachefile, reject);
+              resolve(params);
+            })
+          .on('error', reject);
+        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
+        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
+        src.on('error', reject);
       });
       this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       this.archive.on('error', err => reject(err));
@@ -211,25 +214,34 @@ class awsutils {
     });
   }
 
-  createArchive(bucket, cache, { key, files, subpath }) {
+  createArchive(bucket, cache, params) {
+    const { key, files, subpath } = params;
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
+      if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
       const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
+      dst.on('error', reject);
       dst.on('finish', () => {
-        log.trace(awsutils.displayName, 'finish:', cachefile);
+        log.trace(awsutils.displayName, 'dst:finish:', cachefile);
         const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key)).on('error', reject);
-        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
-        src.on('close', () => {
-          log.trace(awsutils.displayName, 'close', key);
-          fs.remove(subdir, err => {
-            if(err) return reject(err);
-            fs.unlink(cachefile, reject);
-            resolve({ Bucket: bucket, Key: key });
-          });
-        });
+        src.pipe(this.createWriteStream(bucket, key))
+          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
+          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
+          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
+          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
+          .on('end',  ()  => {
+              log.info(awsutils.displayName, 'aws:end', key);
+              fs.remove(subdir, err => {
+                if(err) return reject(err);
+                fs.unlink(cachefile, reject);
+                resolve(params);
+              });
+            })
+          .on('error', reject);
+        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
+        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
+        src.on('error', reject);
       });
       this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       this.archive.on('error', reject);
@@ -239,25 +251,34 @@ class awsutils {
     });
   }
 
-  createZipArchive(bucket, cache, { key, files, subpath }) {
+  createZipArchive(bucket, cache, params) {
+    const { key, files, subpath } = params
     return new Promise((resolve, reject) => {
-      if(files.length === 0) return reject({ name: 'Warning:', message: 'File not found.' });
+      if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
       const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const subdir    = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(cachefile);
+      dst.on('error', reject);
       dst.on('close', () => {
-        log.trace(awsutils.displayName, 'close:', cachefile);
+        log.trace(awsutils.displayName, 'dst:close:', cachefile);
         const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key)).on('error', reject);
-        src.on('end', () => log.trace(awsutils.displayName, 'end', key));
-        src.on('close', () => {
-          log.trace(awsutils.displayName, 'close', key);
-          fs.remove(subdir, err => {
-            if(err) return reject(err);
-            fs.unlink(cachefile, reject);
-            resolve({ Bucket: bucket, Key: key });
-          });
-        });
+        src.pipe(this.createWriteStream(bucket, key))
+          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
+          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
+          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
+          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
+          .on('end',  ()  => {
+              log.info(awsutils.displayName, 'aws:end:', key);
+              fs.remove(subdir, err => {
+                if(err) return reject(err);
+                fs.unlink(cachefile, reject);
+                resolve(params);
+              });
+            })
+          .on('error', reject);
+        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
+        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
+        src.on('error', reject);
       });
       this.zip.outputStream.pipe(dst);
       R.map(obj => this.zip.addReadStream(fs.createReadStream(path.resolve(subdir, obj.name)), obj.name), files);

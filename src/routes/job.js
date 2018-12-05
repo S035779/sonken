@@ -14,7 +14,8 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info(displayName, 'download', 'Query to job Queue.'));
+      , () => log.info(displayName, 'download', 'Query to job Queue.')
+      );
     };
   },
 
@@ -27,7 +28,8 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info(displayName, 'download', 'Queue to download file.'));
+      , () => log.info(displayName, 'download', 'Queue to download file.')
+      );
     };
   },
 
@@ -40,8 +42,23 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info(displayName, 'signedlink', 'Queue to signed link.'));
-      };
+      , () => log.info(displayName, 'signedlink', 'Queue to signed link.')
+      );
+    };
+  },
+
+  clearcaches() {
+    return (req, res) => {
+      const { operation, user, category, type, number } = req.query;
+      job.clearcaches(operation, { user, category, type, number }).subscribe(
+        obj => res.status(200).send(obj)
+      , err => {
+          res.status(500).send({ name: err.name, message: err.message });
+          log.error(displayName, err.name, ':', err.message);
+        }
+      , () => log.info(displayName, 'signedlink', 'Clear to signed link.')
+      );
+    };
   },
 
   notImplemented() {

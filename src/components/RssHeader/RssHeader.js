@@ -21,16 +21,18 @@ class RssHeader extends React.Component {
       loadingDownload: false
     , category: ''
     };
+    this.timers = null;
   }
 
   componentDidMount() {
     const { user, location } = this.props;
     const category = location.pathname.split('/')[1];
+    std.logInfo(RssHeader.displayName, 'setInterval', category);
     this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category }), 0, interval);
   }
 
   componentWillUnmount() {
-    if(this.timer) clearInterval(this.timer);
+    clearInterval(this.timer);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -43,10 +45,10 @@ class RssHeader extends React.Component {
       this.setState({ loadingDownload: nextJobs });
     }
     if(nextCategory !== prevCategory) {
-      NoteAction.fetchJobs({ user, category: nextCategory });
-      this.setState({ category: nextCategory });
-      if(this.timer) clearInterval(this.timer);
+      std.logInfo(RssHeader.displayName, 'setInterval', nextCategory);
+      clearInterval(this.timer);
       this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category: nextCategory }), 0, interval);
+      this.setState({ category: nextCategory });
     }
   }
 

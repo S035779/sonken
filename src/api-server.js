@@ -191,7 +191,7 @@ router.route('/worker')
 .get(job.fetchJobs())
 .put(job.signedlinks())
 .post(job.download())
-.delete(job.notImplemented());
+.delete(job.clearcaches());
 
 router.route('/notes')
 .get(feed.fetchNotes())

@@ -81,12 +81,14 @@ export default {
         return new Promise((resolve, reject) => xhr.postFile(   api + '/traded',    options, resolve, reject));
       case 'download/bided':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
+      case 'fetch/jobs':
+        return new Promise((resolve, reject) => xhr.getJSON(    api + '/worker',    options, resolve, reject));
       case 'download/job':
         return new Promise((resolve, reject) => xhr.postFile(   api + '/worker',    options, resolve, reject));
       case 'signedlink/job':
         return new Promise((resolve, reject) => xhr.putJSON(    api + '/worker',    options, resolve, reject));
-      case 'fetch/jobs':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/worker',    options, resolve, reject));
+      case 'clearcache/job':
+        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -209,6 +211,9 @@ export default {
   /*
    *  jobQueue
    */
+  fetchJobs(params) {
+    return this.request('fetch/jobs', params);
+  },
   downloadJob(operation, params) {
     const { ids, user, category, type, filter, number } = params;
     return this.request('download/job', { operation, ids, user, category, type, filter, number });
@@ -217,8 +222,9 @@ export default {
     const { ids, user, category, type, filter, number } = params;
     return this.request('signedlink/job', { operation, ids, user, category, type, filter, number });
   },
-  fetchJobs(params) {
-    return this.request('fetch/jobs', params);
+  clearcacheJob(operation, params) {
+    const { user, category, type, number } = params;
+    return this.request('clearcache/job', { operation, user, category, type, number });
   },
 
   /*

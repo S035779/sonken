@@ -138,13 +138,18 @@ export default {
       dispatch({ type: 'job/download', file });
     });
   },
+  deleteCache() {
+    dispatch({ type: 'job/create', file: null });
+  },
   signedlinkJob(operation, params) { 
     return NoteApiClient.signedlinkJob(operation, params).then(images => {
       dispatch({ type: 'job/signedlink', images });
     });
   },
-  deleteCache() {
-    dispatch({ type: 'job/create', file: null });
+  clearcacheJob(operation, params) {
+    return NoteApiClient.clearcacheJob(operation, params).then(() => {
+      dispatch({ type: 'job/signedlink', images: [] });
+    });
   },
   deleteAdd(user, ids) {
     return NoteApiClient.deleteAdd(user, ids).then(() => {
