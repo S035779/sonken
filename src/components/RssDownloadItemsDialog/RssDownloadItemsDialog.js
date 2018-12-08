@@ -47,16 +47,24 @@ class RssDownloadItemsDialog extends React.Component {
     std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
     const { user, ids, filter, noteNumber, itemNumber, category, checked } = this.props;
     if(noteNumber === 0 || itemNumber === 0) return;
-    const type = operation === 'download/items' ? this.state.name : '9999';
     const number = checked ? noteNumber : R.length(ids);
-    const params = checked ? { user, category, filter, type, number } : { user, category, filter, ids, type, number };
+    const setParams= type => checked ? { user, category, type, filter, number } : { user, category, type, filter, number, ids };
+    let params;
     switch(operation) { 
+      case 'download/item':
+        params = setParams(this.state.name);
+        return this.download(operation, params);
       case 'download/items':
+        params = setParams(this.state.name);
+        return this.download(operation, params);
       case 'download/images':
+        params = setParams('9999');
         return this.download(operation, params);
       case 'signedlink/images':
+        params = setParams('9999');
         return this.signedlink(operation, params);
       case 'clearcache/images':
+        params = setParams('9999');
         return this.clearcache(operation, params);
     }
   }
@@ -113,6 +121,7 @@ class RssDownloadItemsDialog extends React.Component {
   downloadFile(operation, { blob, urls }) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'downloadFile', blob);
     switch(operation) {
+      case 'download/item':
       case 'download/items':
         {
           const fileReader = new FileReader();
@@ -192,7 +201,7 @@ class RssDownloadItemsDialog extends React.Component {
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'clearcache/images')} classes={classes.button}>
             キャッシュ削除
           </RssButton>
-          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/items')} classes={classes.button}>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/item')} classes={classes.button}>
             リスト保存
           </RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>

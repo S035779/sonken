@@ -14,7 +14,7 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info(displayName, 'download', 'Query to job Queue.')
+      , () => log.info(displayName, 'fetchJobs', 'Query to job Queue.')
       );
     };
   },
@@ -56,7 +56,7 @@ export default {
           res.status(500).send({ name: err.name, message: err.message });
           log.error(displayName, err.name, ':', err.message);
         }
-      , () => log.info(displayName, 'signedlink', 'Clear to signed link.')
+      , () => log.info(displayName, 'clearcaches', 'Clear to signed link.')
       );
     };
   },

@@ -1,7 +1,7 @@
 import path                       from 'path';
 import dotenv                     from 'dotenv';
 import * as R                     from 'ramda';
-import { from, forkJoin, defer, of }  from 'rxjs';
+import { from, forkJoin, defer }  from 'rxjs';
 import { map, flatMap }           from 'rxjs/operators';
 import { parseString }            from 'xml2js';
 import mongoose                   from 'mongoose';
@@ -28,8 +28,6 @@ const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const STORAGE         = process.env.STORAGE;
-const CACHE           = process.env.CACHE;
-
 
 const amz_keyset  = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
 const aws_keyset  = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
@@ -2205,7 +2203,9 @@ export default class FeedParser {
 
   downloadItems({ user, ids, filter, type }, header) {
     const CSV         = this.setCsvItems(type);
+    const BOM         = Buffer.from('\uFEFF', 'utf8');
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
+    const setHeader   = buf  => header ? Buffer.concat([BOM, buf]) : buf;
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys, header }).parse();
     const dupItems    = objs => std.dupObj(objs, 'title');
     const getItems    = obj => obj.items ? obj.items : [];
@@ -2217,6 +2217,7 @@ export default class FeedParser {
     , map(dupItems)
     , map(setItemsCsv)
     , map(setBuffer)
+    , map(setHeader)
     );
   }
 
@@ -2262,45 +2263,6 @@ export default class FeedParser {
     , map(dupItems)
     , map(setImages)
     , map(R.flatten)
-    );
-  }
-
-  setArchiveKey(key, value, count) {
-    const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.zip';
-    return setKey(key, value + '-' + count);
-  }
-
-  createArchive({ user, category, type }, file) {
-    log.info(FeedParser.displayName, 'createArchive', { user, category, type });
-    const { files } = file;
-    const header      = user + '-' + category;
-    const setKey      = () => this.setArchiveKey(type, header, 0);
-    const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size });
-    return from(this.AWS.createArchiveFromS3(STORAGE, CACHE, { key: setKey(), files }))
-      .pipe(map(file => setDetail(file)));
-  }
-
-  createArchives({ user, category, type, limit, count, total, index }, file) {
-    log.info(FeedParser.displayName, 'createArchives', { user, category, type, limit, count, total, index });
-    const { subpath, files } = file;
-    const header      = user + '-' + category;
-    const setFiles    = R.map(file => ({ name: file }))
-    const numTotal    = Number(total);
-    const numIndex    = Number(index);
-    const numLimit    = Number(limit);
-    const numCount    = Number(count);
-    const numFiles    = R.length(files);
-    const numCounts   = numCount !== 0 ? Math.floor(numIndex / numCount) : 0;
-    const isCountUp   = numCount !== 0 && ((numIndex + 1) % numCount === 0);
-    const isFiles     = numFiles !== 0;
-    const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
-    const setKey      = () => this.setArchiveKey(type, header, numCounts);
-    const setDetail   = 
-      obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size, count: numCounts, countup: isCountUp });
-    return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
-      ? from(this.AWS.createZipArchive(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath }))
-          .pipe(map(file => setDetail(file)))
-      : of(setDetail(file))
     );
   }
 }

@@ -177,111 +177,180 @@ class awsutils {
   deleteObject(bucket, { key, file }) {
     const params = { Bucket: bucket, Key: key };
     const promise = this.s3.deleteObject(params).promise();
-    const setFile = obj => R.merge(file, { data: obj });
+    const setFile = obj => R.merge(file, { status: obj });
     return promise.then(setFile);
   }
 
-  createS3Archive(bucket, cache, params) {
-    const { key, files } = params;
+  createS3Archives(bucket, cache, params) {
     return new Promise((resolve, reject) => {
+      const { key, files } = params;
       if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
-      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
-      const dst = fs.createWriteStream(cachefile);
+      const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const dst = fs.createWriteStream(tmpfile);
       dst.on('error', reject);
       dst.on('finish', () => {
-        log.trace(awsutils.displayName, 'dst:finish:', cachefile);
-        const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key))
-          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
-          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
-          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
-          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
-          .on('end',  ()  => {
-              log.info(awsutils.displayName, 'aws:end:', key);
-              fs.unlink(cachefile, reject);
-              resolve(params);
-            })
-          .on('error', reject);
-        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
-        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
-        src.on('error', reject);
+        log.trace(awsutils.displayName, 'dst:finish:', tmpfile);
+        const _src = fs.createReadStream(tmpfile);
+        const _dst = this.createWriteStream(bucket, key);
+        _dst.on('error',  reject);
+        //_dst.on('pipe',   ()  => log.debug(awsutils.displayName, '_dst:pipe',   'it is pipe.'))
+        //_dst.on('unpipe', ()  => log.debug(awsutils.displayName, '_dst:unpipe', 'it is unpipe.'))
+        //_dst.on('drain',  ()  => log.debug(awsutils.displayName, '_dst:drain',  'it is drain.'))
+        //_dst.on('close',  ()  => log.debug(awsutils.displayName, '_dst:close',  'it is close.'))
+        //_dst.on('end',    ()  => log.debug(awsutils.displayName, '_dst:end',    'it is end.'))
+        _dst.on('finish', ()  => {
+          log.info(awsutils.displayName, '_dst:finish', key);
+          fs.unlink(tmpfile, err => { 
+            if(err) return reject(err);
+            resolve(params);
+          });
+        })
+        _src.on('error', reject);
+        //_src.on('pipe',   ()  => log.debug(awsutils.displayName, '_src:pipe',   'it is pipe.'))
+        //_src.on('unpipe', ()  => log.debug(awsutils.displayName, '_src:unpipe', 'it is unpipe.'))
+        //_src.on('drain',  ()  => log.debug(awsutils.displayName, '_src:drain',  'it is drain.'))
+        //_src.on('close',  ()  => log.info(awsutils.displayName,  '_src:close',  'it is close.'));
+        //_src.on('finish', ()  => log.info(awsutils.displayName,  '_src:finish', 'it is finish.'));
+        //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end',    tmpfile));
+        _src.pipe(_dst)
       });
       this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      this.archive.on('error', err => reject(err));
+      this.archive.on('error', reject);
       this.archive.pipe(dst);
       R.map(obj => this.archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
       this.archive.finalize();
     });
   }
 
-  createArchive(bucket, cache, params) {
-    const { key, files, subpath } = params;
+  _createArchives(bucket, cache, params) {
     return new Promise((resolve, reject) => {
+      const { key, files, subpath } = params;
       if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
-      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
-      const subdir    = path.resolve(__dirname, '../', cache, subpath);
-      const dst = fs.createWriteStream(cachefile);
+      const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const srcdir  = path.resolve(__dirname, '../', cache, subpath);
+      const dst = fs.createWriteStream(tmpfile);
       dst.on('error', reject);
       dst.on('finish', () => {
-        log.trace(awsutils.displayName, 'dst:finish:', cachefile);
-        const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key))
-          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
-          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
-          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
-          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
-          .on('end',  ()  => {
-              log.info(awsutils.displayName, 'aws:end', key);
-              fs.remove(subdir, err => {
-                if(err) return reject(err);
-                fs.unlink(cachefile, reject);
-                resolve(params);
-              });
-            })
-          .on('error', reject);
-        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
-        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
-        src.on('error', reject);
+        log.trace(awsutils.displayName, 'dst:finish:', tmpfile);
+        const _src = fs.createReadStream(tmpfile);
+        const _dst = this.createWriteStream(bucket, key);
+        _dst.on('error', reject);
+        //_dst.on('pipe',   ()  => log.debug(awsutils.displayName, '_dst:pipe',   'it is pipe.'))
+        //_dst.on('unpipe', ()  => log.debug(awsutils.displayName, '_dst:unpipe', 'it is unpipe.'))
+        //_dst.on('drain',  ()  => log.debug(awsutils.displayName, '_dst:drain',  'it is drain.'))
+        //_dst.on('close',  ()  => log.info(awsutils.displayName,  '_dst:close',  'it is close.'))
+        //_dst.on('end',    ()  => log.debug(awsutils.displayName, '_dst:end',    'it is end.'))
+        _dst.on('finish', ()  => {
+          log.info(awsutils.displayName, '_dst:finish', key);
+          fs.remove(srcdir, err => {
+            if(err) return reject(err);
+            fs.unlink(tmpfile, err => {
+              if(err) return reject(err);
+              resolve(params);
+            });
+          });
+        })
+        _src.on('error',  reject);
+        //_src.on('pipe',   src => log.debug(awsutils.displayName, '_src:pipe',   'it is pipe.'))
+        //_src.on('unpipe', src => log.debug(awsutils.displayName, '_src:unpipe', 'it is unpipe.'))
+        //_src.on('drain',  ()  => log.debug(awsutils.displayName, '_src:drain',  'it is drain.'))
+        //_src.on('close',  ()  => log.info(awsutils.displayName,  '_src:close',  'it is close.'));
+        //_src.on('finish', ()  => log.info(awsutils.displayName,  '_src:finish', 'it is finish.'));
+        //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end',    srcfile));
+        _src.pipe(_dst)
       });
       this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
       this.archive.on('error', reject);
       this.archive.pipe(dst);
-      R.map(obj => this.archive.append(fs.createReadStream(path.resolve(subdir, obj.name)), { name: obj.name }), files);
+      R.map(obj => this.archive.append(fs.createReadStream(path.resolve(srcdir, obj.name)), { name: obj.name }), files);
       this.archive.finalize();
     });
   }
 
-  createZipArchive(bucket, cache, params) {
-    const { key, files, subpath } = params
+  createArchive(bucket, cache, params) {
     return new Promise((resolve, reject) => {
+      const { key, files } = params
+      const file = R.head(files);
       if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
-      const cachefile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
-      const subdir    = path.resolve(__dirname, '../', cache, subpath);
-      const dst = fs.createWriteStream(cachefile);
+      const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const srcfile = path.resolve(__dirname, '../', cache, file.name);
+      const dst = fs.createWriteStream(tmpfile);
+      const src = fs.createReadStream(srcfile)
       dst.on('error', reject);
       dst.on('close', () => {
-        log.trace(awsutils.displayName, 'dst:close:', cachefile);
-        const src = fs.createReadStream(cachefile);
-        src.pipe(this.createWriteStream(bucket, key))
-          //.on('drain',  ()  => log.debug(awsutils.displayName, 'aws:drain:', 'it is drain.'))
-          //.on('finish', ()  => log.debug(awsutils.displayName, 'aws:finish:', 'it is finish.'))
-          //.on('pipe',   src => log.debug(awsutils.displayName, 'aws:pipe:', src))
-          //.on('unpipe', src => log.debug(awsutils.displayName, 'aws:unpipe:', src))
-          .on('end',  ()  => {
-              log.info(awsutils.displayName, 'aws:end:', key);
-              fs.remove(subdir, err => {
-                if(err) return reject(err);
-                fs.unlink(cachefile, reject);
-                resolve(params);
-              });
-            })
-          .on('error', reject);
-        //src.on('end',   ()  => log.debug(awsutils.displayName, 'src:end:', cachefile));
-        src.on('close', ()  => log.info(awsutils.displayName,  'src:close:', cachefile));
-        src.on('error', reject);
+        log.trace(awsutils.displayName, 'dst:close:', tmpfile);
+        const _src = fs.createReadStream(tmpfile);
+        const _dst = this.createWriteStream(bucket, key);
+        _dst.on('error', reject);
+        //_dst.on('pipe',   ()  => log.debug(awsutils.displayName, '_dst:pipe',   'it is pipe.'));
+        //_dst.on('unpipe', ()  => log.debug(awsutils.displayName, '_dst:unpipe', 'it is unpipe.'));
+        //_dst.on('drain',  ()  => log.debug(awsutils.displayName, '_dst:drain',  'it is drain.'));
+        //_dst.on('close',  ()  => log.info(awsutils.displayName,  '_dst:close',  'it is close.'));
+        //_dst.on('end',    ()  => log.debug(awsutils.displayName, '_dst:end',    'it is end.'));
+        _dst.on('finish', ()  => {
+          log.info(awsutils.displayName, '_dst:finish', key);
+          fs.unlink(srcfile, err => {
+            if(err) return reject(err);
+            fs.unlink(tmpfile, err => {
+              if(err) return reject(err);
+              resolve(params);
+            });
+          });
+        });
+        _src.on('error',  reject);
+        //_src.on('pipe',   ()  => log.debug(awsutils.displayName, '_src:pipe',   'it is pipe.'));
+        //_src.on('unpipe', ()  => log.debug(awsutils.displayName, '_src:unpipe', 'it is unpipe.'));
+        //_src.on('drain',  ()  => log.debug(awsutils.displayName, '_src:drain',  'it is drain.'));
+        //_src.on('close',  ()  => log.info(awsutils.displayName,  '_src:close',  'it is close.'));
+        //_src.on('finish', ()  => log.info(awsutils.displayName,  '_src:finish', 'it is finish.'));
+        //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end', srcfile));
+        _src.pipe(_dst);
       });
       this.zip.outputStream.pipe(dst);
-      R.map(obj => this.zip.addReadStream(fs.createReadStream(path.resolve(subdir, obj.name)), obj.name), files);
+      this.zip.addReadStream(src, file.name);
+      this.zip.end();
+    });
+  }
+
+  createArchives(bucket, cache, params) {
+    return new Promise((resolve, reject) => {
+      const { key, files, subpath } = params
+      if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
+      const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
+      const srcdir  = path.resolve(__dirname, '../', cache, subpath);
+      const dst = fs.createWriteStream(tmpfile);
+      dst.on('error', reject);
+      dst.on('close', () => {
+        log.trace(awsutils.displayName, 'dst:close:', tmpfile);
+        const _src = fs.createReadStream(tmpfile);
+        const _dst = this.createWriteStream(bucket, key);
+        _dst.on('error', reject);
+        //_dst.on('pipe',   src => log.debug(awsutils.displayName, '_dst:pipe',    'it is pipe.'))
+        //_dst.on('unpipe', src => log.debug(awsutils.displayName, '_dst:unpipe',  'it is unpipe.'))
+        //_dst.on('drain',  ()  => log.debug(awsutils.displayName, '_dst:drain',   'it is drain.'))
+        //_dst.on('close',  ()  => log.info(awsutils.displayName,  '_dst:close',   'it is close.'))
+        //_dst.on('end',    ()  => log.debug(awsutils.displayName, '_dst:end',     'it is end.'))
+        _dst.on('finish', ()  => {
+          log.info(awsutils.displayName, '_dst:finish', key);
+          fs.remove(srcdir, err => {
+            if(err) return reject(err);
+            fs.unlink(tmpfile, err => {
+              if(err) return reject(err);
+              resolve(params);
+            });
+          });
+        })
+        _src.on('error', reject);
+        //_src.on('pipe',   ()  => log.debug(awsutils.displayName, '_src:pipe',   'it is pipe.'));
+        //_src.on('unpipe', ()  => log.debug(awsutils.displayName, '_src:unpipe', 'it is unpipe.'));
+        //_src.on('drain',  ()  => log.debug(awsutils.displayName, '_src:drain',  'it is drain.'));
+        //_src.on('close',  ()  => log.info(awsutils.displayName,  '_src:close',  'it is close.'));
+        //_src.on('finish', ()  => log.info(awsutils.displayName,  '_src:finish', 'it is finish.'));
+        //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end:',   srcfile));
+        _src.pipe(_dst)
+      });
+      this.zip.outputStream.pipe(dst);
+      R.map(obj => this.zip.addReadStream(fs.createReadStream(path.resolve(srcdir, obj.name)), obj.name), files);
       this.zip.end();
     });
   }

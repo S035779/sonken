@@ -1,11 +1,12 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
 import * as R           from 'ramda';
-import { forkJoin, throwError, of }   from 'rxjs';
+import { forkJoin, throwError, of, from, defer }   from 'rxjs';
 import { flatMap, map, catchError } from 'rxjs/operators';
 import _async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Routes/Yahoo/Yahoo';
+import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
 import aws              from 'Utilities/awsutils';
 import job              from 'Utilities/jobutils';
@@ -18,11 +19,15 @@ if(config.error) throw new Error(config.error);
 const node_env        = process.env.NODE_ENV    || 'development';
 const workername      = process.env.WORKER_NAME || 'empty';
 const CACHE           = process.env.CACHE;
+const STORAGE         = process.env.STORAGE;
 const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
-const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 process.env.NODE_PENDING_DEPRECATION = 0;
+
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+const AWS = aws.of(aws_keyset);
+const FSS = fss.of({ dirpath: '../', dirname: CACHE });
 
 const displayName = `[WRK] (${process.pid})`;
 
@@ -36,9 +41,8 @@ if (node_env === 'production') {
   log.config('file', 'json', 'job-worker', 'INFO');
 }
 
+
 const request = (operation, options) => {
-  const AWS = aws.of(aws_keyset);
-  const FSS = fss.of({ dirpath: '../', dirname: CACHE });
   const yahoo = Yahoo.of();
   const feed  = FeedParser.of();
   switch(operation) {
@@ -138,23 +142,53 @@ const request = (operation, options) => {
         const sizeFiles = obj => R.sum(sizeFile(obj));
         const hasFiles =  obj => R.filter(filename => isCSV(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
         const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
-        return feed.downloadItems({ user, ids, filter, type }).pipe(
-            flatMap(obj => !R.isEmpty(obj) 
+        return feed.downloadItems({ user, ids, filter, type }, index === 0).pipe(
+            flatMap(obj => !R.isNil(obj) 
               ? of(setData(obj)) 
               : throwError({ name: 'NotFound', message: 'File not found.', stack: operation }))
           , flatMap(file => FSS.createDirectory(file))
-          , flatMap(file => FSS.createBom(file))
-          , flatMap(file => FSS.appendFile(file))
+          , flatMap(file => FSS.createFile(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+          , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
               if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
                   flatMap(file => FSS.createDirectory(file))
                 , flatMap(file => FSS.fetchFileList(file))
                 , map(setFiles)
-                , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+                , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
+                );
+            })
+          );
+      }
+    case 'download/item':
+      {
+        const { params } = options;
+        const { user, category, ids, filter, type, limit, count, total, index } = params;
+        const header = user + '-' + category + '-' + type;
+        const setData = buffer => ({ subpath: header, data: { name: header + '-' + Date.now() + '.csv', buffer } });
+        const isCSV = R.test(/.*\.csv$/);
+        const sizeFile = obj => R.map(filename => isCSV(filename) ? FSS.sizeFile({ subpath: obj.subpath, filename }) : 0, obj.files);
+        const sizeFiles = obj => R.sum(sizeFile(obj));
+        const hasFiles =  obj => R.filter(filename => isCSV(filename) && FSS.isFile({ subpath: obj.subpath, filename }), obj.files);
+        const setFiles = obj => R.merge(obj, { files: hasFiles(obj), size: sizeFiles(obj) });
+        return feed.downloadItems({ user, ids, filter, type }, index === 0).pipe(
+            flatMap(obj => !R.isNil(obj) 
+              ? of(setData(obj)) 
+              : throwError({ name: 'NotFound', message: 'File not found.', stack: operation }))
+          , flatMap(file => FSS.createDirectory(file))
+          , flatMap(file => FSS.createFile(file))
+          , flatMap(file => FSS.fetchFileList(file))
+          , map(setFiles)
+          , flatMap(file => mergeArchives({ user, category, type, limit, count, total, index }, file))
+          , catchError(err => {
+              if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
+              return of(setData()).pipe(
+                  flatMap(file => FSS.createDirectory(file))
+                , flatMap(file => FSS.fetchFileList(file))
+                , map(setFiles)
+                , flatMap(file => mergeArchives({ user, category, type, limit, count, total, index }, file))
                 );
             })
           );
@@ -179,14 +213,14 @@ const request = (operation, options) => {
           , flatMap(file => FSS.createFiles(file))
           , flatMap(file => FSS.fetchFileList(file))
           , map(setFiles)
-          , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+          , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
               if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
                   flatMap(file => FSS.createDirectory(file))
                 , flatMap(file => FSS.fetchFileList(file))
                 , map(setFiles)
-                , flatMap(file => feed.createArchives({ user, category, type, limit, count, total, index }, file))
+                , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
                 );
             })
           );
@@ -198,13 +232,78 @@ const request = (operation, options) => {
         const setFiles = files => ({ files });
         return feed.downloadImage({ user, ids, filter, type }).pipe(
             map(setFiles)
-          , flatMap(file => feed.createArchive({ user, category, type }, file))
+          , flatMap(file => createS3Archives({ user, category, type }, file))
           );
       }
     default:
       return throwError({ name: 'Invalid request:', message: 'Request is not implemented.', stack: operation });
   }
 };
+
+const setArchiveKey = (key, value, count) => {
+  const setKey      = (_key, _val) => std.crypto_sha256(_val, _key, 'hex') + '.zip';
+  return setKey(key, value + '-' + count);
+}
+
+const createS3Archives = ({ user, category, type }, file) => {
+  log.info(displayName, 'createArchive', { user, category, type });
+  const { files } = file;
+  const header      = user + '-' + category;
+  const setKey      = () => setArchiveKey(type, header, 0);
+  const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: obj.size });
+  return from(AWS.createS3Archives(STORAGE, CACHE, { key: setKey(), files })).pipe(map(setDetail));
+}
+
+const createArchives = ({ user, category, type, limit, count, total, index }, file) => {
+  log.info(displayName, 'createArchives', { user, category, type, limit, count, total, index });
+  const { subpath, files, size } = file;
+  const header      = user + '-' + category;
+  const setFiles    = R.map(filename => ({ name: filename }))
+  const numTotal    = Number(total);
+  const numIndex    = Number(index);
+  const numLimit    = Number(limit);
+  const numCount    = Number(count);
+  const numSize     = Number(size);
+  const numFiles    = R.length(files);
+  const numCounts   = numCount !== 0 ? Math.floor(numIndex / numCount) : 0;
+  const isCountUp   = numCount !== 0 && ((numIndex + 1) % numCount === 0);
+  const isFiles     = numFiles !== 0;
+  const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
+  const setKey      = () => setArchiveKey(type, header, numCounts);
+  const setDetail   = 
+    obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: numSize, count: numCounts, countup: isCountUp });
+  return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
+    ? from(AWS.createArchives(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath })).pipe(map(setDetail))
+    : of(setDetail(file))
+  );
+}
+
+const mergeArchives = ({ user, category, type, limit, count, total, index }, file) => {
+  log.info(displayName, 'mergeArchives', { user, category, type, limit, count, total, index });
+  const { subpath, files, size } = file;
+  const header      = user + '-' + category;
+  const setFiles    = R.map(filename => ({ name: filename }))
+  const numTotal    = Number(total);
+  const numIndex    = Number(index);
+  const numLimit    = Number(limit);
+  const numCount    = Number(count);
+  const numSize     = Number(size);
+  const numFiles    = R.length(files);
+  const numCounts   = numCount !== 0 ? Math.floor(numIndex / numCount) : 0;
+  const isCountUp   = numCount !== 0 && ((numIndex + 1) % numCount === 0);
+  const isFiles     = numFiles !== 0;
+  const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
+  const setKey      = () => setArchiveKey(type, header, numCounts);
+  const setDetail   = 
+    obj => ({ subpath: obj.subpath, files, size: numSize, count: numCounts, countup: isCountUp  });
+  return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
+    ? FSS.mergeFiles(file).pipe(
+        flatMap(obj => AWS.createArchive(STORAGE, CACHE, { key: setKey(), files: setFiles([obj]), subpath }))
+      , map(setDetail)
+      )
+    : of(setDetail(file))
+  );
+}
 
 const worker = (options, callback) => {
   const { operation, url, user, id, skip, limit, params } = options;
@@ -227,7 +326,7 @@ const worker = (options, callback) => {
 let jobs;
 switch(workername) {
   case 'wks-worker':
-    jobs = ['download/items'];
+    jobs = ['download/items', 'download/item'];
     break;
   case 'arc-worker':
     jobs = ['download/images', 'signedlink/images'];
