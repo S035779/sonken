@@ -270,8 +270,7 @@ const createArchives = ({ user, category, type, limit, count, total, index }, fi
   const isFiles     = numFiles !== 0;
   const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
   const setKey      = () => setArchiveKey(type, header, numCounts);
-  const setDetail   = 
-    obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: numSize, count: numCounts, countup: isCountUp });
+  const setDetail   = obj => ({ subpath: obj.subpath, files: R.length(obj.files), size: numSize, count: numCounts, countup: isCountUp });
   return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
     ? from(AWS.createArchives(STORAGE, CACHE, { key: setKey(), files: setFiles(files), subpath })).pipe(map(setDetail))
     : of(setDetail(file))
@@ -294,14 +293,13 @@ const mergeArchives = ({ user, category, type, limit, count, total, index }, fil
   const isFiles     = numFiles !== 0;
   const isFinalize  = (numTotal <= numLimit) || ((numTotal >  numLimit) && (numTotal <= numLimit * (numIndex + 1)));
   const setKey      = () => setArchiveKey(type, header, numCounts);
-  const setDetail   = 
-    obj => ({ subpath: obj.subpath, files, size: numSize, count: numCounts, countup: isCountUp  });
+  const setDetail   = obj => ({ subpath: obj.subpath, files, size: numSize, count: numCounts, countup: isCountUp  });
   return defer(() => (isFiles && isFinalize) || (isFiles && isCountUp)
     ? FSS.mergeFiles(file).pipe(
         flatMap(obj => AWS.createArchive(STORAGE, CACHE, { key: setKey(), files: setFiles([obj]), subpath }))
       , map(setDetail)
       )
-    : of(setDetail(file))
+    : of(setDetail(file)) 
   );
 }
 

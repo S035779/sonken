@@ -24,8 +24,6 @@ class awsutils {
     this.props = { config: { s3, rekognition } };
     this.rekognition = new AWS.Rekognition(rekognition);
     this.s3 = new AWS.S3(s3);
-    this.zip = new yazl.ZipFile();
-    this.archive = archiver('zip', { zlib: { level: 9 } });
   }
 
   static of(props) {
@@ -187,6 +185,7 @@ class awsutils {
       if(files.length === 0) return reject({ name: 'NotFound', message: 'File not found.' });
       const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const dst = fs.createWriteStream(tmpfile);
+      const arc = archiver('zip', { zlib: { level: 9 } });
       dst.on('error', reject);
       dst.on('finish', () => {
         log.trace(awsutils.displayName, 'dst:finish:', tmpfile);
@@ -214,11 +213,11 @@ class awsutils {
         //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end',    tmpfile));
         _src.pipe(_dst)
       });
-      this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      this.archive.on('error', reject);
-      this.archive.pipe(dst);
-      R.map(obj => this.archive.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
-      this.archive.finalize();
+      arc.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      arc.on('error', reject);
+      arc.pipe(dst);
+      R.map(obj => arc.append(this.createReadStream(bucket, obj.key), { name: obj.name }), files);
+      arc.finalize();
     });
   }
 
@@ -229,6 +228,7 @@ class awsutils {
       const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const srcdir  = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(tmpfile);
+      const arc = archiver('zip', { zlib: { level: 9 } });
       dst.on('error', reject);
       dst.on('finish', () => {
         log.trace(awsutils.displayName, 'dst:finish:', tmpfile);
@@ -259,11 +259,11 @@ class awsutils {
         //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end',    srcfile));
         _src.pipe(_dst)
       });
-      this.archive.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
-      this.archive.on('error', reject);
-      this.archive.pipe(dst);
-      R.map(obj => this.archive.append(fs.createReadStream(path.resolve(srcdir, obj.name)), { name: obj.name }), files);
-      this.archive.finalize();
+      arc.on('warning', err => err.code !== 'ENOENT' ? reject(err) : null);
+      arc.on('error', reject);
+      arc.pipe(dst);
+      R.map(obj => arc.append(fs.createReadStream(path.resolve(srcdir, obj.name)), { name: obj.name }), files);
+      arc.finalize();
     });
   }
 
@@ -276,6 +276,7 @@ class awsutils {
       const srcfile = path.resolve(__dirname, '../', cache, file.name);
       const dst = fs.createWriteStream(tmpfile);
       const src = fs.createReadStream(srcfile)
+      const zip = new yazl.ZipFile();
       dst.on('error', reject);
       dst.on('close', () => {
         log.trace(awsutils.displayName, 'dst:close:', tmpfile);
@@ -306,9 +307,9 @@ class awsutils {
         //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end', srcfile));
         _src.pipe(_dst);
       });
-      this.zip.outputStream.pipe(dst);
-      this.zip.addReadStream(src, file.name);
-      this.zip.end();
+      zip.outputStream.pipe(dst);
+      zip.addReadStream(src, file.name);
+      zip.end();
     });
   }
 
@@ -319,6 +320,7 @@ class awsutils {
       const tmpfile = path.resolve(__dirname, '../', cache, `cachefile_${Date.now()}.tmp`);
       const srcdir  = path.resolve(__dirname, '../', cache, subpath);
       const dst = fs.createWriteStream(tmpfile);
+      const zip = new yazl.ZipFile();
       dst.on('error', reject);
       dst.on('close', () => {
         log.trace(awsutils.displayName, 'dst:close:', tmpfile);
@@ -349,9 +351,9 @@ class awsutils {
         //_src.on('end',    ()  => log.debug(awsutils.displayName, '_src:end:',   srcfile));
         _src.pipe(_dst)
       });
-      this.zip.outputStream.pipe(dst);
-      R.map(obj => this.zip.addReadStream(fs.createReadStream(path.resolve(srcdir, obj.name)), obj.name), files);
-      this.zip.end();
+      zip.outputStream.pipe(dst);
+      R.map(obj => zip.addReadStream(fs.createReadStream(path.resolve(srcdir, obj.name)), obj.name), files);
+      zip.end();
     });
   }
 

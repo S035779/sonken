@@ -47,8 +47,8 @@ export default class JobQueue {
       case 'create/jobs':
         {
           const { operation, idss, data } = options;
-          const { ids, limit, count } = idss;
-          const setParam = (idx, obj) => R.merge(data, { ids: obj, limit, count, index: idx, total: R.length(ids), created: new Date });
+          const { ids, limit, count, total } = idss;
+          const setParam = (idx, obj) => R.merge(data, { ids: obj, limit, count, index: idx, total, created: new Date });
           const mapIndex = R.addIndex(R.map);
           const datas = mapIndex((obj, idx) => ({ operation, params: setParam(idx, obj) }), ids);
           return job.enqueue(JobQueue.displayName, operation, datas);
@@ -119,7 +119,7 @@ export default class JobQueue {
           const limit = 20; // seller count.
           const count = 0;  // archive count.
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count });
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count, total: objs.length });
           const observable = defer(() => R.isNil(ids) 
             ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ], sort: 'desc', skip: 0, limit: 1000 }).pipe(map(setIds))
             : of(ids));
@@ -147,7 +147,7 @@ export default class JobQueue {
           const limit = 1;  // seller count.
           const count = 20; // archive count.
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count });
+          const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count, total: objs.length });
           const observable = defer(() => R.isNil(ids) 
             ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ], sort: 'desc', skip: 0, limit: 1000 }).pipe(map(setIds))
             : of(ids));
@@ -172,7 +172,7 @@ export default class JobQueue {
           , 'data.params.type': type
           };
           const setIds = R.map(obj => obj._id);
-          const setParams = objs => ({ ids: [objs] });
+          const setParams = objs => ({ ids: [objs], total: objs.length });
           const observable = defer(() => R.isNil(ids)
             ? this.feed.fetchJobNotes({ users: [ user ], categorys: [ category ], sort: 'desc', skip: 0, limit: 1000 }).pipe(map(setIds))
             : of(ids));

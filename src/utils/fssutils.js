@@ -1,11 +1,11 @@
 import archiver         from 'archiver';
 import fs               from 'fs-extra';
 import path             from 'path';
+import StreamConcat     from 'stream-concat';
 import * as R           from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map }          from 'rxjs/operators';
 import log              from 'Utilities/logutils';
-import StreamConcat     from 'stream-concat';
 
 /**
  * FileSystemSupport class.
@@ -62,9 +62,9 @@ export default class FSSupport {
           const setFile       = str => path.resolve(srcdir, str);
           const setReadStream = str => fs.createReadStream(str);
           const createReadStream = R.compose(setReadStream, setFile);
+          let idx = 0;
+          const nextStream = () => idx === files.length ? null : createReadStream(files[idx++]);
           return new Promise((resolve, reject) => {
-            let idx = 0;
-            const nextStream = () => idx === files.length ? null : createReadStream(files[idx++]);
             const src = new StreamConcat(nextStream);
             const dst = fs.createWriteStream(path.resolve(this.dir, dstfile));
             dst.on('error',  reject);
@@ -85,14 +85,7 @@ export default class FSSupport {
             //src.on('drain',  ()  => log.debug(FSSupport.displayName, 'src:drain',  'it is drain.'));
             //src.on('finish', ()  => log.debug(FSSupport.displayName, 'src:finish', 'it is finish.'));
             //src.on('close',  ()  => log.debug(FSSupport.displayName, 'src:close',  'it is close.'));
-            src.on('end',    ()  => {
-              log.info(FSSupport.displayName,  'src:end',    'it is end.');
-              src.pause();
-              src.unpipe();
-              if(src.close())         src.close();
-              else if(src.destroy())  src.destroy();
-              dst.end();
-            });
+            //src.on('end',    ()  => log.info(FSSupport.displayName,  'src:end',    'it is end.'));
             src.pipe(dst);
           });
         }
