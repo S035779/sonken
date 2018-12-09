@@ -104,28 +104,23 @@ export default class FeedParser {
           return query.populate(params).exec()
             .then(doc => doc.toObject());
         }
-      case 'count/items':
-        {
-          const { user, category } = options;
-          const conditions = { user, category };
-          const query = Note.find(conditions, { _id: 1 });
-          return query.exec()
-            .then(docs =>  Note.aggregate()
-              .match({ user, _id: { $in: docs.map(doc => ObjectId(doc._id)) } })
-              .project({ item_size: { $size: "$items" }})
-              .group({ _id: "$_id", counts: { $sum: "$item_size" } })
-              .exec());
-        }
+      //case 'count/items':
+      //  {
+      //    const { user, category } = options;
+      //    return Note.aggregate()
+      //      .match({ user, category })
+      //      .project({ item_size: { $size: "$items" }})
+      //      .group({ _id: "$_id", counts: { $sum: "$item_size" } })
+      //      .exec();
+      //  }
       case 'count/note':
         {
           const { user, category } = options;
-          const conditions = { user, category };
-          //const params = { path: 'items', options: { sort: { bidStopTime: 'desc' }}};
-          const query = Note.find(conditions);
-          return query
-            //.populate(params)
-            .countDocuments().exec();
+          return Note.find({ user, category })
+            .countDocuments()
+            .exec();
         }
+      case 'count/items':
       case 'fetch/notes':
         {
           const { user, category, skip, limit, filter } = options;
@@ -133,10 +128,13 @@ export default class FeedParser {
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCategory = !R.isNil(category);
+          const isCount = request === 'count/items';
           const conditions = isCategory ? { user, category } : { user };
+          const query = Note.find(conditions);
+          let sold = 0;
           let params = { 
             path:     'items'
-          , options:  { sort: { bidStopTime: 'desc' }, skip: 0, limit: 20 }
+          , options:  { sort: { bidStopTime: 'desc' } }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
@@ -146,11 +144,24 @@ export default class FeedParser {
             , { path: 'attributes' }
             ]
           };
-          if(isProject)   params = R.merge(params, { select: filter.select });
-          const query = Note.find(conditions);
-          if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
-          if(!isCSV)      query.populate(params);
-          return query.exec();
+          if(isProject) params = R.merge(params, { select: filter.select });
+          const setCount = doc => isCount ? ({ 
+            _id:      doc._id
+          , counts:   R.length(doc.items)
+          }) : doc;
+          const setCounts = R.map(setCount);
+          const sliItems = docs => R.slice(0, 20, docs);
+          const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const setItems = R.compose(sliItems, hasItems);
+          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setNotes = docs => isCount ? docs : R.map(setNote, docs);
+          const setObjects = R.map(doc => doc.toObject());
+          if(isPaginate && !isCount)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          if(!isCSV     && !isCount)  query.populate(params);
+          return query.exec()
+            .then(setObjects)
+            .then(setNotes)
+            .then(setCounts);
         }
       case 'count/item':
       case 'fetch/note':
@@ -192,7 +203,6 @@ export default class FeedParser {
               sold  = Number(filter.sold);
             }
           }
-
           let params = { 
             path: 'items'
           , options: { sort: { bidStopTime: 'desc' } }
@@ -227,8 +237,9 @@ export default class FeedParser {
           const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setObject = doc => doc.toObject();
           return query.populate(params).exec()
-            .then(doc => doc.toObject())
+            .then(setObject)
             .then(setNote)
             .then(setCount);
         }
@@ -1083,7 +1094,7 @@ export default class FeedParser {
     //, this.setReaded(objs[2])
     //, this.setListed(objs[1])
     //, this.setStarred(objs[0])
-    , this.toObject
+    //, this.toObject
     )(objs[3]);
     return observables.pipe(
       map(setAttribute)
@@ -1292,13 +1303,15 @@ export default class FeedParser {
     //log.trace(FeedParser.displayName, 'setItemPage', counts);
     const _counts = id => R.find(obj => id.equals(obj._id))(counts);
     const inCounts = num => R.gt(num, Number(skip) + Number(limit))
+    const setTotal = R.compose(num => ({ total: num }), R.sum, R.map(obj => obj.counts));
     const setItem = num => ({ total: num, count: inCounts(num) ? Number(skip) + Number(limit) : num });
     const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
-    const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts) });
+    const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts), items: setTotal(counts) });
     const setPerfCount = obj => ({ sold: { total: obj.sold }, images: { total: obj.images }, archive: { total: obj.archive } });
     const setAttributes = obj => !R.isNil(obj.sold) || !R.isNil(obj.images) || !R.isNil(obj.archive)
-      ? R.merge(setItemCount(obj), setPerfCount(obj)) : setItemCount(obj);
+      ? R.merge(setItemCount(obj), setPerfCount(obj))
+      : setItemCount(obj);
     const setCounts = obj => R.merge(obj, { item_attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
     return results;

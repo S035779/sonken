@@ -32,8 +32,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
         resources:
           requests:
-            cpu: 128m
-            memory: 256Mi
+            cpu: 160m
+            memory: 384Mi
         lifecycle:
           postStart:
             exec:
@@ -59,7 +59,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:
           requests:
-            cpu: 128m
-            memory: 256Mi
+            cpu: 160m
+            memory: 384Mi
         ports:
           - containerPort: 8082
