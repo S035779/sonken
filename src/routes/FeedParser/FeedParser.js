@@ -104,15 +104,6 @@ export default class FeedParser {
           return query.populate(params).exec()
             .then(doc => doc.toObject());
         }
-      //case 'count/items':
-      //  {
-      //    const { user, category } = options;
-      //    return Note.aggregate()
-      //      .match({ user, category })
-      //      .project({ item_size: { $size: "$items" }})
-      //      .group({ _id: "$_id", counts: { $sum: "$item_size" } })
-      //      .exec();
-      //  }
       case 'count/note':
         {
           const { user, category } = options;
@@ -120,7 +111,75 @@ export default class FeedParser {
             .countDocuments()
             .exec();
         }
-      case 'count/items':
+      case 'count/item':
+        {
+          const { user, category, filter } = options;
+          const conditions = { user, category };
+          const query = Note.find(conditions, { items: 1 });
+          let sold = 0;
+          let match, params = null;
+          if(filter) {
+            const date      = new Date();
+            const start     = new Date(filter.aucStartTime);
+            const stop      = new Date(filter.aucStopTime);
+            const year      = date.getFullYear();
+            const month     = date.getMonth();
+            const day       = date.getDate();
+            const hours     = date.getHours();
+            const minutes   = date.getMinutes();
+            const seconds   = date.getSeconds();
+            const lastWeek  = new Date(year, month, day - 7);
+            const twoWeeks  = new Date(year, month, day - 14);
+            const lastMonth = new Date(year, month - 1, day);
+            const today     = new Date(year, month, day, hours, minutes, seconds);
+            if(filter.inAuction) {
+              match = { bidStopTime: { $gte: start, $lt: stop } };
+            } else if(filter.allAuction) {
+              match = null;
+            } else if(filter.lastMonthAuction) {
+              match = { bidStopTime: { $gte: lastMonth, $lt: today } };
+            } else if(filter.twoWeeksAuction) {
+              match = { bidStopTime: { $gte: twoWeeks, $lt: today } };
+            } else if(filter.lastWeekAuction) {
+              match = { bidStopTime: { $gte: lastWeek, $lt: today } };
+            }
+            if(filter.sold) {
+              sold  = Number(filter.sold);
+            }
+            params = { 
+              path:     'items'
+            , select:   { guid__: 1 }
+            , populate: { path: 'attributes', select: { sold: 1, images: 1, archive: 1 } }
+            };
+            if(match)     params = R.merge(params, { match })
+            query.populate(params);
+          }
+          const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
+          const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
+          const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
+          const hasSold  = R.filter(isSold);
+          const hasImgs  = R.filter(isImgs);
+          const hasArch  = R.filter(isArch);
+          const setSold  = R.compose(R.length, hasSold);
+          const setImgs  = R.compose(R.length, hasImgs);
+          const setArch  = R.compose(R.length, hasArch);
+          const setCount = doc => ({ 
+            _id:      doc._id
+          , counts:   R.length(doc.items)
+          , sold:     setSold(doc.items)
+          , images:   setImgs(doc.items)
+          , archive:  setArch(doc.items)
+          });
+          const setCounts = R.map(setCount);
+          const setItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setNotes = R.map(setNote);
+          const setObjects = R.map(doc => doc.toObject());
+          return query.exec()
+            .then(setObjects)
+            .then(setNotes)
+            .then(setCounts);
+        }
       case 'fetch/notes':
         {
           const { user, category, skip, limit, filter } = options;
@@ -128,10 +187,8 @@ export default class FeedParser {
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const isCategory = !R.isNil(category);
-          const isCount = request === 'count/items';
           const conditions = isCategory ? { user, category } : { user };
           const query = Note.find(conditions);
-          let sold = 0;
           let params = { 
             path:     'items'
           , options:  { sort: { bidStopTime: 'desc' } }
@@ -145,31 +202,22 @@ export default class FeedParser {
             ]
           };
           if(isProject) params = R.merge(params, { select: filter.select });
-          const setCount = doc => isCount ? ({ 
-            _id:      doc._id
-          , counts:   R.length(doc.items)
-          }) : doc;
-          const setCounts = R.map(setCount);
-          const sliItems = docs => R.slice(0, 20, docs);
-          const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
-          const setItems = R.compose(sliItems, hasItems);
+          const setItems = R.slice(0, 20);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
-          const setNotes = docs => isCount ? docs : R.map(setNote, docs);
+          const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
-          if(isPaginate && !isCount)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
-          if(!isCSV     && !isCount)  query.populate(params);
+          if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
+          if(!isCSV)      query.populate(params);
           return query.exec()
             .then(setObjects)
-            .then(setNotes)
-            .then(setCounts);
+            .then(setNotes);
         }
-      case 'count/item':
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
-          const isCount = request === 'count/item';
+          //const isCount = request === 'count/item';
           const conditions = { user, _id: id };
           const query = Note.findOne(conditions);
           let match = null;
@@ -217,22 +265,22 @@ export default class FeedParser {
           };
           if(match)     params = R.merge(params, { match })
           if(isProject) params = R.merge(params, { select: filter.select });
-          const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
-          const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
-          const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
-          const hasSold  = R.filter(isSold);
-          const hasImgs  = R.filter(isImgs);
-          const hasArch  = R.filter(isArch);
-          const setSold  = R.compose(R.length, hasSold);
-          const setImgs  = R.compose(R.length, hasImgs);
-          const setArch  = R.compose(R.length, hasArch);
-          const setCount = doc => isCount ? [{ 
-            _id:      doc._id
-          , counts:   R.length(doc.items)
-          , sold:     setSold(doc.items)
-          , images:   setImgs(doc.items)
-          , archive:  setArch(doc.items)
-          }] : doc;
+          //const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
+          //const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
+          //const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
+          //const hasSold  = R.filter(isSold);
+          //const hasImgs  = R.filter(isImgs);
+          //const hasArch  = R.filter(isArch);
+          //const setSold  = R.compose(R.length, hasSold);
+          //const setImgs  = R.compose(R.length, hasImgs);
+          //const setArch  = R.compose(R.length, hasArch);
+          //const setCount = doc => isCount ? [{ 
+          //  _id:      doc._id
+          //, counts:   R.length(doc.items)
+          //, sold:     setSold(doc.items)
+          //, images:   setImgs(doc.items)
+          //, archive:  setArch(doc.items)
+          //}] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
           const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const setItems = R.compose(sliItems, hasItems);
@@ -240,8 +288,8 @@ export default class FeedParser {
           const setObject = doc => doc.toObject();
           return query.populate(params).exec()
             .then(setObject)
-            .then(setNote)
-            .then(setCount);
+            .then(setNote);
+            //.then(setCount);
         }
       case 'count/traded':
       case 'fetch/traded':
@@ -875,12 +923,8 @@ export default class FeedParser {
     return this.request('count/note', { user, category });
   }
 
-  cntItems(user, category) {
-    return this.request('count/items', { user, category });
-  }
-
-  cntItem(user, id, filter) { 
-    return this.request('count/item', { user, id, filter });
+  cntItem(user, category, filter) {
+    return this.request('count/item', { user, category, filter });
   }
 
   cntBided(user, skip, limit, filter) {
@@ -1072,18 +1116,19 @@ export default class FeedParser {
     //  ]);
   }
 
-  fetchNotes({ user, category, skip, limit }) {
-    const filter = { select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
+  fetchNotes({ user, category, skip, limit, filter }) {
+    const project = { select:   { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
+    const _filter = R.merge(filter, project);
     const observables = forkJoin([
     //  this.getStarred(user)
     //, this.getListed(user)
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntItems(user, category)
+      this.cntItem(user, category, _filter)
     , this.cntNote(user, category)
     , this.getCategorys(user)
-    , this.getNotes(user, category, skip, limit, filter)
+    , this.getNotes(user, category, skip, limit, _filter)
     ]);
     const setAttribute = objs => R.compose(
       this.setCategorys(objs[2])
@@ -1205,16 +1250,16 @@ export default class FeedParser {
     );
   }
 
-  fetchNote({ user, id, skip, limit, filter }) {
+  fetchNote({ user, category, id, skip, limit, filter }) {
     const project = { select: { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
-    const _filter  = R.merge(filter, project);
+    const _filter = R.merge(filter, project);
     const observables = forkJoin([
     //  this.getStarred(user)
     //, this.getListed(user)
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntItem(user, id, filter)
+      this.cntItem(user, category, _filter)
     , this.getNote(user, id, skip, limit, _filter)
     ]);
     const setAttribute = objs => R.compose(
@@ -1385,7 +1430,7 @@ export default class FeedParser {
     );
   }
 
-  updateNote({ user, id, data }) {
+  updateNote({ user, category, id, data }) {
     const isAsin = data.asin !== '';
     const setAmazonData = obj => obj
       ? R.merge(data, {
@@ -1394,16 +1439,14 @@ export default class FeedParser {
         , AmazonImg:  obj.MediumImage ? obj.MediumImage.URL : ''
       })
       : R.merge(data, { name: '', AmazonUrl: '', AmazonImg: '' });
-    const setNote = obj => this._updateNote({ user, id, data: obj });
-    const getNote = () => this.fetchNote({ user, id });
     return isAsin
       ? Amazon.of(amz_keyset).fetchItemLookup(data.asin, 'ASIN').pipe(
           map(setAmazonData)
-        , flatMap(setNote)
-        , flatMap(getNote)
+        , flatMap(obj => this._updateNote({ user, id, data: obj }))
+        , flatMap(() => this.fetchNote({ user, category, id }))
         )
       : this._updateNote({ user, id, data }).pipe(
-          flatMap(getNote)
+          flatMap(() => this.fetchNote({ user, category, id }))
         )
     ;
   }

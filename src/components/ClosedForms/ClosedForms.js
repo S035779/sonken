@@ -216,7 +216,7 @@ class ClosedForms extends React.Component {
   }
 
   fetch(page) {
-    const { user, note } = this.props;
+    const { user, category, note } = this.props;
     const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
     const id = note._id;
     const limit = 20;
@@ -224,7 +224,7 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
     this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit
+    return NoteAction.fetch(user, category, id, skip, limit
       , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold });
   }
 

@@ -52,7 +52,7 @@ class Dashboard extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     //std.logInfo(Dashboard.displayName, 'Props', { next: nextProps, prev: this.props });
-    const { user, page } = this.state;
+    const { user, page, filter } = this.state;
     const nextCategory = nextProps.match.params.category;
     const prevCategory = this.props.match.params.category;
     if(user && (nextCategory !== prevCategory)) {
@@ -60,7 +60,7 @@ class Dashboard extends React.Component {
       const limit = page.perPage;
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'update', nextCategory);
-      NoteAction.fetchNotes(user, nextCategory, skip, limit)
+      NoteAction.fetchNotes(user, nextCategory, skip, limit, filter)
         .then(() => this.spn.stop());
     }
   }

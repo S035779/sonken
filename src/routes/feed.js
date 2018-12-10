@@ -334,7 +334,7 @@ export default {
 
   fetchNote() {
     return (req, res) => {
-      const { user, id, skip, limit, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+      const { user, category, id, skip, limit, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
       , aucStartTime, aucStopTime, sold } = req.query;
       const filter = allAuction && allAuction ==='false' ? {
         lastWeekAuction:  lastWeekAuction === 'true'
@@ -346,7 +346,7 @@ export default {
       , aucStopTime
       , sold
       } : null;
-      feed.fetchNote({ user, id, skip, limit, filter }).subscribe(
+      feed.fetchNote({ user, category, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -387,8 +387,8 @@ export default {
 
   updateNote() {
     return (req, res) => {
-      const { user, id, data } = req.body;
-      feed.updateNote({ user, id, data }).subscribe(
+      const { user, category, id, data } = req.body;
+      feed.updateNote({ user, category, id, data }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -561,8 +561,19 @@ export default {
 
   fetchNotes() {
     return (req, res) => {
-      const { user, category, skip, limit } = req.query;
-      feed.fetchNotes({ user, category, skip, limit }).subscribe(
+      const { user, category, skip, limit, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction
+      , aucStartTime, aucStopTime, sold } = req.query;
+      const filter = allAuction && allAuction ==='false' ? {
+        lastWeekAuction:  lastWeekAuction === 'true'
+      , twoWeeksAuction:  twoWeeksAuction === 'true'
+      , lastMonthAuction: lastMonthAuction === 'true'
+      , allAuction:       false
+      , inAuction:        inAuction === 'true'
+      , aucStartTime
+      , aucStopTime
+      , sold
+      } : null;
+      feed.fetchNotes({ user, category, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

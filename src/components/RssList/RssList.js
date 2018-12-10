@@ -49,13 +49,13 @@ class RssList extends React.Component {
     NoteAction.select(user, newChecked);
   }
   
-  handleChangeTitle(id, title, categoryIds) {
+  handleChangeTitle(id, category, title, categoryIds) {
     std.logInfo(RssList.displayName, 'handleChangeTitle', id);
     const { user } = this.props;
     const { notes } = this.state;
     const curNote = notes.find(obj => obj._id === id);
     const newNote = Object.assign({}, curNote, { title, categoryIds });
-    NoteAction.update(user, id, newNote)
+    NoteAction.update(user, category, id, newNote)
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => {
         std.logError(RssList.displayName, err.name, err.message);
@@ -63,13 +63,13 @@ class RssList extends React.Component {
       });
   }
 
-  handleReaded(note) {
+  handleReaded({ _id, category, items }) {
     const { user } = this.props;
-    if (note.items && note.items.length) {
-      NoteAction.fetch(user, note._id, 0, 20)
-      .then(() => NoteAction.createRead(user, [note._id]));
+    if (items && items.length) {
+      NoteAction.fetch(user, category, _id, 0, 20)
+      .then(() => NoteAction.createRead(user, [_id]));
     } else {
-      NoteAction.fetch(user, note._id, 0, 20);
+      NoteAction.fetch(user, category, _id, 0, 20);
     }
   }
 

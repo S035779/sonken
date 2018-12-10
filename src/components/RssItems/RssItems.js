@@ -141,13 +141,13 @@ class RssItems extends React.Component {
   }
 
   fetch(page) {
-    const { user, note } = this.props;
+    const { user, category, note } = this.props;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(RssItems.displayName, 'fetch', { id, page });
     this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, id, skip, limit);
+    return NoteAction.fetch(user, category, id, skip, limit);
   }
 
   getColor(category) {

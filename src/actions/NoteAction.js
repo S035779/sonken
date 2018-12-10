@@ -32,8 +32,8 @@ export default {
   //      dispatch({ type: 'category/fetch/my', categorys });
   //    });
   //},
-  fetchNotes(user, category, skip, limit) {
-    return NoteApiClient.fetchNotes(user, category, skip, limit).then(({ notes, categorys }) => {
+  fetchNotes(user, category, skip, limit, filter) {
+    return NoteApiClient.fetchNotes(user, category, skip, limit, filter).then(({ notes, categorys }) => {
         dispatch({ type: 'note/fetch/my', notes });
         dispatch({ type: 'category/fetch/my', categorys });
       });
@@ -68,8 +68,8 @@ export default {
         dispatch({ type: 'category/delete', ids });
       });
   },
-  fetch(user, id, skip, limit, filter) {
-    return NoteApiClient.fetchNote(user, id, skip, limit, filter).then(note => {
+  fetch(user, category, id, skip, limit, filter) {
+    return NoteApiClient.fetchNote(user, category, id, skip, limit, filter).then(note => {
         dispatch({ type: 'note/fetch', id, note });
       });
   },
@@ -78,8 +78,8 @@ export default {
         dispatch({ type: 'note/create', note });
       });
   },
-  update(user, id, data) {
-    return NoteApiClient.updateNote(user, id, data).then(note => {
+  update(user, category, id, data) {
+    return NoteApiClient.updateNote(user, category, id, data).then(note => {
         dispatch({ type: 'note/update', id, note });
       });
   },

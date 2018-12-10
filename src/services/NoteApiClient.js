@@ -124,8 +124,9 @@ export default {
   /*
    * Notes
    */
-  fetchNotes(user, category, skip, limit) {
-    return this.request('fetch/notes', { user, category, skip, limit });
+  fetchNotes(user, category, skip, limit, filter) {
+    const params = filter ? R.merge({ user, category, skip, limit }, filter) : { user, category, skip, limit };
+    return this.request('fetch/notes', params);
   },
   fetchTradedNotes(user, skip, limit, filter) {
     const params = filter ? R.merge({ user, skip, limit }, filter) : { user, skip, limit };
@@ -163,16 +164,16 @@ export default {
   /*
    * Note
    */
-  fetchNote(user, id, skip, limit, filter) {
-    const params = filter ? R.merge({ user, id, skip, limit }, filter) : { user, id, skip, limit };
+  fetchNote(user, category, id, skip, limit, filter) {
+    const params = filter ? R.merge({ user, category, id, skip, limit }, filter) : { user, category, id, skip, limit };
     return this.request('fetch/note', params);
   },
   createNote(user, { url, category, categoryIds, title }) {
     return this.request('create/note', { user, url, category, categoryIds, title });
   },
-  updateNote(user, id, { title, asin, price, bidsprice, body, categoryIds }) {
+  updateNote(user, category, id, { title, asin, price, bidsprice, body, categoryIds }) {
     const data = { title, asin, price, bidsprice, body, categoryIds };
-    return this.request('update/note', { user, id, data });
+    return this.request('update/note', { user, category, id, data });
   },
   deleteNote(user, ids) {
     return this.request('delete/note', { user, ids });

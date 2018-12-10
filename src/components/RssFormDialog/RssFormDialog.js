@@ -105,8 +105,8 @@ class RssFormDialog extends React.Component {
   handleSubmitDialog() {
     if(this.isValidate() && this.isChanged()) {
       const { noteTitle, checked } = this.state;
-      const { selectedNoteId } = this.props;
-      this.props.onSubmit(selectedNoteId, noteTitle, checked);
+      const { selectedNoteId, category } = this.props;
+      this.props.onSubmit(selectedNoteId, category, noteTitle, checked);
       this.props.onClose();
     } else {
       this.setState({ isNotValid: true });
