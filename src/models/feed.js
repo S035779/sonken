@@ -37,9 +37,9 @@ const itemSchema = new mongoose.Schema({
 , ship_price:       String
 , ship_buynow:      String
 , images:           Array
-, pubDate:          { type: Date, required: true, default: Date.now }
+, pubDate:          { type: Date, required: true, default: Date.now, expires: 60*60*24*7 }
 }, { collection: 'items' });
-itemSchema.index({ bidStopTime: 1, guid__: 1 });
+itemSchema.index({ bidStopTime: 1, guid__: 1, pubDate: 1 });
 itemSchema.virtual('added',     { ref: 'Added',       localField: 'guid__', foreignField: 'added',    justOne: true });
 itemSchema.virtual('deleted',   { ref: 'Deleted',     localField: 'guid__', foreignField: 'deleted',  justOne: true });
 itemSchema.virtual('readed',    { ref: 'Readed',      localField: 'guid__', foreignField: 'readed',   justOne: true });
