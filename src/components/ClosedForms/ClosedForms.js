@@ -24,6 +24,7 @@ class ClosedForms extends React.Component {
     , twoWeeksAuction: true
     , lastMonthAuction: true
     , allAuction: true
+    , asinAuction: false
     , inAuction: false
     , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
     , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
@@ -146,41 +147,78 @@ class ClosedForms extends React.Component {
     const checked = event.target.checked;
     switch(name) {
       case 'inAuction':
-        this.setState({
-          inAuction: checked, allAuction: !checked, lastWeekAuction: !checked, twoWeeksAuction: !checked, lastMonthAuction: !checked
-        });
-        break;
+        {
+          this.setState({
+            inAuction:        checked
+            , allAuction:       !checked
+            , lastWeekAuction:  !checked
+            , twoWeeksAuction:  !checked
+            , lastMonthAuction: !checked
+          });
+          break;
+        }
       case 'allAuction':
-        this.setState({
-          inAuction: false, allAuction: checked, lastWeekAuction: true, twoWeeksAuction:  true, lastMonthAuction: true
-        });
-        break;
+        {
+          this.setState({
+            inAuction:        false
+            , allAuction:       checked
+            , lastWeekAuction:  true
+            , twoWeeksAuction:  true
+            , lastMonthAuction: true
+          }, () => this.handleFilter());
+          break;
+        }
       case 'lastWeekAuction':
-        this.setState({
-          inAuction: !checked, allAuction: false, lastWeekAuction: checked, twoWeeksAuction: false, lastMonthAuction: false
-        });
-        break;
+        {
+          this.setState({
+            inAuction:        !checked
+            , allAuction:       false
+            , lastWeekAuction:  checked
+            , twoWeeksAuction:  false
+            , lastMonthAuction: false
+          }, () => this.handleFilter());
+          break;
+        }
       case 'twoWeeksAuction':
-        this.setState({
-          inAuction: false, allAuction: false, lastWeekAuction: true, twoWeeksAuction: checked, lastMonthAuction: false
-        });
-        break;
+        {
+          this.setState({
+            inAuction:        false
+            , allAuction:       false
+            , lastWeekAuction:  true
+            , twoWeeksAuction:  checked
+            , lastMonthAuction: false
+          }, () => this.handleFilter());
+          break;
+        }
       case 'lastMonthAuction':
-        this.setState({
-          inAuction: false, allAuction: false, lastWeekAuction: true, twoWeeksAuction: true, lastMonthAuction: checked
-        });
-        break;
+        {
+          this.setState({
+            inAuction:        false
+            , allAuction:       false
+            , lastWeekAuction:  true
+            , twoWeeksAuction:  true
+            , lastMonthAuction: checked
+          }, () => this.handleFilter());
+          break;
+        }
+      case 'asinAuction':
+        {
+          this.setState({
+            asinAuction: checked
+          }, () => this.handleFilter());
+          break;
+        }
     }
   }
 
   handleFilter() {
     const { user } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold, isRequest }
-      = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold
+      , isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
-      .then(() => NoteAction.filter(user
-        , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold }))
+      .then(() => NoteAction.filter(user, { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction
+        , aucStartTime, aucStopTime, sold }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
       .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
@@ -217,7 +255,8 @@ class ClosedForms extends React.Component {
 
   fetch(page) {
     const { user, category, note } = this.props;
-    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold } = this.state;
+    const { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold } 
+      = this.state;
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
@@ -225,7 +264,7 @@ class ClosedForms extends React.Component {
     this.spn.start();
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, category, id, skip, limit
-      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, aucStartTime, aucStopTime, sold });
+      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold });
   }
 
   getColor(category) {
@@ -245,10 +284,11 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'State', this.state);
     //std.logInfo(ClosedForms.displayName, 'Props', this.props);
     const { classes, itemNumber, noteNumber, perPage, user, note, category, file, images } = this.props;
-    const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold, page, isNotValid
-      , isSuccess, isNotResult, isDownload, isQueued, loadingDownload, loadingImages } = this.state;
+    const { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, sold
+      , page, isNotValid, isSuccess, isNotResult, isDownload, isQueued, loadingDownload, loadingImages } = this.state;
     const { items } = this.state.note;
-    const filter = { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, inAuction, sold };
+    const filter = { aucStartTime, aucStopTime, lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction
+      , sold };
     const color = this.getColor(category);
     return <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
       <div className={classes.header}>
@@ -289,7 +329,10 @@ class ClosedForms extends React.Component {
         <Typography variant="subtitle1" noWrap className={classes.column}>終了後１ヶ月</Typography>
         <Checkbox color="primary" className={classes.checkbox} checked={allAuction}
           onChange={this.handleChangeCheckbox.bind(this, 'allAuction')} tabIndex={-1} disableRipple />
-        <Typography variant="subtitle1" noWrap className={classes.column}>全て表示</Typography>
+        <Typography variant="subtitle1" noWrap className={classes.column}>全期間表示</Typography>
+        <Checkbox color="primary" className={classes.checkbox} checked={asinAuction}
+          onChange={this.handleChangeCheckbox.bind(this, 'asinAuction')} tabIndex={-1} disableRipple />
+        <Typography variant="subtitle1" noWrap className={classes.column}>ASIN有り</Typography>
       </div>
       <div className={classes.edit}>
         <div className={classes.column}>

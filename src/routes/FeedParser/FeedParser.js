@@ -116,8 +116,7 @@ export default class FeedParser {
           const { user, category, filter } = options;
           const conditions = { user, category };
           const query = Note.find(conditions, { items: 1 });
-          let sold = 0;
-          let match, params = null;
+          let sold = 0, isAsin = false;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -132,6 +131,12 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
+            let match = null;
+            let params = { 
+              path:     'items'
+            , select:   { guid__: 1 }
+            , populate: { path: 'attributes', select: { sold: 1, images: 1, archive: 1 } }
+            };
             if(filter.inAuction) {
               match = { bidStopTime: { $gte: start, $lt: stop } };
             } else if(filter.allAuction) {
@@ -146,12 +151,10 @@ export default class FeedParser {
             if(filter.sold) {
               sold  = Number(filter.sold);
             }
-            params = { 
-              path:     'items'
-            , select:   { guid__: 1 }
-            , populate: { path: 'attributes', select: { sold: 1, images: 1, archive: 1 } }
-            };
-            if(match)     params = R.merge(params, { match })
+            if(filter.asinAuction) { 
+              isAsin = true;
+            }
+            if(match)       params = R.merge(params, { match });
             query.populate(params);
           }
           const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
@@ -171,7 +174,11 @@ export default class FeedParser {
           , archive:  setArch(doc.items)
           });
           const setCounts = R.map(setCount);
-          const setItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const hasSoldItem = 
+            R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const hasAsinItem = 
+            R.filter(obj => obj.attributes && isAsin      ? obj.attributes.asins && !R.isEmpty(obj.attributes.asins) : true);
+          const setItems = R.compose(hasSoldItem, hasAsinItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
@@ -221,7 +228,7 @@ export default class FeedParser {
           const conditions = { user, _id: id };
           const query = Note.findOne(conditions);
           let match = null;
-          let sold = 0;
+          let sold = 0, isAsin = false;
           if(filter) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
@@ -249,6 +256,9 @@ export default class FeedParser {
             }
             if(filter.sold) {
               sold  = Number(filter.sold);
+            }
+            if(filter.asinAuction) {
+              isAsin = true;
             }
           }
           let params = { 
@@ -282,8 +292,11 @@ export default class FeedParser {
           //, archive:  setArch(doc.items)
           //}] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          const hasItems = R.filter(obj => obj.attributes && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
-          const setItems = R.compose(sliItems, hasItems);
+          const hasSoldItem = 
+            R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
+          const hasAsinItem = 
+            R.filter(obj => obj.attributes && isAsin      ? obj.attributes.asins && !R.isEmpty(obj.attributes.asins) : true);
+          const setItems = R.compose(sliItems, hasAsinItem, hasSoldItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setObject = doc => doc.toObject();
           return query.populate(params).exec()
@@ -700,7 +713,7 @@ export default class FeedParser {
           const setIds = R.map(obj => obj._id);
           return Note.findOne(conditions, 'items').exec()
             .then(obj => Item.find({ _id: { $in: obj.items } }, '_id').exec())
-            .then(objs => Note.updateMany(conditions, { $set: { items: setIds(objs) } }).exec())
+            .then(objs => Note.updateMany(conditions, { $set: { items: setIds(objs) } }).exec());
         }
       case 'defrag/added':
         {
@@ -972,18 +985,18 @@ export default class FeedParser {
   }
 
   garbageCollection({ user, id }) {
-    const observables = forkJoin([
-      this.dfgItems(user, id)
-    , this.dfgAdded(user)
-    , this.dfgDeleted(user)
-    , this.dfgReaded(user)
-    , this.dfgStarred(user)
-    , this.dfgListed(user)
-    , this.dfgBided(user)
-    , this.dfgTraded(user)
-    , this.dfgAttribute(user)
-    ]);
-    return observables;
+    return from(this.dfgItems(user, id))
+      //.pipe(
+      //  flatMap(() => this.dfgAdded(user)    )
+      //, flatMap(() => this.dfgDeleted(user)  )
+      //, flatMap(() => this.dfgReaded(user)   )
+      //, flatMap(() => this.dfgStarred(user)  )
+      //, flatMap(() => this.dfgListed(user)   )
+      //, flatMap(() => this.dfgBided(user)    )
+      //, flatMap(() => this.dfgTraded(user)   )
+      //, flatMap(() => this.dfgAttribute(user))
+      //)
+    ;
   }
 
   //fetchCategorys({ user, category, skip, limit }) {

@@ -16,6 +16,7 @@ export default class DashboardStore extends ReduceStore {
       , twoWeeksAuction: true
       , lastMonthAuction: true
       , allAuction: true
+      , asinAuction: false
       , inAuction: false
       , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
       , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')

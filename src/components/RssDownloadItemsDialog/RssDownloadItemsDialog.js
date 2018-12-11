@@ -88,9 +88,11 @@ class RssDownloadItemsDialog extends React.Component {
     NoteAction.deleteCache()
     return NoteAction.signedlinkJob(operation, params)
       .then(() => this.props.images && R.length(this.props.images) !== 0
-        ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+        ? this.setState({ isSuccess: true,  isQueued: false })
+        : this.setState({ isSuccess: false, isQueued: true  }))
       .then(() => this.props.images && R.length(this.props.images) !== 0
-        ? this.downloadFile(operation, { urls: this.props.images }) : null)
+        ? this.downloadFile(operation, { urls: this.props.images })
+        : null)
       .then(() => this.spn.stop())
       .then(() => NoteAction.fetchJobs({ user, category }))
       .catch(err => {
@@ -106,9 +108,11 @@ class RssDownloadItemsDialog extends React.Component {
     NoteAction.deleteCache()
     return NoteAction.downloadJob(operation, params) 
       .then(() => this.props.file && this.props.file.size !== 0
-        ? this.setState({ isSuccess: true,  isQueued: false }) : this.setState({ isSuccess: false, isQueued: true  }))
+        ? this.setState({ isSuccess: true,  isQueued: false }) 
+        : this.setState({ isSuccess: false, isQueued: true  }))
       .then(() => this.props.file && this.props.file.size !== 0
-        ? this.downloadFile(operation, { blob: this.props.file }) : null)
+        ? this.downloadFile(operation, { blob: this.props.file }) 
+        : null)
       .then(() => this.spn.stop())
       .then(() => NoteAction.fetchJobs({ user, category }))
       .catch(err => {
@@ -190,19 +194,21 @@ class RssDownloadItemsDialog extends React.Component {
     const renderMenu = formats ? formats.map((obj, idx) => this.renderMenu(obj, idx)) : [];
     return <LoginFormDialog open={open} title={'ダウンロード'} onClose={this.handleCloseDialog.bind(this, 'isDownload')} >
         <div className={classes.dialog}>
-        <FormControl component="fieldset" className={classes.column}>
-          <TextField select autoFocus margin="dense" value={name} onChange={this.handleChangeSelect.bind(this, 'name')}
-            label={title} fullWidth>{renderMenu}</TextField>
-        </FormControl>
+          <FormControl component="fieldset" className={classes.column}>
+            <TextField select autoFocus margin="dense" value={name} onChange={this.handleChangeSelect.bind(this, 'name')}
+              label={title} fullWidth>{renderMenu}</TextField>
+          </FormControl>
+        </div>
+        <div className={classes.dialog}>
         <div className={classes.buttons}>
+          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/item')} classes={classes.button}>
+            リスト保存
+          </RssButton>
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'signedlink/images')} classes={classes.button}>
             画像保存
           </RssButton>
           <RssButton color="success" onClick={this.handleDownload.bind(this, 'clearcache/images')} classes={classes.button}>
             キャッシュ削除
-          </RssButton>
-          <RssButton color="success" onClick={this.handleDownload.bind(this, 'download/item')} classes={classes.button}>
-            リスト保存
           </RssButton>
           <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleClose.bind(this, 'isNotValid')}>
             内容に不備があります。もう一度確認してください。
@@ -245,7 +251,7 @@ RssDownloadItemsDialog.propTypes = {
 const columnHeight = 62;
 const styles = theme => ({
   input:    { display: 'none' }
-, dialog:   { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'flex-start'
+, dialog:   { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'center'
             , height: columnHeight, minHeight: columnHeight, boxSizing: 'border-box', padding: 5 }
 , buttons:  { flex: 0, display: 'flex', flexDirection: 'row' }
 , button:   { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all' }

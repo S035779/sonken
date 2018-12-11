@@ -19,6 +19,8 @@ const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 const STORAGE         = process.env.STORAGE;
 const aws_keyset  = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 
+const max_images_capacity = 50; // 50 images = 1000 MB
+const max_seller_count = 20;    // 20 sellers
 /**
  * JobQueue class.
  *
@@ -116,7 +118,7 @@ export default class JobQueue {
           , 'data.params.category': category
           , 'data.params.type': type
           };
-          const limit = 20; // seller count.
+          const limit = max_seller_count; // seller count.
           const count = 0;  // archive count.
           const setIds = R.map(obj => obj._id);
           const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count, total: objs.length });
@@ -145,7 +147,7 @@ export default class JobQueue {
           , 'data.params.type': type
           };
           const limit = 1;  // seller count.
-          const count = 20; // archive count.
+          const count = max_images_capacity; // archive count.
           const setIds = R.map(obj => obj._id);
           const setParams = objs => ({ ids: R.splitEvery(limit, objs), limit, count, total: objs.length });
           const observable = defer(() => R.isNil(ids) 
@@ -194,7 +196,7 @@ export default class JobQueue {
 
   signedlinks(operation, params) {
     const { number } = params;
-    const num = Math.ceil(number / 20);
+    const num = Math.ceil(number / max_images_capacity);
     return of(this.setAWSParams(operation, params, null)).pipe(
         flatMap(    obj => from(this.AWS.fetchObjectHead(STORAGE, obj.key)))
       , flatMap(     () => interval(1000).pipe(take(num)))
@@ -223,7 +225,7 @@ export default class JobQueue {
 
   clearcaches(operation, params) {
     const { number } = params;
-    const num = Math.ceil(number / 20);
+    const num = Math.ceil(number / max_images_capacity);
     return of(this.setAWSParams(operation, params, null)).pipe(
       flatMap(obj => from(this.AWS.fetchObjectHead(STORAGE, obj.key)))
     , flatMap(() => interval(1000).pipe(take(num)))
