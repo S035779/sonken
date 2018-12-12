@@ -310,7 +310,7 @@ const worker = (options, callback) => {
   request(operation, { url, user, id, skip, limit, params }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => {
-      log.error(displayName, err.name, err.message, err.stack);
+      if(err && err.name !== 'NoProblem') log.error(displayName, err.name, err.message, err.stack);
       callback();
     }
   , ()  => {

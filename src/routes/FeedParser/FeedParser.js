@@ -42,6 +42,11 @@ const ObjectId = mongoose.Types.ObjectId;
  */
 export default class FeedParser {
   constructor() {
+    const safeRequest = R.curry(this.request);
+    this.countNote  = R.memoizeWith(JSON.stringify, safeRequest('count/note'));
+    this.countItem  = R.memoizeWith(JSON.stringify, safeRequest('count/item'));
+    this.countBids  = R.memoizeWith(JSON.stringify, safeRequest('count/bided'));
+    this.countTrade = R.memoizeWith(JSON.stringify, safeRequest('count/traded'));
     this.AWS = aws.of(aws_keyset);
   }
 
@@ -539,15 +544,15 @@ export default class FeedParser {
           const setItems = obj => obj.items;
           const getItems = objs => Item.find({ _id: { $in: setIds(objs) }});
           const delItems = objs => Promise.all([
-            Item.deleteMany({       _id: { $in: setIds(objs) }})
-          , Listed.deleteMany({     user, listed:  { $in: setGuids(objs) }}).exec()
-          , Traded.deleteMany({     user, traded:  { $in: setGuids(objs) }}).exec()
-          , Bided.deleteMany({      user, bided:   { $in: setGuids(objs) }}).exec()
-          , Added.deleteMany({      user, added:   { $in: setGuids(objs) }}).exec()
-          , Deleted.deleteMany({    user, deleted: { $in: setGuids(objs) }}).exec()
-          , Readed.deleteMany({     user, readed:  { $in: setGuids(objs) }}).exec()
-          , Starred.deleteMany({    user, starred: { $in: setGuids(objs) }}).exec()
-          , Attribute.deleteMany({  user, guid:    { $in: setGuids(objs) }}).exec()
+            Item.deleteMany({ _id: { $in: setIds(objs) }})
+          , Listed.deleteMany({ user, listed: { $in: setGuids(objs) }}).exec()
+          , Traded.deleteMany({ user, traded: { $in: setGuids(objs) }}).exec()
+          , Bided.deleteMany({ user, bided: { $in: setGuids(objs) }}).exec()
+          , Added.deleteMany({ user, added: { $in: setGuids(objs) }}).exec()
+          , Deleted.deleteMany({ user, deleted: { $in: setGuids(objs) }}).exec()
+          , Readed.deleteMany({ user, readed: { $in: setGuids(objs) }}).exec()
+          , Starred.deleteMany({ user, starred: { $in: setGuids(objs) }}).exec()
+          , Attribute.deleteMany({ user, guid: { $in: setGuids(objs) }}).exec()
           ]);
           return Note.findOneAndDelete(conditions).exec()
             .then(setItems)
@@ -710,83 +715,93 @@ export default class FeedParser {
         {
           const { user, id } = options;
           const conditions = { user, _id: id };
-          const setIds = R.map(obj => obj._id);
           return Note.findOne(conditions, 'items').exec()
-            .then(obj => Item.find({ _id: { $in: obj.items } }, '_id').exec())
-            .then(objs => Note.updateMany(conditions, { $set: { items: setIds(objs) } }).exec());
+            .then(async obj => {
+
+              const ids   = obj.items;
+              const docs  = await Item.find({ _id: { $in: ids } }, '_id').exec();
+
+              const _ids  = R.map(obj => obj._id, docs);
+              const cmp   = (id, _id) => id.equals(_id);
+              const diff  = R.differenceWith(cmp, ids, _ids);
+
+              if(R.isEmpty(diff)) throw ({ name: 'NoProblem', message: 'Compared successfully.', stack: diff });
+              return _ids;
+            })
+            .then(objs => Note.updateMany(conditions, { $set: { items: objs } }).exec());
         }
-      case 'defrag/added':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Added.deleteMany({ added: obj.added }).exec());
-          return Added.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/deleted':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Deleted.deleteMany({ deleted: obj.deleted }).exec());
-          return  Deleted.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/readed':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Readed.deleteMany({ readed: obj.readed }).exec());
-          return Readed.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/starred':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Starred.deleteMany({ starred: obj.starred }).exec());
-          return Starred.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/bided':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Bided.deleteMany({ bided: obj.bided }).exec());
-          return Bided.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/traded':
-        { 
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Traded.deleteMany({ traded: obj.traded }).exec());
-          return Traded.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/listed':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Listed.deleteMany({ listed: obj.listed }).exec());
-          return Listed.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
-      case 'defrag/attribute':
-        {
-          const { user } = options;
-          const hasNotItems = R.filter(obj => R.isNil(obj.items));
-          const promises = R.map(obj => Attribute.deleteMany({ guid: obj.guid }).exec());
-          return Attribute.find({ user }).populate('items', '_id').exec()
-            .then(docs => hasNotItems(docs))
-            .then(docs => Promise.all(promises(docs)));
-        }
+      //case 'defrag/added':
+      //  {
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Added.deleteMany({ added: obj.added }).exec());
+      //    return Added.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/deleted':
+      //  {
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Deleted.deleteMany({ deleted: obj.deleted }).exec());
+      //    return  Deleted.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/readed':
+      //  { 
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Readed.deleteMany({ readed: obj.readed }).exec());
+      //    return Readed.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/starred':
+      //  {
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Starred.deleteMany({ starred: obj.starred }).exec());
+      //    return Starred.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/bided':
+      //  { 
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Bided.deleteMany({ bided: obj.bided }).exec());
+      //    return Bided.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/traded':
+      //  { 
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Traded.deleteMany({ traded: obj.traded }).exec());
+      //    return Traded.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/listed':
+      //  {
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Listed.deleteMany({ listed: obj.listed }).exec());
+      //    return Listed.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
+      //case 'defrag/attribute':
+      //  {
+      //    const { user } = options;
+      //    const hasNotItems = R.filter(obj => R.isNil(obj.items));
+      //    const promises = R.map(obj => Attribute.deleteMany({ guid: obj.guid }).exec());
+      //    return Attribute.find({ user }).populate('items', '_id').exec()
+      //      .then(docs => hasNotItems(docs))
+      //      .then(docs => Promise.all(promises(docs)));
+      //  }
       default:
         return new Promise((resolve, reject) => reject({ name: 'error', message: 'request: ' + request }));
     }
@@ -933,19 +948,19 @@ export default class FeedParser {
   }
   
   cntNote(user, category) {
-    return this.request('count/note', { user, category });
+    return this.countNote({ user, category });
   }
 
   cntItem(user, category, filter) {
-    return this.request('count/item', { user, category, filter });
+    return this.countItem({ user, category, filter });
   }
 
   cntBided(user, skip, limit, filter) {
-    return this.request('count/bided', { user, skip, limit, filter });
+    return this.countBids({ user, skip, limit, filter });
   }
 
   cntTraded(user, skip, limit, filter) {
-    return this.request('count/traded', { user, skip, limit, filter });
+    return this.countTrade({ user, skip, limit, filter });
   }
 
   dfgItems(user, id) {
@@ -985,7 +1000,7 @@ export default class FeedParser {
   }
 
   garbageCollection({ user, id }) {
-    return from(this.dfgItems(user, id))
+    return from(this.dfgItems(user, id));
       //.pipe(
       //  flatMap(() => this.dfgAdded(user)    )
       //, flatMap(() => this.dfgDeleted(user)  )
@@ -996,7 +1011,6 @@ export default class FeedParser {
       //, flatMap(() => this.dfgTraded(user)   )
       //, flatMap(() => this.dfgAttribute(user))
       //)
-    ;
   }
 
   //fetchCategorys({ user, category, skip, limit }) {

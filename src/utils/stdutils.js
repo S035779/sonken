@@ -9,6 +9,22 @@ const std = {
 
   config: function() {
     this.cache['counter'] = counter();
+    this.cache['timer'] = timer();
+    this.cache['memoize'] = memoize();
+  },
+
+  memoize: function(fn) {
+    return this.cache.memoize.memoized(fn);
+  },
+
+  time: function(title) {
+    return this.cache.timer.count(title);
+  },
+  timeStart: function(title) {
+    return this.cache.timer.reset(title);
+  },
+  timeStop: function(title) {
+    return this.cache.timer.print(title);
   },
 
   count: function(title) {
@@ -790,10 +806,20 @@ const std = {
 };
 export default std;
 
+const memoize = function() {
+  let cache = {};
+  return {
+    memoized: function(fn) {
+      let key = JSON.stringify(arguments);
+      cache[key] = cache[key] || fn.apply(this, arguments);
+      return cache[key];
+    }
+  }
+};
+
 /**
  * counter
  *
- * @returns {object}
  */
 const counter = function() {
   let _s = 'count';
@@ -815,9 +841,38 @@ const counter = function() {
       delete _n[_s];
       return msg;
     }
-  }
+  };
 };
 
+/**
+ * timer
+ *
+ */
+const timer = function() {
+  let _s = 'time';
+  let _n = {};
+  return {
+    count: function(s) {
+      _s = s || _s;
+      return _n[_s];
+    },
+    reset: function(s) {
+      _s = s || _s;
+      return _n[_s];
+    },
+    print: function(s) {
+      _s = s || _s;
+      const msg =  `${_s}: ${_n[_s]}`;
+      delete _n[_s];
+      return msg;
+    }
+  };
+};
+
+/**
+ * color_code
+ *
+ */
 const color_code = {
   Reset:      isNode ? "\x1b[0m" : ''
 , Bright:     isNode ? "\x1b[1m" : ''
@@ -846,6 +901,10 @@ const color_code = {
 , BgWhite:    isNode ? "\x1b[47m" : ''
 }
 
+/**
+ * numFormat
+ *
+ */
 const numFormat = {
   fmt: {
     ddddd: function(num) { return ('0000' + num).slice(-5); },
@@ -916,6 +975,10 @@ const dateFormat = {
   }
 };
 
+/**
+ * zipRegex
+ *
+ */
 const zipRegex = {
   reg: {
     "GB":"GIR[ ]?0AA|((AB|AL|B|BA|BB|BD|BH|BL|BN|BR|BS|BT|CA|CB|CF|CH|CM|CO|CR|CT|CV|CW|DA|DD|DE|DG|DH|DL|DN|DT|DY|E|EC|EH|EN|EX|FK|FY|G|GL|GY|GU|HA|HD|HG|HP|HR|HS|HU|HX|IG|IM|IP|IV|JE|KA|KT|KW|KY|L|LA|LD|LE|LL|LN|LS|LU|M|ME|MK|ML|N|NE|NG|NN|NP|NR|NW|OL|OX|PA|PE|PH|PL|PO|PR|RG|RH|RM|S|SA|SE|SG|SK|SL|SM|SN|SO|SP|SR|SS|ST|SW|SY|TA|TD|TF|TN|TQ|TR|TS|TW|UB|W|WA|WC|WD|WF|WN|WR|WS|WV|YO|ZE)(\\d[\\dA-Z]?[ ]?\\d[ABD-HJLN-UW-Z]{2}))|BFPO[ ]?\\d{1,4}",

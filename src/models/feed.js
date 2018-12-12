@@ -37,9 +37,10 @@ const itemSchema = new mongoose.Schema({
 , ship_price:       String
 , ship_buynow:      String
 , images:           Array
-, pubDate:          { type: Date, required: true, default: Date.now, expires: 60*60*24*7 }
+, pubDate:          { type: Date, required: true, default: Date.now }
 }, { collection: 'items' });
-itemSchema.index({ bidStopTime: 1, guid__: 1, pubDate: 1 });
+itemSchema.index({ bidStopTime: 1, guid__: 1 });
+itemSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 itemSchema.virtual('added',     { ref: 'Added',       localField: 'guid__', foreignField: 'added',    justOne: true });
 itemSchema.virtual('deleted',   { ref: 'Deleted',     localField: 'guid__', foreignField: 'deleted',  justOne: true });
 itemSchema.virtual('readed',    { ref: 'Readed',      localField: 'guid__', foreignField: 'readed',   justOne: true });
@@ -84,9 +85,10 @@ categorySchema.index({ user: 1, subcategoryId: 1 });
 const addedSchema = new mongoose.Schema({
   user:             { type: String, required: true } 
 , added:            { type: String, required: true }
-, updated:          { type: Date, required: true }
+, updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'added' });
 addedSchema.index({ user: 1, added: 1 }, { unique: true });
+addedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 addedSchema.virtual('items', { ref: 'Item', localField: 'added', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -99,6 +101,7 @@ const deletedSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'deleted' });
 deletedSchema.index({ user: 1, deleted: 1 }, { unique: true });
+deletedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 deletedSchema.virtual('items', { ref: 'Item', localField: 'deleted', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -111,6 +114,7 @@ const readedSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'readed' });
 readedSchema.index({ user: 1, readed: 1 }, { unique: true });
+readedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 readedSchema.virtual('items', { ref: 'Item', localField: 'readed', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -123,6 +127,7 @@ const starredSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'starred' });
 starredSchema.index({ user: 1, starred: 1 }, { unique: true });
+starredSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 starredSchema.virtual('items', { ref: 'Item', localField: 'starred', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -135,6 +140,7 @@ const tradedSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'traded' });
 tradedSchema.index({ user: 1, traded: 1 }, { unique: true });
+tradedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 tradedSchema.virtual('items', { ref: 'Item', localField: 'traded', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -147,6 +153,7 @@ const bidedSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'bided' });
 bidedSchema.index({ user: 1, bided: 1 }, { unique: true });
+bidedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 bidedSchema.virtual('items', { ref: 'Item', localField: 'bided', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -159,6 +166,7 @@ const listedSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'listed' });
 listedSchema.index({ user: 1, listed: 1 }, { unique: true });
+listedSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 listedSchema.virtual('items', { ref: 'Item', localField: 'listed', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
@@ -175,6 +183,7 @@ const attributeSchema = new mongoose.Schema({
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'attributes' });
 attributeSchema.index({ user: 1, guid: 1 }, { unique: true });
+attributeSchema.index({ updated: 1 }, { expires: 60*60*24*180 });
 attributeSchema.virtual('items', { ref: 'Item', localField: 'guid', foreignField: 'guid__', justOne: true
 , options: { sort: { bidStopTime: 'desc' } }
 });
