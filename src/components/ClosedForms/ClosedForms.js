@@ -221,7 +221,7 @@ class ClosedForms extends React.Component {
         , aucStartTime, aucStopTime, sold }))
       .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
-      .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
+      //.then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
       .catch(err => {
         std.logError(ClosedForms.displayName, err.name, err.message);
         this.spn.stop();
