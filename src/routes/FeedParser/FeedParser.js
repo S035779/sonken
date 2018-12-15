@@ -44,7 +44,7 @@ export default class FeedParser {
   constructor() {
     const safeRequest = R.curry(this.request);
     this.countNote  = R.memoizeWith(JSON.stringify, safeRequest('count/note'));
-    this.countItem  = R.memoizeWith(JSON.stringify, safeRequest('count/item'));
+    this.countItems = R.memoizeWith(JSON.stringify, safeRequest('count/items'));
     this.countBids  = R.memoizeWith(JSON.stringify, safeRequest('count/bided'));
     this.countTrade = R.memoizeWith(JSON.stringify, safeRequest('count/traded'));
     this.AWS = aws.of(aws_keyset);
@@ -116,7 +116,7 @@ export default class FeedParser {
             .countDocuments()
             .exec();
         }
-      case 'count/item':
+      case 'count/items':
         {
           const { user, category, filter } = options;
           const conditions = { user, category };
@@ -182,7 +182,7 @@ export default class FeedParser {
           const hasSoldItem = 
             R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const hasAsinItem = 
-            R.filter(obj => obj.attributes && isAsin      ? obj.attributes.asins && !R.isEmpty(obj.attributes.asins) : true);
+            R.filter(obj => obj.attributes && isAsin      ? !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins) : true);
           const setItems = R.compose(hasSoldItem, hasAsinItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setNotes = R.map(setNote);
@@ -300,7 +300,7 @@ export default class FeedParser {
           const hasSoldItem = 
             R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
           const hasAsinItem = 
-            R.filter(obj => obj.attributes && isAsin      ? obj.attributes.asins && !R.isEmpty(obj.attributes.asins) : true);
+            R.filter(obj => obj.attributes && isAsin      ? !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins) : true);
           const setItems = R.compose(sliItems, hasAsinItem, hasSoldItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setObject = doc => doc.toObject();
@@ -951,8 +951,12 @@ export default class FeedParser {
     return this.countNote({ user, category });
   }
 
-  cntItem(user, category, filter) {
-    return this.countItem({ user, category, filter });
+  cntItems(user, category, filter) {
+    return this.countItems({ user, category, filter });
+  }
+
+  cntItem(user, category, id, filter) {
+    return this.countItems({ user, category, id, filter });
   }
 
   cntBided(user, skip, limit, filter) {
@@ -1152,7 +1156,7 @@ export default class FeedParser {
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntItem(user, category, _filter)
+      this.cntItems(user, category, _filter)
     , this.cntNote(user, category)
     , this.getCategorys(user)
     , this.getNotes(user, category, skip, limit, _filter)
@@ -1280,13 +1284,14 @@ export default class FeedParser {
   fetchNote({ user, category, id, skip, limit, filter }) {
     const project = { select: { title: 1, guid__: 1, pubDate: 1, price: 1, bids: 1, bidStopTime: 1, seller: 1, description: 1 } };
     const _filter = R.merge(filter, project);
+    const promise = R.isNil(filter) ? this.cntItems(user, category, _filter) : this.cntItem(user, category, id, _filter);
     const observables = forkJoin([
     //  this.getStarred(user)
     //, this.getListed(user)
     //, this.getReaded(user)
     //, this.getDeleted(user)
     //, this.getAdded(user)
-      this.cntItem(user, category, _filter)
+      promise
     , this.getNote(user, id, skip, limit, _filter)
     ]);
     const setAttribute = objs => R.compose(
@@ -1806,7 +1811,7 @@ export default class FeedParser {
 
   setCsvItems(type) {
     const urlpath = NODE_ENV !== 'staging';
-    //const setAsins = R.join(':');
+    const setAsins = R.join(':');
     const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
     const setName = (guid, url) => urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
     const setImage = (guid, img, idx) => img[idx-1] ? setName(guid, img[idx-1]) : '-';
@@ -1836,7 +1841,7 @@ export default class FeedParser {
         //, 'explanation'
         //, 'payment'
         //, 'shipping'
-        //, 'asins'
+        , 'asins'
         ];
         map = R.map(obj => ({
           auid:         obj.guid__
@@ -1870,7 +1875,7 @@ export default class FeedParser {
         //, explanation:  obj.explanation
         //, payment:      obj.payment
         //, shipping:     obj.shipping
-        //, asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
+        , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         }));
         break;
       case '0002': // Format A
@@ -2045,7 +2050,7 @@ export default class FeedParser {
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9', 'image10'
         ];
         map = R.map(obj => ({
-          asin:           obj.attributes ? setAsin(obj.attributes.asins) : '-'
+          asin:           obj.attributes ? setAsin(obj.attributes.asins, 1) : '-'
         , title:          obj.title
         , brand:          ''
         , category:       ''
@@ -2257,12 +2262,12 @@ export default class FeedParser {
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
-    const dupItems    = objs => std.dupObj(objs, 'title');
+    //const dupItems    = objs => std.dupObj(objs, 'title');
     return this.getTraded(user, null, null, filter).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
-    , map(dupItems)
+    //, map(dupItems)
     , map(setItemsCsv)
     , map(setBuffer)
     );
@@ -2273,12 +2278,12 @@ export default class FeedParser {
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
-    const dupItems    = objs => std.dupObj(objs, 'title');
+    //const dupItems    = objs => std.dupObj(objs, 'title');
     return this.getBided(user, null, null, filter).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
-    , map(dupItems)
+    //, map(dupItems)
     , map(setItemsCsv)
     , map(setBuffer)
     );
@@ -2290,14 +2295,14 @@ export default class FeedParser {
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setHeader   = buf  => header ? Buffer.concat([BOM, buf]) : buf;
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys, header }).parse();
-    const dupItems    = objs => std.dupObj(objs, 'title');
+    //const dupItems    = objs => std.dupObj(objs, 'title');
     const getItems    = obj => obj.items ? obj.items : [];
     const promises    = R.map(id => this.getNote(user, id, null, null, filter));
     return forkJoin(promises(ids)).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
-    , map(dupItems)
+    //, map(dupItems)
     , map(setItemsCsv)
     , map(setBuffer)
     , map(setHeader)

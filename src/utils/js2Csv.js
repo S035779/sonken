@@ -37,15 +37,18 @@ class js2Csv {
     const setQuota = R.map(R.map(js2Csv.prepare));
     const setSprta = R.map(R.join(','));
     const setEnter = R.join('\n');
+    const setEOL   = str => str + '\n';
     if (this.dataType === this.ARRAY) {
       return R.compose(
-        setEnter
+        setEOL
+      , setEnter
       , setSprta
       , setQuota
       )(this.data);
     } else if (this.dataType === this.OBJECT) {
       return R.compose(
-        setEnter
+        setEOL
+      , setEnter
       , setSprta
       , setQuota
       , setHeads
