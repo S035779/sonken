@@ -166,7 +166,7 @@ class RssSearch extends React.Component {
   render() {
     //std.logInfo(RssSearch.displayName, 'Props', this.props);
     //std.logInfo(RssSearch.displayName, 'State', this.state);
-    const { classes, noteNumber, note, user, category, categorys, title, file } = this.props;
+    const { classes, noteNumber, itemsNumber, user, category, categorys, title, file } = this.props;
     const { isUpload, isDownload, isLimit, isAddNote, isSuccess, isNotValid, url, perPage } = this.state;
     const color = this.getColor(category);
     const _categorys = category => categorys.filter(obj => category === obj.category)
@@ -176,13 +176,12 @@ class RssSearch extends React.Component {
     const categoryList = category => categorys ? _categorys(category) : null;
     const newSubCategory = std.formatDate(new Date(), 'YYYY-MM-DD hh:mm');
     const downloadFormat = '0001';
-    const itemNumber = (note && note.item_attributes && note.item_attributes.items) ? note.item_attributes.items.total : 0;
     return <div className={classes.noteSearchs}>
       <div className={classes.results}>
         <Typography variant="body2" align="center"
           className={classes.title}>全 {noteNumber}件中 {perPage > noteNumber ? noteNumber : perPage}件表示</Typography>
         <Typography variant="body2" align="center" 
-          className={classes.title}>絞込結果 {itemNumber}件</Typography>
+          className={classes.title}>絞込結果 {itemsNumber}件</Typography>
       </div>
       <FormControl className={classes.inputSelect}>
         <InputLabel htmlFor="results">表示件数</InputLabel>
@@ -232,8 +231,8 @@ RssSearch.defaultProps = {};
 RssSearch.propTypes = {
   classes: PropTypes.object.isRequired
 , noteNumber: PropTypes.number.isRequired
+, itemsNumber: PropTypes.number.isRequired
 , notePage: PropTypes.object.isRequired
-, note: PropTypes.object
 , user: PropTypes.string.isRequired
 , category: PropTypes.string.isRequired
 , file: PropTypes.object

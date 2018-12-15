@@ -7,13 +7,13 @@ import RssView        from 'Components/RssView/RssView';
 
 class MarchantEdit extends React.Component {
   render() {
-    const { classes, user, note, category, file, images, noteNumber } = this.props
+    const { classes, user, note, category, file, images, noteNumber, itemsNumber } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
     const attrNumber = note.item_attributes && note.item_attributes.sold ? note.item_attributes.sold.total : 0;
     const loadingDownload = itemNumber !== attrNumber;
     return <div className={classes.noteEdit}>
-      <RssForms user={user} note={note} category={category} noteNumber={noteNumber} itemNumber={itemNumber}
+      <RssForms user={user} note={note} category={category} noteNumber={noteNumber} itemsNumber={itemsNumber} itemNumber={itemNumber}
         loadingDownload={loadingDownload} file={file} images={images} >
         <div className={classes.view}>
           <RssView note={note}/>
@@ -32,6 +32,7 @@ MarchantEdit.propTypes = {
 , file: PropTypes.object
 , images: PropTypes.array
 , noteNumber: PropTypes.number.isRequired
+, itemsNumber: PropTypes.number.isRequired
 };
 
 const barHeightSmUp     = 64;

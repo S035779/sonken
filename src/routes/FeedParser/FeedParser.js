@@ -77,6 +77,7 @@ export default class FeedParser {
           , $or:      [{ created: { $gt: create }}, { updated: { $lt: expire } }]
           };
           const select = { user: 1, category: 1, url: 1 };
+          const query = Note.find(conditions).select(select);
           const params = {
             path:     'items'
           , select:   { guid__: 1 }
@@ -89,40 +90,39 @@ export default class FeedParser {
           const hasNotes = R.compose(setItems, hasItems);
           const setNotes = objs => isItems ? hasNotes(objs) : objs;
           const setObject = R.map(doc => doc.toObject());
-          const query = Note.find(conditions).select(select);
-          if(isItems || isImages) query.populate(params);
-          if(isPaginate)          query.sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
-          return query.exec()
-            .then(setObject)
-            .then(setNotes);
+          if(isPaginate) query.sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
+          const promise = (isItems || isImages) ? query.populate(params).exec() : query.exec();
+          return promise.then(setObject).then(setNotes);
         }
       case 'job/note':
         {
           const { user, id } = options;
           const conditions = { user, _id: id };
+          const query = Note.findOne(conditions);
           const params = {
             path: 'items'
           , options: { sort: { bidStopTime: 'desc' }}
           , populate: { path: 'attributes', select: { images: 1 } }
           };
-          const query = Note.findOne(conditions);
-          return query.populate(params).exec()
-            .then(doc => doc.toObject());
+          const setObject = doc => doc.toObject();
+          const promise = query.populate(params).exec();
+          return promise.then(setObject);
         }
       case 'count/note':
         {
           const { user, category } = options;
-          return Note.find({ user, category })
-            .countDocuments()
-            .exec();
+          const conditions = { user, category };
+          const query = Note.find(conditions);
+          const promise = query.countDocuments().exec();
+          return promise;
         }
       case 'count/items':
         {
           const { user, category, filter } = options;
           const conditions = { user, category };
           const query = Note.find(conditions, { items: 1 });
-          let sold = 0, isAsin = false;
-          if(filter) {
+          let match = null, sold = 0, isAsin = false;
+          if(!R.isNil(filter)) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
@@ -136,32 +136,30 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
-            let match = null;
-            let params = { 
-              path:     'items'
-            , select:   { guid__: 1 }
-            , populate: { path: 'attributes', select: { sold: 1, images: 1, archive: 1 } }
-            };
-            if(filter.inAuction) {
+            if(!R.isNil(filter.inAuction)               && filter.inAuction) {
               match = { bidStopTime: { $gte: start, $lt: stop } };
-            } else if(filter.allAuction) {
+            } else if(!R.isNil(filter.allAuction)       && filter.allAuction) {
               match = null;
-            } else if(filter.lastMonthAuction) {
+            } else if(!R.isNil(filter.lastMonthAuction) && filter.lastMonthAuction) {
               match = { bidStopTime: { $gte: lastMonth, $lt: today } };
-            } else if(filter.twoWeeksAuction) {
+            } else if(!R.isNil(filter.twoWeeksAuction)  && filter.twoWeeksAuction) {
               match = { bidStopTime: { $gte: twoWeeks, $lt: today } };
-            } else if(filter.lastWeekAuction) {
+            } else if(!R.isNil(filter.lastWeekAuction)  && filter.lastWeekAuction) {
               match = { bidStopTime: { $gte: lastWeek, $lt: today } };
             }
-            if(filter.sold) {
+            if(!R.isNil(filter.sold)) {
               sold  = Number(filter.sold);
             }
-            if(filter.asinAuction) { 
-              isAsin = true;
+            if(!R.isNil(filter.asinAuction)) { 
+              isAsin = filter.asinAuction;
             }
-            if(match)       params = R.merge(params, { match });
-            query.populate(params);
           }
+          let params = { 
+            path:     'items'
+          , select:   { guid__: 1 }
+          , populate: { path: 'attributes', select: { sold: 1, images: 1, archive: 1, asins: 1 } }
+          };
+          if(match) params = R.merge(params, { match });
           const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
           const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
           const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
@@ -179,18 +177,18 @@ export default class FeedParser {
           , archive:  setArch(doc.items)
           });
           const setCounts = R.map(setCount);
-          const hasSoldItem = 
-            R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
-          const hasAsinItem = 
-            R.filter(obj => obj.attributes && isAsin      ? !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins) : true);
+          const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
+            ? R.equals(sold, obj.attributes.sold)
+            : R.lte(sold, 0));
+          const hasAsinItem = R.filter(obj => isAsin
+            ? !R.isNil(obj.attributes) && !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins)
+            : true);
           const setItems = R.compose(hasSoldItem, hasAsinItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
-          return query.exec()
-            .then(setObjects)
-            .then(setNotes)
-            .then(setCounts);
+          const promise = !R.isNil(filter) ? query.populate(params).exec() : query.exec();
+          return promise.then(setObjects).then(setNotes).then(setCounts);
         }
       case 'fetch/notes':
         {
@@ -219,22 +217,18 @@ export default class FeedParser {
           const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
           if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
-          if(!isCSV)      query.populate(params);
-          return query.exec()
-            .then(setObjects)
-            .then(setNotes);
+          const promise = !isCSV ? query.populate(params).exec() : query.exec();
+          return promise.then(setObjects).then(setNotes);
         }
       case 'fetch/note':
         {
           const { user, id, skip, limit, filter } = options;
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
-          //const isCount = request === 'count/item';
           const conditions = { user, _id: id };
           const query = Note.findOne(conditions);
-          let match = null;
-          let sold = 0, isAsin = false;
-          if(filter) {
+          let match = null, sold = 0, isAsin = false;
+          if(!R.isNil(filter)) {
             const date      = new Date();
             const start     = new Date(filter.aucStartTime);
             const stop      = new Date(filter.aucStopTime);
@@ -248,22 +242,22 @@ export default class FeedParser {
             const twoWeeks  = new Date(year, month, day - 14);
             const lastMonth = new Date(year, month - 1, day);
             const today     = new Date(year, month, day, hours, minutes, seconds);
-            if(filter.inAuction) {
+            if(!R.isNil(filter.inAuction)               && filter.inAuction) {
               match = { bidStopTime: { $gte: start, $lt: stop } };
-            } else if(filter.allAuction) {
+            } else if(!R.isNil(filter.allAuction)       && filter.allAuction) {
               match = null;
-            } else if(filter.lastMonthAuction) {
+            } else if(!R.isNil(filter.lastMonthAuction) && filter.lastMonthAuction) {
               match = { bidStopTime: { $gte: lastMonth, $lt: today } };
-            } else if(filter.twoWeeksAuction) {
+            } else if(!R.isNil(filter.twoWeeksAuction)  && filter.twoWeeksAuction) {
               match = { bidStopTime: { $gte: twoWeeks, $lt: today } };
-            } else if(filter.lastWeekAuction) {
+            } else if(!R.isNil(filter.lastWeekAuction)  && filter.lastWeekAuction) {
               match = { bidStopTime: { $gte: lastWeek, $lt: today } };
             }
-            if(filter.sold) {
+            if(!R.isNil(filter.sold)) {
               sold  = Number(filter.sold);
             }
-            if(filter.asinAuction) {
-              isAsin = true;
+            if(!R.isNil(filter.asinAuction)) {
+              isAsin = filter.asinAuction;
             }
           }
           let params = { 
@@ -278,36 +272,20 @@ export default class FeedParser {
             , { path: 'attributes' }
             ]
           };
-          if(match)     params = R.merge(params, { match })
+          if(match) params = R.merge(params, { match })
           if(isProject) params = R.merge(params, { select: filter.select });
-          //const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
-          //const isImgs   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.images);
-          //const isArch   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.archive);
-          //const hasSold  = R.filter(isSold);
-          //const hasImgs  = R.filter(isImgs);
-          //const hasArch  = R.filter(isArch);
-          //const setSold  = R.compose(R.length, hasSold);
-          //const setImgs  = R.compose(R.length, hasImgs);
-          //const setArch  = R.compose(R.length, hasArch);
-          //const setCount = doc => isCount ? [{ 
-          //  _id:      doc._id
-          //, counts:   R.length(doc.items)
-          //, sold:     setSold(doc.items)
-          //, images:   setImgs(doc.items)
-          //, archive:  setArch(doc.items)
-          //}] : doc;
           const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          const hasSoldItem = 
-            R.filter(obj => obj.attributes && sold !== 0  ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0));
-          const hasAsinItem = 
-            R.filter(obj => obj.attributes && isAsin      ? !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins) : true);
+          const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
+            ? R.equals(sold, obj.attributes.sold)
+            : R.lte(sold, 0));
+          const hasAsinItem = R.filter(obj => isAsin
+            ? !R.isNil(obj.attributes) && !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins)
+            : true);
           const setItems = R.compose(sliItems, hasAsinItem, hasSoldItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setObject = doc => doc.toObject();
-          return query.populate(params).exec()
-            .then(setObject)
-            .then(setNote);
-            //.then(setCount);
+          const promise = query.populate(params).exec();
+          return promise.then(setObject).then(setNote);
         }
       case 'count/traded':
       case 'fetch/traded':
@@ -1833,14 +1811,14 @@ export default class FeedParser {
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
         , 'link'
         , 'date'
-        //, 'offers'
-        //, 'market'
-        //, 'sale'
-        //, 'sold'
-        //, 'categoryid'
-        //, 'explanation'
-        //, 'payment'
-        //, 'shipping'
+        , 'offers'
+        , 'market'
+        , 'sale'
+        , 'sold'
+        , 'categoryid'
+        , 'explanation'
+        , 'payment'
+        , 'shipping'
         , 'asins'
         ];
         map = R.map(obj => ({
@@ -1867,14 +1845,14 @@ export default class FeedParser {
         , image10:      setImage(obj.guid__, obj.images, 10)
         , link:         obj.link
         , date:         obj.pubDate
-        //, offers:       obj.offers
-        //, market:       obj.attributes ? obj.attributes.market : '-'
-        //, sale:         obj.attributes ? obj.attributes.sale : '-'
-        //, sold:         obj.attributes ? obj.attributes.sold : '-'
-        //, categoryid:   obj.item_categoryid
-        //, explanation:  obj.explanation
-        //, payment:      obj.payment
-        //, shipping:     obj.shipping
+        , offers:       obj.offers
+        , market:       obj.attributes ? obj.attributes.market : '-'
+        , sale:         obj.attributes ? obj.attributes.sale : '-'
+        , sold:         obj.attributes ? obj.attributes.sold : '-'
+        , categoryid:   obj.item_categoryid
+        , explanation:  obj.explanation
+        , payment:      obj.payment
+        , shipping:     obj.shipping
         , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         }));
         break;

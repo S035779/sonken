@@ -45,8 +45,8 @@ class RssDownloadItemsDialog extends React.Component {
 
   handleDownload(operation) {
     std.logInfo(RssDownloadItemsDialog.displayName, 'handleDownload', this.props);
-    const { user, ids, filter, noteNumber, itemNumber, category, checked } = this.props;
-    if(noteNumber === 0 || itemNumber === 0) return;
+    const { user, ids, filter, noteNumber, itemsNumber, category, checked } = this.props;
+    if(itemsNumber === 0) return;
     const number = checked ? noteNumber : R.length(ids);
     const setParams= type => checked ? { user, category, type, filter, number } : { user, category, type, filter, number, ids };
     let params;
@@ -241,6 +241,7 @@ RssDownloadItemsDialog.propTypes = {
 , ids: PropTypes.array.isRequired
 , filter: PropTypes.object
 , noteNumber: PropTypes.number.isRequired
+, itemsNumber: PropTypes.number.isRequired
 , itemNumber: PropTypes.number.isRequired
 , name: PropTypes.string.isRequired
 , open: PropTypes.bool.isRequired

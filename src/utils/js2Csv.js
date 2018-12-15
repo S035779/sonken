@@ -8,7 +8,7 @@ class js2Csv {
     this.data = data;
     if (js2Csv.isArray(data)) {
       if (0 === data.length) {
-        this.dataType = this.ARRAY;
+        this.dataType = this.OBJECT;
       } else if (js2Csv.isObject(data[0])) {
         this.dataType = this.OBJECT;
       } else if (js2Csv.isArray(data[0])) {
@@ -37,7 +37,7 @@ class js2Csv {
     const setQuota = R.map(R.map(js2Csv.prepare));
     const setSprta = R.map(R.join(','));
     const setEnter = R.join('\n');
-    const setEOL   = str => str + '\n';
+    const setEOL   = str => this.header || R.length(this.data) !== 0 ? str + '\n' : str;
     if (this.dataType === this.ARRAY) {
       return R.compose(
         setEOL

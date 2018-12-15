@@ -1,4 +1,3 @@
-import * as R                   from 'ramda';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -110,23 +109,23 @@ class Dashboard extends React.Component {
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
     const _note = _notes.find(obj => obj._id === _id);
-    const __note = R.head(_notes);
-    const noteNumber = __note && __note.note_attributes && __note.note_attributes.note ? __note.note_attributes.note.total : 0; 
+    const noteNumber  = _note && _note.note_attributes && _note.note_attributes.note  ? _note.note_attributes.note.total  : 0; 
+    const itemsNumber = _note && _note.item_attributes && _note.item_attributes.items ? _note.item_attributes.items.total : 0;
     const _images = images === '' ? [] : images;
     return isAuthenticated
       ? ( <div className={classes.root}>
-          <RssSearch user={user} title={title} category={category} categorys={categorys} note={_note} file={file}
+          <RssSearch user={user} title={title} category={category} categorys={categorys} itemsNumber={itemsNumber} file={file}
             notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
           <div className={classes.body}>
             <div className={classes.noteList}>
               <RssButtons user={user} category={category} notes={_notes} note={_note} file={file} images={_images} 
-                selectedNoteId={ids} noteNumber={noteNumber} itemFilter={filter} />
+                selectedNoteId={ids} noteNumber={noteNumber} itemsNumber={itemsNumber} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
                 notePage={page}/>
             </div>
             <div className={classes.noteEdit}>
               { route.routes 
-                  ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images: _images, noteNumber }) 
+                  ? renderRoutes(route.routes, { user, note: _note, category, filter, file, images: _images, noteNumber, itemsNumber }) 
                   : null }
             </div>
           </div>

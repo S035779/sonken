@@ -6,13 +6,13 @@ import RssItems       from 'Components/RssItems/RssItems';
 
 class SellersEdit extends React.Component {
   render() {
-    const { classes, user, note, category, file, images, noteNumber } = this.props
+    const { classes, user, note, category, file, images, noteNumber, itemsNumber } = this.props
     if(!note || !note._id) return null;
     const itemNumber = note.item_attributes && note.item_attributes.item ? note.item_attributes.item.total : 0;
     const attrNumber = note.item_attributes && note.item_attributes.sold ? note.item_attributes.sold.total : 0;
     const loadingDownload = itemNumber !== attrNumber;
     return <div className={classes.noteEdit}>
-      <RssItems user={user} note={note} category={category} noteNumber={noteNumber} itemNumber={itemNumber}
+      <RssItems user={user} note={note} category={category} noteNumber={noteNumber} itemsNumber={itemsNumber} itemNumber={itemNumber}
         loadingDownload={loadingDownload} file={file} images={images} />
     </div>;
   }
@@ -27,6 +27,7 @@ SellersEdit.propTypes = {
 , file: PropTypes.object
 , images: PropTypes.array
 , noteNumber: PropTypes.number.isRequired
+, itemsNumber: PropTypes.number.isRequired
 };
 
 const barHeightSmUp     = 64;
