@@ -1811,14 +1811,14 @@ export default class FeedParser {
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
         , 'link'
         , 'date'
-        , 'offers'
-        , 'market'
-        , 'sale'
-        , 'sold'
-        , 'categoryid'
-        , 'explanation'
-        , 'payment'
-        , 'shipping'
+        //, 'offers'
+        //, 'market'
+        //, 'sale'
+        //, 'sold'
+        //, 'categoryid'
+        //, 'explanation'
+        //, 'payment'
+        //, 'shipping'
         , 'asins'
         ];
         map = R.map(obj => ({
@@ -1845,14 +1845,14 @@ export default class FeedParser {
         , image10:      setImage(obj.guid__, obj.images, 10)
         , link:         obj.link
         , date:         obj.pubDate
-        , offers:       obj.offers
-        , market:       obj.attributes ? obj.attributes.market : '-'
-        , sale:         obj.attributes ? obj.attributes.sale : '-'
-        , sold:         obj.attributes ? obj.attributes.sold : '-'
-        , categoryid:   obj.item_categoryid
-        , explanation:  obj.explanation
-        , payment:      obj.payment
-        , shipping:     obj.shipping
+        //, offers:       obj.offers
+        //, market:       obj.attributes ? obj.attributes.market : '-'
+        //, sale:         obj.attributes ? obj.attributes.sale : '-'
+        //, sold:         obj.attributes ? obj.attributes.sold : '-'
+        //, categoryid:   obj.item_categoryid
+        //, explanation:  obj.explanation
+        //, payment:      obj.payment
+        //, shipping:     obj.shipping
         , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         }));
         break;

@@ -8,9 +8,12 @@ const setExplanation  = _obj => {
   let num1 = R.length(words), idx = 0, pairs = [];
   while(num1--) {
     idx = R.indexOf(words[num1], input)
-    if(idx !== -1)        pairs[num1] = { name: words[num1], from: idx };
+    if(idx !== -1) pairs[num1] = { name: words[num1], from: idx };
   }
-  pairs = R.compose(R.sortBy(R.prop('from')), R.filter(__obj => !R.isNil(__obj)))(pairs);
+  pairs = R.compose(
+    R.sortBy(R.prop('from'))
+  , R.filter(__obj => !R.isNil(__obj))
+  )(pairs);
   const max = R.length(pairs);
   let num2 = max;
   while(num2--) {
@@ -30,12 +33,15 @@ const setExplanation  = _obj => {
   , shipment: setShipment(__obj)
   , notes:    setNotes(__obj) 
   });
-  const setParams     = R.compose(template, setExplan, R.map(setSubStr));
-  const explanation   = setParams(pairs);
+  const explanation   = R.compose(
+    render
+  , setExplan
+  , R.map(setSubStr)
+  )(pairs);
   return R.merge(_obj, { explanation }); 
 };
 
-const template = params => {
+const render = params => {
   const repTitle  = R.replace(/支払詳細|商品詳細|発送詳細|注意事項/, '');
   const repRetBR  = R.replace(/\r?\n/g, '<br>');
   const replace   = R.compose(repTitle, repRetBR);
@@ -44,7 +50,7 @@ const template = params => {
   const payment   = params.payment  && params.payment.string  ? replace(params.payment.string)  : '';
   const shipment  = params.shipment && params.shipment.string ? replace(params.shipment.string) : '';
   const notes     = params.notes    && params.notes.string    ? replace(params.notes.string)    : '';
-  return `<center>
+  return item === '' ? '-' : `<center>
       <img src= width=500><br>
       <img src= width=500><br>
       <img src= width=500><br>
