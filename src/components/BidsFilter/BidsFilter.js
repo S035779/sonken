@@ -71,7 +71,7 @@ class BidsFilter extends React.Component {
       }
     } else if(prevItems && prevItems.length !== 0){
       if(prevPage === nextPage) {
-        std.logInfo(BidsFilter.displayName, 'prev', { prevPage, nextPage, prevItems, nextItems });
+        std.logInfo(BidsFilter.displayName, 'Prev', { prevPage, nextPage, prevItems, nextItems });
         this.setState({ items: [], page: 1, prevPage: 1 });
       } else {
         std.logInfo(BidsFilter.displayName, 'Next', { prevPage, nextPage, prevItems, nextItems });
@@ -87,7 +87,7 @@ class BidsFilter extends React.Component {
     const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
-        .then(() => this.setState({ isRequest: false }))
+        .then(num => this.setState({ isRequest: false, page: num }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(BidsFilter.displayName, err.name, err.message);
@@ -153,8 +153,8 @@ class BidsFilter extends React.Component {
     const { endBidding, allBidding, inBidding, bidStartTime, bidStopTime, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
+      .then(num => this.setState({ isRequest: false, page: num }))
       .then(() => BidsAction.filter(user, { endBidding, allBidding, inBidding, bidStartTime, bidStopTime }))
-      .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
       .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
       .catch(err => {
@@ -180,9 +180,10 @@ class BidsFilter extends React.Component {
     const limit = 20;
     const skip = (page - 1) * limit;
     this.spn.start();
-    this.setState({ isRequest: true, page });
+    this.setState({ isRequest: true });
     return BidsAction.fetchBided(user, skip, limit, { endBidding, allBidding, inBidding, bidStartTime
-    , bidStopTime });
+    , bidStopTime })
+      .then(() => page);
   }
 
   handleCloseDialog(name) {

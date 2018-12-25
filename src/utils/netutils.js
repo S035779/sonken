@@ -38,7 +38,8 @@ const gpromise = (url, options) => {
   });
 };
 
-const fetch = (url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback) => {  
+const fetch = (url, options, callback) => {  
+  const { method, header, search, auth, body, type, accept, parser, lang, operator } = options;
   const api           = std.parse_url(url);
   const hostname      = api.hostname;
   const protocol      = api.protocol;
@@ -126,9 +127,7 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
           callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          setTimeout(() => 
-            fetch(url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback)
-              , retry());
+          setTimeout(() => fetch(url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback), retry());
           break;
         default:
           callback(status);
@@ -141,7 +140,8 @@ const fetch = (url, { method, header, search, auth, body, type, accept, parser, 
   req.end();
 };
 
-const get = (url, { search, operator, filename }, callback) => {  
+const get = (url, options, callback) => {  
+  const { search, operator, filename } = options;
   const api       = std.parse_url(url);
   const hostname  = api.hostname;
   const protocol  = api.protocol;

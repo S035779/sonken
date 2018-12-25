@@ -98,7 +98,7 @@ class RssForms extends React.Component {
     if(scrolledToBottom && !isRequest) {
       this.spn.start();
       this.fetch(page + 1)
-        .then(() => this.setState({ isRequest: false }))
+        .then(num => this.setState({ isRequest: false, page: num }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssForms.displayName, err.name, err.message);
@@ -204,8 +204,9 @@ class RssForms extends React.Component {
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(RssForms.displayName, 'fetch', { id, page });
-    this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, category, id, skip, limit);
+    this.setState({ isRequest: true });
+    return NoteAction.fetch(user, category, id, skip, limit)
+      .then(() => page);
   }
 
   isValidate() {
@@ -342,37 +343,22 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}p
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const columnHeight = 62;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column'
-                , overflow: 'scroll' }
-, noteList:     { width: '100%'
-                , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: {
-                  height: listHeightSmUp }}
-, header:       { display: 'flex', flexDirection: 'row' 
-                , alignItems: 'stretch', justifyContent: 'space-between'
-                , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box', padding: '5px' }
+  forms:        { display: 'flex', flexDirection: 'column', overflow: 'auto' }
+, noteList:     { width: '100%', height: listHeightSmDown, [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
+, header:       { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-between'
+                , height: columnHeight, minHeight: columnHeight, boxSizing: 'border-box', padding: '5px' }
 , title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
 , label:        { margin: theme.spacing.unit * 1.75 }
-, edit:         { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch'
-                , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box'
-                , padding: '5px' }
+, edit:         { display: 'flex', flexDirection: 'row', alignItems: 'stretch', height: columnHeight, minHeight: columnHeight
+                , boxSizing: 'border-box', padding: '5px' }
 , buttons:      { display: 'flex', flexDirection: 'row' }
-, button:       { flex: 1, margin: theme.spacing.unit
-                , wordBreak: 'keep-all' }
-, link:         { flex: 1, margin: theme.spacing.unit /2
-                , wordBreak: 'keep-all' }
-, name:         { flex: 1, margin: theme.spacing.unit /2
-                , border: '1px solid #CCC'
-                , wordBreak: 'keep-all' }
+, button:       { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all' }
+, link:         { flex: 1, margin: theme.spacing.unit /2, wordBreak: 'keep-all' }
+, name:         { flex: 1, margin: theme.spacing.unit /2, border: '1px solid #CCC', wordBreak: 'keep-all' }
 , text:         { marginLeft: theme.spacing.unit * 1.75 }
 , wrapper:      { position: 'relative' }
 , btnProgress:  { position: 'absolute', top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }
-, memo:         { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch'
-                , height: columnHeight * 2, minHeight: columnHeight * 2
+, memo:         { display: 'flex', flexDirection: 'row', alignItems: 'stretch', height: columnHeight * 2, minHeight: columnHeight * 2
                 , boxSizing: 'border-box' }
 , field:        { paddingTop: 5 }
 , textarea:     { width: '100%', padding: 5 }

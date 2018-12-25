@@ -12,16 +12,6 @@ import mgmtImg          from 'Assets/image/full-screen-image-1.jpg';
 import rgstImg          from 'Assets/image/bg5.jpg';
 import cnfmImg          from 'Assets/image/bg4.jpg';
 
-const node_env  = process.env.NODE_ENV || 'development';
-const asetPath  = process.env.ASSET_URL;
-let image;
-if(node_env === 'development') {
-  image = asetPath;
-} else 
-if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image';
-}
-
 class Auth extends React.Component {
   render() {
     //std.logInfo(Auth.displayName, 'Props', this.props);
@@ -57,28 +47,24 @@ const barHeightSmDown = 56;
 const root =  { width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh' };
 const styles = theme => ({
   authenticate: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}${authImg})`
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${authImg})`
   , backgroundSize: 'cover'
   })
 , management: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${image}${mgmtImg})`
+    background: `linear-gradient(to bottom, ${auth_top}, ${auth_btm}), url(${mgmtImg})`
   , backgroundSize: 'cover'
   })
 , registration: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}${rgstImg})`
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${rgstImg})`
   , backgroundSize: 'cover'
   })
 , confirmation: Object.assign({}, root, {
-    background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${image}${cnfmImg})`
+    background: `linear-gradient(to bottom, ${cnfm_top}, ${cnfm_btm}), url(${cnfmImg})`
   , backgroundSize: 'cover'
   })
 , authFrame:  { position: 'relative', height: '100%' } 
-, content:    { position: 'absolute', width: '100%'
-              , display: 'flex', flexDirection: 'column'
-              , justifyContent: 'center', alignItems: 'center'
-              , height: `calc(100vh - ${barHeightSmDown}px)`
-              , [theme.breakpoints.up('sm')]: {
-                  height: `calc(100vh - ${barHeightSmUp}px)`
-              }}
+, content:    { position: 'absolute', width: '100%', display: 'flex', flexDirection: 'column'
+              , justifyContent: 'center', alignItems: 'center', height: `calc(100vh - ${barHeightSmDown}px)`
+              , [theme.breakpoints.up('sm')]: { height: `calc(100vh - ${barHeightSmUp}px)` }}
 });
 export default withStyles(styles)(Auth);

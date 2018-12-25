@@ -152,8 +152,8 @@ export default {
             res.clearCookie('auto');
           }
           res.status(200).send(obj);
-          log.info(displayName, 'req.cookies:', req.cookies);
-          log.info(displayName, 'req.session:', req.session);
+          //log.debug(displayName, 'req.cookies:', req.cookies);
+          //log.debug(displayName, 'req.session:', req.session);
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -183,8 +183,8 @@ export default {
             res.status(401).send({ name: 'Client Error', message: 'Unauthorized.' });
             log.error(displayName, 'Client Error', ':', 'Unauthorized.');
           }
-          log.info(displayName, 'req.cookies:', req.cookies);
-          log.info(displayName, 'req.session:', req.session);
+          //log.debug(displayName, 'req.cookies:', req.cookies);
+          //log.debug(displayName, 'req.session:', req.session);
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });
@@ -208,8 +208,8 @@ export default {
             res.status(401).send({ name: 'Client Error', message: 'Unauthorized.' });
             log.error(displayName, 'Client Error', ':', 'Unauthorized.');
           }
-          log.info(displayName, 'req.cookies:', req.cookies);
-          log.info(displayName, 'req.session:', req.session);
+          //log.debug(displayName, 'req.cookies:', req.cookies);
+          //log.debug(displayName, 'req.session:', req.session);
         }
       , err => {
           res.status(500).send({ name: err.name, message: err.message });

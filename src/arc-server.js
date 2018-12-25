@@ -27,7 +27,7 @@ if(node_env === 'production') {
 
 const cpu_num = os.cpus().length;
 const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const job = path.resolve(__dirname, 'dist', 'wrk.node.js');
+const job = path.resolve('dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);

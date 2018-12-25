@@ -46,15 +46,6 @@ spec:
         volumeMounts:
           - mountPath: /app/assets
             name: assets
-        env:
-          - name: NODE_ENV
-            value: "staging"
-          - name: API_URL
-            value: "http://35.227.255.168/api"
-          - name: ASSET_URL
-            value: "http://35.227.255.168/assets"
-          - name: APP_NAME
-            value: "SellerSearch!"
       - name: node-api
         image: asia.gcr.io/feedparser-217913/feedparser/node_api:latest
         resources:

@@ -1,7 +1,6 @@
 import Agenda from 'agenda';
 import log    from 'Utilities/logutils';
 
-const displayName = 'jobutils';
 const mdb_url = process.env.MDB_URL || 'mongodb://localhost:27017';
 const params = {
   db: { 
@@ -44,12 +43,12 @@ const enqueue = (workerName, jobName, datas) => {
   return queue(workerName)
     .then(async queue => {
 
-      await queue.start()
-      log.debug(workerName, '>>> start');
+      await queue.start();
+      //log.debug(workerName, '>>> start');
 
       for (let data of datas) {
         await queue.create(jobName, data).save();
-        log.debug(workerName, '>>> job added', data);
+        //log.debug(workerName, '>>> job added', data);
       }
 
       return queue;
@@ -65,16 +64,16 @@ const dequeue = (workerName, jobName, concurrent, callback) => {
       });
 
       await queue.start();
-      log.debug(workerName, '>>> start');
+      //log.debug(workerName, '>>> start');
 
       await queue.cancel({ name: jobName });
-      log.debug(workerName, '>>> cancel');
+      //log.debug(workerName, '>>> cancel');
 
       const objs = await queue.jobs({ name: jobName })
-      log.debug(workerName, '>>> jobs length:', objs.length);
+      log.info(workerName, '>>> jobs length:', objs.length);
 
-      queue.on('start:'     + jobName, job =>         log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
-      queue.on('complete:'  + jobName, job =>         log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
+      //queue.on('start:'     + jobName, job =>         log.debug('start:',     job.attrs.lockedAt,   job.attrs.lastRunAt));
+      //queue.on('complete:'  + jobName, job =>         log.debug('complete:',  job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
       queue.on('success:'   + jobName, job =>         log.info( 'success:',   job.attrs.lastRunAt,  job.attrs.lastFinishedAt));
       queue.on('fail:'      + jobName, (err, job) =>  log.error('fail:',      job.attrs.failedAt,   job.attrs.failReason));
 
@@ -83,7 +82,7 @@ const dequeue = (workerName, jobName, concurrent, callback) => {
 }
 
 const queueList = (workerName, conditions) => {
-  log.info(displayName, 'QueueList', { workerName, conditions });
+  //log.debug(workerName, 'QueueList', { workerName, conditions });
   return queue(workerName)
     .then(async queue => {
       await queue.start();

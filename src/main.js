@@ -1,32 +1,18 @@
-import React from 'react';
-import { hydrate, unmountComponentAtNode } from 'react-dom';
-import { AppContainer } from 'react-hot-loader';
-import { createDispatcher } from './dispatcher';
-import { rehydrateState } from './actions';
-import { createStores } from './stores';
-import Root from './pages/Root/Root';
-import 'typeface-roboto';
+import React                from 'react';
+import { hydrate }          from 'react-dom';
+import { createDispatcher } from 'Main/dispatcher';
+import { rehydrateState }   from 'Main/actions';
+import { createStores }     from 'Main/stores';
+import Root                 from 'Pages/Root/Root';
+import 'Assets/fonts/index.css';
 
-const dispatcher = createDispatcher();
-createStores(dispatcher);
-rehydrateState(JSON.parse(document.getElementById('initial-data').getAttribute('data-init')));
 const rootEl = document.getElementById('app');
-const renderRoot = () => {
-  hydrate(
-    <AppContainer>
-      <Root />
-    </AppContainer>
-    , rootEl,
-  );
-};
+const dataEl = document.getElementById('initial-data');
+if(dataEl) {
+  const data = JSON.parse(dataEl.getAttribute('data-init'));
+  const dispatcher = createDispatcher();
 
-if (module.hot) {
-  module.hot.accept('./pages/Root/Root' , () => {
-    setImmediate(() => {
-      unmountComponentAtNode(rootEl);
-      renderRoot();
-    });
-  });
+  createStores(dispatcher);
+  rehydrateState(data);
+  hydrate(<Root />, rootEl);
 }
-
-renderRoot()

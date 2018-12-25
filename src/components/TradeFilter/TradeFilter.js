@@ -87,7 +87,7 @@ class TradeFilter extends React.Component {
     const scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
-        .then(() => this.setState({ isRequest: false }))
+        .then(num => this.setState({ isRequest: false, page: num }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(TradeFilter.displayName, err.name, err.message);
@@ -153,8 +153,8 @@ class TradeFilter extends React.Component {
     const { endTrading, allTrading, inBidding, bidStartTime, bidStopTime, isRequest } = this.state;
     if(isRequest) return;
     this.fetch(1)
+      .then(num => this.setState({ isRequest: false, page: num }))
       .then(() => TradeAction.filter(user, { endTrading, allTrading, inBidding, bidStartTime, bidStopTime }))
-      .then(() => this.setState({ isRequest: false }))
       .then(() => this.spn.stop())
       .then(() => this.props.itemNumber === 0 ? this.setState({ isNotResult: true }) : null)
       .catch(err => {
@@ -180,9 +180,10 @@ class TradeFilter extends React.Component {
     const limit = 20;
     const skip = (page - 1) * limit;
     this.spn.start();
-    this.setState({ isRequest: true, page });
+    this.setState({ isRequest: true });
     return TradeAction.fetchTraded(user, skip, limit, { endTrading, allTrading, inBidding, bidStartTime
-    , bidStopTime });
+    , bidStopTime })
+      .then(() => page);
   }
 
   handleCloseDialog(name) {

@@ -8,16 +8,6 @@ import { Hidden, Drawer } from '@material-ui/core';
 import DrawerList         from 'Components/DrawerList/DrawerList';
 import rgstImg            from 'Assets/image/sidebar-5.jpg';
 
-const node_env = process.env.NODE_ENV || 'development';
-const asetPath = process.env.ASSET_URL;
-let image;
-if(node_env === 'development') {
-  image = asetPath;
-} else
-if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image';
-}
-
 class DrawerPermanent extends React.Component {
   render() {
     //std.logInfo(DrawerPermanent.displayName, 'Props', this.props);
@@ -48,7 +38,7 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper: {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}${rgstImg})`, backgroundSize: 'cover'
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${rgstImg})`, backgroundSize: 'cover'
   , width: drawerWidthMdDown, [theme.breakpoints.up('md')]: { width: drawerWidthMdUp, height: '100%' }
   , transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen }) 

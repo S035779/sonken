@@ -8,16 +8,6 @@ import { Hidden, Drawer }
 import DrawerList       from 'Components/DrawerList/DrawerList';
 import rgstImg          from 'Assets/image/sidebar-5.jpg';
 
-const node_env = process.env.NODE_ENV || 'development';
-const asetPath = process.env.ASSET_URL;
-let image;
-if(node_env === 'development') {
-  image = asetPath;
-} else
-if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image';
-}
-
 class DrawerTemporary extends React.Component {
   handleToggle() {
     this.props.onClose();
@@ -54,7 +44,7 @@ const rgst_top = std.toRGBa('#FFA534', 0.8);
 const rgst_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper: {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${image}${rgstImg})`, width: drawerWidthMdDown
+    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${rgstImg})`, width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: { position: 'relative', width: drawerWidthMdUp, height: '100%' }
   }
 });

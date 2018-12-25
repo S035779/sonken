@@ -1,10 +1,10 @@
-import NoteAction from 'Actions/NoteAction';
-import BidsAction from 'Actions/BidsAction';
-import TradeAction from 'Actions/TradeAction';
-import LoginAction from 'Actions/LoginAction';
-import UserAction from 'Actions/UserAction';
-import FaqAction from 'Actions/FaqAction';
-import MailAction from 'Actions/MailAction';
+import NoteAction   from 'Actions/NoteAction';
+import BidsAction   from 'Actions/BidsAction';
+import TradeAction  from 'Actions/TradeAction';
+import LoginAction  from 'Actions/LoginAction';
+import UserAction   from 'Actions/UserAction';
+import FaqAction    from 'Actions/FaqAction';
+import MailAction   from 'Actions/MailAction';
 
 export function rehydrateState(state) {
   NoteAction.rehydrate(state);

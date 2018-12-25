@@ -1,21 +1,26 @@
+const Dotenv = require('dotenv-webpack');
 const merge = require('webpack-merge');
 const path = require('path');
 const webpack = require('webpack');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-const Dotenv = require('dotenv-webpack');
 const common = require('./webpack.common.js');
 
+const devMode = process.env.NODE_ENV === 'development';
+console.log('devMode(web platform): ', devMode);
 const bundle = {
   target: "web"
 , entry: {
-    app: [ 'react-hot-loader/patch', './main.js' ]
+    app: [ 
+      'webpack-hot-middleware/client?path=/__webpack_hmr'
+    , './main.js' 
+    ]
   }
 , output: {
-    filename: '[name].bundle.js'
-  , path: path.resolve(__dirname, 'dist')
-  , publicPath: '/'
+    path: path.resolve(__dirname, 'dist')
+  , publicPath: devMode ? '/' : '/assets/'
+  , filename: devMode ? 'js/[name].bundle.js' : 'js/[name].[chunkhash].js'
   }
 , optimization: {
     splitChunks: {
@@ -36,17 +41,22 @@ const bundle = {
     }
   }
 , plugins: [
-  ]
-, plugins: [
     new webpack.NamedModulesPlugin()
   , new webpack.HotModuleReplacementPlugin()
-  , new ManifestPlugin({ fileName: 'manifest.bundle.json' })
-  , new MiniCssExtractPlugin({ filename: '[name].bundle.css' })
+  , new webpack.DefinePlugin({
+      'process.env.PLATFORM': JSON.stringify('web')
+    })
+  , new ManifestPlugin({
+      fileName: 'manifest.bundle.json'
+    })
+  , new MiniCssExtractPlugin({
+      filename: devMode ? 'css/[name].bundle.css' : 'css/[name].[contenthash].css'
+    })
   , new CleanWebpackPlugin([
-      'dist/*.bundle.*'
-    , 'dist/*.jpg'
-    , 'dist/*.woff'
-    , 'dist/*.woff2'
+      'dist/js/*'
+    , 'dist/images/*'
+    , 'dist/fonts/*'
+    , 'dist/css/*'
     ], { verbose: false })
   , new Dotenv({ 
       path: './.env.webpack' 

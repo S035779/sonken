@@ -39,7 +39,7 @@ const feed = FeedParser.of();
 const profile = UserProfiler.of();
 const cpu_num = os.cpus().length;
 const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const job = path.resolve(__dirname, 'dist', 'wrk.node.js');
+const job = path.resolve('dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
@@ -69,7 +69,7 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['sellers', 'marchant', 'closedsellers', 'closedmarchant' ]
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 35)), sort: 'desc'
+      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 100) * 5)), sort: 'desc'
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

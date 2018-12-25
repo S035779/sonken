@@ -13,16 +13,6 @@ import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader              from 'Components/LoginHeader/LoginHeader';
 import iqryImg                  from 'Assets/image/bg6.jpg';
 
-const node_env = process.env.NODE_ENV || 'development';
-const asetPath = process.env.ASSET_URL;
-let image;
-if(node_env === 'development') {
-  image = asetPath;
-} else
-if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image';
-}
-
 class Inquiry extends React.Component {
   static getStores() {
     return getStores(['loginStore']);
@@ -73,7 +63,7 @@ const barHeightSmDown = 56;
 const styles = theme => ({
   root: {
     width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
-  , background: `linear-gradient(315deg, ${iqry_top}, ${iqry_btm}), url(${image}${iqryImg})`
+  , background: `linear-gradient(315deg, ${iqry_top}, ${iqry_btm}), url(${iqryImg})`
   , backgroundSize: 'cover'
   }
 , inquiryFrame: { position: 'relative', height: '100%' }

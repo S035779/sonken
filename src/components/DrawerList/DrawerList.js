@@ -14,9 +14,9 @@ import LoginProfile     from 'Components/LoginProfile/LoginProfile';
 import LoginPreference  from 'Components/LoginPreference/LoginPreference';
 import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
 
-const app_name = process.env.APP_NAME;
-const isAlpha = process.env.NODE_ENV !== 'production';
-const isBeta = process.env.NODE_ENV !== 'staging';
+const APP_NAME  = process.env.APP_NAME;
+const isAlpha   = process.env.NODE_ENV !== 'production';
+const isBeta    = process.env.NODE_ENV !== 'staging';
 
 class DrawerList extends React.Component {
   constructor(props) {
@@ -407,7 +407,7 @@ class DrawerList extends React.Component {
     return <div>
       <ListItem button onClick={this.handleClickButton.bind(this, 'title')}>
         <ListItemIcon><Avatar className={classes.avatar}><BlurOn /></Avatar></ListItemIcon>
-        <ListItemText primary={app_name} classes={textClass}/>
+        <ListItemText primary={APP_NAME} classes={textClass}/>
       </ListItem>
     </div>;
   }

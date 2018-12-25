@@ -89,7 +89,7 @@ RUN buildDeps='git' \
 ARG DOTENV
 ARG DOTENV_WEBPACK
 RUN echo "$DOTENV" > /app/sonken/.env \
-  &&  echo "$DOTENV_WEBPACK" > /app/sonken/.env.webpack
+  && echo "$DOTENV_WEBPACK" > /app/sonken/.env.webpack
 
 RUN buildDeps='python build-essential' \
   && apt-get update && apt-get install -y $buildDeps \

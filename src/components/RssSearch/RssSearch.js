@@ -16,9 +16,12 @@ import RssDownloadDialog  from 'Components/RssDownloadDialog/RssDownloadDialog';
 class RssSearch extends React.Component {
   constructor(props) {
     super(props);
+    const { number, perPage } = props.notePage;
     this.state = {
       url:          ''
-    , perPage:      props.noteNumber
+    , perPage:      perPage
+    , number:       number
+    , maxNumber:    props.noteNumber
     , isSuccess:    false
     , isNotValid:   false
     , isAddNote:    false
@@ -30,6 +33,9 @@ class RssSearch extends React.Component {
 
   componentDidMount() {
     this.spn = Spinner.of('app');
+    const { user, noteNumber, notePage } = this.props;
+    const { number, perPage } = notePage;
+    NoteAction.pagenation(user, { maxNumber: noteNumber, number, perPage });
   }
 
   componentWillUnmount() {
@@ -38,8 +44,17 @@ class RssSearch extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     //std.logInfo(RssSearch.displayName, 'Props', nextProps);
-    const { notePage } = nextProps;
-    this.setState({ perPage: notePage.perPage });
+    const nextMaxNumber = nextProps.noteNumber;
+    const prevMaxNumber = this.state.maxNumber;
+    const nextPage = nextProps.notePage.number;
+    const prevPage = this.state.number;
+    const nextPerPage = nextProps.notePage.perPage;
+    const prevPerPage = this.state.perPage;
+    if((nextMaxNumber !== 0) && (prevPage !== nextPage || prevPerPage !== nextPerPage || prevMaxNumber !== nextMaxNumber)) {
+      std.logInfo(RssSearch.displayName, 'maxNumber', nextMaxNumber);
+      this.setState({ maxNumber: nextMaxNumber, number: nextPage, perPage: nextPerPage }
+        , () => NoteAction.pagenation(this.props.user, { maxNumber: nextMaxNumber, number: nextPage, perPage: nextPerPage }));
+    }
   }
 
   handleDetailSubmit(title, categoryIds) {
@@ -78,14 +93,14 @@ class RssSearch extends React.Component {
   }
 
   handleChangeSelect(name, event) {
-    const { user, category, noteNumber } = this.props;
+    const { user, category, noteNumber, filter } = this.props;
+    const number = 1;
     const perPage = event.target.value;
     const maxNumber = Math.ceil(noteNumber / perPage);
-    const number = 1;
     this.spn.start();
-    std.logInfo(RssSearch.displayName, 'handleChangeSelect', perPage);
+    std.logInfo(RssSearch.displayName, 'handleChangeSelect', this.props);
     NoteAction.pagenation(user, { maxNumber, number, perPage })
-      .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage))
+      .then(() => NoteAction.fetchNotes(user, category, (number - 1) * perPage, perPage, filter))
       .then(() => this.setState({ perPage }))
       .then(() => this.spn.stop())
       .catch(err => {
@@ -241,6 +256,7 @@ RssSearch.propTypes = {
 , changed: PropTypes.bool
 , profile: PropTypes.object.isRequired
 , preference: PropTypes.object.isRequired
+, filter: PropTypes.object.isRequired
 };
 
 const titleHeight = 62;

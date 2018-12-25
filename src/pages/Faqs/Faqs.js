@@ -14,16 +14,6 @@ import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
 import LoginHeader              from 'Components/LoginHeader/LoginHeader';
 import faqsImg                  from 'Assets/image/bg7.jpg';
 
-const node_env = process.env.NODE_ENV || 'development';
-const asetPath = process.env.ASSET_URL;
-let image;
-if(node_env === 'development') {
-  image = asetPath;
-} else 
-if(node_env === 'production' || node_env === 'staging') {
-  image = asetPath + '/image';
-}
-
 class Faqs extends React.Component {
   static getStores() {
     return getStores(['postedFaqsStore']);
@@ -92,7 +82,7 @@ const barHeightSmDown = 56;
 const styles = theme => ({
   root: {
     width: '100vw', zIndex: 1, overflow: 'hidden', height: '100vh'
-  , background: `linear-gradient(180deg, ${faqs_top}, ${faqs_btm}), url(${image}${faqsImg})`
+  , background: `linear-gradient(180deg, ${faqs_top}, ${faqs_btm}), url(${faqsImg})`
   , backgroundSize: 'cover'
   }
 , faqsFrame:  { position: 'relative', height: '100%' }

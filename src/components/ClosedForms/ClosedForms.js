@@ -4,7 +4,6 @@ import * as R                 from 'ramda';
 import NoteAction             from 'Actions/NoteAction';
 import std                    from 'Utilities/stdutils';
 import Spinner                from 'Utilities/Spinner';
-import echo                   from 'Utilities/echo';
 
 import { withStyles }         from '@material-ui/core/styles';
 import { Button, Checkbox, Typography, TextField, Select, InputLabel, FormControl, MenuItem, CircularProgress }
@@ -45,12 +44,10 @@ class ClosedForms extends React.Component {
 
   componentDidMount() {
     this.spn = Spinner.of('app');
-    echo.init(this.formsRef);
   }
 
   componentWillUnmount() {
     this.spn.stop();
-    echo.detach();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -133,7 +130,7 @@ class ClosedForms extends React.Component {
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
-        .then(() => this.setState({ isRequest: false }))
+        .then(num => this.setState({ isRequest: false, page: num }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(ClosedForms.displayName, err.name, err.message);
@@ -262,9 +259,10 @@ class ClosedForms extends React.Component {
     const skip = (page - 1) * limit;
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
-    this.setState({ isRequest: true, page });
+    this.setState({ isRequest: true });
     return NoteAction.fetch(user, category, id, skip, limit
-      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold });
+      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold })
+      .then(() => page);
   }
 
   getColor(category) {
@@ -395,10 +393,7 @@ ClosedForms.propTypes = {
 const barHeightSmUp       = 64;
 const barHeightSmDown     = 56;
 const searchHeight        = 62;
-const normalHeight        = 62 * 1;
 const filterHeight        = 62 * 4;
-const normalHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${normalHeight}px - ${searchHeight}px)`;
-const normalHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${normalHeight}px - ${searchHeight}px)`;
 const filterHeightSmDown  = `calc(100vh - ${barHeightSmDown}px  - ${filterHeight}px - ${searchHeight}px)`;
 const filterHeightSmUp    = `calc(100vh - ${barHeightSmUp}px    - ${filterHeight}px - ${searchHeight}px)`;
 const columnHeight        = 62;
@@ -407,28 +402,19 @@ const checkboxWidth       = 38;
 const datetimeWidth       = 200;
 const minWidth            = 125;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
-, normalList:   { width: '100%', height: normalHeightSmDown 
-                , [theme.breakpoints.up('sm')]: { height: normalHeightSmUp }}
-, filterList:   { width: '100%', height: filterHeightSmDown 
-                , [theme.breakpoints.up('sm')]: { height: filterHeightSmUp }}
-, header:       { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch', justifyContent: 'space-between'
-                , height: columnHeight, minHeight: columnHeight
-                , boxSizing: 'border-box', padding: '5px' }
+  forms:        { display: 'flex', flexDirection: 'column', overflow: 'auto' }
+, filterList:   { width: '100%', height: filterHeightSmDown, [theme.breakpoints.up('sm')]: { height: filterHeightSmUp }}
+, header:       { display: 'flex', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-between'
+                , height: columnHeight, minHeight: columnHeight, boxSizing: 'border-box', padding: '5px' }
 , title:        { flex: 2, margin: theme.spacing.unit * 1.75 }
 , datetimes:    { display: 'flex', flexDirection: 'row' }
-, column:       { minWidth: contentWidth
-                , margin: theme.spacing.unit * 1.75 }
-, edit:         { display: 'flex', flexDirection: 'row'
-                , alignItems: 'stretch'
-                , height: columnHeight, minHeight: columnHeight
+, column:       { minWidth: contentWidth, margin: theme.spacing.unit * 1.75 }
+, edit:         { display: 'flex', flexDirection: 'row', alignItems: 'stretch', height: columnHeight, minHeight: columnHeight
                 , boxSizing: 'border-box', padding: '5px' }
 , checkbox:     { flex: 0, minWidth: checkboxWidth }
 , inputSelect:  { margin: theme.spacing.unit / 3 + 1, minWidth }
 , buttons:      { flex: 0, display: 'flex', flexDirection: 'row' }
-, button:       { flex: 1, margin: theme.spacing.unit
-                , wordBreak: 'keep-all' }
+, button:       { flex: 1, margin: theme.spacing.unit, wordBreak: 'keep-all' }
 , text:         { width: datetimeWidth, marginRight: theme.spacing.unit }
 , wrapper:      { position: 'relative' }
 , btnProgress:  { position: 'absolute', top: '50%', left: '50%', marginTop: -11, marginLeft: -11 }

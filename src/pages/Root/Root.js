@@ -1,8 +1,8 @@
 import React              from 'react';
 import { BrowserRouter }  from 'react-router-dom';
 import { renderRoutes }   from 'react-router-config';
+import { hot }            from 'react-hot-loader/root';
 import getRoutes          from 'Routes';
-import 'typeface-roboto';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -14,12 +14,10 @@ const theme = createMuiTheme({
 , typography: { useNextVariants: true }
 });
 
-export default class Root extends React.Component {
+class Root extends React.Component {
   componentDidMount() {
-    const jssStyles = document.getElementById('jss-server-side');
-    if (jssStyles && jssStyles.parentNode) {
-      jssStyles.parentNode.removeChild(jssStyles);
-    }
+    const jssEl = document.getElementById('jss-server-side');
+    if (jssEl && jssEl.parentNode) jssEl.parentNode.removeChild(jssEl);
   }
 
   render() {
@@ -29,3 +27,4 @@ export default class Root extends React.Component {
     </MuiThemeProvider>;
   }
 }
+export default hot(Root);

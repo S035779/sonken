@@ -13,7 +13,7 @@ const development = {
   , historyApiFallback: true
   , watchContentBase:   true
   , disableHostCheck:   true
-  , stats: { colors: true}
+  , stats: { colors: true }
   , proxy: { '*': 'http://localhost:8081' }
   }
 };

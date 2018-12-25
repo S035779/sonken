@@ -1,3 +1,4 @@
+const Dotenv = require('dotenv-webpack');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const path = require('path');
@@ -5,6 +6,8 @@ const nodeExternals = require('webpack-node-externals');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const common = require('./webpack.common.js');
 
+const devMode = process.env.NODE_ENV === 'development';
+console.log('devMode(local platform): ', devMode);
 const node = {
   target: "node"
 , externals: [ nodeExternals() ]
@@ -23,14 +26,24 @@ const node = {
   , wks: ['./wks-server.js']
   }
 , output: {
-    filename: '[name].node.js'
-  , path: path.resolve(__dirname, 'dist')
-  , publicPath: '/'
+    path: path.resolve(__dirname, 'dist')
+  , publicPath: devMode ? '/' : '/assets'
+  , filename: '[name].node.js'
   }
 , optimization: { nodeEnv: false }
 , plugins: [
-    new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('local') })
-  , new ManifestPlugin({ fileName: 'manifest.node.json' })
+    new webpack.DefinePlugin({
+      'process.env.PLATFORM': JSON.stringify('local')
+    })
+  , new ManifestPlugin({
+      fileName: 'manifest.node.json'
+    })
+  , new Dotenv({ 
+      path: './.env.webpack' 
+    , safe: false
+    , systemvars: false
+    , silent: false
+    })
   ]
 , node: { __dirname: true, __filename: true }
 , devtool: 'inline-source-map'

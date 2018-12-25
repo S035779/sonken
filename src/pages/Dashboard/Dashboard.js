@@ -1,3 +1,4 @@
+import * as R                   from 'ramda';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -98,9 +99,25 @@ class Dashboard extends React.Component {
         return '取引チェック';
     }
   }
+  
+  setNoteNumber(notes) {
+    const _note = R.head(notes);
+    return _note && _note.note_attributes && _note.note_attributes.note  ? _note.note_attributes.note.total  : 0;
+  }
+
+  setItemsNumber(notes) {
+    const _note = R.head(notes);
+    return _note && _note.item_attributes && _note.item_attributes.items ? _note.item_attributes.items.total : 0;
+  }
+
+  setNote(notes, id) {
+    const isId = obj => obj._id === id;
+    const setNote = R.find(isId);
+    return setNote(notes);
+  }
 
   render() {
-    //std.logInfo(Dashboard.displayName, 'State', this.state);
+    //std.logInfo(Dashboard.displayName, 'State', this.state.notes);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;
@@ -108,20 +125,20 @@ class Dashboard extends React.Component {
     const title = this.getTitleName(category);
     const categoryId = location.state && location.state.categoryId ? location.state.categoryId : 'all';
     const _notes = this.filterNotes(notes, category, categoryId);
-    const _note = _notes.find(obj => obj._id === _id);
-    const noteNumber  = _note && _note.note_attributes && _note.note_attributes.note  ? _note.note_attributes.note.total  : 0; 
-    const itemsNumber = _note && _note.item_attributes && _note.item_attributes.items ? _note.item_attributes.items.total : 0;
+    const noteNumber  = this.setNoteNumber(_notes); 
+    const itemsNumber = this.setItemsNumber(_notes);
+    const _note = this.setNote(_notes, _id);
     const _images = images === '' ? [] : images;
     return isAuthenticated
       ? ( <div className={classes.root}>
           <RssSearch user={user} title={title} category={category} categorys={categorys} itemsNumber={itemsNumber} file={file}
-            notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} />
+            notePage={page} noteNumber={noteNumber} profile={profile} preference={preference} filter={filter} />
           <div className={classes.body}>
             <div className={classes.noteList}>
               <RssButtons user={user} category={category} notes={_notes} note={_note} file={file} images={_images} 
                 selectedNoteId={ids} noteNumber={noteNumber} itemsNumber={itemsNumber} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
-                notePage={page}/>
+                category={category} notePage={page} itemFilter={filter} />
             </div>
             <div className={classes.noteEdit}>
               { route.routes 

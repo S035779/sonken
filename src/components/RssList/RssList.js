@@ -1,8 +1,10 @@
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
+import * as R         from 'ramda';
 import NoteAction     from 'Actions/NoteAction';
 import std            from 'Utilities/stdutils';
+import Spinner        from 'Utilities/Spinner';
 
 import { withStyles } from '@material-ui/core/styles';
 import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction }
@@ -14,18 +16,80 @@ class RssList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      opened:     []
-    , checked:    props.selectedNoteId
-    , notes:      props.notes
-    , isSuccess:  false
+      opened: []
+    , checked: props.selectedNoteId
+    , notes: props.notes
+    , category: props.category
+    //, page: 1
+    , prevPage: 1
+    , isSuccess: false
     , isNotValid: false
+    , isRequest: false
     };
   }
 
+  componentDidMount() {
+    this.spn = Spinner.of('app');
+  }
+
+  componentWillUnmount() {
+    this.spn.stop();
+  }
+
   componentWillReceiveProps(nextProps) {
+    const { user } = this.props;
+    const { maxNumber, number, perPage } = nextProps.notePage;
     const checked = nextProps.selectedNoteId;
-    const notes = nextProps.notes;
-    this.setState({ checked, notes });
+    const nextNotes = nextProps.notes;
+    const prevNotes = this.state.notes;
+    const nextPage = number;
+    const prevPage = this.state.prevPage;
+    const nextCategory = nextProps.category;
+    const prevCategory = this.state.category;
+    if(nextNotes.length !== 0) {
+      if(prevCategory !== nextCategory) {
+        std.logInfo(RssList.displayName, 'Init', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.formsRef.scrollTop = 0;
+        this.setState({ checked, notes: nextNotes, prevPage: 1, category: nextCategory }
+          , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
+      } else if(prevPage !== nextPage) {
+        std.logInfo(RssList.displayName, 'Update', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        const setNotes = R.concat(prevNotes);
+        this.setState({ checked, notes: setNotes(nextNotes), prevPage: nextPage });
+      } else if(prevNotes.length === 0) {
+        std.logInfo(RssList.displayName, 'Ready', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.formsRef.scrollTop = 0;
+        this.setState({ checked, notes: nextNotes, prevPage: 1, category: nextCategory }
+          , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
+      }
+    } else if(nextNotes.length === 0) {
+      if(prevCategory !== nextCategory) {
+        std.logInfo(RssList.displayName, 'Next', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.formsRef.scrollTop = 0;
+        this.setState({ checked, notes: nextNotes, prevPage: 1, category: nextCategory }
+          , () => this.fetch(1).then(() => this.setState({ isRequest: false })));
+      }
+    }
+  }
+
+  handlePagination() {
+    const { isRequest } = this.state;
+    const { notePage } = this.props;
+    const page = notePage.number;
+    const scrollTop         = this.formsRef.scrollTop;
+    const scrollHeight      = this.formsRef.scrollHeight;
+    const clientHeight      = this.formsRef.clientHeight;
+    const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+    if(scrolledToBottom && !isRequest) {
+      this.spn.start();
+      this.fetch(page + 1)
+        .then(() => this.setState({ isRequest: false }))
+        .then(() => this.spn.stop())
+        .catch(err => {
+          std.logError(RssList.displayName, err.name, err.message);
+          this.spn.stop();
+        });
+    }
   }
 
   handleChangeDialog(id) {
@@ -54,7 +118,7 @@ class RssList extends React.Component {
     const { user } = this.props;
     const { notes } = this.state;
     const curNote = notes.find(obj => obj._id === id);
-    const newNote = Object.assign({}, curNote, { title, categoryIds });
+    const newNote = R.merge(curNote, { title, categoryIds });
     NoteAction.update(user, category, id, newNote)
       .then(() => this.setState({ isSuccess: true }))
       .catch(err => {
@@ -77,7 +141,18 @@ class RssList extends React.Component {
     this.setState({ [name]: false });
   }
 
-  renderItem(note) {
+  fetch(number) {
+    //std.logInfo(RssList.displayName, 'Props', this.props);
+    const { user, category, notePage, itemFilter } = this.props;
+    const { maxNumber, perPage } = notePage;
+    const skip = (number - 1) * perPage;
+    const limit = perPage;
+    std.logInfo(RssList.displayName, 'fetch', { maxNumber, number, perPage, skip, limit });
+    this.setState({ isRequest: true }, () => NoteAction.pagenation(user, { maxNumber, number, perPage }));
+    return NoteAction.fetchNotes(user, category, skip, limit, itemFilter);
+  }
+
+  renderItem(index, note) {
     const { classes, user, categorys, categoryId, title } = this.props;
     const { checked } = this.state;
     const textClass = { primary: classes.primary, secondary: classes.secondary };
@@ -92,7 +167,7 @@ class RssList extends React.Component {
       .sort((a, b) => parseInt(a.subcategoryId, 16) < parseInt(b.subcategoryId, 16)
         ? 1 : parseInt(a.subcategoryId, 16) > parseInt(b.subcategoryId, 16) ? -1  : 0);
     const categoryList = category => categorys ? _categorys(category) : null;
-    return <div key={note._id} className={classes.noteItem}>
+    return <div key={index} className={classes.noteItem}>
       <Checkbox className={classes.checkbox} onClick={this.handleChangeCheckbox.bind(this, note._id)}
         checked={checked.indexOf(note._id) !== -1} tabIndex={-1} disableRipple />
       <Paper className={classes.paper}>
@@ -115,23 +190,17 @@ class RssList extends React.Component {
   render() {
     const { classes } = this.props;
     const { isSuccess, isNotValid, notes } = this.state;
-    //const compareId = (a, b) => {
-    //  if(a._id < b._id) return 1;
-    //  if(a._id > b._id) return -1;
-    //  return 0;
-    //};
-    const renderItems = notes
-      //.sort(compareId)
-      .map(note => this.renderItem(note));
-    return <List className={classes.noteList}>
-      {renderItems}
-      <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
-        要求を受け付けました。
-      </RssDialog>
-      <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
-        内容に不備があります。もう一度確認してください。
-      </RssDialog>
-    </List>;
+    const mapIndexed = R.addIndex(R.map);
+    const renderItems = mapIndexed((note, index) => this.renderItem(index, note), notes);
+    return <div ref={node => this.formsRef = node} onScroll={this.handlePagination.bind(this)} className={classes.forms}>
+        <List className={classes.noteList}>{renderItems}</List>
+        <RssDialog open={isSuccess} title={'送信完了'} onClose={this.handleCloseDialog.bind(this, 'isSuccess')}>
+          要求を受け付けました。
+        </RssDialog>
+        <RssDialog open={isNotValid} title={'送信エラー'} onClose={this.handleCloseDialog.bind(this, 'isNotValid')}>
+          内容に不備があります。もう一度確認してください。
+        </RssDialog>
+      </div>;
   }
 }
 RssList.displayName = 'RssList';
@@ -144,10 +213,13 @@ RssList.propTypes = {
 , categorys: PropTypes.array.isRequired
 , categoryId: PropTypes.string.isRequired
 , title: PropTypes.string.isRequired
+, category: PropTypes.string.isRequired
+, notePage: PropTypes.object.isRequired
+, itemFilter: PropTypes.object.isRequired
 };
 
-const barHeightSmUp     = 64;//112;
-const barHeightSmDown   = 56;//104;
+const barHeightSmUp     = 64;
+const barHeightSmDown   = 56;
 const titleHeight       = 62;
 const searchHeight      = 62;
 const itemHeight        = 64;
@@ -155,26 +227,17 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${titleHeight}px 
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${titleHeight}px - ${searchHeight}px)`;
 const noticeWidth       = 72;
 const styles = theme => ({
-  noteList:     { width: '100%', overflow: 'scroll'
-                , height: listHeightSmDown
-                , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
-  , noteItem:   { display: 'flex', flexDirection: 'row'
-                , alignItems: 'center' }
-  , listItem:   { height: itemHeight, padding: theme.spacing.unit /2
-                , '&:hover':  { backgroundColor: theme.palette.primary.main
-                  , '& $checkbox': { color: theme.palette.common.white }}}
-  , checkbox:   {}
-  , button:     { wordBreak: 'keep-all'
-                , margin: '8px 0'
-                , minWidth: 0
-                , '&:hover':  { color: theme.palette.common.white }}
-  , paper:      { width: '100%', margin: theme.spacing.unit /8
-                , '&:hover':  { backgroundColor: theme.palette.primary.main
-                  , '& $primary, $secondary': {
-                    color: theme.palette.common.white }}}   
-  , primary:    {}
-  , secondary:  {}
-  , notice:     { flex:1, padding: theme.spacing.unit /2
-                , minWidth: noticeWidth }
+  forms:      { display: 'flex', flexDirection: 'column', overflow: 'auto' }
+, noteList:   { width: '100%', height: listHeightSmDown, [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
+, noteItem:   { display: 'flex', flexDirection: 'row', alignItems: 'center' }
+, listItem:   { height: itemHeight, padding: theme.spacing.unit /2, '&:hover':  { backgroundColor: theme.palette.primary.main
+              , '& $checkbox': { color: theme.palette.common.white }}}
+, checkbox:   {}
+, button:     { wordBreak: 'keep-all', margin: '8px 0', minWidth: 0, '&:hover':  { color: theme.palette.common.white }}
+, paper:      { width: '100%', margin: theme.spacing.unit /8, '&:hover':  { backgroundColor: theme.palette.primary.main
+              , '& $primary, $secondary': { color: theme.palette.common.white }}}   
+, primary:    {}
+, secondary:  {}
+, notice:     { flex:1, padding: theme.spacing.unit /2, minWidth: noticeWidth }
 });
 export default withStyles(styles)(RssList);

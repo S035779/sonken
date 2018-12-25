@@ -44,7 +44,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 app.use(log.connect());
-app.use(favicon(path.join(__dirname, 'dist', 'favicon.ico')));
+app.use(favicon(path.resolve('dist', 'favicon.ico')));
 app.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })

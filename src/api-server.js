@@ -21,6 +21,7 @@ if(config.error) throw new Error(config.error);
 const env           = process.env.NODE_ENV || 'development';
 const http_port     = process.env.API_PORT || 8082;
 const http_host     = process.env.API_HOST || '127.0.0.1';
+const http_path     = process.env.API_PATH || '/api';
 const mdb_url       = process.env.MDB_URL  || 'mongodb://localhost:27017';
 process.env.NODE_PENDING_DEPRECATION = 0;
 
@@ -60,7 +61,6 @@ app.use(session({
 , saveUninitialized: true
 }));
 app.use(cookieParser());
-
 app.set('etag', false);
 app.use((req, res, next) => {
   res.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -223,11 +223,9 @@ router.route('/category')
 .post(feed.updateCategory())
 .delete(feed.deleteCategory());
 
-app.use('/api', router);
+app.use(http_path, router);
 const server = http.createServer(app);
-server.listen(http_port, http_host, () => {
-  log.info(displayName, `listening on ${http_host}:${http_port}`);
-});
+server.listen(http_port, http_host, () => log.info(displayName, `listening on ${http_host}:${http_port}`));
 
 const rejections = new Map();
 const reject = (err, promise) => {

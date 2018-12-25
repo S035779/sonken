@@ -181,7 +181,8 @@ class RssItemList extends React.Component {
     //std.logInfo(RssItemList.displayName, 'State', this.state);
     //std.logInfo(RssItemList.displayName, 'Props', this.props);
     const { items } = this.props;
-    const renderItems = items.map((item, index) => this.renderItem(index, item));
+    const mapIndexed = R.addIndex(R.map);
+    const renderItems = mapIndexed((item, index) => this.renderItem(index, item), items);
     return <List>{renderItems}</List>;
   }
 }

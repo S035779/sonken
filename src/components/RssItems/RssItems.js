@@ -93,7 +93,7 @@ class RssItems extends React.Component {
     if(scrolledToBottom && !isRequest) {
       this.spn.start();
       this.fetch(page + 1)
-        .then(() => this.setState({ isRequest: false }))
+        .then(num => this.setState({ isRequest: false, page: num }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssItems.displayName, err.name, err.message);
@@ -102,36 +102,6 @@ class RssItems extends React.Component {
     }
   }
 
-  //handleDownload() {
-  //  const { user, note } = this.props;
-  //  //std.logInfo(RssItems.displayName, 'handleDownload', user);
-  //  this.spn.start();
-  //  NoteAction.downloadItems(user, note._id)
-  //    .then(() => this.setState({ isSuccess: true }))
-  //    .then(() => this.downloadFile(this.props.file))
-  //    .then(() => this.spn.stop())
-  //    .catch(err => {
-  //      std.logError(RssItems.displayName, err.name, err.message);
-  //      this.setState({ isNotValid: true });
-  //      this.spn.stop();
-  //    })
-  //  ;
-  //}
-
-  //downloadFile(blob) {
-  //  //std.logInfo(RssItems.displayName, 'downloadFile', blob);
-  //  const a = document.createElement('a');
-  //  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-  //  const fileReader = new FileReader();
-  //  fileReader.onload = function() {
-  //    a.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-  //    a.target = '_blank';
-  //    a.download = 'download.csv';
-  //    a.click();
-  //  };
-  //  fileReader.readAsArrayBuffer(blob);
-  //}
-  
   handleOpenDialog(name) {
     this.setState({ [name]: true });
   }
@@ -146,8 +116,9 @@ class RssItems extends React.Component {
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(RssItems.displayName, 'fetch', { id, page });
-    this.setState({ isRequest: true, page });
-    return NoteAction.fetch(user, category, id, skip, limit);
+    this.setState({ isRequest: true });
+    return NoteAction.fetch(user, category, id, skip, limit)
+      .then(() => page);
   }
 
   getColor(category) {
@@ -219,7 +190,7 @@ const listHeightSmDown  = `calc(100vh - ${barHeightSmDown}px - ${filterHeight}px
 const listHeightSmUp    = `calc(100vh - ${barHeightSmUp}px - ${filterHeight}px - ${searchHeight}px)`;
 const columnHeight = 62;
 const styles = theme => ({
-  forms:        { display: 'flex', flexDirection: 'column', overflow: 'scroll' }
+  forms:        { display: 'flex', flexDirection: 'column', overflow: 'auto' }
 , noteList:     { width: '100%'
                 , height: listHeightSmDown
                 , [theme.breakpoints.up('sm')]: { height: listHeightSmUp }}
