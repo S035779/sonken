@@ -36,12 +36,12 @@ class Dashboard extends React.Component {
     const { match } = this.props;
     const { isAuthenticated, user, page } = this.state;
     if(isAuthenticated) {
-      const skip = (page.number - 1) * page.perPage;
-      const limit = page.perPage;
+      //const skip = (page.number - 1) * page.perPage;
+      //const limit = page.perPage;
       const category = match.params.category || 'marchant';
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'fetch', category);
-      NoteAction.fetchNotes(user, category, skip, limit)
+      NoteAction.fetchNotes(user, category, 0, page.perPage)
         .then(() => this.spn.stop());
     }
   }
@@ -56,11 +56,11 @@ class Dashboard extends React.Component {
     const nextCategory = nextProps.match.params.category;
     const prevCategory = this.props.match.params.category;
     if(user && (nextCategory !== prevCategory)) {
-      const skip = (page.number - 1) * page.perPage;
-      const limit = page.perPage;
+      //const skip = (page.number - 1) * page.perPage;
+      //const limit = page.perPage;
       this.spn.start();
       std.logInfo(Dashboard.displayName, 'update', nextCategory);
-      NoteAction.fetchNotes(user, nextCategory, skip, limit, filter)
+      NoteAction.fetchNotes(user, nextCategory, 0, page.perPage, filter)
         .then(() => this.spn.stop());
     }
   }
@@ -138,7 +138,7 @@ class Dashboard extends React.Component {
               <RssButtons user={user} category={category} notes={_notes} note={_note} file={file} images={_images} 
                 selectedNoteId={ids} noteNumber={noteNumber} itemsNumber={itemsNumber} itemFilter={filter} />
               <RssList user={user} title={title} notes={_notes} categorys={categorys} categoryId={categoryId} selectedNoteId={ids}
-                category={category} notePage={page} itemFilter={filter} />
+                category={category} notePage={page} noteNumber={noteNumber} itemFilter={filter} />
             </div>
             <div className={classes.noteEdit}>
               { route.routes 

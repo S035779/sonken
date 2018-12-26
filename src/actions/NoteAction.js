@@ -32,6 +32,12 @@ export default {
   //      dispatch({ type: 'category/fetch/my', categorys });
   //    });
   //},
+  appendNotes(user, category, skip, limit, filter) {
+    return NoteApiClient.fetchNotes(user, category, skip, limit, filter).then(({ notes, categorys }) => {
+        dispatch({ type: 'note/append/my', notes });
+        dispatch({ type: 'category/fetch/my', categorys });
+      });
+  },
   fetchNotes(user, category, skip, limit, filter) {
     return NoteApiClient.fetchNotes(user, category, skip, limit, filter).then(({ notes, categorys }) => {
         dispatch({ type: 'note/fetch/my', notes });

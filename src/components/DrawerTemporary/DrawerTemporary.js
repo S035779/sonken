@@ -6,7 +6,7 @@ import { withStyles }   from '@material-ui/core/styles';
 import { Hidden, Drawer }
                         from '@material-ui/core';
 import DrawerList       from 'Components/DrawerList/DrawerList';
-import rgstImg          from 'Assets/image/sidebar-5.jpg';
+import sideImg          from 'Assets/image/sidebar-5.jpg';
 
 class DrawerTemporary extends React.Component {
   handleToggle() {
@@ -40,11 +40,11 @@ DrawerTemporary.propTypes = {
 
 const drawerWidthMdUp = 240;
 const drawerWidthMdDown = 250;
-const rgst_top = std.toRGBa('#FFA534', 0.8);
-const rgst_btm = std.toRGBa('#FF5221', 0.8);
+const side_top = std.toRGBa('#FFA534', 0.8);
+const side_btm = std.toRGBa('#FF5221', 0.8);
 const styles = theme => ({
   paper: {
-    background: `linear-gradient(to bottom, ${rgst_top}, ${rgst_btm}), url(${rgstImg})`, width: drawerWidthMdDown
+    background: `linear-gradient(to bottom, ${side_top}, ${side_btm}), url(${sideImg})`, width: drawerWidthMdDown
   , [theme.breakpoints.up('md')]: { position: 'relative', width: drawerWidthMdUp, height: '100%' }
   }
 });

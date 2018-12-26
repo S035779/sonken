@@ -21,7 +21,7 @@ class RssSearch extends React.Component {
       url:          ''
     , perPage:      perPage
     , number:       number
-    , maxNumber:    props.noteNumber
+    , maxNumber:    Math.ceil(props.noteNumber / perPage)
     , isSuccess:    false
     , isNotValid:   false
     , isAddNote:    false
@@ -35,7 +35,8 @@ class RssSearch extends React.Component {
     this.spn = Spinner.of('app');
     const { user, noteNumber, notePage } = this.props;
     const { number, perPage } = notePage;
-    NoteAction.pagenation(user, { maxNumber: noteNumber, number, perPage });
+    const maxNumber = Math.ceil(noteNumber / perPage);
+    NoteAction.pagenation(user, { maxNumber, number, perPage });
   }
 
   componentWillUnmount() {
@@ -44,12 +45,12 @@ class RssSearch extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     //std.logInfo(RssSearch.displayName, 'Props', nextProps);
-    const nextMaxNumber = nextProps.noteNumber;
+    const nextPerPage   = nextProps.notePage.perPage;
+    const nextMaxNumber = Math.ceil(nextProps.noteNumber / nextPerPage);
+    const nextPage      = nextProps.notePage.number;
+    const prevPerPage   = this.state.perPage;
     const prevMaxNumber = this.state.maxNumber;
-    const nextPage = nextProps.notePage.number;
-    const prevPage = this.state.number;
-    const nextPerPage = nextProps.notePage.perPage;
-    const prevPerPage = this.state.perPage;
+    const prevPage      = this.state.number;
     if((nextMaxNumber !== 0) && (prevPage !== nextPage || prevPerPage !== nextPerPage || prevMaxNumber !== nextMaxNumber)) {
       std.logInfo(RssSearch.displayName, 'maxNumber', nextMaxNumber);
       this.setState({ maxNumber: nextMaxNumber, number: nextPage, perPage: nextPerPage }
@@ -204,7 +205,6 @@ class RssSearch extends React.Component {
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={50}>50</MenuItem>
           <MenuItem value={300}>300</MenuItem>
-          <MenuItem value={1000}>1000</MenuItem>
         </Select>
       </FormControl>
       <FormControl className={classes.inputText}>

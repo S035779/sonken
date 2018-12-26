@@ -439,58 +439,28 @@ DrawerList.propTypes = {
 , preference: PropTypes.object.isRequired
 };
 
-const barHeightSmUp   = 64;//112;
-const barHeightSmDown = 56;//104;
+const barHeightSmUp   = 64;
+const barHeightSmDown = 56;
 const primary_color   = '#477AF7';
 const secondary_color = '#29CBEF';
 //const warning_color   = '#FEA634';
 //const success_color   = '#87CC16';
 const danger_color    = '#FA404B';
 const styles = theme => ({
-  header: {
-    height: barHeightSmDown
-  , [theme.breakpoints.up('sm')]: { height: barHeightSmUp }
-  }
-, icon: {
-    color: theme.palette.common.white
-  , marginRight: theme.spacing.unit *2
-  }
-, setting: {
-    color: theme.palette.common.white
-  }
-, avatar: {
-    color: theme.palette.common.white
-  , background: 'inherit'
-  , width: 24, height: 24, fontSize: 16
-  }
-, badge: {}
-, nonbadge: {
-    display: 'none'
-  }
-, badgePrimary: {
-    backgroundColor: primary_color
-  }
-, badgeSecondary: {
-    backgroundColor: secondary_color
-  }
-, badgeError: {
-    backgroundColor: danger_color
-  }
-, textPrimary: {
-    whiteSpace: 'nowrap'
-  , color: theme.palette.common.white
-  }
-, textSecondary: {
-    whiteSpace: 'nowrap'
-  , color: theme.palette.common.white
-  }
-, title:  {
-    whiteSpace: 'nowrap'
-  , color: theme.palette.common.white
-  , fontSize: 20
-  }
-, draggable:  { cursor: 'move' }
-, dragged:    { opacity: 0.4 }
-, dragOver:   { border: '1px dashed #FFF' }
+  header:         { height: barHeightSmDown, [theme.breakpoints.up('sm')]: { height: barHeightSmUp } }
+, icon:           { color: theme.palette.common.white, marginRight: theme.spacing.unit *2 }
+, setting:        { color: theme.palette.common.white }
+, avatar:         { color: theme.palette.common.white, background: 'inherit', width: 24, height: 24, fontSize: 16 }
+, badge:          {}
+, nonbadge:       { display: 'none' }
+, badgePrimary:   { backgroundColor: primary_color }
+, badgeSecondary: { backgroundColor: secondary_color }
+, badgeError:     { backgroundColor: danger_color }
+, textPrimary:    { whiteSpace: 'nowrap', color: theme.palette.common.white }
+, textSecondary:  { whiteSpace: 'nowrap', color: theme.palette.common.white }
+, title:          { whiteSpace: 'nowrap', color: theme.palette.common.white, fontSize: 20 }
+, draggable:      { cursor: 'move' }
+, dragged:        { opacity: 0.4 }
+, dragOver:       { border: '1px dashed #FFF' }
 });
 export default withStyles(styles)(withRouter(DrawerList));

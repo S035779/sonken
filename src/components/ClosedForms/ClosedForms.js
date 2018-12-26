@@ -115,9 +115,9 @@ class ClosedForms extends React.Component {
         , prevAllAuction: true
         , loadingDownload: true, loadingImages: true
         });
-      } else if(nextNote._id === prevNote._id) {
-        std.logInfo(ClosedForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
-        this.setState({ note: prevNote });
+      //} else if(nextNote._id === prevNote._id) {
+      //  std.logInfo(ClosedForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
+      //  this.setState({ note: prevNote });
       }
     }
   }
@@ -130,7 +130,7 @@ class ClosedForms extends React.Component {
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     if(scrolledToBottom && !isRequest) {
       this.fetch(page + 1)
-        .then(num => this.setState({ isRequest: false, page: num }))
+        .then(() => this.setState({ isRequest: false }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(ClosedForms.displayName, err.name, err.message);
@@ -259,10 +259,9 @@ class ClosedForms extends React.Component {
     const skip = (page - 1) * limit;
     //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
-    this.setState({ isRequest: true });
+    this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, category, id, skip, limit
-      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold })
-      .then(() => page);
+      , { lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction, inAuction, aucStartTime, aucStopTime, sold });
   }
 
   getColor(category) {

@@ -21,11 +21,11 @@ const manifest_of_bundle_file = path.resolve(__dirname, '..', '..', 'dist', 'man
 
 class Html extends React.Component {
   setManifest(filepath) {
-    log.info(Html.displayName, 'Manifest file:', filepath);
+    log.info(Html.displayName, 'SSR manifest file:', filepath);
     try {
       return fs.readFileSync(filepath, 'utf8');
     } catch {
-      const err = { name: 'NotFound', message: 'Manifest file not found.' };
+      const err = { name: 'NotFound', message: 'SSR manifest file not found.' };
       log.error(Html.displayName, err.name, err.message);
       throw new Error(err);
     }

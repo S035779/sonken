@@ -82,9 +82,9 @@ class RssForms extends React.Component {
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: true
         });
-      } else if(nextNote._id === prevNote._id) {
-        std.logInfo(RssForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
-        this.setState({ note: prevNote });
+      //} else if(nextNote._id === prevNote._id) {
+      //  std.logInfo(RssForms.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
+      //  this.setState({ note: prevNote });
       }
     }
   }
@@ -98,7 +98,7 @@ class RssForms extends React.Component {
     if(scrolledToBottom && !isRequest) {
       this.spn.start();
       this.fetch(page + 1)
-        .then(num => this.setState({ isRequest: false, page: num }))
+        .then(() => this.setState({ isRequest: false }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssForms.displayName, err.name, err.message);
@@ -161,35 +161,6 @@ class RssForms extends React.Component {
     }
   }
 
-  //handleDownload() {
-  //  const { user, note } = this.props;
-  //  //std.logInfo(RssForms.displayName, 'handleDownload', user);
-  //  this.spn.start();
-  //  NoteAction.downloadItems(user, note._id)
-  //    .then(() => this.setState({ isSuccess: true }))
-  //    .then(() => this.downloadFile(this.props.file))
-  //    .then(() => this.spn.stop())
-  //    .catch(err => {
-  //      std.logError(RssForms.displayName, err.name, err.message);
-  //      this.setState({ isNotValid: true });
-  //      this.spn.stop();
-  //    });
-  //}
-
-  //downloadFile(blob) {
-  //  //std.logInfo(RssForms.dislpayName, 'downloadFile', blob);
-  //  const anchor = document.createElement('a');
-  //  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-  //  const fileReader = new FileReader();
-  //  fileReader.onload = function() {
-  //    anchor.href = URL.createObjectURL(new Blob([bom, this.result], { type: 'text/csv' }));
-  //    anchor.target = '_blank';
-  //    anchor.download = 'download.csv';
-  //    anchor.click();
-  //  }
-  //  fileReader.readAsArrayBuffer(blob);
-  //}
-
   handleOpenDialog(name) {
     this.setState({ [name]: true });
   }
@@ -204,9 +175,8 @@ class RssForms extends React.Component {
     const limit = 20;
     const skip = (page - 1) * limit;
     //std.logInfo(RssForms.displayName, 'fetch', { id, page });
-    this.setState({ isRequest: true });
-    return NoteAction.fetch(user, category, id, skip, limit)
-      .then(() => page);
+    this.setState({ isRequest: true, page });
+    return NoteAction.fetch(user, category, id, skip, limit);
   }
 
   isValidate() {

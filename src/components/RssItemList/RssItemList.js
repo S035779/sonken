@@ -10,6 +10,8 @@ import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryActio
 import { Star, StarBorder, Delete, FiberNew, Done } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
+const amz = 'https://www.amazon.co.jp/gp/product/';
+
 class RssItemList extends React.Component {
   constructor(props) {
     super(props);
@@ -112,35 +114,23 @@ class RssItemList extends React.Component {
     this.setState({ added: newAdded });
   }
 
-  renderStar() {
-    const { classes } = this.props;
-    return <Star className={classes.star} />;
-  }
-
-  renderUnStar() {
-    const { classes } = this.props;
-    return <StarBorder className={classes.star} />;
-  }
-
-  renderNewAdded() {
-    return <FiberNew color="error"/>
-  }
-
-  renderDone() {
-    return <Done color="action"/>
+  handleError(event, imgsrc) {
+    event.target.onerror = null;
+    event.target.src = imgsrc ? imgsrc : "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
   }
 
   renderItem(index, item) {
     //std.logInfo(RssItemList.displayName, 'Item', { index, item });
-    //const _blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-    const archive = item.attributes && item.attributes.images ? R.head(item.attributes.images) : null;
-    const image = archive && archive.signedlink ? archive.signedlink : item.description.DIV.A.IMG.attr.SRC;
     const { classes } = this.props;
     const { listed, starred, added, deleted } = this.state;
     const textClass = { primary: classes.primary, secondary: classes.secondary };
     const buttonColor = listed.indexOf(item.guid__) === -1 ? 'yellow' : 'green';
     const buttonText = listed.indexOf(item.guid__) === -1 ? '入札リスト 登録' : '入札リスト 登録済み';
     const title = `出品件名：${item.title}`;
+    const asin   = item.attributes && item.attributes.asins ? R.head(item.attributes.asins) : null;
+    const amzsrc = asin ? amz + asin : null;
+    const image  = item.attributes && item.attributes.images ?  R.head(item.attributes.images) : null;
+    const imgsrc = image && image.signedlink ? image.signedlink : null;
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
@@ -148,23 +138,27 @@ class RssItemList extends React.Component {
     + `出品数：${item.attributes ? item.attributes.sale : '-'}、`
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid__}、`
-    + `Seller：${item.seller}`;
-    const renderStar = starred.indexOf(item.guid__) === -1 ? this.renderUnStar() : this.renderStar();
-    const renderNewAdded = added.indexOf(item.guid__) === -1 ? this.renderNewAdded() : this.renderDone();
+    + `Seller：${item.seller}、`
+    + `ASIN: ${asin ? asin : '-'}`;
     if(deleted.indexOf(item.guid__) !== -1) return;
     return item.description
       ? ( <div key={index} className={classes.noteItem}>
         <Paper className={classes.paper}>
-          <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)}
-            className={classes.listItem}>
-            <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>{renderStar}</IconButton>
-            <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>{renderNewAdded}</IconButton>
+          <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)} className={classes.listItem}>
+            <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>
+              { starred.indexOf(item.guid__) === -1 ? <StarBorder className={classes.star} /> : <Star className={classes.star} /> }
+            </IconButton>
+            <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>
+              { added.indexOf(item.guid__) === -1 ? <FiberNew color="error"/> : <Done color="action"/> }
+            </IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-              <img src={image} alt={item.description.DIV.A.IMG.attr.ALT} className={classes.image} />
+                <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT}
+                  onError={this.handleError.bind(this, imgsrc)} className={classes.image} />
               </a>
             </div>
-            <ListItemText classes={textClass} className={classes.listItemText} primary={title} secondary={description}/>
+            <ListItemText classes={textClass} className={classes.listItemText} primary={title} 
+              secondary={amzsrc ? <a href={amzsrc}>{description}</a> : description} />
             <ListItemSecondaryAction>
               <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)} classes={classes.button}>
                 {buttonText}

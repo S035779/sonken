@@ -20,7 +20,6 @@ class RssList extends React.Component {
     , checked: props.selectedNoteId
     , notes: props.notes
     , category: props.category
-    //, page: 1
     , prevPage: 1
     , isSuccess: false
     , isNotValid: false
@@ -37,25 +36,25 @@ class RssList extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { user } = this.props;
-    const { maxNumber, number, perPage } = nextProps.notePage;
-    const checked = nextProps.selectedNoteId;
-    const nextNotes = nextProps.notes;
-    const prevNotes = this.state.notes;
-    const nextPage = number;
-    const prevPage = this.state.prevPage;
-    const nextCategory = nextProps.category;
-    const prevCategory = this.state.category;
+    const { user, noteNumber } = this.props;
+    const { number, perPage } = nextProps.notePage;
+    const checked       = nextProps.selectedNoteId;
+    const nextNotes     = nextProps.notes;
+    const nextPage      = number;
+    const nextCategory  = nextProps.category;
+    const prevNotes     = this.state.notes;
+    const prevPage      = this.state.prevPage;
+    const prevCategory  = this.state.category;
+    const maxNumber     = Math.ceil(noteNumber / perPage);
     if(nextNotes.length !== 0) {
       if(prevCategory !== nextCategory) {
         std.logInfo(RssList.displayName, 'Init', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.formsRef.scrollTop = 0;
         this.setState({ checked, notes: nextNotes, prevPage: 1, category: nextCategory }
           , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
-      } else if(prevPage !== nextPage) {
+      } else if(prevPage !== nextPage && (prevPage < maxNumber)) {
         std.logInfo(RssList.displayName, 'Update', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
-        const setNotes = R.concat(prevNotes);
-        this.setState({ checked, notes: setNotes(nextNotes), prevPage: nextPage });
+        this.setState({ checked, notes: nextNotes, prevPage: nextPage });
       } else if(prevNotes.length === 0) {
         std.logInfo(RssList.displayName, 'Ready', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.formsRef.scrollTop = 0;
@@ -63,26 +62,25 @@ class RssList extends React.Component {
           , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
       }
     } else if(nextNotes.length === 0) {
-      if(prevCategory !== nextCategory) {
-        std.logInfo(RssList.displayName, 'Next', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
-        this.formsRef.scrollTop = 0;
-        this.setState({ checked, notes: nextNotes, prevPage: 1, category: nextCategory }
-          , () => this.fetch(1).then(() => this.setState({ isRequest: false })));
+      if(prevPage !== nextPage) {
+        std.logInfo(RssList.displayName, 'Max', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.setState({ checked, prevPage: nextPage });
       }
     }
   }
 
   handlePagination() {
-    const { isRequest } = this.state;
-    const { notePage } = this.props;
-    const page = notePage.number;
+    const { isRequest, prevPage } = this.state;
+    const { notePage, noteNumber } = this.props;
+    const number            = notePage.number;
+    const maxNumber         = Math.ceil(noteNumber / notePage.perPage);
     const scrollTop         = this.formsRef.scrollTop;
     const scrollHeight      = this.formsRef.scrollHeight;
     const clientHeight      = this.formsRef.clientHeight;
     const scrolledToBottom  = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-    if(scrolledToBottom && !isRequest) {
+    if(scrolledToBottom && !isRequest && (prevPage < maxNumber)) {
       this.spn.start();
-      this.fetch(page + 1)
+      this.fetch(number + 1)
         .then(() => this.setState({ isRequest: false }))
         .then(() => this.spn.stop())
         .catch(err => {
@@ -143,13 +141,15 @@ class RssList extends React.Component {
 
   fetch(number) {
     //std.logInfo(RssList.displayName, 'Props', this.props);
-    const { user, category, notePage, itemFilter } = this.props;
-    const { maxNumber, perPage } = notePage;
+    const { user, category, notePage, noteNumber, itemFilter } = this.props;
+    const { perPage } = notePage;
     const skip = (number - 1) * perPage;
     const limit = perPage;
-    std.logInfo(RssList.displayName, 'fetch', { maxNumber, number, perPage, skip, limit });
-    this.setState({ isRequest: true }, () => NoteAction.pagenation(user, { maxNumber, number, perPage }));
-    return NoteAction.fetchNotes(user, category, skip, limit, itemFilter);
+    const maxNumber = Math.ceil(noteNumber / perPage);
+    std.logInfo(RssList.displayName, 'fetch', { noteNumber, number, perPage, skip, limit });
+    this.setState({ isRequest: true });
+    return NoteAction.appendNotes(user, category, skip, limit, itemFilter)
+      .then(() => NoteAction.pagenation(user, { maxNumber, number, perPage }));
   }
 
   renderItem(index, note) {
@@ -215,6 +215,7 @@ RssList.propTypes = {
 , title: PropTypes.string.isRequired
 , category: PropTypes.string.isRequired
 , notePage: PropTypes.object.isRequired
+, noteNumber: PropTypes.number.isRequired
 , itemFilter: PropTypes.object.isRequired
 };
 

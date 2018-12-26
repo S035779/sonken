@@ -5,16 +5,22 @@ WORKDIR=/app/sonken
 if [ ! -d $ASSET/js ]; then
     mkdir $ASSET/js
 fi
-cp $WORKDIR/dist/app.bundle.js      $ASSET/js/
-cp $WORKDIR/dist/icon.bundle.js     $ASSET/js/
-cp $WORKDIR/dist/view.bundle.js     $ASSET/js/
-cp $WORKDIR/dist/app.bundle.js.map  $ASSET/js/
-cp $WORKDIR/dist/icon.bundle.js.map $ASSET/js/
-cp $WORKDIR/dist/view.bundle.js.map $ASSET/js/
+cp $WORKDIR/dist/js/*.js      $ASSET/js/
 
-if [ ! -d $ASSET/image ]; then
-    mkdir $ASSET/image
+if [ ! -d $ASSET/css ]; then
+    mkdir $ASSET/css
 fi
-cp $WORKDIR/dist/favicon.ico        $ASSET/image/
-cp $WORKDIR/dist/*.jpg              $ASSET/image/
+cp $WORKDIR/dist/css/*.css    $ASSET/css/
 
+if [ ! -d $ASSET/images ]; then
+    mkdir $ASSET/images
+fi
+cp $WORKDIR/dist/images/*.jpg $ASSET/images/
+
+if [ ! -d $ASSET/fonts ]; then
+    mkdir $ASSET/fonts
+fi
+cp $WORKDIR/dist/fonts/*.eot  $ASSET/fonts/
+cp $WORKDIR/dist/fonts/*.svg  $ASSET/fonts/
+cp $WORKDIR/dist/fonts/*.ttf  $ASSET/fonts/
+cp $WORKDIR/dist/fonts/*.woff $ASSET/fonts/

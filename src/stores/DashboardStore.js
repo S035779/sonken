@@ -54,10 +54,6 @@ export default class DashboardStore extends ReduceStore {
     return hasCategorys(state.categorys);
   }
 
-  fetchNotes(state, action) {
-    return action.notes;
-  }
-
   fetchNote(state, action) {
     const setNote = note => action.id === note._id ? R.merge(note, action.note) : note;
     const setNotes = R.map(setNote);
@@ -189,7 +185,9 @@ export default class DashboardStore extends ReduceStore {
       case 'note/prefetch/my':
         return R.merge(state, { notes: action.notes });
       case 'note/fetch/my':
-        return R.merge(state, { notes: this.fetchNotes(state, action) });
+        return R.merge(state, { notes: action.notes });
+      case 'note/append/my':
+        return R.merge(state, { notes: R.concat(state.notes, action.notes) });
       case 'note/fetch': 
         return R.merge(state, { notes: this.fetchNote(state, action) });
       case 'note/create':

@@ -39,11 +39,11 @@ class RssItems extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const nextNote = nextProps.note;
-    const nextPage = this.state.page;
+    const nextNote            = nextProps.note;
     const nextLoadingDownload = nextProps.loadingDownload;
-    const prevNote = this.state.note;
-    const prevPage = this.state.prevPage;
+    const nextPage            = this.state.page;
+    const prevNote            = this.state.note;
+    const prevPage            = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
     if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
@@ -77,9 +77,9 @@ class RssItems extends React.Component {
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: true
         });
-      } else if(nextNote._id === prevNote._id) {
-        std.logInfo(RssItems.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
-        this.setState({ note: prevNote });
+      //} else if(nextNote._id === prevNote._id) {
+      //  std.logInfo(RssItems.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
+      //  this.setState({ note: prevNote });
       }
     }
   }
@@ -93,7 +93,7 @@ class RssItems extends React.Component {
     if(scrolledToBottom && !isRequest) {
       this.spn.start();
       this.fetch(page + 1)
-        .then(num => this.setState({ isRequest: false, page: num }))
+        .then(() => this.setState({ isRequest: false }))
         .then(() => this.spn.stop())
         .catch(err => {
           std.logError(RssItems.displayName, err.name, err.message);
@@ -117,8 +117,7 @@ class RssItems extends React.Component {
     const skip = (page - 1) * limit;
     //std.logInfo(RssItems.displayName, 'fetch', { id, page });
     this.setState({ isRequest: true });
-    return NoteAction.fetch(user, category, id, skip, limit)
-      .then(() => page);
+    return NoteAction.fetch(user, category, id, skip, limit);
   }
 
   getColor(category) {
