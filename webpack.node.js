@@ -27,7 +27,7 @@ const node = {
   }
 , output: {
     path: path.resolve(__dirname, 'dist')
-  , publicPath: devMode ? '/' : '/assets'
+  , publicPath: devMode ? '/' : '/assets/'
   , filename: '[name].node.js'
   }
 , optimization: { nodeEnv: false }
