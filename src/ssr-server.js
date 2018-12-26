@@ -15,6 +15,7 @@ const config = dotenv.config();
 if(config.error) throw new Error(config.error);
 
 const env       = process.env.NODE_ENV || 'development';
+const asset_path = env === 'development' ? '' : 'assets';
 const http_port = process.env.SSR_PORT || 8081;
 const http_host = process.env.SSR_HOST || '127.0.0.1';
 const mdb_url   = process.env.MDB_URL  || 'mongodb://localhost:27017';
@@ -44,7 +45,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 app.use(log.connect());
-app.use(favicon(path.resolve('dist', 'favicon.ico')));
+app.use(favicon(path.resolve('dist', asset_path, 'favicon.ico')));
 app.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })

@@ -2,7 +2,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   env: ['PROJECT_ROOT=feedparser']
   args: ['build','--tag=asia.gcr.io/$PROJECT_ID/feedparser/node_wks','--build-arg','DOTENV=${_DOTENV}','--build-arg','DOTENV_WEBPACK=${_DOTENV_WEBPACK}','.']
-timeout: '300s'
+timeout: '600s'
 substitutions:
     _DOTENV: _dotenv_file_required_
     _DOTENV_WEBPACK: _dotenv_webpack_file_required_
