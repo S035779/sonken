@@ -7,8 +7,8 @@ const production = {
 , devtool: 'source-map'
 , performance: {
     hints: "warning"
-  , maxAssetSize: 768000
-  , maxEntrypointSize: 1024000
+  , maxAssetSize: 7680000
+  , maxEntrypointSize: 10240000
   , assetFilter: function(assetFilename) { 
       return assetFilename.endsWith('.css') || assetFilename.endsWith('.js');
     }
