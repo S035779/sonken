@@ -9,7 +9,6 @@ import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import log              from 'Utilities/logutils';
-import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -31,10 +30,6 @@ if (env === 'development') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
 
-const manifest_of_node_file = path.resolve('dist', 'manifest.node.json');
-const initialAssets = app.manifest(manifest_of_node_file);
-const icon_path = initialAssets['favicon.ico'];
-
 const db            = mongoose.createConnection();
 const web           = express();
 const SessionStore  = connect(session);
@@ -49,7 +44,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
-web.use(favicon(path.resolve('dist', icon_path)));
+web.use(favicon(path.resolve('dist', 'favicon.ico')));
 web.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })

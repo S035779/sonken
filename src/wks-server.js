@@ -4,7 +4,6 @@ import path             from 'path';
 import os               from 'os';
 import child_process    from 'child_process';
 import log              from 'Utilities/logutils';
-import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -28,10 +27,7 @@ if(node_env === 'production') {
 
 const cpu_num = os.cpus().length;
 const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const manifest_of_node_file = path.resolve('dist', 'manifest.node.json');
-const initialAssets = app.manifest(manifest_of_node_file);
-const worker_path = initialAssets['wrk.js'];
-const job = path.resolve('dist', worker_path);
+const job = path.resolve('dist', 'wrk.node.js');
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
 log.info(displayName, 'worker:', job);
