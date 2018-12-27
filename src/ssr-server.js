@@ -9,6 +9,7 @@ import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import log              from 'Utilities/logutils';
+import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -30,8 +31,12 @@ if (env === 'development') {
   log.config('file', 'json', 'ssr-server', 'INFO');
 }
 
+const manifest_of_node_file = path.resolve('dist', 'manifest.node.json');
+const initialAssets = app.manifest(manifest_of_node_file);
+const icon_path = '.' + initialAssets['favicon.ico'];
+
 const db            = mongoose.createConnection();
-const app           = express();
+const web           = express();
 const SessionStore  = connect(session);
 db.on('open',  () => log.info( '[MDB]', 'session #1 connected.'));
 db.on('close', () => log.info( '[MDB]', 'session #1 disconnected.'));
@@ -43,18 +48,18 @@ db.openUri(mdb_url + '/session', {
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 
-app.use(log.connect());
-app.use(favicon(path.resolve('dist', 'favicon.ico')));
-app.use(session({
+web.use(log.connect());
+web.use(favicon(path.resolve('dist', icon_path)));
+web.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })
 , cookie: { httpOnly: false, maxAge: 60 * 60 * 1000 }
 , resave: false
 , saveUninitialized: true
 }));
-app.use(ReactSSRenderer.of().request());
+web.use(ReactSSRenderer.of().request());
 
-const server = http.createServer(app);
+const server = http.createServer(web);
 server.listen(http_port, http_host, () => log.info(displayName, `listening on ${http_host}:${http_port}`));
 
 const rejections = new Map();

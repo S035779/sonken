@@ -10,8 +10,8 @@ const production = {
 , plugins: [ new UglifyJSPlugin({ cache: true, parallel: true, sourceMap: true }) ]
 , performance: {
     hints: "warning"
-  , maxAssetSize: 7680000
-  , maxEntrypointSize: 10240000
+  , maxAssetSize: 768000
+  , maxEntrypointSize: 1024000
   , assetFilter: function(assetFilename) {
       return assetFilename.endsWith('.css') || assetFilename.endsWith('.js');
     }

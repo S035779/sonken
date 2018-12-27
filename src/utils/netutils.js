@@ -1,12 +1,12 @@
-import * as R           from 'ramda';
-import PromiseThrottle  from 'promise-throttle';
 import http             from 'http';
 import https            from 'https';
+import * as R           from 'ramda';
+import PromiseThrottle  from 'promise-throttle';
 import std              from 'Utilities/stdutils';
 
 const mimes = {
-  NV:  'application/x-www-form-urlencoded'
-, JSON:  'application/json'
+  NV:   'application/x-www-form-urlencoded'
+, JSON: 'application/json'
 , XML:  'application/xml; charset="UTF-8"'
 , BIN:  'application/octet-stream'
 , TXT:  'text/plain; charset="UTF-8"'

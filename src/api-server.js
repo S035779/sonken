@@ -36,7 +36,7 @@ if (env === 'development') {
 }
 
 const db            = mongoose.createConnection();
-const app           = express();
+const web           = express();
 const router        = express.Router();
 const SessionStore  = connect(session);
 
@@ -50,19 +50,19 @@ db.openUri(mdb_url + '/session', {
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 
-app.use(log.connect());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(session({
+web.use(log.connect());
+web.use(bodyParser.urlencoded({ extended: true }));
+web.use(bodyParser.json());
+web.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })
 , cookie: { httpOnly: false, maxAge: 60 * 60 * 1000 }
 , resave: false
 , saveUninitialized: true
 }));
-app.use(cookieParser());
-app.set('etag', false);
-app.use((req, res, next) => {
+web.use(cookieParser());
+web.set('etag', false);
+web.use((req, res, next) => {
   res.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, proxy-revalidate');
   next();
 });
@@ -223,8 +223,8 @@ router.route('/category')
 .post(feed.updateCategory())
 .delete(feed.deleteCategory());
 
-app.use(http_path, router);
-const server = http.createServer(app);
+web.use(http_path, router);
+const server = http.createServer(web);
 server.listen(http_port, http_host, () => log.info(displayName, `listening on ${http_host}:${http_port}`));
 
 const rejections = new Map();

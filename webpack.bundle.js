@@ -12,10 +12,7 @@ console.log('devMode(web platform): ', devMode);
 const bundle = {
   target: "web"
 , entry: {
-    app: [ 
-      'webpack-hot-middleware/client?path=/__webpack_hmr'
-    , './main.js' 
-    ]
+    app: devMode ? [ 'webpack-hot-middleware/client?path=/__what&timeout=20000', './main.js' ] : './main.js'
   }
 , output: {
     path: path.resolve(__dirname, 'dist')
@@ -41,17 +38,10 @@ const bundle = {
     }
   }
 , plugins: [
-    new webpack.NamedModulesPlugin()
-  , new webpack.HotModuleReplacementPlugin()
-  , new webpack.DefinePlugin({
-      'process.env.PLATFORM': JSON.stringify('web')
-    })
-  , new ManifestPlugin({
-      fileName: 'manifest.bundle.json'
-    })
-  , new MiniCssExtractPlugin({
-      filename: devMode ? 'css/[name].bundle.css' : 'css/[name].[contenthash].css'
-    })
+    new webpack.HotModuleReplacementPlugin()
+  , new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('web') })
+  , new ManifestPlugin({ fileName: 'manifest.bundle.json' })
+  , new MiniCssExtractPlugin({ filename: devMode ? 'css/[name].bundle.css' : 'css/[name].[hash].css' })
   , new CleanWebpackPlugin([
       'dist/js/*'
     , 'dist/images/*'
