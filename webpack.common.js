@@ -42,7 +42,7 @@ const common = {
           , { loader: 'css-loader' }
           ]}
       , {
-          test: /\.(gif|jpe?g|png|svg)$/
+          test: /\.(gif|jpe?g|png|svg|ico)$/
         , use: [
             { loader: 'url-loader',   options: { outputPath: 'images/', name: devMode ? '[name].[ext]' : '[hash].[ext]', limit: 8192 } }
           ]}
@@ -50,11 +50,6 @@ const common = {
           test: /\.(eot|otf|svg|ttf|woff2?)$/
         , use: [
             { loader: 'file-loader',  options: { outputPath: 'fonts/',  name: devMode ? '[name].[ext]' : '[hash].[ext]' } }
-          ]}
-      , {
-          test: /\.ico$/
-        , use: [
-            { loader: 'file-loader',  options: { name: '[name].[ext]' } }
           ]}
       ]}
   , resolve: { alias: {

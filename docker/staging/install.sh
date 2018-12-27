@@ -18,6 +18,7 @@ if [ ! -d $ASSET/images ]; then
     mkdir $ASSET/images
 fi
 cp $WORKDIR/dist/images/*.jpg   $ASSET/images/
+cp $WORKDIR/dist/images/*.ico   $ASSET/images/
 
 if [ ! -d $ASSET/fonts ]; then
     mkdir $ASSET/fonts
