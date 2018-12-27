@@ -33,7 +33,7 @@ if (env === 'development') {
 
 const manifest_of_node_file = path.resolve('dist', 'manifest.node.json');
 const initialAssets = app.manifest(manifest_of_node_file);
-const icon_path = '.' + initialAssets['favicon.ico'];
+const icon_path = initialAssets['favicon.ico'];
 
 const db            = mongoose.createConnection();
 const web           = express();

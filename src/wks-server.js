@@ -4,6 +4,7 @@ import path             from 'path';
 import os               from 'os';
 import child_process    from 'child_process';
 import log              from 'Utilities/logutils';
+import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -27,13 +28,16 @@ if(node_env === 'production') {
 
 const cpu_num = os.cpus().length;
 const job_num = numChildProcess <= cpu_num ? numChildProcess : cpu_num;
-const job_wrk = path.resolve('dist', 'wrk.node.js');
+const manifest_of_node_file = path.resolve('dist', 'manifest.node.json');
+const initialAssets = app.manifest(manifest_of_node_file);
+const worker_path = initialAssets['wrk.js'];
+const job = path.resolve('dist', worker_path);
 log.info(displayName, 'cpu#:', cpu_num);
 log.info(displayName, 'job#:', job_num);
-log.info(displayName, 'worker:', job_wrk);
+log.info(displayName, 'worker:', job);
 
 const fork = () => {
-  const cps = child_process.fork(job_wrk);
+  const cps = child_process.fork(job);
   cps.on('message', mes => log.info(displayName, 'got message.', mes));
   cps.on('error', err => log.error(displayName, err.name, err.message));
   cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
