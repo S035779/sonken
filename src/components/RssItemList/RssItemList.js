@@ -158,7 +158,7 @@ class RssItemList extends React.Component {
               </a>
             </div>
             <ListItemText classes={textClass} className={classes.listItemText} primary={title} 
-              secondary={amzsrc ? <a href={amzsrc}>{description}</a> : description} />
+              secondary={amzsrc ? <a href={amzsrc} target="_blank" rel="noopener noreferrer">{description}</a> : description} />
             <ListItemSecondaryAction>
               <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)} classes={classes.button}>
                 {buttonText}
