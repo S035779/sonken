@@ -54,7 +54,7 @@ const common = {
       , {
           test: /\.ico$/
         , use: [
-            { loader: 'file-loader',  options: { name: devMode ? '[name].[ext]' : '[hash].[ext]' } }
+            { loader: 'file-loader',  options: { name: '[name].[ext]' } }
           ]}
       ]}
   , resolve: { alias: {
