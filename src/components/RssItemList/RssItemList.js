@@ -114,9 +114,9 @@ class RssItemList extends React.Component {
     this.setState({ added: newAdded });
   }
 
-  handleError(event, imgsrc) {
+  handleError(event) {
     event.target.onerror = null;
-    event.target.src = imgsrc ? imgsrc : "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    event.target.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
   }
 
   renderItem(index, item) {
@@ -130,7 +130,7 @@ class RssItemList extends React.Component {
     const asin   = item.attributes && item.attributes.asins ? R.head(item.attributes.asins) : null;
     const amzsrc = asin ? amz + asin : null;
     const image  = item.attributes && item.attributes.images ?  R.head(item.attributes.images) : null;
-    const imgsrc = image && image.signedlink ? image.signedlink : null;
+    const imgsrc = image && image.signedlink ? image.signedlink : item.description.DIV.A.IMG.attr.SRC;
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
@@ -153,8 +153,8 @@ class RssItemList extends React.Component {
             </IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-                <img src={item.description.DIV.A.IMG.attr.SRC} alt={item.description.DIV.A.IMG.attr.ALT}
-                  onError={this.handleError.bind(this, imgsrc)} className={classes.image} />
+                <img src={imgsrc} alt={item.description.DIV.A.IMG.attr.ALT}
+                  onError={this.handleError.bind(this)} className={classes.image} />
               </a>
             </div>
             <ListItemText classes={textClass} className={classes.listItemText} 
