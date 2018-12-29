@@ -29,7 +29,7 @@ const compiler = webpack(config);
 
 app.use(log.connect());
 app.use(webpackDevMiddleware(compiler, { publicPath: config.output.publicPath }));
-app.use(webpackHotMiddleware(compiler, { log: log.debug, path: '/__what', hartbeat: 2000 }));
+app.use(webpackHotMiddleware(compiler, { path: '/__what' }));
 app.use(api_path, proxy({ target: api_url, changeOrigin: true }));
 app.use(ssr_path, proxy({ target: ssr_url, changeOrigin: true }));
 

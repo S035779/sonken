@@ -12,7 +12,7 @@ console.log('devMode(web platform): ', devMode);
 const bundle = {
   target: "web"
 , entry: {
-    app: devMode ? [ 'webpack-hot-middleware/client?path=/__what&timeout=20000', './main.js' ] : './main.js'
+    app: devMode ? [ 'webpack-hot-middleware/client?path=/__what', './main.js' ] : './main.js'
   }
 , output: {
     path: path.resolve(__dirname, 'dist')
