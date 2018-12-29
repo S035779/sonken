@@ -1,12 +1,15 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
+import path             from 'path';
 import http             from 'http';
 import express          from 'express';
+import favicon          from 'serve-favicon';
 import session          from 'express-session';
 import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import log              from 'Utilities/logutils';
+import Icon             from 'Assets/image/favicon.ico';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -42,6 +45,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
+web.use(favicon(path.resolve('dist', '.' + Icon)));
 web.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })

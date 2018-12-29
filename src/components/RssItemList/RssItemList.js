@@ -5,7 +5,7 @@ import NoteAction           from 'Actions/NoteAction';
 import std                  from 'Utilities/stdutils';
 
 import { withStyles }       from '@material-ui/core/styles';
-import { List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
+import { Button, List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
                             from '@material-ui/core';
 import { Star, StarBorder, Delete, FiberNew, Done } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
@@ -157,8 +157,9 @@ class RssItemList extends React.Component {
                   onError={this.handleError.bind(this, imgsrc)} className={classes.image} />
               </a>
             </div>
-            <ListItemText classes={textClass} className={classes.listItemText} primary={title} 
-              secondary={amzsrc ? <a href={amzsrc} target="_blank" rel="noopener noreferrer">{description}</a> : description} />
+            <ListItemText classes={textClass} className={classes.listItemText} 
+              primary={<Button disabled={!amzsrc} color="secondary" size="large" href={amzsrc} target="_blank">{title}</Button>}
+              secondary={description} />
             <ListItemSecondaryAction>
               <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)} classes={classes.button}>
                 {buttonText}
