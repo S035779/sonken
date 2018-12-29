@@ -1,5 +1,6 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
+import * as R           from 'ramda';
 import path             from 'path';
 import http             from 'http';
 import express          from 'express';
@@ -44,8 +45,9 @@ db.openUri(mdb_url + '/session', {
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 
+const icon_path = '.' + R.replace(/assets\//, '', Icon);
 web.use(log.connect());
-web.use(favicon(path.resolve('dist', '.' + Icon)));
+web.use(favicon(path.resolve('dist', icon_path)));
 web.use(session({
   secret: 'koobkooCedoN'
 , store: new SessionStore({ mongooseConnection: db })
