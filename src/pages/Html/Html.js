@@ -7,7 +7,6 @@ import { SheetsRegistry } from 'react-jss';
 import app                from 'Utilities/apputils';
 
 import Static             from 'Pages/Static/Static';
-import Icon               from 'Assets/image/favicon.ico';
 
 const config = dotenv.config();
 if(config.error) throw new Error(config.error);
@@ -27,7 +26,7 @@ class Html extends React.Component {
       <head>
       <meta charSet="utf-8" />
       <title>{APP_NAME}</title>
-      <link rel="shortcut icon" href={ Icon } />
+      <link rel="shortcut icon" href={'/favicon.ico'} />
       {devMode ? null : <link rel="stylesheet"    href={ initialAssets['app.css'] }/>}
       </head>
       <body>
