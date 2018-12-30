@@ -9,6 +9,7 @@ import connect          from 'connect-mongo';
 import mongoose         from 'mongoose';
 import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import log              from 'Utilities/logutils';
+import app              from 'Utilities/apputils';
 import Icon             from 'Assets/image/favicon.ico';
 
 sourceMapSupport.install();
@@ -45,6 +46,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
+web.use(app.compression({ threshold: '1mb' }));
 web.use(favicon(path.resolve('dist', '.' + Icon)));
 web.use(session({
   secret: 'koobkooCedoN'
