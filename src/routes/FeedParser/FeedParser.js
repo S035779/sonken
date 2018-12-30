@@ -1364,9 +1364,9 @@ export default class FeedParser {
       ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
     const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts), items: setTotal(counts) });
     const setPerfCount = obj => ({ sold: { total: obj.sold }, images: { total: obj.images }, archive: { total: obj.archive } });
-    const setAttributes = obj => !R.isNil(obj.sold) || !R.isNil(obj.images) || !R.isNil(obj.archive)
+    const setAttributes = obj => obj && (!R.isNil(obj.sold) || !R.isNil(obj.images) || !R.isNil(obj.archive))
       ? R.merge(setItemCount(obj), setPerfCount(obj))
-      : setItemCount(obj);
+      : (obj ? setItemCount(obj) : {});
     const setCounts = obj => R.merge(obj, { item_attributes: setAttributes(_counts(obj._id)) });
     const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
     return results;

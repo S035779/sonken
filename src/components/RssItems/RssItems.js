@@ -77,9 +77,6 @@ class RssItems extends React.Component {
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: true
         });
-      //} else if(nextNote._id === prevNote._id) {
-      //  std.logInfo(RssItems.displayName, 'Prev', { nextNote, nextPage, prevNote, prevPage });
-      //  this.setState({ note: prevNote });
       }
     }
   }
