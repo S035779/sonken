@@ -13,6 +13,7 @@ import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 import log              from 'Utilities/logutils';
+import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -51,6 +52,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
+web.use(app.compression({ threshold: '1kb' }));
 web.use(bodyParser.urlencoded({ extended: true }));
 web.use(bodyParser.json());
 web.use(session({

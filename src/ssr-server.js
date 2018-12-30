@@ -46,7 +46,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
-web.use(app.compression({ threshold: '1mb' }));
+web.use(app.compression({ threshold: '1kb' }));
 web.use(favicon(path.resolve('dist', '.' + Icon)));
 web.use(session({
   secret: 'koobkooCedoN'
