@@ -47,7 +47,7 @@ class RssList extends React.Component {
     const prevPage      = this.state.prevPage;
     const prevCategory  = this.state.category;
     const maxNumber     = Math.ceil(noteNumber / perPage);
-    std.logInfo(RssList.displayName, 'Pros', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+    //std.logInfo(RssList.displayName, 'Pros', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
     if(prevChecked.length !== nextChecked.length) {
       std.logInfo(RssList.displayName, 'Checked', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
       this.setState({ checked: nextChecked });
