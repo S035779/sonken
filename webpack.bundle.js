@@ -18,7 +18,7 @@ const bundle = {
 , output: {
     path: path.resolve(__dirname, 'dist')
   , publicPath: devMode ? '/' : '/assets/'
-  , filename: devMode ? 'js/[name].bundle.js' : 'js/[name].[contenthash].js'
+  , filename: devMode ? 'js/[name].bundle.js' : 'js/[name].[hash].js'
   }
 , optimization: {
     splitChunks: {
