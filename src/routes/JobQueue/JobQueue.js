@@ -38,7 +38,7 @@ export default class JobQueue {
   }
 
   request(operation, options) {
-    log.info(JobQueue.displayName, 'Request', operation);
+    //log.info(JobQueue.displayName, 'Request', operation);
     switch(operation) {
       case 'fetch/jobs':
         {

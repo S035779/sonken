@@ -68,7 +68,7 @@ const compression = options => {
     };
 
     onHeaders(res, () => {
-      log.debug(displayName, 'compression:start', '');
+      //log.debug(displayName, 'compression:start', '');
       if(!filter(req, res))                 return nocompress('filtered');
       if(!isTransform(req, res))            return nocompress('no transform');
       vary(res, 'Accept-Encoding');
@@ -81,19 +81,19 @@ const compression = options => {
       const encodings = new Set(accepts(req).encodings());
 
       if(encodings.has('br')) {
-        log.debug(displayName, 'content-encoding:', 'br');
+        //log.debug(displayName, 'content-encoding:', 'br');
         res.setHeader('Content-Encoding', 'br');
         stream = brotli.compressStream(_options);
       } else if(encodings.has('lzma')) {
-        log.debug(displayName, 'content-encoding:', 'lzma');
+        //log.debug(displayName, 'content-encoding:', 'lzma');
         res.setHeader('Content-Encoding', 'lzma');
         stream = lzma.createStream('aloneEncoder', _options);
       } else if(encodings.has('deflate')) {
-        log.debug(displayName, 'content-encoding:', 'deflate');
+        //log.debug(displayName, 'content-encoding:', 'deflate');
         res.setHeader('Content-Encoding', 'deflate');
         stream = zlib.createDeflate(_options);
       } else if(encodings.has('gzip')) {
-        log.debug(displayName, 'content-encoding:', 'gzip');
+        //log.debug(displayName, 'content-encoding:', 'gzip');
         res.setHeader('Content-Encoding', 'gzip');
         stream = zlib.createGzip(_options);
       } else {
@@ -104,17 +104,17 @@ const compression = options => {
       res.removeHeader('Content-Length');
 
       stream.on('data', chunk => { 
-        log.debug(displayName, 'compression:data');
+        //log.debug(displayName, 'compression:data');
         if(_write.call(res, chunk) === false) stream.pause();
       });
 
       stream.on('end', () => {
-        log.debug(displayName, 'compression:end');
+        //log.debug(displayName, 'compression:end');
         _end.call(res)
       });
 
       _on.call(res, 'drain', () => {
-        log.debug(displayName, 'compression:drain');
+        //log.debug(displayName, 'compression:drain');
         stream.resume();
       });
 
@@ -131,13 +131,13 @@ const chunkLength = (chunk, encoding) => {
 
 const isCompress = (req, res) => {
   const contentType = res.getHeader('Content-Type');
-  log.debug(displayName, 'content-type:', contentType || 'NotFound');
+  //log.debug(displayName, 'content-type:', contentType || 'NotFound');
   return !R.isNil(contentType) && compressible(contentType);
 };
 
 const isTransform = (req, res) => {
   const cacheControl = res.getHeader('Cache-Control');
-  log.debug(displayName, 'cache-control:', cacheControl || 'NotFound');
+  //log.debug(displayName, 'cache-control:', cacheControl || 'NotFound');
   return !R.isNil(cacheControl) || !R.test(/(?:^|,)\s*?no-transform\s*?(?:,|$)/, cacheControl)
 };
 

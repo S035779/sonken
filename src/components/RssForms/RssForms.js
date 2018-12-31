@@ -50,7 +50,8 @@ class RssForms extends React.Component {
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
-    if(prevNote && nextNote.items.length !== 0) {
+    if(!prevNote) return;
+    if(nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(RssForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
@@ -74,7 +75,7 @@ class RssForms extends React.Component {
           loadingDownload: nextLoadingDownload
         });
       }
-    } else if(prevNote && prevNote.items.length !== 0) {
+    } else if(nextNote.items.length === 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(RssForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;

@@ -47,36 +47,46 @@ class RssList extends React.Component {
     const prevPage      = this.state.prevPage;
     const prevCategory  = this.state.category;
     const maxNumber     = Math.ceil(noteNumber / perPage);
+    std.logInfo(RssList.displayName, 'Pros', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+    if(prevChecked.length !== nextChecked.length) {
+      std.logInfo(RssList.displayName, 'Checked', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+      this.setState({ checked: nextChecked });
+    } else 
     if(nextNotes.length !== 0) {
       if(prevCategory !== nextCategory) {
         std.logInfo(RssList.displayName, 'Init', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.formsRef.scrollTop = 0;
         this.setState({ checked: nextChecked, notes: nextNotes, prevPage: 1, category: nextCategory }
           , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
-      } else if(prevPage !== nextPage && (prevPage < maxNumber)) {
+      } else 
+      if(prevPage !== nextPage && (prevPage < maxNumber)) {
         std.logInfo(RssList.displayName, 'Update', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.setState({ checked: nextChecked, notes: nextNotes, prevPage: nextPage });
-      } else if(prevNotes.length === 0) {
+      } else
+      if(prevNotes.length === 0) {
         std.logInfo(RssList.displayName, 'Ready', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.formsRef.scrollTop = 0;
         this.setState({ checked: nextChecked, notes: nextNotes, prevPage: 1, category: nextCategory }
           , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
-      } else if(prevChecked.length !== nextChecked.length) {
-        std.logInfo(RssList.displayName, 'Checked', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
-        this.setState({ checked: nextChecked });
+      } else
+      if(prevNotes.length !== nextNotes.length) {
+        std.logInfo(RssList.displayName, 'Add/Delete', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.setState({ checked: nextChecked, notes: nextNotes, prevPage: nextPage });
       }
     } else if(nextNotes.length === 0) {
       if(prevCategory !== nextCategory) {
-        std.logInfo(RssList.displayName, 'Init', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        std.logInfo(RssList.displayName, 'Init2', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.formsRef.scrollTop = 0;
         this.setState({ checked: nextChecked, notes: nextNotes, prevPage: 1, category: nextCategory }
           , () => NoteAction.pagenation(user, { maxNumber, number: 1, perPage }));
-      } else if(prevPage !== nextPage) {
+      } else 
+      if(prevPage !== nextPage) {
         std.logInfo(RssList.displayName, 'Max', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
         this.setState({ checked: nextChecked, prevPage: nextPage });
-      } else if(prevChecked.length !== nextChecked.length) {
-        std.logInfo(RssList.displayName, 'Checked', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
-        this.setState({ checked: nextChecked });
+      } else
+      if(prevNotes.length !== nextNotes.length) {
+        std.logInfo(RssList.displayName, 'Add/Delete2', { nextNotes, nextPage, prevNotes, prevPage, prevCategory, nextCategory });
+        this.setState({ checked: nextChecked, notes: nextNotes, prevPage: nextPage });
       }
     }
   }

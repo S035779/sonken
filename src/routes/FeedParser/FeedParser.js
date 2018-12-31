@@ -519,9 +519,9 @@ export default class FeedParser {
           const conditions = { _id: id, user };
           const setIds   = R.map(obj => obj._id);
           const setGuids = R.map(obj => obj.guid__);
-          const setItems = obj => obj.items;
-          const getItems = objs => Item.find({ _id: { $in: setIds(objs) }});
-          const delItems = objs => Promise.all([
+          const setItems = obj => obj ? obj.items : null;
+          const getItems = objs => objs ? Item.find({ _id: { $in: setIds(objs) }}) : null;
+          const delItems = objs => objs ? Promise.all([
             Item.deleteMany({ _id: { $in: setIds(objs) }})
           , Listed.deleteMany({ user, listed: { $in: setGuids(objs) }}).exec()
           , Traded.deleteMany({ user, traded: { $in: setGuids(objs) }}).exec()
@@ -531,7 +531,7 @@ export default class FeedParser {
           , Readed.deleteMany({ user, readed: { $in: setGuids(objs) }}).exec()
           , Starred.deleteMany({ user, starred: { $in: setGuids(objs) }}).exec()
           , Attribute.deleteMany({ user, guid: { $in: setGuids(objs) }}).exec()
-          ]);
+          ]) : null;
           return Note.findOneAndDelete(conditions).exec()
             .then(setItems)
             .then(getItems)
@@ -1284,6 +1284,7 @@ export default class FeedParser {
     return observables.pipe(
       map(setAttribute)
     , map(R.head)
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 

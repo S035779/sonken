@@ -61,7 +61,8 @@ class ClosedForms extends React.Component {
     const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
     const prevLoadingImages = this.state.loadingImages;
-    if(prevNote && nextNote.items.length !== 0) {
+    if(!prevNote) return;
+    if(nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
@@ -106,7 +107,7 @@ class ClosedForms extends React.Component {
           loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
         });
       }
-    } else if(prevNote && prevNote.items.length !== 0) {
+    } else if(nextNote.items.length === 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;

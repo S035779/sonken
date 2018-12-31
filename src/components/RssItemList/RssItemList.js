@@ -11,6 +11,7 @@ import { Star, StarBorder, Delete, FiberNew, Done } from '@material-ui/icons';
 import RssButton            from 'Components/RssButton/RssButton';
 
 const amz = 'https://www.amazon.co.jp/gp/product/';
+const _dummy = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
 class RssItemList extends React.Component {
   constructor(props) {
@@ -116,7 +117,7 @@ class RssItemList extends React.Component {
 
   handleError(event) {
     event.target.onerror = null;
-    event.target.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    event.target.src = _dummy;
   }
 
   renderItem(index, item) {
@@ -130,7 +131,9 @@ class RssItemList extends React.Component {
     const asin   = item.attributes && item.attributes.asins ? R.head(item.attributes.asins) : null;
     const amzsrc = asin ? amz + asin : null;
     const image  = item.attributes && item.attributes.images ?  R.head(item.attributes.images) : null;
-    const imgsrc = image && image.signedlink ? image.signedlink : item.description.DIV.A.IMG.attr.SRC;
+    const imgsrc = image && image.signedlink 
+      ? image.signedlink 
+      : item.description ? item.description.DIV.A.IMG.attr.SRC : _dummy;
     const description = 
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`

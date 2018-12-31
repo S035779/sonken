@@ -28,6 +28,7 @@ const common = {
                 ]]
             , plugins: [
                 'react-hot-loader/babel'
+              , '@loadable/babel-plugin'
               , '@babel/proposal-object-rest-spread'
               , '@babel/transform-member-expression-literals'
               , '@babel/transform-property-literals'

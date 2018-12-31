@@ -29,7 +29,7 @@ const queue = (workerName, concurrent) => {
         .defaultLockLimit(concurrent);
     }
     agenda.on('ready', () => {
-      log.info(workerName, 'mongo connection successfully.');
+      //log.info(workerName, 'mongo connection successfully.');
       resolve(agenda);
     });
     agenda.on('error', err => {
@@ -59,7 +59,7 @@ const dequeue = (workerName, jobName, concurrent, callback) => {
   return queue(workerName, concurrent)
     .then(async queue => {
       queue.define(jobName, { lockLifetime: 10000 }, (obj, done) => {
-        log.info(workerName, '<<< job (data/next/lock)', obj.attrs.data, ' / ', obj.attrs.nextRunAt, ' / ', obj.attrs.lockedAt);
+        //log.info(workerName, '<<< job (data/next/lock)', obj.attrs.data, ' / ', obj.attrs.nextRunAt, ' / ', obj.attrs.lockedAt);
         callback(obj.attrs.data, done);
       });
 

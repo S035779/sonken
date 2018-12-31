@@ -2,6 +2,7 @@ const Dotenv = require('dotenv-webpack');
 const merge = require('webpack-merge');
 const path = require('path');
 const webpack = require('webpack');
+const LoadablePlugin = require('@loadable/webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
@@ -17,31 +18,31 @@ const bundle = {
 , output: {
     path: path.resolve(__dirname, 'dist')
   , publicPath: devMode ? '/' : '/assets/'
-  , filename: devMode ? 'js/[name].bundle.js' : 'js/[name].[hash].js'
+  , filename: devMode ? 'js/[name].bundle.js' : 'js/[name].[contenthash].js'
   }
 , optimization: {
     splitChunks: {
-      cacheGroups: {
-        view: {
-          name: 'view'
-        , test: /react|react-dom|react-router|react-router-dom|react-router-config|flux|@material-ui[\\/]core/
-        , chunks: 'initial'
-        , enforce: true
-        }
-      , icon: {
-          name: 'icon'
-        , test: /@material-ui[\\/]icons/
-        , chunks: 'initial'
-        , enforce: true
+      chunks: 'all'
+    , maxInitialRequests: 20
+    , maxAsyncRequests: 20
+    , minSize: 0
+    , cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/
+        , name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `npm.${packageName.replace('@', '')}`;
+          }
         }
       }
     }
   }
 , plugins: [
     new webpack.HotModuleReplacementPlugin()
+  , new LoadablePlugin()
   , new webpack.DefinePlugin({ 'process.env.PLATFORM': JSON.stringify('web') })
   , new ManifestPlugin({ fileName: 'manifest.bundle.json' })
-  , new MiniCssExtractPlugin({ filename: devMode ? 'css/[name].bundle.css' : 'css/[name].[hash].css' })
+  , new MiniCssExtractPlugin({ filename: devMode ? 'css/[name].bundle.css' : 'css/[name].[contenthash].css' })
   , new CleanWebpackPlugin([
       'dist/js/*'
     , 'dist/images/*'
