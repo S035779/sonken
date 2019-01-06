@@ -7,6 +7,7 @@ if [ ! -d $ASSET/js ]; then
 fi
 cp $WORKDIR/dist/js/*.js        $ASSET/js/
 cp $WORKDIR/dist/js/*.js.map    $ASSET/js/
+cp -r $WORKDIR/dist/js/Components-* $ASSET/js/
 
 if [ ! -d $ASSET/css ]; then
     mkdir $ASSET/css
