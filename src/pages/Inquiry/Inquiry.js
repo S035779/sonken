@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { renderRoutes }         from 'react-router-config';
@@ -10,7 +11,8 @@ import std                      from 'Utilities/stdutils';
 import { withStyles }           from '@material-ui/core/styles';
 import { CssBaseline }          from '@material-ui/core';
 import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
-import LoginHeader              from 'Components/LoginHeader/LoginHeader';
+const LoginHeader = loadable(() => import('Components/LoginHeader/LoginHeader'));
+
 import iqryImg                  from 'Assets/image/bg6.jpg';
 
 class Inquiry extends React.Component {

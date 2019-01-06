@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import * as R                   from 'ramda';
@@ -9,8 +10,8 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import TradeSearch              from 'Components/TradeSearch/TradeSearch';
-import TradeFilter              from 'Components/TradeFilter/TradeFilter';
+const TradeSearch = loadable(() => import('Components/TradeSearch/TradeSearch'));
+const TradeFilter = loadable(() => import('Components/TradeFilter/TradeFilter'));
 
 class Trade extends React.Component {
   static getStores() {
@@ -21,23 +22,25 @@ class Trade extends React.Component {
     return getState('tradedNotesStore');
   }
 
-  static prefetch(options) {
-    const { user, category } = options;
+  static prefetch({ user, page }) {
     if(!user) return null;
-    std.logInfo(Trade.displayName, 'prefetch', { user, category });
+    std.logInfo(Trade.displayName, 'fetch', { user });
+    const skip = 0;
+    const limit = page ? page.perPage : 20;
     return TradeAction.presetUser(user)
-      .then(() => TradeAction.prefetchTraded(user, 0, 20));
+      .then(() => TradeAction.fetchTraded(user, skip, limit));
   }
 
   componentDidMount() {
     this.spn = Spinner.of('app');
     const { user, page } = this.state;
     if(!user) return;
-    const skip = (page.number - 1) * page.perPage;
-    const limit = page.perPage;
+    //const skip = (page.number - 1) * page.perPage;
+    //const limit = page.perPage;
     this.spn.start();
-    std.logInfo(Trade.displayName, 'fetch', 'trade');
-    TradeAction.fetchTraded(user, skip, limit)
+    //std.logInfo(Trade.displayName, 'fetch', 'trade');
+    //TradeAction.fetchTraded(user, skip, limit)
+    Trade.prefetch({ user, page })
       .then(() => this.spn.stop());
   }
 

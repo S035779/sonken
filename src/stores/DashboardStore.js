@@ -162,8 +162,8 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { user: action.user, isAuthenticated: action.isAuthenticated })
       case 'login/authenticate':
         return R.merge(state, { isAuthenticated: action.isAuthenticated });
-      case 'category/prefetch/my':
-        return R.merge(state, { categorys: action.categorys });
+      //case 'category/prefetch/my':
+      //  return R.merge(state, { categorys: action.categorys });
       case 'category/fetch/my':
         return R.merge(state, { categorys: action.categorys });
       case 'category/create':
@@ -182,8 +182,8 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { profile: action.profile });
       case 'profile/update':
         return R.merge(state, { profile: action.profile });
-      case 'note/prefetch/my':
-        return R.merge(state, { notes: action.notes });
+      //case 'note/prefetch/my':
+      //  return R.merge(state, { notes: action.notes });
       case 'note/fetch/my':
         return R.merge(state, { notes: action.notes });
       case 'note/append/my':

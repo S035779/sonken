@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { renderRoutes }         from 'react-router-config';
@@ -11,7 +12,8 @@ import Spinner                  from 'Utilities/Spinner';
 import { withStyles }           from '@material-ui/core/styles';
 import { CssBaseline }          from '@material-ui/core';
 import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
-import LoginHeader              from 'Components/LoginHeader/LoginHeader';
+const LoginHeader = loadable(() => import('Components/LoginHeader/LoginHeader'));
+
 import faqsImg                  from 'Assets/image/bg7.jpg';
 
 class Faqs extends React.Component {
@@ -23,23 +25,21 @@ class Faqs extends React.Component {
     return getState('postedFaqsStore');
   }
 
-  static prefetch(options) {
-    const { user } = options;
+  static prefetch({ user }) {
     if(!user) return null;
-    std.logInfo(Faqs.displayName, 'prefetch', options)
-    return Promise.all([
-        FaqAction.presetUser(user)
-      , FaqAction.prefetchPostedFaqs()
-      ]);
+    std.logInfo(Faqs.displayName, 'fetch', { user })
+    return FaqAction.presetUser(user)
+      .then(() => FaqAction.fetchPostedFaqs());
   }
 
   componentDidMount() {
     this.spn = Spinner.of('app');
-    const { isAuthenticated } = this.state;
+    const { isAuthenticated, user } = this.state;
     if(isAuthenticated) {
       this.spn.start();
-      std.logInfo(Faqs.displayName, 'fetch', 'Faqs');
-      FaqAction.fetchPostedFaqs()
+      //std.logInfo(Faqs.displayName, 'fetch', 'Faqs');
+      //FaqAction.fetchPostedFaqs()
+      Faqs.prefetch({ user })
         .then(() => this.spn.stop());
     }
   }

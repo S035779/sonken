@@ -1,15 +1,16 @@
+import loadable             from '@loadable/component';
 import React                from 'react';
 import { withRouter }       from 'react-router-dom';
 import PropTypes            from 'prop-types'
 import LoginAction          from 'Actions/LoginAction';
+import std                  from 'Utilities/stdutils';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { IconButton }       from '@material-ui/core';
 import { Menu as MenuIcon } from '@material-ui/icons';
-import LoginSwitch          from 'Components/LoginSwitch/LoginSwitch';
-import AdminMenu            from 'Components/AdminMenu/AdminMenu';
-import AdminButtonNav       from 'Components/AdminButtonNav/AdminButtonNav';
-import std                  from 'Utilities/stdutils';
+const LoginSwitch    = loadable(() => import('Components/LoginSwitch/LoginSwitch'));
+const AdminMenu      = loadable(() => import('Components/AdminMenu/AdminMenu'));
+const AdminButtonNav = loadable(() => import('Components/AdminButtonNav/AdminButtonNav'));
 
 class AdminHeader extends React.Component {
   constructor(props) {

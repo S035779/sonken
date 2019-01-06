@@ -1,32 +1,32 @@
 import xhr    from 'Utilities/xhrutils';
 
-const api = process.env.API_URL;
+const API_URL = process.env.API_URL;
 
 export default {
   request(request, options) {
     switch(request) {
       case 'signin/authenticate':
-        return new Promise((resolve, reject) => xhr.postJSON(  api+'/authenticate', options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(  API_URL+'/authenticate', options, resolve, reject));
       case 'auto/authenticate':
-        return new Promise((resolve, reject) => xhr.getJSON(   api+'/authenticate', options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(   API_URL+'/authenticate', options, resolve, reject));
       case 'signout/authenticate':
-        return new Promise((resolve, reject) => xhr.deleteJSON(api+'/authenticate', options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON(API_URL+'/authenticate', options, resolve, reject));
       case 'preference/fetch':
-        return new Promise((resolve, reject) => xhr.getJSON(   api+'/preference',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(   API_URL+'/preference',   options, resolve, reject));
       case 'preference/update':
-        return new Promise((resolve, reject) => xhr.postJSON(  api+'/preference',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(  API_URL+'/preference',   options, resolve, reject));
       case 'preference/create':
-        return new Promise((resolve, reject) => xhr.putJSON(   api+'/preference',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(   API_URL+'/preference',   options, resolve, reject));
       case 'fetch/user':
-        return new Promise((resolve, reject) => xhr.getJSON(   api+'/login',        options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(   API_URL+'/login',        options, resolve, reject));
       case 'update/user':
-        return new Promise((resolve, reject) => xhr.postJSON(  api+'/login',        options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(  API_URL+'/login',        options, resolve, reject));
       case 'create/user':
-        return new Promise((resolve, reject) => xhr.putJSON(   api+'/login',        options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(   API_URL+'/login',        options, resolve, reject));
       case 'delete/user':
-        return new Promise((resolve, reject) => xhr.deleteJSON(api+'/login',        options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON(API_URL+'/login',        options, resolve, reject));
       case 'inquiry/create':
-        return new Promise((resolve, reject) => xhr.putJSON(   api+'/inquiry',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(   API_URL+'/inquiry',      options, resolve, reject));
     }
   },
 

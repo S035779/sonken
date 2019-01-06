@@ -1,3 +1,4 @@
+import loadable                   from '@loadable/component';
 import React                from 'react';
 import PropTypes            from 'prop-types';
 import UserAction           from 'Actions/UserAction';
@@ -6,7 +7,7 @@ import Spinner              from 'Utilities/Spinner';
 
 import { withStyles }       from '@material-ui/core/styles';
 import { Button, Checkbox } from '@material-ui/core';
-import RssDialog            from 'Components/RssDialog/RssDialog';
+const RssDialog = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class AdminButtons extends React.Component {
   constructor(props) {

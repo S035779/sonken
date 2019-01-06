@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types'
 import { withRouter }   from 'react-router-dom';
@@ -8,11 +9,10 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { Divider, List, Avatar, IconButton, Badge, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Collapse }
                         from '@material-ui/core';
-import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown, AccountBox, BlurOn, SettingsApplications, PeopleOutline
-, NotificationsActive } from '@material-ui/icons';
-import LoginProfile     from 'Components/LoginProfile/LoginProfile';
-import LoginPreference  from 'Components/LoginPreference/LoginPreference';
-import RssEditDialog    from 'Components/RssEditDialog/RssEditDialog';
+import { LocalMall, People, Timeline, Gavel, ArrowDropUp, ArrowDropDown, AccountBox, BlurOn, SettingsApplications, PeopleOutline, NotificationsActive } from '@material-ui/icons';
+const LoginProfile    = loadable(() => import('Components/LoginProfile/LoginProfile'));
+const LoginPreference = loadable(() => import('Components/LoginPreference/LoginPreference'));
+const RssEditDialog   = loadable(() => import('Components/RssEditDialog/RssEditDialog'));
 
 const APP_NAME  = process.env.APP_NAME;
 const isAlpha   = process.env.NODE_ENV !== 'production';

@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import * as R           from 'ramda';
@@ -6,10 +7,9 @@ import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Button, Checkbox, Typography, TextField }
-                        from '@material-ui/core';
-import TradeItemList    from 'Components/TradeItemList/TradeItemList';
-import RssDialog        from 'Components/RssDialog/RssDialog';
+import { Button, Checkbox, Typography, TextField } from '@material-ui/core';
+const TradeItemList = loadable(() => import('Components/TradeItemList/TradeItemList'));
+const RssDialog     = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class TradeFilter extends React.Component {
   constructor(props) {

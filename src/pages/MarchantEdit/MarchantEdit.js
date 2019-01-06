@@ -1,9 +1,10 @@
+import loadable       from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import RssForms       from 'Components/RssForms/RssForms';
-import RssView        from 'Components/RssView/RssView';
+const RssForms = loadable(() => import('Components/RssForms/RssForms'));
+const RssView  = loadable(() => import('Components/RssView/RssView'));
 
 class MarchantEdit extends React.Component {
   render() {

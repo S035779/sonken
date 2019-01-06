@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types'
 import { withRouter }   from 'react-router-dom';
@@ -7,7 +8,7 @@ import LoginAction      from 'Actions/LoginAction';
 import { withStyles }   from '@material-ui/core/styles';
 import { IconButton, Menu, Divider, ListItemIcon, MenuItem } from '@material-ui/core';
 import { AccountCircle, ImportContacts, Feedback, PowerSettingsNew, SettingsEthernet } from '@material-ui/icons';
-import LoginPreference  from 'Components/LoginPreference/LoginPreference';
+const LoginPreference = loadable(() => import('Components/LoginPreference/LoginPreference'));
 
 class RssMenu extends React.Component {
   constructor(props) {

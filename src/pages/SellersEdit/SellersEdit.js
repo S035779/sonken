@@ -1,8 +1,9 @@
+import loadable       from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import RssItems       from 'Components/RssItems/RssItems';
+const RssItems = loadable(() => import('Components/RssItems/RssItems'));
 
 class SellersEdit extends React.Component {
   render() {

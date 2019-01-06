@@ -7,11 +7,11 @@ export default {
       dispatch({ type: 'admin/preset', admin, isAuthenticated });
     });
   },
-  prefetchMails(admin) {
-    return UserApiClient.prefetchMails(admin).then(mails => {
-      dispatch({ type: 'mail/prefetch', mails });
-    });
-  },
+  //prefetchMails(admin) {
+  //  return UserApiClient.prefetchMails(admin).then(mails => {
+  //    dispatch({ type: 'mail/prefetch', mails });
+  //  });
+  //},
   fetchMails(admin) {
     return UserApiClient.fetchMails(admin).then(mails => {
       dispatch({ type: 'mail/fetch', mails });

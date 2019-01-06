@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import { Link }       from 'react-router-dom';
@@ -7,10 +8,9 @@ import std            from 'Utilities/stdutils';
 import Spinner        from 'Utilities/Spinner';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction }
-                      from '@material-ui/core';
-import RssFormDialog  from 'Components/RssFormDialog/RssFormDialog';
-import RssDialog      from 'Components/RssDialog/RssDialog';
+import { List, Paper, Checkbox, Button, Typography, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
+const RssFormDialog = loadable(() => import('Components/RssFormDialog/RssFormDialog'));
+const RssDialog     = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class RssList extends React.Component {
   constructor(props) {

@@ -1,3 +1,4 @@
+import loadable               from '@loadable/component';
 import React                  from 'react';
 import PropTypes              from 'prop-types';
 import * as R                 from 'ramda';
@@ -6,12 +7,11 @@ import std                    from 'Utilities/stdutils';
 import Spinner                from 'Utilities/Spinner';
 
 import { withStyles }         from '@material-ui/core/styles';
-import { Typography, CircularProgress }
-                              from '@material-ui/core';
-import RssButton              from 'Components/RssButton/RssButton';
-import RssDialog              from 'Components/RssDialog/RssDialog';
-import RssItemList            from 'Components/RssItemList/RssItemList';
-import RssDownloadItemsDialog from 'Components/RssDownloadItemsDialog/RssDownloadItemsDialog';
+import { Typography, CircularProgress } from '@material-ui/core';
+const RssButton              = loadable(() => import('Components/RssButton/RssButton'));
+const RssDialog              = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssItemList            = loadable(() => import('Components/RssItemList/RssItemList'));
+const RssDownloadItemsDialog = loadable(() => import('Components/RssDownloadItemsDialog/RssDownloadItemsDialog'));
 
 const isAlpha = process.env.NODE_ENV !== 'production';
 

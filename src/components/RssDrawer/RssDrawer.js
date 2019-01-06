@@ -1,10 +1,11 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 
 import { withStyles }   from '@material-ui/core/styles';
-import RssHeader        from 'Components/RssHeader/RssHeader';
-import DrawerPermanent  from 'Components/DrawerPermanent/DrawerPermanent';
-import DrawerTemporary  from 'Components/DrawerTemporary/DrawerTemporary';
+const RssHeader       = loadable(() => import('Components/RssHeader/RssHeader'));
+const DrawerPermanent = loadable(() => import('Components/DrawerPermanent/DrawerPermanent'));
+const DrawerTemporary = loadable(() => import('Components/DrawerTemporary/DrawerTemporary'));
 
 class RssDrawer extends React.Component {
   constructor(props) {

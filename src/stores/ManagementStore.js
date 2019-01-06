@@ -53,8 +53,8 @@ export default class ManagementStore extends ReduceStore {
         return R.merge(state, { preference: action.preference });
       case 'login/authenticate':
         return R.merge(state, { isAuthenticated: action.isAuthenticated });
-      case 'user/prefetch':
-        return R.merge(state, { users: action.users });
+      //case 'user/prefetch':
+      //  return R.merge(state, { users: action.users });
       case 'user/fetch':
         return R.merge(state, { users: action.users });
       case 'user/create':

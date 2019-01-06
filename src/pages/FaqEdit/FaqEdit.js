@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import FaqAction                from 'Actions/FaqAction';
@@ -5,9 +6,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import EditBody                 from 'Components/EditBody/EditBody';
-import EditButtons              from 'Components/EditButtons/EditButtons';
-import RssDialog                from 'Components/RssDialog/RssDialog';
+const EditBody    = loadable(() => import('Components/EditBody/EditBody'));
+const EditButtons = loadable(() => import('Components/EditButtons/EditButtons'));
+const RssDialog   = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class FaqEdit extends React.Component {
   constructor(props) {

@@ -1,12 +1,12 @@
+import loadable       from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 import TradeAction    from 'Actions/TradeAction';
 import std            from 'Utilities/stdutils';
 
 import { withStyles } from '@material-ui/core/styles';
-import { List, ListItem, ListItemText, ListItemSecondaryAction, Paper, Checkbox }
-                      from '@material-ui/core';
-import RssButton      from 'Components/RssButton/RssButton';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, Paper, Checkbox } from '@material-ui/core';
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
 
 class TradeItemList extends React.Component {
   constructor(props) {

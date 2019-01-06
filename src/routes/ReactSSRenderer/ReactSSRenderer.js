@@ -28,12 +28,11 @@ class ReactSSRenderer {
       createStores(createDispatcher());
       const routes = getRoutes();
       const matchs = matchRoutes(routes, location);
-      const appStream = this.setInitialData(location);
       const pass = new stream.PassThrough();
       pass.write(docType);
       this.getUserData(matchs, { user, admin, category })
         .then(objs => this.prefetchData(matchs, objs))
-        .then(()   => appStream.pipe(pass).pipe(res))
+        .then(()   => this.setInitialData(location).pipe(pass).pipe(res))
         .then(()   => next())
         .catch(err => res.status(500).send({ error: { name: err.name, message: err.message, stack: err.stack }}));
     };

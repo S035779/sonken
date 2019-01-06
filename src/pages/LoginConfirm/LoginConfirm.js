@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { withRouter }           from 'react-router-dom';
@@ -8,8 +9,8 @@ import Spinner                  from 'Utilities/Spinner';
 import { withStyles }           from '@material-ui/core/styles';
 import { Typography, Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle }
                                 from '@material-ui/core';
-import RssButton                from 'Components/RssButton/RssButton';
-import RssInput                 from 'Components/RssInput/RssInput';
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
+const RssInput  = loadable(() => import('Components/RssInput/RssInput'));
 
 class LoginConfirm extends React.Component {
   constructor(props) {

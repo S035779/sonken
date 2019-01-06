@@ -1,13 +1,13 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
 import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Typography, TextField }
-                        from '@material-ui/core';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
+import { Typography, TextField } from '@material-ui/core';
+const RssDialog       = loadable(() => import('Components/RssDialog/RssDialog'));
+const LoginFormDialog = loadable(() => import('Components/LoginFormDialog/LoginFormDialog'));
 
 class LoginProfile extends React.Component {
   constructor(props) {

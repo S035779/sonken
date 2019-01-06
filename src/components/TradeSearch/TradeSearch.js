@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import TradeAction      from 'Actions/TradeAction';
@@ -7,8 +8,8 @@ import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { Select, Typography, InputLabel, FormControl, MenuItem } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssDialog        from 'Components/RssDialog/RssDialog';
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
+const RssDialog = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class TradeSearch extends React.Component {
   constructor(props) {

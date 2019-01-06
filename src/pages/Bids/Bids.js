@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import * as R                   from 'ramda';
@@ -9,8 +10,8 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import BidsSearch               from 'Components/BidsSearch/BidsSearch';
-import BidsFilter               from 'Components/BidsFilter/BidsFilter';
+const BidsSearch = loadable(() => import('Components/BidsSearch/BidsSearch'));
+const BidsFilter = loadable(() => import('Components/BidsFilter/BidsFilter'));
 
 class Bids extends React.Component {
   static getStores() {
@@ -21,23 +22,25 @@ class Bids extends React.Component {
     return getState('bidedNotesStore');
   }
 
-  static prefetch(options) {
-    const { user, category } = options;
+  static prefetch({ user, page }) {
     if(!user) return null;
-    std.logInfo(Bids.displayName, 'prefetch', { user, category });
+    std.logInfo(Bids.displayName, 'fetch', { user });
+    const skip = 0;
+    const limit = page ? page.perPage : 20;
     return BidsAction.presetUser(user)
-      .then(() => BidsAction.prefetchBided(user, 0, 20));
+      .then(() => BidsAction.fetchBided(user, skip, limit));
   }
 
   componentDidMount() {
     this.spn = Spinner.of('app');
     const { user, page } = this.state;
     if(!user) return;
-    const skip = (page.number - 1) * page.perPage;
-    const limit = page.perPage;
+    //const skip = (page.number - 1) * page.perPage;
+    //const limit = page.perPage;
     this.spn.start();
-    std.logInfo(Bids.displayName, 'fetch', 'bids');
-    BidsAction.fetchBided(user, skip, limit)
+    //std.logInfo(Bids.displayName, 'fetch', 'bids');
+    //BidsAction.fetchBided(user, skip, limit)
+    Bids.prefetch({ user, page })
       .then(() => this.spn.stop());
   }
 

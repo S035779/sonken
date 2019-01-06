@@ -56,8 +56,8 @@ export default class TradedNotesStore extends ReduceStore {
         return R.merge(state, { isAuthenticated: action.isAuthenticated });
       case 'bids/delete':
         return R.merge(state, { notes: this.deleteBids(state, action), ids: [] });
-      case 'trade/prefetch':
-        return R.merge(state, { notes: action.notes });
+      //case 'trade/prefetch':
+      //  return R.merge(state, { notes: action.notes });
       case 'trade/fetch':
         return R.merge(state, { notes: action.notes });
       case 'trade/create':

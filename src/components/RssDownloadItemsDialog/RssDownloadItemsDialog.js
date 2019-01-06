@@ -1,3 +1,4 @@
+import loadable                   from '@loadable/component';
 import * as R                     from 'ramda';
 import React                      from 'react';
 import PropTypes                  from 'prop-types';
@@ -7,9 +8,9 @@ import Spinner                    from 'Utilities/Spinner';
 
 import { withStyles }             from '@material-ui/core/styles';
 import { FormControl, TextField, MenuItem } from '@material-ui/core';
-import RssDialog                  from 'Components/RssDialog/RssDialog';
-import RssButton                  from 'Components/RssButton/RssButton';
-import LoginFormDialog            from 'Components/LoginFormDialog/LoginFormDialog';
+const RssDialog       = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssButton       = loadable(() => import('Components/RssButton/RssButton'));
+const LoginFormDialog = loadable(() => import('Components/LoginFormDialog/LoginFormDialog'));
 
 class RssDownloadItemsDialog extends React.Component {
   constructor(props) {

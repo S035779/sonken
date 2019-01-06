@@ -1,3 +1,4 @@
+import loadable                 from '@loadable/component';
 import * as R                   from 'ramda';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
@@ -10,9 +11,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import RssSearch                from 'Components/RssSearch/RssSearch';
-import RssButtons               from 'Components/RssButtons/RssButtons';
-import RssList                  from 'Components/RssList/RssList';
+const RssSearch  = loadable(() => import('Components/RssSearch/RssSearch'  )); 
+const RssButtons = loadable(() => import('Components/RssButtons/RssButtons')); 
+const RssList    = loadable(() => import('Components/RssList/RssList'      )); 
 
 class Dashboard extends React.Component {
   static getStores() {
@@ -23,12 +24,13 @@ class Dashboard extends React.Component {
     return getState('dashboardStore');
   }
 
-  static prefetch(options) {
-    const { user, category } = options;
+  static prefetch({ user, category, page, filter }) {
     if(!user) return null;
-    std.logInfo(Dashboard.displayName, 'prefetch', { user, category });
+    std.logInfo(Dashboard.displayName, 'fetch', { user, category });
+    const skip = 0;
+    const limit = page ? page.perPage : 20;
     return NoteAction.presetUser(user)
-      .then(() => NoteAction.prefetchNotes(user, category, 0, 20));
+      .then(() => NoteAction.fetchNotes(user, category, skip, limit, filter));
   }
 
   componentDidMount() {
@@ -40,8 +42,9 @@ class Dashboard extends React.Component {
       //const limit = page.perPage;
       const category = match.params.category || 'marchant';
       this.spn.start();
-      std.logInfo(Dashboard.displayName, 'fetch', category);
-      NoteAction.fetchNotes(user, category, 0, page.perPage)
+      //std.logInfo(Dashboard.displayName, 'fetch', category);
+      //NoteAction.fetchNotes(user, category, 0, page.perPage)
+      Dashboard.prefetch({ user, category, page })
         .then(() => this.spn.stop());
     }
   }
@@ -59,8 +62,9 @@ class Dashboard extends React.Component {
       //const skip = (page.number - 1) * page.perPage;
       //const limit = page.perPage;
       this.spn.start();
-      std.logInfo(Dashboard.displayName, 'update', nextCategory);
-      NoteAction.fetchNotes(user, nextCategory, 0, page.perPage, filter)
+      //std.logInfo(Dashboard.displayName, 'update', nextCategory);
+      //NoteAction.fetchNotes(user, nextCategory, 0, page.perPage, filter)
+      Dashboard.prefetch({ user, category: nextCategory, page, filter })
         .then(() => this.spn.stop());
     }
   }
@@ -117,7 +121,7 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    //std.logInfo(Dashboard.displayName, 'State', this.state.notes);
+    //std.logInfo(Dashboard.displayName, 'State', this.state);
     const { classes, match, route, location } = this.props;
     const { isAuthenticated, user, notes, page, ids, filter, file, images, categorys, profile, preference } = this.state;
     const _id = match.params.id;

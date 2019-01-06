@@ -1,3 +1,4 @@
+import loadable                   from '@loadable/component';
 import * as R             from 'ramda';
 import React              from 'react';
 import { withRouter }     from 'react-router-dom';
@@ -10,7 +11,7 @@ import { withStyles }     from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Fab, LinearProgress }
                           from '@material-ui/core';
 import { Menu, MoreVert } from '@material-ui/icons';
-import RssMenu            from 'Components/RssMenu/RssMenu';
+const RssMenu = loadable(() => import('Components/RssMenu/RssMenu'));
 
 const interval = 1000 * 60 * 3;
 

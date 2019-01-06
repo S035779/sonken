@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -9,9 +10,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import FaqSearch                from 'Components/FaqSearch/FaqSearch';
-import FaqButtons               from 'Components/FaqButtons/FaqButtons';
-import FaqList                  from 'Components/FaqList/FaqList';
+const FaqSearch  = loadable(() => import('Components/FaqSearch/FaqSearch'));
+const FaqButtons = loadable(() => import('Components/FaqButtons/FaqButtons'));
+const FaqList    = loadable(() => import('Components/FaqList/FaqList'));
 
 class Faq extends React.Component {
   static getStores() {
@@ -22,14 +23,11 @@ class Faq extends React.Component {
     return getState('faqStore');
   }
 
-  static prefetch(options) {
-    const { admin } = options;
+  static prefetch({ admin }) {
     if(!admin) return null;
-    std.logInfo(Faq.displayName, 'prefetch', options);
-    return Promise.all([
-        FaqAction.presetAdmin(admin)
-      , FaqAction.prefetchFaqs()
-      ]);
+    std.logInfo(Faq.displayName, 'fetch', { admin });
+    return FaqAction.presetAdmin(admin)
+      .then(() => FaqAction.fetchFaqs(admin));
   }
 
   componentDidMount() {
@@ -37,8 +35,9 @@ class Faq extends React.Component {
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
-      std.logInfo(Faq.displayName, 'fetch', 'Faq');
-      FaqAction.fetchFaqs(admin)
+      //std.logInfo(Faq.displayName, 'fetch', 'Faq');
+      //FaqAction.fetchFaqs(admin)
+      Faq.prefetch({ admin })
         .then(() => this.spn.stop());
     }
   }

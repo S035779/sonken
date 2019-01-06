@@ -7,26 +7,26 @@ export default {
         dispatch({ type: 'user/preset', user, isAuthenticated });
       });
   },
-  prefetchNotes(user, category, skip, limit) {
-    return NoteApiClient.prefetchNotes(user, category, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/my', notes });
-      });
-  },
-  prefetchCategorys(user, category, skip, limit) {
-    return NoteApiClient.prefetchCategorys(user, category, skip, limit).then(categorys => {
-        dispatch({ type: 'category/prefetch/my', categorys });
-      });
-  },
-  prefetchBided(user, skip, limit) {
-    return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/bided', notes });
-      });
-  },
-  prefetchTraded(user, skip, limit) {
-    return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'note/prefetch/traded', notes });
-      });
-  },
+  //prefetchNotes(user, category, skip, limit) {
+  //  return NoteApiClient.prefetchNotes(user, category, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/my', notes });
+  //    });
+  //},
+  //prefetchCategorys(user, category, skip, limit) {
+  //  return NoteApiClient.prefetchCategorys(user, category, skip, limit).then(categorys => {
+  //      dispatch({ type: 'category/prefetch/my', categorys });
+  //    });
+  //},
+  //prefetchBided(user, skip, limit) {
+  //  return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/bided', notes });
+  //    });
+  //},
+  //prefetchTraded(user, skip, limit) {
+  //  return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'note/prefetch/traded', notes });
+  //    });
+  //},
   //fetchCategorys(user, category, skip, limit) {
   //  return NoteApiClient.fetchCategorys(user, category, skip, limit).then(categorys => {
   //      dispatch({ type: 'category/fetch/my', categorys });

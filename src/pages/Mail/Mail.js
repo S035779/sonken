@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -9,9 +10,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import MailSearch               from 'Components/MailSearch/MailSearch';
-import MailButtons              from 'Components/MailButtons/MailButtons';
-import MailList                 from 'Components/MailList/MailList';
+const MailSearch  = loadable(() => import('Components/MailSearch/MailSearch'));
+const MailButtons = loadable(() => import('Components/MailButtons/MailButtons'));
+const MailList    = loadable(() => import('Components/MailList/MailList'));
 
 class Mail extends React.Component {
   static getStores() {
@@ -22,14 +23,11 @@ class Mail extends React.Component {
     return getState('mailStore');
   }
 
-  static prefetch(options) {
-    const { admin } = options;
+  static prefetch({ admin }) {
     if(!admin) return null;
-    std.logInfo(Mail.displayName, 'prefetch', options);
-    return Promise.all([
-        MailAction.presetAdmin(options.admin)
-      , MailAction.prefetchMails()
-      ]);
+    std.logInfo(Mail.displayName, 'fetch', { admin });
+    return MailAction.presetAdmin(admin)
+      .then(() => MailAction.fetchMails(admin));
   }
 
   componentDidMount() {
@@ -37,8 +35,9 @@ class Mail extends React.Component {
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
-      std.logInfo(Mail.displayName, 'fetch', 'Mail');
-      MailAction.fetchMails(admin)
+      //std.logInfo(Mail.displayName, 'fetch', 'Mail');
+      //MailAction.fetchMails(admin)
+      Mail.prefetch({ admin })
         .then(() => this.spn.stop());
     }
   }

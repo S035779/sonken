@@ -1,4 +1,5 @@
 import { ReduceStore } from 'flux/utils';
+import * as R from 'ramda';
 
 export default class MailStore extends ReduceStore {
   getInitialState() {
@@ -18,7 +19,7 @@ export default class MailStore extends ReduceStore {
   
   updateMail(state, action) {
     return state.mails.map(mail => action.id === mail._id
-      ? Object.assign({}, mail, action.mail) : mail);
+      ? R.merge(mail, action.mail) : mail);
   }
 
   deleteMail(state, action) {
@@ -28,70 +29,42 @@ export default class MailStore extends ReduceStore {
 
   createSelect(state, action) {
     const isMail = obj => action.ids.some(id => id === obj._id)
-    const setMail = obj => Object.assign({}, obj, { selected: true });
+    const setMail = obj => R.merge(obj, { selected: true });
     return state.mails.map(mail => isMail(mail) ? setMail(mail) : mail);
   }
 
   deleteSelect(state, action) {
     const isMail = obj => action.ids.some(id => id === obj._id)
-    const setMail = obj => Object.assign({}, obj, { selected: false });
+    const setMail = obj => R.merge(obj, { selected: false });
     return state.mails.map(mail => isMail(mail) ? setMail(mail) : mail);
   }
 
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
-        return Object.assign({}, state, {
-          admin:   action.admin
-        , isAuthenticated: action.isAuthenticated
-        })
+        return R.merge(state, { admin:   action.admin, isAuthenticated: action.isAuthenticated })
       case 'login/authenticate':
-        return Object.assign({}, state, {
-          isAuthenticated: action.isAuthenticated
-        });
-      case 'mail/prefetch':
-        return Object.assign({}, state, {
-          mails:  action.mails
-        });
+        return R.merge(state, { isAuthenticated: action.isAuthenticated });
+      //case 'mail/prefetch':
+      //  return R.merge(state, { mails:  action.mails });
       case 'mail/fetch':
-        return Object.assign({}, state, {
-          mails:  action.mails
-        });
+        return R.merge(state, { mails:  action.mails });
       case 'mail/create':
-        return Object.assign({}, state, {
-          mails:  [action.mail, ...state.mails]
-        });
+        return R.merge(state, { mails:  [action.mail, ...state.mails] });
       case 'mail/update': 
-        return Object.assign({}, state, {
-          mails:  this.updateMail(state, action)
-        });
+        return R.merge(state, { mails:  this.updateMail(state, action) });
       case 'mail/pagenation':
-        return Object.assign({}, state, {
-          page:   action.page
-        });
+        return R.merge(state, { page:   action.page });
       case 'mail/select':
-        return Object.assign({}, state, {
-          ids:    action.ids
-        });
+        return R.merge(state, { ids:    action.ids });
       case 'mail/delete':
-        return Object.assign({}, state, {
-          mails:  this.deleteMail(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { mails:  this.deleteMail(state, action) , ids:    [] });
       case 'select/create':
-        return Object.assign({}, state, {
-          mails: this.createSelect(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { mails: this.createSelect(state, action) , ids:    [] });
       case 'select/delete':
-        return Object.assign({}, state, {
-          mails: this.deleteSelect(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { mails: this.deleteSelect(state, action) , ids:    [] });
       case 'mail/upload':
-        return Object.assign({}, state, {
-          mail: this.updateMail(state, action)
-        });
+        return R.merge(state, { mail: this.updateMail(state, action) });
       case 'mail/rehydrate':
         return    action.state;
       default: 

@@ -11,9 +11,7 @@ class RssView extends React.Component {
   render() {
     //std.logInfo(RssView.displayName, 'Props', this.props);
     const {classes, note} = this.props;
-    const link_img = note.AmazonImg === '' || !note.AmazonImg
-      ? `data:image/png;base64,${noImg}`
-      : note.AmazonImg;
+    const link_img = note.AmazonImg === '' || !note.AmazonImg ? `data:image/png;base64,${noImg}` : note.AmazonImg;
     const link_kpa = kpa + note.asin;
     return <div className={classes.noteView}>
       <img className={classes.image} src={link_img} />
@@ -30,9 +28,7 @@ RssView.propTypes = {
 
 const rowHeight = 62;
 const styles = {
-  noteView: { display: 'flex', flexDirection: 'row'
-            , alignItems: 'center', height: rowHeight * 4 - 30
-            , justifyContent: 'space-around' }
+  noteView: { display: 'flex', flexDirection: 'row', alignItems: 'center', height: rowHeight * 4 - 30, justifyContent: 'space-around' }
 , image:    { width: '15%', border: '1px solid #CCC' }
 , graph:    { width: '80%', height: '100%', border: '1px solid #CCC' }
 };

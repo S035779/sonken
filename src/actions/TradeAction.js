@@ -12,11 +12,11 @@ export default {
         dispatch({ type: 'bids/delete', ids });
       });
   },
-  prefetchTraded(user, skip, limit) {
-    return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'trade/prefetch', notes });
-      });
-  },
+  //prefetchTraded(user, skip, limit) {
+  //  return NoteApiClient.prefetchTradedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'trade/prefetch', notes });
+  //    });
+  //},
   fetchTraded(user, skip, limit, filter) {
     return NoteApiClient.fetchTradedNotes(user, skip, limit, filter).then(notes => {
         dispatch({ type: 'trade/fetch', notes });

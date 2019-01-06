@@ -56,8 +56,8 @@ export default class BidedNotesStore extends ReduceStore {
         return R.merge(state, { isAuthenticated: action.isAuthenticated });
       case 'list/delete':
         return R.merge(state, { notes: this.deleteList(state, action), ids: [] });
-      case 'bids/prefetch':
-        return R.merge(state, { notes: action.notes });
+      //case 'bids/prefetch':
+      //  return R.merge(state, { notes: action.notes });
       case 'bids/fetch':
         return R.merge(state, { notes: action.notes });
       case 'bids/create':

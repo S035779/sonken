@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React              from 'react';
 import PropTypes          from 'prop-types';
 import { Link }           from 'react-router-dom';
@@ -6,7 +7,7 @@ import std                from 'Utilities/stdutils';
 import { withStyles }     from '@material-ui/core/styles';
 import { Typography }     from '@material-ui/core';
 import { AccountCircle }  from '@material-ui/icons';
-import EditBody           from 'Components/EditBody/EditBody';
+const EditBody = loadable(() => import('Components/EditBody/EditBody'));
 
 class FaqsList extends React.Component {
   renderList(faq, classes) {

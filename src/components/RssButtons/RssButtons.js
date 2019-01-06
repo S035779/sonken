@@ -1,14 +1,15 @@
-import React                  from 'react';
-import PropTypes              from 'prop-types';
-import NoteAction             from 'Actions/NoteAction';
-import std                    from 'Utilities/stdutils';
-import Spinner                from 'Utilities/Spinner';
+import loadable         from '@loadable/component';
+import React            from 'react';
+import PropTypes        from 'prop-types';
+import NoteAction       from 'Actions/NoteAction';
+import std              from 'Utilities/stdutils';
+import Spinner          from 'Utilities/Spinner';
 
-import { withStyles }         from '@material-ui/core/styles';
+import { withStyles }   from '@material-ui/core/styles';
 import { Button, Checkbox }   from '@material-ui/core';
-import RssDialog              from 'Components/RssDialog/RssDialog';
-import RssButton              from 'Components/RssButton/RssButton';
-import RssDownloadItemsDialog from 'Components/RssDownloadItemsDialog/RssDownloadItemsDialog';
+const RssDialog              = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssButton              = loadable(() => import('Components/RssButton/RssButton'));
+const RssDownloadItemsDialog = loadable(() => import('Components/RssDownloadItemsDialog/RssDownloadItemsDialog'));
 
 const isAlpha = process.env.NODE_ENV !== 'production';
 

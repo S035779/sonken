@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { Redirect }             from 'react-router-dom';
@@ -9,9 +10,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-import AdminSearch              from 'Components/AdminSearch/AdminSearch';
-import AdminButtons             from 'Components/AdminButtons/AdminButtons';
-import AdminList                from 'Components/AdminList/AdminList';
+const AdminSearch  = loadable(() => import('Components/AdminSearch/AdminSearch'));
+const AdminButtons = loadable(() => import('Components/AdminButtons/AdminButtons'));
+const AdminList    = loadable(() => import('Components/AdminList/AdminList'));
 
 class Management extends React.Component {
   static getStores() {
@@ -22,14 +23,11 @@ class Management extends React.Component {
     return getState('managementStore');
   }
 
-  static prefetch(options) {
-    const { admin } = options;
+  static prefetch({ admin }) {
     if(!admin) return null;
-    std.logInfo(Management.displayName, 'prefetch', options);
-    return Promise.all([
-      UserAction.presetAdmin(admin)
-    , UserAction.prefetchUsers()
-    ]);
+    std.logInfo(Management.displayName, 'fetch', { admin });
+    return UserAction.presetAdmin(admin)
+      .then(() => UserAction.fetchUsers());
   }
 
   componentDidMount() {
@@ -37,8 +35,10 @@ class Management extends React.Component {
     const { isAuthenticated, admin } = this.state;
     if(isAuthenticated) {
       this.spn.start();
-      std.logInfo(Management.displayName, 'fetch', 'Management');
-      UserAction.fetchUsers(admin).then(() => this.spn.stop());
+      //std.logInfo(Management.displayName, 'fetch', 'Management');
+      //UserAction.fetchUsers(admin)
+      Management.prefetch({ admin })
+        .then(() => this.spn.stop());
     }
   }
 

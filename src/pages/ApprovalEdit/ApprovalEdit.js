@@ -1,8 +1,9 @@
+import loadable       from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import ApprovalForms  from 'Components/ApprovalForms/ApprovalForms';
+const ApprovalForms = loadable(() => import('Components/ApprovalForms/ApprovalForms'));
 
 class ApprovalEdit extends React.Component {
   render() {

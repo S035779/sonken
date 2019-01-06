@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types'
 import { Link }                 from 'react-router-dom';
@@ -7,7 +8,7 @@ import { withStyles }           from '@material-ui/core/styles';
 import { AppBar, Toolbar }      from '@material-ui/core';
 import { BlurOn, Fingerprint }  from '@material-ui/icons';
 //import { BlurOn, PieChartOutlined, Fingerprint, PhoneIphone, LockOpen } from '@material-ui/icons';
-import RssButton                from 'Components/RssButton/RssButton';
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
 
 const app_name = process.env.APP_NAME;
 const isBeta = process.env.NODE_ENV !== 'staging';

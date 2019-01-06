@@ -1,4 +1,5 @@
 import { ReduceStore } from 'flux/utils';
+import * as R from 'ramda';
 
 export default class FaqStore extends ReduceStore {
   getInitialState() {
@@ -17,8 +18,7 @@ export default class FaqStore extends ReduceStore {
   }
   
   updateFaq(state, action) {
-    return state.faqs.map(faq => action.id === faq._id
-      ? Object.assign({}, faq, action.faq) : faq);
+    return state.faqs.map(faq => action.id === faq._id ? R.merge(faq, action.faq) : faq);
   }
 
   deleteFaq(state, action) {
@@ -28,70 +28,42 @@ export default class FaqStore extends ReduceStore {
 
   createPost(state, action) {
     const isFaq = obj => action.ids.some(id => id === obj._id)
-    const setFaq = obj => Object.assign({}, obj, { posted: true });
+    const setFaq = obj => R.merge(obj, { posted: true });
     return state.faqs.map(faq => isFaq(faq) ? setFaq(faq) : faq);
   }
 
   deletePost(state, action) {
     const isFaq = obj => action.ids.some(id => id === obj._id)
-    const setFaq = obj => Object.assign({}, obj, { posted: false });
+    const setFaq = obj => R.merge(obj, { posted: false });
     return state.faqs.map(faq => isFaq(faq) ? setFaq(faq) : faq);
   }
 
   reduce(state, action) {
     switch (action.type) { 
       case 'admin/preset':
-        return Object.assign({}, state, {
-          admin:   action.admin
-        , isAuthenticated: action.isAuthenticated
-        });
+        return R.merge(state, { admin:   action.admin , isAuthenticated: action.isAuthenticated });
       case 'login/authenticate':
-        return Object.assign({}, state, {
-          isAuthenticated: action.isAuthenticated
-        });
-      case 'faq/prefetch':
-        return Object.assign({}, state, {
-          faqs:  action.faqs
-        });
+        return R.merge(state, { isAuthenticated: action.isAuthenticated });
+      //case 'faq/prefetch':
+      //  return R.merge(state, { faqs:  action.faqs });
       case 'faq/fetch':
-        return Object.assign({}, state, {
-          faqs:  action.faqs
-        });
+        return R.merge(state, { faqs:  action.faqs });
       case 'faq/create':
-        return Object.assign({}, state, {
-          faqs:  [action.faq, ...state.faqs]
-        });
+        return R.merge(state, { faqs:  [action.faq, ...state.faqs] });
       case 'faq/update': 
-        return Object.assign({}, state, {
-          faqs:  this.updateFaq(state, action)
-        });
+        return R.merge(state, { faqs:  this.updateFaq(state, action) });
       case 'faq/pagenation':
-        return Object.assign({}, state, {
-          page:   action.page
-        });
+        return R.merge(state, { page:   action.page });
       case 'faq/select':
-        return Object.assign({}, state, {
-          ids:    action.ids
-        });
+        return R.merge(state, { ids:    action.ids });
       case 'faq/delete':
-        return Object.assign({}, state, {
-          faqs:  this.deleteFaq(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { faqs:  this.deleteFaq(state, action) , ids:    [] });
       case 'post/create':
-        return Object.assign({}, state, {
-          faqs: this.createPost(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { faqs: this.createPost(state, action) , ids:    [] });
       case 'post/delete':
-        return Object.assign({}, state, {
-          faqs: this.deletePost(state, action)
-        , ids:    []
-        });
+        return R.merge(state, { faqs: this.deletePost(state, action) , ids:    [] });
       case 'faq/upload':
-        return Object.assign({}, state, {
-          faq: this.updateFaq(state, action)
-        });
+        return R.merge(state, { faq: this.updateFaq(state, action) });
       case 'faq/rehydrate':
         return    action.state;
       default: 

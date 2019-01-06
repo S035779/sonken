@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React              from 'react';
 import PropTypes          from 'prop-types';
 import * as R             from 'ramda';
@@ -7,11 +8,11 @@ import Spinner            from 'Utilities/Spinner';
 
 import { withStyles }     from '@material-ui/core/styles';
 import { Select, Input, Button, Typography, InputLabel, FormControl, MenuItem } from '@material-ui/core';
-import RssButton          from 'Components/RssButton/RssButton';
-import RssDialog          from 'Components/RssDialog/RssDialog';
-import RssAddDialog       from 'Components/RssAddDialog/RssAddDialog';
-import RssUploadDialog    from 'Components/RssUploadDialog/RssUploadDialog';
-import RssDownloadDialog  from 'Components/RssDownloadDialog/RssDownloadDialog';
+const RssButton         = loadable(() => import('Components/RssButton/RssButton'));
+const RssDialog         = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssAddDialog      = loadable(() => import('Components/RssAddDialog/RssAddDialog'));
+const RssUploadDialog   = loadable(() => import('Components/RssUploadDialog/RssUploadDialog'));
+const RssDownloadDialog = loadable(() => import('Components/RssDownloadDialog/RssDownloadDialog'));
 
 class RssSearch extends React.Component {
   constructor(props) {

@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import * as R           from 'ramda';
@@ -6,10 +7,9 @@ import std              from 'Utilities/stdutils';
 import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
-import { Button, Checkbox, Typography, TextField }
-                        from '@material-ui/core';
-import BidsItemList     from 'Components/BidsItemList/BidsItemList';
-import RssDialog        from 'Components/RssDialog/RssDialog';
+import { Button, Checkbox, Typography, TextField } from '@material-ui/core';
+const BidsItemList = loadable(() => import('Components/BidsItemList/BidsItemList'));
+const RssDialog    = loadable(() => import('Components/RssDialog/RssDialog'));
 
 class BidsFilter extends React.Component {
   constructor(props) {

@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import NoteAction       from 'Actions/NoteAction';
@@ -6,11 +7,11 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, TextField, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import { Clear, Edit } from '@material-ui/icons';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssNewDialog     from 'Components/RssNewDialog/RssNewDialog';
-import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
+const RssDialog       = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssCheckbox     = loadable(() => import('Components/RssCheckbox/RssCheckbox'));
+const RssButton       = loadable(() => import('Components/RssButton/RssButton'));
+const RssNewDialog    = loadable(() => import('Components/RssNewDialog/RssNewDialog'));
+const LoginFormDialog = loadable(() => import('Components/LoginFormDialog/LoginFormDialog'));
 
 class RssFormDialog extends React.Component {
   constructor(props) {

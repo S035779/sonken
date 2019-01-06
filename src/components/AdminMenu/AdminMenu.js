@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import * as R           from 'ramda';
 import React            from 'react';
 import PropTypes        from 'prop-types'
@@ -8,8 +9,8 @@ import Spinner          from 'Utilities/Spinner';
 import { withStyles }   from '@material-ui/core/styles';
 import { IconButton, Menu, TextField, Typography, MenuItem } from '@material-ui/core';
 import { AccountCircle } from '@material-ui/icons';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
+const RssDialog       = loadable(() => import('Components/RssDialog/RssDialog'));
+const LoginFormDialog = loadable(() => import('Components/LoginFormDialog/LoginFormDialog'));
 
 class AdminMenu extends React.Component {
   constructor(props) {

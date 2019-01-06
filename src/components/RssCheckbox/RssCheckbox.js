@@ -3,8 +3,7 @@ import PropTypes      from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Checkbox }   from '@material-ui/core';
-import { CheckBoxOutlineBlank, CheckBox }
-                      from '@material-ui/icons';
+import { CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
 
 class RssCheckbox extends React.Component {
   render() {

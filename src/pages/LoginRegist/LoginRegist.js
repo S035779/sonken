@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import { withRouter }   from 'react-router-dom';
@@ -7,10 +8,11 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { TextField, Typography, Divider, MenuItem, FormControlLabel } from '@material-ui/core';
 //import { TextField, Typography, Divider, MenuItem, FormControlLabel, PersonAdd, Public, NetworkCheck } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssFullDialog    from 'Components/RssFullDialog/RssFullDialog';
-import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
+const RssButton     = loadable(() => import('Components/RssButton/RssButton'));
+const RssDialog     = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssFullDialog = loadable(() => import('Components/RssFullDialog/RssFullDialog'));
+const RssCheckbox   = loadable(() => import('Components/RssCheckbox/RssCheckbox'));
+
 import agrTxt           from 'Main/agreement';
 import plnImg           from 'Main/planlist';
 

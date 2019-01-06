@@ -1,3 +1,4 @@
+import loadable                   from '@loadable/component';
 import * as R               from 'ramda';
 import React                from 'react';
 import PropTypes            from 'prop-types';
@@ -8,7 +9,7 @@ import { withStyles }       from '@material-ui/core/styles';
 import { Button, List, Paper, IconButton, ListItem, ListItemText, ListItemSecondaryAction } 
                             from '@material-ui/core';
 import { Star, StarBorder, Delete, FiberNew, Done } from '@material-ui/icons';
-import RssButton            from 'Components/RssButton/RssButton';
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
 
 const amz = 'https://www.amazon.co.jp/gp/product/';
 const _dummy = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";

@@ -17,9 +17,8 @@ class Login extends React.Component {
     return getState('loginStore');
   }
 
-  static prefetch(options) {
-    const { user, admin } = options;
-    std.logInfo(Login.displayName, 'prefetch', options);
+  static prefetch({ user, admin }) {
+    std.logInfo(Login.displayName, 'fetch', { user, admin });
     if(user) return LoginAction.presetUser(user);
     if(admin) return LoginAction.presetAdmin(admin);
   }

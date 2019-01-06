@@ -1,3 +1,4 @@
+import loadable       from '@loadable/component';
 import React                    from 'react';
 import PropTypes                from 'prop-types';
 import { renderRoutes }         from 'react-router-config';
@@ -8,7 +9,7 @@ import LoginAction              from 'Actions/LoginAction';
 import { withStyles }           from '@material-ui/core/styles';
 import { CssBaseline }          from '@material-ui/core';
 import ErrorBoundary            from 'Components/ErrorBoundary/ErrorBoundary';
-import RssDrawer                from 'Components/RssDrawer/RssDrawer';
+const RssDrawer = loadable(() => import('Components/RssDrawer/RssDrawer'));
 
 class App extends React.Component {
   static getStores() {

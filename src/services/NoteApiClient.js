@@ -2,93 +2,100 @@ import * as R from 'ramda';
 import net    from 'Utilities/netutils';
 import xhr    from 'Utilities/xhrutils';
 
-const api = process.env.API_URL  || 'http://localhost:8080/api';
+const API_URL = process.env.API_URL;
+const isLocal = process.env.PLATFORM === 'local';
 
 export default {
   request(request, options) {
     switch(request) {
       case 'preset/user':
         return new Promise(resolve => setTimeout(() => resolve(options.user !== ''), 200));
-      case 'prefetch/notes':
-        return net.promise(api + '/notes',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
+      //case 'prefetch/notes':
+      //  return net.promise(API_URL + '/notes',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
       //case 'prefetch/categorys':
-      //  return net.promise(api +'/categorys', R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
-      case 'prefetch/traded':
-        return net.promise(api + '/traded',   R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
-      case 'prefetch/bided':
-        return net.promise(api + '/bided',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
+      //  return net.promise(API_URL +'/categorys', R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
+      //case 'prefetch/traded':
+      //  return net.promise(API_URL + '/traded',   R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
+      //case 'prefetch/bided':
+      //  return net.promise(API_URL + '/bided',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }));
       //case 'fetch/categorys':
-      //  return new Promise((resolve, reject) => xhr.getJSON(    api + '/categorys', options, resolve, reject));
+      //  return new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/categorys', options, resolve, reject));
       case 'fetch/notes':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/notes',     options, resolve, reject));
+        return isLocal
+          ? net.promise(API_URL + '/notes',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }))
+          : new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/notes',     options, resolve, reject));
       case 'fetch/traded':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/traded',    options, resolve, reject));
+        return isLocal
+          ? net.promise(API_URL + '/traded',   R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }))
+          : new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/traded',    options, resolve, reject));
       case 'fetch/bided':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/bided',     options, resolve, reject));
+        return isLocal
+          ? net.promise(API_URL + '/bided',    R.merge({ method: 'GET', type: 'NV', accept: 'JSON' }, { search: options }))
+          : new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/bided',     options, resolve, reject));
       case 'fetch/category':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/category',  options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/category',  options, resolve, reject));
       case 'create/category':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/category',  options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/category',  options, resolve, reject));
       case 'update/category':
-        return new Promise((resolve, reject) => xhr.postJSON(   api + '/category',  options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(   API_URL + '/category',  options, resolve, reject));
       case 'delete/category':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/category',  options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/category',  options, resolve, reject));
       case 'fetch/note':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/note',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/note',      options, resolve, reject));
       case 'create/note':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/note',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/note',      options, resolve, reject));
       case 'update/note':
-        return new Promise((resolve, reject) => xhr.postJSON(   api + '/note',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postJSON(   API_URL + '/note',      options, resolve, reject));
       case 'delete/note':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/note',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/note',      options, resolve, reject));
       case 'create/added':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/added',     options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/added',     options, resolve, reject));
       case 'delete/added':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/added',     options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/added',     options, resolve, reject));
       case 'create/deleted':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/deleted',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/deleted',   options, resolve, reject));
       case 'delete/deleted':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/deleted',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/deleted',   options, resolve, reject));
       case 'create/readed':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/readed',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/readed',    options, resolve, reject));
       case 'delete/readed':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/readed',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/readed',    options, resolve, reject));
       case 'create/traded':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/traded',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/traded',    options, resolve, reject));
       case 'delete/traded':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/traded',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/traded',    options, resolve, reject));
       case 'create/bided':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/bided',     options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/bided',     options, resolve, reject));
       case 'delete/bided':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/bided',     options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/bided',     options, resolve, reject));
       case 'create/starred':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/starred',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/starred',   options, resolve, reject));
       case 'delete/starred':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/starred',   options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/starred',   options, resolve, reject));
       case 'create/listed':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/listed',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/listed',    options, resolve, reject));
       case 'delete/listed':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/listed',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/listed',    options, resolve, reject));
       case 'upload/notes':
-        return new Promise((resolve, reject) => xhr.putFile(    api + '/notes',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putFile(    API_URL + '/notes',      options, resolve, reject));
       case 'download/notes':
-        return new Promise((resolve, reject) => xhr.postFile(    api + '/notes',      options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postFile(    API_URL + '/notes',      options, resolve, reject));
       //case 'download/items':
-      //  return new Promise((resolve, reject) => xhr.postFile(   api + '/file',      options, resolve, reject));
+      //  return new Promise((resolve, reject) => xhr.postFile(   API_URL + '/file',      options, resolve, reject));
       //case 'download/images':
-      //  return new Promise((resolve, reject) => xhr.postFile(   api + '/image',     options, resolve, reject));
+      //  return new Promise((resolve, reject) => xhr.postFile(   API_URL + '/image',     options, resolve, reject));
       case 'download/traded':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/traded',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postFile(   API_URL + '/traded',    options, resolve, reject));
       case 'download/bided':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/bided',     options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postFile(   API_URL + '/bided',     options, resolve, reject));
       case 'fetch/jobs':
-        return new Promise((resolve, reject) => xhr.getJSON(    api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.getJSON(    API_URL + '/worker',    options, resolve, reject));
       case 'download/job':
-        return new Promise((resolve, reject) => xhr.postFile(   api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.postFile(   API_URL + '/worker',    options, resolve, reject));
       case 'signedlink/job':
-        return new Promise((resolve, reject) => xhr.putJSON(    api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.putJSON(    API_URL + '/worker',    options, resolve, reject));
       case 'clearcache/job':
-        return new Promise((resolve, reject) => xhr.deleteJSON( api + '/worker',    options, resolve, reject));
+        return new Promise((resolve, reject) => xhr.deleteJSON( API_URL + '/worker',    options, resolve, reject));
       case 'pagenation/note':
       case 'pagenation/traded':
       case 'pagenation/bided':
@@ -108,18 +115,18 @@ export default {
   presetUser(user) {
     return this.request('preset/user', { user });
   },
-  prefetchNotes(user, category, skip, limit) {
-    return this.request('prefetch/notes', { user, category, skip, limit });
-  },
+  //prefetchNotes(user, category, skip, limit) {
+  //  return this.request('prefetch/notes', { user, category, skip, limit });
+  //},
   //prefetchCategorys(user, category, skip, limit) {
   //  return this.request('prefetch/categorys', { user, category, skip, limit });
   //},
-  prefetchTradedNotes(user, skip, limit) {
-    return this.request('prefetch/traded', { user, skip, limit });
-  },
-  prefetchBidedNotes(user, skip, limit) {
-    return this.request('prefetch/bided', { user, skip, limit });
-  },
+  //prefetchTradedNotes(user, skip, limit) {
+  //  return this.request('prefetch/traded', { user, skip, limit });
+  //},
+  //prefetchBidedNotes(user, skip, limit) {
+  //  return this.request('prefetch/bided', { user, skip, limit });
+  //},
 
   /*
    * Notes

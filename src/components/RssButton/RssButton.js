@@ -1,7 +1,6 @@
 import React          from 'react';
 
-import { MuiThemeProvider, createMuiTheme }
-                      from '@material-ui/core/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { Button }     from '@material-ui/core';
 import { fade }       from '@material-ui/core/styles/colorManipulator';
 import orange         from '@material-ui/core/colors/orange';

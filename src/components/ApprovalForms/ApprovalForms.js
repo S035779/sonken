@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import * as R           from 'ramda';
 import React            from 'react';
 import PropTypes        from 'prop-types';
@@ -7,8 +8,8 @@ import Spinner          from 'Utilities/Spinner';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { Typography }   from '@material-ui/core';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssButton        from 'Components/RssButton/RssButton';
+const RssDialog = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssButton = loadable(() => import('Components/RssButton/RssButton'));
 
 class ApprovalForms extends React.Component {
   constructor(props) {

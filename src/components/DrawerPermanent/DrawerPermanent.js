@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React              from 'react';
 import PropTypes          from 'prop-types'
 import classNames         from 'classnames';
@@ -5,7 +6,8 @@ import std                from 'Utilities/stdutils';
 
 import { withStyles }     from '@material-ui/core/styles';
 import { Hidden, Drawer } from '@material-ui/core';
-import DrawerList         from 'Components/DrawerList/DrawerList';
+const DrawerList = loadable(() => import('Components/DrawerList/DrawerList'));
+
 import sideImg            from 'Assets/image/sidebar-5.jpg';
 
 class DrawerPermanent extends React.Component {

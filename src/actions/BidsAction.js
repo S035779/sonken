@@ -12,11 +12,11 @@ export default {
         dispatch({ type: 'list/delete', ids });
       });
   },
-  prefetchBided(user, skip, limit) {
-    return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
-        dispatch({ type: 'bids/prefetch', notes });
-      });
-  },
+  //prefetchBided(user, skip, limit) {
+  //  return NoteApiClient.prefetchBidedNotes(user, skip, limit).then(notes => {
+  //      dispatch({ type: 'bids/prefetch', notes });
+  //    });
+  //},
   fetchBided(user, skip, limit, filter) {
     return NoteApiClient.fetchBidedNotes(user, skip, limit, filter).then(notes => {
         dispatch({ type: 'bids/fetch', notes });

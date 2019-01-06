@@ -1,8 +1,9 @@
+import loadable       from '@loadable/component';
 import React          from 'react';
 import PropTypes      from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import ClosedForms    from 'Components/ClosedForms/ClosedForms';
+const ClosedForms = loadable(() => import('Components/ClosedForms/ClosedForms'));
 
 class ClosedEdit extends React.Component {
   render() {

@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import { Redirect, withRouter, Link }
@@ -7,10 +8,10 @@ import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { Typography, FormControlLabel } from '@material-ui/core';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssInput         from 'Components/RssInput/RssInput';
-import RssCheckbox      from 'Components/RssCheckbox/RssCheckbox';
+const RssButton   = loadable(() => import('Components/RssButton/RssButton'));
+const RssDialog   = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssInput    = loadable(() => import('Components/RssInput/RssInput'));
+const RssCheckbox = loadable(() => import('Components/RssCheckbox/RssCheckbox'));
 
 class LoginMgmt extends React.Component {
   constructor(props) {

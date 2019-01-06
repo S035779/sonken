@@ -1,3 +1,4 @@
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types'
 import LoginAction      from 'Actions/LoginAction';
@@ -6,10 +7,10 @@ import std              from 'Utilities/stdutils';
 import { withStyles }   from '@material-ui/core/styles';
 import { List, IconButton, Avatar, FormLabel, FormControl, FormHelperText, ListItem, ListItemSecondaryAction, ListItemText, ListItemAvatar } from '@material-ui/core';
 import { Clear, Edit, Folder } from '@material-ui/icons';
-import RssDialog        from 'Components/RssDialog/RssDialog';
-import RssButton        from 'Components/RssButton/RssButton';
-import RssNewDialog     from 'Components/RssNewDialog/RssNewDialog';
-import LoginFormDialog  from 'Components/LoginFormDialog/LoginFormDialog';
+const RssDialog       = loadable(() => import('Components/RssDialog/RssDialog'));
+const RssButton       = loadable(() => import('Components/RssButton/RssButton'));
+const RssNewDialog    = loadable(() => import('Components/RssNewDialog/RssNewDialog'));
+const LoginFormDialog = loadable(() => import('Components/LoginFormDialog/LoginFormDialog'));
 
 class RssEditDialog extends React.Component {
   constructor(props) {
