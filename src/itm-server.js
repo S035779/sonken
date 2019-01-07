@@ -21,6 +21,15 @@ const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
+
+const perPageItemTime = 9.000; // sec. (interval per page)
+const perPageItemNums = 20; // items per page.
+const perNoteProcTime = perPageItemTime * perPageItemNums * 1000; // ms.
+const procNoteNumbers = 1000; // notes.
+const createdInterval = Date.now() - procNoteNumbers * perNoteProcTime; // 1 term process interval.
+const procNoteExpires = Date.now() - 24 * 60 * 60 * 1000; // note expire time = 24 hours.
+const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
+
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[ITM]';
@@ -76,8 +85,8 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 20) * 9)), sort: 'desc'
-      , filter: { expire: Date.now() - 24 * 60 * 60 * 1000, create: Date.now() - updatedInterval * 60 * 1000 }
+      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
+      , filter: { expire: procNoteExpires, create: createdInterval }
       }))
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

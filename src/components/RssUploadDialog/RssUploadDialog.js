@@ -37,13 +37,13 @@ class RssUploadDialog extends React.Component {
 
   handleChangeFile(event) {
     const { user, category } = this.props;
-    const { perPage, name } = this.state;
+    const { name } = this.state;
     const file = event.target.files.item(0);
     const spn = Spinner.of('app');
     spn.start();
     std.logInfo(RssUploadDialog.displayName, 'handleChangeFile', file.type + ";" + file.name);
     NoteAction.upload(user, category, file, name)
-      .then(() => NoteAction.fetchCategorys(user, category, 0, perPage))
+      //.then(() => NoteAction.fetchCategorys(user, category, 0, perPage))
       .then(() => this.setState({ isSuccess: true }))
       .then(() => spn.stop())
       .catch(err => {

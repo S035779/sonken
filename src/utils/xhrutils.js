@@ -15,7 +15,7 @@ const get = function(url, data, resolve, reject) {
     if (request.readyState === 4) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
-        if (type.indexOf("xml") !== -1 && request.responseXML) {
+        if (type && type.indexOf("xml") !== -1 && request.responseXML) {
           resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
           resolve(JSON.parse(request.responseText));
@@ -46,7 +46,7 @@ const getJSON = function(url, data, resolve, reject) {
     if (request.readyState === 4) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
-        if (type.indexOf("xml") !== -1 && request.responseXML) {
+        if (type && type.indexOf("xml") !== -1 && request.responseXML) {
           resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
           resolve(JSON.parse(request.responseText));
@@ -77,7 +77,7 @@ const deleteJSON = function(url, data, resolve, reject) {
     if (request.readyState === 4) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
-        if (type.indexOf("xml") !== -1 && request.responseXML) {
+        if (type && type.indexOf("xml") !== -1 && request.responseXML) {
           resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
           resolve(JSON.parse(request.responseText));
@@ -108,7 +108,7 @@ const post = function(url, data, resolve, reject) {
     if (request.readyState === 4) {
       if (request.status === 200) {
         const type = request.getResponseHeader("Content-Type");
-        if (type.indexOf("xml") !== -1 && request.responseXML) {
+        if (type && type.indexOf("xml") !== -1 && request.responseXML) {
           resolve(request.responseXML);
         } else if (type === "application/json; charset=utf-8") {
           resolve(JSON.parse(request.responseText));

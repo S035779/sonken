@@ -164,8 +164,8 @@ export default class DashboardStore extends ReduceStore {
         return R.merge(state, { isAuthenticated: action.isAuthenticated });
       //case 'category/prefetch/my':
       //  return R.merge(state, { categorys: action.categorys });
-      case 'category/fetch/my':
-        return R.merge(state, { categorys: action.categorys });
+      //case 'category/fetch/my':
+      //  return R.merge(state, { categorys: action.categorys });
       case 'category/create':
         return R.merge(state, { categorys: [action.category, ...state.categorys] });
       case 'category/update': 

@@ -21,6 +21,11 @@ const executeInterval = process.env.JOB_EXE_SEC || 1;
 const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
+
+const perPageItemTime = 60; // sec. (interval per page)
+const perPageItemNums = 20; // items per page.
+const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
+
 process.env.NODE_PENDING_DEPRECATION = 0;
 
 const displayName = '[ITS]';
@@ -69,7 +74,7 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: Math.ceil((updatedInterval * 60) / ((numUpdatedItems / 20) * 60)), sort: 'desc'
+      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
       , filter: { isItems: true }
       }))
     , map(R.map(setQueue))

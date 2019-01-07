@@ -70,11 +70,11 @@ export default class FeedParser {
             user:     { $in: users }
           , category: { $in: categorys }
           , items:    { $ne: [], $exists: true }
-          , $or:      [{ created: { $gt: create }}, { updated: { $lt: expire } }]
+          , $or:      [{ updated: { $gt: create }}, { updated: { $lt: expire } }]
           } : {
             user:     { $in: users }
           , category: { $in: categorys }
-          , $or:      [{ created: { $gt: create }}, { updated: { $lt: expire } }]
+          , $or:      [{ updated: { $gt: create }}, { updated: { $lt: expire } }]
           };
           const select = { user: 1, category: 1, url: 1 };
           const query = Note.find(conditions).select(select);
@@ -90,7 +90,7 @@ export default class FeedParser {
           const hasNotes = R.compose(setItems, hasItems);
           const setNotes = objs => isItems ? hasNotes(objs) : objs;
           const setObject = R.map(doc => doc.toObject());
-          if(isPaginate) query.sort({ updated: sort }).skip(Number(skip)).limit(Number(limit));
+          if(isPaginate) query.sort({ updated : sort }).skip(Number(skip)).limit(Number(limit));
           const promise = (isItems || isImages) ? query.populate(params).exec() : query.exec();
           return promise.then(setObject).then(setNotes);
         }
@@ -218,7 +218,9 @@ export default class FeedParser {
           const setObjects = R.map(doc => doc.toObject());
           if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
           const promise = !isCSV ? query.populate(params).exec() : query.exec();
-          return promise.then(setObjects).then(setNotes);
+          return promise.then(setObjects).then(setNotes)
+          //.then(R.tap(log.trace.bind(this)))
+          ;
         }
       case 'fetch/note':
         {
@@ -1007,7 +1009,7 @@ export default class FeedParser {
   //    this.setCategorys(objs[0])
   //  //, this.setStarred(objs[1])
   //  //  this.setReaded(objs[0])
-  //  , this.toObject
+  //  //, this.toObject
   //  )(objs[1]);
   //  return observables.pipe(
   //    map(setAttribute)
@@ -1151,6 +1153,7 @@ export default class FeedParser {
     //, this.toObject
     )(objs[3]);
     return observables.pipe(
+    //  map(R.tap(log.trace.bind(this)))
       map(setAttribute)
     );
   }
@@ -1696,7 +1699,7 @@ export default class FeedParser {
       const convChar = str => str !== '' ? iconvUtf(str) : '';
       const toMBConv = R.map(R.map(c => isUtf(c) ? c : convChar(c)));
       const toRcords = R.split('\n');
-      const toTailes = R.tail;
+      //const toTailes = R.tail;
       const toColumn = R.map(R.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/));
       const toCutDbl = c => R.match(/^\s*"(.*?)"\s*$/, c)[1];
       const toNonCut = c => R.match(/^\s*(?!")(.*?)\s*$/, c)[1];
@@ -1729,13 +1732,14 @@ export default class FeedParser {
       , bidsprice:    array[4]
       , body:         array[5]
       , updated:      std.formatDate(new Date(), 'YYYY/MM/DD hh:mm:ss') }));
+
       resolve(R.compose(
         setNotes
       , toCutRec
       , toMBConv
       , forkJoin
       , toColumn
-      , toTailes
+      //, toTailes
       , toRcords
       )(data));
     });
