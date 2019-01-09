@@ -22,7 +22,7 @@ const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 
-const perPageItemTime = 9.000; // sec. (interval per page)
+const perPageItemTime = 5; // sec. (interval per page)
 const perPageItemNums = 20; // items per page.
 const perNoteProcTime = perPageItemTime * perPageItemNums * 1000; // ms.
 const procNoteNumbers = 1000; // notes.
