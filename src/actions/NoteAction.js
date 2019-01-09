@@ -110,8 +110,9 @@ export default {
       });
   },
   upload(user, category, file, subcategory) {
-    return NoteApiClient.uploadNotes(user, category, file, subcategory).then(notes => {
+    return NoteApiClient.uploadNotes(user, category, file, subcategory).then(({ notes, categorys }) => {
         dispatch({ type: 'note/upload/my', notes });
+        dispatch({ type: 'category/fetch/my', categorys });
       });
   },
   download(user, category, type) {

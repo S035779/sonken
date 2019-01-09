@@ -70,20 +70,35 @@ class Dashboard extends React.Component {
   }
 
   filterNotes(notes, category, categoryId) {
-    const isCategory = obj => obj.category === category;
-    const isCategoryId = obj => obj.categoryIds ? obj.categoryIds.some(id => id === categoryId) : false;
-    const isNonCategoryId = obj => obj.categoryIds ? obj.categoryIds.length === 0 : true;
-    const isFavorite = obj => obj.items ? obj.items.some(obj => obj.starred) : false;
+    const isCategory        = obj => obj.category === category;
+    const isCategoryId      = obj => obj.categoryIds ? obj.categoryIds.some(id => id === categoryId) : false;
+    const isNonCategoryId   = obj => obj.categoryIds ? obj.categoryIds.length === 0 : true;
+    const isFavorite        = obj => obj.items ? obj.items.some(obj => obj.starred) : false;
+    const hasCategory       = R.filter(isCategory);
+    const hasCategoryId     = R.filter(isCategoryId);
+    const hasNonCategoryId  = R.filter(isNonCategoryId);
+    const hasFavorite       = R.filter(isFavorite);
     if(!notes) return [];
     switch(categoryId) {
       case 'all':
-        return notes.filter(isCategory);
+        return R.compose(
+          hasCategory
+        )(notes);
       case 'none':
-        return notes.filter(isCategory).filter(isNonCategoryId);
+        return R.compose(
+          hasNonCategoryId
+        , hasCategory
+        )(notes);
       case 'favorite':
-        return notes.filter(isCategory).filter(isFavorite);
+        return R.compose(
+          hasFavorite
+        , hasCategory
+        )(notes);
       default:
-        return notes.filter(isCategory).filter(isCategoryId);
+        return R.compose(
+          hasCategoryId
+        , hasCategory
+        )(notes);
     }
   }
 

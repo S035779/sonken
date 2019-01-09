@@ -1617,7 +1617,6 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, subcategory, file }) {
-    const setNote = objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] });
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
@@ -1625,12 +1624,18 @@ export default class FeedParser {
         return forkJoin([
             this.addCategory(user, { category, subcategory })
           , this.setCsvToObj(user, category, file.content)
-          ]).pipe(flatMap(setNote));
+          ]).pipe(
+            flatMap(objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] }))
+          , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
+          );
       case 'opml':
         return forkJoin([
             this.addCategory(user, { category, subcategory })
           , this.setOmplToObj(user, category, file.content)
-          ]).pipe(flatMap(setNote));
+          ]).pipe(
+            flatMap(objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] }))
+          , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
+          );
       default:
         log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
         return null;

@@ -53,7 +53,7 @@ class RssSearch extends React.Component {
     const prevMaxNumber = this.state.maxNumber;
     const prevPage      = this.state.number;
     if((nextMaxNumber !== 0) && (prevPage !== nextPage || prevPerPage !== nextPerPage || prevMaxNumber !== nextMaxNumber)) {
-      std.logInfo(RssSearch.displayName, 'maxNumber', nextMaxNumber);
+      //std.logInfo(RssSearch.displayName, 'maxNumber', nextMaxNumber);
       this.setState({ maxNumber: nextMaxNumber, number: nextPage, perPage: nextPerPage }
         , () => NoteAction.pagenation(this.props.user, { maxNumber: nextMaxNumber, number: nextPage, perPage: nextPerPage }));
     }
