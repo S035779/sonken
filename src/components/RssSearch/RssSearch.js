@@ -82,10 +82,10 @@ class RssSearch extends React.Component {
     const { noteNumber, profile, preference } = this.props;
     const menu = R.find(obj => obj.id === profile.plan)(preference.menu)
     std.logInfo(RssSearch.displayName, 'handleURLSubmit', menu);
-    if(menu && menu.number >= noteNumber + 1) {
-      this.setState({ isAddNote: true });
-    } else {
+    if(menu && menu.number <= noteNumber) {
       this.setState({ isLimit: true });
+    } else {
+      this.setState({ isAddNote: true });
     }
   }
 

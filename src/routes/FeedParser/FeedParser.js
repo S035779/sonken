@@ -1,14 +1,13 @@
 import path                       from 'path';
 import dotenv                     from 'dotenv';
 import * as R                     from 'ramda';
-import { from, forkJoin, defer }  from 'rxjs';
-import { map, flatMap }           from 'rxjs/operators';
+import { from, forkJoin, defer, throwError, of }  from 'rxjs';
+import { map, flatMap, catchError }               from 'rxjs/operators';
 import { parseString }            from 'xml2js';
 import mongoose                   from 'mongoose';
 import encoding                   from 'encoding-japanese';
 import { Iconv }                  from 'iconv';
-import { Item, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed, Attribute } 
-                                  from 'Models/feed';
+import { Item, Note, Category, Added, Deleted, Readed, Traded, Bided, Starred, Listed, Attribute } from 'Models/feed';
 import std                        from 'Utilities/stdutils';
 import Amazon                     from 'Routes/Amazon/Amazon';
 import Yahoo                      from 'Routes/Yahoo/Yahoo';
@@ -1625,16 +1624,30 @@ export default class FeedParser {
             this.addCategory(user, { category, subcategory })
           , this.setCsvToObj(user, category, file.content)
           ]).pipe(
-            flatMap(objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] }))
+            flatMap(objs => R.length(objs[1]) <= 1000 
+              ? this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] })
+              : throwError({ name: 'Throttle Error:', message: 'The maximum number of notes has been exceeded.' })
+            )
           , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
+          , catchError(err => { 
+              if(err) log.warn(FeedParser.displayName, err.name, err.message, err.stack);
+              return of(null);
+            })
           );
       case 'opml':
         return forkJoin([
             this.addCategory(user, { category, subcategory })
           , this.setOmplToObj(user, category, file.content)
           ]).pipe(
-            flatMap(objs => this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] }))
+            flatMap(objs => R.length(objs[1]) <= 1000 
+              ? this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] })
+              : throwError({ name: 'Throttle Error:', message: 'The maximum number of notes has been exceeded.' })
+            )
           , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
+          , catchError(err => { 
+              if(err) log.warn(FeedParser.displayName, err.name, err.message, err.stack);
+              return of(null);
+            })
           );
       default:
         log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);

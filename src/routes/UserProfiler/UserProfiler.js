@@ -727,7 +727,17 @@ export default class UserProfiler {
       appname: app_name
     , from: mms_from
     , menu: [
-        { id: '0001', name: 'リスト 1000（無料)', number: 1000
+        { id: '0001', name: 'リスト 30000（無料)', number: 30000
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+      , { id: '0002', name: 'リスト 3000（無料)', number: 3000
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+      , { id: '0003', name: 'リスト 1000（無料)', number: 1000
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+      , { id: '0004', name: 'リスト 300（無料)', number: 300
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+      , { id: '0005', name: 'リスト 100（無料)', number: 100
+        , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
+      , { id: '0006', name: 'リスト 10（無料)', number: 10
         , price: 0, link: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXXXX' }
       ]
     , advertisement: {
