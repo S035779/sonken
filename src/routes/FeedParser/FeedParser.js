@@ -218,7 +218,7 @@ export default class FeedParser {
           if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
           const promise = !isCSV ? query.populate(params).exec() : query.exec();
           return promise.then(setObjects).then(setNotes)
-          //.then(R.tap(log.trace.bind(this)))
+            //.then(R.tap(log.trace.bind(this)))
           ;
         }
       case 'fetch/note':
@@ -459,10 +459,11 @@ export default class FeedParser {
           };
           const getIds = R.map(obj => obj._id);
           const setIds = objs => R.merge(note, { items: objs });
-          const putNote = obj => Note.create(obj);
-          const setNote = R.compose(putNote, setIds, getIds);
+          const setNote = R.compose(setIds, getIds);
           return Item.insertMany(items)
-            .then(setNote);
+            .then(setNote)
+            .then(obj => Note.create(obj));
+            //.then(R.tap(log.trace.bind(this)))
         }
       case 'update/note':
         {
@@ -541,8 +542,13 @@ export default class FeedParser {
       case 'create/category':
         {
           const { user, data } = options;
-          const docs = { user, category: data.category, subcategory: data.subcategory, subcategoryId: new ObjectId };
-          return Category.create(docs);
+          const category = {
+            user
+          , category: data.category
+          , subcategory: data.subcategory
+          , subcategoryId: new ObjectId
+          };
+          return Category.create(category);
         }
       case 'update/category':
         {
@@ -1435,11 +1441,9 @@ export default class FeedParser {
         observable = Yahoo.of().fetchHtml({ url });
         break;
     }
-    const setNote = obj => this.setNote({ user, url, category, categoryIds, title }, obj);
-    const addNote = obj => from(this.addNote(user, obj));
     return observable.pipe(
-      map(setNote)
-    , flatMap(addNote)
+      map(obj => this.setNote({ user, url, category, categoryIds, title }, obj))
+    , flatMap(obj => from(this.addNote(user, obj)))
     );
   }
 
@@ -1605,8 +1609,7 @@ export default class FeedParser {
     const setImages = objs => ({ images: objs });
     const getLinks  = R.compose(setImages, mrgLinks, zipLinks, setLinks);
     return defer(() => !R.isNil(images) 
-      ? from(this.AWS.fetchSignedUrls(STORAGE, setFiles(images)))
-          .pipe(map(getLinks), flatMap(obj => this.addAttribute(user, id, obj)))
+      ? from(this.AWS.fetchSignedUrls(STORAGE, setFiles(images))).pipe(map(getLinks), flatMap(obj => this.addAttribute(user, id, obj)))
       : from(this.addAttribute(user, id, data))
     );
   }
@@ -1616,50 +1619,34 @@ export default class FeedParser {
   }
 
   uploadNotes({ user, category, subcategory, file }) {
+    let observable;
     switch(file.type) {
       case 'application/vnd.ms-excel':
       case 'text/csv':
       case 'csv':
-        return forkJoin([
-            this.addCategory(user, { category, subcategory })
-          , this.setCsvToObj(user, category, file.content)
-          ]).pipe(
-            flatMap(objs => R.length(objs[1]) <= 1000 
-              ? this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] })
-              : throwError({ name: 'Throttle Error:', message: 'The maximum number of notes has been exceeded.' })
-            )
-          , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
-          , catchError(err => { 
-              if(err) log.warn(FeedParser.displayName, err.name, err.message, err.stack);
-              return of(null);
-            })
-          );
+        observable = forkJoin([ this.addCategory(user, { category, subcategory }), this.setCsvToObj(user, category, file.content) ]);
+        break;
       case 'opml':
-        return forkJoin([
-            this.addCategory(user, { category, subcategory })
-          , this.setOmplToObj(user, category, file.content)
-          ]).pipe(
-            flatMap(objs => R.length(objs[1]) <= 1000 
-              ? this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] })
-              : throwError({ name: 'Throttle Error:', message: 'The maximum number of notes has been exceeded.' })
-            )
-          , flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
-          , catchError(err => { 
-              if(err) log.warn(FeedParser.displayName, err.name, err.message, err.stack);
-              return of(null);
-            })
-          );
-      default:
-        log.error(FeedParser.displayName, 'setContent', `Unknown File Type: ${file.type}`);
-        return null;
+        observable = forkJoin([ this.addCategory(user, { category, subcategory }), this.setOmplToObj(user, category, file.content) ]);
+        break;
     }
+    return observable.pipe(
+      flatMap(objs => R.length(objs[1]) <= 1000 
+        ? this.createNotes({ user, category, categoryIds: [objs[0]._id], notes: objs[1] })
+        : throwError({ name: 'Throttle Error:', message: 'The maximum number of notes has been exceeded.' }))
+      , catchError(err => { 
+        if(err) log.warn(FeedParser.displayName, err.name, err.message, err.stack);
+        return of(null);
+      }));
   }
   
   createNotes({ user, category, categoryIds, notes }) {
     const setNote = obj => this.setNote({ user, category, categoryIds, title: obj.title , url: obj.url });
     const setNotes = R.map(setNote);
     const promises = R.map(obj => this.addNote(user, obj));
-    return forkJoin(promises(setNotes(notes)));
+    return forkJoin(promises(setNotes(notes))).pipe(
+      flatMap(() => this.fetchNotes({ user, category, skip: 0, limit: 20 }))
+    );
   }
 
   setOmplToObj(user, category, file) {

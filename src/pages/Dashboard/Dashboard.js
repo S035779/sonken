@@ -11,9 +11,9 @@ import std                      from 'Utilities/stdutils';
 import Spinner                  from 'Utilities/Spinner';
 
 import { withStyles }           from '@material-ui/core/styles';
-const RssSearch  = loadable(() => import('Components/RssSearch/RssSearch'  ), { fallback: <div>Loading...</div> }); 
-const RssButtons = loadable(() => import('Components/RssButtons/RssButtons'), { fallback: <div>Loading...</div> }); 
-const RssList    = loadable(() => import('Components/RssList/RssList'      ), { fallback: <div>Loading...</div> }); 
+const RssSearch  = loadable(() => import('Components/RssSearch/RssSearch'  )); 
+const RssButtons = loadable(() => import('Components/RssButtons/RssButtons')); 
+const RssList    = loadable(() => import('Components/RssList/RssList'      )); 
 
 class Dashboard extends React.Component {
   static getStores() {

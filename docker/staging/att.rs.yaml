@@ -24,7 +24,7 @@ spec:
         resources:
           requests:
             cpu: 128m
-            memory: 256Mi
+            memory: 512Mi
         env:
           - name: WORKER_NAME
             value: "att-worker"
