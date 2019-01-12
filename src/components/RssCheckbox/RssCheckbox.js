@@ -25,6 +25,10 @@ RssCheckbox.displayName = 'RssCheckbox';
 RssCheckbox.defaultProps = {};
 RssCheckbox.propTypes = {
   classes: PropTypes.object.isRequired
+, color: PropTypes.string.isRequired
+, onChange: PropTypes.func.isRequired
+, value: PropTypes.bool
+, checked: PropTypes.bool.isRequired
 };
 
 const default_color   = '#888888';

@@ -1,4 +1,5 @@
 import React          from 'react';
+import PropTypes      from 'prop-types';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { Button }     from '@material-ui/core';
@@ -126,5 +127,15 @@ const theme = {
 , yellow:           createMuiTheme({
     overrides: { MuiButton: { root: { background: yellow[600], margin, boxShadow, '&:hover':  { color: 'black' } } }}
   , typography })
+};
+RssButton.displayName = 'RssButton';
+RssButton.defaultProps = {};
+RssButton.propTypes = {
+  classes: PropTypes.string
+, color: PropTypes.string.isRequired
+, children: PropTypes.node.isRequired
+, onClick: PropTypes.func
+, type: PropTypes.string
+, component: PropTypes.func
 };
 export default RssButton;

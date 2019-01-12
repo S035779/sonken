@@ -51,5 +51,11 @@ RssInput.displayName = 'RssInput';
 RssInput.defaultProps = {};
 RssInput.propTypes = {
   classes: PropTypes.object.isRequired
+, onChange: PropTypes.func.isRequired
+, type: PropTypes.string
+, id: PropTypes.string
+, label: PropTypes.string.isRequired
+, value: PropTypes.string.isRequired
+, autoComplete: PropTypes.string
 };
 export default withStyles(styles)(RssInput);
