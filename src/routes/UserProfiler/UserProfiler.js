@@ -115,9 +115,7 @@ export default class UserProfiler {
           const isAdmin = admin;
           const isData = data;
           const isPass = hash && salt;
-          let conditions = isAdmin
-            ? { user: data.user }
-            : { user: user };
+          let conditions = isAdmin ? { user: data.user } : { user: user };
           let update = isAdmin && isData
             ? {
               isAdmin:  data.isAdmin
@@ -126,6 +124,11 @@ export default class UserProfiler {
             , email:    data.email
             , phone:    data.phone
             , plan:     data.plan
+            , deleteWord: data.deleteWord
+            , paymentWord: data.paymentWord
+            , itemWord: data.itemWord
+            , deliverWord: data.deliverWord
+            , noteWord: data.noteWord
             , updated:  new Date
             }
             : isData && isPass
@@ -135,6 +138,11 @@ export default class UserProfiler {
               , email:  data.email
               , phone:  data.phone
               , plan:   data.plan
+              , deleteWord: data.deleteWord
+              , paymentWord: data.paymentWord
+              , itemWord: data.itemWord
+              , deliverWord: data.deliverWord
+              , noteWord: data.noteWord
               , salt:   salt
               , hash:   hash
               , updated: new Date
@@ -146,6 +154,11 @@ export default class UserProfiler {
                 , email:  data.email
                 , phone:  data.phone
                 , plan:   data.plan
+                , deleteWord: data.deleteWord
+                , paymentWord: data.paymentWord
+                , itemWord: data.itemWord
+                , deliverWord: data.deliverWord
+                , noteWord: data.noteWord
                 , updated: new Date
                 }
                 : {

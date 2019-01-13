@@ -370,7 +370,7 @@ class DrawerList extends React.Component {
   renderUserListItems() {
     const { classes, profile, preference } = this.props;
     const { openUser, isProfile, isPreference } = this.state;
-    const { name, user, kana, email, phone, plan } = profile;
+    const { name, user, kana, email, phone, plan, deleteWord, paymentWord, itemWord, deliverWord, noteWord } = profile;
     const textClass = { primary: classes.textPrimary, secondary: classes.textSecondary };
     return <div>
         <ListItem button onClick={this.handleClickButton.bind(this, 'user')}>
@@ -393,10 +393,28 @@ class DrawerList extends React.Component {
               <ListItemText primary="Setting" classes={textClass} />
             </ListItem>
           </List>
-          <LoginProfile open={isProfile} profile={profile} name={name} user={user} kana={kana} email={email}
-            phone={phone} onClose={this.handleCloseDialog.bind(this, 'isProfile')} />
-          <LoginPreference open={isPreference} profile={profile} preference={preference} name={name}
-            user={user} plan={plan} onClose={this.handleCloseDialog.bind(this, 'isPreference')} />
+          <LoginProfile
+            open={isProfile}
+            profile={profile}
+            name={name}
+            user={user} 
+            kana={kana}
+            email={email}
+            phone={phone}
+            onClose={this.handleCloseDialog.bind(this, 'isProfile')} />
+          <LoginPreference
+            open={isPreference}
+            profile={profile}
+            preference={preference}
+            name={name}
+            user={user}
+            plan={plan}
+            deleteWord={deleteWord}
+            paymentWord={paymentWord}
+            itemWord={itemWord}
+            deliverWord={deliverWord}
+            noteWord={noteWord}
+            onClose={this.handleCloseDialog.bind(this, 'isPreference')} />
         </Collapse>
       </div>;
   }
@@ -434,8 +452,8 @@ DrawerList.propTypes = {
   classes:  PropTypes.object.isRequired
 , categorys: PropTypes.array.isRequired
 , history: PropTypes.object.isRequired
-, profile: PropTypes.object.isRequired
 , open: PropTypes.bool.isRequired
+, profile: PropTypes.object.isRequired
 , preference: PropTypes.object.isRequired
 };
 

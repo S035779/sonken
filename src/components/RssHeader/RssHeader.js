@@ -20,7 +20,6 @@ class RssHeader extends React.Component {
     super(props);
     this.state = { 
       loadingDownload: false
-    , category: ''
     };
     this.timers = null;
   }
@@ -28,7 +27,6 @@ class RssHeader extends React.Component {
   componentDidMount() {
     const { user, location } = this.props;
     const category = location.pathname.split('/')[1];
-    //std.logInfo(RssHeader.displayName, 'setInterval', category);
     this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category }), 0, interval);
   }
 
@@ -38,18 +36,14 @@ class RssHeader extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { user, location, jobs } = nextProps;
+    const nextCategory = location.pathname.split('/')[1];
+    const prevCategory = this.props.location.pathname.split('/')[1];
     const nextJobs = !R.isEmpty(jobs);
     const prevJobs = this.state.loadingDownload;
-    const nextCategory = location.pathname.split('/')[1];
-    const prevCategory = this.state.category;
-    if(nextJobs !== prevJobs) {
-      this.setState({ loadingDownload: nextJobs });
-    }
+    if(nextJobs !== prevJobs) this.setState({ loadingDownload: nextJobs });
     if(nextCategory !== prevCategory) {
-      //std.logInfo(RssHeader.displayName, 'setInterval', nextCategory);
       clearInterval(this.timer);
       this.timer = std.invoke(() => NoteAction.fetchJobs({ user, category: nextCategory }), 0, interval);
-      this.setState({ category: nextCategory });
     }
   }
 

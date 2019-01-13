@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema({
 , email:            { type: String, required: true }
 , phone:            { type: String, required: true }
 , plan:             { type: String, required: true }
+, deleteWord:       { type: String }
+, paymentWord:      { type: String }
+, itemWord:         { type: String }
+, deliverWord:      { type: String }
+, noteWord:         { type: String }
 , created:          { type: Date, required: true, default: Date.now } 
 , updated:          { type: Date, required: true, default: Date.now } 
 }, { collection: 'users' });
@@ -58,8 +63,7 @@ db.openUri(mdb_url + '/profile', {
 , reconnectInterval: 500            // Reconnect every 500ms
 });
 
-process.on('SIGINT', () =>
-  mongoose.disconnect(() => log.info(displayName, 'profile terminated.')));
+process.on('SIGINT', () => mongoose.disconnect(() => log.info(displayName, 'profile terminated.')));
 export const User = db.model('User', userSchema);
 export const Approved = db.model('Approved', approvedSchema);
 export const Admin = db.model('Admin', adminSchema);

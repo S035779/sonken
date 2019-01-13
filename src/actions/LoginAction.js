@@ -59,8 +59,8 @@ export default {
         dispatch({ type: 'preference/create', preference });
       });
   },
-  fetchProfile(admin) {
-    return LoginApiClient.fetchProfile(admin).then(profile => {
+  fetchProfile(user) {
+    return LoginApiClient.fetchProfile(user).then(profile => {
         dispatch({ type: 'profile/fetch',  profile });
       });
   },

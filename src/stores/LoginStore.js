@@ -14,6 +14,11 @@ export default class LoginStore extends ReduceStore {
       , phone:          ''
       , username:       ''
       , plan:           ''
+      , deleteWord:     ''
+      , paymentWord:    ''
+      , itemWord:       ''
+      , deliverWord:    ''
+      , noteWord:       ''
       }
     , preference: {
         from:           ''

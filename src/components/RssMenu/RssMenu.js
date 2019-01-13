@@ -3,7 +3,7 @@ import React            from 'react';
 import PropTypes        from 'prop-types'
 import { withRouter }   from 'react-router-dom';
 import LoginAction      from 'Actions/LoginAction';
-//import std              from 'Utilities/stdutils';
+import std              from 'Utilities/stdutils';
 
 import { withStyles }   from '@material-ui/core/styles';
 import { IconButton, Menu, Divider, ListItemIcon, MenuItem } from '@material-ui/core';
@@ -20,7 +20,7 @@ class RssMenu extends React.Component {
   }
 
   componentDidMount() {
-    //std.logInfo(RssMenu.displayName, 'fetch', 'RssMenu');
+    std.logInfo(RssMenu.displayName, 'fetch', 'RssMenu');
     if(this.props.isAuthenticated) {
       LoginAction.fetchPreference()
         .then(() => LoginAction.fetchProfile(this.props.user));
@@ -70,25 +70,49 @@ class RssMenu extends React.Component {
     //std.logInfo(RssMenu.displayName, 'State', this.state);
     const { isAuthenticated, profile, preference } = this.props;
     const { anchorEl, isPreference } = this.state;
-    const { name, user, plan } = profile;
+    const { name, user, plan, deleteWord, paymentWord, itemWord, deliverWord, noteWord } = profile;
     const open = Boolean(anchorEl);
     return isAuthenticated && (<div>
-      <IconButton aria-owns={open ? 'menu-appbar' : null} aria-haspopup="true"
-        onClick={this.handleMenu.bind(this)} color="inherit" ><AccountCircle /></IconButton>
-      <Menu id="menu-appbar" anchorEl={anchorEl} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right'}} open={open}
+      <IconButton aria-owns={open ? 'menu-appbar' : null} aria-haspopup="true" onClick={this.handleMenu.bind(this)} color="inherit" >
+        <AccountCircle />
+      </IconButton>
+      <Menu 
+        id="menu-appbar" 
+        anchorEl={anchorEl} 
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right'}} 
+        open={open}
         onClose={this.handleClose.bind(this)}>
         <MenuItem onClick={this.handleClickButton.bind(this, 'faq')}>
-          <ListItemIcon><ImportContacts /></ListItemIcon>FAQ</MenuItem>
+          <ListItemIcon><ImportContacts /></ListItemIcon>
+          FAQ
+        </MenuItem>
         <MenuItem onClick={this.handleClickButton.bind(this, 'inquiry')}>
-          <ListItemIcon><Feedback /></ListItemIcon>Help Center</MenuItem>
+          <ListItemIcon><Feedback /></ListItemIcon>
+          Help Center
+        </MenuItem>
         <MenuItem onClick={this.handleOpenDialog.bind(this, 'isPreference')}>
-          <ListItemIcon><SettingsEthernet /></ListItemIcon>Setting</MenuItem>
+          <ListItemIcon><SettingsEthernet /></ListItemIcon>
+          Setting
+        </MenuItem>
         <Divider />
         <MenuItem onClick={this.handleLogout.bind(this)}>
-          <ListItemIcon><PowerSettingsNew /></ListItemIcon>Log Out</MenuItem>
-        <LoginPreference open={isPreference} profile={profile} preference={preference} name={name} user={user}
-          plan={plan} onClose={this.handleCloseDialog.bind(this, 'isPreference')} />
+          <ListItemIcon><PowerSettingsNew /></ListItemIcon>
+          Log Out
+        </MenuItem>
+        <LoginPreference 
+          open={isPreference}
+          profile={profile}
+          preference={preference} 
+          name={name}
+          user={user}
+          plan={plan}
+          deleteWord={deleteWord}
+          paymentWord={paymentWord}
+          itemWord={itemWord}
+          deliverWord={deliverWord}
+          noteWord={noteWord}
+          onClose={this.handleCloseDialog.bind(this, 'isPreference')} />
       </Menu>
     </div>);
   }
