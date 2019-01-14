@@ -116,7 +116,8 @@ class Yahoo {
       const pages = options.pages || 1;
       const skip  = options.skip  || 0;
       const limit = options.limit || 20;
-      log.info(Yahoo.displayName, 'closedsearch:', 'skip =', skip, 'limit =', limit);
+      const profile = options.profile;
+      log.info(Yahoo.displayName, 'closedsearch:', 'skip =', skip, 'limit =', limit, 'user =', profile.user);
 
       let results;
       if(!url) return reject({ name: 'Error', message: 'Url not passed.' });
@@ -203,11 +204,11 @@ class Yahoo {
           const setImages       = _obj => R.merge(_obj, { images: R.uniq(_obj.images) });
           const isGuid          = _obj => _obj.guid__;
           const setItems        = _objs => ({ url, title: data.title, item: _objs });
-          const result = R.compose(
+          const result          = R.compose(
             setItems
           , R.map(setImages)
           //, R.tap(log.trace.bind(this))
-          , R.map(yho.setExplanation)
+          , R.map(yho.setExplanation(profile))
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
@@ -253,7 +254,8 @@ class Yahoo {
       const pages = options.pages || 1;
       const skip  = options.skip  || 0;
       const limit = options.limit || 25;
-      log.info(Yahoo.displayName, 'closedsellers:', 'skip =', skip, 'limit =', limit);
+      const profile = options.profile;
+      log.info(Yahoo.displayName, 'closedsellers:', 'skip =', skip, 'limit =', limit, 'user =', profile.user);
 
       const page  = Math.ceil((skip + 1) / limit);
       let results;
@@ -348,7 +350,7 @@ class Yahoo {
             setItems
           , R.map(setImages)
           //, R.tap(log.trace.bind(this))
-          , R.map(yho.setExplanation)
+          , R.map(yho.setExplanation(profile))
           , R.map(setShipping)
           , R.map(setShipBuyNow)
           , R.map(setShipPrice)
@@ -544,12 +546,12 @@ class Yahoo {
     return this.request('fetch/file', { url, operator, filename });
   }
 
-  getClosedMerchant(url, pages, skip, limit) {
-    return this.request('fetch/closedmerchant', { url, pages, skip, limit });
+  getClosedMerchant(url, pages, skip, limit, profile) {
+    return this.request('fetch/closedmerchant', { url, pages, skip, limit, profile });
   }
 
-  getClosedSellers(url, pages, skip, limit) {
-    return this.request('fetch/closedsellers', { url, pages, skip, limit });
+  getClosedSellers(url, pages, skip, limit, profile) {
+    return this.request('fetch/closedsellers', { url, pages, skip, limit, profile });
   }
 
   getHtml(url, pages, skip, limit) {
@@ -564,12 +566,12 @@ class Yahoo {
     );
   }
   
-  jobClosedMerchant({ url, pages, skip, limit }) {
-    return from(this.getClosedMerchant(url, pages, skip, limit));
+  jobClosedMerchant({ url, pages, skip, limit, profile }) {
+    return from(this.getClosedMerchant(url, pages, skip, limit, profile));
   }
 
-  jobClosedSellers({ url, pages, skip, limit }) {
-    return from(this.getClosedSellers(url, pages, skip, limit));
+  jobClosedSellers({ url, pages, skip, limit, profile }) {
+    return from(this.getClosedSellers(url, pages, skip, limit, profile));
   }
 
   jobHtml({ url, pages, skip, limit }) {
@@ -601,31 +603,21 @@ class Yahoo {
     const setMarkets        = R.curry(_setMarkets)(items);
     const _setPerformances  = (_items, objs) => R.map(obj => this.setPerformance(_items, obj), objs);
     const setPerformances   = R.curry(_setPerformances)(items);
-    //const _setItems         = (_note, objs) => R.merge(_note, { item: objs });
-    //const setItems          = R.curry(_setItems)(data);
-    //const delIds            = R.map(R.omit(['_id']))
     const promise           = obj => this.getHtml(obj);
     const promises          = R.map(promise, urls);
     return forkJoin(promises).pipe(
       map(setMarkets)
     , map(setPerformances)
-    //, map(delIds)
-    //, map(setItems)
     );
   }
 
-  jobItemSearch({ items }) {
-    const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, objs), _items);
-    const setAsins    = R.curry(_setAsins)(items);
-    //const _setItems   = (_note, objs) => R.merge(_note, { item: objs });
-    //const setItems    = R.curry(_setItems)(data);
-    //const delIds      = R.map(R.omit(['_id']))
-    const observable  = obj => this.AMZ.fetchItemSearch(this.repSpace(obj.title), obj.item_categoryid, 1)
-    const observables = R.map(observable, items);
-    return forkJoin(observables).pipe(
-      map(setAsins)
-    //, map(delIds)
-    //, map(setItems)
+  jobItemSearch({ items, profile }) {
+    const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, profile, objs), _items);
+    const setAsins    = R.curry(_setAsins);
+    const setKeywords = str => this.trimTitle(str, profile);
+    const observables = R.map(obj => this.AMZ.fetchItemSearch(setKeywords(obj.title), obj.item_categoryid, 1));
+    return forkJoin(observables(items)).pipe(
+      map(setAsins(items))
     );
   }
 
@@ -652,41 +644,27 @@ class Yahoo {
     return api.href;
   }
 
-  setAsin (item, objs) {
-    const isValid   = _obj  => _obj
+  setAsin (item, profile, datas) {
+    const isASIN    = _obj  => _obj
       && _obj.Request.IsValid === 'True'
-      && _obj.Request.ItemSearchRequest.Keywords === this.repSpace(item.title)
+      && _obj.Request.ItemSearchRequest.Keywords === this.trimTitle(item.title, profile)
       && Number(_obj.TotalResults) !== 0;
-    const getASIN   = _obj  => Array.isArray(_obj.Item)
-      ? R.map(Item => Item.ASIN, _obj.Item)
-      : [ _obj.Item.ASIN ];
-    const setASINs  = _objs => R.merge(item, { asins: _objs });
-    const setASIN   = _objs => _objs ? _objs : [];
-    return R.compose(
-      setASINs 
-    , setASIN
-    , R.head
-    , R.map(getASIN)
-    , R.filter(isValid)
-    )(objs);
+    const hasASINs  = R.filter(isASIN);
+    const getASIN   = _obj  => Array.isArray(_obj.Item) ? R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
+    const getASINs  = R.map(getASIN);
+    const setASIN   = _objs => R.merge(item, { asins: _objs ? _objs : [] });
+    const setASINs  = R.compose(setASIN, R.head, getASINs, hasASINs);
+    return setASINs(datas);
   }
 
-  repSpace(keywords)  {
-    const delMark1   = R.replace(/[\u25CE\u25CF\u25B3\u25BD\u25B2\u25BC\u22BF\u25B6\u25C0\u25A1\u25A0]/g, ' ');
-    const delMark2   = R.replace(/[\u25C7\u25C6\uFF01\u2661\u2665\u2664\u2660\u2667\u2663\u2662\u2666]/g, ' ');
-    const delMark3   = R.replace(/[\u3010\u3011\u2605\u2606\u203B\uFF0A\u266A]/g                        , ' ');
-    const delString1 = R.replace(/\u7F8E\u54C1|\u826F\u54C1|\u6975|\u512A|\u4E2D\u53E4|\u7D14\u6B63/g   , ' ');
-    const delString2 = R.replace(/\u8A33\u3042\u308A|\u73FE\u72B6\u54C1|\u307B\u307C\u672A\u4F7F\u7528/g, ' ');
-    const delString3 = R.replace(/\u9AD8\u901F\u7248|\u9001\u6599\u7121\u6599|\u8D85/g                  , ' ');
-    const repString  = R.compose(
-      delMark1
-    , delMark2
-    , delMark3
-    , delString1
-    , delString2
-    , delString3
-    );
-    return repString(keywords);
+  trimTitle(title, profile)  {
+    log.info('deleteWord =', profile.deleteWord, 'user =', profile.user);
+    const split = str => R.map(R.trim, R.split(',', str));
+    const join  = str => R.join('|', str);
+    const regexp  = str => new RegExp(str, 'g');
+    const replace = str => R.replace(str, '', title);
+    const replaceString = R.compose(replace, regexp, join, split);
+    return replaceString(profile.deleteWord);
   }
 
   setMarket(item, objs) {

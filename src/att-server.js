@@ -64,17 +64,13 @@ const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
-  const setQueue    = obj => ({
-    operation:  'attribute'
-  , user:       obj.user
-  , id:         obj._id
-  , created:    Date.now()
-  });
+  const setQueue = obj => ({ operation: 'attribute', user: obj.user, id: obj._id, created: Date.now() });
   return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
+      , skip: 0, limit: procNoteLmtNums
+      , sort: 'asc'
       , filter: { isItems: true }
       }))
     , map(R.map(setQueue))

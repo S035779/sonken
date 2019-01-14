@@ -4,8 +4,8 @@ import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
+import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
-//import amz                from 'Utilities/amzutils';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 /**
@@ -46,8 +46,7 @@ class Amazon {
   }
 
   fetchNewReleases(node_id) {
-    const observable = from(this.getNewReleases(node_id));
-    return observable.pipe(
+    return from(this.getNewReleases(node_id)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setTopItems)
     , flatMap(this.forItemLookup.bind(this))
@@ -57,8 +56,7 @@ class Amazon {
   }
 
   fetchBestSellers(node_id) {
-    const observable = from(this.getBestSellers(node_id));
-    return observable.pipe(
+    return from(this.getBestSellers(node_id)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setTopItems)
     , flatMap(this.forItemLookup.bind(this))
@@ -68,8 +66,7 @@ class Amazon {
   }
 
   fetchReleaseDate(node_id, category, page) {
-    const observable = from(this.getReleaseDate(node_id, category, page));
-    return observable.pipe(
+    return from(this.getReleaseDate(node_id, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
     );
@@ -78,8 +75,7 @@ class Amazon {
   fetchSalesRanking(node_id, category, rate, patern) {
     const curriedCheckRate = R.curry(this.checkRate.bind(this))(rate);
     const curriedDiffRate = R.curry(this.diffRate.bind(this))(patern);
-    const observable = this.forSalesRanking(node_id, category, 10);
-    return observable.pipe(
+    return this.forSalesRanking(node_id, category, 10).pipe(
       flatMap(this.forParseXml.bind(this))
     , map(this.forItems.bind(this))
     , map(R.flatten)
@@ -89,18 +85,17 @@ class Amazon {
   }
 
   fetchItemLookup(item_id, id_type) {
-    const observable = from(this.getItemLookup(item_id, id_type));
-    return observable.pipe(
+    return from(this.getItemLookup(item_id, id_type)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItem)
     );
   }
 
   fetchItemSearch(keywords, category, page) {
-    const observable = from(this.getItemSearch(keywords, category, page));
-    return observable.pipe(
+    return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
+    , map(R.tap(log.debug.bind(this)))
     );
   }
 

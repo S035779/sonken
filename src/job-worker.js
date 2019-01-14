@@ -50,26 +50,23 @@ const request = (operation, options) => {
     case 'sellers':
       {
         const { url, user, id, skip, limit } = options;
-        const conditions = { url, skip, limit };
-        return yahoo.jobHtml(conditions).pipe( 
+        return yahoo.jobHtml({ url, skip, limit }).pipe( 
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
       }
     case 'closedmarchant':
       {
-        const { url, user, id, skip, limit } = options;
-        const conditions = { url, skip, limit };
-        return yahoo.jobClosedMerchant(conditions).pipe(
+        const { url, user, id, skip, limit, profile } = options;
+        return yahoo.jobClosedMerchant({ url, skip, limit, profile }).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
       }
     case 'closedsellers':
       {
-        const { url, user, id, skip, limit } = options;
-        const conditions = { url, skip, limit };
-        return yahoo.jobClosedSellers(conditions).pipe(
+        const { url, user, id, skip, limit, profile } = options;
+        return yahoo.jobClosedSellers({ url, skip, limit, profile }).pipe(
             map(obj => ({ items: obj.item }))
           , flatMap(obj => feed.updateHtml({ user, id, html: obj }))
           );
@@ -78,8 +75,7 @@ const request = (operation, options) => {
     //  {
     //    const { url, user, id } = options;
     //    const putRss  = obj => feed.updateRss({ user, id, rss: obj });
-    //    const conditions = { url };
-    //    return yahoo.jobRss(conditions).pipe(
+    //    return yahoo.jobRss({ url }).pipe(
     //        map(obj => ({ items: obj.item }))
     //      , flatMap(putRss)
     //      );
@@ -87,9 +83,8 @@ const request = (operation, options) => {
     case 'images':
       {
         const { user, id } = options;
-        const conditions = { user, id };
         const operator = (storage, filename) => AWS.createWriteStream(storage, filename);
-        return feed.fetchJobNote(conditions).pipe(
+        return feed.fetchJobNote({ user, id }).pipe(
             flatMap(obj => yahoo.jobImages({ items: obj.items, operator }))
           , flatMap(obj => feed.createAttribute({ user, id: obj.guid__, data: { images: obj.images } }))
           );
@@ -97,8 +92,7 @@ const request = (operation, options) => {
     //case 'archives':
     //  {
     //    const { user, id } = options;
-    //    const conditions = { user, id };
-    //    return feed.fetchJobNote(conditions).pipe(
+    //    return feed.fetchJobNote({ user, id }).pipe(
     //        flatMap(obj => feed.createArchives(obj))
     //      , flatMap(obj => feed.createAttribute({ user, id: obj.guid__, data: { archive: obj.archive } }))
     //      );
@@ -106,30 +100,27 @@ const request = (operation, options) => {
     case 'attribute':
       {
         const { user, id } = options;
-        const conditions = { user, id };
         const setAttribute = obj => ({ user, id: obj.guid__, data: { sale: obj.sale, sold: obj.sold, market: obj.market } });
         const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
-        return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => yahoo.jobAttribute(obj))
+        return feed.fetchJobNote({ user, id }).pipe(
+            flatMap(obj => yahoo.jobAttribute({ items: obj.items }))
           , flatMap(objs => forkJoin(observables(objs)))
           );
       }
     case 'itemsearch':
       {
-        const { user, id } = options;
-        const conditions = { user, id };
+        const { user, id, profile } = options;
         const setAttribute = obj => ({ user, id: obj.guid__, data: { asins: obj.asins } });
         const observables = R.map(obj => feed.createAttribute(setAttribute(obj)));
-        return feed.fetchJobNote(conditions).pipe(
-            flatMap(obj => yahoo.jobItemSearch(obj))
+        return feed.fetchJobNote({ user, id }).pipe(
+            flatMap(obj => yahoo.jobItemSearch({ items: obj.items, profile }))
           , flatMap(objs => forkJoin(observables(objs)))
           );
       }
     case 'defrag':
       {
         const { user, id } = options;
-        const conditions = { user, id };
-        return feed.garbageCollection(conditions);
+        return feed.garbageCollection({ user, id });
       }
     case 'download/items':
       {
@@ -304,10 +295,10 @@ const mergeArchives = ({ user, category, type, limit, count, total, index }, fil
 }
 
 const worker = (options, callback) => {
-  const { operation, url, user, id, skip, limit, params } = options;
+  const { operation, url, user, id, skip, limit, profile, params } = options;
   log.info(displayName, 'Started. _id/ope:', id, operation);
   const start = new Date();
-  request(operation, { url, user, id, skip, limit, params }).subscribe(
+  request(operation, { url, user, id, skip, limit, profile, params }).subscribe(
     obj => log.info(displayName, 'Proceeding... _id/ope/status:', id, operation, obj)
   , err => {
       if(err && err.name !== 'NoProblem') log.error(displayName, err.name, err.message, err.stack);

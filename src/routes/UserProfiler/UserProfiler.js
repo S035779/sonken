@@ -6,15 +6,15 @@ import { User, Approved, Admin }  from 'Models/profile';
 import { Mail, Selected }         from 'Models/mail';
 import std                        from 'Utilities/stdutils';
 import Sendmail                   from 'Utilities/Sendmail';
-import log                        from 'Utilities/logutils';
+//import log                        from 'Utilities/logutils';
 
 const config = dotenv.config();
 if(config.error) throw config.error();
 
 const node_env    = process.env.NODE_ENV;
 const app_name    = process.env.APP_NAME;
-const admin_user  = process.env.ADMIN_USER;
-const admin_pass  = process.env.ADMIN_PASS;
+//const admin_user  = process.env.ADMIN_USER;
+//const admin_pass  = process.env.ADMIN_PASS;
 const mms_from    = process.env.MMS_FROM;
 const smtp_port   = process.env.MMS_PORT;
 const ssmtp_port  = process.env.MMS_SSL;
@@ -37,14 +37,14 @@ const mail_keyset = {
  */
 export default class UserProfiler {
   constructor() {
-    this.createMenu({ admin: admin_user }).subscribe(
-        obj => log.info(UserProfiler.displayName, obj)
-      , err => log.warn(UserProfiler.displayName, err.name, err.message)
-      , ()  => log.info(UserProfiler.displayName, 'Complete to create Menu!!'));
-    this.createAdmin({ admin: admin_user, password: admin_pass }).subscribe(
-        obj => log.info(UserProfiler.displayName, obj)
-      , err => log.warn(UserProfiler.displayName, err.name, err.message)
-      , ()  => log.info(UserProfiler.displayName, 'Complete to create Administrator!!'));
+    //this.createMenu({ admin: admin_user }).subscribe(
+    //    obj => log.info(UserProfiler.displayName, obj)
+    //  , err => log.warn(UserProfiler.displayName, err.name, err.message)
+    //  , ()  => log.info(UserProfiler.displayName, 'Complete to create Menu!!'));
+    //this.createAdmin({ admin: admin_user, password: admin_pass }).subscribe(
+    //    obj => log.info(UserProfiler.displayName, obj)
+    //  , err => log.warn(UserProfiler.displayName, err.name, err.message)
+    //  , ()  => log.info(UserProfiler.displayName, 'Complete to create Administrator!!'));
   }
 
   static of() {
@@ -411,18 +411,25 @@ export default class UserProfiler {
   fetchJobUsers({ admin }) {
     const isApproved  = obj => obj.approved;
     const setUser     = obj => obj.user;
-    const observables = forkJoin([
-      this.getApproval()
-    , this.getUsers(admin)
-    ]);
-    const setAttribute = objs => R.compose(
-      this.setApproved(objs[0])
-    , this.toObject
-    )(objs[1]);
+    const observables = forkJoin([this.getApproval(), this.getUsers(admin)]);
+    const setAttribute = objs => R.compose(this.setApproved(objs[0]), this.toObject)(objs[1]);
+    const hasApproved = R.filter(isApproved);
+    const setUsers = R.map(setUser);
     return observables.pipe(
       map(setAttribute)
-    , map(R.filter(isApproved))
-    , map(R.map(setUser))
+    , map(hasApproved)
+    , map(setUsers)
+    );
+  }
+
+  fetchJobProfiles({ admin }) {
+    const isApproved  = obj => obj.approved;
+    const observables = forkJoin([this.getApproval(), this.getUsers(admin)]);
+    const setAttribute = objs => R.compose(this.setApproved(objs[0]), this.toObject)(objs[1]);
+    const hasApproved = R.filter(isApproved);
+    return observables.pipe(
+      map(setAttribute)
+    , map(hasApproved)
     );
   }
 

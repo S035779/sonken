@@ -1163,8 +1163,13 @@ export default class FeedParser {
     );
   }
 
-  fetchJobNotes({ users, categorys, filter, skip, limit, sort }) {
-    return from(this.getJobNotes(users, categorys, filter, skip, limit, sort));
+  fetchJobNotes({ users, categorys, filter, skip, limit, sort, profiles }) {
+    const hasProfile = obj => R.find(profile => profile.user === obj.user)(profiles); 
+    const setProfile = obj => profiles ? R.merge({ profile: hasProfile(obj) }, obj) : obj;
+    const setProfiles = R.map(setProfile);
+    return from(this.getJobNotes(users, categorys, filter, skip, limit, sort)).pipe(
+        map(setProfiles)
+      );
   }
 
   fetchJobNote({ user, id }) {

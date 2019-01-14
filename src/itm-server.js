@@ -73,6 +73,7 @@ const request = queue => {
   , user:       obj.user
   , id:         obj._id
   , url:        obj.url
+  , profile:    obj.profile
   , created:    Date.now()
   });
   const setLimit = category => category === 'closedsellers' ? 25 : 20;
@@ -81,12 +82,16 @@ const request = queue => {
   const setItems = R.curry(_setItems);
   const repQueue = obj => R.map(setItems(obj), setRange(obj.url));
   const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
-  return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
+  const setUsers = R.map(obj => obj.user);
+  return profile.fetchJobProfiles({ adimn: 'Administrator' }).pipe(
       flatMap(objs => feed.fetchJobNotes({
-        users: objs
+        users: setUsers(objs)
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
+      , skip: 0
+      , limit: procNoteLmtNums
+      , sort: 'asc'
       , filter: { expire: procNoteExpires, create: createdInterval }
+      , profiles: objs
       }))
     , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

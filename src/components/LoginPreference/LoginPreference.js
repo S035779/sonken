@@ -110,8 +110,8 @@ class LoginPreference extends React.Component {
   }
 
   render() {
-    std.logInfo(LoginPreference.displayName, 'Props', this.props);
-    std.logInfo(LoginPreference.displayName, 'State', this.state);
+    //std.logInfo(LoginPreference.displayName, 'Props', this.props);
+    //std.logInfo(LoginPreference.displayName, 'State', this.state);
     const { classes, name, user, preference, open } = this.props;
     const { isNotValid, isSuccess, plan, deleteWord, itemWord, paymentWord, deliverWord, noteWord } = this.state;
     const renderMenu = preference.menu ? preference.menu.map((obj, idx) => this.renderMenu(obj, idx)) : [];

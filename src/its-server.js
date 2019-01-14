@@ -68,16 +68,22 @@ const request = queue => {
     operation:  'itemsearch'
   , user:       obj.user
   , id:         obj._id
+  , profile:    obj.profile
   , created:    Date.now()
   });
-  return profile.fetchJobUsers({ adimn: 'Administrator' }).pipe(
+  const setQueues = R.map(setQueue);
+  const setUsers = R.map(obj => obj.user);
+  return profile.fetchJobProfiles({ adimn: 'Administrator' }).pipe(
       flatMap(objs => feed.fetchJobNotes({
-        users: objs
+        users: setUsers(objs)
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
+      , skip: 0
+      , limit: procNoteLmtNums
+      , sort: 'asc'
       , filter: { isItems: true }
+      , profiles: objs
       }))
-    , map(R.map(setQueue))
+    , map(setQueues)
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))
     );
 };
