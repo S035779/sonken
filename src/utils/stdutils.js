@@ -674,7 +674,7 @@ const std = {
       for(let name in data) {
         if (!data.hasOwnProperty(name)) continue;
         if (typeof data[name] === "function") continue;
-        let value = data[name].toString();
+        let value = data[name] ? data[name].toString() : '';
         name = encode(name);
         value = encode(value);
         pairs.push(name + "=" + value);

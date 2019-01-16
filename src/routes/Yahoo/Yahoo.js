@@ -612,12 +612,10 @@ class Yahoo {
   }
 
   jobItemSearch({ items, profile }) {
-    const _setAsins   = (_items, objs) => R.map(_item => this.setAsin(_item, profile, objs), _items);
-    const setAsins    = R.curry(_setAsins);
-    const setKeywords = str => this.trimTitle(str, profile);
-    const observables = R.map(obj => this.AMZ.fetchItemSearch(setKeywords(obj.title), obj.item_categoryid, 1));
+    const setKeyword = str => this.trimTitle(str, profile);
+    const observables = R.map(obj => this.AMZ.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(items)).pipe(
-      map(setAsins(items))
+      map(this.setItemSearchs(profile, items))
     );
   }
 
@@ -644,21 +642,56 @@ class Yahoo {
     return api.href;
   }
 
-  setAsin (item, profile, datas) {
-    const isASIN    = _obj  => _obj
-      && _obj.Request.IsValid === 'True'
-      && _obj.Request.ItemSearchRequest.Keywords === this.trimTitle(item.title, profile)
-      && Number(_obj.TotalResults) !== 0;
-    const hasASINs  = R.filter(isASIN);
-    const getASIN   = _obj  => Array.isArray(_obj.Item) ? R.map(Item => Item.ASIN, _obj.Item) : [ _obj.Item.ASIN ];
-    const getASINs  = R.map(getASIN);
-    const setASIN   = _objs => R.merge(item, { asins: _objs ? _objs : [] });
-    const setASINs  = R.compose(setASIN, R.head, getASINs, hasASINs);
-    return setASINs(datas);
+  setItemSearchs(profile, items) {
+    const setKeyword = str => this.trimTitle(str, profile);
+    const memoKeyword = R.memoizeWith(JSON.stringify, setKeyword);
+    const self = this;
+    return function(datas) {
+      const setItemSearch = (item, obj) => {
+        log.debug(Yahoo.displayName, 'Item', item);
+        const key = memoKeyword(item.title);
+        return self.setItemSearch(key, item, obj)
+      };
+      const hasItemSearch = str => R.find(item => memoKeyword(item.title) === memoKeyword(str))(items);
+      const hasItemSearchs = obj => {
+        const item = hasItemSearch(obj.Request.ItemSearchRequest.Keywords);
+        return setItemSearch(item, obj);
+      };
+      const setItemSearchs = R.map(hasItemSearchs);
+      return setItemSearchs(datas);
+    };
+  }
+
+  setItemSearch(keyword, item, data) {
+    const setErrors  = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
+    const setInvalid = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'InvaildRequest',      message: '不正なリクエストです。' });
+    const setNoMatch = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'NoMatchTitle',        message: 'タイトルが合致しません。' });
+    const setNoItems = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'NoItems',             message: 'アイテムを取得できませんでした。' });
+    const setItem    = obj => ({ request: keyword
+    , code: 'ExactMatches',        message: '正常に取得できました。'
+    , asin:           obj.ASIN
+    , itemAttributes: obj.ItemAttributes
+    , offerSummary:   obj.OfferSummary
+    , offers:         obj.Offers });
+    const setItems   = R.map(setItem);
+    const setSearch  = obj => ({ guid__: item.guid__, asins: obj });
+    const isTitle    = obj => obj.Request.ItemSearchRequest.Keywords === keyword;
+    const isValid    = obj => obj.Request.IsValid === 'True';
+    const isItem     = obj => obj.Item && Number(obj.TotalResults) === 1;
+    const getSearch  = obj => obj.Request.Errors  ? [ setErrors(obj.Request)  ] :
+                               !isValid(obj)      ? [ setInvalid(obj.Request) ] :
+                               !isTitle(obj)      ? [ setNoMatch(obj.Request) ] :
+                               !obj.Item          ? [ setNoItems(obj.Request) ] :
+                               isItem(obj)        ? [ setItem(obj.Item)       ] : setItems(obj.Item);
+    return R.compose(setSearch, getSearch)(data);
   }
 
   trimTitle(title, profile)  {
-    log.info('deleteWord =', profile.deleteWord, 'user =', profile.user);
+    //log.info('deleteWord =', profile.deleteWord, 'user =', profile.user);
     const split = str => R.map(R.trim, R.split(',', str));
     const join  = str => R.join('|', str);
     const regexp  = str => new RegExp(str, 'g');

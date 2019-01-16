@@ -178,7 +178,7 @@ const attributeSchema = new mongoose.Schema({
 , sale:             Number
 , sold:             Number
 , market:           String
-, asins:            [String]
+, asins:            [Object]
 , images:           [{ url: String, archive: String, signedlink: String }]
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'attributes' });
