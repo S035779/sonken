@@ -179,9 +179,9 @@ export default class FeedParser {
           const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
             ? R.equals(sold, obj.attributes.sold)
             : R.lte(sold, 0));
-          const hasAsinItem = R.filter(obj => isAsin
-            ? !R.isNil(obj.attributes) && !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins)
-            : true);
+          const isAsins   = obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0]
+            && obj.attributes.asins[0].code === 'ExactMatches';
+          const hasAsinItem = R.filter(obj => isAsin ? isAsins(obj) : true);
           const setItems = R.compose(hasSoldItem, hasAsinItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setNotes = R.map(setNote);
@@ -279,9 +279,9 @@ export default class FeedParser {
           const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
             ? R.equals(sold, obj.attributes.sold)
             : R.lte(sold, 0));
-          const hasAsinItem = R.filter(obj => isAsin
-            ? !R.isNil(obj.attributes) && !R.isNil(obj.attributes.asins) && !R.isEmpty(obj.attributes.asins)
-            : true);
+          const isAsins   = obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0]
+            && obj.attributes.asins[0].code === 'ExactMatches';
+          const hasAsinItem = R.filter(obj => isAsin ? isAsins(obj) : true);
           const setItems = R.compose(sliItems, hasAsinItem, hasSoldItem);
           const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
           const setObject = doc => doc.toObject();
@@ -1803,11 +1803,31 @@ export default class FeedParser {
   }
 
   setCsvItems(type) {
-    const urlpath = NODE_ENV !== 'staging';
-    const setAsins = R.join(':');
-    const setAsin = (asin, idx) => asin[idx-1] ? asin[idx-1] : '-';
-    const setName = (guid, url) => urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
-    const setImage = (guid, img, idx) => img[idx-1] ? setName(guid, img[idx-1]) : '-';
+    const urlpath   = NODE_ENV !== 'staging';
+    const setName   = (guid, url) => urlpath ? url : guid + '_' + path.basename(std.parse_url(url).pathname);
+    const setImage  = (guid, img, idx) => img[idx-1] ? setName(guid, img[idx-1]) : '-';
+    const setAsin   = obj => obj.asin;
+    const isAsins   = obj => 
+      obj.attributes && obj.attributes.asins && obj.attributes.asins[0] && obj.attributes.asins[0].code === 'ExactMatches';
+    const isOffers  = obj => obj.attributes.asins[0].offers && Number(obj.attributes.asins[0].offers.TotalOffers) !== 0; 
+    const isOffer   = obj => Number(obj.offers.TotalOffers) === 1;
+    const hasOffer  = 
+      obj => R.find(offer => obj.offerSummary.LowestNewPrice.Amount === offer.OfferListing.Price.Amount)(obj.offers.Offer);
+    const setMerchant           = obj => obj.Merchant ? obj.Merchant.Name : '-';
+    const setMerchants          = 
+      obj => isOffer(obj) ? setMerchant(obj.offers.Offer)          : R.compose(setMerchant, hasOffer)(obj);
+    const isPrime               = obj => Number(obj.OfferListing.IsEligibleForPrime) === 1 ? '有' : '無';
+    const isPrimes              = 
+      obj => isOffer(obj) ? isPrime(obj.offers.Offer)              : R.compose(isPrime, hasOffer)(obj);
+    const isSuperSaverShipping  = obj => Number(obj.OfferListing.IsEligibleForSuperSaverShipping) === 1 ? '有' : '無';
+    const isSuperSaverShippings = 
+      obj => isOffer(obj) ? isSuperSaverShipping(obj.offers.Offer) : R.compose(isSuperSaverShipping, hasOffer)(obj);
+    const setAvailabirity       = obj => obj.OfferListing.Availability ? obj.OfferListing.Availability : '発売未定';
+    const setAvailabiritys      = 
+      obj => isOffer(obj) ? setAvailabirity(obj.offers.Offer)      : R.compose(setAvailabirity, hasOffer)(obj);
+    const setPurchasePrice      = obj => obj.OfferListing.Price ? obj.OfferListing.Price.FormattedPrice : '-';
+    const setPurchasePrices     = 
+      obj => isOffer(obj) ? setPurchasePrice(obj.offers.Offer)     : R.compose(setPurchasePrice, hasOffer)(obj);
     let map, keys;
     switch(type) {
       case '0001':
@@ -1825,6 +1845,12 @@ export default class FeedParser {
         , 'seller'
         , 'image1', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7', 'image8', 'image9',  'image10'
         , 'link'
+        , 'asin'
+        , 'merchant'
+        , 'isPrime'
+        , 'isSuperSaverShipping'
+        , 'availability'
+        , 'purchasePrice'
         , 'date'
         //, 'offers'
         //, 'market'
@@ -1834,7 +1860,6 @@ export default class FeedParser {
         //, 'explanation'
         //, 'payment'
         //, 'shipping'
-        , 'asins'
         ];
         map = R.map(obj => ({
           auid:         obj.guid__
@@ -1859,6 +1884,12 @@ export default class FeedParser {
         , image9:       setImage(obj.guid__, obj.images, 9)
         , image10:      setImage(obj.guid__, obj.images, 10)
         , link:         obj.link
+        , asin:                 isAsins(obj) ? setAsin(obj.attributes.asins[0]) : '-'
+        , merchant:             isAsins(obj) && isOffers(obj) ? setMerchants(obj.attributes.asins[0]) : '-'
+        , isPrime:              isAsins(obj) && isOffers(obj) ? isPrimes(obj.attributes.asins[0]) : '-'
+        , isSuperSaverShipping: isAsins(obj) && isOffers(obj) ? isSuperSaverShippings(obj.attributes.asins[0]) : '-'
+        , availability:         isAsins(obj) && isOffers(obj) ? setAvailabiritys(obj.attributes.asins[0]) : '-'
+        , purchasePrice:        isAsins(obj) && isOffers(obj) ? setPurchasePrices(obj.attributes.asins[0]) : '-'
         , date:         obj.pubDate
         //, offers:       obj.offers
         //, market:       obj.attributes ? obj.attributes.market : '-'
@@ -1868,7 +1899,6 @@ export default class FeedParser {
         //, explanation:  obj.explanation
         //, payment:      obj.payment
         //, shipping:     obj.shipping
-        , asins:        obj.attributes ? setAsins(obj.attributes.asins) : '-'
         }));
         break;
       case '0002': // Format A

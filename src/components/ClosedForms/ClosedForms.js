@@ -31,6 +31,7 @@ class ClosedForms extends React.Component {
     , page: 1
     , prevPage: 1
     , prevAllAuction: true
+    , prevAsinAuction: false
     , isSuccess: false
     , isNotValid: false
     , isRequest: false
@@ -57,6 +58,7 @@ class ClosedForms extends React.Component {
     const nextLoadingDownload = nextProps.loadingDownload;
     const nextLoadingImages = nextProps.loadingImages;
     const prevAllAuction = this.state.prevAllAuction;
+    const prevAsinAuction = this.state.prevAsinAuction;
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
@@ -87,18 +89,23 @@ class ClosedForms extends React.Component {
         });
       } else if(!nextFilter.allAuction) {
         std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
-        this.formsRef.scrollTop = 0;
         this.setState({
-          note: nextNote, page: 1, prevPage: 1
+          note: nextNote
         , prevAllAuction: false
         , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
         });
       } else if(nextFilter.allAuction !== prevAllAuction) {
         std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
+        this.setState({
+          note: nextNote
+        , prevAllAuction: !nextFilter.allAuction
+        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        });
+      } else if(nextFilter.asinAuction !== prevAsinAuction) {
         this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
-        , prevAllAuction: true
+        , prevAsinAuction: !nextFilter.asinAuction
         , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
         });
       } else if(nextLoadingDownload !== prevLoadingDownload || nextLoadingImages !== prevLoadingImages) {

@@ -1,7 +1,7 @@
 import * as R from 'ramda';
-import log from 'Utilities/logutils';
+//import log from 'Utilities/logutils';
 
-const displayName = 'yhoutils';
+//const displayName = 'yhoutils';
 
 const setExplanation  = function(profile) { 
   const { paymentWord, itemWord, deliverWord, noteWord } = profile;
@@ -9,7 +9,7 @@ const setExplanation  = function(profile) {
   const _itemWord    = itemWord    || '商品詳細'
   const _deliverWord = deliverWord || '配送詳細'
   const _noteWord    = noteWord    || '注意事項' 
-  log.info(displayName, { _paymentWord, _itemWord, _deliverWord, _noteWord });
+  //log.info(displayName, { _paymentWord, _itemWord, _deliverWord, _noteWord });
   return function(_obj) {
     const input = _obj.explanation;
     const title = _obj.title;
@@ -41,7 +41,7 @@ const setExplanation  = function(profile) {
     , notes:    setNotes(__obj) 
     });
     const explanation   = R.compose(render(profile), setExplan, R.map(setSubStr))(pairs);
-    log.info('explanation =', explanation);
+    //log.info('explanation =', explanation);
     return R.merge(_obj, { explanation }); 
   };
 };

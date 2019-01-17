@@ -64,13 +64,7 @@ const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
-  const setQueue    = obj => ({
-    operation:  'itemsearch'
-  , user:       obj.user
-  , id:         obj._id
-  , profile:    obj.profile
-  , created:    Date.now()
-  });
+  const setQueue = obj => ({ operation: 'itemsearch', user: obj.user, id: obj._id, profile: obj.profile, created: Date.now() });
   const setQueues = R.map(setQueue);
   const setUsers = R.map(obj => obj.user);
   return profile.fetchJobProfiles({ adimn: 'Administrator' }).pipe(

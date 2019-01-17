@@ -69,7 +69,8 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['closedsellers', 'closedmarchant']
-      , skip: 0, limit: procNoteLmtNums
+      , skip: 0
+      , limit: procNoteLmtNums
       , sort: 'asc'
       , filter: { isItems: true }
       }))

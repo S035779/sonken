@@ -648,14 +648,13 @@ class Yahoo {
     const self = this;
     return function(datas) {
       const setItemSearch = (item, obj) => {
-        log.debug(Yahoo.displayName, 'Item', item);
         const key = memoKeyword(item.title);
         return self.setItemSearch(key, item, obj)
       };
       const hasItemSearch = str => R.find(item => memoKeyword(item.title) === memoKeyword(str))(items);
       const hasItemSearchs = obj => {
         const item = hasItemSearch(obj.Request.ItemSearchRequest.Keywords);
-        return setItemSearch(item, obj);
+        return item ? setItemSearch(item, obj) : null;
       };
       const setItemSearchs = R.map(hasItemSearchs);
       return setItemSearchs(datas);

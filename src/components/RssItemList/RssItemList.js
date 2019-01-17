@@ -129,8 +129,9 @@ class RssItemList extends React.Component {
     const buttonColor = listed.indexOf(item.guid__) === -1 ? 'yellow' : 'green';
     const buttonText = listed.indexOf(item.guid__) === -1 ? '入札リスト 登録' : '入札リスト 登録済み';
     const title = `出品件名：${item.title}`;
-    const asin   = item.attributes && item.attributes.asins ? R.head(item.attributes.asins) : null;
-    const amzsrc = asin ? amz + asin : null;
+    const asins   = item.attributes && item.attributes.asins ? R.head(item.attributes.asins) : null;
+    const isAsin = asins && asins.asin;
+    const amzsrc = isAsin ? amz + asins.asin : null;
     const image  = item.attributes && item.attributes.images ?  R.head(item.attributes.images) : null;
     const imgsrc = image && image.signedlink 
       ? image.signedlink 
@@ -139,11 +140,11 @@ class RssItemList extends React.Component {
       `配信時間：${std.formatDate(new Date(item.pubDate), 'YYYY/MM/DD hh:mm')}、`
     + `現在価格：${item.price}円、`
     + `入札数：${item.bids}、`
-    + `出品数：${item.attributes ? item.attributes.sale : '-'}、`
+    + `出品数：${item.attributes && item.attributes.sale ? item.attributes.sale : '-'}、`
     + `入札終了時間：${std.formatDate(new Date(item.bidStopTime), 'YYYY/MM/DD hh:mm')}、`
     + `AuctionID：${item.guid__}、`
     + `Seller：${item.seller}、`
-    + `ASIN: ${asin ? asin : '-'}`;
+    + `ASIN: ${isAsin ? asins.asin : '-'}`;
     if(deleted.indexOf(item.guid__) !== -1) return;
     return item.description
       ? ( <div key={index} className={classes.noteItem}>
