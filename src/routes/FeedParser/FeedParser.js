@@ -235,8 +235,8 @@ export default class FeedParser {
         }
       case 'fetch/note':
         {
-          //log.debug(FeedParser.displayName, 'fetch/note', options); 
           const { user, id, skip, limit, filter } = options;
+          const isCSV      = !R.isNil(filter) && filter.isCSV;
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const conditions = { user, _id: id };
@@ -283,7 +283,10 @@ export default class FeedParser {
             , { path: 'readed',     select: 'readed'  }
             , { path: 'starred',    select: 'starred' }
             , { path: 'listed',     select: 'listed'  }
-            , { path: 'attributes', select: { 'asins.code': 1, 'asins.asin': 1, images: 1, sale: 1, sold: 1, market: 1 } }
+            , { path: 'attributes', select: isCSV
+                ? { asins: 1, images: 1, sale: 1, sold: 1, market: 1 }
+                : { 'asins.code': 1, 'asins.asin': 1, images: 1, sale: 1, sold: 1, market: 1 }
+              }
             ]
           };
           if(match) params = R.merge(params, { match })
@@ -2294,12 +2297,13 @@ export default class FeedParser {
   }
   
   downloadTrade({ user, filter }) {
-    const CSV = this.setCsvItems('0001');
+    const CSV         = this.setCsvItems('0001');
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     //const dupItems    = objs => std.dupObj(objs, 'title');
-    return this.getTraded(user, null, null, filter).pipe(
+    const promise     = this.getTraded(user, null, null, filter);
+    return from(promise).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
@@ -2310,12 +2314,13 @@ export default class FeedParser {
   }
   
   downloadBids({ user, filter }) {
-    const CSV = this.setCsvItems('0001');
+    const CSV         = this.setCsvItems('0001');
     const setBuffer   = csv  => Buffer.from(csv, 'utf8');
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys }).parse();
     const getItems    = obj => obj.items ? obj.items : [];
     //const dupItems    = objs => std.dupObj(objs, 'title');
-    return this.getBided(user, null, null, filter).pipe(
+    const promise     = this.getBided(user, null, null, filter);
+    return from(promise).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
     , map(R.flatten)
@@ -2333,7 +2338,8 @@ export default class FeedParser {
     const setItemsCsv = objs => js2Csv.of({ csv: objs, keys: CSV.keys, header }).parse();
     //const dupItems    = objs => std.dupObj(objs, 'title');
     const getItems    = obj => obj.items ? obj.items : [];
-    const promises    = R.map(id => this.getNote(user, id, null, null, filter));
+    const _filter     = R.merge(filter, { isCSV: true });
+    const promises    = R.map(id => this.getNote(user, id, null, null, _filter));
     return forkJoin(promises(ids)).pipe(
       map(R.map(getItems))
     , map(R.map(CSV.map))
