@@ -67,7 +67,7 @@ const noteSchema = new mongoose.Schema({
 , AmazonUrl:        String
 , AmazonImg:        String
 , created:          { type: Date, required: true, default: Date.now } 
-, updated:          { type: Date, required: true, default: Date.now } 
+, updated:          { type: Date, required: true, default: 0 } 
 }, { collection: 'notes' });
 noteSchema.index({ user: 1, category: 1, updated: -1 });
 
@@ -178,7 +178,8 @@ const attributeSchema = new mongoose.Schema({
 , sale:             Number
 , sold:             Number
 , market:           String
-, asins:            [Object]
+, asins:            [{ request: String, keyword: String, code: String, message: String
+                    , asin: String, itemAttributes: Object, offerSummary: Object, offers: Object }]
 , images:           [{ url: String, archive: String, signedlink: String }]
 , updated:          { type: Date, required: true, default: Date.now }
 }, { collection: 'attributes' });

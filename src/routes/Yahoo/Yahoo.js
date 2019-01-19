@@ -6,6 +6,7 @@ import osmosis            from 'osmosis';
 import PromiseThrottle    from 'promise-throttle';
 import { parseString }    from 'xml2js';
 import Amazon             from 'Routes/Amazon/Amazon';
+//import Google             from 'Routes/Google/Google';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
@@ -43,6 +44,7 @@ class Yahoo {
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
     this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 2, promiseImplementation: Promise });
     this.AMZ = Amazon.of(amz_keyset);
+    //this.GGL = Google.of();
   }
 
   static of(options) {
@@ -612,12 +614,23 @@ class Yahoo {
   }
 
   jobItemSearch({ items, profile }) {
+    //log.trace(Yahoo.displayName, 'jobItemSearch', items );
     const setKeyword = str => this.trimTitle(str, profile);
     const observables = R.map(obj => this.AMZ.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(items)).pipe(
       map(this.setItemSearchs(profile, items))
     );
   }
+
+  //jobItemLookup({ items, profile }) {
+  //  //log.trace(Yahoo.displayName, 'jobItemLookup', items);
+  //  const setKeyword = str => this.trimTitle(str, profile);
+  //  const observables = R.map(obj => this.GGL.fetchItemSearch(setKeyword(obj.title)));
+  //  return forkJoin(observables(items)).pipe(
+  //    flatMap(objs => this.AMZ.forItemLookup(objs))
+  //  , map(this.setItemSearchs(profile, items))
+  //  );
+  //}
 
   //fetchRss({ url }) {
   //  let _note;
@@ -694,7 +707,7 @@ class Yahoo {
     const split = str => R.map(R.trim, R.split(',', str));
     const join  = str => R.join('|', str);
     const regexp  = str => new RegExp(str, 'g');
-    const replace = str => R.replace(str, '', title);
+    const replace = reg => R.replace(reg, '', title);
     const replaceString = R.compose(replace, regexp, join, split);
     return replaceString(profile.deleteWord);
   }

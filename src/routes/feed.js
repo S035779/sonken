@@ -98,13 +98,7 @@ export default {
   downloadTrade() {
     return (req, res) => {
       const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
-      const filter = allAuction === false ? {
-        endAuction
-      , allAuction
-      , inAuction
-      , bidStartTime
-      , bidStopTime
-      } : null;
+      const filter = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
       feed.downloadTrade({ user, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -119,13 +113,7 @@ export default {
   downloadBids() {
     return (req, res) => {
       const { user, endAuction, allAuction, inAuction, bidStartTime, bidStopTime } = req.body;
-      const filter = allAuction === false ? {
-        endAuction
-      , allAuction
-      , inAuction
-      , bidStartTime
-      , bidStopTime 
-      } : null;
+      const filter = allAuction === false ? { endAuction, allAuction, inAuction, bidStartTime, bidStopTime } : null;
       feed.downloadBids({ user, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -335,32 +323,21 @@ export default {
 
   fetchNote() {
     return (req, res) => {
-      const {
-        user, category, id, skip, limit
-      , lastWeekAuction
-      , twoWeeksAuction
-      , lastMonthAuction
-      , allAuction
-      , asinAuction
-      , inAuction
-      , aucStartTime
-      , aucStopTime
-      , sold
-      } = req.query;
-      const asinsFilter  = asinAuction && asinAuction === 'true' ? { asinAuction: true } : null;
-      const periodFilter = allAuction && allAuction ==='false'
-        ? {
-            lastWeekAuction:  lastWeekAuction === 'true'
+      const { user, category, id, skip, limit
+      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction
+      , inAuction, aucStartTime, aucStopTime, sold } = req.query;
+      const asinsFilter  = asinAuction === 'true' ? { asinAuction: true } : {};
+      const periodFilter = allAuction === 'true'
+        ? {}
+        : { lastWeekAuction:  lastWeekAuction === 'true'
           , twoWeeksAuction:  twoWeeksAuction === 'true'
           , lastMonthAuction: lastMonthAuction === 'true'
           , allAuction:       false
           , inAuction:        inAuction === 'true'
           , aucStartTime
           , aucStopTime
-          , sold
-          }
-        : null;
-      const filter = asinsFilter && periodFilter ? R.merge(asinsFilter, periodFilter) : (asinsFilter ? asinsFilter : periodFilter);
+          , sold };
+      const filter = R.isEmpty(asinsFilter) && R.isEmpty(periodFilter) ? null : R.merge(asinsFilter, periodFilter);
       feed.fetchNote({ user, category, id, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {
@@ -576,32 +553,21 @@ export default {
 
   fetchNotes() {
     return (req, res) => {
-      const {
-        user, category, skip, limit
-      , lastWeekAuction
-      , twoWeeksAuction
-      , lastMonthAuction
-      , allAuction
-      , asinAuction
-      , inAuction
-      , aucStartTime
-      , aucStopTime
-      , sold 
-      } = req.query;
-      const asinsFilter  = asinAuction && asinAuction === 'true' ? { asinAuction: true } : null;
-      const periodFilter = allAuction && allAuction ==='false'
-        ? {
-            lastWeekAuction:  lastWeekAuction === 'true'
+      const { user, category, skip, limit
+      , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction
+      , inAuction, aucStartTime, aucStopTime, sold } = req.query;
+      const asinsFilter  = asinAuction === 'true' ? { asinAuction: true } : {};
+      const periodFilter = allAuction ==='false'
+        ? {}
+        : { lastWeekAuction:  lastWeekAuction === 'true'
           , twoWeeksAuction:  twoWeeksAuction === 'true'
           , lastMonthAuction: lastMonthAuction === 'true'
           , allAuction:       false
           , inAuction:        inAuction === 'true'
           , aucStartTime
           , aucStopTime
-          , sold
-          }
-        : null;
-      const filter = asinsFilter && periodFilter ? R.merge(asinsFilter, periodFilter) : (asinsFilter ? asinsFilter : periodFilter);
+          , sold };
+      const filter = R.isEmpty(asinsFilter) && R.isEmpty(periodFilter) ? null : R.merge(asinsFilter, periodFilter);
       feed.fetchNotes({ user, category, skip, limit, filter }).subscribe(
         obj => { res.status(200).send(obj); }
       , err => {

@@ -59,21 +59,23 @@ export default class FeedParser {
       case 'job/notes':
         {
           const { users, categorys, filter, skip, limit, sort } = options;
-          const isPaginate = !R.isNil(skip) && !R.isNil(limit);
-          const isItems = filter && filter.isItems;
-          const isImages = filter && filter.isImages;
-          const create = filter && !R.isNil(filter.create) ? filter.create : Date.now();
-          const expire = filter && !R.isNil(filter.expire) ? filter.expire : Date.now();
-          const conditions = isItems
+          const isPaginate      = !R.isNil(skip) && !R.isNil(limit);
+          const isItems         = filter && filter.isItems;
+          const isImages        = filter && filter.isImages;
+          const isNotAsins      = filter && filter.isNotAsins;
+          const isNotAttributes = filter && filter.isNotAttributes;
+          const isNotImages     = filter && filter.isNotImages;
+          const expire          = filter && !R.isNil(filter.expire) ? filter.expire : Date.now();
+          const conditions      = isItems
           ? { 
-            user:     { $in: users }
-          , category: { $in: categorys }
-          , items:    { $ne: [], $exists: true }
-          , $or:      [{ updated: { $gt: create }}, { updated: { $lt: expire } }]
+            user:     { $in: users              }
+          , category: { $in: categorys          }
+          , items:    { $ne: [], $exists: true  }
+          , updated:  { $lt: expire             }
           } : {
-            user:     { $in: users }
-          , category: { $in: categorys }
-          , $or:      [{ updated: { $gt: create }}, { updated: { $lt: expire } }]
+            user:     { $in: users              }
+          , category: { $in: categorys          }
+          , updated:  { $lt: expire             }
           };
           const select = { user: 1, category: 1, url: 1 };
           const query = Note.find(conditions).select(select);
@@ -81,16 +83,25 @@ export default class FeedParser {
             path:     'items'
           , select:   { guid__: 1 }
           , options:  { sort: { bidStopTime: 'desc' } }
-          , populate: { path: 'attributes', select: { images: 1 } }
+          , populate: { path: 'attributes', select: { images: 1, asins: 1 } }
           };
-          const hasImages = R.filter(obj => obj.attributes && obj.attributes.images)
-          const setItems = R.map(obj => isImages ? R.merge(obj, { items: hasImages(obj.items) }) : obj);
-          const hasItems = R.filter(obj => obj.items);
-          const hasNotes = R.compose(setItems, hasItems);
-          const setNotes = objs => isItems ? hasNotes(objs) : objs;
-          const setObject = R.map(doc => doc.toObject());
+          const hasNotImages      = R.filter(obj => obj.attributes && obj.attributes.images && obj.attributes.images[0]
+            && !obj.attributes.images[0].archive);
+          const hasNotAttributes = R.filter(obj => obj.attributes && obj.attributes.updated < expire);
+          const hasNotAsins = R.filter(obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0]
+            && obj.attributes.asins[0].code !== 'ExactMatches');
+          const hasImages   = R.filter(obj => obj.attributes && obj.attributes.images)
+          const setItem     = obj =>  isImages        ? R.merge(obj, { items: hasImages(obj.items) })         :
+                                      isNotAsins      ? R.merge(obj, { items: hasNotAsins(obj.items) })       :
+                                      isNotAttributes ? R.merge(obj, { items: hasNotAttributes(obj.items) })  :
+                                      isNotImages     ? R.merge(obj, { items: hasNotImages(obj.items) })      : obj;
+          const setItems    = R.map(setItem);
+          const hasItems    = R.filter(obj => obj.items);
+          const hasNotes    = R.compose(setItems, hasItems);
+          const setNotes    = objs => isItems ? hasNotes(objs) : objs;
+          const setObject   = R.map(doc => doc.toObject());
           if(isPaginate) query.sort({ updated : sort }).skip(Number(skip)).limit(Number(limit));
-          const promise = (isItems || isImages) ? query.populate(params).exec() : query.exec();
+          const promise = (isItems || isImages  || isNotAsins) ? query.populate(params).exec() : query.exec();
           return promise.then(setObject).then(setNotes);
         }
       case 'job/note':
@@ -223,6 +234,7 @@ export default class FeedParser {
         }
       case 'fetch/note':
         {
+          //log.debug(FeedParser.displayName, 'fetch/note', options); 
           const { user, id, skip, limit, filter } = options;
           const isProject  = !R.isNil(filter) && filter.select;
           const isPaginate = !R.isNil(skip) && !R.isNil(limit);

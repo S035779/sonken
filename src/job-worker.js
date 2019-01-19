@@ -3,7 +3,7 @@ import dotenv           from 'dotenv';
 import * as R           from 'ramda';
 import { forkJoin, throwError, of, from, defer }   from 'rxjs';
 import { flatMap, map, catchError } from 'rxjs/operators';
-import _async           from 'async';
+import Async           from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import Yahoo            from 'Routes/Yahoo/Yahoo';
 import std              from 'Utilities/stdutils';
@@ -125,6 +125,20 @@ const request = (operation, options) => {
           , flatMap(objs => forkJoin(observables(objs)))
           );
       }
+    //case 'itemlookup':
+    //  {
+    //    const { user, id, profile } = options;
+    //    const setAttribute = obj => ({ user, id: obj.guid__, data: { asins: obj.asins } });
+    //    const setAttributes = R.map(setAttribute);
+    //    const hasAttributes = R.filter(obj => !R.isNil(obj));
+    //    const observables = R.map(obj => feed.createAttribute(obj));
+    //    return feed.fetchJobNote({ user, id }).pipe(
+    //        flatMap(obj => yahoo.jobItemLookup({ items: obj.items, profile }))
+    //      , map(hasAttributes)
+    //      , map(setAttributes)
+    //      , flatMap(objs => forkJoin(observables(objs)))
+    //      );
+    //  }
     case 'defrag':
       {
         const { user, id } = options;
@@ -342,7 +356,7 @@ for(let jobname of jobs) {
 }
 
 const main = () => {
-  const queue = _async.queue(worker);
+  const queue = Async.queue(worker);
   const wait        = () => queue.length();
   const runs        = () => queue.running();
   const idle        = () => queue.idle() ? '[idle]' : '[busy]';
@@ -351,15 +365,12 @@ const main = () => {
   const list        = () => queue.workersList();
   queue.concurrency = 1;
   queue.buffer      = 1;
-  queue.saturated   = () => log.debug(displayName, '== Saturated.   wait/runs:', wait(), runs(), idle());
-  queue.unsaturated = () => log.debug(displayName, '== Unsaturated. wait/runs:', wait(), runs(), idle());
-  queue.empty       = () => log.debug(displayName, '== Last.        wait/runs:', wait(), runs(), idle());
-  queue.drain       = () => log.debug(displayName, '== Drain.       wait/runs:', wait(), runs(), idle());
-  queue.error       = (err, task) => {
-    log.error(displayName, err.name, err.message, err.task);
-    log.debug(displayName, 'Task:', task);
-    log.debug(displayName, 'Queue list:', list(), paused(), started());
-  };
+  queue.saturated   = () => process.send({ name: 'saturated',   message: '== Saturated.',    wait: wait(), runs: runs(), idle: idle() });
+  queue.unsaturated = () => process.send({ name: 'unsaturated', message: '== Unsaturated.',  wait: wait(), runs: runs(), idle: idle() });
+  queue.empty       = () => process.send({ name: 'empty',       message: '== Last.',         wait: wait(), runs: runs(), idle: idle() });
+  queue.drain       = () => process.send({ name: 'drain',       message: '== Drain.',        wait: wait(), runs: runs(), idle: idle() });
+  queue.error       = 
+    (err, task) => process.send({ name: 'error', message: err, task: task, queue: list(), paused: paused(), started: started() });
   process.on('disconnect', () => shutdown(null, process.exit));
   process.on('message', task => {
     if(task) {

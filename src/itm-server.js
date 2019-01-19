@@ -5,7 +5,7 @@ import os               from 'os';
 import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
-import async            from 'async';
+import Async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
 import std              from 'Utilities/stdutils';
@@ -24,10 +24,7 @@ const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 
 const perPageItemTime = 5; // sec. (interval per page)
 const perPageItemNums = 20; // items per page.
-const perNoteProcTime = perPageItemTime * perPageItemNums * 1000; // ms.
-const procNoteNumbers = 1000; // notes.
-const createdInterval = Date.now() - procNoteNumbers * perNoteProcTime; // 1 term process interval.
-const procNoteExpires = Date.now() - 24 * 60 * 60 * 1000; // note expire time = 24 hours.
+const procNoteExpires = () => Date.now() - 24 * 60 * 60 * 1000; // note expire time = 24 hours.
 const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
 
 process.env.NODE_PENDING_DEPRECATION = 0;
@@ -55,7 +52,18 @@ log.info(displayName, 'worker:', job);
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message', mes => log.info(displayName, 'got message.', mes));
+  cps.on('message', mes => {
+    log.info(displayName, 'got message.', mes);
+    //if(mes.name === 'drain') {
+    //  const queue = Async.queue(worker, cpu_num);
+    //  queue.drain = () => log.info(displayName, 'all items have been processed.');
+    //  request(queue).subscribe(
+    //    obj => log.debug(displayName, 'finished proceeding item...', obj)
+    //  , err => log.error(displayName, err.name, err.message, err.stack)
+    //  , ()  => log.info(displayName, 'post items completed.')
+    //  );
+    //}
+  });
   cps.on('error', err => log.error(displayName, err.name, err.message));
   cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
   cps.on('exit', (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
@@ -90,7 +98,7 @@ const request = queue => {
       , skip: 0
       , limit: procNoteLmtNums
       , sort: 'asc'
-      , filter: { expire: procNoteExpires, create: createdInterval }
+      , filter: { expire: procNoteExpires() }
       , profiles: objs
       }))
     , map(setQueues)
@@ -115,7 +123,7 @@ const worker = (task, callback) => {
 
 const main = () => {
   log.info(displayName, 'Start ITEM Server.')
-  const queue = async.queue(worker, cpu_num);
+  const queue = Async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all items have been processed.');
   std.invoke(() => request(queue).subscribe(
     obj => log.debug(displayName, 'finished proceeding item...', obj)

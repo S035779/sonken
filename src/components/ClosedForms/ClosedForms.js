@@ -17,29 +17,32 @@ class ClosedForms extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      note: props.note
-    , checked: false
-    , lastWeekAuction: true
-    , twoWeeksAuction: true
+      note:             props.note
+    , checked:          false
+    , page:             1,      prevPage: 1
+    , lastWeekAuction:  true
+    , twoWeeksAuction:  true
     , lastMonthAuction: true
-    , allAuction: true
-    , asinAuction: false
-    , inAuction: false
-    , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-    , sold: 0
-    , page: 1
-    , prevPage: 1
-    , prevAllAuction: true
-    , prevAsinAuction: false
-    , isSuccess: false
-    , isNotValid: false
-    , isRequest: false
-    , isNotResult: false
-    , isDownload: false
-    , isQueued: false
-    , loadingImages: props.loadingImages
-    , loadingDownload: props.loadingDownload
+    , allAuction:       true
+    , asinAuction:      false
+    , inAuction:        false
+    , prevLastWeekAuction:  true
+    , prevTwoWeeksAuction:  true
+    , prevLastMonthAuction: true
+    , prevAllAuction:       true
+    , prevAsinAuction:      false
+    , prevInAuction:        false
+    , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+    , sold:             0
+    , loadingImages:    props.loadingImages
+    , loadingDownload:  props.loadingDownload
+    , isSuccess:        false
+    , isNotValid:       false
+    , isRequest:        false
+    , isNotResult:      false
+    , isDownload:       false
+    , isQueued:         false
     };
   }
 
@@ -52,30 +55,34 @@ class ClosedForms extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const nextFilter = nextProps.itemFilter;
     const nextNote = nextProps.note;
     const nextPage = this.state.page;
     const nextLoadingDownload = nextProps.loadingDownload;
-    const nextLoadingImages = nextProps.loadingImages;
-    const prevAllAuction = this.state.prevAllAuction;
-    const prevAsinAuction = this.state.prevAsinAuction;
+    const nextLoadingImages   = nextProps.loadingImages;
     const prevNote = this.state.note;
     const prevPage = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
     const prevLoadingImages = this.state.loadingImages;
-    if(!prevNote) return;
-    if(nextNote.items.length !== 0) {
+    //std.logInfo(ClosedForms.displayName, 'Prop', { nextNote, prevNote });
+    if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({
-          note: nextNote, page: 1, prevPage: 1
-        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
-        , lastWeekAuction: true, twoWeeksAuction: true, lastMonthAuction: true
-        , allAuction: true, inAuction: false
-        , aucStartTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-        , aucStopTime: std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
-        , sold: 0
+          note:             nextNote
+        , page:             1
+        , prevPage:         1
+        , loadingDownload:  nextLoadingDownload
+        , loadingImages:    nextLoadingImages
+        , lastWeekAuction:  true
+        , twoWeeksAuction:  true
+        , lastMonthAuction: true
+        , allAuction:       true
+        , asinAuction:      false
+        , inAuction:        false
+        , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , sold:             0
         });
       } else if(prevPage !== nextPage) {
         std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
@@ -84,47 +91,86 @@ class ClosedForms extends React.Component {
         const setItems = objs => R.merge(prevNote, { items: objs });
         const setNote  = R.compose(setItems, catItems, getItems);
         this.setState({
-          note: setNote(nextNote), prevPage: nextPage
-        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+          note:             setNote(nextNote)
+        , prevPage:         nextPage
+        , loadingDownload:  nextLoadingDownload
+        , loadingImages:    nextLoadingImages
         });
-      } else if(!nextFilter.allAuction) {
-        std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
-        this.setState({
-          note: nextNote
-        , prevAllAuction: false
-        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
-        });
-      } else if(nextFilter.allAuction !== prevAllAuction) {
-        std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
-        this.setState({
-          note: nextNote
-        , prevAllAuction: !nextFilter.allAuction
-        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
-        });
-      } else if(nextFilter.asinAuction !== prevAsinAuction) {
+      //} else if(!nextFilter.allAuction) {
+      //  std.logInfo(ClosedForms.displayName, 'Filter', { nextFilter, prevAllAuction });
+      //  this.setState({
+      //    note: nextNote
+      //  , prevAllAuction: false
+      //  , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+      //  });
+      //} else if(nextFilter.allAuction !== prevAllAuction) {
+      //  std.logInfo(ClosedForms.displayName, 'Normal', { nextFilter, prevAllAuction });
+      //  this.setState({
+      //    note: nextNote, page: 1, prevPage: 1
+      //  , prevAllAuction: true
+      //  , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+      //  });
+      } else if(this.isPrevFilter(nextProps.itemFilter, this.state)) {
+        std.logInfo(ClosedForms.displayName, 'Filter', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
-        this.setState({
-          note: nextNote, page: 1, prevPage: 1
-        , prevAsinAuction: !nextFilter.asinAuction
-        , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+        this.setState({ 
+          note:             nextNote
+        , page:             1
+        , prevPage:         1
+        , loadingDownload:  nextLoadingDownload
+        , loadingImages:    nextLoadingImages
+        , prevLastWeekAuction:  this.state.lastWeekAuction
+        , prevTwoWeeksAuction:  this.state.twoWeeksAuction
+        , prevLastMonthAuction: this.state.lastMonthAuction
+        , prevAllAuction:       this.state.allAuction
+        , prevAsinAuction:      this.state.asinAuction
+        , prevInAuction:        this.state.inAuction
         });
       } else if(nextLoadingDownload !== prevLoadingDownload || nextLoadingImages !== prevLoadingImages) {
         std.logInfo(ClosedForms.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
         this.setState({
-          loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
+          loadingDownload:  nextLoadingDownload
+        , loadingImages:    nextLoadingImages
         });
       }
-    } else if(nextNote.items.length === 0) {
+    } else if(prevNote && nextNote.items.length === 0) {
       if(nextNote._id !== prevNote._id) {
         std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
-        this.setState({ 
-          note: nextNote, page: 1, prevPage: 1
-        , prevAllAuction: true
-        , loadingDownload: true, loadingImages: true
+        this.setState({
+          note: nextNote
+        , page: 1, prevPage: 1
+        , loadingDownload:  true
+        , loadingImages:    true
+        , lastWeekAuction:  true
+        , twoWeeksAuction:  true
+        , lastMonthAuction: true
+        , allAuction:       true
+        , asinAuction:      false
+        , inAuction:        false
+        , aucStartTime:     std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , aucStopTime:      std.formatDate(new Date(), 'YYYY-MM-DDThh:mm')
+        , sold:             0
         });
       }
     }
+  }
+
+  isPrevFilter(nextFilter, prevFilter) {
+    return (
+       nextFilter.lastWeekAuction  !== prevFilter.lastWeekAuction
+    || nextFilter.twoWeeksAuction  !== prevFilter.twoWeeksAuction
+    || nextFilter.lastMonthAuction !== prevFilter.lastMonthAuction
+    || nextFilter.allAuction       !== prevFilter.allAuction
+    || nextFilter.asinAuction      !== prevFilter.asinAuction
+    || nextFilter.inAuction        !== prevFilter.inAuction
+    || prevFilter.lastWeekAuction  !== prevFilter.prevLastWeekAuction
+    || prevFilter.twoWeeksAuction  !== prevFilter.prevTwoWeeksAuction
+    || prevFilter.lastMonthAuction !== prevFilter.prevLastMonthAuction
+    || prevFilter.allAuction       !== prevFilter.prevAllAuction
+    || prevFilter.asinAuction      !== prevFilter.prevAsinAuction
+    || prevFilter.inAuction        !== prevFilter.prevInAuction
+    );
   }
 
   handlePagination() {
@@ -262,7 +308,6 @@ class ClosedForms extends React.Component {
     const id = note._id;
     const limit = 20;
     const skip = (page - 1) * limit;
-    //std.logInfo(ClosedForms.displayName, 'fetch', { id, page });
     this.spn.start();
     this.setState({ isRequest: true, page });
     return NoteAction.fetch(user, category, id, skip, limit

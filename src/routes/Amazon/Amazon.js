@@ -95,7 +95,6 @@ class Amazon {
     return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -226,9 +225,12 @@ class Amazon {
 
   getItemSearch(keywords, categoryid, page) {
     const options = {};
-    options['Keywords']       = this.setKeywords(keywords);
+    const Keywords = this.setKeywords(keywords);
+    const SearchIndex = this.setSearchIndex(categoryid);
+    //log.trace(Amazon.displayName, 'getItemSearch', `Keyword(${keywords}) =`, Keywords, `SearchIndex(${categoryid}) =`, SearchIndex);
+    options['Keywords']       = Keywords;
     options['ItemPage']       = page;
-    options['SearchIndex']    = this.setSearchIndex(categoryid);
+    options['SearchIndex']    = SearchIndex;
     options['ResponseGroup']  = 'ItemAttributes,ItemIds,OfferFull';
     return this.request('ItemSearch', options);
   }
@@ -237,7 +239,7 @@ class Amazon {
     const options = {};
     options['IdType']         = id_type;
     options['ItemId']         = item_id;
-    options['ResponseGroup']  = 'Large';
+    options['ResponseGroup']  = 'ItemAttributes,ItemIds,OfferFull';
     return this.request('ItemLookup', options);
   }
 

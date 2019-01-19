@@ -5,7 +5,7 @@ import os               from 'os';
 import child_process    from 'child_process';
 import * as R           from 'ramda';
 import { map, flatMap } from 'rxjs/operators';
-import async            from 'async';
+import Async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
 import UserProfiler     from 'Routes/UserProfiler/UserProfiler';
 import std              from 'Utilities/stdutils';
@@ -51,7 +51,18 @@ log.info(displayName, 'worker:', job);
 
 const fork = () => {
   const cps = child_process.fork(job);
-  cps.on('message', mes => log.info(displayName, 'got message.', mes));
+  cps.on('message', mes => {
+    log.info(displayName, 'got message.', mes);
+    //if(mes.name === 'drain') {
+    //  const queue = Async.queue(worker, cpu_num);
+    //  queue.drain = () => log.info(displayName, 'all itemsearch have been processed.');
+    //  request(queue).subscribe(
+    //    obj => log.debug(displayName, 'finished proceeding itemsearch...', obj)
+    //  , err => log.error(displayName, err.name, err.message, err.stack)
+    //  , ()  => log.info(displayName, 'post itemsearch completed.')
+    //  );
+    //}
+  });
   cps.on('error', err => log.error(displayName, err.name, err.message));
   cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));
   cps.on('exit', (code, signal) => log.warn(displayName, `worker terminated. (s/c): ${signal || code}`));
@@ -74,7 +85,7 @@ const request = queue => {
       , skip: 0
       , limit: procNoteLmtNums
       , sort: 'asc'
-      , filter: { isItems: true }
+      , filter: { isItems: true, isNotAsins: true }
       , profiles: objs
       }))
     , map(setQueues)
@@ -99,7 +110,7 @@ const worker = (task, callback) => {
 
 const main = () => {
   log.info(displayName, 'start fetch itemsearch server.')
-  const queue = async.queue(worker, cpu_num);
+  const queue = Async.queue(worker, cpu_num);
   queue.drain = () => log.info(displayName, 'all itemsearch have been processed.');
   std.invoke(() => request(queue).subscribe(
     obj => log.debug(displayName, 'finished proceeding itemsearch...', obj)
