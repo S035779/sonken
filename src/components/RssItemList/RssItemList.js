@@ -110,10 +110,10 @@ class RssItemList extends React.Component {
     const currentIndex = added.indexOf(id);
     const newAdded = [...added];
     if (currentIndex === -1) {
-      newAdded.splice(currentIndex, 1);
+      newAdded.push(id);
       NoteAction.createAdd(user, [id]);
+      this.setState({ added: newAdded });
     }
-    this.setState({ added: newAdded });
   }
 
   handleError(event) {
@@ -151,25 +151,31 @@ class RssItemList extends React.Component {
         <Paper className={classes.paper}>
           <ListItem disableGutters onMouseLeave={this.handleMouseLeaveAdded.bind(this, item.guid__)} className={classes.listItem}>
             <IconButton onClick={this.handleChangeStarred.bind(this, item.guid__)}>
-              { starred.indexOf(item.guid__) === -1 ? <StarBorder className={classes.star} /> : <Star className={classes.star} /> }
+              { 
+                starred.indexOf(item.guid__) === -1 ? <StarBorder className={classes.star} /> : <Star className={classes.star} />
+              }
             </IconButton>
             <IconButton onClick={this.handleChangeAdded.bind(this, item.guid__)}>
-              { added.indexOf(item.guid__) === -1 ? <FiberNew color="error"/> : <Done color="action"/> }
+              { 
+                added.indexOf(item.guid__) === -1 ? <FiberNew color="error"/> : <Done color="action"/> 
+              }
             </IconButton>
             <div className={classes.description}>
               <a href={item.description.DIV.A.attr.HREF} target="_blank" rel="noopener noreferrer">
-                <img src={imgsrc} alt={item.description.DIV.A.IMG.attr.ALT}
-                  onError={this.handleError.bind(this)} className={classes.image} />
+                <img src={imgsrc} alt={item.description.DIV.A.IMG.attr.ALT} onError={this.handleError.bind(this)}
+                  className={classes.image} />
               </a>
             </div>
-            <ListItemText classes={textClass} className={classes.listItemText} 
-              primary={<Button disabled={!amzsrc} color="secondary" size="large" href={amzsrc} target="_blank">{title}</Button>}
-              secondary={description} />
+            <ListItemText classes={textClass} className={classes.listItemText} primary={
+                <Button disabled={!amzsrc} color="secondary" size="large" href={amzsrc} target="_blank">{title}</Button>
+              } secondary={description} />
             <ListItemSecondaryAction>
               <RssButton color={buttonColor} onClick={this.handleChangeListed.bind(this, item.guid__)} classes={classes.button}>
                 {buttonText}
               </RssButton>
-              <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}><Delete /></IconButton>
+              <IconButton onClick={this.handleChangeDeleted.bind(this, item.guid__)}>
+                <Delete />
+              </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
         </Paper>

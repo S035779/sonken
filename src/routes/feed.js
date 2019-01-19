@@ -557,7 +557,7 @@ export default {
       , lastWeekAuction, twoWeeksAuction, lastMonthAuction, allAuction, asinAuction
       , inAuction, aucStartTime, aucStopTime, sold } = req.query;
       const asinsFilter  = asinAuction === 'true' ? { asinAuction: true } : {};
-      const periodFilter = allAuction ==='false'
+      const periodFilter = allAuction ==='true'
         ? {}
         : { lastWeekAuction:  lastWeekAuction === 'true'
           , twoWeeksAuction:  twoWeeksAuction === 'true'
