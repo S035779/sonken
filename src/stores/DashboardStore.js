@@ -55,7 +55,9 @@ export default class DashboardStore extends ReduceStore {
   }
 
   fetchNote(state, action) {
-    const setNote = note => action.id === note._id ? R.merge(note, action.note) : note;
+    const setNote = note => action.id === note._id
+      ? R.merge(note, action.note)
+      : R.merge(note, { item_attributes: action.note.item_attributes });
     const setNotes = R.map(setNote);
     return setNotes(state.notes);
   }

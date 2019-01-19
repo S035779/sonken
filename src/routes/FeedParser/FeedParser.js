@@ -211,14 +211,14 @@ export default class FeedParser {
           const query = Note.find(conditions);
           let params = { 
             path:     'items'
-          , options:  { limit: 20, skip: 0, sort: { bidStopTime: 'desc' } }
+          , options:  { skip: 0, limit: 20, sort: { bidStopTime: 'desc' } }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
             , { path: 'readed',  select: 'readed'  }
             , { path: 'starred', select: 'starred' }
             , { path: 'listed',  select: 'listed'  }
-            , { path: 'attributes' }
+            , { path: 'attributes', select: { 'asins.code': 1, 'asins.asin': 1, images: 1, sale: 1, sold: 1, market: 1 } }
             ]
           };
           if(isProject) params = R.merge(params, { select: filter.select });
@@ -227,7 +227,7 @@ export default class FeedParser {
           //const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
           if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
-          const promise = !isCSV ? query.populate(params).exec() : query.exec();
+          const promise = isCSV ? query.exec() : query.populate(params).exec();
           return promise.then(setObjects)
             //.then(setNotes)
             //.then(R.tap(log.trace.bind(this)))
@@ -283,7 +283,7 @@ export default class FeedParser {
             , { path: 'readed',     select: 'readed'  }
             , { path: 'starred',    select: 'starred' }
             , { path: 'listed',     select: 'listed'  }
-            , { path: 'attributes' }
+            , { path: 'attributes', select: { 'asins.code': 1, 'asins.asin': 1, images: 1, sale: 1, sold: 1, market: 1 } }
             ]
           };
           if(match) params = R.merge(params, { match })
