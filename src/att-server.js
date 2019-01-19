@@ -54,15 +54,15 @@ const fork = () => {
   const cps = child_process.fork(job);
   cps.on('message', mes => {
     log.info(displayName, 'got message.', mes);
-    //if(mes.name === 'drain') {
-    //  const queue = Async.queue(worker, cpu_num);
-    //  queue.drain = () => log.info(displayName, 'all attribute have been processed.');
-    //  request(queue).subscribe(
-    //    obj => log.debug(displayName, 'finished proceeding attribute...', obj)
-    //  , err => log.error(displayName, err.name, err.message, err.stack)
-    //  , ()  => log.info(displayName, 'post attribute completed.')
-    //  );
-    //}
+    if(mes.name === 'drain') {
+      const queue = Async.queue(worker, cpu_num);
+      queue.drain = () => log.info(displayName, 'all attribute have been processed.');
+      request(queue).subscribe(
+        obj => log.debug(displayName, 'finished proceeding attribute...', obj)
+      , err => log.error(displayName, err.name, err.message, err.stack)
+      , ()  => log.info(displayName, 'post attribute completed.')
+      );
+    }
   });
   cps.on('error', err => log.error(displayName, err.name, err.message));
   cps.on('disconnect', () => log.info(displayName, 'worker disconnected.'));

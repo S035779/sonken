@@ -95,6 +95,7 @@ class Amazon {
     return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
