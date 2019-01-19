@@ -211,7 +211,7 @@ export default class FeedParser {
           const query = Note.find(conditions);
           let params = { 
             path:     'items'
-          , options:  { sort: { bidStopTime: 'desc' } }
+          , options:  { limit: 20, skip: 0, sort: { bidStopTime: 'desc' } }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
@@ -222,13 +222,14 @@ export default class FeedParser {
             ]
           };
           if(isProject) params = R.merge(params, { select: filter.select });
-          const setItems = R.slice(0, 20);
-          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
-          const setNotes = R.map(setNote);
+          //const setItems = R.slice(0, 20);
+          //const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
+          //const setNotes = R.map(setNote);
           const setObjects = R.map(doc => doc.toObject());
           if(isPaginate)  query.skip(Number(skip)).limit(Number(limit)).sort('-updated');
           const promise = !isCSV ? query.populate(params).exec() : query.exec();
-          return promise.then(setObjects).then(setNotes)
+          return promise.then(setObjects)
+            //.then(setNotes)
             //.then(R.tap(log.trace.bind(this)))
           ;
         }
@@ -1170,8 +1171,8 @@ export default class FeedParser {
     //, this.toObject
     )(objs[3]);
     return observables.pipe(
-    //  map(R.tap(log.trace.bind(this)))
       map(setAttribute)
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
