@@ -22,9 +22,13 @@ class Root extends React.Component {
 
   render() {
     const routes = getRoutes();
-    return <MuiThemeProvider theme={theme}>
-      <BrowserRouter>{renderRoutes(routes)}</BrowserRouter>
-    </MuiThemeProvider>;
+    return (
+      <MuiThemeProvider theme={theme}>
+        <BrowserRouter>
+          {renderRoutes(routes)}
+        </BrowserRouter>
+      </MuiThemeProvider>
+    );
   }
 }
 export default hot(Root);

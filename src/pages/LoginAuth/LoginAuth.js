@@ -1,4 +1,4 @@
-import loadable       from '@loadable/component';
+import loadable         from '@loadable/component';
 import React            from 'react';
 import PropTypes        from 'prop-types';
 import { Redirect, withRouter, Link }

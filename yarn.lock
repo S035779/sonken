@@ -2055,14 +2055,6 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-create-react-context@^0.2.2:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/create-react-context/-/create-react-context-0.2.3.tgz#9ec140a6914a22ef04b8b09b7771de89567cb6f3"
-  integrity sha512-CQBmD0+QGgTaxDL3OX1IDXYqjkp2It4RIbcb99jS6AEg27Ga+a9G3JtK6SIu0HBwPLZlmwt9F7UwWA4Bn92Rag==
-  dependencies:
-    fbjs "^0.8.0"
-    gud "^1.0.0"
-
 cron@~1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/cron/-/cron-1.3.1.tgz#9dd9c1c72b894df835715aad32cab62d13cf0fd8"
@@ -3348,11 +3340,6 @@ graceful-fs@^4.1.0, graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2
   version "4.1.15"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.15.tgz#ffb703e1066e8a0eeaa4c8b80ba9253eeefbfb00"
   integrity sha512-6uHUhOPEBgQ24HM+r6b/QwWfZq+yiFcipKFrOFiBEnWdy5sdzYoi+pJeQaPI5qOLRFqWmAXUPQNsielzdLoecA==
-
-gud@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/gud/-/gud-1.0.0.tgz#a489581b17e6a70beca9abe3ae57de7a499852c0"
-  integrity sha512-zGEOVKFM5sVPPrYs7J5/hYEw2Pof8KCyOwyhG8sAF26mCAeUFAcYPu1mwB7hhpIP29zOIBaDqwuHdLp0jvZXjw==
 
 handle-thing@^2.0.0:
   version "2.0.0"
@@ -5926,31 +5913,28 @@ react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-router-config@4.4.0-beta.6:
-  version "4.4.0-beta.6"
-  resolved "https://registry.yarnpkg.com/react-router-config/-/react-router-config-4.4.0-beta.6.tgz#bb2a29acb22b6458ed044cc48c5d69db71ab0cfd"
-  integrity sha512-qxqqJ4LDok3UNRpJEs2NwCOBxugvKA71I4N5mk/qeZwo3EiUnqsX7YVyDIiGcTvzKx+h8qVTUyJeCqOe0fFMGw==
-  dependencies:
-    "@babel/runtime" "^7.1.2"
+react-router-config@1.0.0-beta.4:
+  version "1.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/react-router-config/-/react-router-config-1.0.0-beta.4.tgz#d202496dd0eabdf06cf24eb0793031f6891eef01"
+  integrity sha512-4jWfQK+PNAYeMU7dZ5h/dNDTReVjm41p761+XP+II360Jz5TfzHiuP27tAasIQ+JcGWwX2l2dCWG8jEmcS5SBA==
 
-react-router-dom@4.4.0-beta.1:
-  version "4.4.0-beta.1"
-  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-4.4.0-beta.1.tgz#2bdf808bb72c93dd5746ff01e61fe7312454c7a9"
-  integrity sha512-A/iFscMBCmyxFj56fWXSUw8Dz5lIw66JoNQ7RH24l+fooF1QdcxuZH787UGPWHWzcuPcDfyMaSrXDqDELA59gQ==
+react-router-dom@4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-4.3.1.tgz#4c2619fc24c4fa87c9fd18f4fb4a43fe63fbd5c6"
+  integrity sha512-c/MlywfxDdCp7EnB7YfPMOfMD3tOtIjrQlj/CKfNMBxdmpJP8xcz5P/UAFn3JbnQCNUxsHyVVqllF9LhgVyFCA==
   dependencies:
     history "^4.7.2"
     invariant "^2.2.4"
     loose-envify "^1.3.1"
     prop-types "^15.6.1"
-    react-router "4.4.0-beta.1"
+    react-router "^4.3.1"
     warning "^4.0.1"
 
-react-router@4.4.0-beta.1:
-  version "4.4.0-beta.1"
-  resolved "https://registry.yarnpkg.com/react-router/-/react-router-4.4.0-beta.1.tgz#26db716b90afd755eeb977ddcdb4fdd026b358ca"
-  integrity sha512-NL800HrzF+gSzuEfmHJ8o4w5REo2zBmQxXapUqoYLj25mM2iYnuOq2Ha5Axl7aKMXb1/bv8NrzyxOP8Zv/3HOQ==
+react-router@4.3.1, react-router@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/react-router/-/react-router-4.3.1.tgz#aada4aef14c809cb2e686b05cee4742234506c4e"
+  integrity sha512-yrvL8AogDh2X42Dt9iknk4wF4V8bWREPirFfS9gLU1huk6qK41sg7Z/1S81jjTrGHxa3B8R3J6xIkDAA6CVarg==
   dependencies:
-    create-react-context "^0.2.2"
     history "^4.7.2"
     hoist-non-react-statics "^2.5.0"
     invariant "^2.2.4"
