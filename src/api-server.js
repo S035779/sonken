@@ -14,7 +14,7 @@ import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 import log              from 'Utilities/logutils';
-import app              from 'Utilities/apputils';
+//import app              from 'Utilities/apputils';
 import readline         from 'readline';
 import heapdump         from 'heapdump';
 
@@ -55,7 +55,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
-web.use(app.compression({ threshold: '1kb' }));
+//web.use(app.compression({ threshold: '1kb' }));
 web.use(bodyParser.urlencoded({ extended: true }));
 web.use(bodyParser.json());
 web.use(session({
@@ -267,6 +267,15 @@ if(process.platform === 'win32') {
     process.emit('SIGUSR1');
   }); 
 }
+
+setInterval(() => {
+  const used = process.memoryUsage()
+  const messages = []
+  for (let key in used) {
+    messages.push(`${key}: ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+  }
+  log.info(displayName, 'memory usage', messages.join(', '));
+}, 5 * 60 * 1000)
 
 process.on('SIGUSR1', () => heapdump.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot')));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
