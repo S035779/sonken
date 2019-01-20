@@ -11,6 +11,8 @@ import ReactSSRenderer  from 'Routes/ReactSSRenderer/ReactSSRenderer';
 import log              from 'Utilities/logutils';
 import app              from 'Utilities/apputils';
 import Icon             from 'Assets/image/favicon.ico';
+import readline         from 'readline';
+import heapdump         from 'heapdump';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -83,11 +85,19 @@ const shutdown = (err, cbk) => {
     server.close(() => {
       log.info(displayName, 'express #1 terminated.');
       log.info(displayName, 'log4js #1 terminated.');
-      log.close(() => cbk());
+      log.close(() => cbk(0));
     });
   });
 };
 
+if(process.platform === 'win32') {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  rl.on('SIGTSTP', () => {
+    log.info(displayName, 'Received: Ctr-Z');
+    process.emit('SIGUSR1');
+  }); 
+}
+process.on('SIGUSR1', () => heapdump.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot')));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));

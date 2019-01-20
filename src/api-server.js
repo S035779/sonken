@@ -1,5 +1,6 @@
 import sourceMapSupport from 'source-map-support';
 import dotenv           from 'dotenv';
+import path             from 'path';
 import http             from 'http';
 import express          from 'express';
 import session          from 'express-session';
@@ -14,6 +15,8 @@ import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 import log              from 'Utilities/logutils';
 import app              from 'Utilities/apputils';
+import readline         from 'readline';
+import heapdump         from 'heapdump';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -252,11 +255,20 @@ const shutdown = (err, cbk) => {
     server.close(() => {
       log.info(displayName, 'express #2 terminated.');
       log.info(displayName, 'log4js #2 terminated.');
-      log.close(() => cbk());
+      log.close(() => cbk(0));
     });
   });
 };
 
+if(process.platform === 'win32') {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  rl.on('SIGTSIP', () => {
+    log.info(displayName, 'Received: Ctr-Z');
+    process.emit('SIGUSR1');
+  }); 
+}
+
+process.on('SIGUSR1', () => heapdump.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot')));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));

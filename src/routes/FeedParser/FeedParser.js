@@ -211,7 +211,7 @@ export default class FeedParser {
           const query = Note.find(conditions);
           let params = { 
             path:     'items'
-          , options:  { skip: 0, limit: 0, sort: { bidStopTime: 'desc' } }
+          , options:  { skip: 0, limit: 20, sort: { bidStopTime: 'desc' } }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
