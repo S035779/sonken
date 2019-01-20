@@ -178,10 +178,22 @@ const attributeSchema = new mongoose.Schema({
 , sale:             Number
 , sold:             Number
 , market:           String
-, asins:            [{ request: String, keyword: String, code: String, message: String
-                    , asin: String, itemAttributes: Object, offerSummary: Object, offers: Object }]
-, images:           [{ url: String, archive: String, signedlink: String }]
-, updated:          { type: Date, required: true, default: Date.now }
+, asins:            [{ 
+                      request:        String
+                    , keyword:        String
+                    , code:           String
+                    , message:        String
+                    , asin:           String
+                    , itemAttributes: Object
+                    , offerSummary:   Object
+                    , offers:         Object
+                    }]
+, images:           [{
+                      url:        String
+                    , archive:    String
+                    , signedlink: String 
+                    }]
+, updated:          { type:     Date, required: true, default:  Date.now }
 }, { collection: 'attributes' });
 attributeSchema.index({ user: 1, guid: 1 }, { unique: true });
 attributeSchema.index({ updated: 1 }, { expires: 60*60*24*30 });
