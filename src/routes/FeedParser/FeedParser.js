@@ -211,14 +211,15 @@ export default class FeedParser {
           const query = Note.find(conditions);
           let params = { 
             path:     'items'
-          , options:  { skip: 0, limit: 20, sort: { bidStopTime: 'desc' } }
+          , options:  { skip: 0, limit: 0, sort: { bidStopTime: 'desc' } }
           , populate: [
               { path: 'added',   select: 'added'   }
             , { path: 'deleted', select: 'deleted' }
             , { path: 'readed',  select: 'readed'  }
             , { path: 'starred', select: 'starred' }
             , { path: 'listed',  select: 'listed'  }
-            , { path: 'attributes', select: { 'asins.code': 1, 'asins.asin': 1, images: 1, sale: 1, sold: 1, market: 1 } }
+            , { path: 'attributes'
+              , select: { sale: 1, sold: 1, market: 1, 'asins.code': 1, 'asins.asin': 1, 'images.signedlink': 1 } }
             ]
           };
           if(isProject) params = R.merge(params, { select: filter.select });
