@@ -54,7 +54,7 @@ export default class FeedParser {
 
   request(request, options) {
     //log.trace(FeedParser.displayName, 'Request', request, options);
-    console.time(request);
+    //console.time(request);
     switch(request) {
       case 'job/notes':
         {
@@ -105,7 +105,7 @@ export default class FeedParser {
           return promise
             .then(setObject)
             .then(setNotes)
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'job/note':
@@ -122,7 +122,7 @@ export default class FeedParser {
           const promise = query.populate(params).exec();
           return promise
             .then(setObject)
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'count/note':
@@ -132,7 +132,7 @@ export default class FeedParser {
           const query = Note.find(conditions);
           const promise = query.countDocuments().exec();
           return promise
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'count/items':
@@ -211,7 +211,7 @@ export default class FeedParser {
             .then(setObjects)
             .then(setNotes)
             .then(setCounts)
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/notes':
@@ -246,7 +246,7 @@ export default class FeedParser {
           return promise.then(setObjects)
             //.then(setNotes)
             //.then(R.tap(log.trace.bind(this)))
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/note':
@@ -321,7 +321,7 @@ export default class FeedParser {
           return promise
             .then(setObject)
             .then(setNote)
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'count/traded':
@@ -472,14 +472,14 @@ export default class FeedParser {
         {
           const conditions = { user: options.user };
           return Category.find(conditions).exec()
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/category':
         {
           const conditions = { _id:  options.id, user: options.user };
           return Category.findOne(conditions).exec()
-            .then(R.tap(console.timeEnd.bind(this, request)))
+            //.then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'create/note': 
