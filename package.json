@@ -6,21 +6,16 @@
   "author": "Mamoru Hashimoto <you@example.com>",
   "scripts": {
     "start:all": "npm-run-all -p start:job start:api start:ssr start:mms start:dev",
+
     "start:web": "npm-run-all -p start:mms start:dev",
-    "start:mms": "node -r ./src/hook/babel-register src/mms-server.js",
-    "start:dev": "cross-env NODE_ENV=development node -r ./src/hook/babel-register src/dev-server.js",
+      "start:mms": "node -r ./src/hook/babel-register src/mms-server.js",
+      "start:dev": "cross-env NODE_ENV=development node -r ./src/hook/babel-register src/dev-server.js",
+
     "start:node": "npm-run-all -p start:api start:ssr watch:node",
-    "start:api": "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
-    "start:ssr": "supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
-    "dump:api": "node --expose-gc dist/api.node.js",
-    "dump:ssr": "node --expose-gc dist/ssr.node.js",
-    "prof:api": "node --prof dist/api.node.js",
-    "prof:ssr": "node --prof dist/ssr.node.js",
-    "prof-process:api": "node --prof-process isolate-0xNNNNNNNNNNNNN-v8.log",
-    "prof-process:ssr": "node --prof-process isolate-0xNNNNNNNNNNNNN-v8.log",
-    "graph:api": "0x dist/api.node.js",
-    "graph:ssr": "0x dist/ssr.node.js",
-    "watch:node": "cross-env NODE_ENV=development webpack --config webpack.node.js --watch --colors",
+      "start:api": "supervisor -q -n error -w dist -i node_modules dist/api.node.js",
+      "start:ssr": "supervisor -q -n error -w dist -i node_modules dist/ssr.node.js",
+      "watch:node": "cross-env NODE_ENV=development webpack --config webpack.node.js --watch --colors",
+
     "start:job": "cross-env WORKER_NAME=job-worker supervisor -q -n error -w dist -i node_modules dist/job.node.js",
     "start:itm": "cross-env WORKER_NAME=itm-worker supervisor -q -n error -w dist -i node_modules dist/itm.node.js",
     "start:img": "cross-env WORKER_NAME=img-worker supervisor -q -n error -w dist -i node_modules dist/img.node.js",
@@ -29,15 +24,30 @@
     "start:its": "cross-env WORKER_NAME=its-worker supervisor -q -n error -w dist -i node_modules dist/its.node.js",
     "start:arc": "cross-env WORKER_NAME=arc-worker supervisor -q -n error -w dist -i node_modules dist/arc.node.js",
     "start:wks": "cross-env WORKER_NAME=wks-worker supervisor -q -n error -w dist -i node_modules dist/wks.node.js",
+
     "build:production": "npm-run-all -p build:pro:node build:pro:web",
+      "build:pro:web": "cross-env NODE_ENV=production  webpack --config webpack.production.js",
+      "build:pro:node": "cross-env NODE_ENV=production  webpack --config webpack.node.js",
+
     "build:staging": "npm-run-all -p build:stg:node build:stg:web",
+      "build:stg:web": "cross-env NODE_ENV=staging     webpack --config webpack.staging.js",
+      "build:stg:node": "cross-env NODE_ENV=staging     webpack --config webpack.node.js",
+
     "build:development": "npm-run-all -p build:dev:node build:dev:web",
-    "build:pro:web": "cross-env NODE_ENV=production  webpack --config webpack.production.js",
-    "build:stg:web": "cross-env NODE_ENV=staging     webpack --config webpack.staging.js",
-    "build:dev:web": "cross-env NODE_ENV=development webpack --config webpack.development.js",
-    "build:pro:node": "cross-env NODE_ENV=production  webpack --config webpack.node.js",
-    "build:stg:node": "cross-env NODE_ENV=staging     webpack --config webpack.node.js",
-    "build:dev:node": "cross-env NODE_ENV=development webpack --config webpack.node.js",
+      "build:dev:web": "cross-env NODE_ENV=development webpack --config webpack.development.js",
+      "build:dev:node": "cross-env NODE_ENV=development webpack --config webpack.node.js",
+
+      "dump:api": "node --expose-gc dist/api.node.js",
+      "dump:ssr": "node --expose-gc dist/ssr.node.js",
+
+      "prof:api": "node --prof dist/api.node.js",
+      "prof:ssr": "node --prof dist/ssr.node.js",
+
+      "prof-process": "node --prof-process",
+
+      "graph:api": "0x dist/api.node.js",
+      "graph:ssr": "0x dist/ssr.node.js",
+
     "release": "/bin/bash systemd/install.sh",
     "restart": "/bin/bash systemd/restart.sh"
   },

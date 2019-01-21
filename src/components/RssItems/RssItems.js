@@ -45,17 +45,16 @@ class RssItems extends React.Component {
     const prevNote            = this.state.note;
     const prevPage            = this.state.prevPage;
     const prevLoadingDownload = this.state.loadingDownload;
-    if(!prevNote) return;
-    if(nextNote.items.length !== 0) {
+    if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
-        std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(RssItems.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1
         , loadingDownload: nextLoadingDownload
         });
       } else if(prevPage !== nextPage) {
-        std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(RssItems.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
@@ -65,14 +64,14 @@ class RssItems extends React.Component {
         , loadingDownload: nextLoadingDownload
         });
       } else if(prevLoadingDownload !== nextLoadingDownload) {
-        std.logInfo(RssItems.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(RssItems.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
         this.setState({
           loadingDownload: nextLoadingDownload
         });
       }
-    } else if(nextNote.items.length === 0) {
+    } else if(prevNote && nextNote.items.length === 0) {
       if(nextNote._id !== prevNote._id) {
-        std.logInfo(RssItems.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(RssItems.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote, page: 1, prevPage: 1

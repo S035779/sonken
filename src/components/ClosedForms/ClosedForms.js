@@ -66,7 +66,7 @@ class ClosedForms extends React.Component {
     //std.logInfo(ClosedForms.displayName, 'Prop', { nextNote, prevNote });
     if(prevNote && nextNote.items.length !== 0) {
       if(nextNote._id !== prevNote._id) {
-        std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Init', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({
           note:             nextNote
@@ -85,7 +85,7 @@ class ClosedForms extends React.Component {
         , sold:             0
         });
       } else if(prevPage !== nextPage) {
-        std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Update', { nextNote, nextPage, prevNote, prevPage });
         const getItems = obj => obj.items;
         const catItems = R.concat(prevNote.items);
         const setItems = objs => R.merge(prevNote, { items: objs });
@@ -111,7 +111,7 @@ class ClosedForms extends React.Component {
       //  , loadingDownload: nextLoadingDownload, loadingImages: nextLoadingImages
       //  });
       } else if(this.isPrevFilter(nextProps.itemFilter, this.state)) {
-        std.logInfo(ClosedForms.displayName, 'Filter', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Filter', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({ 
           note:             nextNote
@@ -127,7 +127,7 @@ class ClosedForms extends React.Component {
         , prevInAuction:        this.state.inAuction
         });
       } else if(nextLoadingDownload !== prevLoadingDownload || nextLoadingImages !== prevLoadingImages) {
-        std.logInfo(ClosedForms.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Ready', { nextNote, nextPage, prevNote, prevPage });
         this.setState({
           loadingDownload:  nextLoadingDownload
         , loadingImages:    nextLoadingImages
@@ -135,7 +135,7 @@ class ClosedForms extends React.Component {
       }
     } else if(prevNote && nextNote.items.length === 0) {
       if(nextNote._id !== prevNote._id) {
-        std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
+        //std.logInfo(ClosedForms.displayName, 'Next', { nextNote, nextPage, prevNote, prevPage });
         this.formsRef.scrollTop = 0;
         this.setState({
           note: nextNote

@@ -14,9 +14,7 @@ import profile          from 'Routes/profile';
 import faq              from 'Routes/faq';
 import mail             from 'Routes/mail';
 import log              from 'Utilities/logutils';
-//import app              from 'Utilities/apputils';
-import readline         from 'readline';
-import heapdump         from 'heapdump';
+import app              from 'Utilities/apputils';
 
 sourceMapSupport.install();
 const config = dotenv.config();
@@ -55,7 +53,7 @@ db.openUri(mdb_url + '/session', {
 });
 
 web.use(log.connect());
-//web.use(app.compression({ threshold: '1kb' }));
+web.use(app.compression({ threshold: '1kb' }));
 web.use(bodyParser.urlencoded({ extended: true }));
 web.use(bodyParser.json());
 web.use(session({
@@ -260,24 +258,15 @@ const shutdown = (err, cbk) => {
   });
 };
 
-if(process.platform === 'win32') {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  rl.on('SIGTSIP', () => {
-    log.info(displayName, 'Received: Ctr-Z');
-    process.emit('SIGUSR1');
-  }); 
-}
-
 setInterval(() => {
   const used = process.memoryUsage()
   const messages = []
-  for (let key in used) {
-    messages.push(`${key}: ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
-  }
+  for (let key in used) messages.push(`${key}: ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
   log.info(displayName, 'memory usage', messages.join(', '));
+  //if(env === 'development') process.emit('SIGUSR1');
 }, 5 * 60 * 1000)
 
-process.on('SIGUSR1', () => heapdump.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot')));
+process.on('SIGUSR1', () => import('heapdump').then(h => h.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot'))));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
