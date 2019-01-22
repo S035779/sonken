@@ -19,11 +19,11 @@ class LoginPreference extends React.Component {
     , isNotValid: false
     , profile: props.profile
     , plan: props.plan
-    , deleteWord: props.deleteWord
-    , itemWord: props.itemWord
-    , paymentWord: props.paymentWord
-    , deliverWord: props.deliverWord
-    , noteWord: props.noteWord
+    , deleteWord: props.deleteWord || ''
+    , itemWord: props.itemWord || ''
+    , paymentWord: props.paymentWord || ''
+    , deliverWord: props.deliverWord || ''
+    , noteWord: props.noteWord || ''
     };
   }
 
