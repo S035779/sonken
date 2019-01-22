@@ -19,11 +19,11 @@ class LoginPreference extends React.Component {
     , isNotValid: false
     , profile: props.profile
     , plan: props.plan
-    , deleteWord: props.deleteWord || ''
-    , itemWord: props.itemWord || ''
-    , paymentWord: props.paymentWord || ''
-    , deliverWord: props.deliverWord || ''
-    , noteWord: props.noteWord || ''
+    , deleteWord: props.deleteWord
+    , itemWord: props.itemWord
+    , paymentWord: props.paymentWord
+    , deliverWord: props.deliverWord
+    , noteWord: props.noteWord
     };
   }
 
@@ -39,7 +39,7 @@ class LoginPreference extends React.Component {
     const prevProfile = prevProps.profile;
     const nextProfile = this.props.profile;
     if(this.isChanged(prevProfile, nextProfile)) {
-      std.logInfo(LoginPreference.displayName, 'componentDidUpdate', name);
+      std.logInfo(LoginPreference.displayName, 'componentDidUpdate', nextProfile);
       this.setState({
         profile:      nextProfile
       , plan:         nextProfile.plan
@@ -135,7 +135,7 @@ class LoginPreference extends React.Component {
           label="除外ワード"
           multiline
           rows="4"
-          value={deleteWord}
+          value={deleteWord || ''}
           className={classes.textField}
           margin="normal"
           variant="outlined"
@@ -145,7 +145,7 @@ class LoginPreference extends React.Component {
         <TextField
           label="商品詳細"
           multiline
-          value={itemWord}
+          value={itemWord || ''}
           className={classes.textField}
           margin="normal"
           variant="outlined"
@@ -154,7 +154,7 @@ class LoginPreference extends React.Component {
         <TextField
           label="支払詳細"
           multiline
-          value={paymentWord}
+          value={paymentWord || ''}
           className={classes.textField}
           margin="normal"
           variant="outlined"
@@ -163,7 +163,7 @@ class LoginPreference extends React.Component {
         <TextField
           label="発送詳細"
           multiline
-          value={deliverWord}
+          value={deliverWord || ''}
           className={classes.textField}
           margin="normal"
           variant="outlined"
@@ -172,7 +172,7 @@ class LoginPreference extends React.Component {
         <TextField
           label="注意事項"
           multiline
-          value={noteWord}
+          value={noteWord || ''}
           className={classes.textField}
           margin="normal"
           variant="outlined"
