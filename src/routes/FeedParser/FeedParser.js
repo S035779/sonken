@@ -40,12 +40,12 @@ const ObjectId = mongoose.Types.ObjectId;
  */
 export default class FeedParser {
   constructor() {
-    const safeRequest = R.curry(this.request);
-    //this.countNote  = R.memoizeWith(JSON.stringify, safeRequest('count/note'));
-    this.countItems = R.memoizeWith(JSON.stringify, safeRequest('count/items'));
-    this.countBids  = R.memoizeWith(JSON.stringify, safeRequest('count/bided'));
-    this.countTrade = R.memoizeWith(JSON.stringify, safeRequest('count/traded'));
     this.AWS = aws.of(aws_keyset);
+    //const _request = R.curry(this.request);
+    //this.countNote  = R.memoizeWith(JSON.stringify, _request('count/note'));
+    //this.countItems = R.memoizeWith(JSON.stringify, _request('count/items'));
+    //this.countBids  = R.memoizeWith(JSON.stringify, _request('count/bided'));
+    //this.countTrade = R.memoizeWith(JSON.stringify, _request('count/traded'));
   }
 
   static of() {
@@ -979,19 +979,23 @@ export default class FeedParser {
   //}
 
   cntItems(user, category, filter) {
-    return this.countItems({ user, category, filter });
+    return this.request('count/items', { user, category, filter });
+    //return this.countItems({ user, category, filter });
   }
 
   cntItem(user, category, id, filter) {
-    return this.countItems({ user, category, id, filter });
+    return this.request('count/items', { user, category, id, filter });
+    //return this.countItems({ user, category, id, filter });
   }
 
   cntBided(user, skip, limit, filter) {
-    return this.countBids({ user, skip, limit, filter });
+    return this.request('count/bided', { user, skip, limit, filter });
+    //return this.countBids({ user, skip, limit, filter });
   }
 
   cntTraded(user, skip, limit, filter) {
-    return this.countTrade({ user, skip, limit, filter });
+    return this.request('count/traded', { user, skip, limit, filter });
+    //return this.countTrade({ user, skip, limit, filter });
   }
 
   dfgItems(user, id) {

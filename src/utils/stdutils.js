@@ -5,7 +5,24 @@ const env = process.env.PLATFORM;
 const isNode = env === 'local';
 
 const std = {
-  cache: {},
+  cache: {
+    store: {}
+  , maxSize: 26214400
+  , maxAge: 5400 * 1000
+  , cleanAfter: 7200 * 1000
+  , cleanedAt: 0
+  , clean: function(now) {
+      if(now - this.cleanAfter > this.cleanedAt) {
+        this.cleanedAt = now;
+        const that = this;
+        Object.keys(this.store).forEach(function(key) {
+          if(now > that.store[key].timestamp + that.maxAge) {
+            delete that.store[key];
+          }
+        });
+      }
+    }
+  },
 
   config: function() {
     this.cache['counter'] = counter();
