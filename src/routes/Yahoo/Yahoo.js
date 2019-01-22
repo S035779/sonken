@@ -709,7 +709,7 @@ class Yahoo {
     const regexp  = str => new RegExp(str, 'g');
     const replace = reg => R.replace(reg, '', title);
     const replaceString = R.compose(replace, regexp, join, split);
-    return replaceString(profile.deleteWord);
+    return profile.deleteWord ? replaceString(profile.deleteWord) : title;
   }
 
   setMarket(item, objs) {

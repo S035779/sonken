@@ -83,6 +83,15 @@ const shutdown = (err, cbk) => {
   log.close(() => cbk());
 };
 
+setInterval(() => {
+  const used = process.memoryUsage()
+  const messages = []
+  for (let key in used) messages.push(`${key}: ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB`);
+  log.info(displayName, 'memory usage', messages.join(', '));
+  //if(env === 'development') process.emit('SIGUSR1');
+}, 5 * 60 * 1000)
+
+process.on('SIGUSR1', () => import('heapdump').then(h => h.writeSnapshot(path.resolve('tmp', Date.now() + '.heapsnapshot'))));
 process.on('SIGUSR2', () => shutdown(null, process.exit));
 process.on('SIGINT',  () => shutdown(null, process.exit));
 process.on('SIGTERM', () => shutdown(null, process.exit));
