@@ -41,7 +41,7 @@ const ObjectId = mongoose.Types.ObjectId;
 export default class FeedParser {
   constructor() {
     const safeRequest = R.curry(this.request);
-    this.countNote  = R.memoizeWith(JSON.stringify, safeRequest('count/note'));
+    //this.countNote  = R.memoizeWith(JSON.stringify, safeRequest('count/note'));
     this.countItems = R.memoizeWith(JSON.stringify, safeRequest('count/items'));
     this.countBids  = R.memoizeWith(JSON.stringify, safeRequest('count/bided'));
     this.countTrade = R.memoizeWith(JSON.stringify, safeRequest('count/traded'));
@@ -54,7 +54,7 @@ export default class FeedParser {
 
   request(request, options) {
     //log.trace(FeedParser.displayName, 'Request', request, options);
-    //console.time(request);
+    console.time(request);
     switch(request) {
       case 'job/notes':
         {
@@ -105,7 +105,7 @@ export default class FeedParser {
           return promise
             .then(setObject)
             .then(setNotes)
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'job/note':
@@ -122,19 +122,19 @@ export default class FeedParser {
           const promise = query.populate(params).exec();
           return promise
             .then(setObject)
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
-      case 'count/note':
-        {
-          const { user, category } = options;
-          const conditions = { user, category };
-          const query = Note.find(conditions);
-          const promise = query.countDocuments().exec();
-          return promise
-            //.then(R.tap(console.timeEnd.bind(this, request)))
-          ;
-        }
+      //case 'count/note':
+      //  {
+      //    const { user, category } = options;
+      //    const conditions = { user, category };
+      //    const query = Note.find(conditions);
+      //    const promise = query.countDocuments().exec();
+      //    return promise
+      //      //.then(R.tap(console.timeEnd.bind(this, request)))
+      //    ;
+      //  }
       case 'count/items':
         {
           const { user, category, filter } = options;
@@ -188,14 +188,16 @@ export default class FeedParser {
           const setSold  = R.compose(R.length, hasSold);
           const setImgs  = R.compose(R.length, hasImgs);
           //const setArch  = R.compose(R.length, hasArch);
-          const setCount = doc => ({ 
+          const setNoteCounts = docs => R.map(obj => R.merge(obj, { notes: docs.length }), docs);
+          const setItemCount = doc => ({ 
             _id:      doc._id
-          , counts:   R.length(doc.items)
+          , items:    R.length(doc.items)
           , sold:     setSold(doc.items)
           , images:   setImgs(doc.items)
           //, archive:  setArch(doc.items)
           });
-          const setCounts = R.map(setCount);
+          const setItemCounts = R.map(setItemCount);
+          const setCounts = R.compose(setNoteCounts, setItemCounts);
           const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
             ? R.equals(sold, obj.attributes.sold)
             : R.lte(sold, 0));
@@ -211,7 +213,7 @@ export default class FeedParser {
             .then(setObjects)
             .then(setNotes)
             .then(setCounts)
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/notes':
@@ -246,7 +248,7 @@ export default class FeedParser {
           return promise.then(setObjects)
             //.then(setNotes)
             //.then(R.tap(log.trace.bind(this)))
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/note':
@@ -321,7 +323,7 @@ export default class FeedParser {
           return promise
             .then(setObject)
             .then(setNote)
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'count/traded':
@@ -472,14 +474,14 @@ export default class FeedParser {
         {
           const conditions = { user: options.user };
           return Category.find(conditions).exec()
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/category':
         {
           const conditions = { _id:  options.id, user: options.user };
           return Category.findOne(conditions).exec()
-            //.then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'create/note': 
@@ -972,9 +974,9 @@ export default class FeedParser {
     return this.request('fetch/category', { user, id });
   }
   
-  cntNote(user, category) {
-    return this.countNote({ user, category });
-  }
+  //cntNote(user, category) {
+  //  return this.countNote({ user, category });
+  //}
 
   cntItems(user, category, filter) {
     return this.countItems({ user, category, filter });
@@ -1182,13 +1184,13 @@ export default class FeedParser {
     //, this.getDeleted(user)
     //, this.getAdded(user)
       this.cntItems(user, category, _filter)
-    , this.cntNote(user, category)
+    //, this.cntNote(user, category)
     , this.getCategorys(user)
     , this.getNotes(user, category, skip, limit, _filter)
     ]);
     const setAttribute = objs => R.compose(
-      this.setCategorys(objs[2])
-    , this.setNotePage(skip, limit, objs[1])
+      this.setCategorys(objs[1])
+    , this.setNotePage(skip, limit, objs[0])
     , this.setItemPage(   0,    20, objs[0])
     //, this.setAdded(objs[4])
     //, this.setDeleted(objs[3])
@@ -1196,10 +1198,10 @@ export default class FeedParser {
     //, this.setListed(objs[1])
     //, this.setStarred(objs[0])
     //, this.toObject
-    )(objs[3]);
+    )(objs[2]);
     return observables.pipe(
       map(setAttribute)
-    //, map(R.tap(console.timeEnd.bind(this, 'fetchNotes')))
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -1410,31 +1412,75 @@ export default class FeedParser {
 
   setItemPage(skip, limit, counts) {
     //log.trace(FeedParser.displayName, 'setItemPage', counts);
-    const _counts = id => R.find(obj => id.equals(obj._id))(counts);
-    const inCounts = num => R.gt(num, Number(skip) + Number(limit))
-    const setTotal = R.compose(num => ({ total: num }), R.sum, R.map(obj => obj.counts));
-    const setItem = num => ({ total: num, count: inCounts(num) ? Number(skip) + Number(limit) : num });
-    const setPage = num => ({ total: Math.ceil(num / Number(limit)), count: inCounts(num)
-      ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(num / Number(limit)) });
-    const setItemCount = obj => ({ page: setPage(obj.counts), item: setItem(obj.counts), items: setTotal(counts) });
-    const setPerfCount = obj => ({ sold: { total: obj.sold }, images: { total: obj.images }/*, archive: { total: obj.archive }*/});
+    const itemSkip  = Number(skip);
+    const itemLimit = Number(limit);
+
+    const inCounts = num => R.gt(num, itemSkip + itemLimit);
+
+    const setPage = num => ({
+      total: Math.ceil(num / itemLimit)
+    , count: inCounts(num) ? Math.ceil((itemSkip + itemLimit) / itemLimit) : Math.ceil(num / itemLimit) 
+    });
+    const setItem = num => ({
+      total: num
+    , count: inCounts(num) ? itemSkip + itemLimit : num
+    });
+    const setItems = R.compose(
+      num => ({ total: num })
+    , R.sum
+    , R.map(obj => obj.items)
+    );
+
+    const setItemCount = obj => ({ 
+      page:   setPage(obj.items)
+    , item:   setItem(obj.items)
+    , items:  setItems(counts)
+    });
+    const setPerfCount = obj => ({ 
+      sold:   { total: obj.sold }
+    , images: { total: obj.images }
+    /*, archive: { total: obj.archive }*/
+    });
+
     const setAttributes = obj => obj && (!R.isNil(obj.sold) || !R.isNil(obj.images)/*|| !R.isNil(obj.archive) */)
       ? R.merge(setItemCount(obj), setPerfCount(obj))
       : (obj ? setItemCount(obj) : {});
+
+    const _counts = id => R.find(obj => id.equals(obj._id))(counts);
     const setCounts = obj => R.merge(obj, { item_attributes: setAttributes(_counts(obj._id)) });
-    const results = objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
-    return results;
+
+    return objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
   }
 
   setNotePage(skip, limit, counts) {
-    //log.trace(FeedParser.displayName, 'setNotePage', counts);
-    const inCounts = R.gt(counts, Number(skip) + Number(limit));
-    const note = { total: counts, count: inCounts ? Number(skip) + Number(limit) : counts };
-    const page = { total: Math.ceil(counts / Number(limit)), count: inCounts
-      ? Math.ceil((Number(skip) + Number(limit)) / Number(limit)) : Math.ceil(counts / Number(limit)) };
-    const setCounts = obj => R.merge(obj, { note_attributes: { note, page } });
-    const results = objs => R.isNil(objs) || counts === 0 ? [] : R.map(setCounts, objs);
-    return results;
+  //  //log.trace(FeedParser.displayName, 'setNotePage', counts);
+    const noteSkip  = Number(skip);
+    const noteLimit = Number(limit);
+
+    const inCounts = num => R.gt(num, noteSkip + noteLimit);
+
+    const setPage = num => ({
+      total: Math.ceil(num / noteLimit)
+    , count: inCounts(num) ? Math.ceil((noteSkip + noteLimit) / noteLimit) : Math.ceil(num / noteLimit)
+    });
+    const setNote = num => ({
+      total: num
+    , count: inCounts(num) ? noteSkip + noteLimit : num
+    });
+
+    const setNoteCount = obj => ({ 
+      page:   setPage(obj.notes)
+    , note:   setNote(obj.notes)
+    });
+    
+    const setAttributes = obj => obj && !R.isNil(obj.notes)
+      ? setNoteCount(obj)
+      : {};
+
+    const _counts = id => R.find(obj => id.equals(obj._id))(counts);
+    const setCounts = obj => R.merge(obj, { note_attributes: setAttributes(_counts(obj._id)) });
+
+    return objs => R.isNil(objs) || R.isEmpty(counts) ? [] : R.map(setCounts, objs);
   }
 
   setAttributes(skip, limit, counts) {
