@@ -32,7 +32,7 @@ const common = {
               , '@babel/proposal-object-rest-spread'
               , '@babel/transform-member-expression-literals'
               , '@babel/transform-property-literals'
-              , 'react-hot-loader/babel'
+              //, 'react-hot-loader/babel'
               ]
             , compact: true
             }}

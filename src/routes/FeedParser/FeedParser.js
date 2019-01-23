@@ -54,7 +54,7 @@ export default class FeedParser {
 
   request(request, options) {
     //log.debug(FeedParser.displayName, 'Request', request, options);
-    //console.time(request);
+    console.time(request);
     switch(request) {
       case 'job/notes':
         {

@@ -1,7 +1,7 @@
 import React              from 'react';
 import { BrowserRouter }  from 'react-router-dom';
 import { renderRoutes }   from 'react-router-config';
-import { hot }            from 'react-hot-loader/root';
+//import { hot }            from 'react-hot-loader/root';
 import getRoutes          from 'Routes';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -31,4 +31,5 @@ class Root extends React.Component {
     );
   }
 }
-export default hot(Root);
+export default Root;
+//export default hot(Root);
