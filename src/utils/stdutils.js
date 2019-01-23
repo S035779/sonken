@@ -5,24 +5,7 @@ const env = process.env.PLATFORM;
 const isNode = env === 'local';
 
 const std = {
-  cache: {
-    store: {}
-  , maxSize: 26214400
-  , maxAge: 5400 * 1000
-  , cleanAfter: 7200 * 1000
-  , cleanedAt: 0
-  , clean: function(now) {
-      if(now - this.cleanAfter > this.cleanedAt) {
-        this.cleanedAt = now;
-        const that = this;
-        Object.keys(this.store).forEach(function(key) {
-          if(now > that.store[key].timestamp + that.maxAge) {
-            delete that.store[key];
-          }
-        });
-      }
-    }
-  },
+  cache: {},
 
   config: function() {
     this.cache['counter'] = counter();
@@ -824,13 +807,34 @@ const std = {
 export default std;
 
 const memoize = function() {
-  let cache = {};
+  let cache = {
+    store: {}
+  , maxSize: 26214400
+  , maxAge: 5400 * 1000
+  , cleanAfter: 7200 * 1000
+  , cleanedAt: 0
+  , clean: function(now) {
+      if(now - this.cleanAfter > this.cleanedAt) {
+        this.cleanedAt = now;
+        const that = this;
+        Object.keys(this.store).forEach(function(key) {
+          if(now > that.store[key].timestamp + that.maxAge) {
+            delete that.store[key];
+          }
+        });
+      }
+    }
+  };
   return {
     memoized: function(fn) {
       let key = JSON.stringify(arguments);
-      cache[key] = cache[key] || fn.apply(this, arguments);
-      return cache[key];
+      cache.store[key] = { content: cache.store[key].content || fn.apply(this, arguments), timestamp: Date.now() };
+      return cache.store[key].content;
     }
+  , clean: function() {
+      return cache.clean(Date.now());
+    }
+  , maxSize: cache.maxSize
   }
 };
 
