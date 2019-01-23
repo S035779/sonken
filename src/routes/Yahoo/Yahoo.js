@@ -41,7 +41,7 @@ class Yahoo {
     this.secret_key = secret_key;
     this.redirect_url = redirect_url;
     this.tokens = [];
-    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 10, promiseImplementation: Promise });
+    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 5, promiseImplementation: Promise });
     this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 2, promiseImplementation: Promise });
     this.AMZ = Amazon.of(amz_keyset);
     //this.GGL = Google.of();
@@ -74,14 +74,11 @@ class Yahoo {
       case 'parse/xml/item':
         return this.promiseXmlItem(options);
       case 'fetch/closedmerchant':
-        return this.promiseThrottle
-          .add(this.promiseClosedMerchant.bind(this, options));
+        return this.promiseThrottle.add(this.promiseClosedMerchant.bind(this, options));
       case 'fetch/closedsellers':
-        return this.promiseThrottle
-          .add(this.promiseClosedSellers.bind(this, options));
+        return this.promiseThrottle.add(this.promiseClosedSellers.bind(this, options));
       case 'fetch/html':
-        return this.promiseThrottle
-          .add(this.promiseHtml.bind(this, options));
+        return this.promiseThrottle.add(this.promiseHtml.bind(this, options));
     }
   }
   
@@ -657,14 +654,15 @@ class Yahoo {
 
   setItemSearchs(profile, items) {
     const setKeyword = str => this.trimTitle(str, profile);
-    const memoKeyword = R.memoizeWith(JSON.stringify, setKeyword);
+    const memoKeyword = std.memoizeWith(5 * 60 * 1000, setKeyword);
     const self = this;
     return function(datas) {
       const setItemSearch = (item, obj) => {
-        const key = memoKeyword(item.title);
+        const key = memoKeyword.memoize(item.title);
+        memoKeyword.clean();
         return self.setItemSearch(key, item, obj)
       };
-      const hasItemSearch = str => R.find(item => memoKeyword(item.title) === memoKeyword(str))(items);
+      const hasItemSearch = str => R.find(item => memoKeyword.memoize(item.title) === memoKeyword.memoize(str))(items);
       const hasItemSearchs = obj => {
         const item = hasItemSearch(obj.Request.ItemSearchRequest.Keywords);
         return item ? setItemSearch(item, obj) : null;

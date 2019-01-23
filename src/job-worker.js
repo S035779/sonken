@@ -167,6 +167,7 @@ const request = (operation, options) => {
           , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
               if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
+              else log.warn(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
                   flatMap(file => FSS.createDirectory(file))
                 , flatMap(file => FSS.fetchFileList(file))
@@ -198,6 +199,7 @@ const request = (operation, options) => {
           , flatMap(file => mergeArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
               if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
+              else log.warn(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
                   flatMap(file => FSS.createDirectory(file))
                 , flatMap(file => FSS.fetchFileList(file))
@@ -230,6 +232,7 @@ const request = (operation, options) => {
           , flatMap(file => createArchives({ user, category, type, limit, count, total, index }, file))
           , catchError(err => {
               if(err && !(err.name === 'NotFound' || err.name === 'NoSuchKey')) log.error(displayName, err.name, err.message, err.stack);
+              else log.warn(displayName, err.name, err.message, err.stack);
               return of(setData()).pipe(
                   flatMap(file => FSS.createDirectory(file))
                 , flatMap(file => FSS.fetchFileList(file))

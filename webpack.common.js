@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const devMode = process.env.NODE_ENV === 'development';
+
 const common = {
     context: path.resolve(__dirname, 'src')
   , module: {
@@ -27,11 +28,11 @@ const common = {
                   , 'useBuiltIns': 'usage' }
                 ]]
             , plugins: [
-                'react-hot-loader/babel'
-              , '@loadable/babel-plugin'
+                '@loadable/babel-plugin'
               , '@babel/proposal-object-rest-spread'
               , '@babel/transform-member-expression-literals'
               , '@babel/transform-property-literals'
+              , 'react-hot-loader/babel'
               ]
             , compact: true
             }}
