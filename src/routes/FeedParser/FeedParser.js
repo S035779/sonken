@@ -53,7 +53,7 @@ export default class FeedParser {
   }
 
   request(request, options) {
-    //log.trace(FeedParser.displayName, 'Request', request, options);
+    //log.debug(FeedParser.displayName, 'Request', request, options);
     console.time(request);
     switch(request) {
       case 'job/notes':
@@ -176,7 +176,7 @@ export default class FeedParser {
           let params = { 
             path:     'items'
           , select:   { guid__: 1 }
-          , populate: { path: 'attributes', select: { sold: 1, 'asins.asin': 1, 'images.signedlink': 1 } } 
+          , populate: { path: 'attributes', select: { sold: 1, 'asins.code': 1, 'asins.asin': 1, 'images.signedlink': 1 } } 
           };
           if(match) params = R.merge(params, { match });
           const isSold   = obj => !R.isNil(obj.attributes) && !R.isNil(obj.attributes.sold);
@@ -197,18 +197,17 @@ export default class FeedParser {
           //, archive:  setArch(doc.items)
           });
           const setItemCounts = R.map(setItemCount);
-          const setCounts = R.compose(setNoteCounts, setItemCounts);
-          const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
-            ? R.equals(sold, obj.attributes.sold)
-            : R.lte(sold, 0));
-          const isAsins   = obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0]
-            && obj.attributes.asins[0].code === 'ExactMatches';
-          const hasAsinItem = R.filter(obj => isAsin ? isAsins(obj) : true);
-          const setItems = R.compose(hasSoldItem, hasAsinItem);
-          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
-          const setNotes = R.map(setNote);
-          const setObjects = R.map(doc => doc.toObject());
-          const promise = !R.isNil(filter) ? query.populate(params).exec() : query.exec();
+          const setCounts     = R.compose(setNoteCounts, setItemCounts);
+          const isSolds       = obj => !R.isNil(obj.attributes) && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0);
+          const hasSoldItems  = R.filter(isSolds);
+          const isAsins       =
+            obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0] && obj.attributes.asins[0].code === 'ExactMatches';
+          const hasAsinItems  = R.filter(obj => isAsin ? isAsins(obj) : true);
+          const setItems      = R.compose(hasAsinItems, hasSoldItems);
+          const setNote       = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setNotes      = R.map(setNote);
+          const setObjects    = R.map(doc => doc.toObject());
+          const promise       = !R.isNil(filter) ? query.populate(params).exec() : query.exec();
           return promise
             .then(setObjects)
             .then(setNotes)
@@ -308,18 +307,17 @@ export default class FeedParser {
             ]
           };
           if(match) params = R.merge(params, { match })
-          if(isProject) params = R.merge(params, { select: filter.select });
-          const sliItems = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
-          const hasSoldItem = R.filter(obj => !R.isNil(obj.attributes) && sold !== 0 
-            ? R.equals(sold, obj.attributes.sold)
-            : R.lte(sold, 0));
-          const isAsins   = obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0]
-            && obj.attributes.asins[0].code === 'ExactMatches';
-          const hasAsinItem = R.filter(obj => isAsin ? isAsins(obj) : true);
-          const setItems = R.compose(sliItems, hasAsinItem, hasSoldItem);
-          const setNote  = obj => R.merge(obj, { items: setItems(obj.items) });
-          const setObject = doc => doc.toObject();
-          const promise = query.populate(params).exec();
+          if(isProject) params  = R.merge(params, { select: filter.select });
+          const sliItems        = docs => isPaginate ? R.slice(Number(skip), Number(skip) + Number(limit), docs) : docs;
+          const isSolds         = obj => !R.isNil(obj.attributes) && sold !== 0 ? R.equals(sold, obj.attributes.sold) : R.lte(sold, 0);
+          const hasSoldItems    = R.filter(isSolds);
+          const isAsins         =
+            obj => obj.attributes && obj.attributes.asins && obj.attributes.asins[0] && obj.attributes.asins[0].code === 'ExactMatches';
+          const hasAsinItems    = R.filter(obj => isAsin ? isAsins(obj) : true);
+          const setItems        = R.compose(sliItems, hasAsinItems, hasSoldItems);
+          const setNote         = obj => R.merge(obj, { items: setItems(obj.items) });
+          const setObject       = doc => doc.toObject();
+          const promise         = query.populate(params).exec();
           return promise
             .then(setObject)
             .then(setNote)
@@ -381,7 +379,9 @@ export default class FeedParser {
             query = isCount ? query.countDocuments() : query;
             promise = query.exec();
           }
-          return promise;
+          return promise
+            .then(R.tap(console.timeEnd.bind(this, request)))
+          ;
         }
       case 'count/bided':
       case 'fetch/bided':
@@ -443,7 +443,9 @@ export default class FeedParser {
             query = isCount ? query.countDocuments() : query;
             promise = query.exec();
           }
-          return promise;
+          return promise
+            .then(R.tap(console.timeEnd.bind(this, request)))
+          ;
         }
       case 'fetch/listed':
         {
@@ -473,16 +475,12 @@ export default class FeedParser {
       case 'fetch/categorys':
         {
           const conditions = { user: options.user };
-          return Category.find(conditions).exec()
-            .then(R.tap(console.timeEnd.bind(this, request)))
-          ;
+          return Category.find(conditions).exec();
         }
       case 'fetch/category':
         {
           const conditions = { _id:  options.id, user: options.user };
-          return Category.findOne(conditions).exec()
-            .then(R.tap(console.timeEnd.bind(this, request)))
-          ;
+          return Category.findOne(conditions).exec();
         }
       case 'create/note': 
         {
@@ -504,8 +502,9 @@ export default class FeedParser {
           const setNote = R.compose(setIds, getIds);
           return Item.insertMany(items)
             .then(setNote)
-            .then(obj => Note.create(obj));
+            .then(obj => Note.create(obj))
             //.then(R.tap(log.trace.bind(this)))
+          ;
         }
       case 'update/note':
         {
@@ -555,7 +554,8 @@ export default class FeedParser {
                 Note.updateMany(conditions, { $set: objs[0] }).exec()
               , Item.deleteMany({ _id: { $in: objs[1] }}).exec()
               ]))
-            : Note.updateMany(conditions, { $set: update }).exec();
+            : Note.updateMany(conditions, { $set: update }).exec()
+          ;
         }
       case 'delete/note':
         {
