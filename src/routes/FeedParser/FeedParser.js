@@ -41,11 +41,11 @@ const ObjectId = mongoose.Types.ObjectId;
 export default class FeedParser {
   constructor() {
     this.AWS = aws.of(aws_keyset);
-    //const _request = R.curry(this.request);
-    //this.countNote  = R.memoizeWith(JSON.stringify, _request('count/note'));
-    //this.countItems = R.memoizeWith(JSON.stringify, _request('count/items'));
-    //this.countBids  = R.memoizeWith(JSON.stringify, _request('count/bided'));
-    //this.countTrade = R.memoizeWith(JSON.stringify, _request('count/traded'));
+    const _request = R.curry(this.request);
+    this.countNote  = std.memoizeWith(5 * 60 * 1000, _request('count/note'));
+    this.countItems = std.memoizeWith(5 * 60 * 1000, _request('count/items'));
+    this.countBids  = std.memoizeWith(5 * 60 * 1000, _request('count/bided'));
+    this.countTrade = std.memoizeWith(5 * 60 * 1000, _request('count/traded'));
   }
 
   static of() {
@@ -979,23 +979,31 @@ export default class FeedParser {
   //}
 
   cntItems(user, category, filter) {
-    return this.request('count/items', { user, category, filter });
-    //return this.countItems({ user, category, filter });
+    //return this.request('count/items', { user, category, filter });
+    const result = this.countItems.memoize({ user, category, filter });
+    this.countItems.clean();
+    return result;
   }
 
   cntItem(user, category, id, filter) {
-    return this.request('count/items', { user, category, id, filter });
-    //return this.countItems({ user, category, id, filter });
+    //return this.request('count/items', { user, category, id, filter });
+    const result = this.countItems.memoize({ user, category, id, filter });
+    this.countItems.clean();
+    return result;
   }
 
   cntBided(user, skip, limit, filter) {
-    return this.request('count/bided', { user, skip, limit, filter });
-    //return this.countBids({ user, skip, limit, filter });
+    //return this.request('count/bided', { user, skip, limit, filter });
+    const result = this.countBids.memoize({ user, skip, limit, filter });
+    this.countBids.clean();
+    return result;
   }
 
   cntTraded(user, skip, limit, filter) {
-    return this.request('count/traded', { user, skip, limit, filter });
-    //return this.countTrade({ user, skip, limit, filter });
+    //return this.request('count/traded', { user, skip, limit, filter });
+    const result = this.countTrade.memoize({ user, skip, limit, filter });
+    this.countTrade.clean();
+    return result;
   }
 
   dfgItems(user, id) {

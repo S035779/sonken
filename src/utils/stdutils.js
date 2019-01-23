@@ -10,11 +10,6 @@ const std = {
   config: function() {
     this.cache['counter'] = counter();
     this.cache['timer'] = timer();
-    this.cache['memoize'] = memoize();
-  },
-
-  memoize: function(fn) {
-    return this.cache.memoize.memoized(fn);
   },
 
   time: function(title) {
@@ -801,42 +796,45 @@ const std = {
 
   regexEmail: function(address) {
     return /^[-a-z0-9~!$%^&*_=+}{\\'?]+(\.[-a-z0-9~!$%^&*_=+}{\\'?]+)*@([a-z0-9_][a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i.test(address);
+  },
+
+  memoizeWith: function(expire, fn) {
+    let cache = {
+      store: {}
+    , maxSize: 26214400
+    , maxAge: expire
+    , cleanAfter: expire * 1.5
+    , cleanedAt: 0
+    , clean: function(now) {
+        if(now - this.cleanAfter > this.cleanedAt) {
+          this.cleanedAt = now;
+          const that = this;
+          Object.keys(this.store).forEach(function(key) {
+            if(now > that.store[key].timestamp + that.maxAge) {
+              delete that.store[key];
+            }
+          });
+        }
+      }
+    };
+    return {
+      memoize: function() {
+        let key = JSON.stringify(arguments);
+        cache.store[key] = { 
+          content: cache.store[key] ? cache.store[key].content : fn.apply(this, arguments)
+        , timestamp: Date.now()
+        };
+        return cache.store[key].content;
+      }
+    , clean: function() {
+        return cache.clean(Date.now());
+      }
+    , maxSize: cache.maxSize
+    }
   }
 
 };
 export default std;
-
-const memoize = function() {
-  let cache = {
-    store: {}
-  , maxSize: 26214400
-  , maxAge: 5400 * 1000
-  , cleanAfter: 7200 * 1000
-  , cleanedAt: 0
-  , clean: function(now) {
-      if(now - this.cleanAfter > this.cleanedAt) {
-        this.cleanedAt = now;
-        const that = this;
-        Object.keys(this.store).forEach(function(key) {
-          if(now > that.store[key].timestamp + that.maxAge) {
-            delete that.store[key];
-          }
-        });
-      }
-    }
-  };
-  return {
-    memoized: function(fn) {
-      let key = JSON.stringify(arguments);
-      cache.store[key] = { content: cache.store[key].content || fn.apply(this, arguments), timestamp: Date.now() };
-      return cache.store[key].content;
-    }
-  , clean: function() {
-      return cache.clean(Date.now());
-    }
-  , maxSize: cache.maxSize
-  }
-};
 
 /**
  * counter
