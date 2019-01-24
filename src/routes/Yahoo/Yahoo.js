@@ -6,7 +6,7 @@ import osmosis            from 'osmosis';
 import PromiseThrottle    from 'promise-throttle';
 import { parseString }    from 'xml2js';
 import Amazon             from 'Routes/Amazon/Amazon';
-//import Google             from 'Routes/Google/Google';
+import Google             from 'Routes/Google/Google';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
@@ -44,7 +44,7 @@ class Yahoo {
     this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 5, promiseImplementation: Promise });
     this.gpromiseThrottle = new PromiseThrottle({ requestsPerSecond: 2, promiseImplementation: Promise });
     this.AMZ = Amazon.of(amz_keyset);
-    //this.GGL = Google.of();
+    this.GGL = Google.of();
   }
 
   static of(options) {
@@ -619,15 +619,15 @@ class Yahoo {
     );
   }
 
-  //jobItemLookup({ items, profile }) {
-  //  //log.trace(Yahoo.displayName, 'jobItemLookup', items);
-  //  const setKeyword = str => this.trimTitle(str, profile);
-  //  const observables = R.map(obj => this.GGL.fetchItemSearch(setKeyword(obj.title)));
-  //  return forkJoin(observables(items)).pipe(
-  //    flatMap(objs => this.AMZ.forItemLookup(objs))
-  //  , map(this.setItemSearchs(profile, items))
-  //  );
-  //}
+  jobItemLookup({ items, profile }) {
+    //log.trace(Yahoo.displayName, 'jobItemLookup', items);
+    const setKeyword = str => this.trimTitle(str, profile);
+    const observables = R.map(obj => this.GGL.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid));
+    return forkJoin(observables(items)).pipe(
+      flatMap(objs => this.AMZ.forItemLookup(objs))
+    , map(this.setItemSearchs(profile, items))
+    );
+  }
 
   //fetchRss({ url }) {
   //  let _note;

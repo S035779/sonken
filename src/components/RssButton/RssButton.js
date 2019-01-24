@@ -136,6 +136,9 @@ RssButton.propTypes = {
 , children: PropTypes.node.isRequired
 , onClick: PropTypes.func
 , type: PropTypes.string
-, component: PropTypes.func
+, component: PropTypes.oneOfType([
+    PropTypes.func
+  , PropTypes.string
+  ])
 };
 export default RssButton;

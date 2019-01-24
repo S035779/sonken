@@ -42,7 +42,7 @@ export default class FeedParser {
   constructor() {
     this.AWS = aws.of(aws_keyset);
     const _request = R.curry(this.request);
-    this.countNote  = std.memoizeWith(5 * 60 * 1000, _request('count/note'));
+    //this.countNote  = std.memoizeWith(5 * 60 * 1000, _request('count/note'));
     this.countItems = std.memoizeWith(5 * 60 * 1000, _request('count/items'));
     this.countBids  = std.memoizeWith(5 * 60 * 1000, _request('count/bided'));
     this.countTrade = std.memoizeWith(5 * 60 * 1000, _request('count/traded'));
@@ -210,7 +210,7 @@ export default class FeedParser {
             .then(setObjects)
             .then(setNotes)
             .then(setCounts)
-          //  .then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/notes':
@@ -245,7 +245,7 @@ export default class FeedParser {
           return promise.then(setObjects)
             //.then(setNotes)
             //.then(R.tap(log.trace.bind(this)))
-          //  .then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'fetch/note':
@@ -319,7 +319,7 @@ export default class FeedParser {
           return promise
             .then(setObject)
             .then(setNote)
-          //  .then(R.tap(console.timeEnd.bind(this, request)))
+            .then(R.tap(console.timeEnd.bind(this, request)))
           ;
         }
       case 'count/traded':

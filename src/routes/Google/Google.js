@@ -1,15 +1,15 @@
 import * as R           from 'ramda';
 import { from }         from 'rxjs';
 import { map }          from 'rxjs/operators';
-import osmosis          from 'osmosis';
+import google           from 'google-search-scraper';
+//import osmosis          from 'osmosis';
 import PromiseThrottle  from 'promise-throttle';
 import searchIndex      from 'Utilities/amzindex';
-import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
 
 class Google {
   constructor() {
-    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.1, promiseImplementation: Promise });
+    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.05, promiseImplementation: Promise });
   }
 
   static of() {
@@ -17,29 +17,29 @@ class Google {
   }
 
   request(searchs) {
-    const searchString = R.join(' ', searchs);
-    const searchEngine = std.parse_url(`https://www.google.com/search?hl=ja&safe=off&tbo=d&qscrl=1&btnI=1&q="${searchString}","検索"`);
     return new Promise((resolve, reject) => {
-      let results = [];
-      osmosis
-        .get(searchEngine.href)
-        .find('.srg:first .g:gt(0)')
-        .set({ title: '.LC20lb', site: '.iUh30' })
-        .data(data => results.push(data.site))
-        .then((context, data) => {
-          const params = context.resquest.params;
-          const title = data.title;
-          const site = data.cite;
-          log.info(Google.displayName, 'Request:', params, 'title =', title, 'site =', site);
-        })
-        .log(msg    => log.trace(Google.displayName, 'Request:', msg))
-        .debug(msg  => log.debug(Google.displayName, 'Request:', msg))
-        .error(msg  => reject({ name: 'Request:', message: msg, stack: '' }))
-        .done(()    => resolve(results));
+      if(!searchs) return reject({ name: 'NotQuery', message: 'request query was not found.', stack: searchs }); 
+      const urls = [];
+      const limit = 10;
+      const query = R.join(' ', searchs);
+      log.info(Google.displayName, 'Request', query);
+      google.search({ query, limit }, (err, url) => {
+        if (err) reject(err)
+        urls.push(url);
+        if(urls.length === limit) resolve(urls);
+      });
     });
   }
 
-  throttle(searchs) {
+  //request(searchs) {
+  //  return new Promise((resolve, reject) => {
+  //    osmosis
+  //      .get('www.google.com')
+  //      .set({ })
+  //  });
+  //}
+
+  trequest(searchs) {
     return this.promiseThrottle.add(this.request.bind(this, searchs));
   }
 
@@ -47,13 +47,17 @@ class Google {
     const searchs = ['site:https://www.amazon.co.jp/', this.setKeywords(keywords), this.setSearchIndex(categoryid)];
     const setAsins = urls => {
       const results = [];
+      const re = /^https:\/\/www\.amazon\.co\.jp\/.*\/dp\/(\w{10})/i;
       urls.forEach(url => {
-        const result = R.match(/^https:\/\/www\.amazon\.co\.jp\/.*\/dp\/(\w{10})/i, url);
-        if(result) results.push(result[1]); 
+        if(R.test(re, url)) {
+          const result = R.match(re, url);
+          const asin = { ASIN: result[1] };
+          results.push(asin); 
+        }
       });
       return results;
     };
-    return from(this.throttle(searchs)).pipe(
+    return from(this.trequest(searchs)).pipe(
         map(setAsins)
       , map(R.tap(log.trace.bind(this)))
       );

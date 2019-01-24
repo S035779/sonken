@@ -4,7 +4,7 @@ import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
-//import log                from 'Utilities/logutils';
+import log                from 'Utilities/logutils';
 import searchIndex        from 'Utilities/amzindex';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
@@ -95,7 +95,6 @@ class Amazon {
     return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
@@ -228,7 +227,7 @@ class Amazon {
     const options = {};
     const Keywords = this.setKeywords(keywords);
     const SearchIndex = this.setSearchIndex(categoryid);
-    //log.trace(Amazon.displayName, 'getItemSearch', `Keyword(${keywords}) =`, Keywords, `SearchIndex(${categoryid}) =`, SearchIndex);
+    log.info(Amazon.displayName, 'Request', Keywords, SearchIndex);
     options['Keywords']       = Keywords;
     options['ItemPage']       = page;
     options['SearchIndex']    = SearchIndex;

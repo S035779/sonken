@@ -22,6 +22,7 @@ const node = {
   , dfg: ['./dfg-server.js']
   , att: ['./att-server.js']
   , its: ['./its-server.js']
+  , itl: ['./itl-server.js']
   , arc: ['./arc-server.js']
   , wks: ['./wks-server.js']
   }

@@ -801,7 +801,6 @@ const std = {
   memoizeWith: function(expire, fn) {
     let cache = {
       store: {}
-    , maxSize: 26214400
     , maxAge: expire
     , cleanAfter: expire * 1.5
     , cleanedAt: 0
@@ -811,6 +810,7 @@ const std = {
           const that = this;
           Object.keys(this.store).forEach(function(key) {
             if(now > that.store[key].timestamp + that.maxAge) {
+              console.log('>>> cache delete...');
               delete that.store[key];
             }
           });
@@ -829,7 +829,6 @@ const std = {
     , clean: function() {
         return cache.clean(Date.now());
       }
-    , maxSize: cache.maxSize
     }
   }
 
