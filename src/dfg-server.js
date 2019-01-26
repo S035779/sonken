@@ -85,7 +85,9 @@ const request = queue => {
       flatMap(objs => feed.fetchJobNotes({
         users: objs
       , categorys: ['sellers', 'marchant', 'closedsellers', 'closedmarchant' ]
-      , skip: 0, limit: procNoteLmtNums, sort: 'asc'
+      , skip: 0
+      , limit: procNoteLmtNums
+      , sort: 'asc'
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

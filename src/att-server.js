@@ -24,7 +24,7 @@ const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 
 const perPageItemTime = 3.000; // sec. (interval per page)
 const perPageItemNums = 20; // items per page.
-const procNoteExpires = () => Date.now() - 24 * 60 * 60 * 1000; // note expire time = 24 hours.
+//const procNoteExpires = () => Date.now() - 24 * 60 * 60 * 1000; // note expire time = 24 hours.
 const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
 
 process.env.NODE_PENDING_DEPRECATION = 0;
@@ -84,7 +84,7 @@ const request = queue => {
       , skip: 0
       , limit: procNoteLmtNums
       , sort: 'asc'
-      , filter: { expire: procNoteExpires(), isItems: true, isNotAttributes: true }
+      , filter: { /*expire: procNoteExpires(),*/ isItems: true, isNotAttributes: true }
       }))
     , map(R.map(setQueue))
     , map(std.invokeMap(queuePush, 0, 1000 * executeInterval, null))

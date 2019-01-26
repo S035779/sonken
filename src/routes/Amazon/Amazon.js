@@ -5,7 +5,7 @@ import xml2js             from 'xml2js';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
-import searchIndex        from 'Utilities/amzindex';
+import index              from 'Utilities/amzindex';
 
 const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 /**
@@ -92,10 +92,19 @@ class Amazon {
   }
 
   fetchItemSearch(keywords, category, page) {
-    return from(this.getItemSearch(keywords, category, page)).pipe(
+    const title = this.trimTitle(keywords);
+    return from(this.getItemSearch(title, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
     );
+  }
+
+  trimTitle(title)  {
+    const join  = R.join('|');
+    const regexp  = str => new RegExp(str, 'g');
+    const replace = reg => R.replace(reg, '', title);
+    const replaceString = R.compose(replace, regexp, join);
+    return replaceString(index.words.delete);
   }
 
   fetchNodeList(node_id) {
@@ -244,8 +253,8 @@ class Amazon {
   }
 
   setSearchIndex(categoryid) {
-    const keys       = R.keys(searchIndex);
-    const values     = key => R.prop(key, searchIndex);
+    const keys       = R.keys(index.search);
+    const values     = key => R.prop(key, index.search);
     const isCategory = key => R.contains(Number(categoryid), values(key));
     const isIndex    = R.filter(isCategory);
     const setIndex   = R.compose(R.head, isIndex);
