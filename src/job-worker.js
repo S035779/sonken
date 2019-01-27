@@ -4,8 +4,9 @@ import path             from 'path';
 import * as R           from 'ramda';
 import { forkJoin, throwError, of, from, defer }   from 'rxjs';
 import { flatMap, map, catchError } from 'rxjs/operators';
-import Async           from 'async';
+import Async            from 'async';
 import FeedParser       from 'Routes/FeedParser/FeedParser';
+import Amazon           from 'Routes/Amazon/Amazon';
 import Yahoo            from 'Routes/Yahoo/Yahoo';
 import std              from 'Utilities/stdutils';
 import log              from 'Utilities/logutils';
@@ -21,12 +22,19 @@ const node_env        = process.env.NODE_ENV    || 'development';
 const workername      = process.env.WORKER_NAME || 'empty';
 const CACHE           = process.env.CACHE;
 const STORAGE         = process.env.STORAGE;
+
 const AWS_ACCESS_KEY  = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_KEY  = process.env.AWS_SECRET_KEY;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
+const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
+
+const AMZ_ACCESS_KEY  = process.env.AMZ_ACCESS_KEY;
+const AMZ_SECRET_KEY  = process.env.AMZ_SECRET_KEY;
+const AMZ_ASSOCI_TAG  = process.env.AMZ_ASSOCI_TAG;
+const amz_keyset      = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY, associ_tag: AMZ_ASSOCI_TAG };
+
 process.env.NODE_PENDING_DEPRECATION = 0;
 
-const aws_keyset      = { access_key: AWS_ACCESS_KEY, secret_key: AWS_SECRET_KEY, region: AWS_REGION_NAME };
 const AWS = aws.of(aws_keyset);
 const FSS = fss.of({ dirpath: '../', dirname: CACHE });
 
@@ -44,8 +52,9 @@ if (node_env === 'production') {
 
 
 const request = (operation, options) => {
-  const yahoo = Yahoo.of();
-  const feed  = FeedParser.of();
+  const amazon  = Amazon.of(amz_keyset);
+  const yahoo   = Yahoo.of();
+  const feed    = FeedParser.of();
   switch(operation) {
     case 'marchant':
     case 'sellers':
@@ -120,7 +129,7 @@ const request = (operation, options) => {
         const hasAttributes = R.filter(obj => !R.isNil(obj));
         const observables = R.map(obj => feed.createAttribute(obj));
         return feed.fetchJobNote({ user, id }).pipe(
-            flatMap(obj => yahoo.jobItemSearch({ items: obj.items, profile }))
+            flatMap(obj => amazon.jobItemSearch({ items: obj.items, profile }))
           , map(hasAttributes)
           , map(setAttributes)
           , flatMap(objs => forkJoin(observables(objs)))
@@ -134,7 +143,7 @@ const request = (operation, options) => {
         const hasAttributes = R.filter(obj => !R.isNil(obj));
         const observables = R.map(obj => feed.createAttribute(obj));
         return feed.fetchJobNote({ user, id }).pipe(
-            flatMap(obj => yahoo.jobItemLookup({ items: obj.items, profile }))
+            flatMap(obj => amazon.jobItemLookup({ items: obj.items, profile }))
           , map(hasAttributes)
           , map(setAttributes)
           , flatMap(objs => forkJoin(observables(objs)))

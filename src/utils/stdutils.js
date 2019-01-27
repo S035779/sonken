@@ -810,7 +810,8 @@ const std = {
           const that = this;
           Object.keys(this.store).forEach(function(key) {
             if(now > that.store[key].timestamp + that.maxAge) {
-              console.log('>>> cache delete...');
+              console.log('>>> cache delete key:', key);
+              console.log('>>>            value:', that.store[key]);
               delete that.store[key];
             }
           });

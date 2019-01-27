@@ -729,7 +729,7 @@ export default class FeedParser {
                 ? { sale: sale, sold: sold, market: market, updated: new Date }
                 : null;
           const params = { upsert: true/*, multi: !!isArchive*/ };
-          //log.trace(FeedParser.displayName, 'options', options, { isPerformance, isArchive, isImages, isAsins });
+          //log.trace(FeedParser.displayName, 'options', options, { isPerformance, isImages, isAsins });
           return update
             ? Attribute.updateMany(conditions, { $set: update }, params).exec()
             : Promise.reject(new Error(`request ${request}.`));

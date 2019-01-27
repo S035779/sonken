@@ -2,6 +2,7 @@ import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
+import Google             from 'Routes/Google/Google';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
@@ -19,6 +20,7 @@ const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 class Amazon {
   constructor(access_key, secret_key, associ_tag) {
     this.keyset = { access_key, secret_key, associ_tag };
+    this.GGL = Google.of();
   }
 
   static of({ access_key, secret_key, associ_tag }) {
@@ -92,19 +94,92 @@ class Amazon {
   }
 
   fetchItemSearch(keywords, category, page) {
-    const title = this.trimTitle(keywords);
-    return from(this.getItemSearch(title, category, page)).pipe(
+    return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
+    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
-  trimTitle(title)  {
+  jobItemSearch({ items, profile }) {
+    //log.trace(Amazon.displayName, 'jobItemSearch', items );
+    const setKeyword = str => this.trimTitle(str, profile);
+    const observables = R.map(obj => this.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
+    return forkJoin(observables(items)).pipe(
+      map(this.setItemSearchs(profile, items))
+    //, map(R.tap(log.trace.bind(this)))
+    );
+  }
+
+  jobItemLookup({ items, profile }) {
+    //log.trace(Amazon.displayName, 'jobItemLookup', items);
+    const setKeyword = str => this.trimTitle(str, profile);
+    const observables = R.map(obj => this.GGL.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid));
+    return forkJoin(observables(items)).pipe(
+      flatMap(objs => this.forItemLookup(objs))
+    , map(this.setItemSearchs(profile, items))
+    );
+  }
+
+  setItemSearchs(profile, items) {
+    const setKeyword = str => this.trimTitle(str, profile);
+    //const memoKeyword = std.memoizeWith(5 * 60 * 1000, setKeyword);
+    const self = this;
+    return function(datas) {
+      const setItemSearch = (item, obj) => {
+        //const key = memoKeyword.memoize(item.title);
+        //memoKeyword.clean();
+        const key = setKeyword(item.title);
+        return self.setItemSearch(key, item, obj)
+      };
+      //const hasItemSearch = str => R.find(item => memoKeyword.memoize(item.title) === memoKeyword.memoize(str))(items);
+      const hasItemSearch = str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
+      const hasItemSearchs = obj => {
+        const item = hasItemSearch(obj.Request.ItemSearchRequest.Keywords);
+        return item ? setItemSearch(item, obj) : null;
+      };
+      const setItemSearchs = R.map(hasItemSearchs);
+      return setItemSearchs(datas);
+    };
+  }
+
+  setItemSearch(keyword, item, data) {
+    const setErrors  = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
+    const setInvalid = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'InvaildRequest',      message: '不正なリクエストです。' });
+    const setNoMatch = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'NoMatchTitle',        message: 'タイトルが合致しません。' });
+    const setNoItems = obj => ({ request: keyword, keyword: obj.ItemSearchRequest.Keywords
+    , code: 'NoItems',             message: 'アイテムを取得できませんでした。' });
+    const setItem    = obj => ({ request: keyword
+    , code: 'ExactMatches',        message: '正常に取得できました。'
+    , asin:           obj.ASIN
+    , itemAttributes: obj.ItemAttributes
+    , offerSummary:   obj.OfferSummary
+    , offers:         obj.Offers });
+    const setItems   = R.map(setItem);
+    const setSearch  = obj => ({ guid__: item.guid__, asins: obj });
+    const isTitle    = obj => obj.Request.ItemSearchRequest.Keywords === keyword;
+    const isValid    = obj => obj.Request.IsValid === 'True';
+    const isItem     = obj => obj.Item && Number(obj.TotalResults) === 1;
+    const getSearch  = obj => obj.Request.Errors  ? [ setErrors(obj.Request)  ] :
+                               !isValid(obj)      ? [ setInvalid(obj.Request) ] :
+                               !isTitle(obj)      ? [ setNoMatch(obj.Request) ] :
+                               !obj.Item          ? [ setNoItems(obj.Request) ] :
+                               isItem(obj)        ? [ setItem(obj.Item)       ] : setItems(obj.Item);
+    return R.compose(setSearch, getSearch)(data);
+  }
+
+  trimTitle(title, profile)  {
+    //log.info('deleteWord =', profile.deleteWord);
+    const split = str => R.map(R.trim, R.split(',', str));
+    const concat = R.concat(index.words.delete);
     const join  = R.join('|');
     const regexp  = str => new RegExp(str, 'g');
     const replace = reg => R.replace(reg, '', title);
-    const replaceString = R.compose(replace, regexp, join);
-    return replaceString(index.words.delete);
+    const replaceString = R.compose(replace, regexp, join, concat, split);
+    return replaceString(profile.deleteWord);
   }
 
   fetchNodeList(node_id) {

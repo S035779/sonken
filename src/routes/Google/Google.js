@@ -2,45 +2,35 @@ import * as R           from 'ramda';
 import { from }         from 'rxjs';
 import { map }          from 'rxjs/operators';
 import google           from 'google-search-scraper';
-//import osmosis          from 'osmosis';
 import PromiseThrottle  from 'promise-throttle';
 import searchIndex      from 'Utilities/amzindex';
 import log              from 'Utilities/logutils';
 
 class Google {
   constructor() {
-    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.05, promiseImplementation: Promise });
+    this.promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.1, promiseImplementation: Promise });
   }
 
   static of() {
     return new Google();
   }
 
+  trequest(searchs) {
+    return this.promiseThrottle.add(this.request.bind(this, searchs));
+  }
+
   request(searchs) {
     return new Promise((resolve, reject) => {
-      if(!searchs) return reject({ name: 'NotQuery', message: 'request query was not found.', stack: searchs }); 
-      const urls = [];
-      const limit = 10;
       const query = R.join(' ', searchs);
+      const limit = 5;
+      const urls = [];
       log.info(Google.displayName, 'Request', query);
-      google.search({ query, limit }, (err, url) => {
-        if (err) reject(err)
+      google.search({ limit, query }, (err, url) => {
+        if (err) return reject(err);
         urls.push(url);
         if(urls.length === limit) resolve(urls);
       });
     });
-  }
-
-  //request(searchs) {
-  //  return new Promise((resolve, reject) => {
-  //    osmosis
-  //      .get('www.google.com')
-  //      .set({ })
-  //  });
-  //}
-
-  trequest(searchs) {
-    return this.promiseThrottle.add(this.request.bind(this, searchs));
   }
 
   fetchItemSearch(keywords, categoryid) {
