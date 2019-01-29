@@ -35,8 +35,9 @@ const amz_keyset      = { access_key: AMZ_ACCESS_KEY, secret_key: AMZ_SECRET_KEY
 
 process.env.NODE_PENDING_DEPRECATION = 0;
 
-const AWS = aws.of(aws_keyset);
 const FSS = fss.of({ dirpath: '../', dirname: CACHE });
+const AWS = aws.of(aws_keyset);
+const amazon  = Amazon.of(amz_keyset);
 
 const displayName = `[WRK] (${process.pid})`;
 
@@ -52,9 +53,8 @@ if (node_env === 'production') {
 
 
 const request = (operation, options) => {
-  const amazon  = Amazon.of(amz_keyset);
-  const yahoo   = Yahoo.of();
   const feed    = FeedParser.of();
+  const yahoo   = Yahoo.of();
   switch(operation) {
     case 'marchant':
     case 'sellers':

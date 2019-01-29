@@ -2,7 +2,7 @@ import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
 import xml2js             from 'xml2js';
-import Google             from 'Routes/Google/Google';
+import CloudSearch        from 'Routes/CloudSearch/CloudSearch';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
 import log                from 'Utilities/logutils';
@@ -20,7 +20,7 @@ const baseurl = 'https://webservices.amazon.co.jp/onca/xml';
 class Amazon {
   constructor(access_key, secret_key, associ_tag) {
     this.keyset = { access_key, secret_key, associ_tag };
-    this.GGL = Google.of();
+    this.CSE = CloudSearch.of();
   }
 
   static of({ access_key, secret_key, associ_tag }) {
@@ -97,26 +97,26 @@ class Amazon {
     return from(this.getItemSearch(keywords, category, page)).pipe(
       flatMap(this.parseXml.bind(this))
     , map(this.setItems)
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
   jobItemSearch({ items, profile }) {
-    //log.trace(Amazon.displayName, 'jobItemSearch', items );
     const setKeyword = str => this.trimTitle(str, profile);
     const observables = R.map(obj => this.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
     return forkJoin(observables(items)).pipe(
       map(this.setItemSearchs(profile, items))
-    //, map(R.tap(log.trace.bind(this)))
     );
   }
 
   jobItemLookup({ items, profile }) {
     //log.trace(Amazon.displayName, 'jobItemLookup', items);
     const setKeyword = str => this.trimTitle(str, profile);
-    const observables = R.map(obj => this.GGL.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid));
-    return forkJoin(observables(items)).pipe(
-      flatMap(objs => this.forItemLookup(objs))
+    const setSearch  = obj => ({ title: setKeyword(obj.title) });
+    const searchs    = R.map(setSearch, items);
+    const promise    = objs => this.CSE.forItemSearch(objs);
+    return from(promise(searchs)).pipe(
+      map(R.tap(log.trace.bind(this)))
+    , flatMap(objs => this.forItemLookup(objs))
     , map(this.setItemSearchs(profile, items))
     );
   }
@@ -173,7 +173,7 @@ class Amazon {
 
   trimTitle(title, profile)  {
     //log.info('deleteWord =', profile.deleteWord);
-    const split = str => R.map(R.trim, R.split(',', str));
+    const split = str => str ? R.map(R.trim, R.split(',', str)) : [];
     const concat = R.concat(index.words.delete);
     const join  = R.join('|');
     const regexp  = str => new RegExp(str, 'g');
