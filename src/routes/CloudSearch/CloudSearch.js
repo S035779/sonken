@@ -8,7 +8,7 @@ import log              from 'Utilities/logutils';
 class CloudSearch {
   constructor() {
     this.topPromiseThrottle = new PromiseThrottle({ 
-      requestsPerSecond: 0.333, promiseImplementation: Promise
+      requestsPerSecond: 0.002, promiseImplementation: Promise
     });
     this.promiseThrottle = new PromiseThrottle({ 
       requestsPerSecond: 0.3, promiseImplementation: Promise
@@ -48,6 +48,12 @@ class CloudSearch {
           const { site } = options;
           if(!this.browser) this.browser = await puppeteer.launch(this.browserOptions);
           const page = await this.browser.newPage();
+          await page.goto(site, { waitUntil: 'load' });
+          return { page };
+        }
+      case 'goto/page':
+        {
+          const { page, site } = options;
           await page.goto(site, { waitUntil: 'load' });
           return { page };
         }
@@ -159,8 +165,8 @@ class CloudSearch {
       case 'signout/google':
         {
           const { page, results } = options;
-          await page.waitForSelector('a.gb_b.gb_hb.gb_R > span.gb_cb.gbii');
-          await page.click('a.gb_b.gb_hb.gb_R > span.gb_cb.gbii');
+          await page.waitForSelector('a.gb_b.gb_hb.gb_R');
+          await page.click('a.gb_b.gb_hb.gb_R');
           await page.waitForSelector('div.gb_ug.gb_Sb > div > a#gb_71.gb_Aa.gb_xg.gb_Eg.gb_ef.gb_Tb');
           await page.click('div.gb_ug.gb_Sb > div > a#gb_71.gb_Aa.gb_xg.gb_Eg.gb_ef.gb_Tb');
           return { page, results };
@@ -178,11 +184,12 @@ class CloudSearch {
     }
   }
 
-  createBrowser() {
-    return this.request('create/browser', this.browserOptions);
-  }
   openPage(site) {
     return this.request('open/page', { site });
+  }
+
+  gotoPage({ site, page }) {
+    return this.request('goto/page', { site, page });
   }
 
   signinGoogle({ page }) {
@@ -249,9 +256,9 @@ class CloudSearch {
       .then(obj => this.signinGoogle(obj))
       .then(obj => this.setSearchs(strings)(obj))
       .then(objs => Promise.all(promises(objs)))
-      .then(obj => this.getResults(obj))
-      .then(obj => this.signoutGoogle(obj))
       .then(R.tap(console.log))
+      .then(objs => this.getResults(objs))
+      .then(obj => this.signoutGoogle(obj))
       .then(obj => this.closePage(obj))
     ;
   }
@@ -262,7 +269,7 @@ class CloudSearch {
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings)(obj))
       .then(objs => Promise.all(promises(objs)))
-      .then(obj => this.getResults(obj))
+      .then(objs => this.getResults(objs))
       .then(obj => this.closePage(obj))
       .then(R.tap(console.log))
     ;
@@ -282,7 +289,7 @@ class CloudSearch {
       return { title, asins };
     };
     const setAsins = R.map(setAsin);
-    return from(this.scrapsByBing(keywords)).pipe(
+    return from(this.scrapsByGoogle(keywords)).pipe(
         map(R.tap(log.trace.bind(this)))
       , map(setAsins)
       );

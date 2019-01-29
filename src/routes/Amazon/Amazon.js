@@ -114,11 +114,36 @@ class Amazon {
     const setSearch  = obj => ({ title: setKeyword(obj.title) });
     const searchs    = R.map(setSearch, items);
     const promise    = objs => this.CSE.forItemSearch(objs);
+    const observables = R.map(obj => this.fetchAsinsLookup(obj));
     return from(promise(searchs)).pipe(
       map(R.tap(log.trace.bind(this)))
-    , flatMap(objs => this.forItemLookup(objs))
-    , map(this.setItemSearchs(profile, items))
+    , flatMap(objs => forkJoin(observables(objs)))
+    , map(this.setItemLookups(profile, items))
     );
+  }
+
+  fetchAsinsLookup({ title, asins }) {
+    return this.forItemLookup(asins).pipe(
+      map(objs =>({ title, asins: objs }))
+    );
+  }
+
+  setItemLookups(profile, items) {
+    const setKeyword = str => this.trimTitle(str, profile);
+    const self = this;
+    return function(datas) {
+      const setItemLookup = (item, obj) => {
+        const key = setKeyword(item.title);
+        return self.setItemSearch(key, item, obj)
+      };
+      const hasItemLookup = str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
+      const hasItemLookups = obj => {
+        const item = hasItemLookup(obj.title);
+        return item ? setItemLookup(item, obj) : null;
+      };
+      const setItemLookups = R.map(hasItemLookups);
+      return setItemLookups(datas);
+    };
   }
 
   setItemSearchs(profile, items) {
