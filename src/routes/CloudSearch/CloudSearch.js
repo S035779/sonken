@@ -1,6 +1,4 @@
 import * as R           from 'ramda';
-import { from }         from 'rxjs';
-import { map }          from 'rxjs/operators';
 import puppeteer        from 'puppeteer';
 import PromiseThrottle  from 'promise-throttle';
 import log              from 'Utilities/logutils';
@@ -8,7 +6,7 @@ import log              from 'Utilities/logutils';
 class CloudSearch {
   constructor() {
     this.topPromiseThrottle = new PromiseThrottle({ 
-      requestsPerSecond: 0.002, promiseImplementation: Promise
+      requestsPerSecond: 0.003, promiseImplementation: Promise
     });
     this.promiseThrottle = new PromiseThrottle({ 
       requestsPerSecond: 0.3, promiseImplementation: Promise
@@ -40,22 +38,31 @@ class CloudSearch {
     return this.promiseThrottle.add(this.searchBingTail.bind(this, params)); 
   }
 
+  tsearchYahooHead(params) {
+    return this.promiseThrottle.add(this.searchYahooHead.bind(this, params));
+  }
+
+  tsearchYahooTail(params) { 
+    return this.promiseThrottle.add(this.searchYahooTail.bind(this, params)); 
+  }
+
   async request(operation, options) {
     log.info(CloudSearch.displayName, 'Request', operation);
     switch(operation) {
       case 'open/page':
         {
           const { site } = options;
-          if(!this.browser) this.browser = await puppeteer.launch(this.browserOptions);
+          if(!this.browser)  this.browser = await puppeteer.launch(this.browserOptions);
           const page = await this.browser.newPage();
           await page.goto(site, { waitUntil: 'load' });
           return { page };
         }
       case 'goto/page':
         {
-          const { page, site } = options;
+          const { page, site, results } = options;
           await page.goto(site, { waitUntil: 'load' });
-          return { page };
+          //log.debug(CloudSearch.displayName, operation, results);
+          return { page, results };
         }
       case 'signin/google':
         {
@@ -162,19 +169,62 @@ class CloudSearch {
           log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
+      case 'search/yahoo/head':
+        {
+          const { page, string } = options;
+          const { title } = string;
+          await page.waitForSelector('input[name="p"]');
+          await page.type('input[name="p"]', 'site:https://www.amazon.co.jp/ ' + title);
+          await page.click('input#srchbtn.srchbtn');
+          await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+          const datas = await page.evaluate(() => {
+            const nodeList = document.querySelectorAll('div.hd > h3 > a');
+            let urls = [];
+            nodeList.forEach(node => {
+              urls.push(node.href);
+            });
+            return urls;
+          });
+          const result = { title, datas };
+          log.debug(CloudSearch.displayName, operation, result);
+          return { page, result };
+        }
+      case 'search/yahoo/tail':
+        {
+          const { page, string } = options;
+          const { title } = string;
+          await page.waitForSelector('div.sbox_2 > input[name="p"]');
+          await page.click('div.sbox_2 > input[name="p"]', { clickCount: 3 });
+          await page.type('div.sbox_2 > input[name="p"]', 'site:https://www.amazon.co.jp/ ' + title);
+          await page.click('div.sbox_1.cf > input.b');
+          await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+          const datas = await page.evaluate(() => {
+            const nodeList = document.querySelectorAll('div.hd > h3 > a');
+            let urls = [];
+            nodeList.forEach(node => {
+              urls.push(node.href);
+            });
+            return urls;
+          });
+          const result = { title, datas };
+          log.debug(CloudSearch.displayName, operation, result);
+          return { page, result };
+        }
       case 'signout/google':
         {
           const { page, results } = options;
-          await page.waitForSelector('a.gb_b.gb_hb.gb_R');
-          await page.click('a.gb_b.gb_hb.gb_R');
-          await page.waitForSelector('div.gb_ug.gb_Sb > div > a#gb_71.gb_Aa.gb_xg.gb_Eg.gb_ef.gb_Tb');
-          await page.click('div.gb_ug.gb_Sb > div > a#gb_71.gb_Aa.gb_xg.gb_Eg.gb_ef.gb_Tb');
+          await page.waitForSelector('div.gb_ad.gb_lb.gb_oh.gb_R > a.gb_b.gb_hb.gb_R > span.gb_cb.gbii');
+          await page.click('div.gb_ad.gb_lb.gb_oh.gb_R > a.gb_b.gb_hb.gb_R > span.gb_cb.gbii');
+
+          await page.waitForSelector('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
+          await page.click('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
           return { page, results };
         }
       case 'close/page':
         {
           const { results } = options;
           await this.browser.close();
+          this.browser = null;
           return results;
         }
       default:
@@ -188,8 +238,8 @@ class CloudSearch {
     return this.request('open/page', { site });
   }
 
-  gotoPage({ site, page }) {
-    return this.request('goto/page', { site, page });
+  gotoPage(site, { page, results }) {
+    return this.request('goto/page', { site, page, results });
   }
 
   signinGoogle({ page }) {
@@ -212,67 +262,132 @@ class CloudSearch {
     return this.request('search/bing/tail', { page, string }); 
   }
 
+  searchYahooHead({ page, string }) {
+    return this.request('search/yahoo/head', { page, string });
+  }
+
+  searchYahooTail({ page, string }) {
+    return this.request('search/yahoo/tail', { page, string }); 
+  }
+
   signoutGoogle({ page, results }) {
     return this.request('signout/google', { page, results });
+  }
+
+  setSearchs(strings) {
+    return function({ page, results }) {
+      const searchs = R.map(string => ({ page, string }), strings);
+      return ({ searchs, results });
+    };
+  }
+
+  async searchGoogle({ searchs, results }) {
+    const searchHeads = [R.head(searchs)];
+    const searchTails = R.tail(searchs);
+    const heads = R.map(search => this.tsearchGoogleHead(search), searchHeads);
+    const tails = R.map(search => this.tsearchGoogleTail(search), searchTails)
+    const _searchs = await Promise.all(R.concat(heads, tails));
+    searchs = searchs ? R.concat(searchs, _searchs) : _searchs;
+    return { searchs, results };
+  }
+
+  async searchBing({ searchs, results }) {
+    const searchHeads = [R.head(searchs)];
+    const searchTails = R.tail(searchs);
+    const heads = R.map(search => this.tsearchBingHead(search), searchHeads);
+    const tails = R.map(search => this.tsearchBingTail(search), searchTails);
+    const _searchs = await Promise.all(R.concat(heads, tails));
+    searchs = searchs ? R.concat(searchs, _searchs) : _searchs;
+    return { searchs, results };
+  }
+
+  async searchYahoo({ searchs, results }) {
+    const searchHeads = [R.head(searchs)];
+    const searchTails = R.tail(searchs);
+    const heads = R.map(search => this.tsearchYahooHead(search), searchHeads);
+    const tails = R.map(search => this.tsearchYahooTail(search), searchTails);
+    const _searchs = await Promise.all(R.concat(heads, tails));
+    searchs = searchs ? R.concat(searchs, _searchs) : _searchs;
+    return { searchs, results };
+  }
+
+  getResults({ searchs, results }) {
+    const searchHead = R.head(searchs);
+    const page = searchHead.page;
+    const _results = R.map(obj => obj.result, searchs);
+    results = results ? R.concat(results, _results) : _results;
+    return { page, results };
   }
 
   closePage({ page, results }) {
     return this.request('close/page', { page, results });
   }
 
-  searchGoogle(searchs) {
-    const searchHeads = [R.head(searchs)];
-    const searchTails = R.tail(searchs);
-    const heads = R.map(search => this.tsearchGoogleHead(search), searchHeads);
-    const tails = R.map(search => this.tsearchGoogleTail(search), searchTails)
-    return R.concat(heads, tails);
-  }
+  scraps(strings) {
+    strings.length = 40;
+    log.info(CloudSearch.displayName, 'scraps', strings.length);
+    const max = strings.length;
+    const skip = Math.ceil(max / 5);
+    const strings1 = R.slice(skip * 0, skip * 1 - 1, strings);
+    const strings2 = R.slice(skip * 1, skip * 3 - 1, strings);
+    const strings3 = R.slice(skip * 3, max         , strings);
+    return this.topenPage('https://www.google.co.jp/')
+      .then(obj => this.signinGoogle(obj))
+      .then(obj => this.setSearchs(strings1)(obj))
+      .then(objs => this.searchGoogle(objs))
+      .then(objs => this.getResults(objs))
 
-  searchBing(searchs) {
-    const searchHeads = [R.head(searchs)];
-    const searchTails = R.tail(searchs);
-    const heads = R.map(search => this.tsearchBingHead(search), searchHeads);
-    const tails = R.map(search => this.tsearchBingTail(search), searchTails);
-    return R.concat(heads, tails);
-  }
+      .then(obj => this.gotoPage('https://www.bing.com/', obj))
+      .then(obj => this.setSearchs(strings2)(obj))
+      .then(objs => this.searchBing(objs))
+      .then(objs => this.getResults(objs))
 
-  setSearchs(strings) {
-    return function({ page }) {
-      return R.map(string => ({ page, string }), strings);
-    };
-  }
+      .then(obj => this.gotoPage('https://www.yahoo.co.jp/', obj))
+      .then(obj => this.setSearchs(strings3)(obj))
+      .then(objs => this.searchYahoo(objs))
+      .then(objs => this.getResults(objs))
 
-  getResults(searchs) {
-    const searchHead = R.head(searchs);
-    const page = searchHead.page;
-    const results = R.map(obj => obj.result, searchs);
-    return { page, results };
+      .then(obj => this.gotoPage('https://www.google.co.jp/', obj))
+      //.then(obj => this.signoutGoogle(obj))
+      .then(obj => this.closePage(obj))
+      .then(R.tap(console.log))
+    ;
   }
 
   scrapsByGoogle(strings) {
+    strings.length = 20;
     log.info(CloudSearch.displayName, 'scrapsByGoogle', strings.length);
-    const promises = objs => this.searchGoogle(objs);
     return this.topenPage('https://www.google.co.jp/')
       .then(obj => this.signinGoogle(obj))
       .then(obj => this.setSearchs(strings)(obj))
-      .then(objs => Promise.all(promises(objs)))
-      .then(R.tap(console.log))
+      .then(objs => this.searchGoogle(objs))
       .then(objs => this.getResults(objs))
       .then(obj => this.signoutGoogle(obj))
       .then(obj => this.closePage(obj))
+      //.then(R.tap(console.log))
     ;
   }
 
   scrapsByBing(strings) {
+    strings.length = 20;
     log.info(CloudSearch.displayName, 'scrapsByBing', strings.length);
-    const promises = objs => this.searchBing(objs);
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings)(obj))
-      .then(objs => Promise.all(promises(objs)))
+      .then(objs => this.searchBing(objs))
       .then(objs => this.getResults(objs))
       .then(obj => this.closePage(obj))
-      .then(R.tap(console.log))
-    ;
+      //.then(R.tap(console.log));
+  }
+
+  scrapsByYahoo(strings) {
+    strings.length = 30;
+    log.info(CloudSearch.displayName, 'scrapsByYahoo', strings.length);
+    return this.topenPage('https://www.yahoo.co.jp/')
+      .then(obj => this.setSearchs(strings)(obj))
+      .then(objs => this.searchYahoo(objs))
+      .then(objs => this.getResults(objs))
+      .then(obj => this.closePage(obj))
+      //.then(R.tap(console.log));
   }
 
   forItemSearch(keywords) {
@@ -288,11 +403,11 @@ class CloudSearch {
       });
       return { title, asins };
     };
+    const hasAsins = R.filter(obj => !R.isNil(obj));
     const setAsins = R.map(setAsin);
-    return from(this.scrapsByGoogle(keywords)).pipe(
-        map(R.tap(log.trace.bind(this)))
-      , map(setAsins)
-      );
+    return this.scraps(keywords)
+      .then(objs => hasAsins(objs))
+      .then(objs => setAsins(objs));
   }
 }
 CloudSearch.displayName = '[CSE]';

@@ -5,6 +5,32 @@ const env = process.env.PLATFORM;
 const isNode = env === 'local';
 
 const std = {
+  delay: function(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  },
+
+  ratelimit: function(func, rate, limit) {
+    let histories = [];
+    const wrapped = (...args) => {
+      const now = Date.now();
+      histories.push(now);
+      histories = histories.filter(execAt => (now - execAt) < limit);
+
+      if(rate < histories.length) {
+        const sleepTime = limit - (now - Math.min(...histories));
+        return this.delay(sleepTime).then(() => {
+          histories.pop();
+          return wrapped(...args);
+        });
+      } else {
+        return func(...args);
+      }
+    };
+    return wrapped;
+  },
+
   cache: {},
 
   config: function() {
@@ -15,9 +41,11 @@ const std = {
   time: function(title) {
     return this.cache.timer.count(title);
   },
+
   timeStart: function(title) {
     return this.cache.timer.reset(title);
   },
+
   timeStop: function(title) {
     return this.cache.timer.print(title);
   },
@@ -25,9 +53,11 @@ const std = {
   count: function(title) {
     return this.cache.counter.count(title);
   },
+
   countStart: function(title) {
     return this.cache.counter.reset(title);
   },
+
   countStop: function(title) {
     return this.cache.counter.print(title);
   },
@@ -44,26 +74,31 @@ const std = {
     const head = color_code['Reset'] + name;
     console.error(date ,'[ERROR]', caller, '-',head, ':', message);
   },
+
   logWarn: function(caller, name, message) {
     const date = color_code['FgYellow'] + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset'] + name;
     console.warn(date ,'[WARN]', caller, '-',head, ':', message);
   },
+
   logDebug: function(caller, name, message) {
     const date = color_code['FgCyan'] + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset'] + name;
     console.log(date ,'[DEBUG]', caller, '-',head, ':', message);
   },
+
   logTrace: function(caller, name, message) {
     const date = color_code['FgBlue'] + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset'] + name;
     console.trace(date, '[TRACE]', caller, '-', head, ':', message);
   },
+
   logInfo: function(caller, name, message) {
     const date = color_code['FgGreen'] + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset'] + name;
     console.info(date, '[INFO]', caller, '-', head, ':', message);
   },
+
   logTime: function(caller, name, message) {
     const date = color_code['FgMagenta'] + `[${this.getLocalISOTimeStamp(new Date)}]`;
     const head = color_code['Reset'] + name;
@@ -79,6 +114,7 @@ const std = {
         break;
     }
   },
+
   is: function(type, obj) {
     const clas = Object.prototype.toString.call(obj).slice(8, -1);
     return obj !== undefined && obj !== null && clas === type;

@@ -1,7 +1,8 @@
+import xml2js             from 'xml2js';
 import * as R             from 'ramda';
 import { from, forkJoin } from 'rxjs';
 import { map, flatMap }   from 'rxjs/operators';
-import xml2js             from 'xml2js';
+import PromiseThrottle    from 'promise-throttle';
 import CloudSearch        from 'Routes/CloudSearch/CloudSearch';
 import std                from 'Utilities/stdutils';
 import net                from 'Utilities/netutils';
@@ -21,29 +22,58 @@ class Amazon {
   constructor(access_key, secret_key, associ_tag) {
     this.keyset = { access_key, secret_key, associ_tag };
     this.CSE = CloudSearch.of();
+    this.topPromiseThrottle = new PromiseThrottle({
+      requestsPerSecond: 0.1, promiseImplementation: Promise
+    });
+    this.promiseThrottle = new PromiseThrottle({
+      requestsPerSecond: 1, promiseImplementation: Promise
+    });
   }
 
   static of({ access_key, secret_key, associ_tag }) {
     return new Amazon(access_key, secret_key, associ_tag);
   }
 
-  request(operation, options) {
+  tfetchItemLookups(params) {
+    return this.topPromiseThrottle.add(this.fetchItemLookups.bind(this, params));
+  }
+
+  tfetchItemSearch(keywords, category, page) {
+    return this.promiseThrottle.add(this.fetchItemSearch.bind(this, keywords, category, page));
+  }
+
+  tfetchItemLookup(item_id, id_type) {
+    return this.promiseThrottle.add(this.fetchItemLookup.bind(this, item_id, id_type));
+  }
+
+  request({ operation, options }) {
     switch(operation) {
       case 'parse/xml':
-        return new Promise((resolve, reject) => {
-          xml2js.parseString(options.xml, { attrkey: 'root', charkey: 'sub', trim: true, explicitArray: false }
-          , (error, result) => {
-            if(error) return reject(error);
-            resolve(result);
+        {
+          return new Promise((resolve, reject) => {
+            const { xml } = options;
+            const params =
+              { attrkey: 'root', charkey: 'sub', trim: true, explicitArray: false };
+            xml2js.parseString(xml, params, (err, res) => {
+              if(err) return reject(err);
+              resolve(res);
+            });
           });
-        });
+        }
       case 'BrowseNodeLookup':
       case 'ItemSearch':
-      case 'ItemLookup': {
-        const search    = this.setSearch(this.keyset, operation, options);
-        const operator  = R.curry(this.setSignature)(this.keyset, baseurl);
-        return net.throttle(baseurl, { method: 'GET', type: 'NV', accept: 'XML', search, operator });
-      }
+      case 'ItemLookup':
+        {
+          const search   = this.setSearch(this.keyset, operation, options);
+          const operator = R.curry(this.setSignature)(this.keyset, baseurl);
+          const params   = { method: 'GET', type: 'NV', accept: 'XML', search, operator };
+          return new Promise((resolve, reject) => {
+            net.fetch(baseurl, params, (err, res) => {
+              if(err) return reject(err);
+              resolve(res);
+            });
+          });
+        }
     }
   }
 
@@ -86,46 +116,48 @@ class Amazon {
     );
   }
 
-  fetchItemLookup(item_id, id_type) {
-    return from(this.getItemLookup(item_id, id_type)).pipe(
-      flatMap(this.parseXml.bind(this))
-    , map(this.setItem)
-    );
+  fetchItemSearch(keywords, category, page) {
+    //log.trace(Amazon.displayName, 'fetchItemSearch', keywords, category, page);
+    return this.getItemSearch(keywords, category, page)
+      .then(obj => this.getXml(obj))
+      .then(obj => obj.ItemSearchResponse.Items);
   }
 
-  fetchItemSearch(keywords, category, page) {
-    return from(this.getItemSearch(keywords, category, page)).pipe(
-      flatMap(this.parseXml.bind(this))
-    , map(this.setItems)
-    );
+  fetchItemLookup(item_id, id_type) {
+    //log.trace(Amazon.displayName, 'fetchItemLookup', item_id, id_type);
+    return this.getItemLookup(item_id, id_type)
+      .then(obj => this.getXml(obj))
+      .then(obj => obj.ItemLookupResponse.Items)
+    ;
+  }
+
+  fetchItemLookups({ title, asins }) {
+    //log.trace(Amazon.displayName, 'fetchAsinsLookup', title, asins);
+    const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
+    return Promise.all(promises(asins))
+      .then(objs => ({ title, asins: objs }));
   }
 
   jobItemSearch({ items, profile }) {
+    //log.trace(Amazon.displayName, 'jobItemSearch', items, profile);
     const setKeyword = str => this.trimTitle(str, profile);
-    const observables = R.map(obj => this.fetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
-    return forkJoin(observables(items)).pipe(
-      map(this.setItemSearchs(profile, items))
-    );
+    const promises = 
+      R.map(obj => this.tfetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
+    return Promise.all(promises(items))
+      .then(objs => this.setItemSearchs(profile, items)(objs));
   }
 
   jobItemLookup({ items, profile }) {
-    //log.trace(Amazon.displayName, 'jobItemLookup', items);
-    const setKeyword = str => this.trimTitle(str, profile);
-    const setSearch  = obj => ({ title: setKeyword(obj.title) });
-    const searchs    = R.map(setSearch, items);
-    const promise    = objs => this.CSE.forItemSearch(objs);
-    const observables = R.map(obj => this.fetchAsinsLookup(obj));
-    return from(promise(searchs)).pipe(
-      map(R.tap(log.trace.bind(this)))
-    , flatMap(objs => forkJoin(observables(objs)))
-    , map(this.setItemLookups(profile, items))
-    );
-  }
-
-  fetchAsinsLookup({ title, asins }) {
-    return this.forItemLookup(asins).pipe(
-      map(objs =>({ title, asins: objs }))
-    );
+    //log.trace(Amazon.displayName, 'jobItemLookup', items, profile);
+    const setKeyword  = str => this.trimTitle(str, profile);
+    const setSearch   = obj => ({ title: setKeyword(obj.title) });
+    const searchs     = R.map(setSearch, items);
+    const promises    = R.map(obj => this.tfetchItemLookups(obj));
+    return this.CSE.forItemSearch(searchs)
+      .then(objs => Promise.all(promises(objs)))
+      .then(objs => this.setItemLookups(profile, items)(objs))
+      .then(R.tap(log.trace.bind(this)))
+    ;
   }
 
   setItemLookups(profile, items) {
@@ -134,31 +166,59 @@ class Amazon {
     return function(datas) {
       const setItemLookup = (item, obj) => {
         const key = setKeyword(item.title);
-        return self.setItemSearch(key, item, obj)
+        console.log(key, obj);
+        return self.setItemLookup(key, item, obj)
       };
-      const hasItemLookup = str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
+      const hasItemLookup = 
+        str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
       const hasItemLookups = obj => {
         const item = hasItemLookup(obj.title);
-        return item ? setItemLookup(item, obj) : null;
+        return item && !R.isEmpty(obj.asins) ? setItemLookup(item, obj) : null;
       };
       const setItemLookups = R.map(hasItemLookups);
       return setItemLookups(datas);
     };
   }
 
+  setItemLookup(keyword, item, data) {
+    log.trace(Amazon.displayName, 'setItemLookup', data);
+    const setErrors  = obj => ({ request: keyword, keyword: data.title
+    , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
+    const setInvalid = () => ({ request: keyword, keyword: data.title
+    , code: 'InvaildRequest',      message: '不正なリクエストです。' });
+    const setNoMatch = () => ({ request: keyword, keyword: data.title
+    , code: 'NoMatchTitle',        message: 'タイトルが合致しません。' });
+    const setNoItems = () => ({ request: keyword, keyword: data.title
+    , code: 'NoItems',             message: 'アイテムを取得できませんでした。' });
+    const setItem    = obj => ({ request: keyword
+    , code: 'ExactMatches',        message: '正常に取得できました。'
+    , asin:           obj.ASIN
+    , itemAttributes: obj.ItemAttributes
+    , offerSummary:   obj.OfferSummary
+    , offers:         obj.Offers });
+    const setItems   = R.map(setItem);
+    const setSearch  = obj => ({ guid__: item.guid__, asins: obj });
+    const isTitle    = () => data.title === keyword;
+    const isValid    = obj => obj.Request.IsValid === 'True';
+    const isItem     = obj => obj.Item;
+    const getSearch  = obj => obj.Request.Errors ? [setErrors(obj.Request) ] :
+                              !isValid(obj)      ? [setInvalid(obj.Request)] :
+                              !isTitle(obj)      ? [setNoMatch(obj.Request)] :
+                              !obj.Item          ? [setNoItems(obj.Request)] :
+                              isItem(obj)        ? [setItem(obj.Item)      ] : setItems(obj.Item);
+    return R.compose(setSearch, getSearch)(data.asins);
+  }
+
   setItemSearchs(profile, items) {
     const setKeyword = str => this.trimTitle(str, profile);
-    //const memoKeyword = std.memoizeWith(5 * 60 * 1000, setKeyword);
     const self = this;
     return function(datas) {
       const setItemSearch = (item, obj) => {
-        //const key = memoKeyword.memoize(item.title);
-        //memoKeyword.clean();
         const key = setKeyword(item.title);
         return self.setItemSearch(key, item, obj)
       };
-      //const hasItemSearch = str => R.find(item => memoKeyword.memoize(item.title) === memoKeyword.memoize(str))(items);
-      const hasItemSearch = str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
+      const hasItemSearch = 
+        str => R.find(item => setKeyword(item.title) === setKeyword(str))(items);
       const hasItemSearchs = obj => {
         const item = hasItemSearch(obj.Request.ItemSearchRequest.Keywords);
         return item ? setItemSearch(item, obj) : null;
@@ -188,11 +248,11 @@ class Amazon {
     const isTitle    = obj => obj.Request.ItemSearchRequest.Keywords === keyword;
     const isValid    = obj => obj.Request.IsValid === 'True';
     const isItem     = obj => obj.Item && Number(obj.TotalResults) === 1;
-    const getSearch  = obj => obj.Request.Errors  ? [ setErrors(obj.Request)  ] :
-                               !isValid(obj)      ? [ setInvalid(obj.Request) ] :
-                               !isTitle(obj)      ? [ setNoMatch(obj.Request) ] :
-                               !obj.Item          ? [ setNoItems(obj.Request) ] :
-                               isItem(obj)        ? [ setItem(obj.Item)       ] : setItems(obj.Item);
+    const getSearch  = obj => obj.Request.Errors ? [setErrors(obj.Request) ] :
+                              !isValid(obj)      ? [setInvalid(obj.Request)] :
+                              !isTitle(obj)      ? [setNoMatch(obj.Request)] :
+                              !obj.Item          ? [setNoItems(obj.Request)] :
+                              isItem(obj)        ? [setItem(obj.Item)      ] : setItems(obj.Item);
     return R.compose(setSearch, getSearch)(data);
   }
 
@@ -225,7 +285,7 @@ class Amazon {
   }
 
   forItemLookup(objs) {
-    const promises = R.map(obj => this.getItemLookup(obj.ASIN, 'ASIN'));
+    const promises = R.map(obj => this.rgetItemLookup(obj.ASIN, 'ASIN'));
     return forkJoin(promises(objs));
   }
 
@@ -288,28 +348,28 @@ class Amazon {
   }
 
   getXml(xml) {
-    return this.request('parse/xml', { xml });
+    return this.request({ operation: 'parse/xml', options: { xml } });
   }
 
   getNodeList(node_id) {
     const options = {};
     options['BrowserNodeId'] = node_id;
     options['ResponseGroup'] ='BrowseNodeInfo' ;
-    return this.request('BrowseNodeLookup', options);
+    return this.request({ operation: 'BrowseNodeLookup', options });
   }
 
   getNewReleases(node_id) {
     const options = {};
     options['BrowseNodeId'] = node_id;
     options['ResponseGroup'] ='NewReleases' ;
-    return this.request('BrowseNodeLookup', options);
+    return this.request({ operation: 'BrowseNodeLookup', options });
   }
 
   getBestSellers(node_id) {
     const options = {};
     options['BrowseNodeId'] = node_id;
     options['ResponseGroup'] ='TopSellers' ;
-    return this.request('BrowseNodeLookup', options);
+    return this.request({ operation: 'BrowseNodeLookup', options });
   }
 
   getReleaseDate(node_id, category, page) {
@@ -319,7 +379,7 @@ class Amazon {
     options['ItemPage']       = page;
     options['Sort']           = '-release-date';
     options['ResponseGroup']  = 'Large';
-    return this.request('ItemSearch', options);
+    return this.request({ operation: 'ItemSearch', options });
   }
 
   getSalesRanking(node_id, category, page) {
@@ -329,19 +389,19 @@ class Amazon {
     options['ItemPage']       = page;
     options['Sort']           = 'salesrank';
     options['ResponseGroup']  = 'Large';
-    return this.request('ItemSearch', options);
+    return this.request({ operation: 'ItemSearch', options });
   }
 
   getItemSearch(keywords, categoryid, page) {
     const options = {};
     const Keywords = this.setKeywords(keywords);
     const SearchIndex = this.setSearchIndex(categoryid);
-    log.info(Amazon.displayName, 'Request', Keywords, SearchIndex);
     options['Keywords']       = Keywords;
     options['ItemPage']       = page;
     options['SearchIndex']    = SearchIndex;
     options['ResponseGroup']  = 'ItemAttributes,ItemIds,OfferFull';
-    return this.request('ItemSearch', options);
+    log.info(Amazon.displayName, 'getItemSearch', Keywords, SearchIndex);
+    return this.request({ operation: 'ItemSearch', options });
   }
 
   getItemLookup(item_id, id_type) {
@@ -349,7 +409,8 @@ class Amazon {
     options['IdType']         = id_type;
     options['ItemId']         = item_id;
     options['ResponseGroup']  = 'ItemAttributes,ItemIds,OfferFull';
-    return this.request('ItemLookup', options);
+    log.info(Amazon.displayName, 'getItemLookup', item_id, id_type);
+    return this.request({ operation: 'ItemLookup', options });
   }
 
   setSearchIndex(categoryid) {
@@ -384,7 +445,8 @@ class Amazon {
     options['Timestamp'] = std.getTimeStamp();
     const params    = std.ksort(options);
     const api       = std.parse_url(url);
-    const setString = obj => "GET\n" + api.host + "\n" + api.pathname + "\n" + std.urlencode_rfc3986(obj);
+    const setString = 
+      obj => "GET\n" + api.host + "\n" + api.pathname + "\n" + std.urlencode_rfc3986(obj);
     const hshString = str => std.crypto_sha256(str, keyset.secret_key, 'base64');
     const sgnString = R.compose(hshString, setString);
     params['Signature'] = sgnString(params);

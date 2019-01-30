@@ -12,11 +12,11 @@ const mimes = {
 , TXT:  'text/plain; charset="UTF-8"'
 };
 
-const min = 2000;
-const max = 5000;
-const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
+//const min = 2000;
+//const max = 5000;
+//const retry = () => Math.floor(Math.random() * (max - min + 1) + min);
 
-const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 0.3, promiseImplementation: Promise });
+const promiseThrottle = new PromiseThrottle({ requestsPerSecond: 3, promiseImplementation: Promise });
 
 const throttle = (url, options) => promiseThrottle.add(promise.bind(this, url, options));
 const promise = (url, options) => {
@@ -127,7 +127,8 @@ const fetch = (url, options, callback) => {
           callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          setTimeout(() => fetch(url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback), retry());
+          //setTimeout(() => fetch(url, { method, header, search, auth, body, type, accept, parser, lang, operator }, callback), retry());
+          callback(status);
           break;
         default:
           callback(status);
@@ -184,7 +185,8 @@ const get = (url, options, callback) => {
           callback(status);
           break; 
         case 500: case 501: case 502: case 503: case 504: case 505:
-          setTimeout(() => get(url, { search, operator, filename }, callback), retry());
+          //setTimeout(() => get(url, { search, operator, filename }, callback), retry());
+          callback(status);
           break;
         default:
           callback(status);
