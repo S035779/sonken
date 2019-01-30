@@ -1,21 +1,35 @@
+import dotenv           from 'dotenv';
 import * as R           from 'ramda';
 import puppeteer        from 'puppeteer';
 import PromiseThrottle  from 'promise-throttle';
 import log              from 'Utilities/logutils';
 
+const config = dotenv.config();
+if(config.error) throw new Error(config.error);
+
+const GGL_ACCESS_KEY = process.env.GGL_ACCESS_KEY;
+const GGL_SECRET_KEY = process.env.GGL_SECRET_KEY;
+const devMode = process.env.NODE_ENV === 'development';
+
 class CloudSearch {
-  constructor() {
+  constructor(access_key, secret_key) {
+    this.keyset = { access_key, secret_key  };
     this.topPromiseThrottle = new PromiseThrottle({ 
-      requestsPerSecond: 0.003, promiseImplementation: Promise
+      requestsPerSecond: 0.0007
+    , promiseImplementation: Promise
     });
     this.promiseThrottle = new PromiseThrottle({ 
-      requestsPerSecond: 0.3, promiseImplementation: Promise
+      requestsPerSecond: 0.3
+    , promiseImplementation: Promise
     });
-    this.browserOptions = { headless: false, defaultViewport: { width: 1200, height: 800 } };
+    this.browserOptions = { 
+      headless: !devMode
+    , defaultViewport: { width: 1200, height: 800 }
+    };
   }
 
   static of() {
-    return new CloudSearch();
+    return new CloudSearch(GGL_ACCESS_KEY, GGL_SECRET_KEY);
   }
 
   topenPage(params) {
@@ -66,7 +80,7 @@ class CloudSearch {
         }
       case 'signin/google':
         {
-          const { page } = options;
+          const { keyset, page } = options;
           const loginChk = await page.evaluate(() => {
             const node = document.querySelectorAll('div.gb_ad > a#gb_70.gb_Ue.gb_Ba.gb_Tb');
             return node.length ? false : true;
@@ -77,12 +91,12 @@ class CloudSearch {
             await page.click('div.gb_ad > a#gb_70.gb_Ue.gb_Ba.gb_Tb');
 
             await page.waitForSelector('div.Xb9hP > input[name="identifier"]');
-            await page.type('div.Xb9hP > input[name="identifier"]', 'tadtarch@gmail.com');
+            await page.type('div.Xb9hP > input[name="identifier"]', keyset.access_key);
             await page.click('div#identifierNext.U26fgb.O0WRkf.zZhnYe.e3Duub.C0oVfc.DL0QTb > div.ZFr60d.CeoRYc');
 
             await page.waitFor(1000);
             await page.waitForSelector('div.Xb9hP > input.whsOnd.zHQkBf');
-            await page.type('div.Xb9hP > input.whsOnd.zHQkBf', '7952079tI$');
+            await page.type('div.Xb9hP > input.whsOnd.zHQkBf', keyset.secret_key);
             await page.click('div#passwordNext.U26fgb.O0WRkf.zZhnYe.e3Duub.C0oVfc.DL0QTb > div.ZFr60d.CeoRYc');
           }
           return { page };
@@ -104,7 +118,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'search/google/tail':
@@ -125,7 +139,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'search/bing/head':
@@ -145,7 +159,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'search/bing/tail':
@@ -166,7 +180,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'search/yahoo/head':
@@ -186,7 +200,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'search/yahoo/tail':
@@ -207,7 +221,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          log.debug(CloudSearch.displayName, operation, result);
+          //log.debug(CloudSearch.displayName, operation, result);
           return { page, result };
         }
       case 'signout/google':
@@ -243,7 +257,8 @@ class CloudSearch {
   }
 
   signinGoogle({ page }) {
-    return this.request('signin/google', { page });
+    const keyset = this.keyset;
+    return this.request('signin/google', { keyset, page });
   }
 
   searchGoogleHead({ page, string }) {
@@ -324,13 +339,13 @@ class CloudSearch {
   }
 
   scraps(strings) {
-    strings.length = 40;
     log.info(CloudSearch.displayName, 'scraps', strings.length);
     const max = strings.length;
     const skip = Math.ceil(max / 5);
     const strings1 = R.slice(skip * 0, skip * 1 - 1, strings);
     const strings2 = R.slice(skip * 1, skip * 3 - 1, strings);
     const strings3 = R.slice(skip * 3, max         , strings);
+    const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.google.co.jp/')
       .then(obj => this.signinGoogle(obj))
       .then(obj => this.setSearchs(strings1)(obj))
@@ -350,13 +365,14 @@ class CloudSearch {
       .then(obj => this.gotoPage('https://www.google.co.jp/', obj))
       //.then(obj => this.signoutGoogle(obj))
       .then(obj => this.closePage(obj))
-      .then(R.tap(console.log))
+      .then(hasSearchs)
+      //.then(R.tap(console.log))
     ;
   }
 
   scrapsByGoogle(strings) {
-    strings.length = 20;
     log.info(CloudSearch.displayName, 'scrapsByGoogle', strings.length);
+    const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.google.co.jp/')
       .then(obj => this.signinGoogle(obj))
       .then(obj => this.setSearchs(strings)(obj))
@@ -364,29 +380,32 @@ class CloudSearch {
       .then(objs => this.getResults(objs))
       .then(obj => this.signoutGoogle(obj))
       .then(obj => this.closePage(obj))
+      .then(hasSearchs)
       //.then(R.tap(console.log))
     ;
   }
 
   scrapsByBing(strings) {
-    strings.length = 20;
     log.info(CloudSearch.displayName, 'scrapsByBing', strings.length);
+    const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings)(obj))
       .then(objs => this.searchBing(objs))
       .then(objs => this.getResults(objs))
       .then(obj => this.closePage(obj))
+      .then(hasSearchs)
       //.then(R.tap(console.log));
   }
 
   scrapsByYahoo(strings) {
-    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByYahoo', strings.length);
+    const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.yahoo.co.jp/')
       .then(obj => this.setSearchs(strings)(obj))
       .then(objs => this.searchYahoo(objs))
       .then(objs => this.getResults(objs))
       .then(obj => this.closePage(obj))
+      .then(hasSearchs)
       //.then(R.tap(console.log));
   }
 

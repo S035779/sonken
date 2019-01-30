@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: itl-worker
+  labels:
+    app: feedparser
+    tier: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: worker
+    matchExpressions:
+      - { key: tier, operator: In, values: [worker] }
+  template:
+    metadata:
+      labels:
+        app: feedparser
+        tier: worker
+    spec:
+      containers:
+      - name: node-itl
+        image: asia.gcr.io/feedparser-217913/feedparser/node_itl:latest
+        resources:
+          requests:
+            cpu: 160m
+            memory: 256Mi
+        env:
+          - name: WORKER_NAME
+            value: "itl-worker"

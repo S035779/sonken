@@ -22,8 +22,8 @@ const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 
-const perPageItemTime = 60; // sec. (interval per page)
-const perPageItemNums = 20; // items per page.
+const perPageItemTime = 1350; // sec. (interval per page)
+const perPageItemNums = 100; // items per page.
 const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
 
 process.env.NODE_PENDING_DEPRECATION = 0;

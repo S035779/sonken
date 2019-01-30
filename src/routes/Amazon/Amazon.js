@@ -70,6 +70,7 @@ class Amazon {
           return new Promise((resolve, reject) => {
             net.fetch(baseurl, params, (err, res) => {
               if(err) return reject(err);
+              //log.trace(Amazon.displayName, 'Response', res);
               resolve(res);
             });
           });
@@ -117,38 +118,29 @@ class Amazon {
   }
 
   fetchItemSearch(keywords, category, page) {
-    //log.trace(Amazon.displayName, 'fetchItemSearch', keywords, category, page);
     return this.getItemSearch(keywords, category, page)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemSearchResponse.Items);
   }
 
   fetchItemLookup(item_id, id_type) {
-    //log.trace(Amazon.displayName, 'fetchItemLookup', item_id, id_type);
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
+      //.then(R.tap(log.trace.bind(this)))
     ;
   }
 
-  fetchItemLookups({ title, asins }) {
-    //log.trace(Amazon.displayName, 'fetchAsinsLookup', title, asins);
-    const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
-    return Promise.all(promises(asins))
-      .then(objs => ({ title, asins: objs }));
-  }
-
   jobItemSearch({ items, profile }) {
-    //log.trace(Amazon.displayName, 'jobItemSearch', items, profile);
     const setKeyword = str => this.trimTitle(str, profile);
-    const promises = 
-      R.map(obj => this.tfetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
+    const promises = R.map(obj => 
+      this.tfetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
     return Promise.all(promises(items))
-      .then(objs => this.setItemSearchs(profile, items)(objs));
+      .then(objs => this.setItemSearchs(profile, items)(objs))
+      .catch(err => log.error(Amazon.displayName, 'jobItemSearch', err));
   }
 
   jobItemLookup({ items, profile }) {
-    //log.trace(Amazon.displayName, 'jobItemLookup', items, profile);
     const setKeyword  = str => this.trimTitle(str, profile);
     const setSearch   = obj => ({ title: setKeyword(obj.title) });
     const searchs     = R.map(setSearch, items);
@@ -156,17 +148,25 @@ class Amazon {
     return this.CSE.forItemSearch(searchs)
       .then(objs => Promise.all(promises(objs)))
       .then(objs => this.setItemLookups(profile, items)(objs))
-      .then(R.tap(log.trace.bind(this)))
+      //.then(R.tap(log.trace.bind(this)))
+      .catch(err => log.error(Amazon.displayName, 'jobItemLookup', err));
+  }
+
+  fetchItemLookups({ title, asins }) {
+    const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
+    return Promise.all(promises(asins))
+      .then(objs => ({ title, asins: objs }))
+      //.then(R.tap(log.trace.bind(this)))
     ;
   }
 
   setItemLookups(profile, items) {
+    //log.trace(Amazon.displayName, 'setItemLookups');
     const setKeyword = str => this.trimTitle(str, profile);
     const self = this;
     return function(datas) {
       const setItemLookup = (item, obj) => {
         const key = setKeyword(item.title);
-        console.log(key, obj);
         return self.setItemLookup(key, item, obj)
       };
       const hasItemLookup = 
@@ -181,14 +181,14 @@ class Amazon {
   }
 
   setItemLookup(keyword, item, data) {
-    log.trace(Amazon.displayName, 'setItemLookup', data);
+    //log.trace(Amazon.displayName, 'setItemLookup', keyword, item, data);
     const setErrors  = obj => ({ request: keyword, keyword: data.title
     , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
-    const setInvalid = () => ({ request: keyword, keyword: data.title
+    const setInvalid = () =>  ({ request: keyword, keyword: data.title
     , code: 'InvaildRequest',      message: '不正なリクエストです。' });
-    const setNoMatch = () => ({ request: keyword, keyword: data.title
+    const setNoMatch = () =>  ({ request: keyword, keyword: data.title
     , code: 'NoMatchTitle',        message: 'タイトルが合致しません。' });
-    const setNoItems = () => ({ request: keyword, keyword: data.title
+    const setNoItems = () =>  ({ request: keyword, keyword: data.title
     , code: 'NoItems',             message: 'アイテムを取得できませんでした。' });
     const setItem    = obj => ({ request: keyword
     , code: 'ExactMatches',        message: '正常に取得できました。'
@@ -196,17 +196,18 @@ class Amazon {
     , itemAttributes: obj.ItemAttributes
     , offerSummary:   obj.OfferSummary
     , offers:         obj.Offers });
-    const setItems   = R.map(setItem);
-    const setSearch  = obj => ({ guid__: item.guid__, asins: obj });
-    const isTitle    = () => data.title === keyword;
+    const setSearchs  = objs => ({ guid__: item.guid__, asins: objs });
+    const isTitle    = ()  => data.title === keyword;
     const isValid    = obj => obj.Request.IsValid === 'True';
     const isItem     = obj => obj.Item;
-    const getSearch  = obj => obj.Request.Errors ? [setErrors(obj.Request) ] :
-                              !isValid(obj)      ? [setInvalid(obj.Request)] :
-                              !isTitle(obj)      ? [setNoMatch(obj.Request)] :
-                              !obj.Item          ? [setNoItems(obj.Request)] :
-                              isItem(obj)        ? [setItem(obj.Item)      ] : setItems(obj.Item);
-    return R.compose(setSearch, getSearch)(data.asins);
+    const getSearch  =
+      obj => obj.Request.Errors ? setErrors(obj.Request)  :
+             !isValid(obj)      ? setInvalid(obj.Request) :
+             !isTitle(obj)      ? setNoMatch(obj.Request) :
+             !obj.Item          ? setNoItems(obj.Request) :
+             isItem(obj)        ? setItem(obj.Item)       : null;
+    const getSearchs = R.map(getSearch);
+    return R.compose(setSearchs, getSearchs)(data.asins);
   }
 
   setItemSearchs(profile, items) {
@@ -248,11 +249,12 @@ class Amazon {
     const isTitle    = obj => obj.Request.ItemSearchRequest.Keywords === keyword;
     const isValid    = obj => obj.Request.IsValid === 'True';
     const isItem     = obj => obj.Item && Number(obj.TotalResults) === 1;
-    const getSearch  = obj => obj.Request.Errors ? [setErrors(obj.Request) ] :
-                              !isValid(obj)      ? [setInvalid(obj.Request)] :
-                              !isTitle(obj)      ? [setNoMatch(obj.Request)] :
-                              !obj.Item          ? [setNoItems(obj.Request)] :
-                              isItem(obj)        ? [setItem(obj.Item)      ] : setItems(obj.Item);
+    const getSearch  =
+      obj => obj.Request.Errors ? [setErrors(obj.Request) ] :
+             !isValid(obj)      ? [setInvalid(obj.Request)] :
+             !isTitle(obj)      ? [setNoMatch(obj.Request)] :
+             !obj.Item          ? [setNoItems(obj.Request)] :
+             isItem(obj)        ? [setItem(obj.Item)      ] : setItems(obj.Item);
     return R.compose(setSearch, getSearch)(data);
   }
 

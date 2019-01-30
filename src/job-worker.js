@@ -422,10 +422,10 @@ const message = (err, code, signal) => {
 
 const shutdown = async (err, cbk) => {
   if(err) log.error(displayName, err.name, err.message, err.stack);
-  for(let [ jobqueue, jobname ] of jobqueues.entries()) {
-    log.info(displayName, jobname, 'terminated.');
-    await jobqueue.stop();
-  }
+  //for(let [ jobqueue, jobname ] of jobqueues.entries()) {
+    //log.info(displayName, jobname, 'terminated.');
+    //await jobqueue.stop();
+  //}
 
   log.info(displayName, 'log4js #4 terminated.');
   await log.exit().then(() => cbk());
