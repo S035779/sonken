@@ -73,15 +73,14 @@ class CloudSearch {
           if(!this.browser)  this.browser = await puppeteer.launch(this.browserOptions);
           const page = await this.browser.newPage();
           await page.goto(site, { waitUntil: 'load' });
-          await page.screenshot({ path: 'tmp/openPage.png' });
+          await page.screenshot({ path: 'openPage.png' });
           return { page };
         }
       case 'goto/page':
         {
           const { page, site, results } = options;
           await page.goto(site, { waitUntil: 'load' });
-          //log.debug(CloudSearch.displayName, operation, results);
-          await page.screenshot({ path: 'tmp/gotoPage.png' });
+          if(!devMode) await page.screenshot({ path: 'gotoPage.png' });
           return { page, results };
         }
       case 'signin/google':
@@ -105,7 +104,7 @@ class CloudSearch {
             await page.type('div.Xb9hP > input.whsOnd.zHQkBf', keyset.secret_key);
             await page.click('div#passwordNext.U26fgb.O0WRkf.zZhnYe.e3Duub.C0oVfc.DL0QTb > div.ZFr60d.CeoRYc');
           }
-          await page.screenshot({ path: 'tmp/signinGoogle.png' });
+          if(!devMode) await page.screenshot({ path: 'signinGoogle.png' });
           return { page };
         }
       case 'search/google/head':
@@ -125,8 +124,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchGoogleHead.png' });
+          if(!devMode) await page.screenshot({ path: 'searchGoogleHead.png' });
           return { page, result };
         }
       case 'search/google/tail':
@@ -147,8 +145,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchGoogleTail.png' });
+          if(!devMode) await page.screenshot({ path: 'searchGoogleTail.png' });
           return { page, result };
         }
       case 'search/bing/head':
@@ -168,8 +165,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchBingHead.png' });
+          if(!devMode) await page.screenshot({ path: 'searchBingHead.png' });
           return { page, result };
         }
       case 'search/bing/tail':
@@ -190,8 +186,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchBingTail.png' });
+          if(!devMode) await page.screenshot({ path: 'searchBingTail.png' });
           return { page, result };
         }
       case 'search/yahoo/head':
@@ -211,8 +206,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchYahooHead.png' });
+          if(!devMode) await page.screenshot({ path: 'searchYahooHead.png' });
           return { page, result };
         }
       case 'search/yahoo/tail':
@@ -233,8 +227,7 @@ class CloudSearch {
             return urls;
           });
           const result = { title, datas };
-          //log.debug(CloudSearch.displayName, operation, result);
-          await page.screenshot({ path: 'tmp/searchYahooTail.png' });
+          if(!devMode) await page.screenshot({ path: 'searchYahooTail.png' });
           return { page, result };
         }
       case 'signout/google':
@@ -245,7 +238,7 @@ class CloudSearch {
 
           await page.waitForSelector('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
           await page.click('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
-          await page.screenshot({ path: 'tmp/signoutGoogle.png' });
+          if(!devMode) await page.screenshot({ path: 'signoutGoogle.png' });
           return { page, results };
         }
       case 'close/page':
