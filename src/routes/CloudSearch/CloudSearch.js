@@ -346,7 +346,7 @@ class CloudSearch {
   }
 
   scraps(strings) {
-    const max = strings.length1;
+    const max = strings.length;
     log.info(CloudSearch.displayName, 'scraps', max);
     const strings1 = R.slice(                     0, Math.floor(max/5 * 1), strings);
     const strings2 = R.slice( Math.floor(max/5 * 1), Math.floor(max/5 * 2), strings);
