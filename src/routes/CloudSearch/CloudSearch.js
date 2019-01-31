@@ -25,6 +25,7 @@ class CloudSearch {
     this.browserOptions = { 
       headless: !devMode
     , defaultViewport: { width: 1200, height: 800 }
+    , args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
   }
 
