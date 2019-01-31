@@ -352,7 +352,7 @@ class CloudSearch {
     const strings2 = R.slice( Math.floor(max/5 * 1), Math.floor(max/5 * 2), strings);
     const strings3 = R.slice( Math.floor(max/5 * 2), Math.floor(max/5 * 3), strings);
     const strings4 = R.slice( Math.floor(max/5 * 3), Math.floor(max/5 * 4), strings);
-    const strings5 = R.slice( Math.floor(max/5 * 4),              Infinity, strings);
+    const strings5 = R.slice( Math.floor(max/5 * 4),                   max, strings);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings1)(obj))
