@@ -346,7 +346,6 @@ class CloudSearch {
   }
 
   scraps(strings) {
-    strings.length = 100;
     log.info(CloudSearch.displayName, 'scraps', strings.length);
     const max = strings.length;
     const skip = Math.ceil(max / 4);
