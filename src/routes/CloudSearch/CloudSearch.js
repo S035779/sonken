@@ -349,10 +349,10 @@ class CloudSearch {
     log.info(CloudSearch.displayName, 'scraps', strings.length);
     const max = strings.length;
     const skip = Math.floor(max / 4);
-    const strings1 = R.slice(skip * 0, skip * 1 - 1, strings);
-    const strings2 = R.slice(skip * 1, skip * 2 - 1, strings);
-    const strings3 = R.slice(skip * 2, skip * 3 - 1, strings);
-    const strings4 = R.slice(skip * 3, max         , strings);
+    const strings1 = R.slice(       0, skip * 1, strings);
+    const strings2 = R.slice(skip * 1, skip * 2, strings);
+    const strings3 = R.slice(skip * 2, skip * 3, strings);
+    const strings4 = R.slice(skip * 3, max, strings);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings1)(obj))
