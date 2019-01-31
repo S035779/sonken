@@ -27,7 +27,7 @@ class CloudSearch {
     , defaultViewport: { width: 1200, height: 800 }
     } : { 
       headless: true
-    , args: ['--no-sandbox', '--disable-setuid-sandbox']
+    , args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     , executablePath: 'google-chrome-unstable'
     };
   }
@@ -73,7 +73,7 @@ class CloudSearch {
           if(!this.browser)  this.browser = await puppeteer.launch(this.browserOptions);
           const page = await this.browser.newPage();
           await page.goto(site, { waitUntil: 'load' });
-          await page.screenshot({ path: 'openPage.png' });
+          if(!devMode) await page.screenshot({ path: 'openPage.png' });
           return { page };
         }
       case 'goto/page':

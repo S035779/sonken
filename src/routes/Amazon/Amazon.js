@@ -131,6 +131,14 @@ class Amazon {
     ;
   }
 
+  fetchItemLookups({ title, asins }) {
+    const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
+    return Promise.all(promises(asins))
+      .then(objs => ({ title, asins: objs }))
+      //.then(R.tap(log.trace.bind(this)))
+    ;
+  }
+
   jobItemSearch({ items, profile }) {
     const setKeyword = str => this.trimTitle(str, profile);
     const promises = R.map(obj => 
@@ -150,14 +158,6 @@ class Amazon {
       .then(objs => this.setItemLookups(profile, items)(objs))
       //.then(R.tap(log.trace.bind(this)))
       .catch(err => log.error(Amazon.displayName, 'jobItemLookup', err));
-  }
-
-  fetchItemLookups({ title, asins }) {
-    const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
-    return Promise.all(promises(asins))
-      .then(objs => ({ title, asins: objs }))
-      //.then(R.tap(log.trace.bind(this)))
-    ;
   }
 
   setItemLookups(profile, items) {
