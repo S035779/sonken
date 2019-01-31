@@ -12,6 +12,15 @@ WORKDIR /app/sonken
 RUN groupadd --gid 1000 app \
   && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
 
+RUN apt-get update && apt-get install -yq libgconf-2-4
+RUN apt-get update && apt-get install -y wget --no-install-recommends \
+   && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+   && apt-get update \
+   && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
+   --no-install-recommends \
+   && rm -rf /var/lib/apt/lists/*
+
 #install nodejs
 ENV NODE_VERSION 10.11.0
 RUN buildDeps='xz-utils' \
@@ -91,6 +100,7 @@ ARG DOTENV_WEBPACK
 RUN echo "$DOTENV" > /app/sonken/.env \
   && echo "$DOTENV_WEBPACK" > /app/sonken/.env.webpack
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 RUN buildDeps='python build-essential' \
   && apt-get update && apt-get install -y $buildDeps \
   && rm -rf /var/lib/apt/list/* \

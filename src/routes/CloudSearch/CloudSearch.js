@@ -26,6 +26,7 @@ class CloudSearch {
       headless: !devMode
     , defaultViewport: { width: 1200, height: 800 }
     , args: ['--no-sandbox', '--disable-setuid-sandbox']
+    , executablePath: 'google-chrome-unstable'
     };
   }
 
