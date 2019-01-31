@@ -26,7 +26,7 @@ class Amazon {
       requestsPerSecond: 0.1, promiseImplementation: Promise
     });
     this.promiseThrottle = new PromiseThrottle({
-      requestsPerSecond: 1, promiseImplementation: Promise
+      requestsPerSecond: 0.5, promiseImplementation: Promise
     });
   }
 
@@ -133,7 +133,7 @@ class Amazon {
   }
 
   fetchItemLookup(item_id, id_type) {
-    //log.info(Amazon.displayName, 'fetchItemLookup');
+    log.info(Amazon.displayName, 'fetchItemLookup');
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
@@ -146,7 +146,7 @@ class Amazon {
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
-      //.then(R.tap(log.info.bind(this)))
+      .then(R.tap(log.info.bind(this)))
     ;
   }
 
