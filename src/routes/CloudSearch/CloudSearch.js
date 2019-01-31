@@ -339,30 +339,29 @@ class CloudSearch {
   }
 
   scraps(strings) {
+    strings.length = 100;
     log.info(CloudSearch.displayName, 'scraps', strings.length);
     const max = strings.length;
-    const skip = Math.ceil(max / 5);
-    const strings1 = R.slice(skip * 0, skip * 1 - 1, strings);
-    const strings2 = R.slice(skip * 1, skip * 3 - 1, strings);
+    const skip = Math.ceil(max / 4);
+    const strings1 = R.slice(skip * 0, skip * 2 - 1, strings);
+    const strings2 = R.slice(skip * 2, skip * 3 - 1, strings);
     const strings3 = R.slice(skip * 3, max         , strings);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
-    return this.topenPage('https://www.google.co.jp/')
-      .then(obj => this.signinGoogle(obj))
+    return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings1)(obj))
-      .then(objs => this.searchGoogle(objs))
-      .then(objs => this.getResults(objs))
-
-      .then(obj => this.gotoPage('https://www.bing.com/', obj))
-      .then(obj => this.setSearchs(strings2)(obj))
       .then(objs => this.searchBing(objs))
       .then(objs => this.getResults(objs))
 
       .then(obj => this.gotoPage('https://www.yahoo.co.jp/', obj))
-      .then(obj => this.setSearchs(strings3)(obj))
+      .then(obj => this.setSearchs(strings2)(obj))
       .then(objs => this.searchYahoo(objs))
       .then(objs => this.getResults(objs))
 
       .then(obj => this.gotoPage('https://www.google.co.jp/', obj))
+      .then(obj => this.signinGoogle(obj))
+      .then(obj => this.setSearchs(strings3)(obj))
+      .then(objs => this.searchGoogle(objs))
+      .then(objs => this.getResults(objs))
       //.then(obj => this.signoutGoogle(obj))
       .then(obj => this.closePage(obj))
       .then(hasSearchs)
@@ -371,6 +370,7 @@ class CloudSearch {
   }
 
   scrapsByGoogle(strings) {
+    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByGoogle', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.google.co.jp/')
@@ -386,6 +386,7 @@ class CloudSearch {
   }
 
   scrapsByBing(strings) {
+    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByBing', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
@@ -398,6 +399,7 @@ class CloudSearch {
   }
 
   scrapsByYahoo(strings) {
+    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByYahoo', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.yahoo.co.jp/')
