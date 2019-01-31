@@ -70,7 +70,7 @@ class Amazon {
           return new Promise((resolve, reject) => {
             net.fetch(baseurl, params, (err, res) => {
               if(err) return reject(err);
-              //log.trace(Amazon.displayName, 'Response', res);
+              log.trace(Amazon.displayName, 'Response', res);
               resolve(res);
             });
           });
