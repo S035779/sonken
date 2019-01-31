@@ -22,9 +22,11 @@ class CloudSearch {
       requestsPerSecond: 0.3
     , promiseImplementation: Promise
     });
-    this.browserOptions = { 
-      headless: !devMode
+    this.browserOptions = devMode ? {
+      headless: false
     , defaultViewport: { width: 1200, height: 800 }
+    } : { 
+      headless: true
     , args: ['--no-sandbox', '--disable-setuid-sandbox']
     , executablePath: 'google-chrome-unstable'
     };
@@ -71,6 +73,7 @@ class CloudSearch {
           if(!this.browser)  this.browser = await puppeteer.launch(this.browserOptions);
           const page = await this.browser.newPage();
           await page.goto(site, { waitUntil: 'load' });
+          await page.screenshot({ path: 'tmp/openPage.png' });
           return { page };
         }
       case 'goto/page':
@@ -78,6 +81,7 @@ class CloudSearch {
           const { page, site, results } = options;
           await page.goto(site, { waitUntil: 'load' });
           //log.debug(CloudSearch.displayName, operation, results);
+          await page.screenshot({ path: 'tmp/gotoPage.png' });
           return { page, results };
         }
       case 'signin/google':
@@ -101,6 +105,7 @@ class CloudSearch {
             await page.type('div.Xb9hP > input.whsOnd.zHQkBf', keyset.secret_key);
             await page.click('div#passwordNext.U26fgb.O0WRkf.zZhnYe.e3Duub.C0oVfc.DL0QTb > div.ZFr60d.CeoRYc');
           }
+          await page.screenshot({ path: 'tmp/signinGoogle.png' });
           return { page };
         }
       case 'search/google/head':
@@ -121,6 +126,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchGoogleHead.png' });
           return { page, result };
         }
       case 'search/google/tail':
@@ -142,6 +148,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchGoogleTail.png' });
           return { page, result };
         }
       case 'search/bing/head':
@@ -162,6 +169,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchBingHead.png' });
           return { page, result };
         }
       case 'search/bing/tail':
@@ -183,6 +191,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchBingTail.png' });
           return { page, result };
         }
       case 'search/yahoo/head':
@@ -203,6 +212,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchYahooHead.png' });
           return { page, result };
         }
       case 'search/yahoo/tail':
@@ -224,6 +234,7 @@ class CloudSearch {
           });
           const result = { title, datas };
           //log.debug(CloudSearch.displayName, operation, result);
+          await page.screenshot({ path: 'tmp/searchYahooTail.png' });
           return { page, result };
         }
       case 'signout/google':
@@ -234,6 +245,7 @@ class CloudSearch {
 
           await page.waitForSelector('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
           await page.click('div.gb_wg.gb_Sb > div > a#gb_71.gb_Aa.gb_zg.gb_Hg.gb_ef.gb_Tb');
+          await page.screenshot({ path: 'tmp/signoutGoogle.png' });
           return { page, results };
         }
       case 'close/page':
