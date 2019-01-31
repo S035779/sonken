@@ -23,8 +23,8 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_itl:latest
         resources:
           requests:
-            cpu: 272m
-            memory: 256Mi
+            cpu: 295m
+            memory: 320Mi
         env:
           - name: WORKER_NAME
             value: "itl-worker"

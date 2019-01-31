@@ -32,7 +32,7 @@ spec:
         image: asia.gcr.io/feedparser-217913/feedparser/node_ssr:latest
         resources:
           requests:
-            cpu: 128m
+            cpu: 64m
             memory: 128Mi
         lifecycle:
           postStart:
