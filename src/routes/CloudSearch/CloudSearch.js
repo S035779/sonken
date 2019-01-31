@@ -346,13 +346,13 @@ class CloudSearch {
   }
 
   scraps(strings) {
-    log.info(CloudSearch.displayName, 'scraps', strings.length);
-    const max = strings.length;
-    const skip = Math.floor(max / 4); // =127 ( 31 )
-    const strings1 = R.slice(       0, skip * 1, strings); // 0  -> 31
-    const strings2 = R.slice(skip * 1, skip * 2, strings); // 31 -> 62
-    const strings3 = R.slice(skip * 2, skip * 3, strings); // 62 -> 93
-    const strings4 = R.slice(skip * 3, Infinity, strings); // 93 -> 127
+    const max = strings.length1;
+    log.info(CloudSearch.displayName, 'scraps', max);
+    const strings1 = R.slice(                     0, Math.floor(max/5 * 1), strings);
+    const strings2 = R.slice( Math.floor(max/5 * 1), Math.floor(max/5 * 2), strings);
+    const strings3 = R.slice( Math.floor(max/5 * 2), Math.floor(max/5 * 3), strings);
+    const strings4 = R.slice( Math.floor(max/5 * 3), Math.floor(max/5 * 4), strings);
+    const strings5 = R.slice( Math.floor(max/5 * 4),              Infinity, strings);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
       .then(obj => this.setSearchs(strings1)(obj))
@@ -374,11 +374,11 @@ class CloudSearch {
       .then(objs => this.searchYahoo(objs))
       .then(objs => this.getResults(objs))
 
-      //.then(obj => this.signinGoogle(obj))
-      //.then(obj => this.setSearchs(strings3)(obj))
-      //.then(objs => this.searchGoogle(objs))
-      //.then(objs => this.getResults(objs))
-      //.then(obj => this.signoutGoogle(obj))
+      .then(obj => this.gotoPage('https://www.bing.com/', obj))
+      .then(obj => this.setSearchs(strings5)(obj))
+      .then(objs => this.searchBing(objs))
+      .then(objs => this.getResults(objs))
+
       .then(obj => this.closePage(obj))
       .then(hasSearchs)
       //.then(R.tap(console.log))

@@ -123,7 +123,17 @@ class Amazon {
       .then(obj => obj.ItemSearchResponse.Items);
   }
 
+  jobItemSearch({ items, profile }) {
+    const setKeyword = str => this.trimTitle(str, profile);
+    const promises = R.map(obj => 
+      this.tfetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
+    return Promise.all(promises(items))
+      .then(objs => this.setItemSearchs(profile, items)(objs))
+      .catch(err => log.error(Amazon.displayName, 'jobItemSearch', err));
+  }
+
   fetchItemLookup(item_id, id_type) {
+    log.info(Amazon.displayName, 'fetchItemLookup');
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
@@ -132,20 +142,12 @@ class Amazon {
   }
 
   fetchItemLookups({ title, asins }) {
+    log.info(Amazon.displayName, 'fetchItemLookups');
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
       //.then(R.tap(log.info.bind(this)))
     ;
-  }
-
-  jobItemSearch({ items, profile }) {
-    const setKeyword = str => this.trimTitle(str, profile);
-    const promises = R.map(obj => 
-      this.tfetchItemSearch(setKeyword(obj.title), obj.item_categoryid, 1));
-    return Promise.all(promises(items))
-      .then(objs => this.setItemSearchs(profile, items)(objs))
-      .catch(err => log.error(Amazon.displayName, 'jobItemSearch', err));
   }
 
   jobItemLookup({ items, profile }) {
