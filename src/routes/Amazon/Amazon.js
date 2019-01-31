@@ -133,20 +133,20 @@ class Amazon {
   }
 
   fetchItemLookup(item_id, id_type) {
-    log.info(Amazon.displayName, 'fetchItemLookup');
+    //log.info(Amazon.displayName, 'fetchItemLookup');
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
     ;
   }
 
   fetchItemLookups({ title, asins }) {
-    log.info(Amazon.displayName, 'fetchItemLookups');
+    //log.info(Amazon.displayName, 'fetchItemLookups');
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
     ;
   }
 
