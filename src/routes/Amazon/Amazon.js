@@ -156,8 +156,8 @@ class Amazon {
     return this.CSE.forItemSearch(searchs)
       //.then(R.tap(log.info.bind(this)))
       .then(objs => Promise.all(promises(objs)))
-      .then(objs => this.setItemLookups(profile, items)(objs))
       .then(R.tap(log.info.bind(this)))
+      .then(objs => this.setItemLookups(profile, items)(objs))
       .catch(err => log.error(Amazon.displayName, 'jobItemLookup', err));
   }
 
