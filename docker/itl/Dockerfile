@@ -95,6 +95,10 @@ RUN buildDeps='git' \
   && git clone https://github.com/S035779/sonken.git \
   && apt-get purge -y --auto-remove $buildDeps
 
+# It's a good idea to use dumb-init to help prevent zombie chrome processes.
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
+
 ARG DOTENV
 ARG DOTENV_WEBPACK
 RUN echo "$DOTENV" > /app/sonken/.env \
@@ -112,4 +116,5 @@ RUN buildDeps='python build-essential' \
   && apt-get purge -y --auto-remove $buildDeps
 
 USER app
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "dist/itl.node.js"]

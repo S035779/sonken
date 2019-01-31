@@ -154,9 +154,10 @@ class Amazon {
     const searchs     = R.map(setSearch, items);
     const promises    = R.map(obj => this.tfetchItemLookups(obj));
     return this.CSE.forItemSearch(searchs)
+      .then(R.tap(log.trace.bind(this)))
       .then(objs => Promise.all(promises(objs)))
       .then(objs => this.setItemLookups(profile, items)(objs))
-      //.then(R.tap(log.trace.bind(this)))
+      .then(R.tap(log.trace.bind(this)))
       .catch(err => log.error(Amazon.displayName, 'jobItemLookup', err));
   }
 
