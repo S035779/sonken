@@ -15,7 +15,7 @@ class CloudSearch {
   constructor(access_key, secret_key) {
     this.keyset = { access_key, secret_key  };
     this.topPromiseThrottle = new PromiseThrottle({ 
-      requestsPerSecond: 0.0007
+      requestsPerSecond: 0.004
     , promiseImplementation: Promise
     });
     this.promiseThrottle = new PromiseThrottle({ 
@@ -386,7 +386,6 @@ class CloudSearch {
   }
 
   scrapsByGoogle(strings) {
-    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByGoogle', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.google.co.jp/')
@@ -402,7 +401,6 @@ class CloudSearch {
   }
 
   scrapsByBing(strings) {
-    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByBing', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.bing.com/')
@@ -415,7 +413,6 @@ class CloudSearch {
   }
 
   scrapsByYahoo(strings) {
-    strings.length = 30;
     log.info(CloudSearch.displayName, 'scrapsByYahoo', strings.length);
     const hasSearchs = R.filter(obj => !R.isNil(obj));
     return this.topenPage('https://www.yahoo.co.jp/')

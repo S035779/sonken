@@ -70,7 +70,7 @@ class Amazon {
           return new Promise((resolve, reject) => {
             net.fetch(baseurl, params, (err, res) => {
               if(err) return reject(err);
-              log.trace(Amazon.displayName, 'Response', res);
+              //log.trace(Amazon.displayName, 'Response', res);
               resolve(res);
             });
           });
@@ -133,7 +133,7 @@ class Amazon {
   }
 
   fetchItemLookup(item_id, id_type) {
-    log.info(Amazon.displayName, 'fetchItemLookup');
+    //log.info(Amazon.displayName, 'fetchItemLookup');
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
@@ -146,7 +146,7 @@ class Amazon {
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
     ;
   }
 
@@ -157,14 +157,14 @@ class Amazon {
     const promises    = R.map(obj => this.tfetchItemLookups(obj));
     return this.CSE.forItemSearch(searchs)
       //.then(R.tap(log.info.bind(this)))
-      .then(objs => Promise.all(promises(objs)))
-      .then(R.tap(log.info.bind(this)))
+      .then(objs => Promise.all(promises(objs))) // <= now !!
+      //.then(R.tap(log.info.bind(this)))
       .then(objs => this.setItemLookups(profile, items)(objs))
       .catch(err => log.error(Amazon.displayName, 'jobItemLookup', err));
   }
 
   setItemLookups(profile, items) {
-    log.info(Amazon.displayName, 'setItemLookups');
+    //log.info(Amazon.displayName, 'setItemLookups');
     const setKeyword = str => this.trimTitle(str, profile);
     const self = this;
     return function(datas) {
@@ -184,7 +184,7 @@ class Amazon {
   }
 
   setItemLookup(keyword, item, data) {
-    log.info(Amazon.displayName, 'setItemLookup', keyword, item, data);
+    //log.info(Amazon.displayName, 'setItemLookup', keyword, item, data);
     const setErrors  = obj => ({ request: keyword, keyword: data.title
     , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
     const setInvalid = () =>  ({ request: keyword, keyword: data.title

@@ -22,8 +22,8 @@ const updatedInterval = process.env.JOB_UPD_MIN || 5;
 const numChildProcess = process.env.JOB_NUM_MAX || 1;
 const numUpdatedItems = process.env.JOB_UPD_NUM || 100;
 
-const perPageItemTime = 1350; // sec. (interval per page)
-const perPageItemNums = 100; // items per page.
+const perPageItemTime = 255; // sec. (interval per page)
+const perPageItemNums = 20; // items per page.
 const procNoteLmtNums = Math.ceil((updatedInterval * 60) / ((numUpdatedItems / perPageItemNums) * perPageItemTime));
 
 process.env.NODE_PENDING_DEPRECATION = 0;
@@ -75,8 +75,19 @@ const request = queue => {
   const queuePush = obj => {
     if(obj) queue.push(obj, err => err ? log.error(displayName, err.name, err.message, err.stack) : null);
   }; 
-  const setQueue = obj => ({ operation: 'itemlookup', user: obj.user, id: obj._id, profile: obj.profile, created: Date.now() });
-  const setQueues = R.map(setQueue);
+  const setQueue = obj => ({
+    operation: 'itemlookup'
+  , user: obj.user
+  , id: obj._id
+  , profile: obj.profile
+  , created: Date.now()
+  });
+  const limit = 20;
+  const range = R.range(0, Math.ceil(numUpdatedItems / limit));
+  const _setItems = (obj, idx) => R.merge(obj, { skip: idx * limit, limit });
+  const setItems = R.curry(_setItems);
+  const repQueue = obj => R.map(setItems(obj), range);
+  const setQueues = R.compose(R.flatten, R.map(repQueue), R.map(setQueue));
   const setUsers = R.map(obj => obj.user);
   return profile.fetchJobProfiles({ adimn: 'Administrator' }).pipe(
       flatMap(objs => feed.fetchJobNotes({

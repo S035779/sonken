@@ -137,12 +137,12 @@ const request = (operation, options) => {
       }
     case 'itemlookup':
       {
-        const { user, id, profile } = options;
+        const { user, id, skip, limit, profile } = options;
         const setAttribute = obj => ({ user, id: obj.guid__, data: { asins: obj.asins } });
         const setAttributes = R.map(setAttribute);
         const hasAttributes = R.filter(obj => !R.isNil(obj));
         const observables = R.map(obj => feed.createAttribute(obj));
-        return feed.fetchJobNote({ user, id }).pipe(
+        return feed.fetchJobNote({ user, id, skip, limit }).pipe(
             flatMap(obj => amazon.jobItemLookup({ items: obj.items, profile }))
           , map(hasAttributes)
           , map(setAttributes)

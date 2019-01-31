@@ -110,10 +110,16 @@ export default class FeedParser {
         }
       case 'job/note':
         {
-          const { user, id } = options;
+          const { user, id, skip, limit } = options;
           const conditions = { user, _id: id };
+          const isPaginate = !R.isNil(skip) && !R.isNil(limit);
           const query = Note.findOne(conditions);
-          const params = {
+          const params = isPaginate
+          ? {
+            path: 'items'
+          , options: { skip: Number(skip), limit: Number(limit), sort: { bidStopTime: 'desc' }}
+          , populate: { path: 'attributes', select: { images: 1 } }
+          } : {
             path: 'items'
           , options: { sort: { bidStopTime: 'desc' }}
           , populate: { path: 'attributes', select: { images: 1 } }
@@ -840,8 +846,8 @@ export default class FeedParser {
     return this.request('job/notes', { users, categorys, filter, skip, limit, sort });
   }
 
-  getJobNote(user, id) {
-    return this.request('job/note', { user, id });
+  getJobNote(user, id, skip, limit) {
+    return this.request('job/note', { user, id, skip, limit });
   }
 
   addList(user, id) {
@@ -1228,8 +1234,8 @@ export default class FeedParser {
       );
   }
 
-  fetchJobNote({ user, id }) {
-    return from(this.getJobNote(user, id));
+  fetchJobNote({ user, id, skip, limit }) {
+    return from(this.getJobNote(user, id, skip, limit));
   }
 
   fetchAddedNotes({ user }) {
