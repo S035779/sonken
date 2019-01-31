@@ -127,7 +127,7 @@ class Amazon {
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
-      //.then(R.tap(log.trace.bind(this)))
+      .then(R.tap(log.info.bind(this)))
     ;
   }
 
@@ -135,7 +135,7 @@ class Amazon {
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
-      //.then(R.tap(log.trace.bind(this)))
+      .then(R.tap(log.info.bind(this)))
     ;
   }
 
