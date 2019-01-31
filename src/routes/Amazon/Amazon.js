@@ -127,7 +127,7 @@ class Amazon {
     return this.getItemLookup(item_id, id_type)
       .then(obj => this.getXml(obj))
       .then(obj => obj.ItemLookupResponse.Items)
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
     ;
   }
 
@@ -135,7 +135,7 @@ class Amazon {
     const promises = R.map(obj => this.tfetchItemLookup(obj.ASIN, 'ASIN'));
     return Promise.all(promises(asins))
       .then(objs => ({ title, asins: objs }))
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
     ;
   }
 
@@ -154,7 +154,7 @@ class Amazon {
     const searchs     = R.map(setSearch, items);
     const promises    = R.map(obj => this.tfetchItemLookups(obj));
     return this.CSE.forItemSearch(searchs)
-      .then(R.tap(log.info.bind(this)))
+      //.then(R.tap(log.info.bind(this)))
       .then(objs => Promise.all(promises(objs)))
       .then(objs => this.setItemLookups(profile, items)(objs))
       .then(R.tap(log.info.bind(this)))
@@ -162,7 +162,7 @@ class Amazon {
   }
 
   setItemLookups(profile, items) {
-    //log.trace(Amazon.displayName, 'setItemLookups');
+    log.info(Amazon.displayName, 'setItemLookups');
     const setKeyword = str => this.trimTitle(str, profile);
     const self = this;
     return function(datas) {
@@ -182,7 +182,7 @@ class Amazon {
   }
 
   setItemLookup(keyword, item, data) {
-    //log.trace(Amazon.displayName, 'setItemLookup', keyword, item, data);
+    log.info(Amazon.displayName, 'setItemLookup', keyword, item, data);
     const setErrors  = obj => ({ request: keyword, keyword: data.title
     , code: obj.Errors.Error.Code, message: obj.Errors.Error.Message });
     const setInvalid = () =>  ({ request: keyword, keyword: data.title
